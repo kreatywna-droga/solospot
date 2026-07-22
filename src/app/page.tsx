@@ -348,9 +348,9 @@ function Hero() {
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden pt-28 pb-16">
-      <div className="absolute inset-0 bg-gradient-to-b from-violet-900/10 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-b from-violet-900/10 via-transparent to-transparent pointer-events-none" />
       <div 
-        className="absolute inset-x-0 top-16 bottom-0 bg-[linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] bg-[size:80px_80px]"
+        className="absolute inset-x-0 top-16 bottom-0 bg-[linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] bg-[size:80px_80px] pointer-events-none"
         style={{ WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 60%, transparent 100%)', maskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 60%, transparent 100%)' }}
       />
       <div className="absolute left-0 top-0 w-[40vw] h-full pointer-events-none overflow-hidden">
