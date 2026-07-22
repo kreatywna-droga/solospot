@@ -7,6 +7,8 @@ import {
   LayoutDashboard, Users, CreditCard, Activity, Menu, X, Zap,
 } from 'lucide-react';
 
+import { Logo } from '@/components/ui/Logo';
+
 const navItems = [
   { label: 'Przegląd', href: '/mission-control', icon: LayoutDashboard },
   { label: 'Tenanci', href: '/mission-control/tenants', icon: Users },
@@ -30,12 +32,7 @@ export default function MissionControlLayout({
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="h-16 flex items-center gap-3 px-6 border-b border-white/5">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 via-fuchsia-500 to-amber-500 flex items-center justify-center shadow-lg shadow-violet-500/30">
-            <Zap className="w-4 h-4 text-white" strokeWidth={2.5} />
-          </div>
-          <span className="font-black text-white tracking-tight text-base">
-            WEB<span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">FACTOR</span>
-          </span>
+          <Logo size="sm" />
           <span className="ml-auto text-[10px] font-bold text-violet-400 uppercase tracking-widest bg-violet-500/10 px-2 py-0.5 rounded-full border border-violet-500/20">
             MC
           </span>

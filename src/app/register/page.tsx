@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowLeft, Mail, Lock, User, Building2, CheckCircle2 } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
+import { supabase } from '@/lib/supabase';
 
 const PLANS = [
   { id: 'starter', name: 'Starter', price: '0 zł/mies.', desc: '1 sklep, do 50 zamówień', backendId: 'starter' },
@@ -19,6 +20,14 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [demoMode, setDemoMode] = useState(false);
   const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        window.location.href = '/dashboard';
+      }
+    });
+  }, []);
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {

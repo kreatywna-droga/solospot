@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, ArrowLeft } from 'lucide-react'
 import { Logo } from './Logo'
 
 interface NavItem {
@@ -40,7 +40,7 @@ export function Sidebar({ items, brand, className = '' }: SidebarProps) {
         className={`fixed top-0 left-0 z-50 h-full w-64 bg-[#080a12] border-r border-white/5
           transform transition-transform duration-200 lg:transform-none lg:translate-x-0
           ${open ? 'translate-x-0' : '-translate-x-full'}
-          ${className}`}
+          ${className} flex flex-col`}
       >
         <div className="flex items-center justify-between px-6 py-5 border-b border-white/5">
           <Logo />
@@ -73,6 +73,17 @@ export function Sidebar({ items, brand, className = '' }: SidebarProps) {
             )
           })}
         </nav>
+
+        {/* Exit back to homepage section */}
+        <div className="p-4 border-t border-white/5 mt-auto bg-[#05060a]/50">
+          <Link
+            href="/"
+            className="flex items-center justify-center gap-2 w-full py-2.5 bg-white/5 hover:bg-violet-500/10 border border-white/5 hover:border-violet-500/20 text-slate-300 hover:text-white text-xs font-semibold rounded-xl transition-all group"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 text-slate-500 group-hover:text-white transition-colors" /> 
+            <span>Wyjdź na stronę główną</span>
+          </Link>
+        </div>
       </aside>
     </>
   )
