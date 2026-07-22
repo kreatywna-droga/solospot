@@ -172,14 +172,16 @@ function Hero() {
         */}
         {/* NOWA ANIMACJA 3D E-COMMERCE */}
         <div className="w-full h-full flex justify-end items-center">
-          <div className="w-full h-full flex justify-end">
-            <img
-              src="/hero-store-builder-black-glow.png"
-              alt=""
-              className="h-full w-auto object-contain mix-blend-lighten [mask-image:linear-gradient(to_right,transparent_0%,black_25%)] scale-110 origin-right"
-              aria-hidden
-            />
-          </div>
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-contain object-right mix-blend-lighten [mask-image:linear-gradient(to_right,transparent_0%,transparent_20%,black_40%)] translate-x-[9.5%]"
+            aria-hidden
+          >
+            <source src="/hero_video.mp4" type="video/mp4" />
+          </video>
         </div>
 
         <div className="absolute inset-0 bg-gradient-to-l from-transparent via-[#050508]/10 to-[#050508]/30" />

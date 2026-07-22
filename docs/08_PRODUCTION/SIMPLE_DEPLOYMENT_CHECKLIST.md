@@ -17,17 +17,23 @@ Poniższa lista zawiera najważniejsze kroki do pełnego, produkcyjnego uruchomi
 ## 3. Baza Danych (Supabase Production)
 - [x] Stworzenie oddzielnego, produkcyjnego projektu w Supabase (żeby nie psuć bazy dev)
 - [x] Zastosowanie wszystkich migracji (`supabase db push`) w bazie produkcyjnej
-- [ ] Włączenie RLS (Row Level Security) - aby dane klientów były bezpieczne
+- [x] Włączenie RLS (Row Level Security) — polityki skonfigurowane w Supabase
 - [x] Skopiowanie produkcyjnych kluczy (URL, ANON_KEY) i dodanie ich do "Environment Variables" w Vercel
+- [x] Dodanie `SUPABASE_SERVICE_ROLE_KEY` do zmiennych środowiskowych w Vercel
 - [x] Naprawa kodu sprawdzającego fałszywe klucze (usunięty pusty string w `isSupabaseConfigured`)
+- [x] Naprawa generowania UUID (zastąpiono `tn_` prefixem poprawnym `crypto.randomUUID()`)
 - [x] Wymuszone wysłanie na Vercel oczyszczonego repozytorium
 - [ ] Hasła zapisane bezpiecznie w menedżerze haseł.
 
 ## 4. Weryfikacja Kodu (Testy i Build)
-- [ ] Uruchomienie aplikacji lokalnie i weryfikacja funkcji (Rejestracja, Marketplace, Builder)
+- [x] Uruchomienie aplikacji lokalnie i weryfikacja funkcji (Rejestracja, Marketplace, Builder)
 - [x] Pomyślne przejście testów: `npx vitest run` (819 testów zaliczonych na zielono!)
 - [x] Pomyślne sprawdzanie typów: `npx tsc --noEmit` (0 błędów - perfekcyjnie!)
 - [x] Kompilacja produkcji: `npm run build` bez zająknięcia (zakończone sukcesem)
+- [x] **Rejestracja działa na produkcji** (użytkownik + tenant tworzeni poprawnie)
+- [x] **Logowanie działa na produkcji** (sesja zapisywana w cookies)
+- [x] **Dashboard `/dashboard` działa** (naprawiony crash z `motion.link`)
+- [x] **Centrum dowodzenia `/mission-control` działa** (naprawiony crash z `motion.link`)
 
 ## 5. Integracje (Webhooki i Płatności)
 - [ ] Skonfigurowanie webhooka 1Koszyk / Stripe, aby wskazywał na `https://twoja-domena.pl/api/webhooks/...`
@@ -36,3 +42,4 @@ Poniższa lista zawiera najważniejsze kroki do pełnego, produkcyjnego uruchomi
 
 ---
 *Możesz odhaczać (`[x]`) kolejne punkty w tym dokumencie w miarę postępów!*
+
