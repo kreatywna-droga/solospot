@@ -177,14 +177,17 @@ function Hero() {
             loop
             muted
             playsInline
+            poster="/hero-store-builder-black-glow.png"
             className="w-full h-full object-contain object-right translate-x-[9.5%]"
             aria-hidden
           >
             <source src="/hero_video.mp4" type="video/mp4" />
           </video>
-          {/* Gradient fade po lewej stronie żeby płynnie wtapiało się w tło */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#050508] via-[#050508]/60 to-transparent pointer-events-none" />
+          {/* Gradient fade po lewej stronie */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#050508] via-[#050508]/50 to-transparent pointer-events-none" />
         </div>
+
+
 
 
         <div className="absolute inset-0 bg-gradient-to-l from-transparent via-[#050508]/10 to-[#050508]/30" />
