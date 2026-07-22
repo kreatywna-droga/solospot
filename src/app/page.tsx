@@ -450,7 +450,7 @@ function Hero() {
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#000000] to-transparent" />
       </div>
       <div className="relative z-10 w-full max-w-7xl mx-auto px-6 py-24 lg:py-32 flex items-center">
-        <div className="relative max-w-4xl lg:-translate-x-20 xl:-translate-x-32">
+        <div className="relative max-w-4xl lg:-translate-x-20 xl:-translate-x-32 -translate-y-4 sm:-translate-y-8 lg:-translate-y-12">
           <div className="relative z-10">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/25 mb-8">
