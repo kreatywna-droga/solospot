@@ -1,0 +1,16 @@
+{
+  "name": "@solospot/observability",
+  "version": "1.0.0",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "files": ["src/**/*"],
+  "scripts": {
+    "test": "vitest",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "vitest": "^1.0.0",
+    "typescript": "^5.0.0"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@solospot/platform-identity",
+  "version": "1.0.0",
+  "description": "Platform Identity — unified model for all SaaS services",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "files": ["src/**/*"],
+  "scripts": {
+    "test": "vitest",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "vitest": "^1.0.0",
+    "typescript": "^5.0.0"
+  }
+}

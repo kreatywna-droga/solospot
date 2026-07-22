@@ -1,0 +1,368 @@
+﻿
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\archive\na-dobranoc-legacy\app-routes\checkout\page.tsx
+  89:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\archive\na-dobranoc-legacy\app-routes\checkout\page.tsx:89:5
+  87 |     }
+  88 |
+> 89 |     setIsRedirecting(true);
+     |     ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  90 |
+  91 |     if (!checkoutUrl) {
+  92 |       setIsRedirecting(false);  react-hooks/set-state-in-effect
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\archive\na-dobranoc-legacy\app-routes\checkout\sukces\page.tsx
+  23:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\archive\na-dobranoc-legacy\app-routes\checkout\sukces\page.tsx:23:5
+  21 |
+  22 |   useEffect(() => {
+> 23 |     setIsClient(true);
+     |     ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  24 |     
+  25 |     // Ustawiamy flag─Ö premium w localStorage po udanym zakupie
+  26 |     // W ┼Ťrodowisku produkcyjnym powinni┼Ťmy zwalidowa─ç session_id ze Stripe  react-hooks/set-state-in-effect
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\migrate.js
+  249:22  error  Parsing error: Invalid character
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\packages\asset-manager-core\src\AssetLibrary.ts
+  151:9  error  'results' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\packages\asset-manager-core\src\AssetStorage.ts
+  137:9  error  Do not assign to the variable `module`. See: https://nextjs.org/docs/messages/no-assign-module-variable  @next/next/no-assign-module-variable
+  141:9  error  Do not assign to the variable `module`. See: https://nextjs.org/docs/messages/no-assign-module-variable  @next/next/no-assign-module-variable
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\packages\asset-manager-core\src\UploadEngine.ts
+  135:9  error  'uploadedSize' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\packages\builder-core\src\__tests__\history-stack.test.ts
+   54:9  error  's' is never reassigned. Use 'const' instead  prefer-const
+   69:9  error  's' is never reassigned. Use 'const' instead  prefer-const
+  108:9  error  's' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\packages\commerce-engine\src\CustomerAccountEngine.ts
+  222:9  error  'updatedAddresses' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\packages\commerce-engine\src\payment-engine.test.ts
+  105:9  error  'intentA' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\packages\commerce-persistence\src\__tests__\commerce-persistence.test.ts
+  167:11  error  'paymentCharged' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\packages\component-runtime\src\ComponentResolver.ts
+  64:7  error  Do not assign to the variable `module`. See: https://nextjs.org/docs/messages/no-assign-module-variable  @next/next/no-assign-module-variable
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\packages\mission-control-core\src\StoreManagement.ts
+  81:11  error  'provisionEngine' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\packages\provision-engine\tests\provision-engine.test.ts
+  145:11  error  'provisionEngine' is never reassigned. Use 'const' instead  prefer-const
+  221:11  error  'provisionEngine' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\packages\provision-engine\tests\provision-isolation-robustness.test.ts
+   77:11  error  'engine' is never reassigned. Use 'const' instead  prefer-const
+  244:11  error  'engine' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\packages\runtime-composition\src\ModuleFactory.ts
+  3:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\packages\runtime-composition\src\RendererFactory.ts
+  3:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\app\api\store\domains\route.ts
+  47:9  error  'cleanDomain' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\app\dashboard\products\[id]\page.tsx
+  265:23  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\app\dashboard\products\page.tsx
+   64:21  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\app\dashboard\products\page.tsx:64:21
+  62 |   }
+  63 |
+> 64 |   useEffect(() => { load() }, [])
+     |                     ^^^^ Avoid calling setState() directly within an effect
+  65 |
+  66 |   const handleCreate = async (e: React.FormEvent) => {
+  67 |     e.preventDefault()  react-hooks/set-state-in-effect
+  131:23  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @next/next/no-img-element
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\app\dashboard\stores\[id]\page.tsx
+  614:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  797:17  warning  Expected an assignment or function call and instead saw an expression                                                                                                                                                                                                                    @typescript-eslint/no-unused-expressions
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\app\dashboard\stores\page.tsx
+  65:21  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\app\dashboard\stores\page.tsx:65:21
+  63 |   };
+  64 |
+> 65 |   useEffect(() => { load(); }, []);
+     |                     ^^^^ Avoid calling setState() directly within an effect
+  66 |
+  67 |   const handleCreate = async (e: React.FormEvent) => {
+  68 |     e.preventDefault();  react-hooks/set-state-in-effect
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\app\marketplace\[slug]\page.tsx
+  658:23  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\app\marketplace\page.tsx
+  214:23  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\app\mission-control\layout.tsx
+  82:13  error  Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages  @next/next/no-html-link-for-pages
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\app\mission-control\page.tsx
+  120:93  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\app\mission-control\page.tsx:120:93
+  118 |     { label: 'Aktywne sklepy', value: activeStores, change: '+8%', icon: Store, color: 'emerald', trend: 'up' },
+  119 |     { label: 'Przych├│d (30d)', value: (totalRevenue / 100).toLocaleString('pl-PL') + ' PLN', change: '+23%', icon: DollarSign, color: 'amber', trend: 'up' },
+> 120 |     { label: 'Zam├│wienia (24h)', value: orders.filter(o => new Date(o.createdAt) > new Date(Date.now() - 86400000)).length, change: '+5%', icon: ShoppingCart, color: 'violet', trend: 'up' },
+      |                                                                                             ^^^^^^^^^^ Cannot call impure function
+  121 |     { label: 'Konwersja', value: totalTenants > 0 ? ((completedPayments / totalTenants) * 100).toFixed(1) + '%' : '0%', change: '+0.3pp', icon: TrendingUp, color: 'blue', trend: 'up' },
+  122 |     { label: 'Uptime platformy', value: '99.99%', change: '0%', icon: Shield, color: 'cyan', trend: 'neutral' },
+  123 |   ]  react-hooks/purity
+  535:80  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\app\mission-control\page.tsx:535:80
+  533 |                   {Array.from({ length: 30 }).map((_, i) => (
+  534 |                     <div key={i} className="flex gap-3 py-1 border-b border-white/5 last:border-0">
+> 535 |                       <span className="text-slate-500 w-20 shrink-0">{new Date(Date.now() - i * 60000).toLocaleTimeString('pl-PL')}</span>
+      |                                                                                ^^^^^^^^^^ Cannot call impure function
+  536 |                       <span className="text-violet-400 w-24 shrink-0">[MISSION-CTRL]</span>
+  537 |                       <span className="text-slate-300">Health check completed for all services. All operational.</span>
+  538 |                     </div>                                                                                                                                                                                                                                                react-hooks/purity
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\app\store\[slug]\page.tsx
+  45:9   error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\app\store\[slug]\page.tsx:45:9
+  43 |     if (!resolver.isPubliclyAccessible(status) && !resolver.canRender(status)) {
+  44 |       return (
+> 45 |         <div className="min-h-screen bg-white flex items-center justify-center">
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 46 |           <div className="text-center max-w-md px-6">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 47 |             <h1 className="text-2xl font-bold text-slate-800 mb-2">Ten sklep nie jest jeszcze opublikowany</h1>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 48 |             <p className="text-slate-500">W┼éa┼Ťciciel sklepu nie zako┼äczy┼é jeszcze konfiguracji.</p>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 49 |           </div>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 50 |         </div>
+     | ^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  51 |       )
+  52 |     }
+  53 |  react-hooks/error-boundaries
+  46:11  error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\app\store\[slug]\page.tsx:46:11
+  44 |       return (
+  45 |         <div className="min-h-screen bg-white flex items-center justify-center">
+> 46 |           <div className="text-center max-w-md px-6">
+     |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 47 |             <h1 className="text-2xl font-bold text-slate-800 mb-2">Ten sklep nie jest jeszcze opublikowany</h1>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 48 |             <p className="text-slate-500">W┼éa┼Ťciciel sklepu nie zako┼äczy┼é jeszcze konfiguracji.</p>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 49 |           </div>
+     | ^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  50 |         </div>
+  51 |       )
+  52 |     }                                                                                                                               react-hooks/error-boundaries
+  47:13  error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\app\store\[slug]\page.tsx:47:13
+  45 |         <div className="min-h-screen bg-white flex items-center justify-center">
+  46 |           <div className="text-center max-w-md px-6">
+> 47 |             <h1 className="text-2xl font-bold text-slate-800 mb-2">Ten sklep nie jest jeszcze opublikowany</h1>
+     |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  48 |             <p className="text-slate-500">W┼éa┼Ťciciel sklepu nie zako┼äczy┼é jeszcze konfiguracji.</p>
+  49 |           </div>
+  50 |         </div>                                                                                                                                                                                                                                                                                                                                                                                              react-hooks/error-boundaries
+  48:13  error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\app\store\[slug]\page.tsx:48:13
+  46 |           <div className="text-center max-w-md px-6">
+  47 |             <h1 className="text-2xl font-bold text-slate-800 mb-2">Ten sklep nie jest jeszcze opublikowany</h1>
+> 48 |             <p className="text-slate-500">W┼éa┼Ťciciel sklepu nie zako┼äczy┼é jeszcze konfiguracji.</p>
+     |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  49 |           </div>
+  50 |         </div>
+  51 |       )                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   react-hooks/error-boundaries
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\components\builder\sidebar\LayerTree.tsx
+  181:22  error  Error: Cannot access variable before it is declared
+
+`findParent` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\components\builder\sidebar\LayerTree.tsx:181:22
+  179 |
+  180 |   const handleSelect = useCallback((sectionId: string) => {
+> 181 |     const parentId = findParent(activePage.sections, sectionId)
+      |                      ^^^^^^^^^^ `findParent` accessed before it is declared
+  182 |     const targetId = parentId || sectionId
+  183 |     dispatch({
+  184 |       type: 'CANVAS',
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\components\builder\sidebar\LayerTree.tsx:189:3
+  187 |   }, [dispatch, activePage])
+  188 |
+> 189 |   function findParent(sections: SectionNode[], childId: string): string | null {
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 190 |     for (const section of sections) {
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 191 |       if (section.children.some(child => child.id === childId)) {
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 192 |         return section.id
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 193 |       }
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 194 |       const found = findParent(section.children, childId)
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 195 |       if (found) return found
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 196 |     }
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 197 |     return null
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 198 |   }
+      | ^^^^ `findParent` is declared here
+  199 |
+  200 |   if (!activePage) {
+  201 |     return (  react-hooks/immutability
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\components\builder\sidebar\PropsPanel.tsx
+  182:11  warning  Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images  jsx-a11y/alt-text
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\components\builder\state\BuilderProvider.tsx
+  81:26  error  Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\components\builder\state\BuilderProvider.tsx:81:26
+  79 |   // Create the memory channel once (stable reference)
+  80 |   const previewChannelRef = useRef<MemoryChannelPair>(createMemoryChannel())
+> 81 |   const previewChannel = previewChannelRef.current
+     |                          ^^^^^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  82 |
+  83 |   // Registry ÔÇö use provided or create default
+  84 |   const registry = useMemo(                                                                                                                                                                                                                                                                      react-hooks/refs
+  81:26  error  Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\components\builder\state\BuilderProvider.tsx:81:26
+  79 |   // Create the memory channel once (stable reference)
+  80 |   const previewChannelRef = useRef<MemoryChannelPair>(createMemoryChannel())
+> 81 |   const previewChannel = previewChannelRef.current
+     |                          ^^^^^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  82 |
+  83 |   // Registry ÔÇö use provided or create default
+  84 |   const registry = useMemo(                                                                                                                                                                                                                                                                      react-hooks/refs
+  81:26  error  Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\components\builder\state\BuilderProvider.tsx:81:26
+  79 |   // Create the memory channel once (stable reference)
+  80 |   const previewChannelRef = useRef<MemoryChannelPair>(createMemoryChannel())
+> 81 |   const previewChannel = previewChannelRef.current
+     |                          ^^^^^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  82 |
+  83 |   // Registry ÔÇö use provided or create default
+  84 |   const registry = useMemo(                                                                                                                                                                                                                                                                      react-hooks/refs
+  81:26  error  Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\components\builder\state\BuilderProvider.tsx:81:26
+  79 |   // Create the memory channel once (stable reference)
+  80 |   const previewChannelRef = useRef<MemoryChannelPair>(createMemoryChannel())
+> 81 |   const previewChannel = previewChannelRef.current
+     |                          ^^^^^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  82 |
+  83 |   // Registry ÔÇö use provided or create default
+  84 |   const registry = useMemo(                                                                                                                                                                                                                                                                      react-hooks/refs
+  90:50  error  Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\components\builder\state\BuilderProvider.tsx:90:50
+  88 |
+  89 |   // BuilderContext stored in React state (immutable update Ôćĺ re-render)
+> 90 |   const [ctx, setCtx] = useState<BuilderContext>(() =>
+     |                                                  ^^^^^
+> 91 |     createBuilderContext({
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 92 |       document: initialDocument,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 93 |       registry,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 94 |       preview: previewChannel.builderChannel,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 95 |     })
+     | ^^^^^^^ Passing a ref to a function may read its value during render
+  96 |   )
+  97 |
+  98 |   // dispatch ÔÇö the single mutation gateway  react-hooks/refs
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\components\runtime\GallerySection.tsx
+  15:22  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  15:88  warning  Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                              jsx-a11y/alt-text
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\components\runtime\ProductGridSection.tsx
+  28:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\components\store\GallerySection.tsx
+  28:17  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  30:17  warning  Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                              jsx-a11y/alt-text
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\components\store\ProductGridSection.tsx
+  37:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY APK\WEB FACTOR\src\lib\webhooks\WebhookEventRepository.ts
+  6:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+Ôťľ 51 problems (38 errors, 13 warnings)
+  9 errors and 0 warnings potentially fixable with the `--fix` option.
+

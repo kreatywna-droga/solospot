@@ -1,0 +1,21 @@
+{
+  "name": "@solospot/marketplace-experience",
+  "version": "1.0.0",
+  "description": "Client-facing marketplace catalog and install UI",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "files": [
+    "src/**/*"
+  ],
+  "scripts": {
+    "test": "vitest",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "vitest": "^1.0.0",
+    "typescript": "^5.0.0"
+  }
+}

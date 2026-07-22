@@ -1,0 +1,7 @@
+# TODO_SPRINT6_STEP3_3.todo
+
+- [ ] Fix TypeScript gate (CheckoutPage default export issue)
+- [ ] Rerun: npx tsc --noEmit --pretty false
+- [ ] Implement Webhook runtime PoW vitest suite (Invalid Signature / Duplicate Delivery / Payment Completed / Payment Failed / Concurrency)
+- [ ] Update TODO_SPRINT6_STEP3_3.progress.md with results
+

@@ -1,0 +1,102 @@
+﻿
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY AGENT\na_dobranoc\frontend-web\src\app\opinie\page.tsx
+  45:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY AGENT\na_dobranoc\frontend-web\src\app\opinie\page.tsx:45:9
+  43 |     if (saved) {
+  44 |       try {
+> 45 |         setTestimonials(JSON.parse(saved));
+     |         ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  46 |       } catch (e) {
+  47 |         console.error("Failed to parse testimonials", e);
+  48 |       }  react-hooks/set-state-in-effect
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY AGENT\na_dobranoc\frontend-web\src\app\page.tsx
+     6:150  warning  'Clock' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+     6:157  warning  'Heart' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+    19:5    error    Error: Cannot access variable before it is declared
+
+`randomize` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY AGENT\na_dobranoc\frontend-web\src\app\page.tsx:19:5
+  17 |
+  18 |   useEffect(() => {
+> 19 |     randomize();
+     |     ^^^^^^^^^ `randomize` accessed before it is declared
+  20 |     const timer = setTimeout(() => setIsMounted(true), initialDelay * 1000);
+  21 |     return () => clearTimeout(timer);
+  22 |   }, [initialDelay]);
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY AGENT\na_dobranoc\frontend-web\src\app\page.tsx:24:3
+  22 |   }, [initialDelay]);
+  23 |
+> 24 |   const randomize = () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 25 |     // 0 = od prawej, 1 = od lewej, 2 = z g├│ry, 3 = z do┼éu
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 26 |     const side = Math.floor(Math.random() * 4);
+     ÔÇŽ
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 44 |     setKey(prev => prev + 1); // Zmiana key resetuje animacj─Ö framer-motion
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 45 |   };
+     | ^^^^^ `randomize` is declared here
+  46 |
+  47 |   if (!isMounted) return null;
+  48 |  react-hooks/immutability
+   551:9    error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY AGENT\na_dobranoc\frontend-web\src\app\page.tsx:551:9
+  549 |     if (saved) {
+  550 |       try {
+> 551 |         setTestimonials(JSON.parse(saved));
+      |         ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  552 |       } catch (e) {}
+  553 |     }
+  554 |   }, []);                                                                                                                                                                                                                                                         react-hooks/set-state-in-effect
+   552:16   warning  'e' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+   580:26   error    Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY AGENT\na_dobranoc\frontend-web\src\app\page.tsx:580:26
+  578 |         {testimonials.slice(0, 3).map((t, i) => (
+  579 |           <motion.div 
+> 580 |             key={t.id || Date.now() + i}
+      |                          ^^^^^^^^^^ Cannot call impure function
+  581 |             initial={{ opacity: 0, y: 30 }}
+  582 |             whileInView={{ opacity: 1, y: 0 }}
+  583 |             viewport={{ once: true }}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  react-hooks/purity
+  1060:31   warning  The ref value 'audioRefs.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'audioRefs.current' to a variable inside the effect, and use that variable in the cleanup function                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          react-hooks/exhaustive-deps
+  1163:18   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\HP\Documents\GOOGLE ANTIGRAVITY AGENT\na_dobranoc\frontend-web\src\app\page.tsx:1163:18
+  1161 |     // Proste sprawdzenie czy u┼╝ytkownik ma aktywn─ů sesj─Ö zapisan─ů w localStorage
+  1162 |     const hasUser = localStorage.getItem('naDobranoc_user');
+> 1163 |     if (hasUser) setIsLoggedIn(true);
+       |                  ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  1164 |   }, []);
+  1165 |
+  1166 |   const handleSmoothScroll = (e: React.MouseEvent<HTMLElement>, id: string) => {                                                                       react-hooks/set-state-in-effect
+  1615:29   warning  'e' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+
+Ôťľ 10 problems (5 errors, 5 warnings)
+

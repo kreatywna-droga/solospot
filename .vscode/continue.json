@@ -1,0 +1,22 @@
+{
+    "models":  [
+                   {
+                       "apiBase":  "http://127.0.0.1:11434",
+                       "title":  "Ollama - Qwen (Lokalnie)",
+                       "model":  "qwen",
+                       "provider":  "ollama"
+                   },
+                   {
+                       "apiBase":  "http://127.0.0.1:11434",
+                       "title":  "Ollama - Gemma (Lokalnie)",
+                       "model":  "gemma",
+                       "provider":  "ollama"
+                   },
+                   {
+                       "apiBase":  "http://127.0.0.1:11434",
+                       "title":  "Ollama - Llama 3 (Lokalnie)",
+                       "model":  "llama3",
+                       "provider":  "ollama"
+                   }
+               ]
+}

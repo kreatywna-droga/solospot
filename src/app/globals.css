@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Segoe UI", Arial, sans-serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+}
+
+:root {
+  --color-primary: #8b5cf6;
+  --color-secondary: #d946ef;
+  --color-accent: #f59e0b;
+  --color-background: #050508;
+  --color-surface: #080a12;
+  --color-text: #e2e8f0;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  min-height: 100vh;
+}

@@ -1,0 +1,28 @@
+{
+  "version": "1.0.0",
+  "buildId": "build_1784720631988_c0g2hhs",
+  "runtimeVersion": "1.0.0",
+  "assets": [
+    {
+      "path": "assets/app.5f0ad3fb.css",
+      "originalPath": "assets/app.css",
+      "type": "stylesheet",
+      "contentType": "text/css",
+      "size": 27,
+      "hash": "5f0ad3fb6533b3f8cadb43bec1c39433a8306392a335e651c66a5897696ce641"
+    }
+  ],
+  "pages": [
+    {
+      "id": "page_home",
+      "slug": "",
+      "name": "Home",
+      "path": "index.html"
+    }
+  ],
+  "integrity": {
+    "assets/app.5f0ad3fb.css": "5f0ad3fb6533b3f8cadb43bec1c39433a8306392a335e651c66a5897696ce641"
+  },
+  "generatedAt": "2026-07-22T11:43:51.988Z",
+  "metadata": {}
+}

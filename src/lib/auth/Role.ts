@@ -1,0 +1,1 @@
+export type Role = 'SUPER_ADMIN' | 'PLATFORM_OPERATOR' | 'TENANT_ADMIN' | 'CUSTOMER';

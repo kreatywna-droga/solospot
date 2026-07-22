@@ -1,0 +1,17 @@
+{
+  "name": "@solospot/ai-layer",
+  "version": "1.0.0",
+  "description": "AI Layer - Natural language orchestration for WEB FACTOR platform",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "files": ["src/**/*"],
+  "scripts": {
+    "test": "vitest",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "vitest": "^1.0.0",
+    "typescript": "^5.0.0"
+  }
+}

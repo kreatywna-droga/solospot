@@ -1,0 +1,22 @@
+// index.ts
+// C9.1: Commerce Persistence — package entry point
+
+export * from './interfaces/Repository'
+export * from './repositories/ProductRepository'
+export * from './repositories/OrderRepository'
+export * from './repositories/CartRepository'
+export * from './repositories/InventoryRepository'
+export * from './repositories/CustomerRepository'
+export * from './providers/MemoryRepository'
+export * from './providers/SupabaseRepository'
+export * from './providers/SupabaseProductRepository'
+export * from './providers/SupabaseOrderRepository'
+export * from './providers/SupabaseCartRepository'
+export * from './providers/SupabaseInventoryRepository'
+export * from './providers/SupabaseCustomerRepository'
+export * from './Transaction'
+export * from './repositories/CategoryRepository'
+export * from './repositories/MemoryProductRepository'
+export * from './repositories/MemoryCategoryRepository'
+export * from './repositories/MemoryInventoryRepository'
+export * from './CommerceDataResolver'

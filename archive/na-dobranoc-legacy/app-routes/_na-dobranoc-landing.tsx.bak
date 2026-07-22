@@ -1,0 +1,1568 @@
+'use client';
+
+import { useRef, useState, useEffect } from 'react';
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/lib/supabase';
+import { PlayCircle, ChevronRight, ChevronLeft, Moon, ShieldCheck, Download, Check, Mail, MessageSquare, Send, X, LogIn, WifiOff, VolumeX, Sparkles, Clock, Heart, Pause, Music, Home, Diamond, BookOpen, User } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { NaffyButton } from '@/components/NaffyButton';
+
+// Komponent pojedynczej komety, która po każdym locie losuje nowe miejsce startu, kąt i prędkość
+function Comet({ initialDelay }: { initialDelay: number }) {
+  const [config, setConfig] = useState({ top: 0, left: 0, angle: 0, duration: 4, size: 1 });
+  const [isMounted, setIsMounted] = useState(false);
+  const [key, setKey] = useState(0);
+
+  const randomize = () => {
+    // 0 = od prawej, 1 = od lewej, 2 = z góry, 3 = z dołu
+    const side = Math.floor(Math.random() * 4);
+    let top = 0, left = 0, angle = 0;
+    
+    if (side === 0) { // od prawej (leci w lewo)
+      top = Math.random() * 100; left = 110; angle = 135 + (Math.random() * 90 - 45); 
+    } else if (side === 1) { // od lewej (leci w prawo)
+      top = Math.random() * 100; left = -10; angle = 0 + (Math.random() * 90 - 45); 
+    } else if (side === 2) { // z góry (leci w dół)
+      top = -10; left = Math.random() * 100; angle = 90 + (Math.random() * 90 - 45); 
+    } else { // z dołu (leci w górę)
+      top = 110; left = Math.random() * 100; angle = -90 + (Math.random() * 90 - 45); 
+    }
+
+    setConfig({ 
+      top, left, angle, 
+      duration: 1.5 + Math.random() * 3, // szybkie (1.5s) lub powolne w oddali (4.5s)
+      size: 0.3 + Math.random() * 0.9 // małe w oddali lub duże blisko
+    });
+    setKey(prev => prev + 1); // Zmiana key resetuje animację framer-motion
+  };
+
+  useEffect(() => {
+    randomize();
+    const timer = setTimeout(() => setIsMounted(true), initialDelay * 1000);
+    return () => clearTimeout(timer);
+  }, [initialDelay]);
+
+  if (!isMounted) return null;
+
+  return (
+    <div className="absolute" style={{ top: `${config.top}%`, left: `${config.left}%`, transform: `rotate(${config.angle}deg)`, opacity: config.size }}>
+      <motion.div
+        key={key}
+        className="relative flex items-center"
+        style={{ width: `${120 * config.size}px`, height: `${2 * config.size}px` }}
+        initial={{ x: 0, opacity: 0 }}
+        animate={{ x: '150vw', opacity: [0, 1, 1, 0] }}
+        transition={{ duration: config.duration, ease: "linear" }}
+        onAnimationComplete={() => setTimeout(randomize, 6000 + Math.random() * 6000)} // kometa pojawia się co 6-12s
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-300/40 to-white/90 rounded-full blur-[1px]" />
+        <div className="absolute right-0 bg-white rounded-full shadow-[0_0_15px_5px_rgba(255,255,255,0.8)]" style={{ width: `${4 * config.size}px`, height: `${4 * config.size}px` }} />
+      </motion.div>
+    </div>
+  );
+}
+
+// Komponent renderujący migoczące i spadające gwiazdy po prawej stronie tła
+function StarrySky() {
+  return (
+    <div className="absolute top-0 right-0 w-full lg:w-[55%] h-full pointer-events-none overflow-hidden z-0">
+      {/* Migoczące gwiazdy (zmniejszona ilość dla lepszej wydajności) */}
+      {[...Array(100)].map((_, i) => {
+        // Pseudolosowe, ale deterministyczne pozycje, aby nie powodować Hydration Error i uniknąć sztucznych skupisk
+        const top = Math.abs(Math.sin(i * 12.9898) * 43758.5453) % 100;
+        const left = Math.abs(Math.cos(i * 78.233) * 43758.5453) % 100;
+        const isBlinking = i % 2 === 0;
+        return (
+          <div
+            key={`star-${i}`}
+            className={`absolute bg-white rounded-full ${isBlinking ? 'animate-pulse' : 'opacity-40'}`}
+            style={{ 
+              top: `${top}%`, 
+              left: `${left}%`,
+              width: i % 3 === 0 ? '3px' : '2px',
+              height: i % 3 === 0 ? '3px' : '2px',
+              animationDuration: `${2 + (i % 4)}s`,
+              animationDelay: `${(i * 0.3) % 2}s`
+            }}
+          />
+        );
+      })}
+      
+      {/* Dynamiczne komety, które same kontrolują swoje losowe przeloty co ok. 10 sekund */}
+      <Comet initialDelay={2} />
+      <Comet initialDelay={8} />
+    </div>
+  );
+}
+
+// Specjalna kometa powitalna, która leci od lewej do prawej nad wszystkimi elementami (w tym nad telefonem) po załadowaniu strony
+function GreetingComet() {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    // Odpalamy niemal natychmiast po zamontowaniu
+    const timer = setTimeout(() => setIsMounted(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!isMounted) return null;
+
+  return (
+    <div className="absolute top-0 left-0 w-full h-screen overflow-hidden pointer-events-none z-0">
+      {/* Start z lewej strony, nieco powyżej środka ekranu, lekko w dół (kąt 15 stopni) */}
+      <div className="absolute" style={{ top: '25vh', left: '-10%', transform: 'rotate(15deg)' }}>
+        <motion.div
+          className="relative flex items-center"
+          style={{ width: '180px', height: '3px' }}
+          initial={{ x: 0, opacity: 0 }}
+          animate={{ x: '120vw', opacity: [0, 1, 1, 0] }}
+          transition={{ duration: 4.5, delay: 0.2, ease: "linear" }}
+        >
+          {/* Bardziej widoczny ogon komety powitalnej */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-200/80 to-white rounded-full blur-[2px]" />
+          {/* Bardzo jasna, widoczna z daleka główka */}
+          <div className="absolute right-0 w-[6px] h-[6px] bg-white rounded-full shadow-[0_0_20px_8px_rgba(255,255,255,0.9)]" />
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
+function PhoneMockup({ src, alt, glowColor, className = "w-[280px] h-[580px]", priority = true, shadowOpacity = 0 }: { src: string, alt: string, glowColor: string, className?: string, priority?: boolean, shadowOpacity?: number }) {
+  const depth = 25;
+  return (
+    <div className={`relative ${className}`} style={{ transformStyle: 'preserve-3d' }}>
+      
+      {/* 1. TYŁ I GRUBOŚĆ (Boczne płytki tworzące efekt 3D) */}
+      {[...Array(depth)].map((_, i) => {
+        const isMiddle = i > 0 && i < depth - 1;
+        return (
+          <div 
+            key={i}
+            className={`absolute inset-0 rounded-[1.5rem] md:rounded-[3rem] bg-[#1a1a24] ${i === depth - 1 ? 'border border-[#2a2a3b]' : ''} ${isMiddle ? 'hidden md:block' : ''}`}
+            style={{ 
+              transform: `translateZ(-${i + 1}px)`,
+              boxShadow: i === depth - 1 ? `0 20px 60px ${glowColor}` : 'none'
+            }}
+          />
+        );
+      })}
+
+      {/* Przyciemnienie plecków dla telefonów odwróconych tyłem do ekranu */}
+      <motion.div 
+        className="absolute inset-0 rounded-[1.5rem] md:rounded-[3rem] bg-[#050508] pointer-events-none"
+        style={{ transform: `translateZ(-${depth + 0.5}px)` }}
+        animate={{ opacity: shadowOpacity }}
+        transition={{ duration: 0.5 }}
+      />
+
+      {/* 2. PLANSZA ZE ZRZUTEM EKRANU (Zabezpieczona przed przenikaniem) */}
+      <div 
+        className="absolute inset-0 rounded-[1.5rem] md:rounded-[3rem] border-[4px] md:border-[8px] border-[#1a1a24] bg-[#0a0a0e]"
+        style={{ transform: 'translateZ(1px)', backfaceVisibility: 'hidden' }}
+      >
+        {/* Idealne docięcie zawartości (clip-path omija błąd overflow-hidden w WebKit 3D) */}
+        <div className="absolute inset-0 w-full h-full [clip-path:inset(0_round_1.2rem)] md:[clip-path:inset(0_round_2.5rem)]">
+          <Image src={src} alt={alt} fill sizes="(max-width: 768px) 140px, 280px" className="object-cover" priority={priority} />
+          
+          {/* Notch - wcięcie */}
+          <div className="absolute top-0 inset-x-0 h-4 md:h-6 flex justify-center z-20">
+            <div className="w-16 md:w-28 h-3 md:h-5 bg-[#1a1a24] rounded-b-lg md:rounded-b-2xl" />
+          </div>
+
+          {/* Poświata odblaskowa */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none z-10" />
+
+          {/* Maska przyciemniająca dla elementów z tyłu karuzeli */}
+          <motion.div 
+            className="absolute inset-0 bg-[#050508] pointer-events-none z-30"
+            animate={{ opacity: shadowOpacity }}
+            transition={{ duration: 0.5 }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Komponent generujący wektorowe logo 3D (kostka z księżycem)
+function Logo3D() {
+  const depth = 15; // Grubość kostki logo
+  return (
+    <div 
+      className="relative w-12 h-14 group-hover:scale-110 transition-transform duration-300" 
+      style={{ transformStyle: 'preserve-3d', transform: 'rotateY(25deg) rotateX(15deg) rotateZ(-5deg)' }}
+    >
+      {/* Płonąca pochodnia (Zbalansowana poświata w przestrzeni za ikoną - minus 15%) */}
+      <motion.div 
+        className="absolute -inset-2 bg-fuchsia-500 rounded-full blur-[20px]"
+        style={{ transform: `translateZ(-${depth + 5}px)` }}
+        animate={{ 
+          scale: [1, 1.21, 1], 
+          opacity: [0.20, 0.45, 0.20] 
+        }}
+        transition={{ 
+          duration: 3.5, 
+          repeat: Infinity, 
+          ease: "easeInOut" 
+        }}
+      />
+
+      {/* Warstwy grubości logo */}
+      {[...Array(depth)].map((_, i) => (
+        <div 
+          key={i}
+          className="absolute inset-0 bg-[#3f196a] rounded-xl"
+          style={{ 
+            transform: `translateZ(-${i + 1}px)`,
+            boxShadow: i === depth - 1 ? `0 10px 20px rgba(0,0,0,0.5)` : 'none'
+          }}
+        />
+      ))}
+      
+      {/* Front logo */}
+      <div 
+        className="absolute inset-0 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center border-t border-white/30"
+        style={{ transform: 'translateZ(0)' }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent rounded-xl pointer-events-none" />
+        <Moon className="w-7 h-7 text-white drop-shadow-lg relative z-10" />
+      </div>
+    </div>
+  );
+}
+
+// Komponent sekcji Cennika (Pricing) ze szklanymi kartami
+function PricingSection() {
+  return (
+    <section id="pricing" className="scroll-mt-24 relative z-30 py-32 px-6 lg:px-12 max-w-[1200px] mx-auto mt-12">
+      {/* Tło Pricing */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none" />
+
+      <div className="text-center mb-24 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 mb-6"
+        >
+          <span className="text-xs font-bold tracking-widest text-purple-400 uppercase">Cennik</span>
+        </motion.div>
+        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight drop-shadow-lg">
+          Zainwestuj w <span className="font-serif italic text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">spokojny sen</span>
+        </h2>
+        <p className="text-xl text-slate-400 font-light leading-relaxed max-w-2xl mx-auto">
+          Prosty, jednorazowy wybór. Bez haczyków, bez abonamentów, z pełnym dostępem od pierwszej sekundy.
+        </p>
+      </div>
+
+      <div className="flex justify-center relative z-10">
+        {/* Karta: Dożywotnia (Premium, Świecąca gradientem) */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="relative p-1 lg:p-[2px] rounded-[3rem] bg-gradient-to-b from-purple-500 via-pink-500 to-[#111118] shadow-[0_0_60px_rgba(168,85,247,0.25)] transform z-20 group max-w-lg w-full"
+        >
+          {/* Tag Najpopularniejszy */}
+          <div className="absolute -top-5 left-1/2 -translate-x-1/2 px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full shadow-[0_0_20px_rgba(236,72,153,0.5)] z-20">
+            <span className="text-[11px] font-black text-white tracking-[0.2em] uppercase">Zakup Jednorazowy</span>
+          </div>
+
+          <div className="relative h-full bg-[#13101c] rounded-[2.9rem] p-10 lg:p-12 overflow-hidden text-center">
+            {/* Wewnętrzny blask za tekstem */}
+            <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-pink-500/10 blur-[100px] pointer-events-none group-hover:bg-pink-500/20 transition-colors duration-500" />
+            
+            <div className="relative z-10">
+              <div className="mb-8">
+                <h3 className="text-3xl font-bold text-white mb-2">Dostęp Dożywotni</h3>
+                <p className="text-pink-200 font-light drop-shadow-sm">Kupujesz raz, usypiasz spokojnie na zawsze.</p>
+              </div>
+              <div className="mb-10 flex flex-col items-center border-b border-white/10 pb-10">
+                <div className="flex items-end gap-2">
+                  <span className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-br from-purple-300 via-white to-pink-300">70</span>
+                  <span className="text-2xl text-slate-400 font-medium mb-2"> zł</span>
+                </div>
+                <span className="text-sm text-slate-500 line-through mt-3 font-medium tracking-wide">Zamiast 149 zł rocznie</span>
+              </div>
+              
+              <ul className="space-y-5 mb-12 text-left">
+                {['Dostęp premium na całe życie (brak abonamentu)', 'Wszystkie przyszłe baśnie całkowicie za darmo', 'Brak reklam i mikropłatności', 'Odtwarzanie w trybie offline i w tle', 'Do 3 urządzeń jednocześnie'].map((feature, i) => (
+                  <li key={i} className="flex items-center gap-4 text-white font-medium">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-pink-500/30">
+                      <Check className="w-3 h-3 text-white" strokeWidth={4} />
+                    </div>
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              
+              {/* TU NALEŻY WKLEIĆ LINK Z 1KOSZYK */}
+              <NaffyButton 
+                naffyLink="https://1ct.eu/6rorw" 
+                text="Kupuję na Zawsze" 
+                variant="primary" 
+              />
+              
+              <div className="mt-8">
+                <Link href="/logowanie" className="inline-block text-sm font-bold text-slate-400 hover:text-white transition-colors underline decoration-slate-600 underline-offset-4 hover:decoration-white">
+                  LUB WYPRÓBUJ 7 DNI ZA DARMO
+                </Link>
+                <p className="text-xs text-slate-500 mt-2 font-light">Pełny dostęp. Bez podawania karty.</p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      <div className="mt-16 text-center relative z-10">
+        <Link href="/porownanie-planow" className="inline-flex items-center gap-2 px-6 py-3 border border-white/20 text-white font-medium rounded-full hover:bg-white/10 transition-colors group">
+          Zobacz szczegóły licencji <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+// Komponent z w pełni trójwymiarową karuzelą 3D (Cylinder)
+function ScreenshotsSection() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [radius, setRadius] = useState(650);
+  const [zoomOffset, setZoomOffset] = useState(200);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 768;
+      setRadius(isMobile ? 350 : 650);
+      setZoomOffset(isMobile ? 120 : 200);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const screens = [
+    '/screenshots/Screenshot_20260523_223956_sklep.png',
+    '/screenshots/Screenshot_20260523_224011_sklep.png',
+    '/screenshots/Screenshot_20260523_224041_sklep.png',
+    '/screenshots/Screenshot_20260523_224130_sklep.png',
+    '/screenshots/Screenshot_20260523_224147_sklep.png',
+    '/screenshots/Screenshot_20260523_224219_sklep.png',
+    '/screenshots/Screenshot_20260523_224327_sklep.png',
+    '/screenshots/Screenshot_20260523_224340_sklep.png',
+    '/screenshots/Screenshot_20260523_224357_sklep.png',
+    '/screenshots/Screenshot_20260523_224415_sklep.png',
+    '/screenshots/Screenshot_20260523_224424_sklep.png',
+  ];
+
+  const totalItems = screens.length;
+  const angleStep = 360 / totalItems;
+
+  const rotateCarousel = (direction: 'left' | 'right') => {
+    setActiveIndex((prev) => direction === 'left' ? prev - 1 : prev + 1);
+  };
+
+  return (
+    <section className="relative z-30 bg-[#050508] border-y border-white/5 mt-12 shadow-[inset_0_0_100px_rgba(0,0,0,1)]">
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
+      
+      {/* Dodatkowy kontener z overflow-hidden, ale ODDZIELONY od perspektywy 3D */}
+      <div className="w-full overflow-hidden py-24 md:py-32">
+        <div className="text-center mb-16 px-6 relative z-10">
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
+            Aplikacja, która szepcze <span className="font-serif italic text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">dobranoc</span>
+          </h2>
+          <p className="text-lg text-slate-400 font-light max-w-2xl mx-auto">
+            Aksamitny interfejs pozbawiony agresywnych bodźców. Zero rażącego światła – tylko czysty relaks i przygotowanie do snu.
+          </p>
+        </div>
+
+        {/* Kontener perspektywy 3D */}
+        <div className="relative max-w-[1400px] mx-auto h-[450px] md:h-[650px] flex items-center justify-center perspective-[1000px] md:perspective-[1500px]">
+          
+          <button 
+            onClick={() => rotateCarousel('left')}
+            className="absolute left-4 sm:left-12 z-40 w-14 h-14 rounded-full bg-[#1a1a24]/80 border border-white/10 text-white flex items-center justify-center backdrop-blur-md transition-all duration-300 hover:bg-purple-600 hover:scale-110 shadow-[0_0_20px_rgba(168,85,247,0.3)]"
+          >
+            <ChevronLeft className="w-7 h-7 -ml-1" />
+          </button>
+
+          {/* Główny kontener karuzeli preserve-3d */}
+          <motion.div 
+            className="relative w-[140px] md:w-[280px] h-[300px] md:h-[580px]"
+            animate={{ 
+              rotateY: -activeIndex * angleStep, 
+              z: -radius + zoomOffset 
+            }}
+            transition={{ type: "spring", stiffness: 50, damping: 14 }}
+            style={{ transformStyle: 'preserve-3d' }}
+          >
+            {screens.map((src, i) => {
+              const angle = i * angleStep;
+              
+              const normalizedActive = ((activeIndex % totalItems) + totalItems) % totalItems;
+              let dist = Math.abs(i - normalizedActive);
+              if (dist > totalItems / 2) dist = totalItems - dist;
+              
+              const shadowOverlay = dist === 0 ? 0 : dist === 1 ? 0.6 : 0.9;
+              
+              return (
+                <div
+                  key={`3d-screen-${i}`}
+                  className="absolute inset-0 flex items-center justify-center"
+                  style={{
+                    transform: `rotateY(${angle}deg) translateZ(${radius}px)`,
+                    transformStyle: 'preserve-3d', 
+                  }}
+                >
+                  {/* Poświata aktywnego telefonu */}
+                  <motion.div 
+                    className="absolute inset-[-14px] bg-gradient-to-r from-purple-500 to-pink-500 rounded-[2rem] md:rounded-[3.6rem] blur-[16px] md:blur-[24px]"
+                    animate={{ opacity: dist === 0 ? 0.8 : 0 }}
+                    transition={{ duration: 0.4 }}
+                    style={{ transform: 'translateZ(-30px)' }}
+                  />
+
+                  <PhoneMockup 
+                    src={src} 
+                    alt={`Zrzut ekranu ${i+1}`} 
+                    glowColor="rgba(0,0,0,0)"
+                    className="w-full h-full" 
+                    priority={true}
+                    shadowOpacity={shadowOverlay}
+                  />
+                </div>
+              );
+            })}
+          </motion.div>
+
+          <button 
+            onClick={() => rotateCarousel('right')}
+            className="absolute right-4 sm:right-12 z-40 w-14 h-14 rounded-full bg-[#1a1a24]/80 border border-white/10 text-white flex items-center justify-center backdrop-blur-md transition-all duration-300 hover:bg-purple-600 hover:scale-110 shadow-[0_0_20px_rgba(168,85,247,0.3)]"
+          >
+            <ChevronRight className="w-7 h-7 ml-1" />
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Komponent wideo
+function VideoSection() {
+  return (
+    <section id="video" className="scroll-mt-24 relative z-30 py-24 px-6 lg:px-12 max-w-[1200px] mx-auto mt-12">
+      <div className="text-center mb-16 relative z-10">
+        <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
+          Zobacz <span className="font-serif italic text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">w akcji</span>
+        </h2>
+        <p className="text-lg text-slate-400 font-light max-w-2xl mx-auto">
+          Zanurz się w świecie aplikacji na naszym filmie promocyjnym.
+        </p>
+      </div>
+      
+      <div className="relative rounded-[2rem] md:rounded-[3rem] overflow-hidden border border-white/10 bg-[#050508] shadow-[0_0_80px_rgba(168,85,247,0.15)] group mx-auto max-w-[1000px] flex items-center justify-center">
+        {/* Glow effect */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 via-transparent to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-10" />
+        
+        <div className="relative w-full aspect-video z-20 rounded-[2rem] md:rounded-[3rem] overflow-hidden" style={{ transform: 'translateZ(0)', isolation: 'isolate' }}>
+          <iframe 
+            width="100%" 
+            height="100%" 
+            src="https://www.youtube.com/embed/mozGUeUZs-k?rel=0&modestbranding=1" 
+            title="Na Dobranoc Promo" 
+            frameBorder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+            referrerPolicy="strict-origin-when-cross-origin" 
+            allowFullScreen
+            className="w-full h-full"
+            style={{ transform: 'translateZ(0)' }}
+          ></iframe>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Komponent z Opiniami Użytkowników
+function TestimonialsSection() {
+  const defaultTestimonials = [
+    {
+      id: 1,
+      name: "Anna Kowalska",
+      role: "Mama 3-letniego Jasia",
+      text: "Próbowaliśmy wszystkiego. Suszarki, projektorów, śpiewania... Odkąd używamy tej aplikacji, Jaś zasypia w 10 minut. Aplikacja w trybie samolotowym to dla mnie absolutny game-changer.",
+      rating: 5,
+      initials: "AK",
+      color: "from-purple-400 to-pink-500"
+    },
+    {
+      id: 2,
+      name: "Michał Zawadzki",
+      role: "Tata bliźniaków",
+      text: "Bałem się, że telefon przed snem będzie tylko rozbudzał dzieci. Ale interfejs jest tak ciemny i pozbawiony bodźców, że działa wyciszająco. Lektor ma niezwykle kojący głos.",
+      rating: 5,
+      initials: "MZ",
+      color: "from-blue-400 to-indigo-500"
+    },
+    {
+      id: 3,
+      name: "Katarzyna L.",
+      role: "Mama 5-letniej Zosi",
+      text: "Najlepiej wydane pieniądze. Kupiłam dostęp dożywotni i wreszcie mamy z mężem wieczory dla siebie. Dźwięki tła (szum morza) grają całą noc, przez co Zosia nie budzi się przy byle hałasie.",
+      rating: 5,
+      initials: "KL",
+      color: "from-fuchsia-400 to-purple-600"
+    }
+  ];
+
+  return (
+    <section id="opinie" className="scroll-mt-24 relative z-30 py-32 px-6 lg:px-12 max-w-[1400px] mx-auto mt-12 bg-[#050508] border-y border-white/5 shadow-[inset_0_0_80px_rgba(0,0,0,0.8)]">
+      <div className="absolute top-0 right-[10%] w-[300px] h-[300px] bg-pink-600/10 blur-[120px] rounded-full pointer-events-none" />
+      
+      <div className="text-center mb-20 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-pink-500/10 border border-pink-500/20 mb-6"
+        >
+          <span className="text-xs font-bold tracking-widest text-pink-400 uppercase">Opinie Rodziców</span>
+        </motion.div>
+        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
+          Rodzice, którzy <span className="font-serif italic text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">odzyskali wieczory</span>
+        </h2>
+        <p className="text-xl text-slate-400 font-light leading-relaxed max-w-2xl mx-auto">
+          Zobacz, jak nasza aplikacja zmieniła rutynę zasypiania w setkach polskich domów.
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-8 relative z-10 mb-12">
+        {defaultTestimonials.map((t, i) => (
+          <motion.div 
+            key={t.id || i}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.2, duration: 0.6 }}
+            className="p-8 lg:p-10 rounded-[2.5rem] bg-[#111118]/80 border border-white/5 backdrop-blur-sm hover:border-purple-500/30 transition-colors flex flex-col h-full shadow-xl"
+          >
+            <div className="flex gap-1 mb-6">
+              {[...Array(t.rating)].map((_, starIndex) => (
+                <svg key={starIndex} className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              ))}
+            </div>
+            
+            <p className="text-lg text-slate-300 font-light leading-relaxed mb-10 flex-grow italic">
+              &quot;{t.text}&quot;
+            </p>
+            
+            <div className="flex items-center gap-4 mt-auto">
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br ${t.color} text-white font-bold text-lg shadow-lg flex-shrink-0`}>
+                {t.initials}
+              </div>
+              <div>
+                <h4 className="text-white font-bold">{t.name}</h4>
+                <p className="text-sm text-slate-500 font-medium">{t.role}</p>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="flex justify-center relative z-10">
+        <Link 
+          href="/opinie"
+          className="group flex items-center gap-3 px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-white font-semibold transition-all hover:scale-105"
+        >
+          <span>Zobacz więcej opinii lub dodaj własną</span>
+          <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+// Komponent z FAQ
+function FaqSection() {
+  const faqs = [
+    { 
+      q: "Jak działa 7-dniowy okres próbny?", 
+      a: "Po rejestracji automatycznie otrzymujesz pełen, bezpłatny dostęp do wszystkich funkcji Premium na 7 dni. Po upływie tego czasu dostęp wygasa do momentu jednorazowego zakupu licencji. Nie wymagamy podawania karty płatniczej z góry – nie ma u nas automatycznych odnowień." 
+    },
+    { 
+      q: "Czy mogę odtwarzać bajki przy zablokowanym ekranie?", 
+      a: "Tak! Nasza aplikacja pozwala na odtwarzanie dźwięku w tle. Możesz włączyć wybraną historię, wygasić ekran telefonu i odłożyć urządzenie. Oszczędza to baterię oraz eliminuje światło niebieskie w pokoju zasypiającego dziecka." 
+    },
+    { 
+      q: "Czy po zakupie ponoszę jeszcze jakieś koszty?", 
+      a: "Absolutnie nie. Oferujemy prosty model: jednorazowa płatność za dożywotni dostęp (Lifetime). W aplikacji nie ma ukrytych mikropłatności, abonamentów ani wyskakujących reklam, które mogłyby zakłócić sen dziecka." 
+    },
+    { 
+      q: "Dla jakiej grupy wiekowej przeznaczone są bajki?", 
+      a: "Treści tworzone są z myślą o dzieciach w wieku od 2 do 8 lat. Słownictwo, tempo narracji oraz częstotliwości dźwięków tła są dobierane tak, by stymulować wyobraźnię, jednocześnie skutecznie wyciszając układ nerwowy malucha." 
+    },
+    { 
+      q: "Na ilu urządzeniach mogę być zalogowany?", 
+      a: "W ramach jednej licencji Premium możesz korzystać z aplikacji na 3 różnych urządzeniach jednocześnie. Dzięki temu bez problemu uruchomisz bajkę ze swojego telefonu, telefonu partnera lub domowego tabletu." 
+    },
+  ];
+
+  return (
+    <section id="faq" className="scroll-mt-24 relative z-30 py-32 px-6 lg:px-12 max-w-[800px] mx-auto mt-12">
+      <div className="text-center mb-16">
+        <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Często zadawane pytania</h2>
+        <p className="text-lg text-slate-400 font-light">Wszystko, co musisz wiedzieć przed startem.</p>
+      </div>
+
+      <div className="space-y-4">
+        {faqs.map((faq, i) => (
+          <details key={i} className="group p-6 lg:p-8 rounded-[2rem] bg-[#111118]/80 backdrop-blur-sm border border-white/5 cursor-pointer hover:border-white/10 transition-colors">
+            <summary className="flex items-center justify-between font-bold text-lg text-white list-none [&::-webkit-details-marker]:hidden">
+              {faq.q}
+              <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-open:rotate-90 transition-transform">
+                <ChevronRight className="w-4 h-4 text-purple-400" />
+              </div>
+            </summary>
+            <p className="mt-6 text-slate-400 font-light leading-relaxed border-t border-white/5 pt-6">
+              {faq.a}
+            </p>
+          </details>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// Stopka (Footer)
+function Footer() {
+  const router = useRouter();
+  const [clickCount, setClickCount] = useState(0);
+
+  const handleAdminClick = () => {
+    const newCount = clickCount + 1;
+    setClickCount(newCount);
+    if (newCount >= 7) {
+      router.push('/admin');
+      setClickCount(0); // Reset after redirect
+    }
+  };
+
+  return (
+    <footer className="relative z-30 border-t border-white/5 bg-[#0a0a0e]/80 backdrop-blur-lg pt-16 pb-8 px-6 lg:px-12 mt-20">
+      <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+        <div className="flex items-center gap-3 opacity-80 hover:opacity-100 transition-opacity">
+          <Moon className="w-6 h-6 text-purple-500" />
+          <span className="text-xl font-serif font-black tracking-tighter text-white">na.dobranoc</span>
+        </div>
+        <div className="flex flex-wrap justify-center gap-6 md:gap-8 text-[13px] font-bold text-slate-500 mt-4 md:mt-0">
+          <Link href="/regulamin" className="hover:text-purple-400 transition-colors">Regulamin Usługi</Link>
+          <Link href="/prywatnosc" className="hover:text-purple-400 transition-colors">Polityka Prywatności</Link>
+          <Link href="/cookies" className="hover:text-purple-400 transition-colors">Cookies</Link>
+          <Link href="/zwroty" className="hover:text-purple-400 transition-colors">Zwroty i Reklamacje</Link>
+          <Link href="/eula" className="hover:text-purple-400 transition-colors">EULA</Link>
+          <Link href="/centrum-pomocy" className="hover:text-purple-400 transition-colors">Centrum Pomocy</Link>
+          <Link href="/blog" className="hover:text-purple-400 transition-colors">Blog</Link>
+          <Link href="/kontakt" className="hover:text-purple-400 transition-colors">Kontakt</Link>
+        </div>
+        <div className="text-[12px] text-slate-600 font-medium flex items-center justify-center gap-2 mt-4 md:mt-0">
+          <span>&copy; {new Date().getFullYear()} <span onClick={handleAdminClick} className="cursor-default select-none">dst.design</span>. Wszelkie prawa zastrzeżone.</span>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+// Komponent Jak to działa
+function HowItWorksSection() {
+  const steps = [
+    { num: '01', title: 'Zainstaluj Aplikację', desc: 'Pobierz bezpieczny plik APK i zaloguj się na swoje konto Premium. Szybko i bezproblemowo.', icon: Download },
+    { num: '02', title: 'Odłącz Świat', desc: 'Wybierz baśń, uruchom odtwarzacz i włącz tryb samolotowy. Zero promieniowania i powiadomień.', icon: ShieldCheck },
+    { num: '03', title: 'Magia Snu', desc: 'Połóż telefon w bezpiecznej odległości. Głęboki i zdrowy sen Twojego dziecka właśnie się zaczyna.', icon: Moon },
+  ];
+
+  return (
+    <section id="how-it-works" className="scroll-mt-24 relative z-30 py-32 px-6 lg:px-12 max-w-[1200px] mx-auto">
+      <div className="text-center mb-24 relative">
+        <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Trzy kroki do <span className="font-serif italic text-purple-400">ciszy</span></h2>
+        <p className="text-lg text-slate-400 font-light max-w-2xl mx-auto">Zaprojektowaliśmy proces, który w 100% minimalizuje użycie i wpływ telefonu w sypialni Twojego dziecka.</p>
+      </div>
+
+      <div className="relative grid md:grid-cols-3 gap-12 lg:gap-8">
+        {/* Pozioma linia łącząca kroki (widoczna na PC) */}
+        <div className="hidden md:block absolute top-[40px] left-[15%] right-[15%] h-[2px] bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
+        
+        {steps.map((step, i) => (
+          <motion.div 
+            key={i}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.2, duration: 0.6 }}
+            className="relative flex flex-col items-center text-center group"
+          >
+            {/* Kółko z ikoną */}
+            <div className="w-20 h-20 rounded-full bg-[#111118] border-[2px] border-[#2a2a3b] flex items-center justify-center mb-8 relative z-10 group-hover:border-purple-500/50 transition-colors shadow-[0_20px_40px_rgba(0,0,0,0.8)] group-hover:shadow-[0_0_40px_rgba(168,85,247,0.3)]">
+              <step.icon className="w-8 h-8 text-slate-400 group-hover:text-purple-400 transition-colors" />
+            </div>
+            
+            <h3 className="text-2xl font-bold text-white mb-4">{step.title}</h3>
+            <p className="text-slate-400 font-light leading-relaxed">{step.desc}</p>
+          </motion.div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// Komponent CTA (Call To Action) nad stopką
+function CtaSection() {
+  return (
+    <section className="relative z-30 py-24 px-6 lg:px-12 max-w-[1200px] mx-auto mt-12 mb-12">
+      <div className="relative rounded-[3rem] bg-gradient-to-b from-[#150a21] to-[#0a0a0e] border border-purple-500/20 overflow-hidden shadow-[0_0_100px_rgba(168,85,247,0.1)] p-12 md:p-20 text-center">
+        
+        {/* Tło CTA */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[800px] h-[300px] bg-purple-600/30 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-pink-600/20 blur-[120px] rounded-full pointer-events-none" />
+        
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="relative z-10"
+        >
+          <h2 className="text-4xl md:text-6xl font-bold text-white mb-8 tracking-tight drop-shadow-lg">
+            Gotowi na <span className="font-serif italic text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">przespaną noc?</span>
+          </h2>
+          <p className="text-xl text-slate-300 font-light leading-relaxed max-w-2xl mx-auto mb-12">
+            Dołącz do grona wypoczętych rodziców. Wykup dostęp już dziś i zyskaj spokój na lata. Bez reklam, bez stresu, z pełną kontrolą.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+            <div className="w-full sm:w-auto">
+              <NaffyButton 
+                naffyLink="https://1ct.eu/6rorw" 
+                text="Kup Dostęp Teraz" 
+                variant="primary" 
+                className="px-10"
+              />
+            </div>
+            <a 
+              href="#contact" 
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="w-full sm:w-auto px-10 py-5 bg-transparent border border-white/20 text-white font-bold rounded-full hover:bg-white/10 transition-colors block text-center cursor-pointer"
+            >
+              Masz pytania? Kontakt
+            </a>
+          </div>
+          <div className="mt-8">
+            <Link href="/logowanie" className="inline-block text-sm font-bold text-slate-400 hover:text-white transition-colors underline decoration-slate-600 underline-offset-4 hover:decoration-white">
+              LUB WYPRÓBUJ 7 DNI ZA DARMO
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// Komponent Kontakt
+function ContactSection() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [isSent, setIsSent] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [isError, setIsError] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !email.trim() || !message.trim()) return;
+    setIsLoading(true);
+    setIsError(false);
+    const accessKey = "85a647de-819f-428b-9e78-ac375b7f6bf3";
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name,
+          email: email,
+          message: message,
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setIsSent(true);
+        setIsError(false);
+        setName('');
+        setEmail('');
+        setMessage('');
+        setTimeout(() => setIsSent(false), 5000);
+      } else {
+        setIsError(true);
+      }
+    } catch (error) {
+      setIsError(true);
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <section id="contact" className="scroll-mt-24 relative z-30 py-32 px-6 lg:px-12 max-w-[1200px] mx-auto border-t border-white/5 mt-12">
+      <div className="text-center mb-16 relative">
+        <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
+          Skontaktuj się z <span className="font-serif italic text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">nami</span>
+        </h2>
+        <p className="text-lg text-slate-400 font-light max-w-2xl mx-auto">
+          Masz pytania, na które nie znalazłeś odpowiedzi w FAQ? Jesteśmy do Twojej dyspozycji i zazwyczaj odpowiadamy w 2 godziny.
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-5 gap-12 items-start relative z-10">
+        {/* Dane Kontaktowe (Lewa Strona) */}
+        <div className="md:col-span-2 space-y-6">
+          <div className="flex items-start gap-4 p-6 lg:p-8 rounded-[2rem] bg-[#111118]/80 border border-white/5 backdrop-blur-sm hover:border-purple-500/30 transition-colors">
+            <div className="w-12 h-12 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0">
+              <Mail className="w-5 h-5 text-purple-400" />
+            </div>
+            <div>
+              <h4 className="text-xl font-bold text-white mb-1">Napisz do nas</h4>
+              <p className="text-sm text-slate-400 font-light leading-relaxed mb-3">Odpowiadamy na wszystkie zapytania przedsprzedażowe i posprzedażowe.</p>
+              <a href="mailto:kreatywna.droga@gmail.com" className="text-purple-400 font-semibold hover:text-pink-400 transition-colors">kreatywna.droga@gmail.com</a>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-4 p-6 lg:p-8 rounded-[2rem] bg-[#111118]/80 border border-white/5 backdrop-blur-sm hover:border-pink-500/30 transition-colors">
+            <div className="w-12 h-12 rounded-full bg-pink-500/10 border border-pink-500/20 flex items-center justify-center flex-shrink-0">
+              <MessageSquare className="w-5 h-5 text-pink-400" />
+            </div>
+            <div>
+              <h4 className="text-xl font-bold text-white mb-1">Pomoc Techniczna</h4>
+              <p className="text-sm text-slate-400 font-light leading-relaxed mb-3">Dla klientów posiadamy priorytetową linię wsparcia technicznego.</p>
+              <a href="/kontakt" className="text-pink-400 font-semibold hover:text-purple-400 transition-colors">Otwórz zgłoszenie →</a>
+            </div>
+          </div>
+        </div>
+
+        {/* Formularz Kontaktowy (Prawa Strona) */}
+        <div className="md:col-span-3">
+          <form onSubmit={handleSubmit} className="p-8 lg:p-12 rounded-[2.5rem] bg-[#111118] border border-white/5 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+            <div className="grid md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label className="block text-sm font-semibold text-slate-300 mb-2">Twoje Imię</label>
+                <input 
+                  type="text" 
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full bg-[#0a0a0e] border border-white/10 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-purple-500/50 transition-colors placeholder-slate-600 font-light" 
+                  placeholder="Jak masz na imię?" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-300 mb-2">Adres E-mail</label>
+                <input 
+                  type="email" 
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-[#0a0a0e] border border-white/10 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-purple-500/50 transition-colors placeholder-slate-600 font-light" 
+                  placeholder="twoj@email.com" 
+                />
+              </div>
+            </div>
+            
+            <div className="mb-8">
+              <label className="block text-sm font-semibold text-slate-300 mb-2">Wiadomość</label>
+              <textarea 
+                rows={4} 
+                required
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="w-full bg-[#0a0a0e] border border-white/10 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-purple-500/50 transition-colors resize-none placeholder-slate-600 font-light" 
+                placeholder="W czym możemy Ci dzisiaj pomóc?"
+              ></textarea>
+            </div>
+
+            <button type="submit" disabled={isLoading || isSent} className="group w-full px-8 py-5 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-extrabold rounded-full hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(236,72,153,0.3)] flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100">
+              {isLoading ? 'Wysyłanie...' : isSent ? 'Wiadomość wysłana! 🚀' : 'Wyślij Wiadomość'} {!isLoading && !isSent && <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />}
+            </button>
+            {isSent && (
+              <p className="text-green-400 text-sm text-center mt-4">
+                Dziękujemy za kontakt! Odezwiemy się najszybciej jak to możliwe.
+              </p>
+            )}
+            {isError && (
+              <p className="text-red-400 text-sm text-center mt-4">
+                Wystąpił błąd podczas wysyłania. Spróbuj ponownie lub napisz bezpośrednio na kreatywna.droga@gmail.com.
+              </p>
+            )}
+          </form>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function DemoModal({ onClose, isPremium = false }: { onClose: () => void, isPremium?: boolean }) {
+  const demos = [
+    { id: 1, title: 'Dobranoc, mały traktorze', duration: '0:30', color: 'from-emerald-500 to-green-500', url: 'https://pub-8791828a7ff445cb857b07c14f225bd7.r2.dev/storys/Kr%C3%B3tkie/Dobranoc%20ma%C5%82y%20traktorze/dobranoc%20ma%C5%82y%20traktorze.m4a' },
+    { id: 2, title: 'Festiwal latających wysp', duration: '0:30', color: 'from-blue-500 to-indigo-500', url: 'https://pub-8791828a7ff445cb857b07c14f225bd7.r2.dev/storys/Spokojne/Festival%20lataj%C4%85cych%20wysp/FESTIWAL%20LATAJ%C4%84CYCH%20WYSP.m4a' },
+    { id: 3, title: 'Ekspedycja na Wyspę...', duration: '0:30', color: 'from-purple-500 to-pink-500', url: 'https://pub-8791828a7ff445cb857b07c14f225bd7.r2.dev/storys/Przygodowe/Ekspedycja%20na%20Wysp%C4%99%20Cyfrowego%20Zegarmistrza/Ekspedycja%20na%20Wysp%C4%99%20Cyfrowego%20Zegarmistrza.m4a' },
+  ];
+
+  const [playingId, setPlayingId] = useState<number | null>(null);
+  const audioRefs = useRef<{ [key: number]: HTMLAudioElement | null }>({});
+
+  // Monitor playback to pause after 30s
+  useEffect(() => {
+    if (isPremium) return; // Użytkownicy Premium słuchają bez limitu czasowego
+    
+    let interval: ReturnType<typeof setInterval>;
+    if (playingId) {
+      interval = setInterval(() => {
+        const audio = audioRefs.current[playingId];
+        if (audio && audio.currentTime >= 30) {
+          audio.pause();
+          setPlayingId(null);
+        }
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [playingId]);
+
+  // Clean up when modal closes
+  useEffect(() => {
+    return () => {
+      Object.values(audioRefs.current).forEach(audio => {
+        if (audio) {
+          audio.pause();
+        }
+      });
+    };
+  }, []);
+
+  const togglePlay = (id: number) => {
+    if (playingId === id) {
+      // Pause if clicking the currently playing track
+      audioRefs.current[id]?.pause();
+      setPlayingId(null);
+    } else {
+      // Pause all others first
+      Object.values(audioRefs.current).forEach(audio => {
+        if (audio) audio.pause();
+      });
+      
+      const audioToPlay = audioRefs.current[id];
+      if (audioToPlay) {
+        audioToPlay.currentTime = 0; // start from beginning
+        const playPromise = audioToPlay.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setPlayingId(id);
+            })
+            .catch(err => {
+              console.error("Audio playback failed:", err);
+              setPlayingId(null);
+            });
+        }
+      }
+    }
+  };
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6"
+    >
+      <div className="absolute inset-0 bg-[#0a0a0e]/90 backdrop-blur-md" onClick={onClose} />
+      <motion.div 
+        initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }}
+        className="relative w-full max-w-lg bg-[#111118] border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl overflow-hidden"
+      >
+        <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-purple-500/10 blur-[60px] pointer-events-none" />
+        
+        <div className="flex justify-between items-center mb-8 relative z-10">
+          <div>
+            <h3 className="text-2xl font-bold text-white mb-1">Posłuchaj Próbek</h3>
+            <p className="text-slate-400 text-sm">Zanurz się w świecie &quot;Na Dobranoc&quot;</p>
+          </div>
+          <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors">
+            <X className="w-5 h-5 text-white" />
+          </button>
+        </div>
+
+        <div className="space-y-4 relative z-10">
+          {demos.map(demo => (
+            <div key={demo.id} className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-colors">
+              <button 
+                onClick={() => togglePlay(demo.id)}
+                className={`w-12 h-12 rounded-full bg-gradient-to-br ${demo.color} flex items-center justify-center shadow-lg hover:scale-105 transition-transform shrink-0`}
+              >
+                {playingId === demo.id ? <Pause className="w-5 h-5 text-white" fill="currentColor" /> : <PlayCircle className="w-5 h-5 text-white" />}
+              </button>
+              <div className="flex-1">
+                <h4 className="font-bold text-white text-base leading-tight mb-1">{demo.title}</h4>
+                <p className="text-xs text-slate-400 font-medium tracking-wide">{demo.duration}</p>
+              </div>
+              {playingId === demo.id && (
+                <div className="flex gap-1 items-end h-5">
+                  <span className="w-1.5 bg-purple-400 h-full animate-[bounce_1s_infinite]" />
+                  <span className="w-1.5 bg-pink-400 h-3 animate-[bounce_1.2s_infinite]" />
+                  <span className="w-1.5 bg-blue-400 h-4 animate-[bounce_0.8s_infinite]" />
+                </div>
+              )}
+              
+              <audio 
+                ref={el => { audioRefs.current[demo.id] = el; }} 
+                src={demo.url} 
+                preload="metadata"
+                onEnded={() => setPlayingId(null)} 
+              />
+            </div>
+          ))}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+export default function LandingPage() {
+  const { scrollY } = useScroll();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showDemoModal, setShowDemoModal] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
+
+  useEffect(() => {
+    const fetchProfile = async (userId: string) => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('is_premium')
+        .eq('id', userId)
+        .single();
+      setIsPremium(!!data?.is_premium);
+    };
+
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsLoggedIn(!!session);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      } else {
+        setIsPremium(false);
+      }
+    };
+    checkUser();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsLoggedIn(!!session);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      } else {
+        setIsPremium(false);
+      }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleSmoothScroll = (e: React.MouseEvent<HTMLElement>, id: string) => {
+    e.preventDefault();
+    if (isMenuOpen) {
+      setIsMenuOpen(false);
+      // Jeśli klikamy z menu, strona jest pomniejszona (scale 0.9).
+      // Czekamy 600ms aż wróci do 1.0, żeby współrzędne Y sekcji przeliczyły się poprawnie!
+      setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) element.scrollIntoView({ behavior: 'smooth' });
+      }, 600);
+    } else {
+      const element = document.getElementById(id);
+      if (element) element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Blokowanie scrolla pod spodem, gdy menu jest otwarte
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [isMenuOpen]);
+  
+  // Parallax: lewy telefon szybko w górę, prawy powoli w dół
+  const yParallax1 = useTransform(scrollY, [0, 1000], [0, -400]);
+  const yParallax2 = useTransform(scrollY, [0, 1000], [0, 250]);
+  
+  // Przenikanie tekstu (Fade out)
+  const textOpacity = useTransform(scrollY, [0, 400], [1, 0]);
+  const textScale = useTransform(scrollY, [0, 400], [1, 0.95]);
+
+  return (
+    <div className="min-h-screen bg-[#0a0a0e] overflow-x-hidden selection:bg-purple-500/30">
+      
+      {/* MODAL DEMO AUDIO */}
+      <AnimatePresence>
+        {showDemoModal && <DemoModal onClose={() => setShowDemoModal(false)} isPremium={isPremium} />}
+      </AnimatePresence>
+
+      {/* WYSUWANE MENU BOCZNE */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <>
+            {/* Niewidzialna nakładka zamykająca po kliknięciu poza menu */}
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setIsMenuOpen(false)}
+              className="fixed inset-0 z-[90] bg-transparent cursor-pointer"
+            />
+            
+            <motion.div
+              initial={{ x: '100%', opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: '100%', opacity: 0 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              style={{ willChange: 'transform, opacity' }}
+              className="fixed top-0 right-0 bottom-0 w-[85vw] md:w-[450px] bg-gradient-to-br from-[#1a1a24]/95 to-[#0a0a0e]/95 backdrop-blur-3xl border-l border-t border-white/10 rounded-l-[2rem] md:rounded-l-[3rem] z-[100] p-6 md:p-8 flex flex-col shadow-[inset_1px_1px_0_rgba(255,255,255,0.1),-40px_0_100px_rgba(0,0,0,0.9)] overflow-y-auto overflow-x-hidden"
+            >
+              {/* Animowany błysk (Glass Sweep) przechodzący co kilka sekund */}
+              <motion.div 
+                animate={{ left: ['-100%', '200%', '200%'] }}
+                transition={{ repeat: Infinity, duration: 6, ease: "linear", times: [0, 0.3, 1] }}
+                className="absolute top-0 bottom-0 w-[60%] bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[-25deg] pointer-events-none z-0"
+              />
+
+              {/* Przycisk Zamknij */}
+              <div className="flex justify-end mb-6 relative z-10">
+                <button onClick={() => setIsMenuOpen(false)} className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 hover:rotate-90 transition-all border border-white/5">
+                  <X className="w-5 h-5 text-white" />
+                </button>
+              </div>
+
+              {/* Główne Linki Nawigacyjne */}
+              <div className="flex flex-col gap-2.5 sm:gap-4 mb-auto text-lg sm:text-xl md:text-2xl font-bold tracking-tight relative z-10 overflow-y-auto max-h-[45vh] pr-2 custom-scrollbar">
+                <Link href="/o-aplikacji" onClick={() => setIsMenuOpen(false)} className="xl:hidden text-slate-300 hover:text-white hover:translate-x-2 transition-all">O aplikacji</Link>
+                <Link href="/dlaczego-my" onClick={() => setIsMenuOpen(false)} className="xl:hidden text-slate-300 hover:text-white hover:translate-x-2 transition-all">Dlaczego my?</Link>
+                <Link href="/opinie" onClick={() => setIsMenuOpen(false)} className="xl:hidden text-slate-300 hover:text-white hover:translate-x-2 transition-all">Opinie</Link>
+                <Link href="/forum" onClick={() => setIsMenuOpen(false)} className="xl:hidden text-slate-300 hover:text-white hover:translate-x-2 transition-all">Forum</Link>
+                <Link href="/blog" onClick={() => setIsMenuOpen(false)} className="xl:hidden text-slate-300 hover:text-white hover:translate-x-2 transition-all">Blog</Link>
+                <a href="#pricing" onClick={(e) => { handleSmoothScroll(e, 'pricing'); setIsMenuOpen(false); }} className="text-slate-300 hover:text-white hover:translate-x-2 transition-all">Cennik</a>
+                <Link href="/centrum-pomocy" onClick={() => setIsMenuOpen(false)} className="text-slate-300 hover:text-white hover:translate-x-2 transition-all">Centrum pomocy</Link>
+                <Link href="/kontakt" onClick={() => setIsMenuOpen(false)} className="text-slate-300 hover:text-white hover:translate-x-2 transition-all">Kontakt</Link>
+                <Link href="/kontakt?temat=problem" onClick={() => setIsMenuOpen(false)} className="text-slate-300 hover:text-white hover:translate-x-2 transition-all">Zgłoś problem</Link>
+                
+                {/* Social Media */}
+                <div className="flex items-center gap-4 mt-2 mb-2">
+                  <a href="https://www.instagram.com/kreatywna.droga/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 hover:-translate-y-1 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+                  </a>
+                  <a href="https://www.facebook.com/profile.php?id=61590365431185" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 hover:-translate-y-1 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                  </a>
+                  <a href="https://www.tiktok.com/@kreatywna.droga" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 hover:-translate-y-1 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
+                  </a>
+                </div>
+              </div>
+
+              {/* Logowanie (Strefa Klienta) */}
+              <div className="mt-4 mb-4 relative z-10 shrink-0">
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2 ml-2">Strefa Klienta</p>
+                <Link href={isLoggedIn ? "/dashboard" : "/logowanie"} className="group w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-extrabold text-sm shadow-[0_0_30px_rgba(236,72,153,0.2)] hover:shadow-[0_0_50px_rgba(236,72,153,0.4)] hover:scale-[1.02] transition-all flex items-center justify-center gap-2 relative overflow-hidden">
+                  {isLoggedIn ? (
+                    <><User className="w-4 h-4 group-hover:-translate-y-1 transition-transform" /> Przejdź do Panelu</>
+                  ) : (
+                    <><LogIn className="w-4 h-4 group-hover:-translate-y-1 transition-transform" /> Zaloguj się</>
+                  )}
+                </Link>
+              </div>
+
+              {/* Linki Prawne */}
+              <div className="flex flex-col gap-2 text-[11px] md:text-sm font-medium text-slate-500 border-t border-white/10 pt-4 relative z-10 shrink-0">
+                <Link href="/regulamin" className="hover:text-purple-400 transition-colors">Regulamin usługi</Link>
+                <Link href="/prywatnosc" className="hover:text-purple-400 transition-colors">Polityka prywatności</Link>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* GŁÓWNA STRONA - przesuwa się i pomniejsza */}
+      <motion.div
+        animate={{ 
+          x: isMenuOpen ? '-4vw' : 0, 
+          scale: isMenuOpen ? 0.9 : 1, 
+          opacity: isMenuOpen ? 0.4 : 1 
+        }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="w-full min-h-screen pointer-events-auto rounded-[2rem]"
+        style={{ 
+          transformOrigin: 'left top', // Kotwiczymy do górnego rogu, aby uniknąć luki na górze
+          willChange: 'transform, opacity',
+          pointerEvents: isMenuOpen ? 'none' : 'auto' // Blokujemy klikanie na stronę w tle
+        }}
+      >
+      
+      {/* Tła Globalne - rozciągnięte na całą stronę */}
+      <div className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none">
+        
+        {/* Piękne, przenikające się tło (Kolor z litery 'z') po lewej stronie */}
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-[#f68087]/20 from-[30%] via-[#f68087]/5 via-[65%] to-transparent opacity-60 md:opacity-100">
+          <div className="absolute top-[0%] left-[-10%] w-[350px] md:w-[800px] h-[350px] md:h-[800px] bg-[#f68087]/15 blur-[80px] md:blur-[150px] rounded-full" />
+          <div className="absolute top-[20%] left-[10%] w-[250px] md:w-[600px] h-[250px] md:h-[600px] bg-[#f68087]/10 blur-[80px] md:blur-[150px] rounded-full" />
+          <div className="absolute top-[40%] left-[-5%] w-[350px] md:w-[800px] h-[350px] md:h-[800px] bg-[#f68087]/15 blur-[80px] md:blur-[150px] rounded-full" />
+          <div className="absolute top-[60%] left-[15%] w-[250px] md:w-[600px] h-[250px] md:h-[600px] bg-[#f68087]/10 blur-[80px] md:blur-[150px] rounded-full" />
+          <div className="absolute top-[80%] left-[-10%] w-[350px] md:w-[800px] h-[350px] md:h-[800px] bg-[#f68087]/15 blur-[80px] md:blur-[150px] rounded-full" />
+        </div>
+
+        {/* Kosmiczne Niebo z prawej strony (NAD KOLOREM) */}
+        <div className="absolute top-0 right-0 w-full lg:w-[55%] h-full overflow-hidden">
+          <StarrySky />
+        </div>
+
+        {/* Kometa powitalna (wewnątrz warstwy tła z-0, by być za telefonem i tekstem) */}
+        <GreetingComet />
+      </div>
+
+      {/* Nawigacja (dst.design style) */}
+      <nav className="relative z-50 flex items-center justify-between px-6 lg:px-12 py-4 md:py-8 max-w-[1600px] mx-auto">
+        
+        {/* Lewa strona - Powiększone Logo 3D z podtytułem */}
+        <div className="flex items-center gap-6 cursor-pointer group perspective-[1000px]">
+          <Logo3D />
+          <div className="flex flex-col justify-center">
+            <span className="text-[28px] font-serif font-black tracking-tighter leading-none text-white">na.dobranoc</span>
+            <span className="text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase mt-1">Aplikacja do usypiania</span>
+          </div>
+        </div>
+
+        {/* Środek - Linki z rozwijanym menu */}
+        <div className="hidden xl:flex items-center gap-8">
+          <Link href="/o-aplikacji" className="text-[13px] font-bold tracking-wide text-white hover:text-purple-400 transition-colors flex items-center gap-1">
+            O aplikacji
+          </Link>
+          <Link href="/dlaczego-my" className="text-[13px] font-bold tracking-wide text-white hover:text-purple-400 transition-colors">
+            Dlaczego my?
+          </Link>
+          <a href="#opinie" onClick={(e) => handleSmoothScroll(e, 'opinie')} className="text-[13px] font-bold tracking-wide text-white hover:text-purple-400 transition-colors">Opinie</a>
+          <a href="#faq" onClick={(e) => handleSmoothScroll(e, 'faq')} className="text-[13px] font-bold tracking-wide text-white hover:text-purple-400 transition-colors">FAQ</a>
+          <Link href="/forum" className="text-[13px] font-bold tracking-wide text-white hover:text-purple-400 transition-colors">Forum</Link>
+          <Link href="/blog" className="text-[13px] font-bold tracking-wide text-white hover:text-purple-400 transition-colors">Blog</Link>
+        </div>
+
+        {/* Prawa strona - Przyciski akcji */}
+        <div className="flex items-center gap-4">
+          <Link href="/checkout" className="hidden sm:flex items-center gap-2 px-7 py-3.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white text-[13px] font-bold rounded-full hover:scale-105 transition-transform shadow-[0_0_20px_rgba(168,85,247,0.4)]">
+            Kup Dostęp <span className="text-lg leading-none mb-0.5">+</span>
+          </Link>
+          
+          <button 
+            onClick={() => setIsMenuOpen(true)}
+            className="flex items-center gap-3 p-3 md:px-6 md:py-3.5 bg-transparent border border-white/20 text-white text-[13px] font-bold rounded-full hover:bg-white/10 transition-colors"
+          >
+            <div className="flex flex-col gap-[4px]">
+              <span className="w-5 h-[2px] bg-white rounded-full"></span>
+              <span className="w-5 h-[2px] bg-white rounded-full"></span>
+              <span className="w-3 h-[2px] bg-white rounded-full"></span>
+            </div>
+            <span className="hidden md:inline">MENU</span>
+          </button>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <main className="relative z-10 min-h-[90vh] flex flex-col items-center justify-center pt-10 pb-24 px-6 max-w-6xl mx-auto text-center">
+        
+        {/* Lewy Telefon 3D Parallax */}
+        <motion.div 
+          style={{ y: yParallax1 }}
+          className="absolute left-[-15%] sm:left-[-10%] md:left-[-10%] top-[10%] pointer-events-none z-0"
+        >
+          <motion.div 
+            animate={{ 
+              y: [0, -30, 0], 
+              rotateZ: [-15, -12, -15], 
+              rotateX: [15, 20, 15], 
+              rotateY: [20, 25, 20] 
+            }}
+            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+            style={{ transformStyle: 'preserve-3d' }}
+          >
+            <PhoneMockup src="/app-home.jpg" alt="Ekran Główny" glowColor="rgba(168,85,247,0.2)" className="w-[180px] h-[375px] md:w-[280px] md:h-[580px]" />
+          </motion.div>
+        </motion.div>
+
+        {/* Prawy Telefon 3D Parallax */}
+        <motion.div 
+          style={{ y: yParallax2 }}
+          className="absolute right-[-15%] sm:right-[-10%] md:right-[-10%] top-[20%] pointer-events-none z-0"
+        >
+          <motion.div 
+            animate={{ 
+              y: [0, 40, 0], 
+              rotateZ: [10, 15, 10], 
+              rotateX: [20, 15, 20], 
+              rotateY: [-25, -20, -25] 
+            }}
+            transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+            style={{ transformStyle: 'preserve-3d' }}
+          >
+            <PhoneMockup src="/app-player.jpg" alt="Odtwarzacz" glowColor="rgba(56,189,248,0.2)" className="w-[180px] h-[375px] md:w-[280px] md:h-[580px]" />
+          </motion.div>
+        </motion.div>
+
+        {/* Tekst Hero */}
+        <motion.div style={{ opacity: textOpacity, scale: textScale }} className="relative z-10 flex flex-col items-center mb-20 md:mb-40">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8 md:mb-12 shadow-[0_0_30px_rgba(168,85,247,0.15)]"
+          >
+            <span className="flex h-2 w-2 rounded-full bg-purple-500 animate-pulse" />
+            <span className="text-xs font-semibold tracking-widest text-slate-300 uppercase">Aplikacja niezależna</span>
+          </motion.div>
+
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.1 }}
+            className="text-5xl md:text-7xl lg:text-[6rem] font-bold tracking-tight mb-8 md:mb-8 leading-[1.1] text-white drop-shadow-xl"
+          >
+            Twój sposób na <br/>
+            <span className="font-serif italic tracking-normal text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 drop-shadow-[0_0_40px_rgba(168,85,247,0.4)]">
+              dobry sen dziecka
+            </span>
+          </motion.h1>
+
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="text-lg md:text-2xl text-slate-400 max-w-3xl mx-auto mb-8 md:mb-14 font-light leading-relaxed drop-shadow-md hidden sm:block"
+          >
+            Zmień wieczorne usypianie w magiczny rytuał. Zaawansowana platforma, która za pomocą kojących dźwięków uspokoi nawet najbardziej aktywne maluchy.
+          </motion.p>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="flex flex-col items-center gap-4 sm:gap-6 w-full mt-4 sm:mt-0"
+          >
+            <div className="flex flex-row gap-2 sm:gap-6 items-center justify-center w-full max-w-[360px] sm:max-w-none mx-auto">
+              <Link href="/checkout" className="relative group px-3 py-3 sm:px-10 sm:py-5 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold text-[11px] sm:text-base rounded-full overflow-hidden shadow-[0_0_30px_rgba(168,85,247,0.3)] flex flex-1 sm:flex-none items-center justify-center hover:scale-105 transition-transform text-center whitespace-nowrap sm:w-auto">
+                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+                <span className="relative flex items-center justify-center gap-1.5 sm:gap-3">
+                  <Download className="w-5 h-5 hidden sm:inline-block" />
+                  <span className="hidden sm:inline">Kup Dostęp Dożywotni</span>
+                  <span className="sm:hidden">Dostęp Dożywotni</span>
+                </span>
+              </Link>
+              
+              <button 
+                onClick={() => setShowDemoModal(true)}
+                className="group px-3 py-3 sm:px-10 sm:py-5 bg-[#0a0a0e]/50 backdrop-blur-xl border border-white/20 text-white font-medium text-[11px] sm:text-base rounded-full hover:bg-white/5 transition-colors flex flex-1 sm:flex-none items-center justify-center gap-1.5 sm:gap-3 text-center whitespace-nowrap sm:w-auto"
+              >
+                <Music className="w-5 h-5 text-slate-300 group-hover:text-white transition-colors hidden sm:inline-block" /> Posłuchaj Demo
+              </button>
+            </div>
+            
+            <Link href={isLoggedIn ? "/dashboard" : "/logowanie"} className="relative group p-[2px] rounded-full overflow-hidden shadow-[0_0_30px_rgba(251,146,60,0.1)] hover:shadow-[0_0_40px_rgba(251,146,60,0.4)] hover:scale-[1.02] transition-all flex w-full max-w-[360px] sm:w-[400px]">
+              {/* Spinning Neon Ray - the "k" in "dziecka" color is #fb923c */}
+              <div className="absolute inset-0 bg-[#fb923c]/20" />
+              <div 
+                className="absolute top-1/2 left-1/2 w-[300%] h-[300%] -translate-x-1/2 -translate-y-1/2 bg-[conic-gradient(from_0deg,transparent_0_270deg,#fb923c_360deg)] opacity-90 group-hover:opacity-100 animate-[spin_3s_linear_infinite]" 
+              />
+              <div className="relative bg-[#0a0a0e] px-4 py-3 sm:px-10 sm:py-5 rounded-full flex items-center justify-center transition-colors duration-300 w-full h-full z-10 group-hover:bg-[#111118]">
+                <span className="text-white group-hover:text-[#fb923c] text-[12px] sm:text-base font-bold flex items-center gap-3 tracking-wide transition-colors whitespace-nowrap">
+                  {isLoggedIn ? 'Twój Panel Użytkownika' : 'Wypróbuj 7 Dni Za Darmo'}
+                </span>
+              </div>
+            </Link>
+
+          </motion.div>
+        </motion.div>
+      </main>
+
+      {/* Sekcja Funkcji (Korzyści) */}
+      <section id="features" className="scroll-mt-24 relative z-30 py-32 px-6 lg:px-12 max-w-[1400px] mx-auto mt-12 bg-[#0a0a0e]">
+        <div className="mb-20 max-w-2xl relative">
+          <div className="absolute -left-10 top-1/2 -translate-y-1/2 w-[200px] h-[200px] bg-purple-600/20 blur-[100px] rounded-full pointer-events-none" />
+          
+          <h2 className="relative text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
+            Poznaj możliwości <span className="font-serif italic text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 whitespace-nowrap">Na&nbsp;dobranoc</span>
+          </h2>
+          <p className="relative text-xl text-slate-400 font-light leading-relaxed">Najbardziej zaawansowana aplikacja do usypiania na rynku. Przemyślana architektura stworzona przez ekspertów od snu.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+          
+          {/* Duży blok - Tryb Offline */}
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.6 }}
+            className="group relative p-10 lg:p-14 rounded-[2rem] bg-gradient-to-br from-[#1a1a24] to-[#0a0a0e] border border-white/10 hover:border-purple-500/40 md:col-span-2 transition-all duration-500 overflow-hidden shadow-2xl"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            <div className="relative z-10 flex flex-col h-full justify-between">
+              <div className="flex justify-between items-start mb-8">
+                <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20">
+                  <WifiOff className="w-10 h-10 text-purple-400" />
+                </div>
+                <span className="text-xs font-bold uppercase tracking-widest text-purple-500/50">Priorytet Zdrowia</span>
+              </div>
+              <div>
+                <h3 className="text-3xl lg:text-4xl font-bold text-white mb-4 tracking-tight">Tryb Samolotowy</h3>
+                <p className="text-slate-400 leading-relaxed font-light text-lg max-w-lg">
+                  Wieczorem liczy się spokój. Dlatego wszystkie ulubione bajki możesz pobrać wcześniej i odtwarzać całkowicie offline, bez Internetu, powiadomień i rozpraszających bodźców.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Mały blok - Biały szum */}
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ delay: 0.1, duration: 0.6 }}
+            className="group relative p-10 lg:p-14 rounded-[2rem] bg-[#111118] border border-white/5 hover:border-pink-500/30 transition-all duration-500 overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 blur-[50px]" />
+            <div className="relative z-10 flex flex-col h-full">
+              <VolumeX className="w-10 h-10 text-pink-400 mb-8" />
+              <h3 className="text-2xl font-bold text-white mb-4 tracking-tight">Dźwięki Tła</h3>
+              <p className="text-slate-400 leading-relaxed font-light">
+                Naturalne pejzaże dźwiękowe oraz kojące szumy zostały dobrane tak, aby stworzyć bezpieczną i relaksującą atmosferę, wspierając spokojne zasypianie każdego wieczoru.
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Mały blok - Bajki */}
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ delay: 0.2, duration: 0.6 }}
+            className="group relative p-10 lg:p-14 rounded-[2rem] bg-[#111118] border border-white/5 hover:border-blue-500/30 transition-all duration-500 overflow-hidden"
+          >
+            <Sparkles className="w-10 h-10 text-blue-400 mb-8" />
+            <h3 className="text-2xl font-bold text-white mb-4 tracking-tight">Biblioteka Bajek</h3>
+            <p className="text-slate-400 leading-relaxed font-light">
+              Każda bajka została stworzona z myślą o spokojnym zakończeniu dnia. Delikatna narracja, wyciszająca atmosfera i starannie dobrane historie pomagają dziecku naturalnie przejść od aktywności do snu.
+            </p>
+          </motion.div>
+
+          {/* Duży blok - Licencja */}
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ delay: 0.3, duration: 0.6 }}
+            className="group relative p-10 lg:p-14 rounded-[2rem] bg-gradient-to-bl from-[#1a1a24] to-[#0a0a0e] border border-white/10 hover:border-indigo-500/40 md:col-span-2 transition-all duration-500 overflow-hidden shadow-2xl"
+          >
+            <div className="absolute inset-0 bg-gradient-to-l from-indigo-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            <div className="relative z-10 flex flex-col md:flex-row gap-10 items-center justify-between h-full">
+              <div className="flex-1">
+                <div className="flex items-center gap-4 mb-6">
+                  <ShieldCheck className="w-8 h-8 text-indigo-400" />
+                  <span className="text-sm font-bold uppercase tracking-widest text-indigo-400">Jedna opłata</span>
+                </div>
+                <h3 className="text-3xl lg:text-4xl font-bold text-white mb-4 tracking-tight">Pełna Kontrola</h3>
+                <p className="text-slate-400 leading-relaxed font-light text-lg max-w-xl">
+                  Twoja licencja i urządzenia są zawsze pod ręką. Intuicyjny panel pozwala zarządzać wszystkim w jednym miejscu, zapewniając wygodę i pełną kontrolę nad kontem.
+                </p>
+              </div>
+              <div className="w-full md:w-auto p-6 rounded-2xl bg-white/5 border border-white/10 flex flex-col gap-4 min-w-[200px]">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-400 font-medium">Urządzenie Mamy</span>
+                  <Check className="w-4 h-4 text-emerald-400" />
+                </div>
+                <div className="w-full h-[1px] bg-white/10" />
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-400 font-medium">Tablet (Pokój Dziecka)</span>
+                  <Check className="w-4 h-4 text-emerald-400" />
+                </div>
+                <div className="w-full h-[1px] bg-white/10" />
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-400 font-medium">Telefon Taty</span>
+                  <Check className="w-4 h-4 text-emerald-400" />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+          
+        </div>
+      </section>
+
+      {/* Dedykowana Galeria Zrzutów Ekranu */}
+      <ScreenshotsSection />
+
+      {/* Sekcja Wideo Promocyjnego */}
+      <VideoSection />
+
+      {/* Sekcja Jak To Działa */}
+      <HowItWorksSection />
+
+      {/* Sekcja Opinii Użytkowników */}
+      <TestimonialsSection />
+
+      {/* Sekcja Cennika */}
+      <PricingSection />
+
+      {/* Sekcja FAQ */}
+      <FaqSection />
+
+      {/* Sekcja Kontakt */}
+      <ContactSection />
+
+      {/* Główny Call To Action */}
+      <CtaSection />
+
+      {/* Stopka */}
+      <Footer />
+      </motion.div>
+
+      {/* Pływający dolny pasek nawigacji TYLKO na urządzeniach mobilnych */}
+      <div className="md:hidden fixed bottom-4 left-4 right-4 z-[80]">
+        <div className="bg-gradient-to-r from-[#1a1a24]/90 to-[#0a0a0e]/90 backdrop-blur-xl border border-white/10 rounded-2xl p-2 flex items-center justify-between shadow-[0_10px_40px_rgba(0,0,0,0.8)]">
+          
+          <button onClick={(e) => { window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex flex-col items-center justify-center flex-1 py-2 text-slate-400 hover:text-white hover:scale-105 transition-all">
+            <Home className="w-5 h-5 mb-1" />
+            <span className="text-[10px] font-bold tracking-wider uppercase">Start</span>
+          </button>
+
+          <button onClick={(e) => handleSmoothScroll(e, 'pricing')} className="flex flex-col items-center justify-center flex-1 py-2 text-purple-400 hover:text-purple-300 hover:scale-105 transition-all">
+            <Diamond className="w-5 h-5 mb-1 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+            <span className="text-[10px] font-bold tracking-wider uppercase">Cennik</span>
+          </button>
+
+          <Link href="/blog" className="flex flex-col items-center justify-center flex-1 py-2 text-slate-400 hover:text-white hover:scale-105 transition-all">
+            <BookOpen className="w-5 h-5 mb-1" />
+            <span className="text-[10px] font-bold tracking-wider uppercase">Blog</span>
+          </Link>
+
+          <Link href={isLoggedIn ? "/dashboard" : "/logowanie"} className="flex flex-col items-center justify-center flex-1 py-2 text-slate-400 hover:text-white hover:scale-105 transition-all">
+            <User className={`w-5 h-5 mb-1 ${isLoggedIn ? 'text-purple-400' : ''}`} />
+            <span className={`text-[10px] font-bold tracking-wider uppercase ${isLoggedIn ? 'text-purple-400' : ''}`}>{isLoggedIn ? 'Panel' : 'Konto'}</span>
+          </Link>
+
+        </div>
+      </div>
+    </div>
+  );
+}

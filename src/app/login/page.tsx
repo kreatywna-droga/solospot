@@ -1,0 +1,113 @@
+'use client';
+
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { Zap, ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+
+export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPass, setShowPass] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Logowanie nie powiodło się');
+        return;
+      }
+      if (data?.degraded) {
+        setError('Lokalny tryb demo: autoryzacja sesji nie jest dostępna bez poprawnej konfiguracji Supabase (dashboard wymaga sesji).');
+        return;
+      }
+      window.location.href = '/dashboard';
+    } catch {
+      setError('Błąd połączenia z serwerem');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#060b14] text-white flex items-center justify-center p-6 relative overflow-hidden">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-500/8 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(14,165,233,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(14,165,233,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
+
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md relative z-10">
+
+        <Link href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-8 transition-colors group">
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Powrót
+        </Link>
+
+        <div className="bg-[#0a0f1e] border border-white/10 rounded-2xl p-8 shadow-2xl">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
+              <Zap className="w-4 h-4 text-white" strokeWidth={2.5} />
+            </div>
+            <span className="font-black text-white text-lg tracking-tight">WEB<span className="text-cyan-400">FACTOR</span></span>
+          </div>
+
+          <h1 className="text-2xl font-black text-white mb-2">Zaloguj się do platformy</h1>
+          <p className="text-slate-400 text-sm mb-8">Dostęp do panelu klienta i Mission Control.</p>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-200 text-sm">
+                  {error}
+                </div>
+              )}
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Email</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+                    placeholder="twoj@email.pl" required
+                    className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50 transition-colors" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Hasło</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <input type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
+                    placeholder="••••••••" required
+                    className="w-full pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50 transition-colors" />
+                  <button type="button" onClick={() => setShowPass(!showPass)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
+                    {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+              <button type="submit" disabled={loading}
+                className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-cyan-500/25 transition-all disabled:opacity-50">
+                {loading ? 'Logowanie...' : 'Zaloguj się'}
+              </button>
+            </form>
+
+          <p className="text-center text-sm text-slate-500 mt-6">
+            Nie masz konta?{' '}
+            <Link href="/register" className="text-cyan-400 hover:text-cyan-300 font-medium">Zarejestruj sklep</Link>
+          </p>
+
+          <div className="mt-6 pt-6 border-t border-white/5 text-center">
+            <Link href="/register" className="text-xs text-slate-500 hover:text-slate-300 underline underline-offset-2">
+              Nie masz jeszcze sklepu? Załóż go teraz →
+            </Link>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
