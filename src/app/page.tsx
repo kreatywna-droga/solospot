@@ -39,17 +39,21 @@ const particles = Array.from({ length: PARTICLE_COUNT }).map((_, i) => ({
 }))
 
 function Nav() {
+  const [mounted, setMounted] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [user, setUser] = useState<any>(null)
 
   useEffect(() => {
+    setMounted(true)
     const h = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', h)
     return () => window.removeEventListener('scroll', h)
   }, [])
 
   useEffect(() => {
+    if (!mounted) return
+
     // Check initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
@@ -61,7 +65,7 @@ function Nav() {
     })
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, [mounted])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -78,6 +82,32 @@ function Nav() {
     { label: 'Mission Control', href: '#mission-control' },
     { label: 'Cennik', href: '#pricing' },
   ]
+
+  if (!mounted) {
+    return (
+      <header className="fixed top-0 inset-x-0 z-50 bg-[#000000]/70 backdrop-blur-md">
+        <div className="relative max-w-8xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
+          <Logo size="md" />
+          <nav className="hidden md:flex items-center gap-8">
+            {links.map(l => (
+              <a key={l.label} href={l.href} className="text-sm font-semibold text-white hover:text-violet-400 transition-colors">{l.label}</a>
+            ))}
+          </nav>
+          <div className="hidden md:flex items-center gap-3">
+            <Link href="/register" className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold text-sm rounded-full transition-all">
+              Rozpocznij <ArrowRight className="w-4 h-4" />
+            </Link>
+            <button className="p-2 text-slate-400 border border-white/10 rounded-full bg-white/5 flex items-center justify-center">
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
+          <button className="md:hidden p-2 text-slate-400 border border-white/10 rounded-full bg-white/5 flex items-center justify-center">
+            <Menu className="w-5 h-5" />
+          </button>
+        </div>
+      </header>
+    )
+  }
 
   return (
     <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${scrolled ? 'bg-[#000000] shadow-lg shadow-violet-500/5' : 'bg-[#000000]/70 backdrop-blur-md'}`}>
