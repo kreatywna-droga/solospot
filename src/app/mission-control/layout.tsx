@@ -75,12 +75,18 @@ export default function MissionControlLayout({
           >
             <Menu className="w-5 h-5" />
           </button>
-          <div className="flex items-center gap-3 ml-auto">
+          <div className="flex items-center gap-4 ml-auto">
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 text-xs font-semibold rounded-lg text-violet-400 hover:text-white transition-all"
+            >
+              <LayoutDashboard className="w-3.5 h-3.5" /> Powrót do panelu głównego
+            </Link>
             <a
               href="/"
               className="text-xs text-slate-500 hover:text-white transition-colors"
             >
-              Powrót do strony głównej
+              Strona główna
             </a>
           </div>
         </header>

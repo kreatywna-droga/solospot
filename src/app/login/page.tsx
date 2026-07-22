@@ -41,6 +41,9 @@ export default function LoginPage() {
         setError('Lokalny tryb demo: autoryzacja sesji nie jest dostępna bez poprawnej konfiguracji Supabase (dashboard wymaga sesji).');
         return;
       }
+      if (data.data?.session) {
+        await supabase.auth.setSession(data.data.session);
+      }
       window.location.href = '/dashboard';
     } catch {
       setError('Błąd połączenia z serwerem');

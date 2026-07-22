@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import {
-  Users, Store, CreditCard, Activity, AlertCircle, Zap,
+  Users, Store, CreditCard, Activity, AlertCircle, Zap, LayoutDashboard,
   Server, Database, Wifi, BarChart3, TrendingUp, DollarSign,
   CheckCircle2, Clock, ExternalLink, Settings, Layers, FileText,
   ArrowRight, ChevronDown, MoreVertical, Star, Truck, Shield,
@@ -192,6 +192,12 @@ export default function MissionControlPage() {
           </div>
 
           <div className="flex items-center gap-4">
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 text-xs font-semibold rounded-lg text-violet-400 hover:text-white transition-all mr-2"
+            >
+              <LayoutDashboard className="w-3.5 h-3.5" /> Powrót do panelu
+            </Link>
             <label className="flex items-center gap-2 text-sm text-slate-400 cursor-pointer">
               <input
                 type="checkbox"
