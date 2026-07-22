@@ -110,52 +110,54 @@ function Nav() {
   }
 
   return (
-    <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${scrolled ? 'bg-[#000000] shadow-lg shadow-violet-500/5' : 'bg-[#000000]/70 backdrop-blur-md'}`}>
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <motion.div
-          className="absolute top-0 w-[40%] h-full bg-gradient-to-r from-transparent via-white/25 to-transparent skew-x-[-20deg]"
-          animate={{ left: ['-30%', '130%'] }}
-          transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut', repeatDelay: 2 }}
-        />
-      </div>
-      <div className="relative max-w-8xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
-        <Logo size="md" />
-        <nav className="hidden md:flex items-center gap-8">
-          {links.map(l => (
-            <a key={l.label} href={l.href} className="text-sm font-semibold text-white hover:text-violet-400 transition-colors">{l.label}</a>
-          ))}
-        </nav>
-        <div className="hidden md:flex items-center gap-3">
-          {user && (
-            <Link href="/dashboard" className="text-sm font-semibold text-violet-400 hover:text-white px-4 py-2 transition-colors flex items-center gap-1.5 bg-violet-500/5 rounded-full border border-violet-500/20">
-              <User className="w-4 h-4" /> Panel
-            </Link>
-          )}
-          
-          {!user && (
-            <Link href="/register" className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-bold text-sm rounded-full transition-all hover:shadow-lg hover:shadow-violet-500/30">
-              Rozpocznij <ArrowRight className="w-4 h-4" />
-            </Link>
-          )}
+    <>
+      <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${scrolled ? 'bg-[#000000] shadow-lg shadow-violet-500/5' : 'bg-[#000000]/70 backdrop-blur-md'}`}>
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <motion.div
+            className="absolute top-0 w-[40%] h-full bg-gradient-to-r from-transparent via-white/25 to-transparent skew-x-[-20deg]"
+            animate={{ left: ['-30%', '130%'] }}
+            transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut', repeatDelay: 2 }}
+          />
+        </div>
+        <div className="relative max-w-8xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
+          <Logo size="md" />
+          <nav className="hidden md:flex items-center gap-8">
+            {links.map(l => (
+              <a key={l.label} href={l.href} className="text-sm font-semibold text-white hover:text-violet-400 transition-colors">{l.label}</a>
+            ))}
+          </nav>
+          <div className="hidden md:flex items-center gap-3">
+            {user && (
+              <Link href="/dashboard" className="text-sm font-semibold text-violet-400 hover:text-white px-4 py-2 transition-colors flex items-center gap-1.5 bg-violet-500/5 rounded-full border border-violet-500/20">
+                <User className="w-4 h-4" /> Panel
+              </Link>
+            )}
+            
+            {!user && (
+              <Link href="/register" className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-bold text-sm rounded-full transition-all hover:shadow-lg hover:shadow-violet-500/30">
+                Rozpocznij <ArrowRight className="w-4 h-4" />
+              </Link>
+            )}
 
-          {/* Desktop Menu/Drawer Trigger Button */}
+            {/* Desktop Menu/Drawer Trigger Button */}
+            <button 
+              onClick={() => setDrawerOpen(true)} 
+              className="p-2 text-slate-400 hover:text-white border border-white/10 hover:border-violet-500/30 rounded-full transition-colors bg-white/5 flex items-center justify-center cursor-pointer"
+              title="Otwórz menu boczne"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
+          
+          {/* Mobile Menu Button - opens drawer directly */}
           <button 
             onClick={() => setDrawerOpen(true)} 
-            className="p-2 text-slate-400 hover:text-white border border-white/10 hover:border-violet-500/30 rounded-full transition-colors bg-white/5 flex items-center justify-center cursor-pointer"
-            title="Otwórz menu boczne"
+            className="md:hidden p-2 text-slate-400 hover:text-white border border-white/10 rounded-full bg-white/5 flex items-center justify-center cursor-pointer"
           >
             <Menu className="w-5 h-5" />
           </button>
         </div>
-        
-        {/* Mobile Menu Button - opens drawer directly */}
-        <button 
-          onClick={() => setDrawerOpen(true)} 
-          className="md:hidden p-2 text-slate-400 hover:text-white border border-white/10 rounded-full bg-white/5 flex items-center justify-center cursor-pointer"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
-      </div>
+      </header>
 
       {/* Slide Drawer Side Menu */}
       <AnimatePresence>
@@ -247,6 +249,14 @@ function Nav() {
                 {/* Navigation Links */}
                 <div className="space-y-1 mb-8">
                   <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 px-3">Nawigacja</p>
+                  <Link
+                    href={user ? "/dashboard" : "/login"}
+                    onClick={() => setDrawerOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white rounded-xl hover:bg-white/5 transition-all group"
+                  >
+                    <User className="w-4 h-4 text-violet-400 group-hover:text-violet-300 transition-colors" />
+                    <span>Panel użytkownika</span>
+                  </Link>
                   {links.map(l => (
                     <a
                       key={l.label}
@@ -335,7 +345,7 @@ function Nav() {
             </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </>
   )
 }
 
