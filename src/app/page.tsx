@@ -2,7 +2,7 @@
 // HMR trigger
 
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import {
   Zap, Server, Layers, ShieldCheck, ArrowRight,
@@ -16,9 +16,11 @@ import {
   FileCode, Download, Cloud, Cpu, Layers3,
   Circle, ArrowDown, GitMerge, HardDrive, Cpu as CpuIcon,
   Network, Terminal, Activity, Eye, Rocket,
-  Package, ShoppingCart, Laptop, Globe2
+  Package, ShoppingCart, Laptop, Globe2,
+  User, Mail, LogOut, ExternalLink, Facebook, Instagram, Twitter, Github
 } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
+import { supabase } from '@/lib/supabase'
 
 const PARTICLE_COUNT = 300
 const particles = Array.from({ length: PARTICLE_COUNT }).map((_, i) => ({
@@ -37,13 +39,36 @@ const particles = Array.from({ length: PARTICLE_COUNT }).map((_, i) => ({
 }))
 
 function Nav() {
-  const [open, setOpen] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [user, setUser] = useState<any>(null)
+
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', h)
     return () => window.removeEventListener('scroll', h)
   }, [])
+
+  useEffect(() => {
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+    })
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    setDrawerOpen(false)
+    window.location.reload()
+  }
+
   const links = [
     { label: 'Architektura', href: '#architecture' },
     { label: 'Marketplace', href: '#marketplace' },
@@ -53,8 +78,9 @@ function Nav() {
     { label: 'Mission Control', href: '#mission-control' },
     { label: 'Cennik', href: '#pricing' },
   ]
+
   return (
-    <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 overflow-hidden ${scrolled ? 'bg-[#000000] shadow-lg shadow-violet-500/5' : 'bg-[#000000]/70 backdrop-blur-md'}`}>
+    <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${scrolled ? 'bg-[#000000] shadow-lg shadow-violet-500/5' : 'bg-[#000000]/70 backdrop-blur-md'}`}>
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <motion.div
           className="absolute top-0 w-[40%] h-full bg-gradient-to-r from-transparent via-white/25 to-transparent skew-x-[-20deg]"
@@ -70,24 +96,206 @@ function Nav() {
           ))}
         </nav>
         <div className="hidden md:flex items-center gap-3">
-          <Link href="/login" className="text-sm font-semibold text-white hover:text-violet-400 px-4 py-2 transition-colors">Zaloguj</Link>
-          <Link href="/register" className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-bold text-sm rounded-full transition-all hover:shadow-lg hover:shadow-violet-500/30">
-            Rozpocznij <ArrowRight className="w-4 h-4" />
-          </Link>
+          {user ? (
+            <Link href="/dashboard" className="text-sm font-semibold text-violet-400 hover:text-white px-4 py-2 transition-colors flex items-center gap-1.5 bg-violet-500/5 rounded-full border border-violet-500/20">
+              <User className="w-4 h-4" /> Panel
+            </Link>
+          ) : (
+            <Link href="/login" className="text-sm font-semibold text-white hover:text-violet-400 px-4 py-2 transition-colors">Zaloguj</Link>
+          )}
+          
+          {!user && (
+            <Link href="/register" className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-bold text-sm rounded-full transition-all hover:shadow-lg hover:shadow-violet-500/30">
+              Rozpocznij <ArrowRight className="w-4 h-4" />
+            </Link>
+          )}
+
+          {/* Desktop Menu/Drawer Trigger Button */}
+          <button 
+            onClick={() => setDrawerOpen(true)} 
+            className="p-2 text-slate-400 hover:text-white border border-white/10 hover:border-violet-500/30 rounded-full transition-colors bg-white/5 flex items-center justify-center cursor-pointer"
+            title="Otwórz menu boczne"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
         </div>
-        <button onClick={() => setOpen(!open)} className="md:hidden p-2 text-slate-400 hover:text-white">
-          {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        
+        {/* Mobile Menu Button - opens drawer directly */}
+        <button 
+          onClick={() => setDrawerOpen(true)} 
+          className="md:hidden p-2 text-slate-400 hover:text-white border border-white/10 rounded-full bg-white/5 flex items-center justify-center cursor-pointer"
+        >
+          <Menu className="w-5 h-5" />
         </button>
       </div>
-      {open && (
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="md:hidden bg-[#080c18] border-b border-violet-500/10 px-6 py-4 space-y-3">
-          {links.map(l => <a key={l.label} href={l.href} onClick={() => setOpen(false)} className="block text-sm font-semibold text-white hover:text-violet-400 py-2">{l.label}</a>)}
-          <div className="flex gap-3 pt-2">
-            <Link href="/login" className="flex-1 text-center py-2 border border-white/10 rounded-full text-sm text-white hover:text-violet-400 hover:border-violet-500/30 transition-colors">Zaloguj</Link>
-            <Link href="/register" className="flex-1 text-center py-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold rounded-full text-sm">Rozpocznij</Link>
-          </div>
-        </motion.div>
-      )}
+
+      {/* Slide Drawer Side Menu */}
+      <AnimatePresence>
+        {drawerOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setDrawerOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 pointer-events-auto"
+            />
+
+            {/* Drawer Panel */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 h-full w-full max-w-sm bg-[#080911]/95 backdrop-blur-2xl border-l border-white/10 z-50 shadow-2xl p-6 flex flex-col justify-between pointer-events-auto text-left"
+            >
+              {/* Drawer Content */}
+              <div className="overflow-y-auto flex-1 pr-1">
+                {/* Header */}
+                <div className="flex items-center justify-between pb-6 border-b border-white/5">
+                  <Logo size="sm" />
+                  <button
+                    onClick={() => setDrawerOpen(false)}
+                    className="p-2 text-slate-400 hover:text-white rounded-full hover:bg-white/5 transition-colors cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* User Session Info Card */}
+                <div className="mt-8 mb-8">
+                  {user ? (
+                    <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center text-violet-400 flex-shrink-0">
+                          <User className="w-5 h-5" />
+                        </div>
+                        <div className="overflow-hidden">
+                          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Zalogowano jako</p>
+                          <p className="text-sm font-semibold text-white truncate">{user.email}</p>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setDrawerOpen(false)}
+                          className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-violet-500/20 text-center"
+                        >
+                          <LayoutDashboard className="w-4 h-4" /> Przejdź do Panelu
+                        </Link>
+                        <button
+                          onClick={handleLogout}
+                          className="flex items-center justify-center gap-2 w-full py-2.5 bg-white/5 hover:bg-red-500/10 border border-white/10 hover:border-red-500/20 text-slate-300 hover:text-red-400 text-xs font-semibold rounded-xl transition-all cursor-pointer"
+                        >
+                          <LogOut className="w-3.5 h-3.5" /> Wyloguj się
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-5 rounded-2xl bg-white/5 border border-white/10 text-center">
+                      <p className="text-sm text-slate-400 mb-4">Uzyskaj dostęp do swojego panelu e-commerce</p>
+                      <div className="flex gap-3">
+                        <Link
+                          href="/login"
+                          onClick={() => setDrawerOpen(false)}
+                          className="flex-1 py-3 border border-white/10 hover:border-violet-500/30 text-white hover:bg-white/5 font-bold text-sm rounded-xl transition-all text-center"
+                        >
+                          Zaloguj się
+                        </Link>
+                        <Link
+                          href="/register"
+                          onClick={() => setDrawerOpen(false)}
+                          className="flex-1 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-bold text-sm rounded-xl transition-all text-center"
+                        >
+                          Zarejestruj
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Navigation Links */}
+                <div className="space-y-1 mb-8">
+                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 px-3">Nawigacja</p>
+                  {links.map(l => (
+                    <a
+                      key={l.label}
+                      href={l.href}
+                      onClick={() => setDrawerOpen(false)}
+                      className="flex items-center px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white rounded-xl hover:bg-white/5 transition-all"
+                    >
+                      {l.label}
+                    </a>
+                  ))}
+                  <a
+                    href="#faq"
+                    onClick={() => setDrawerOpen(false)}
+                    className="flex items-center px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white rounded-xl hover:bg-white/5 transition-all"
+                  >
+                    Najczęstsze pytania (FAQ)
+                  </a>
+                </div>
+
+                {/* Help & Support */}
+                <div className="space-y-1 mb-8">
+                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 px-3">Pomoc i dokumentacja</p>
+                  <a
+                    href="https://docs.solospot.pl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white rounded-xl hover:bg-white/5 transition-all group"
+                  >
+                    <span>Dokumentacja platformy</span>
+                    <ExternalLink className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" />
+                  </a>
+                  <a
+                    href="mailto:support@solospot.pl"
+                    className="flex items-center justify-between px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white rounded-xl hover:bg-white/5 transition-all group"
+                  >
+                    <span>Centrum Pomocy</span>
+                    <HelpCircle className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" />
+                  </a>
+                </div>
+
+                {/* Contact Info */}
+                <div className="space-y-1 px-3">
+                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Szybki kontakt</p>
+                  <div className="text-xs text-slate-400 space-y-2">
+                    <p className="flex items-center gap-2">
+                      <Mail className="w-3.5 h-3.5 text-violet-400" />
+                      <a href="mailto:kontakt@solospot.pl" className="hover:text-white transition-colors">kontakt@solospot.pl</a>
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <span className="text-violet-400 font-bold">Tel:</span>
+                      <span className="text-slate-300">+48 123 456 789</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer (Social Media) */}
+              <div className="pt-6 border-t border-white/5 bg-[#080911]/80 flex items-center justify-between">
+                <span className="text-[10px] text-slate-600">© 2026 SoloSpot</span>
+                <div className="flex gap-4">
+                  <a href="https://facebook.com/solospot" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-violet-400 transition-colors">
+                    <Facebook className="w-4 h-4" />
+                  </a>
+                  <a href="https://instagram.com/solospot" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-fuchsia-400 transition-colors">
+                    <Instagram className="w-4 h-4" />
+                  </a>
+                  <a href="https://twitter.com/solospot" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-cyan-400 transition-colors">
+                    <Twitter className="w-4 h-4" />
+                  </a>
+                  <a href="https://github.com/solospot" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-white transition-colors">
+                    <Github className="w-4 h-4" />
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </header>
   )
 }
