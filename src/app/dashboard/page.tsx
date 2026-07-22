@@ -229,25 +229,25 @@ export default function BusinessDashboard() {
           className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10"
         >
           {kpis.map((kpi, i) => (
-            <motion.link
-              key={kpi.label}
-              href={kpi.href}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.08 * i }}
-              whileHover={{ y: -2 }}
-              className={`relative overflow-hidden rounded-2xl border ${kpi.border} bg-gradient-to-br ${kpi.gradient} p-5`}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <kpi.icon className={`w-5 h-5 ${kpi.iconColor}`} />
-              </div>
-              <div className="text-3xl font-black text-white mb-1">{kpi.value}</div>
-              <div className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">{kpi.label}</div>
-              <div className={`text-xs font-medium ${kpi.trendColor} flex items-center gap-1`}>
-                <TrendingUp className="w-3 h-3" />
-                {kpi.trend} vs miesiąc temu
-              </div>
-            </motion.link>
+            <Link key={kpi.label} href={kpi.href}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.08 * i }}
+                whileHover={{ y: -2 }}
+                className={`relative overflow-hidden rounded-2xl border ${kpi.border} bg-gradient-to-br ${kpi.gradient} p-5`}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <kpi.icon className={`w-5 h-5 ${kpi.iconColor}`} />
+                </div>
+                <div className="text-3xl font-black text-white mb-1">{kpi.value}</div>
+                <div className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">{kpi.label}</div>
+                <div className={`text-xs font-medium ${kpi.trendColor} flex items-center gap-1`}>
+                  <TrendingUp className="w-3 h-3" />
+                  {kpi.trend} vs miesiąc temu
+                </div>
+              </motion.div>
+            </Link>
           ))}
         </motion.div>
 
@@ -384,21 +384,21 @@ export default function BusinessDashboard() {
               </h2>
               <div className="grid grid-cols-2 gap-3">
                 {quickActions.map((action, i) => (
-                  <motion.link
-                    key={action.label}
-                    href={action.href}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.03 * i }}
-                    whileHover={{ scale: 1.02 }}
-                    className={`flex flex-col items-start gap-1 px-4 py-3 rounded-xl bg-gradient-to-r ${action.color} text-white font-medium text-sm hover:opacity-90 transition-all`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <action.icon className="w-4 h-4" />
-                      <span>{action.label}</span>
-                    </div>
-                    <span className="text-xs text-white/70">{action.desc}</span>
-                  </motion.link>
+                  <Link key={action.label} href={action.href}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.03 * i }}
+                      whileHover={{ scale: 1.02 }}
+                      className={`flex flex-col items-start gap-1 px-4 py-3 rounded-xl bg-gradient-to-r ${action.color} text-white font-medium text-sm hover:opacity-90 transition-all`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <action.icon className="w-4 h-4" />
+                        <span>{action.label}</span>
+                      </div>
+                      <span className="text-xs text-white/70">{action.desc}</span>
+                    </motion.div>
+                  </Link>
                 ))}
               </div>
             </div>
