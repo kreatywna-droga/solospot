@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Zap, ArrowLeft, Mail, Lock, User, Building2, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, User, Building2, CheckCircle2 } from 'lucide-react';
+import { Logo } from '@/components/ui/Logo';
 
 const PLANS = [
   { id: 'starter', name: 'Starter', price: '0 zł/mies.', desc: '1 sklep, do 50 zamówień', backendId: 'starter' },
@@ -106,12 +107,12 @@ export default function RegisterPage() {
           </p>
           {checkoutUrl ? (
             <a href={checkoutUrl}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded-full">
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold rounded-full">
               Przejdź do płatności
             </a>
           ) : (
             <Link href="/dashboard"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded-full">
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold rounded-full">
               Otwórz Dashboard
             </Link>
           )}
@@ -121,8 +122,9 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#060b14] text-white flex items-center justify-center p-6 relative overflow-hidden">
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-500/8 rounded-full blur-[120px] pointer-events-none" />
+    <div className="min-h-screen bg-[#060810] text-white flex items-center justify-center p-6 relative overflow-hidden">
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-violet-600/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(139,92,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(139,92,246,0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-lg relative z-10">
@@ -131,12 +133,9 @@ export default function RegisterPage() {
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Powrót
         </Link>
 
-        <div className="bg-[#0a0f1e] border border-white/10 rounded-2xl p-8 shadow-2xl">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
-              <Zap className="w-4 h-4 text-white" strokeWidth={2.5} />
-            </div>
-            <span className="font-black text-white text-lg tracking-tight">WEB<span className="text-cyan-400">FACTOR</span></span>
+        <div className="bg-[#0a0b14] border border-white/8 rounded-2xl p-8 shadow-2xl shadow-black/50">
+          <div className="mb-8">
+            <Logo link={false} size="sm" />
           </div>
 
           {/* Steps */}
@@ -144,7 +143,7 @@ export default function RegisterPage() {
             {[1, 2].map(s => (
               <div key={s} className="flex items-center gap-2">
                 <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black transition-all ${
-                  step >= s ? 'bg-cyan-500 text-black' : 'bg-white/10 text-slate-500'}`}>
+                  step >= s ? 'bg-violet-600 text-white' : 'bg-white/10 text-slate-500'}`}>
                   {s}
                 </div>
                 <span className={`text-xs font-medium ${step >= s ? 'text-white' : 'text-slate-600'}`}>
