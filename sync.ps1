@@ -2,5 +2,14 @@
 git add .
 $commitMsg = "git: auto-update from Antigravity IDE - " + (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
 git commit -m $commitMsg
-git push
+
+# Get current branch name
+$branch = git branch --show-current
+if ($branch) {
+    Write-Host "Wysyłanie gałęzi $branch na serwer..." -ForegroundColor Cyan
+    git push -u origin $branch
+} else {
+    git push
+}
+
 Write-Host "Zsynchronizowano i wysłano na Vercel!" -ForegroundColor Green
