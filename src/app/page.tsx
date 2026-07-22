@@ -1291,12 +1291,7 @@ function Footer() {
   return (
     <footer className="border-t border-violet-500/10 py-12 px-6 bg-[#000000]">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-        <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 via-fuchsia-500 to-amber-500 flex items-center justify-center">
-            <Zap className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
-          </div>
-          <span className="font-black text-white tracking-tight">Solo<span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">Spot</span></span>
-        </div>
+        <Logo size="sm" />
         <div className="flex flex-wrap justify-center gap-6 text-xs font-medium text-slate-500">
           {[['Architektura','#architecture'],['Marketplace','#marketplace'],['Studio','#studio'],['Runtime','#runtime'],['Export','#export'],['Mission Control','#mission-control'],['Cennik','#pricing'],['Rejestracja','/register']].map(([label,href])=>(
             href.startsWith('#') ? (

@@ -9,6 +9,7 @@ import {
   ArrowUp, ArrowDown, ChevronDown, MoreVertical, Truck, CreditCard, Globe as GlobeIcon, Download, Users,
   Shield, Mail,
 } from 'lucide-react'
+import { Logo } from '@/components/ui/Logo'
 
 interface TemplateProduct {
   slug: string
@@ -100,12 +101,7 @@ function Footer() {
   return (
     <footer className="border-t border-white/5 py-12 px-6 bg-[#000000]">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-        <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 via-fuchsia-500 to-amber-500 flex items-center justify-center">
-            <Sparkles className="w-3.5 h-3.5 text-white" />
-          </div>
-          <span className="font-black text-white tracking-tight">Solo<span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">Spot</span></span>
-        </div>
+        <Logo size="sm" />
         <div className="flex flex-wrap justify-center gap-6 text-xs font-medium text-slate-500">
           <Link href="/marketplace" className="hover:text-white transition-colors">Marketplace</Link>
           <Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link>
