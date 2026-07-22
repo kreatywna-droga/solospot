@@ -16,9 +16,11 @@ Poniższa lista zawiera najważniejsze kroki do pełnego, produkcyjnego uruchomi
 
 ## 3. Baza Danych (Supabase Production)
 - [x] Stworzenie oddzielnego, produkcyjnego projektu w Supabase (żeby nie psuć bazy dev)
-- [ ] Zastosowanie wszystkich migracji (`supabase db push`) w bazie produkcyjnej
+- [x] Zastosowanie wszystkich migracji (`supabase db push`) w bazie produkcyjnej
 - [ ] Włączenie RLS (Row Level Security) - aby dane klientów były bezpieczne
 - [x] Skopiowanie produkcyjnych kluczy (URL, ANON_KEY) i dodanie ich do "Environment Variables" w Vercel
+- [x] Naprawa kodu sprawdzającego fałszywe klucze (usunięty pusty string w `isSupabaseConfigured`)
+- [x] Wymuszone wysłanie na Vercel oczyszczonego repozytorium
 - [ ] Hasła zapisane bezpiecznie w menedżerze haseł.
 
 ## 4. Weryfikacja Kodu (Testy i Build)

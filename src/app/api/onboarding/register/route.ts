@@ -94,6 +94,6 @@ export async function POST(req: NextRequest) {
         { status: 503 }
       );
     }
-    return NextResponse.json({ error: 'Internal server error', detail: err.message }, { status: 500 });
+    return NextResponse.json({ error: `Serwer: ${err.message}` }, { status: 500 });
   }
 }
