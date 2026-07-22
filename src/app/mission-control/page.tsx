@@ -257,7 +257,7 @@ export default function MissionControlPage() {
             className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8"
           >
             {kpis.map((kpi, i) => (
-              <motion.link
+              <motion.div
                 key={kpi.label}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -284,8 +284,9 @@ export default function MissionControlPage() {
                   <TrendingUp className="w-3 h-3" />
                   {kpi.change} vs tydzień temu
                 </div>
-              </motion.link>
+              </motion.div>
             ))}
+
           </motion.div>
 
           {activeTab === 'overview' && (
