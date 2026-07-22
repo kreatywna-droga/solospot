@@ -132,24 +132,25 @@ function Nav() {
       {/* Slide Drawer Side Menu */}
       <AnimatePresence>
         {drawerOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setDrawerOpen(false)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 pointer-events-auto"
-            />
+          <motion.div
+            key="backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setDrawerOpen(false)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 pointer-events-auto"
+          />
+        )}
 
-            {/* Drawer Panel */}
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 h-full w-full max-w-sm bg-[#080911]/95 backdrop-blur-2xl border-l border-white/10 z-50 shadow-2xl p-6 flex flex-col justify-between pointer-events-auto text-left"
-            >
+        {drawerOpen && (
+          <motion.div
+            key="drawer-panel"
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed top-0 right-0 h-full w-full max-w-sm bg-[#080911]/95 backdrop-blur-2xl border-l border-white/10 z-50 shadow-2xl p-6 flex flex-col justify-between pointer-events-auto text-left"
+          >
               {/* Drawer Content */}
               <div className="overflow-y-auto flex-1 pr-1">
                 {/* Header */}
@@ -304,7 +305,6 @@ function Nav() {
                 </div>
               </div>
             </motion.div>
-          </>
         )}
       </AnimatePresence>
     </header>
