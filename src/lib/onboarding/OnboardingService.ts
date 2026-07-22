@@ -10,6 +10,7 @@ import type {
   PackageId,
 } from './OnboardingTypes';
 import { PLATFORM_PACKAGES } from './OnboardingTypes';
+import crypto from 'crypto';
 
 export class DuplicateEmailError extends Error {
   constructor(email: string) {

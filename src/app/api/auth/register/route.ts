@@ -27,16 +27,15 @@ export async function POST(request: Request) {
       });
     }
 
-    // Używamy supabase-js po stronie serwera (Next.js), aby ominąć AdBlockery
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    const adminSupabase = getServiceSupabase();
 
-    const { data, error } = await supabase.auth.signUp({
+    // Używamy Admin API, aby pominąć weryfikację e-mail i limit (email rate limit)
+    const { data, error } = await adminSupabase.auth.admin.createUser({
       email,
       password,
-      options: {
-        data: {
-          name: name || '',
-        }
+      email_confirm: true,
+      user_metadata: {
+        name: name || '',
       }
     });
 
@@ -46,7 +45,6 @@ export async function POST(request: Request) {
 
     // Obsługa zaległych licencji (pending_licenses)
     if (data.user) {
-      const adminSupabase = getServiceSupabase();
       
       const { data: pendingLicense, error: pendingError } = await adminSupabase
         .from('pending_licenses')

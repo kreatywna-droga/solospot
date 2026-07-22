@@ -2,6 +2,7 @@ import { PlatformEventBusImpl } from '@/../packages/platform-core/src/events/Pla
 import { EventRegistry } from '@/../packages/platform-core/src/events/EventRegistry';
 import { ConsolePlatformLogger } from '@/../packages/platform-core/src/logger/Logger';
 import { TenantRepository } from './TenantRepository';
+import crypto from 'crypto';
 import type { Tenant, TenantStatus, StoreInstance, StoreStatus } from './TenantStatus';
 
 export class TenantProvisioningEngine {
