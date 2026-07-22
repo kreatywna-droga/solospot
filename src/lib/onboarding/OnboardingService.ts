@@ -62,7 +62,7 @@ export class OnboardingService {
     }
 
     // Generowanie identyfikatorów
-    const tenantId = `tn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const tenantId = crypto.randomUUID();
     const checkoutOrderId = `ord_onb_${tenantId}`;
 
     // Tworzenie tenanta przez silnik provisioningu (publikuje Tenant.Created)

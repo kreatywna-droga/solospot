@@ -92,7 +92,7 @@ export class TenantProvisioningEngine {
 
     const storeName = `${tenantId} Store`;
     const store = await this.tenantRepo.createStore({
-      id: `store_${Math.random().toString(36).substr(2, 9)}`,
+      id: crypto.randomUUID(),
       tenantId,
       name: storeName,
       slug: storeName.toLowerCase().replace(/\s+/g, '-'),
