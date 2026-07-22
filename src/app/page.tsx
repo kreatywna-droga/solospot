@@ -171,18 +171,21 @@ function Hero() {
         </div>
         */}
         {/* NOWA ANIMACJA 3D E-COMMERCE */}
-        <div className="w-full h-full flex justify-end items-center">
+        <div className="w-full h-full flex justify-end items-center relative">
           <video
             autoPlay
             loop
             muted
             playsInline
-            className="w-full h-full object-contain object-right mix-blend-lighten [mask-image:linear-gradient(to_right,transparent_0%,transparent_20%,black_40%)] translate-x-[9.5%]"
+            className="w-full h-full object-contain object-right translate-x-[9.5%]"
             aria-hidden
           >
             <source src="/hero_video.mp4" type="video/mp4" />
           </video>
+          {/* Gradient fade po lewej stronie żeby płynnie wtapiało się w tło */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#050508] via-[#050508]/60 to-transparent pointer-events-none" />
         </div>
+
 
         <div className="absolute inset-0 bg-gradient-to-l from-transparent via-[#050508]/10 to-[#050508]/30" />
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#000000] to-transparent" />
