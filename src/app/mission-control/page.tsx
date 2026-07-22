@@ -12,6 +12,7 @@ import {
   RefreshCw, Terminal, Cpu, HardDrive, Network, Eye, Search,
 } from 'lucide-react'
 import Link from 'next/link'
+import { Logo } from '@/components/ui/Logo'
 
 interface Tenant {
   id: string
@@ -172,12 +173,7 @@ export default function MissionControlPage() {
       <header className="fixed top-0 inset-x-0 z-50 bg-[#000000]/80 backdrop-blur-md border-b border-white/5">
         <div className="max-w-full mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-amber-500 flex items-center justify-center">
-                <Zap className="w-5 h-5 text-white" strokeWidth={2.5} />
-              </div>
-              <span className="font-black text-white tracking-tight text-lg">Solo<span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">Spot</span></span>
-            </Link>
+            <Logo size="sm" />
             <div className="hidden md:flex items-center gap-1 bg-white/5 rounded-xl p-1 border border-white/10">
               {['overview', 'tenants', 'events', 'health', 'deployments'].map(tab => (
                 <button
