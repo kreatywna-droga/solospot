@@ -12,4 +12,7 @@ if ($branch) {
     git push
 }
 
-Write-Host "Zsynchronizowano i wysłano na Vercel!" -ForegroundColor Green
+Write-Host "Rozpoczynanie bezpośredniego wdrożenia na Vercel..." -ForegroundColor Cyan
+npx vercel --prod --yes
+
+Write-Host "Zsynchronizowano i pomyślnie wdrożono na Vercel!" -ForegroundColor Green
