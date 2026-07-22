@@ -88,7 +88,7 @@ function Nav() {
           transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut', repeatDelay: 2 }}
         />
       </div>
-      <div className="relative max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="relative max-w-8xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
         <Logo size="md" />
         <nav className="hidden md:flex items-center gap-8">
           {links.map(l => (
@@ -96,12 +96,10 @@ function Nav() {
           ))}
         </nav>
         <div className="hidden md:flex items-center gap-3">
-          {user ? (
+          {user && (
             <Link href="/dashboard" className="text-sm font-semibold text-violet-400 hover:text-white px-4 py-2 transition-colors flex items-center gap-1.5 bg-violet-500/5 rounded-full border border-violet-500/20">
               <User className="w-4 h-4" /> Panel
             </Link>
-          ) : (
-            <Link href="/login" className="text-sm font-semibold text-white hover:text-violet-400 px-4 py-2 transition-colors">Zaloguj</Link>
           )}
           
           {!user && (
