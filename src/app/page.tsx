@@ -321,9 +321,6 @@ function Nav() {
     </>
   )
 }
-    </>
-  )
-}
 
 function Hero() {
   const [mounted, setMounted] = useState(false);
