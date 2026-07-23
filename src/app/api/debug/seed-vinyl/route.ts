@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/supabase';
-import { v4 as uuidv4 } from 'uuid';
 
 export async function GET() {
   const supabase = getServiceSupabase();
@@ -71,7 +70,7 @@ export async function GET() {
   // Przygotuj nowe sztuczne produkty
   const productsToInsert = [
     {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       tenant_id: store.tenant_id,
       store_id: store.id,
       name: 'Daft Punk - Random Access Memories',
@@ -84,7 +83,7 @@ export async function GET() {
       updated_at: new Date().toISOString()
     },
     {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       tenant_id: store.tenant_id,
       store_id: store.id,
       name: 'Pink Floyd - The Dark Side of the Moon',
