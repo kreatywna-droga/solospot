@@ -116,7 +116,6 @@ export async function GET() {
   // Przygotuj nowe sztuczne produkty
   const productsToInsert = [
     {
-      id: crypto.randomUUID(),
       tenant_id: store.tenant_id,
       store_id: store.id,
       name: 'Daft Punk - Random Access Memories',
@@ -129,7 +128,6 @@ export async function GET() {
       updated_at: new Date().toISOString()
     },
     {
-      id: crypto.randomUUID(),
       tenant_id: store.tenant_id,
       store_id: store.id,
       name: 'Pink Floyd - The Dark Side of the Moon',
@@ -142,7 +140,6 @@ export async function GET() {
       updated_at: new Date().toISOString()
     },
     {
-      id: crypto.randomUUID(),
       tenant_id: store.tenant_id,
       store_id: store.id,
       name: 'Gramofon Audio-Technica LP120X',
