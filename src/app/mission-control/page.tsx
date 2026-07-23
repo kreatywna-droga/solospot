@@ -115,12 +115,12 @@ export default function MissionControlPage() {
   const totalTenants = tenants.length
 
   const kpis = [
-    { label: 'Tenanci', value: totalTenants, change: '+12%', icon: Users, color: 'violet', trend: 'up' },
-    { label: 'Aktywne sklepy', value: activeStores, change: '+8%', icon: Store, color: 'emerald', trend: 'up' },
-    { label: 'Przychód (30d)', value: (totalRevenue / 100).toLocaleString('pl-PL') + ' PLN', change: '+23%', icon: DollarSign, color: 'amber', trend: 'up' },
-    { label: 'Zamówienia (24h)', value: orders.filter(o => new Date(o.createdAt) > new Date(Date.now() - 86400000)).length, change: '+5%', icon: ShoppingCart, color: 'violet', trend: 'up' },
-    { label: 'Konwersja', value: totalTenants > 0 ? ((completedPayments / totalTenants) * 100).toFixed(1) + '%' : '0%', change: '+0.3pp', icon: TrendingUp, color: 'blue', trend: 'up' },
-    { label: 'Uptime platformy', value: '99.99%', change: '0%', icon: Shield, color: 'cyan', trend: 'neutral' },
+    { label: 'Tenanci', value: totalTenants, change: '—', icon: Users, color: 'violet', trend: 'neutral' },
+    { label: 'Aktywne sklepy', value: activeStores, change: '—', icon: Store, color: 'emerald', trend: 'neutral' },
+    { label: 'Przychód (30d)', value: (totalRevenue / 100).toLocaleString('pl-PL') + ' PLN', change: '—', icon: DollarSign, color: 'amber', trend: 'neutral' },
+    { label: 'Zamówienia (24h)', value: orders.filter(o => new Date(o.createdAt) > new Date(Date.now() - 86400000)).length, change: '—', icon: ShoppingCart, color: 'violet', trend: 'neutral' },
+    { label: 'Konwersja', value: totalTenants > 0 ? ((completedPayments / totalTenants) * 100).toFixed(1) + '%' : '0%', change: '—', icon: TrendingUp, color: 'blue', trend: 'neutral' },
+    { label: 'Uptime platformy', value: health.length > 0 && health[0].status === 'operational' ? '100%' : 'Brak', change: '—', icon: Shield, color: 'cyan', trend: 'neutral' },
   ]
 
   const recentEvents = events.slice(0, 20)
@@ -232,6 +232,20 @@ export default function MissionControlPage() {
                 <p className="text-slate-400">Centrum dowodzenia platformą SoloSpot — {totalTenants} tenant{totalTenants !== 1 ? 'ów' : ''}</p>
               </div>
               <div className="flex items-center gap-3">
+                <button 
+                  onClick={async () => {
+                    try {
+                      const res = await fetch('/api/mission-control/simulate-order', { method: 'POST' });
+                      if(res.ok) window.location.reload();
+                    } catch (e) {
+                      console.error(e);
+                    }
+                  }}
+                  className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-xs font-bold text-amber-400 hover:bg-amber-500/30 transition-colors shadow-[0_0_15px_rgba(245,158,11,0.2)] hover:shadow-[0_0_20px_rgba(245,158,11,0.4)]"
+                >
+                  <DollarSign className="w-3 h-3" />
+                  [TEST] SYMULUJ PŁATNOŚĆ 150 PLN
+                </button>
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/30">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   <span className="text-xs font-medium text-emerald-400">System Operational</span>
@@ -283,7 +297,7 @@ export default function MissionControlPage() {
                 <div className="text-3xl font-black text-white mb-1">{kpi.value}</div>
                 <div className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">{kpi.label}</div>
                 <div className={`text-xs font-medium flex items-center gap-1 ${kpi.trend === 'up' ? 'text-emerald-400' : kpi.trend === 'down' ? 'text-red-400' : 'text-slate-500'}`}>
-                  <TrendingUp className="w-3 h-3" />
+                  {kpi.change !== '—' && <TrendingUp className="w-3 h-3" />}
                   {kpi.change} vs tydzień temu
                 </div>
               </motion.div>
