@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
 interface TocItem {
@@ -19,7 +18,6 @@ export function TableOfContents({ content }: TableOfContentsProps) {
   const [activeId, setActiveId] = useState<string>('');
 
   useEffect(() => {
-    // Prosty parser nagłówków markdown: szuka linii zaczynających się od ## lub ###
     const regex = /^(##|###) (.*$)/gim;
     const items: TocItem[] = [];
     let match;
@@ -27,14 +25,12 @@ export function TableOfContents({ content }: TableOfContentsProps) {
     while ((match = regex.exec(content)) !== null) {
       const level = match[1].length;
       const text = match[2].trim();
-      // Konwersja na ID przyjazne dla URL (jak github-slugger)
       const id = text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_]+/g, '-');
       items.push({ id, text, level });
     }
     
     setHeadings(items);
 
-    // Zaznacz pierwszy jako domyślnie aktywny (bardzo proste przybliżenie)
     if (items.length > 0) {
       setActiveId(items[0].id);
     }
@@ -54,10 +50,9 @@ export function TableOfContents({ content }: TableOfContentsProps) {
             <a
               href={`#${heading.id}`}
               onClick={() => setActiveId(heading.id)}
-              className={cn(
-                "text-sm block transition-colors duration-200 hover:text-violet-400",
+              className={`text-sm block transition-colors duration-200 hover:text-violet-400 ${
                 activeId === heading.id ? "text-violet-400 font-medium" : "text-slate-400"
-              )}
+              }`}
             >
               {heading.text}
             </a>

@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { DocMeta } from '@/lib/docs';
-import { cn } from '@/lib/utils';
 import { ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 
@@ -29,18 +28,16 @@ export function DocsSidebar({ groupedDocs }: DocsSidebarProps) {
                   <Link
                     key={doc.slug}
                     href={`/docs/${doc.slug}`}
-                    className={cn(
-                      "group flex items-center justify-between py-1.5 px-3 rounded-lg text-sm transition-all duration-200",
+                    className={`group flex items-center justify-between py-1.5 px-3 rounded-lg text-sm transition-all duration-200 ${
                       isActive 
                         ? "bg-violet-600/10 text-violet-300 font-medium border border-violet-500/20" 
                         : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent"
-                    )}
+                    }`}
                   >
                     {doc.title}
-                    <ChevronRight className={cn(
-                      "w-4 h-4 transition-transform duration-200",
+                    <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${
                       isActive ? "text-violet-400 opacity-100 translate-x-0.5" : "opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0"
-                    )} />
+                    }`} />
                   </Link>
                 );
               })}
