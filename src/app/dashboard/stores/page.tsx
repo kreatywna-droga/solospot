@@ -27,7 +27,7 @@ function statusBadge(status: string) {
     case 'ACTIVE': return <Badge variant="success" dot>AKTYWNY</Badge>;
     case 'CREATED':
     case 'PROVISIONING': return <Badge variant="warning" dot>OCZEKUJĄCY</Badge>;
-    case 'SUSPENDED': return <Badge variant="danger" dot>ZAWORESOWANY</Badge>;
+    case 'SUSPENDED': return <Badge variant="danger" dot>ZAWIESZONY</Badge>;
     default: return <Badge variant="default" dot>{status}</Badge>;
   }
 }

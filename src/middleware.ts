@@ -2,9 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://dummy.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'dummy';
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'dummy';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+const isSupabaseConfigured = (): boolean => {
+  const url = supabaseUrl.toLowerCase();
+  const key = supabaseAnonKey.toLowerCase();
+  return (
+    url.startsWith('https://') &&
+    url.includes('.supabase.co') &&
+    !url.includes('dummy') &&
+    !url.includes('placeholder') &&
+    !key.includes('dummy') &&
+    key.length > 10
+  );
+};
 
 export async function middleware(request: NextRequest) {
   const correlationId = request.headers.get('x-correlation-id') || `req_${Date.now()}`;
@@ -53,36 +66,38 @@ export async function middleware(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const email = session.user.email || '';
-    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
-    const { data: tenant } = await supabaseAdmin
-      .from('tenants')
-      .select('id, status')
-      .eq('owner_email', email)
-      .maybeSingle();
+    if (isSupabaseConfigured()) {
+      const email = session.user.email || '';
+      const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
+      const { data: tenant } = await supabaseAdmin
+        .from('tenants')
+        .select('id, status')
+        .eq('owner_email', email)
+        .maybeSingle();
 
-    if (!tenant) {
-      return NextResponse.json({ success: false, error: 'Forbidden: No tenant associated with this account' }, { status: 403 });
-    }
+      if (!tenant) {
+        return NextResponse.json({ success: false, error: 'Forbidden: No tenant associated with this account' }, { status: 403 });
+      }
 
-    if (tenant.status === 'SUSPENDED') {
-      return NextResponse.json({ success: false, error: 'Forbidden: Tenant account is suspended' }, { status: 403 });
-    }
+      if (tenant.status === 'SUSPENDED') {
+        return NextResponse.json({ success: false, error: 'Forbidden: Tenant account is suspended' }, { status: 403 });
+      }
 
-    // Verify cross-tenant access for /api/stores/[storeId]/...
-    const pathSegments = pathname.split('/');
-    const storesIdx = pathSegments.indexOf('stores');
-    if (storesIdx !== -1 && pathSegments.length > storesIdx + 1) {
-      const storeId = pathSegments[storesIdx + 1];
-      if (storeId && storeId !== 'dashboard' && storeId !== 'settings') {
-        const { data: store } = await supabaseAdmin
-          .from('stores')
-          .select('tenant_id')
-          .eq('id', storeId)
-          .maybeSingle();
+      // Verify cross-tenant access for /api/stores/[storeId]/...
+      const pathSegments = pathname.split('/');
+      const storesIdx = pathSegments.indexOf('stores');
+      if (storesIdx !== -1 && pathSegments.length > storesIdx + 1) {
+        const storeId = pathSegments[storesIdx + 1];
+        if (storeId && storeId !== 'dashboard' && storeId !== 'settings') {
+          const { data: store } = await supabaseAdmin
+            .from('stores')
+            .select('tenant_id')
+            .eq('id', storeId)
+            .maybeSingle();
 
-        if (!store || store.tenant_id !== tenant.id) {
-          return NextResponse.json({ success: false, error: 'Forbidden: Cross-tenant access attempt' }, { status: 403 });
+          if (!store || store.tenant_id !== tenant.id) {
+            return NextResponse.json({ success: false, error: 'Forbidden: Cross-tenant access attempt' }, { status: 403 });
+          }
         }
       }
     }
@@ -99,7 +114,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/marketplace');
 
-  if (!isPlatformPath) {
+  if (!isPlatformPath && isSupabaseConfigured()) {
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
     let resolvedStore = null;
 
@@ -161,6 +176,7 @@ export async function middleware(request: NextRequest) {
 }
 
 async function getSession(request: NextRequest) {
+  if (!isSupabaseConfigured()) return null;
   const response = NextResponse.next();
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {

@@ -65,12 +65,12 @@ const digital: TemplateDefinition = {
     },
   ],
   products: [
-    { name: 'Kurs: Marketing Digital 2026', description: 'Kompleksowy kurs marketingu cyfrowego od podstaw do zaawansowanych strategii', price: 29900, images: [] },
-    { name: 'Szablon: SaaS Landing Page', description: 'Profesjonalny szablon strony głównej dla startupów SaaS', price: 9900, images: [] },
-    { name: 'E-book: Automatyzacja Biznesu', description: 'Praktyczny przewodnik po automatyzacji procesów w małej firmie', price: 4900, images: [] },
-    { name: 'Pack: UI Components 500+', description: 'Kolekcja gotowych komponentów UI dla React i Next.js', price: 14900, images: [] },
-    { name: 'Kurs: Next.js od Zera', description: 'Naucz się budować nowoczesne aplikacje w Next.js 16', price: 19900, images: [] },
-    { name: 'Tool: AI Content Generator', description: 'Narzędzie AI do generowania treści marketingowych', price: 39900, images: [] },
+    { name: 'Kurs: Marketing Digital 2026', description: 'Kompleksowy kurs marketingu cyfrowego od podstaw do zaawansowanych strategii', price: 29900, images: ['https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80'] },
+    { name: 'Szablon: SaaS Landing Page', description: 'Profesjonalny szablon strony głównej dla startupów SaaS', price: 9900, images: ['https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=800&q=80'] },
+    { name: 'E-book: Automatyzacja Biznesu', description: 'Praktyczny przewodnik po automatyzacji procesów w małej firmie', price: 4900, images: ['https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80'] },
+    { name: 'Pack: UI Components 500+', description: 'Kolekcja gotowych komponentów UI dla React i Next.js', price: 14900, images: ['https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?auto=format&fit=crop&w=800&q=80'] },
+    { name: 'Kurs: Next.js od Zera', description: 'Naucz się budować nowoczesne aplikacje w Next.js 16', price: 19900, images: ['https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80'] },
+    { name: 'Tool: AI Content Generator', description: 'Narzędzie AI do generowania treści marketingowych', price: 39900, images: ['https://images.unsplash.com/photo-1677442136019-21780efad99a?auto=format&fit=crop&w=800&q=80'] },
   ],
 }
 

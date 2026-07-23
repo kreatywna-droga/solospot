@@ -810,7 +810,7 @@ export default function MarketplaceProductPage({ params }: { params: Promise<{ s
                 <Shield className="w-5 h-5 text-emerald-400 flex-shrink-0" />
                 <div>
                   <div className="font-medium text-emerald-300">Gwarancja wdrożenia</div>
-                  <div className="text-sm text-slate-400">Automatyczne provisioning: tenant + sklep + template + produkty w poniżej 5 minut po płatności.</div>
+                  <div className="text-sm text-slate-400">Automatyczny provisioning: tenant + sklep + template + produkty w poniżej 5 minut po płatności.</div>
                 </div>
               </motion.div>
             </motion.div>

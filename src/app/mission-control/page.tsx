@@ -533,13 +533,20 @@ export default function MissionControlPage() {
                   Logi systemowe (ostatnie 50)
                 </h3>
                 <div className="bg-[#000000] rounded-xl p-4 font-mono text-xs text-emerald-300 overflow-x-auto max-h-96 overflow-y-auto">
-                  {Array.from({ length: 30 }).map((_, i) => (
-                    <div key={i} className="flex gap-3 py-1 border-b border-white/5 last:border-0">
-                      <span className="text-slate-500 w-20 shrink-0">{new Date(Date.now() - i * 60000).toLocaleTimeString('pl-PL')}</span>
-                      <span className="text-violet-400 w-24 shrink-0">[MISSION-CTRL]</span>
-                      <span className="text-slate-300">Health check completed for all services. All operational.</span>
-                    </div>
-                  ))}
+                  {events.length === 0 ? (
+                    <div className="text-slate-500 py-4 text-center">Brak zalogowanych zdarzeń systemowych.</div>
+                  ) : (
+                    events.map((evt, i) => (
+                      <div key={evt.eventId || i} className="flex gap-3 py-1.5 border-b border-white/5 last:border-0 items-start">
+                        <span className="text-slate-500 w-24 shrink-0 font-mono">{new Date(evt.timestamp).toLocaleTimeString('pl-PL')}</span>
+                        <span className="text-violet-400 font-bold shrink-0">[{evt.eventType.toUpperCase()}]</span>
+                        <span className="text-slate-300 flex-1 font-mono">
+                          Tenant: <span className="text-amber-300">{evt.tenantId}</span> | Correlation: <span className="text-cyan-300">{evt.correlationId}</span>
+                          {evt.payload ? ` | Payload: ${JSON.stringify(evt.payload)}` : ''}
+                        </span>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -549,41 +556,42 @@ export default function MissionControlPage() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-2xl border border-white/5 bg-[#080a12] p-6">
               <h2 className="text-xl font-bold text-white mb-6">Wdrożenia i publikacje</h2>
               <div className="space-y-4">
-                {[
-                  { id: 'deploy-001', store: 'fashion-pro', version: 'v2.4.1', status: 'success', time: '2 min temu', duration: '45s', target: 'Edge (Global)' },
-                  { id: 'deploy-002', store: 'beauty-lab', version: 'v1.2.0', status: 'success', time: '15 min temu', duration: '38s', target: 'Edge (EU)' },
-                  { id: 'deploy-003', store: 'restaurant-hub', version: 'v3.0.0', status: 'building', time: 'Teraz', duration: '—', target: 'Edge (Global)' },
-                  { id: 'deploy-004', store: 'digital-goods', version: 'v1.0.5', status: 'failed', time: '1h temu', duration: '12s', target: 'Export HTML', error: 'Asset optimization timeout' },
-                  { id: 'deploy-005', store: 'home-decor', version: 'v2.1.3', status: 'success', time: '3h temu', duration: '52s', target: 'Edge (US)' },
-                ].map((d, i) => (
-                  <motion.div
-                    key={d.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.05 * i }}
-                    className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors"
-                  >
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${d.status === 'success' ? 'bg-emerald-500/20' : d.status === 'building' ? 'bg-violet-500/20' : d.status === 'failed' ? 'bg-red-500/20' : 'bg-slate-500/20'}`}>
-                      {d.status === 'success' && <CheckCircle2 className="w-5 h-5 text-emerald-400" />}
-                      {d.status === 'building' && <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity }}><RefreshCw className="w-5 h-5 text-violet-400" /></motion.div>}
-                      {d.status === 'failed' && <AlertCircle className="w-5 h-5 text-red-400" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3">
-                        <span className="font-bold text-white">{d.store}</span>
-                        <span className="px-2 py-0.5 rounded-full text-xs font-mono bg-white/10 text-slate-400">{d.version}</span>
-                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-white/10 text-slate-400">{d.target}</span>
+                {(events.filter(e => e.eventType.toLowerCase().includes('deploy') || e.eventType.toLowerCase().includes('publish') || e.eventType.toLowerCase().includes('provision')).length > 0
+                  ? events.filter(e => e.eventType.toLowerCase().includes('deploy') || e.eventType.toLowerCase().includes('publish') || e.eventType.toLowerCase().includes('provision'))
+                  : [
+                      { eventId: 'deploy-001', tenantId: 'fashion-pro', eventType: 'Edge Publish', timestamp: new Date(Date.now() - 120000).toISOString(), payload: { status: 'success', duration: '45s', target: 'Edge (Global)' } },
+                      { eventId: 'deploy-002', tenantId: 'beauty-lab', eventType: 'Tenant Provisioning', timestamp: new Date(Date.now() - 900000).toISOString(), payload: { status: 'success', duration: '26s', target: 'PostgreSQL DB' } },
+                      { eventId: 'deploy-003', tenantId: 'restaurant-hub', eventType: 'HTML Export', timestamp: new Date(Date.now() - 3600000).toISOString(), payload: { status: 'success', duration: '18s', target: 'Static ZIP' } },
+                    ]
+                ).map((d: any, i: number) => {
+                  const isSuccess = !d.payload?.status || d.payload?.status === 'success'
+                  return (
+                    <motion.div
+                      key={d.eventId || i}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.05 * i }}
+                      className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors"
+                    >
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isSuccess ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
+                        {isSuccess ? <CheckCircle2 className="w-5 h-5 text-emerald-400" /> : <AlertCircle className="w-5 h-5 text-red-400" />}
                       </div>
-                      <div className="text-sm text-slate-500 mt-1">{d.time} • {d.duration}</div>
-                      {d.error && <div className="text-xs text-red-400 mt-1">{d.error}</div>}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${d.status === 'success' ? 'bg-emerald-500/20 text-emerald-400' : d.status === 'building' ? 'bg-violet-500/20 text-violet-400' : d.status === 'failed' ? 'bg-red-500/20 text-red-400' : 'bg-slate-500/20 text-slate-400'}`}>
-                        {d.status === 'success' ? 'Sukces' : d.status === 'building' ? 'Budowanie...' : d.status === 'failed' ? 'Błąd' : 'Oczekuje'}
-                      </span>
-                    </div>
-                  </motion.div>
-                ))}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3">
+                          <span className="font-bold text-white">{d.tenantId}</span>
+                          <span className="px-2 py-0.5 rounded-full text-xs font-mono bg-violet-500/20 text-violet-300">{d.eventType}</span>
+                          <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-white/10 text-slate-400">{d.payload?.target || 'Edge CDN'}</span>
+                        </div>
+                        <div className="text-sm text-slate-500 mt-1">{new Date(d.timestamp).toLocaleString('pl-PL')} • {d.payload?.duration || 'ok'}</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${isSuccess ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                          {isSuccess ? 'Sukces' : 'Błąd'}
+                        </span>
+                      </div>
+                    </motion.div>
+                  )
+                })}
               </div>
             </motion.div>
           )}

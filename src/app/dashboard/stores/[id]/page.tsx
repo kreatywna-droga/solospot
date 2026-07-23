@@ -197,7 +197,7 @@ export default function StoreManagementPage({ params }: { params: Promise<{ id: 
         const d = await res.json()
         if (d.success) setPackages(d.packages || [])
       } catch {}
-      finally { setPackagesLoading(true) }
+      finally { setPackagesLoading(false) }
     }
     loadPackages()
   }, [activeTab, store])

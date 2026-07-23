@@ -77,14 +77,14 @@ const fashionPro: TemplateDefinition = {
     },
   ],
   products: [
-    { name: 'Elegancka Sukienka Wieczorowa', description: 'Klasyczna czarna sukienka wieczorowa z koronkowymi rękawami', price: 29900, images: [] },
-    { name: 'Marynarka Garniturowa Slim Fit', description: 'Nowoczesna marynarka w kolorze granatowym', price: 49900, images: [] },
-    { name: 'Torebka Skórzana Premium', description: 'Ręcznie robiona torebka ze skóry naturalnej', price: 34900, images: [] },
-    { name: 'Buty Oxfordy Brązowe', description: 'Klasyczne buty oxford z brązowej skóry', price: 39900, images: [] },
-    { name: 'Apaszka Jedwabna', description: 'Jedwabna apaszka w kwiatowy wzór', price: 9900, images: [] },
-    { name: 'Pasek Skórzany', description: 'Skórzany pasek z automatyczną klamrą', price: 15900, images: [] },
-    { name: 'Sweter Wełniany', description: 'Ciepły wełniany sweter w kolorze kremowym', price: 19900, images: [] },
-    { name: 'Zegarek Klasyczny', description: 'Elegancki zegarek na skórzanym pasku', price: 59900, images: [] },
+    { name: 'Elegancka Sukienka Wieczorowa', description: 'Klasyczna czarna sukienka wieczorowa z koronkowymi rękawami', price: 29900, images: ['https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=800&q=80'] },
+    { name: 'Marynarka Garniturowa Slim Fit', description: 'Nowoczesna marynarka w kolorze granatowym', price: 49900, images: ['https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80'] },
+    { name: 'Torebka Skórzana Premium', description: 'Ręcznie robiona torebka ze skóry naturalnej', price: 34900, images: ['https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80'] },
+    { name: 'Buty Oxfordy Brązowe', description: 'Klasyczne buty oxford z brązowej skóry', price: 39900, images: ['https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=800&q=80'] },
+    { name: 'Apaszka Jedwabna', description: 'Jedwabna apaszka w kwiatowy wzór', price: 9900, images: ['https://images.unsplash.com/photo-1601924994987-69e26d50dc26?auto=format&fit=crop&w=800&q=80'] },
+    { name: 'Pasek Skórzany', description: 'Skórzany pasek z automatyczną klamrą', price: 15900, images: ['https://images.unsplash.com/photo-1624222247344-550fb60583dc?auto=format&fit=crop&w=800&q=80'] },
+    { name: 'Sweter Wełniany', description: 'Ciepły wełniany sweter w kolorze kremowym', price: 19900, images: ['https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=800&q=80'] },
+    { name: 'Zegarek Klasyczny', description: 'Elegancki zegarek na skórzanym pasku', price: 59900, images: ['https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=800&q=80'] },
   ],
 }
 

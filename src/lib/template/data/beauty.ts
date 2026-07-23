@@ -65,12 +65,12 @@ const beauty: TemplateDefinition = {
     },
   ],
   products: [
-    { name: 'Krem Przeciwzmarszczkowy', description: 'Zaawansowany krem z kwasem hialuronowym', price: 12900, images: [] },
-    { name: 'Serum Witaminowe', description: 'Serum z witaminą C rozjaśniające cerę', price: 8900, images: [] },
-    { name: 'Peeling Kwasowy', description: 'Delikatny peeling kwasowy do twarzy', price: 7900, images: [] },
-    { name: 'Maska Nawilżająca', description: 'Maska w płachcie z ekstraktem z aloesu', price: 2900, images: [] },
-    { name: 'Olejek Do Demakijażu', description: 'Olejek micelarny do demakijażu oczu i twarzy', price: 5900, images: [] },
-    { name: 'Perfumy Floral', description: 'Kwiatowe perfumy z nutą jaśminu i róży', price: 24900, images: [] },
+    { name: 'Krem Przeciwzmarszczkowy', description: 'Zaawansowany krem z kwasem hialuronowym', price: 12900, images: ['https://images.unsplash.com/photo-1608248597379-e07443233896?auto=format&fit=crop&w=800&q=80'] },
+    { name: 'Serum Witaminowe', description: 'Serum z witaminą C rozjaśniające cerę', price: 8900, images: ['https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=80'] },
+    { name: 'Peeling Kwasowy', description: 'Delikatny peeling kwasowy do twarzy', price: 7900, images: ['https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=800&q=80'] },
+    { name: 'Maska Nawilżająca', description: 'Maska w płachcie z ekstraktem z aloesu', price: 2900, images: ['https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=800&q=80'] },
+    { name: 'Olejek Do Demakijażu', description: 'Olejek micelarny do demakijażu oczu i twarzy', price: 5900, images: ['https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&w=800&q=80'] },
+    { name: 'Perfumy Floral', description: 'Kwiatowe perfumy z nutą jaśminu i róży', price: 24900, images: ['https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=800&q=80'] },
   ],
 }
 

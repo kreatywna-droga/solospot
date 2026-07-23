@@ -306,8 +306,8 @@ function Nav() {
                       <a href="mailto:kontakt@solospot.pl" className="hover:text-white transition-colors">kontakt@solospot.pl</a>
                     </p>
                     <p className="flex items-center gap-2">
-                      <span className="text-violet-400 font-bold">Tel:</span>
-                      <span className="text-slate-300">+48 123 456 789</span>
+                      <span className="text-violet-400 font-bold">Pomoc:</span>
+                      <a href="mailto:support@solospot.pl" className="text-slate-300 hover:text-white transition-colors">support@solospot.pl</a>
                     </p>
                   </div>
                 </div>
@@ -315,30 +315,13 @@ function Nav() {
 
               {/* Footer (Social Media) */}
               <div className="pt-6 border-t border-white/5 bg-[#080911]/80 flex items-center justify-between">
-                <span className="text-[10px] text-slate-600">© 2026 SoloSpot</span>
+                <span className="text-[10px] text-slate-600">© {new Date().getFullYear()} SoloSpot</span>
                 <div className="flex gap-4">
-                  <a href="https://facebook.com/solospot" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-violet-400 transition-colors">
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-                    </svg>
+                  <a href="https://solospot.pl" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-violet-400 transition-colors" title="Oficjalna strona">
+                    <Globe2 className="w-4 h-4" />
                   </a>
-                  <a href="https://instagram.com/solospot" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-fuchsia-400 transition-colors">
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-                    </svg>
-                  </a>
-                  <a href="https://twitter.com/solospot" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-cyan-400 transition-colors">
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
-                    </svg>
-                  </a>
-                  <a href="https://github.com/solospot" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-white transition-colors">
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
-                      <path d="M9 18c-4.51 2-5-2-7-2" />
-                    </svg>
+                  <a href="mailto:kontakt@solospot.pl" className="text-slate-500 hover:text-fuchsia-400 transition-colors" title="Napisz do nas">
+                    <Mail className="w-4 h-4" />
                   </a>
                 </div>
               </div>
@@ -945,7 +928,7 @@ function HTMLExportSection() {
     { feature: 'Hosting', traditional: 'Vendor lock-in (Shopify, Wix)', soloSpot: 'Dowolny: Vercel, Netlify, CF Pages, AWS, VPS, on-premise' },
     { feature: 'Backend', traditional: 'Wymagany, zarządzany przez vendor', soloSpot: 'Opcjonalny (hydration) / Brak (static)' },
     { feature: 'Skalowanie', traditional: 'Limity planu, upgrade kosztowny', soloSpot: 'Edge CDN skaluje automatycznie, zero kosztów' },
-    { feature: 'Właśność danych', traditional: 'Zamknięte API, eksport ograniczony', soloSpot: 'Pełna własność plików, bazy, kodu' },
+    { feature: 'Własność danych', traditional: 'Zamknięte API, eksport ograniczony', soloSpot: 'Pełna własność plików, bazy, kodu' },
     { feature: 'Koszt', traditional: '% od obrotu + abonament', soloSpot: 'Stały abonament za platformę, 0% od transakcji' },
     { feature: 'Compliance', traditional: 'Dane u vendor', soloSpot: 'Dane u Ciebie (GDPR, PCI DSS friendly)' },
   ]
@@ -1034,54 +1017,73 @@ function MissionControlSection() {
     { name: 'Fashion Store Pro', domain: 'fashion.demo.wf', plan: 'Pro', status: 'active', revenue: '12.4k', health: 98, lastDeploy: '2h ago' },
     { name: 'Beauty Lab', domain: 'beauty.demo.wf', plan: 'Business', status: 'active', revenue: '8.7k', health: 100, lastDeploy: '1d ago' },
     { name: 'Restaurant Hub', domain: 'food.demo.wf', plan: 'Enterprise', status: 'active', revenue: '45.2k', health: 99, lastDeploy: '4h ago' },
-    { name: 'Digital Goods', domain: 'digital.demo.wf', plan: 'Starter', status: 'trial', revenue: '1.2k', health: 87, lastDeploy: '6h ago' },
-    { name: 'Home & Decor', domain: 'home.demo.wf', plan: 'Pro', status: 'active', revenue: '19.8k', health: 95, lastDeploy: '12h ago' },
+function MissionControlSection() {
+  const [realTenants, setRealTenants] = useState<any[]>([])
+  const [realEvents, setRealEvents] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [tRes, eRes] = await Promise.all([
+          fetch('/api/mission-control/tenants'),
+          fetch('/api/mission-control/events'),
+        ])
+        const tData = await tRes.json()
+        const eData = await eRes.json()
+        if (tData?.tenants) setRealTenants(tData.tenants)
+        if (eData?.events) setRealEvents(eData.events)
+      } catch {
+        // Fallback handled safely
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadData()
+  }, [])
+
+  const defaultTenants = [
+    { name: 'Fashion Store Pro', domain: 'fashion.solospot.pl', plan: 'Pro', status: 'active', revenue: '12.4k PLN', health: 98, lastDeploy: '2h temu' },
+    { name: 'Beauty Lab', domain: 'beauty.solospot.pl', plan: 'Business', status: 'active', revenue: '8.7k PLN', health: 100, lastDeploy: '1d temu' },
+    { name: 'Restaurant Hub', domain: 'food.solospot.pl', plan: 'Enterprise', status: 'active', revenue: '45.2k PLN', health: 99, lastDeploy: '4h temu' },
+    { name: 'Digital Goods', domain: 'digital.solospot.pl', plan: 'Starter', status: 'trial', revenue: '1.2k PLN', health: 87, lastDeploy: '6h temu' },
   ]
 
-  const events = [
-    { time: '2 min temu', type: 'deploy', message: 'fashion.demo.wf — v2.4.1 deployed to Edge', status: 'success' },
-    { time: '5 min temu', type: 'provision', message: 'New tenant: beauty-lab-pro — provisioned in 26s', status: 'success' },
-    { time: '12 min temu', type: 'export', message: 'restaurant-hub — HTML export completed (2.4MB)', status: 'success' },
-    { time: '18 min temu', type: 'alert', message: 'Payment webhook latency spike (Stripe) — auto-recovered', status: 'warning' },
-    { time: '35 min temu', type: 'scale', message: 'Edge nodes scaled: 12 → 18 (Black Friday prep)', status: 'info' },
-    { time: '1h temu', type: 'provision', message: 'Tenant fashion-pro-v2 — template installed', status: 'success' },
+  const tenantsList = realTenants.length > 0
+    ? realTenants.map(t => ({
+        name: t.store?.name || t.id,
+        domain: t.store?.domain || `${t.store?.slug || 'sklep'}.solospot.pl`,
+        plan: (t.packageId || 'Pro').toUpperCase(),
+        status: t.status === 'ACTIVE' ? 'active' : 'trial',
+        revenue: `${((t.revenue || 0) / 100).toFixed(1)}k PLN`,
+        health: t.health || 99,
+        lastDeploy: t.lastEvent ? new Date(t.lastEvent.timestamp).toLocaleTimeString('pl-PL') : '1h temu',
+      }))
+    : defaultTenants
+
+  const eventsList = realEvents.length > 0
+    ? realEvents.slice(0, 6).map(e => ({
+        time: new Date(e.timestamp).toLocaleTimeString('pl-PL'),
+        type: e.eventType?.includes('deploy') ? 'deploy' : e.eventType?.includes('provision') ? 'provision' : 'export',
+        message: `${e.tenantId} — ${e.eventType}`,
+        status: 'success',
+      }))
+    : [
+        { time: '2 min temu', type: 'deploy', message: 'fashion-pro — deployment complete (Edge CDN)', status: 'success' },
+        { time: '5 min temu', type: 'provision', message: 'New tenant: beauty-lab-pro — provisioned in 26s', status: 'success' },
+        { time: '12 min temu', type: 'export', message: 'restaurant-hub — HTML export completed', status: 'success' },
+        { time: '18 min temu', type: 'alert', message: 'Payment webhook latency check — auto-recovered', status: 'warning' },
+        { time: '35 min temu', type: 'scale', message: 'Edge nodes scaled automatically', status: 'info' },
+      ]
+
+  const metrics = [
+    { label: 'Aktywni najemcy', value: realTenants.length > 0 ? String(realTenants.length) : '1,247', change: '+12%', icon: Users, color: 'text-violet-400', trend: 'up' },
+    { label: 'Zamówienia / 24h', value: '3,891', change: '+8%', icon: ShoppingCart, color: 'text-emerald-400', trend: 'up' },
+    { label: 'Przychód platformy', value: '284k PLN', change: '+23%', icon: CreditCard, color: 'text-amber-400', trend: 'up' },
+    { label: 'Uptime', value: '99.99%', change: '0%', icon: ShieldIcon, color: 'text-cyan-400', trend: 'neutral' },
+    { label: 'Eksporty / tydzień', value: '89', change: '+34%', icon: Download, color: 'text-emerald-400', trend: 'up' },
+    { label: 'Provisioning time', value: '28s', change: '-15%', icon: CpuIcon, color: 'text-violet-400', trend: 'up' },
   ]
-
-  return (
-    <section id="mission-control" className="py-32 px-6 max-w-7xl mx-auto">
-      <div className="text-center mb-20">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 mb-6">
-          <BarChart3 className="w-4 h-4 text-amber-400" />
-          <span className="text-xs font-bold tracking-widest text-amber-400 uppercase">Mission Control</span>
-        </motion.div>
-        <h2 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight">
-          Centrum dowodzenia<br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-red-400">platformy.</span>
-        </h2>
-        <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-          Pełna obserwowalność: tenantów, provisioningu, deployów, eksportów, płatności, zdarzeń, logów audytu.
-          Zarządzasz platformą z jednego miejsca.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
-        {metrics.map((m, i) => (
-          <motion.div key={m.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
-            className="bg-[#080c18]/90 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-                <m.icon className={`w-4 h-4 ${m.color}`} />
-              </div>
-              <span className="text-xs text-slate-400">{m.label}</span>
-            </div>
-            <div className="text-2xl font-black text-white">{m.value}</div>
-            <div className={`text-xs font-medium mt-1 ${m.trend === 'up' ? 'text-emerald-400' : m.trend === 'down' ? 'text-red-400' : 'text-slate-500'}`}>
-              {m.change} vs tydzień temu
-            </div>
-          </motion.div>
-        ))}
-      </div>
 
       <div className="grid lg:grid-cols-[2fr_1fr] gap-8">
         <div className="bg-[#080c18]/90 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
@@ -1099,7 +1101,7 @@ function MissionControlSection() {
                 </tr>
               </thead>
               <tbody>
-                {tenants.map((t) => (
+                {tenantsList.map((t) => (
                   <tr key={t.name} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4">
                       <div className="font-medium text-white">{t.name}</div>
@@ -1148,7 +1150,7 @@ function MissionControlSection() {
               </span>
             </div>
             <div className="space-y-3 max-h-80 overflow-y-auto">
-              {events.map((e, i) => (
+              {eventsList.map((e, i) => (
                 <motion.div key={i} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
                   className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/5 hover:border-violet-500/30 transition-all">
                   <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${e.status === 'success' ? 'bg-emerald-500/20' : e.status === 'warning' ? 'bg-amber-500/20' : 'bg-cyan-500/20'}`}>
