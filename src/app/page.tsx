@@ -7,14 +7,14 @@ import Link from 'next/link'
 import {
   Zap, Server, Layers, ShieldCheck, ArrowRight,
   ChevronRight, Menu, X, Sparkles, Box,
-  LayoutDashboard, Monitor, Code, Globe, Zap as ZapIcon,
+  LayoutDashboard, Monitor, Code, Globe,
   Database, GitBranch, Shield,
   CreditCard, Truck,
-  CheckCircle, HelpCircle, ArrowRight as ArrowRightIcon,
-  Star, Target, Users, Shield as ShieldIcon,
+  CheckCircle, HelpCircle,
+  Star, Target, Users,
   LayoutGrid, Store, BarChart3, Settings2,
   FileCode, Download, Cloud, Cpu, Layers3,
-  Circle, ArrowDown, GitMerge, HardDrive, Cpu as CpuIcon,
+  Circle, ArrowDown, GitMerge, HardDrive,
   Network, Terminal, Activity, Eye, Rocket,
   Package, ShoppingCart, Laptop, Globe2,
   User, Mail, LogOut, ExternalLink
@@ -1070,9 +1070,9 @@ function MissionControlSection() {
     { label: 'Aktywni najemcy', value: realTenants.length > 0 ? String(realTenants.length) : '1,247', change: '+12%', icon: Users, color: 'text-violet-400', trend: 'up' },
     { label: 'Zamówienia / 24h', value: '3,891', change: '+8%', icon: ShoppingCart, color: 'text-emerald-400', trend: 'up' },
     { label: 'Przychód platformy', value: '284k PLN', change: '+23%', icon: CreditCard, color: 'text-amber-400', trend: 'up' },
-    { label: 'Uptime', value: '99.99%', change: '0%', icon: ShieldIcon, color: 'text-cyan-400', trend: 'neutral' },
+    { label: 'Uptime', value: '99.99%', change: '0%', icon: Shield, color: 'text-cyan-400', trend: 'neutral' },
     { label: 'Eksporty / tydzień', value: '89', change: '+34%', icon: Download, color: 'text-emerald-400', trend: 'up' },
-    { label: 'Provisioning time', value: '28s', change: '-15%', icon: CpuIcon, color: 'text-violet-400', trend: 'up' },
+    { label: 'Provisioning time', value: '28s', change: '-15%', icon: Cpu, color: 'text-violet-400', trend: 'up' },
   ]
 
   return (
