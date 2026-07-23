@@ -41,6 +41,7 @@ const particles = Array.from({ length: PARTICLE_COUNT }).map((_, i) => ({
 function Nav() {
   const [mounted, setMounted] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [helpModalOpen, setHelpModalOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [user, setUser] = useState<any>(null)
 
@@ -246,55 +247,50 @@ function Nav() {
                   )}
                 </div>
 
-                {/* Navigation Links */}
-                <div className="space-y-1 mb-8">
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 px-3">Nawigacja</p>
+                {/* Navigation Links - Exactly 3 items requested by user */}
+                <div className="space-y-2 mb-8">
+                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 px-3">Menu nawigacyjne</p>
+                  
+                  {/* 1. Panel użytkownika */}
                   <Link
                     href={user ? "/dashboard" : "/login"}
                     onClick={() => setDrawerOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white rounded-xl hover:bg-white/5 transition-all group"
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-white bg-violet-600/20 hover:bg-violet-600/30 border border-violet-500/30 rounded-xl transition-all group"
                   >
                     <User className="w-4 h-4 text-violet-400 group-hover:text-violet-300 transition-colors" />
                     <span>Panel użytkownika</span>
                   </Link>
-                  {links.map(l => (
-                    <a
-                      key={l.label}
-                      href={l.href}
-                      onClick={() => setDrawerOpen(false)}
-                      className="flex items-center px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white rounded-xl hover:bg-white/5 transition-all"
-                    >
-                      {l.label}
-                    </a>
-                  ))}
-                  <a
-                    href="#faq"
-                    onClick={() => setDrawerOpen(false)}
-                    className="flex items-center px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white rounded-xl hover:bg-white/5 transition-all"
-                  >
-                    Najczęstsze pytania (FAQ)
-                  </a>
-                </div>
 
-                {/* Help & Support */}
-                <div className="space-y-1 mb-8">
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 px-3">Pomoc i dokumentacja</p>
+                  {/* 2. Dokumentacja platformy */}
                   <a
                     href="https://docs.solospot.pl"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white rounded-xl hover:bg-white/5 transition-all group"
+                    onClick={() => setDrawerOpen(false)}
+                    className="flex items-center justify-between px-4 py-3 text-sm font-semibold text-slate-200 hover:text-white bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-all group"
                   >
-                    <span>Dokumentacja platformy</span>
-                    <ExternalLink className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" />
+                    <div className="flex items-center gap-3">
+                      <FileCode className="w-4 h-4 text-cyan-400" />
+                      <span>Dokumentacja platformy</span>
+                    </div>
+                    <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:text-white transition-colors" />
                   </a>
-                  <a
-                    href="mailto:support@solospot.pl"
-                    className="flex items-center justify-between px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white rounded-xl hover:bg-white/5 transition-all group"
+
+                  {/* 3. Centrum Pomocy (Ściana Formularza) */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDrawerOpen(false);
+                      setHelpModalOpen(true);
+                    }}
+                    className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-slate-200 hover:text-white bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-all group text-left"
                   >
-                    <span>Centrum Pomocy</span>
-                    <HelpCircle className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" />
-                  </a>
+                    <div className="flex items-center gap-3">
+                      <HelpCircle className="w-4 h-4 text-amber-400" />
+                      <span>Centrum Pomocy</span>
+                    </div>
+                    <span className="text-xs px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30">Formularz</span>
+                  </button>
                 </div>
 
                 {/* Contact Info */}
@@ -303,31 +299,28 @@ function Nav() {
                   <div className="text-xs text-slate-400 space-y-2">
                     <p className="flex items-center gap-2">
                       <Mail className="w-3.5 h-3.5 text-violet-400" />
-                      <a href="mailto:kontakt@solospot.pl" className="hover:text-white transition-colors">kontakt@solospot.pl</a>
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <span className="text-violet-400 font-bold">Pomoc:</span>
-                      <a href="mailto:support@solospot.pl" className="text-slate-300 hover:text-white transition-colors">support@solospot.pl</a>
+                      <a href="mailto:kreatywna.droga@gmail.com" className="hover:text-white transition-colors">kreatywna.droga@gmail.com</a>
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Footer (Social Media) */}
+              {/* Footer */}
               <div className="pt-6 border-t border-white/5 bg-[#080911]/80 flex items-center justify-between">
                 <span className="text-[10px] text-slate-600">© {new Date().getFullYear()} SoloSpot</span>
-                <div className="flex gap-4">
-                  <a href="https://solospot.pl" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-violet-400 transition-colors" title="Oficjalna strona">
-                    <Globe2 className="w-4 h-4" />
-                  </a>
-                  <a href="mailto:kontakt@solospot.pl" className="text-slate-500 hover:text-fuchsia-400 transition-colors" title="Napisz do nas">
-                    <Mail className="w-4 h-4" />
-                  </a>
-                </div>
+                <a href="mailto:kreatywna.droga@gmail.com" className="text-xs text-slate-400 hover:text-violet-400 transition-colors flex items-center gap-1">
+                  <Mail className="w-3.5 h-3.5" /> Napisz do nas
+                </a>
               </div>
             </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Interactive Centrum Pomocy Contact Form Modal */}
+      <HelpCenterModal isOpen={helpModalOpen} onClose={() => setHelpModalOpen(false)} />
+    </>
+  )
+}
     </>
   )
 }
@@ -1085,6 +1078,42 @@ function MissionControlSection() {
     { label: 'Provisioning time', value: '28s', change: '-15%', icon: CpuIcon, color: 'text-violet-400', trend: 'up' },
   ]
 
+  return (
+    <section id="mission-control" className="py-32 px-6 max-w-7xl mx-auto">
+      <div className="text-center mb-20">
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 mb-6">
+          <BarChart3 className="w-4 h-4 text-amber-400" />
+          <span className="text-xs font-bold tracking-widest text-amber-400 uppercase">Mission Control</span>
+        </motion.div>
+        <h2 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight">
+          Centrum dowodzenia<br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-red-400">platformy.</span>
+        </h2>
+        <p className="text-xl text-slate-400 max-w-2xl mx-auto">
+          Pełna obserwowalność: tenantów, provisioningu, deployów, eksportów, płatności, zdarzeń, logów audytu.
+          Zarządzasz platformą z jednog miejsca.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
+        {metrics.map((m, i) => (
+          <motion.div key={m.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
+            className="bg-[#080c18]/90 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                <m.icon className={`w-4 h-4 ${m.color}`} />
+              </div>
+              <span className="text-xs text-slate-400">{m.label}</span>
+            </div>
+            <div className="text-2xl font-black text-white">{m.value}</div>
+            <div className={`text-xs font-medium mt-1 ${m.trend === 'up' ? 'text-emerald-400' : m.trend === 'down' ? 'text-red-400' : 'text-slate-500'}`}>
+              {m.change} vs tydzień temu
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
       <div className="grid lg:grid-cols-[2fr_1fr] gap-8">
         <div className="bg-[#080c18]/90 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
           <div className="p-6 border-b border-white/10 flex items-center justify-between">
@@ -1628,6 +1657,178 @@ function MetricsBar() {
         ))}
       </div>
     </section>
+  )
+}
+
+function HelpCenterModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [subject, setSubject] = useState('')
+  const [message, setMessage] = useState('')
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
+  const [errorMsg, setErrorMsg] = useState('')
+
+  if (!isOpen) return null
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setStatus('submitting')
+    setErrorMsg('')
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, subject, message }),
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        setStatus('success')
+        setName('')
+        setEmail('')
+        setSubject('')
+        setMessage('')
+      } else {
+        setStatus('error')
+        setErrorMsg(data.error || 'Wystąpił błąd podczas wysyłania.')
+      }
+    } catch {
+      setStatus('error')
+      setErrorMsg('Błąd połączenia z serwerem.')
+    }
+  }
+
+  return (
+    <AnimatePresence>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        {/* Backdrop */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="absolute inset-0 bg-black/80 backdrop-blur-md"
+        />
+
+        {/* Modal Window */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          className="relative w-full max-w-lg bg-[#0a0d1a] border border-violet-500/30 rounded-3xl p-6 md:p-8 shadow-2xl shadow-violet-900/40 z-10"
+        >
+          <button
+            onClick={onClose}
+            className="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all"
+          >
+            <X className="w-4 h-4" />
+          </button>
+
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+              <HelpCircle className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-xl font-black text-white">Centrum Pomocy</h3>
+              <p className="text-xs text-slate-400">Ściana Formularza Kontaktowego</p>
+            </div>
+          </div>
+
+          <p className="text-xs text-amber-300/90 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 my-4 flex items-center gap-2">
+            <Mail className="w-4 h-4 text-amber-400 flex-shrink-0" />
+            <span>Wszystkie pytania trafiają bezpośrednio do zespołu na adres: <strong className="text-white font-mono">kreatywna.droga@gmail.com</strong></span>
+          </p>
+
+          {status === 'success' ? (
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="py-8 text-center space-y-4">
+              <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center border border-emerald-500/30">
+                <CheckCircle className="w-8 h-8" />
+              </div>
+              <h4 className="text-xl font-bold text-white">Wiadomość została wysłana!</h4>
+              <p className="text-sm text-slate-300">
+                Dziękujemy za kontakt. Twoje zgłoszenie zostało przekazane na skrzynkę <strong className="text-emerald-400">kreatywna.droga@gmail.com</strong>. Odpowiemy najszybciej jak to możliwe.
+              </p>
+              <button
+                onClick={() => setStatus('idle')}
+                className="mt-4 px-6 py-2.5 bg-white/10 hover:bg-white/20 text-white font-medium rounded-xl text-sm transition-all"
+              >
+                Wyślij kolejne zgłoszenie
+              </button>
+            </motion.div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Imię i nazwisko</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Jan Kowalski"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full bg-[#04060d] border border-white/10 focus:border-violet-500 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-600 outline-none transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Twój adres e-mail</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="jan@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-[#04060d] border border-white/10 focus:border-violet-500 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-600 outline-none transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Temat zapytania</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Wdrożenie platformy / Pomoc techniczna"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  className="w-full bg-[#04060d] border border-white/10 focus:border-violet-500 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-600 outline-none transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Treść wiadomości</label>
+                <textarea
+                  required
+                  rows={4}
+                  placeholder="Opisz swoje pytanie lub problem..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="w-full bg-[#04060d] border border-white/10 focus:border-violet-500 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-600 outline-none transition-all resize-none"
+                />
+              </div>
+
+              {status === 'error' && (
+                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-medium">
+                  {errorMsg}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={status === 'submitting'}
+                className="w-full py-3.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-violet-600/30 flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {status === 'submitting' ? (
+                  <span>Wysyłanie do Centrum Pomocy...</span>
+                ) : (
+                  <>
+                    <Mail className="w-4 h-4" />
+                    <span>Wyślij wiadomość do kreatywna.droga@gmail.com</span>
+                  </>
+                )}
+              </button>
+            </form>
+          )}
+        </motion.div>
+      </div>
+    </AnimatePresence>
   )
 }
 
