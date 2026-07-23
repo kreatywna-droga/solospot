@@ -263,7 +263,7 @@ function Nav() {
 
                   {/* 2. Dokumentacja platformy */}
                   <a
-                    href="https://docs.solospot.pl"
+                    href="/docs"
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => setDrawerOpen(false)}
