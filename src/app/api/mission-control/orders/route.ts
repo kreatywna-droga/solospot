@@ -27,6 +27,7 @@ export async function GET() {
       tenantId: intent.tenant_id,
       provider: intent.provider,
       providerTransactionId: intent.provider_transaction_id,
+      amount: intent.amount || 0,
       status: intent.status === 'CAPTURED' ? 'PAID' : intent.status,
       createdAt: intent.created_at,
       updatedAt: intent.updated_at,
