@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { DocMeta } from '@/lib/docs';
+import type { DocMeta } from '@/lib/docs';
 import { cn } from '@/lib/utils';
 import { ChevronRight } from 'lucide-react';
 import { useState } from 'react';
