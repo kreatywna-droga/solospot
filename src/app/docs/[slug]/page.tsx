@@ -69,7 +69,23 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
           prose-blockquote:border-l-violet-500 prose-blockquote:bg-violet-500/5 prose-blockquote:px-6 prose-blockquote:py-2 prose-blockquote:rounded-r-lg prose-blockquote:not-italic
           prose-img:rounded-xl prose-img:border prose-img:border-violet-500/10
           ">
-          <ReactMarkdown>{doc.content}</ReactMarkdown>
+          <ReactMarkdown
+            components={{
+              h2: ({ node, children, ...props }) => {
+                // Wyciąganie czystego tekstu z nagłówka, nawet jeśli zawiera formatowanie
+                const text = extractText(children);
+                const id = text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_]+/g, '-');
+                return <h2 id={id} {...props}>{children}</h2>;
+              },
+              h3: ({ node, children, ...props }) => {
+                const text = extractText(children);
+                const id = text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_]+/g, '-');
+                return <h3 id={id} {...props}>{children}</h3>;
+              }
+            }}
+          >
+            {doc.content}
+          </ReactMarkdown>
         </div>
         
         <div className="mt-20 pt-8 border-t border-violet-500/20 text-sm text-slate-500 flex justify-between">
@@ -82,4 +98,14 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
       <TableOfContents content={doc.content} />
     </div>
   );
+}
+
+// Funkcja pomocnicza do bezpiecznego wyciągania tekstu z elementów React
+function extractText(children: any): string {
+  if (typeof children === 'string') return children;
+  if (Array.isArray(children)) return children.map(extractText).join('');
+  if (children && typeof children === 'object' && children.props && children.props.children) {
+    return extractText(children.props.children);
+  }
+  return '';
 }
