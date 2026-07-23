@@ -5,8 +5,8 @@ import { resolveTenantSession } from '@/lib/tenant/TenantResolver';
 export async function POST() {
   try {
     const session = await resolveTenantSession();
-    if (!session.isAuthenticated) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!session.isAuthenticated || !session.tenantId) {
+      return NextResponse.json({ error: 'Unauthorized or no tenant' }, { status: 401 });
     }
 
     const supabase = getServiceSupabase();
@@ -15,7 +15,7 @@ export async function POST() {
     const fakeIntent = {
       id: `pi_test_${Date.now()}`,
       order_id: `order_test_${Date.now()}`,
-      tenant_id: 'cfc8230c-5ba5-4cc0-846c-1d5092933b24', // Twoj testowy tenant z wczorajszej proby rejestracji
+      tenant_id: session.tenantId,
       provider: 'stripe',
       provider_transaction_id: `ch_test_${Date.now()}`,
       amount: 15000, // 150 PLN (w groszach)
