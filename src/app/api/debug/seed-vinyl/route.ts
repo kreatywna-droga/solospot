@@ -1,18 +1,64 @@
 import { NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const supabase = getServiceSupabase();
 
   // Znajdź Twój sklep "vinyl"
-  const { data: store, error: storeError } = await supabase
+  let { data: store, error: storeError } = await supabase
     .from('stores')
     .select('*')
     .eq('slug', 'vinyl')
-    .single();
+    .maybeSingle();
 
-  if (storeError || !store) {
-    return NextResponse.json({ error: 'Nie znaleziono sklepu "vinyl" w bazie danych!' }, { status: 404 });
+  if (!store) {
+    // Jeśli nie znalazł po slug, weź po prostu pierwszy sklep z bazy
+    const { data: firstStore } = await supabase.from('stores').select('*').limit(1).maybeSingle();
+    store = firstStore;
+  }
+
+  // MAGIA: Jeśli uzytkownik nie ma ABSOLUTNIE ZADNEGO sklepu, stworzmy go dla niego!
+  if (!store) {
+    let { data: tenant } = await supabase.from('tenants').select('*').limit(1).maybeSingle();
+    
+    if (!tenant) {
+      // Create a valid auth user first
+      const dummyEmail = `demo-${Date.now()}@solospot.pl`;
+      const { data: authData, error: authErr } = await supabase.auth.admin.createUser({
+        email: dummyEmail,
+        password: 'TestPassword123!',
+        email_confirm: true
+      });
+      
+      if(authErr || !authData.user) return NextResponse.json({ error: 'Błąd tworzenia użytkownika Auth', details: authErr }, { status: 500 });
+      
+      const { data: newTenant, error: tenantErr } = await supabase.from('tenants').insert({
+        id: authData.user.id,
+        owner_email: dummyEmail,
+        package_id: 'vinyl',
+        status: 'CREATED',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }).select().single();
+      
+      if(tenantErr) return NextResponse.json({ error: 'Błąd tworzenia testowego konta', details: tenantErr }, { status: 500 });
+      tenant = newTenant;
+    }
+    
+    const { data: newStore, error } = await supabase.from('stores').insert({
+      tenant_id: tenant.id,
+      name: 'Vinyl Music Store',
+      slug: 'vinyl',
+      status: 'ACTIVE',
+      config: {},
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }).select().single();
+    
+    if(error) return NextResponse.json({ error: 'Błąd tworzenia sklepu' }, { status: 500 });
+    store = newStore;
   }
 
   // Budowanie ekskluzywnego, gotowego designu i sekcji
@@ -96,7 +142,7 @@ export async function GET() {
       updated_at: new Date().toISOString()
     },
     {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       tenant_id: store.tenant_id,
       store_id: store.id,
       name: 'Gramofon Audio-Technica LP120X',
