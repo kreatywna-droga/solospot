@@ -156,10 +156,11 @@ export async function middleware(request: NextRequest) {
       requestHeaders.set('x-tenant-id', resolvedStore.tenant_id);
       requestHeaders.set('x-store-id', resolvedStore.id);
 
-      // Support rewriting requests dynamically to the storefront runtime engine route: /s/[storeId]/...
+      // Support rewriting requests dynamically to the storefront runtime engine route: /store/[slug]/...
       // This is a premium architecture feature that hides the internal URLs!
       const newUrl = request.nextUrl.clone();
-      newUrl.pathname = `/s/${resolvedStore.id}${pathname}`;
+      const newPathname = pathname === '/' ? '' : pathname;
+      newUrl.pathname = `/store/${resolvedStore.slug}${newPathname}`;
       return NextResponse.rewrite(newUrl, {
         request: {
           headers: requestHeaders,
