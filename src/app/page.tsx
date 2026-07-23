@@ -1,7 +1,7 @@
 'use client'
 // HMR trigger
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import {
@@ -621,7 +621,7 @@ function MarketplaceSection() {
   const steps = [
     { number: '01', title: 'Przeglądaj Marketplace', desc: '4 kategorie: Moda, Uroda, Gastronomia, Cyfrowe. Każdy szablon to gotowy biznes: produkty, motyw, sekcje, SEO.', icon: Store },
     { number: '02', title: 'Kup licencję', desc: 'Jednorazowa opłata (199–399 PLN) lub subskrypcja. Natychmiastowy dostęp do pakietu JSON + assets.', icon: CreditCard },
-    { number: '03', title: 'Provisioning automatyczny', desc: 'Platforma tworzy tenant, izolowaną bazę, wstrzykuje dane, generuje klucze API. 30 sekund.', icon: CpuIcon },
+    { number: '03', title: 'Provisioning automatyczny', desc: 'Platforma tworzy tenant, izolowaną bazę, wstrzykuje dane, generuje klucze API. 30 sekund.', icon: Cpu },
     { number: '04', title: 'Lądujesz w Studio', desc: 'Gotowy sklep otwiera się w builderze. Wszystko skonfigurowane. Edytujesz tylko to, co chcesz.', icon: LayoutDashboard },
     { number: '05', title: 'Publikuj / Eksportuj', desc: 'Wdróż na platformie (Edge CDN, SSL, domeny) lub wyeksportuj HTML na własny hosting.', icon: Rocket },
   ]
@@ -684,7 +684,7 @@ function MarketplaceSection() {
                     )}
                     {i === 2 && (
                       <div className="text-center p-8">
-                        <CpuIcon className="w-16 h-16 mx-auto mb-4 text-slate-600" />
+                        <Cpu className="w-16 h-16 mx-auto mb-4 text-slate-600" />
                         <p className="text-slate-500 text-lg">Provisioning: tenant + DB + klucze API</p>
                         <p className="text-slate-700 text-sm mt-2">~30 sekund • Zero konfiguracji ręcznej</p>
                       </div>
@@ -908,8 +908,8 @@ function HTMLExportSection() {
   const features = [
     { icon: FileCode, title: 'Statyczny HTML/CSS/JS', desc: 'Czyste pliki — bez Node.js, bez bazy, bez kontenerów. Działają wszędzie.' },
     { icon: Globe, title: 'Edge/CDN Ready', desc: 'Optymalizowane pod cache: TTFB < 50ms globalnie. Vercel, Netlify, Cloudflare, AWS S3+CF.' },
-    { icon: ZapIcon, title: 'Hydration opcjonalny', desc: 'Dodaj interaktywność (koszyk, filtry) przez lekki layer — lub zostaw czysty HTML.' },
-    { icon: ShieldIcon, title: 'Bezpieczeństwo by design', desc: 'Brak backendu = brak powierzchni ataku. Płatności w iframe/checkout providera.' },
+    { icon: Zap, title: 'Hydration opcjonalny', desc: 'Dodaj interaktywność (koszyk, filtry) przez lekki layer — lub zostaw czysty HTML.' },
+    { icon: Shield, title: 'Bezpieczeństwo by design', desc: 'Brak backendu = brak powierzchni ataku. Płatności w iframe/checkout providera.' },
     { icon: HardDrive, title: 'Wersjonowanie i rollback', desc: 'Każdy eksport to wersja. Powrót do dowolnej wersji jednym kliknięciem.' },
     { icon: Terminal, title: 'CLI / CI/CD Native', desc: 'solospot export --store fashion-pro --output ./dist --cdn cloudflare. Gotowe do pipeline.' },
   ]
@@ -993,20 +993,6 @@ function HTMLExportSection() {
   )
 }
 
-function MissionControlSection() {
-  const metrics = [
-    { label: 'Aktywni tenantów', value: '1,247', change: '+12%', icon: Users, color: 'text-violet-400', trend: 'up' },
-    { label: 'Zamówienia / 24h', value: '3,891', change: '+8%', icon: ShoppingCart, color: 'text-emerald-400', trend: 'up' },
-    { label: 'Przychód platformy', value: '284k PLN', change: '+23%', icon: CreditCard, color: 'text-amber-400', trend: 'up' },
-    { label: 'Uptime', value: '99.99%', change: '0%', icon: ShieldIcon, color: 'text-cyan-400', trend: 'neutral' },
-    { label: 'Eksporty / tydzień', value: '89', change: '+34%', icon: Download, color: 'text-emerald-400', trend: 'up' },
-    { label: 'Provisioning time', value: '28s', change: '-15%', icon: CpuIcon, color: 'text-violet-400', trend: 'up' },
-  ]
-
-  const tenants = [
-    { name: 'Fashion Store Pro', domain: 'fashion.demo.wf', plan: 'Pro', status: 'active', revenue: '12.4k', health: 98, lastDeploy: '2h ago' },
-    { name: 'Beauty Lab', domain: 'beauty.demo.wf', plan: 'Business', status: 'active', revenue: '8.7k', health: 100, lastDeploy: '1d ago' },
-    { name: 'Restaurant Hub', domain: 'food.demo.wf', plan: 'Enterprise', status: 'active', revenue: '45.2k', health: 99, lastDeploy: '4h ago' },
 function MissionControlSection() {
   const [realTenants, setRealTenants] = useState<any[]>([])
   const [realEvents, setRealEvents] = useState<any[]>([])
@@ -1352,7 +1338,7 @@ function IntegrationsSection() {
           <h3 className="text-xl font-bold text-white mb-2">Brakuje Ci integracji?</h3>
           <p className="text-slate-400 mb-6">Mamy otwarte API i webhook system. Zbuduj własną integrację lub daj nam znać — dodamy ją do roadmapy.</p>
           <Link href="/dashboard" className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm font-medium text-slate-300 hover:text-white transition-all">
-            Dokumentacja API <ArrowRightIcon className="w-4 h-4" />
+            Dokumentacja API <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </div>
@@ -1464,7 +1450,7 @@ function PricingSection() {
               ))}
             </ul>
             <Link href="/register" className={`group flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold text-white transition-all ${tier.buttonGradient} hover:shadow-2xl hover:shadow-violet-500/30`}>
-              {tier.cta} <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              {tier.cta} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </motion.div>
         ))}
@@ -1472,7 +1458,7 @@ function PricingSection() {
       <div className="mt-16 text-center">
         <p className="text-slate-500 mb-4">Wszystkie ceny netto. Faktura VAT 23%. Anuluj w dowolnej chwili. Bez ukrytych opłat.</p>
         <Link href="/register" className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm font-medium text-slate-300 hover:text-white transition-all">
-          Szczegółowe porównanie planów <ArrowRightIcon className="w-4 h-4" />
+          Szczegółowe porównanie planów <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
     </section>

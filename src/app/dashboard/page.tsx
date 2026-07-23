@@ -7,7 +7,7 @@ import {
   Store, ShoppingCart, CreditCard, Activity, Zap, AlertCircle, ArrowRight,
   LayoutTemplate, Package, Eye, PlusCircle, Globe, TrendingUp, DollarSign,
   CheckCircle2, Clock, ExternalLink, Settings, Layers, Download, BarChart3,
-  Users, Shield, Wifi, Server, Database, Zap as ZapIcon,
+  Users, Shield, Wifi, Server, Database,
 } from 'lucide-react'
 
 interface DashboardData {
@@ -118,6 +118,7 @@ export default function BusinessDashboard() {
   const stores = data?.stores || []
   const totals = data?.totals || { activeStores: 0, totalOrders: 0, paidOrders: 0, totalRevenue: 0, totalViews: 0, conversionRate: 0 }
   const activity = data?.recentActivity || []
+  const tenant = data?.tenant
 
   const kpis = [
     {
@@ -188,19 +189,19 @@ export default function BusinessDashboard() {
         >
           <div>
             <h1 className="text-3xl font-black text-white mb-2">Centrum zarządzania biznesem</h1>
-            {data?.tenant ? (
+            {tenant ? (
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
                 className="flex flex-wrap items-center gap-3 text-sm text-slate-500"
               >
-                <span>Tenant: <span className="font-mono text-slate-300">{data.tenant.id}</span></span>
+                <span>Tenant: <span className="font-mono text-slate-300">{tenant.id}</span></span>
                 <span className="w-1 h-1 rounded-full bg-slate-600" />
-                <span>Pakiet: <span className="font-bold text-slate-300">{data.tenant.packageId}</span></span>
+                <span>Pakiet: <span className="font-bold text-slate-300">{tenant.packageId}</span></span>
                 <span className="w-1 h-1 rounded-full bg-slate-600" />
-                <span className={`ml-2 text-xs font-bold px-2.5 py-1 rounded-full border ${statusConfig[data.tenant.status]?.bg || 'bg-slate-500/10 border-slate-500/30'}`}>
-                  {statusConfig[data.tenant.status]?.label || data.tenant.status}
+                <span className={`ml-2 text-xs font-bold px-2.5 py-1 rounded-full border ${statusConfig[tenant.status]?.bg || 'bg-slate-500/10 border-slate-500/30'}`}>
+                  {statusConfig[tenant.status]?.label || tenant.status}
                 </span>
               </motion.div>
             ) : (
