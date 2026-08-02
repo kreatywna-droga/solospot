@@ -1,0 +1,15 @@
+{
+  "name": "@web-factor/code-quality-intelligence",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Static analysis of monorepo code maintainability, complexity, duplication, dead code, naming consistency, and convention compliance.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "vitest": "^4.1.10"
+  }
+}

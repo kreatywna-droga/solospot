@@ -1,0 +1,15 @@
+{
+  "name": "@web-factor/test-fixtures",
+  "version": "1.0.0",
+  "description": "Shared Test Data & Fixtures Library for WEB FACTOR Monorepo",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}

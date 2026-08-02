@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { DocMeta } from '@/lib/docs';
 import { ChevronRight } from 'lucide-react';
-import { useState } from 'react';
 
 interface DocsSidebarProps {
   groupedDocs: Record<string, DocMeta[]>;

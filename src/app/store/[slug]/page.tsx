@@ -1,8 +1,7 @@
 import { notFound } from 'next/navigation'
-import { StoreRepository } from '@/lib/store/StoreRepository'
-import { ProductRepository } from '@/lib/product/ProductRepository'
-import { RuntimeResolver, StoreRuntime } from '@/lib/runtime'
+import { renderStore } from '@/lib/runtime'
 import { SectionRenderer } from '@/components/runtime/SectionRenderer'
+import { generateThemeCssVars } from '@/lib/tenant/TenantTheme'
 import type { Metadata } from 'next'
 
 interface Props {
@@ -12,14 +11,11 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const { slug } = await params
-    const storeRepo = new StoreRepository()
-    const store = await storeRepo.getStoreBySlug(slug)
-    if (!store) return { title: 'Sklep' }
-    const resolver = new RuntimeResolver()
-    const config = resolver.resolve(store, [])
+    const result = await renderStore({ slug, mode: 'LIVE' })
+    if (!result || !result.success) return { title: 'Sklep' }
     return {
-      title: config.seo?.title || config.storeName,
-      description: config.seo?.description || config.theme.description,
+      title: result.seo?.title || result.storeName,
+      description: result.seo?.description || result.theme.description,
     }
   } catch {
     return { title: 'Sklep' }
@@ -29,49 +25,44 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function StorePage({ params }: Props) {
   const { slug } = await params
 
-  let store, products
-  try {
-    const storeRepo = new StoreRepository()
-    const productRepo = new ProductRepository()
+  const result = await renderStore({ slug, mode: 'LIVE' })
 
-    store = await storeRepo.getStoreBySlug(slug)
-    if (!store || !store.config) return notFound()
+  if (!result) return notFound()
 
-    const resolver = new RuntimeResolver()
-    const status = (store.config as any)?.publicationStatus
-
-    if (!resolver.isPubliclyAccessible(status) && !resolver.canRender(status)) {
-      return (
-        <div className="min-h-screen bg-white flex items-center justify-center">
-          <div className="text-center max-w-md px-6">
-            <h1 className="text-2xl font-bold text-slate-800 mb-2">Ten sklep nie jest jeszcze opublikowany</h1>
-            <p className="text-slate-500">Właściciel sklepu nie zakończył jeszcze konfiguracji.</p>
-          </div>
+  if (!result.success) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center max-w-md px-6">
+          <h1 className="text-2xl font-bold text-slate-800 mb-2">Ten sklep nie jest jeszcze opublikowany</h1>
+          <p className="text-slate-500">Właściciel sklepu nie zakończył jeszcze konfiguracji.</p>
         </div>
-      )
-    }
-
-    products = await productRepo.getProductsByStore(store.tenantId, store.id)
-  } catch {
-    return notFound()
+      </div>
+    )
   }
 
-  const resolver = new RuntimeResolver()
-  const runtimeConfig = resolver.resolve(store, products || [])
-
-  const runtime = new StoreRuntime()
-  const rendered = runtime.render(runtimeConfig)
+  // Generate tenant-specific CSS variables from store theme
+  const cssVars = generateThemeCssVars({
+    primary: result.theme.primaryColor,
+    secondary: result.theme.secondaryColor,
+  })
 
   return (
-    <div style={{ fontFamily: rendered.theme.font }}>
-      {rendered.page.sections.map((section) => (
+    <div style={{ fontFamily: result.theme.font, ...cssVars }}>
+      {result.sections.map((section) => (
         <SectionRenderer
           key={section.id}
-          section={section}
-          theme={rendered.theme}
-          storeName={rendered.storeName}
-          products={rendered.products}
-          navigation={rendered.navigation}
+          section={{ id: section.id, type: section.type, label: section.label, config: section.props }}
+          theme={{
+            primaryColor: result.theme.primaryColor,
+            secondaryColor: result.theme.secondaryColor,
+            font: result.theme.font,
+            logo: result.theme.logo,
+            favicon: result.theme.favicon,
+            description: result.theme.description,
+          }}
+          storeName={result.storeName}
+          products={result.products}
+          navigation={result.navigation}
         />
       ))}
       <div className="fixed bottom-4 right-4 z-50">

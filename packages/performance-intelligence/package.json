@@ -1,0 +1,15 @@
+{
+  "name": "@web-factor/performance-intelligence",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Static analysis of monorepo architectural performance risk — dependency cost, import depth, module complexity and hotspot identification.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "vitest": "^4.1.10"
+  }
+}

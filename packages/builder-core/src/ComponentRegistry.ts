@@ -17,6 +17,29 @@
  */
 
 // ---------------------------------------------------------------------------
+// Property Metadata — search, feature gating, deprecation, inline docs
+// ---------------------------------------------------------------------------
+
+export interface PropertyMetadata {
+  /** Mark as experimental — hidden from non-developer users */
+  readonly experimental?: boolean;
+  /** Mark as enterprise-only — requires enterprise plan */
+  readonly enterpriseOnly?: boolean;
+  /** Mark as deprecated — shows warning in UI */
+  readonly deprecated?: boolean;
+  /** Readonly alias for hidden (schema.hidden takes precedence) */
+  readonly hidden?: boolean;
+  /** Link to documentation page */
+  readonly documentation?: string;
+  /** Search keywords for property search */
+  readonly searchKeywords?: ReadonlyArray<string>;
+  /** Lucide icon name for the field */
+  readonly icon?: string;
+  /** Arbitrary tags for filtering/categorization */
+  readonly tags?: ReadonlyArray<string>;
+}
+
+// ---------------------------------------------------------------------------
 // Prop schema — schema-driven UI generation
 // ---------------------------------------------------------------------------
 
@@ -30,6 +53,7 @@ export type PropSchemaType =
   | 'asset'         // generic asset (image, video, svg)
   | 'select'        // enum dropdown
   | 'multiselect'   // multi-value enum
+  | 'range'         // slider control
   | 'array'         // repeatable sub-schema
   | 'object';       // nested prop group
 
@@ -42,6 +66,7 @@ export interface PropSchemaBase {
   readonly description?: string;
   readonly group?: string;              // logical grouping in props panel
   readonly hidden?: boolean;            // exists in schema but not shown in UI
+  readonly metadata?: PropertyMetadata; // search, gating, deprecation, docs
 }
 
 export interface StringPropSchema extends PropSchemaBase {

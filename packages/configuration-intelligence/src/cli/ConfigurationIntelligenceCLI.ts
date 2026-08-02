@@ -1,0 +1,79 @@
+// ---------------------------------------------------------------------------
+// CLI command union
+// ---------------------------------------------------------------------------
+export type ConfigurationCLICommand = 'analyze' | 'validate' | 'report' | 'help';
+
+// ---------------------------------------------------------------------------
+// Output format
+// ---------------------------------------------------------------------------
+export type ConfigurationCLIFormat = 'markdown' | 'json';
+
+// ---------------------------------------------------------------------------
+// Parse result
+// ---------------------------------------------------------------------------
+export interface ConfigurationCLIParseResult {
+  command: ConfigurationCLICommand;
+  /** --target=<path> */
+  targetPath?: string;
+  /** --out=<path> */
+  outputPath?: string;
+  /** --format=<markdown|json> */
+  format: ConfigurationCLIFormat;
+  /** Any remaining flags */
+  options: Record<string, string | boolean>;
+}
+
+// ---------------------------------------------------------------------------
+// ConfigurationIntelligenceCLI — argument parser (no FS access, no execution)
+// ---------------------------------------------------------------------------
+export class ConfigurationIntelligenceCLI {
+  public static parseArgs(args: string[]): ConfigurationCLIParseResult {
+    if (args.length === 0) {
+      return { command: 'help', format: 'markdown', options: {} };
+    }
+
+    const first = args[0].toLowerCase();
+    let command: ConfigurationCLICommand = 'help';
+    if (first === 'analyze')       command = 'analyze';
+    else if (first === 'validate') command = 'validate';
+    else if (first === 'report')   command = 'report';
+
+    let targetPath: string | undefined;
+    let outputPath: string | undefined;
+    let format: ConfigurationCLIFormat = 'markdown';
+    const options: Record<string, string | boolean> = {};
+
+    for (let i = 1; i < args.length; i++) {
+      const arg = args[i];
+
+      if (arg.startsWith('--target=')) {
+        targetPath = arg.substring('--target='.length);
+      } else if (arg.startsWith('--out=')) {
+        outputPath = arg.substring('--out='.length);
+      } else if (arg.startsWith('--format=')) {
+        const fmt = arg.substring('--format='.length).toLowerCase();
+        format = fmt === 'json' ? 'json' : 'markdown';
+      } else if (arg.startsWith('--')) {
+        options[arg.substring(2)] = true;
+      }
+    }
+
+    return { command, targetPath, outputPath, format, options };
+  }
+
+  public static getHelpText(): string {
+    return [
+      'Usage: configuration-intelligence <command> [options]',
+      '',
+      'Commands:',
+      '  analyze   Analyse tsconfig, package.json, ESLint, Prettier, Vitest and bundler configs',
+      '  validate  Validate config compliance, detect conflicts and classify issues',
+      '  report    Generate Configuration Health Score report (Markdown/JSON)',
+      '',
+      'Options:',
+      '  --target=<path>             Root path to analyse (default: current directory)',
+      '  --format=<markdown|json>    Output format (default: markdown)',
+      '  --out=<path>                Destination file for the generated report',
+    ].join('\n');
+  }
+}

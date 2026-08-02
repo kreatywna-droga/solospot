@@ -75,3 +75,22 @@ export function getTenantThemeById(tenantId?: string): TenantTheme {
   }
   return DEFAULT_THEME;
 }
+
+/**
+ * Converts TenantThemeColors to a CSS Custom Properties object.
+ * Use as style prop on a root element to override --color-* variables per tenant.
+ *
+ * @example
+ * <div style={generateThemeCssVars(theme.colors)}>...</div>
+ */
+export function generateThemeCssVars(colors: TenantThemeColors): Record<string, string> {
+  const vars: Record<string, string> = {
+    '--color-primary': colors.primary,
+  };
+  if (colors.secondary)   vars['--color-secondary']   = colors.secondary;
+  if (colors.accent)      vars['--color-accent']      = colors.accent;
+  if (colors.background)  vars['--color-background']  = colors.background;
+  if (colors.surface)     vars['--color-surface']     = colors.surface;
+  if (colors.text)        vars['--color-text']        = colors.text;
+  return vars;
+}

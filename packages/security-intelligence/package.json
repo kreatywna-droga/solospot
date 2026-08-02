@@ -1,0 +1,15 @@
+{
+  "name": "@web-factor/security-intelligence",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Static analysis of monorepo architecture and code security risks, secret detection, policy compliance, and least privilege enforcement.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "vitest": "^4.1.10"
+  }
+}

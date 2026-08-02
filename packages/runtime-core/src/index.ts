@@ -9,6 +9,8 @@ export * from './RuntimePipeline';
 export * from './SectionRegistry';
 export * from './DefaultSectionRegistry';
 export * from './DefaultRuntimePipeline';
+export * from './DefaultRuntimeCompositionEngine';
+export * from './RuntimeCache';
 export * from './adapters';
 export type { 
   RuntimeSection, 

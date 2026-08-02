@@ -130,15 +130,21 @@ export type {
 } from './CanvasState';
 export { DEFAULT_GRID_CONFIG } from './CanvasState';
 
-export type { SnapResult, SnapInput } from './CanvasState';
+export type { SnapResult, SnapInput, Rect, SelectionBox } from './CanvasState';
 export { GridSystem } from './GridSystem';
-export type {
+export {
   createInitialSelection,
   reduceSelection,
   buildBreadcrumbs,
   selectParent,
   isLocked,
   isHidden,
+  isSelected,
+  isLastClicked,
+  isContainer,
+  getNextSiblingId,
+  getPrevSiblingId,
+  computeSelectionBox,
 } from './SelectionEngine';
 export type { DragCommandOptions } from './DragEngine';
 export { createDragCommand, reduceDragState, computeDropTarget, snapDragToGrid } from './DragEngine';
@@ -148,3 +154,219 @@ export { ResponsiveEngine } from './ResponsiveEngine';
 export { createAlignCommand, computeAlignment } from './LayoutEngine';
 export type { BuilderUXState } from './BuilderUX';
 export { createBuilderUX } from './BuilderUX';
+
+// C16.4 — Selection Overlay types & controller
+export type {
+  HandleType,
+  ToolbarActionType,
+  ToolbarAction,
+  ToolbarPositionResult,
+  ToolbarPosition,
+  OverlayConfig,
+} from './OverlayConstants';
+export {
+  HANDLE_POSITIONS,
+  HANDLE_CURSOR,
+  getActiveHandles,
+  DEFAULT_OVERLAY_CONFIG,
+  TOOLBAR_ACTION_LABEL,
+} from './OverlayConstants';
+
+export type {
+  OverlayRect,
+  OverlayViewport,
+} from './OverlayRect';
+export {
+  createOverlayRect,
+  canvasToScreen,
+  screenToCanvas,
+  overlayRectToScreenRect,
+  overlayTransform,
+} from './OverlayRect';
+
+export type {
+  OverlayState,
+} from './OverlayController';
+export {
+  OverlayController,
+  createEmptyOverlayState,
+} from './OverlayController';
+
+// C16.7 — Inspector Foundation (Sprint 4A)
+export type {
+  ValidationResult,
+  ValidationError,
+  ValidationErrorCode,
+  InspectorCategory,
+  InspectorGroup,
+  PropertyBinding,
+} from './InspectorRuntime';
+export {
+  InspectorRuntime,
+} from './InspectorRuntime';
+
+// C16.7 — Property Field Registry (Sprint 4.5)
+export type {
+  FieldRenderer,
+  FieldRendererProps,
+  PropertyFieldRegistry,
+} from './PropertyRegistry';
+export {
+  createPropertyFieldRegistry,
+} from './PropertyRegistry';
+
+// C16.7 — Property Metadata (Sprint 4.5)
+export type {
+  PropertyMetadata,
+} from './ComponentRegistry';
+
+// C16.31 — Layout Property Types (Sprint 5A)
+export type {
+  DisplayMode,
+  FlexDirection,
+  FlexWrap,
+  JustifyContent,
+  AlignItems,
+  AlignContent,
+  AlignSelf,
+  FlexContainerProps,
+  FlexChildProps,
+  SpacingValue,
+  SpacingProps,
+  CSSUnit,
+  SizeValue,
+  SizeProps,
+  PositionType,
+  PositionProps,
+  OverflowMode,
+  OverflowProps,
+} from './LayoutTypes';
+
+export {
+  DEFAULT_SPACING,
+  DEFAULT_SIZE_WIDTH,
+  DEFAULT_SIZE_HEIGHT,
+  VALID_CSS_UNITS,
+  spacingToCSS,
+  sizeToCSS,
+  positionToCSS,
+  displayToCSS,
+  overflowToCSS,
+  validateSpacingValue,
+  validateSizeValue,
+  validatePosition,
+  validateZIndex,
+  validateGap,
+  validateOverflow,
+  validateOverflowProps,
+} from './LayoutTypes';
+
+// C16.49 — Border Property Types (Sprint 5B.3)
+export type {
+  BorderStyle,
+  BorderWidthValue,
+  BorderProps,
+} from './BorderTypes';
+
+export {
+  DEFAULT_BORDER_WIDTH,
+  DEFAULT_BORDER_COLOR,
+  VALID_BORDER_STYLES,
+  borderToCSS,
+  validateBorderStyle,
+  validateBorderWidthValue,
+  validateBorderColor,
+  validateBorderProps,
+} from './BorderTypes';
+
+// C16.53 — Radius Property Types (Sprint 5B.4)
+export type {
+  RadiusMode,
+  RadiusUnit,
+  RadiusValue,
+  RadiusProps,
+} from './RadiusTypes';
+
+export {
+  DEFAULT_RADIUS_MODE,
+  DEFAULT_RADIUS_VALUE,
+  VALID_RADIUS_UNITS,
+  radiusToCSS,
+  validateRadiusValue,
+  validateRadiusProps,
+} from './RadiusTypes';
+
+// C16.19 — Smart Guide Types (Sprint 6B)
+export type {
+  GuideSource,
+  GuideType,
+  GuideOrientation,
+  GuidePriority,
+  ElementBounds,
+  ContainerBounds,
+  SmartGuide,
+  SnapGuidance,
+  SmartGuideConfig,
+  CalculatorInput,
+  GuideCalculator,
+  AggregatedGuideResult,
+} from './SmartGuideTypes';
+
+export {
+  GUIDE_PRIORITY,
+  DEFAULT_SNAP_THRESHOLD,
+  MAX_DISTANCE_GUIDE_RANGE,
+  DEFAULT_SMART_GUIDE_CONFIG,
+  createElementBounds,
+  createContainerBounds,
+  createSmartGuide,
+} from './SmartGuideTypes';
+
+export { SmartGuideEngine } from './SmartGuideEngine';
+export type { GuideCalculator as GuideCalculatorType, CalculatorInput as CalculatorInputType, AggregatedGuideResult as AggregatedGuideResultType } from './SmartGuideEngine';
+
+// C16.38 — Grid Property Types (Sprint 5B.1)
+export type {
+  GridUnit,
+  TrackSize,
+  TrackBreadcrumb,
+  TrackList,
+  GridAutoFlow,
+  GridJustifyContent,
+  GridAlignContent,
+  GridJustifyItems,
+  GridAlignItems,
+  GridContainerProps,
+  GridSpanValue,
+  GridSelfAlignment,
+  GridItemProps,
+} from './GridTypes';
+
+export {
+  DEFAULT_GRID_AUTO_COLUMNS,
+  DEFAULT_GRID_AUTO_ROWS,
+  DEFAULT_GRID_AUTO_FLOW,
+  DEFAULT_SINGLE_COLUMN_TRACK,
+  VALID_GRID_UNITS,
+  VALID_GRID_AUTO_FLOWS,
+  VALID_GRID_CONTENT_ALIGNMENT,
+  VALID_GRID_ITEM_ALIGNMENT,
+  trackBreadcrumbToCSS,
+  trackListToCSS,
+  gridSpanToCSS,
+  gridContainerToCSS,
+  gridItemToCSS,
+  gridToCSS,
+  validateTrackSize,
+  validateTrackBreadcrumb,
+  validateTrackList,
+  validateGridSpan,
+  validateGridAreaName,
+  validateGridAutoFlow,
+  validateGridContentAlignment,
+  validateGridItemAlignment,
+  validateGridLineNumber,
+  validateGridContainerProps,
+  validateGridItemProps,
+} from './GridTypes';
+

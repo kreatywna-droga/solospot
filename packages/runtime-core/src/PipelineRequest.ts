@@ -11,6 +11,10 @@ export interface PipelineRequest {
   readonly headers?: Record<string, string>;
   readonly locale?: string;
   readonly currency?: string;
+  /** Skip cache-check (used by preview with noCache=true). */
+  readonly noCache?: boolean;
+  /** Document hash for cache keying (cache-invalidation). */
+  readonly documentHash?: string;
 }
 
 export function createPipelineRequest(params: {

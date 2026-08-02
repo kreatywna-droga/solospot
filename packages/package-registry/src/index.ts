@@ -1,16 +1,29 @@
-export * from './PackageType';
-export * from './PackageManifest';
-export * from './PackageRegistry';
-export * from './marketplace/MarketplaceListing';
-export * from './marketplace/MarketplaceQuery';
-export * from './marketplace/CompatibilityValidator';
-export * from './marketplace/DependencyValidator';
-export * from './marketplace/UpdateDetector';
-export * from './marketplace/MarketplaceCatalog';
-export * from './marketplace/InMemoryMarketplace';
-export * from './marketplace/InstallationPlan';
-export * from './marketplace/MarketplaceInstaller';
-export * from './marketplace/DefaultMarketplaceInstaller';
-export * from './marketplace/VersionEngine';
-export * from './marketplace/MigrationEngine';
-export * from './marketplace/UpgradePlanner';
+// Manifest Model API
+export type {
+  VersionConstraint,
+  PackageAuthor,
+  PackageDependency,
+  PackageCapability,
+  PackageMetadata,
+  PackageManifest,
+} from './manifest/PackageManifestModel';
+
+// Validator API
+export { ManifestValidator } from './validator/ManifestValidator';
+export type {
+  ValidationError,
+  ValidationWarning,
+  ValidationResult,
+} from './validator/ManifestValidator';
+
+// Graph API
+export { PackageDependencyGraph } from './graph/PackageDependencyGraph';
+export type { GraphNode, GraphReport } from './graph/PackageDependencyGraph';
+
+// Report Generator API
+export { RegistryReportGenerator } from './report/RegistryReportGenerator';
+export type { RegistryReportData } from './report/RegistryReportGenerator';
+
+// CLI API
+export { PackageRegistryCLI } from './cli/PackageRegistryCLI';
+export type { RegistryCLICommand, RegistryCLIParseResult } from './cli/PackageRegistryCLI';

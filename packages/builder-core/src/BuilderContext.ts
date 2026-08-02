@@ -24,6 +24,7 @@ import { HistoryStack, createHistoryStack } from './HistoryStack';
 import { PreviewChannel } from './PreviewContract';
 import { BuilderCommand, applyCommandToDocument, commandLabel } from './BuilderCommands';
 import { createDocumentUpdate, createSectionUpdate } from './PreviewMessage';
+import { reduceSelection } from './SelectionEngine';
 
 // ---------------------------------------------------------------------------
 // Context type
@@ -111,8 +112,35 @@ function buildContext(
       // --- CANVAS only ---
       if (CANVAS_ONLY_COMMANDS.has(command.type)) {
         if (command.type === 'CANVAS') {
-          const nextCanvas = reduceCanvasState(canvas, command.action);
-          
+          let nextCanvas = reduceCanvasState(canvas, command.action);
+
+          // Handle selection actions with document context
+          const selAction = command.action;
+          if (
+            selAction.type === 'SELECT_SECTION' ||
+            selAction.type === 'SELECT_ALL' ||
+            selAction.type === 'SELECT_PARENT' ||
+            selAction.type === 'SELECT_CHILD' ||
+            selAction.type === 'SELECT_NEXT' ||
+            selAction.type === 'SELECT_PREV' ||
+            selAction.type === 'BOX_SELECT' ||
+            selAction.type === 'HOVER_SECTION' ||
+            selAction.type === 'TOGGLE_LOCK' ||
+            selAction.type === 'TOGGLE_VISIBILITY' ||
+            selAction.type === 'SET_BREAKPOINT'
+          ) {
+            // Apply selection reducer with document context
+            const nextSelection = reduceSelection(canvas.selection, document, selAction);
+            nextCanvas = { ...nextCanvas, selection: nextSelection };
+
+            // Sync selectedSectionId from selection state (backward compat)
+            if (nextSelection.selectedIds.length > 0) {
+              nextCanvas = { ...nextCanvas, selectedSectionId: nextSelection.selectedIds[0] };
+            } else if (selAction.type === 'SELECT_SECTION' && !selAction.sectionId) {
+              nextCanvas = { ...nextCanvas, selectedSectionId: null };
+            }
+          }
+
           // Preview sync for drag/resize/breakpoint
           if (
             command.action.type === 'BEGIN_DRAG' ||

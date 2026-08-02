@@ -54,11 +54,16 @@ export interface ResizeState {
 }
 
 // ---------------------------------------------------------------------------
-// Selection state
+// Selection state — C16.4
 // ---------------------------------------------------------------------------
 
 export interface SelectionState {
   readonly selectedIds: ReadonlyArray<string>;
+  readonly primarySelectionId: string | null;  // the "main" selected item (for actions)
+  readonly lastClickedId: string | null;       // for Shift+Click range selection
+  readonly anchorId: string | null;            // start of Shift+Click range
+  readonly focusId: string | null;             // keyboard focus indicator
+  readonly selectionMode: 'SINGLE' | 'MULTI' | 'RANGE' | 'BOX';
   readonly hoveredId: string | null;
   readonly activeBreakpoint: ViewportLabel;
   readonly lockedIds: ReadonlyArray<string>;
@@ -68,6 +73,11 @@ export interface SelectionState {
 
 export const DEFAULT_SELECTION: SelectionState = {
   selectedIds: [],
+  primarySelectionId: null,
+  lastClickedId: null,
+  anchorId: null,
+  focusId: null,
+  selectionMode: 'SINGLE',
   hoveredId: null,
   activeBreakpoint: 'DESKTOP',
   lockedIds: [],
@@ -157,12 +167,21 @@ export interface BreadcrumbItem {
  */
 export type CanvasMode = 'SELECT' | 'INSERT' | 'MOVE' | 'PREVIEW';
 
+/**
+ * RuntimeMode — controls how renderStore() renders the preview.
+ * - LIVE:    Renders the published store as-is (production).
+ * - PREVIEW: Wraps sections with data attributes for Builder selection.
+ * - EXPORT:  Sanitized HTML with script/style stripping.
+ */
+export type RuntimeMode = 'LIVE' | 'PREVIEW' | 'EXPORT';
+
 // ---------------------------------------------------------------------------
 // Canvas state
 // ---------------------------------------------------------------------------
 
 export interface CanvasState {
   readonly mode: CanvasMode;
+  readonly runtimeMode: RuntimeMode;
   readonly selectedSectionId: string | null;
   readonly selectedPageId: string | null;
   readonly hoveredSectionId: string | null;
@@ -181,24 +200,64 @@ export interface CanvasState {
 // Canvas actions (exhaustive discriminated union)
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Rect for box select
+// ---------------------------------------------------------------------------
+
+export interface Rect {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+}
+
+// ---------------------------------------------------------------------------
+// SelectionBox — state for box selection interaction
+// ---------------------------------------------------------------------------
+
+export interface SelectionBox {
+  readonly start: { x: number; y: number };
+  readonly current: { x: number; y: number };
+  readonly rect: Rect | null;
+  readonly isDragging: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Canvas actions (exhaustive discriminated union)
+// ---------------------------------------------------------------------------
+
 export type CanvasAction =
-  | { readonly type: 'SELECT_SECTION';   sectionId: string | null; pageId?: string | null; additive?: boolean }
+  // Selection actions
+  | { readonly type: 'SELECT_SECTION';   sectionId: string | null; pageId?: string | null; additive?: boolean; shift?: boolean }
   | { readonly type: 'HOVER_SECTION';    sectionId: string | null }
   | { readonly type: 'HIGHLIGHT_SECTION';sectionId: string | null }
+  | { readonly type: 'SELECT_ALL';       pageId: string }
+  | { readonly type: 'SELECT_PARENT' }
+  | { readonly type: 'SELECT_CHILD' }
+  | { readonly type: 'SELECT_NEXT' }
+  | { readonly type: 'SELECT_PREV' }
+  | { readonly type: 'BOX_SELECT';       pageId: string; rect: Rect; sectionPositions?: Map<string, Rect> }
+  // Drag actions
   | { readonly type: 'BEGIN_DRAG';       sectionId: string; sourcePageId: string; sourceIndex: number }
   | { readonly type: 'UPDATE_DRAG';      currentIndex: number }
   | { readonly type: 'END_DRAG';         committed: boolean }
+  // Resize actions
   | { readonly type: 'BEGIN_RESIZE';     sectionId: string; handle: ResizeHandle; startSize: { width: number; height: number } }
   | { readonly type: 'UPDATE_RESIZE';    currentSize: { width: number; height: number } }
   | { readonly type: 'END_RESIZE';      committed: boolean }
+  // Mode & viewport
   | { readonly type: 'SET_MODE';         mode: CanvasMode }
+  | { readonly type: 'SET_RUNTIME_MODE'; mode: RuntimeMode }
   | { readonly type: 'SET_VIEWPORT';     viewport: ViewportSize }
   | { readonly type: 'SET_GRID';         grid: Partial<GridConfig> }
   | { readonly type: 'ALIGN_SECTIONS';   sectionIds: ReadonlyArray<string>; alignment: Alignment }
+  // Toggle actions
   | { readonly type: 'TOGGLE_LOCK';      sectionId: string }
   | { readonly type: 'TOGGLE_VISIBILITY';sectionId: string }
+  // Responsive / breakpoint
   | { readonly type: 'SET_BREAKPOINT';   breakpoint: ViewportLabel }
   | { readonly type: 'SET_RESPONSIVE_PROP'; sectionId: string; propName: string; value: any; breakpoint: ViewportLabel }
+  // Zoom & panel
   | { readonly type: 'SET_ZOOM';         zoom: number }
   | { readonly type: 'TOGGLE_PANEL' }
   | { readonly type: 'OPEN_PANEL' }
@@ -211,6 +270,7 @@ export type CanvasAction =
 export function createCanvasState(overrides?: Partial<CanvasState>): CanvasState {
   return {
     mode: 'SELECT',
+    runtimeMode: 'LIVE',
     selectedSectionId: null,
     selectedPageId: null,
     hoveredSectionId: null,
@@ -247,6 +307,14 @@ export function reduceCanvasState(state: CanvasState, action: CanvasAction): Can
     case 'HIGHLIGHT_SECTION':
       return { ...state, highlightedSectionId: action.sectionId };
 
+    case 'SELECT_ALL':
+    case 'SELECT_PARENT':
+    case 'SELECT_CHILD':
+    case 'SELECT_NEXT':
+    case 'SELECT_PREV':
+    case 'BOX_SELECT':
+      return state;
+
     case 'BEGIN_DRAG':
       return {
         ...state,
@@ -276,6 +344,9 @@ export function reduceCanvasState(state: CanvasState, action: CanvasAction): Can
 
     case 'SET_MODE':
       return { ...state, mode: action.mode };
+
+    case 'SET_RUNTIME_MODE':
+      return { ...state, runtimeMode: action.mode };
 
     case 'SET_VIEWPORT':
       return { ...state, viewport: action.viewport };

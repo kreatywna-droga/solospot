@@ -1,0 +1,15 @@
+{
+  "name": "@web-factor/architecture-compliance-intelligence",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Static analysis of architectural compliance — layer violations, forbidden dependencies, ADR conformance and separation-of-concerns enforcement.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "vitest": "^4.1.10"
+  }
+}

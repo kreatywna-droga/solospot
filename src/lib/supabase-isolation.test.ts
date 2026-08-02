@@ -1,6 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { getServiceSupabase } from '@/lib/supabase';
 
+vi.mock('@/lib/supabase');
+
 describe('Tenant Database Isolation Verification', () => {
   it('Should verify that queries enforce tenant boundaries and isolate data', async () => {
     const tenantA = '7d20df20-80a5-48fa-84db-7b66df2e737d';

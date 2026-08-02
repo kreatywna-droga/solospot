@@ -19,7 +19,7 @@ const isSupabaseConfigured = (): boolean => {
   );
 };
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const correlationId = request.headers.get('x-correlation-id') || `req_${Date.now()}`;
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-correlation-id', correlationId);

@@ -1,7 +1,12 @@
 # TODO_SPRINT6_STEP3_3.todo
 
-- [ ] Fix TypeScript gate (CheckoutPage default export issue)
-- [ ] Rerun: npx tsc --noEmit --pretty false
-- [ ] Implement Webhook runtime PoW vitest suite (Invalid Signature / Duplicate Delivery / Payment Completed / Payment Failed / Concurrency)
-- [ ] Update TODO_SPRINT6_STEP3_3.progress.md with results
+- [x] Fix TypeScript gate (CheckoutPage default export issue)
+- [x] Rerun: npx tsc --noEmit --pretty false
+- [x] Implement Webhook runtime PoW vitest suite (Invalid Signature / Duplicate Delivery / Payment Completed / Payment Failed / Concurrency)
+- [x] Update TODO_SPRINT6_STEP3_3.progress.md with results
+
+## Results (Step 3.3 gates)
+- vitest webhook-runtime.test.ts: 5/5 PASS
+- tsc --noEmit: no errors in webhook-related files (pre-existing unrelated errors in other packages remain)
+- eslint: exit 0, 0 errors / 0 warnings on webhook files
 

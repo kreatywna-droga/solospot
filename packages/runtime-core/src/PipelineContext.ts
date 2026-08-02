@@ -5,7 +5,12 @@ import { PipelineRequest } from './PipelineRequest';
 
 export interface PipelineContext {
   readonly request: PipelineRequest;
-  readonly runtimeContext: RuntimeContext;
+  /**
+   * Mutable — the runtime-composition stage replaces this with a context
+   * built from the composed StoreRuntimeSnapshot. Consumers must re-read
+   * this field after that stage runs.
+   */
+  runtimeContext: RuntimeContext;
   readonly mode: RuntimeMode;
   readonly storeConfig: Record<string, unknown>;
   readonly packages: Map<string, unknown>;

@@ -1,0 +1,15 @@
+{
+  "name": "@web-factor/configuration-intelligence",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Static analysis of monorepo configuration files — tsconfig, package.json, ESLint, Prettier, Vitest, bundlers.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "vitest": "^4.1.10"
+  }
+}

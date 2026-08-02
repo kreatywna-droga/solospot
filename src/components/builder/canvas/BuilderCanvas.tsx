@@ -25,7 +25,7 @@
  *   - Clicking a section → dispatch(CANVAS SELECT_SECTION)
  */
 
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import {
   ArrowUp, ArrowDown, Trash2, Copy, Plus,
@@ -35,6 +35,8 @@ import { useBuilder } from '../state/BuilderProvider'
 import { SectionNode } from '../../../../packages/builder-core/src/BuilderDocument'
 import { VIEWPORT_PRESETS, DEFAULT_GRID_CONFIG } from '../../../../packages/builder-core/src/CanvasState'
 import { GridSystem } from '../../../../packages/builder-core/src/GridSystem'
+import { SelectionOverlay } from '../selection/SelectionOverlay'
+import { useRuntimePreview } from './useRuntimePreview'
 
 // ---------------------------------------------------------------------------
 // Section type → icon mapping (used for wireframe preview)
@@ -323,7 +325,21 @@ interface BuilderCanvasProps {
 
 export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
   const { document, canvas, dispatch } = useBuilder()
+  const canvasFrameRef = useRef<HTMLDivElement | null>(null)
+  const iframeRef = useRef<HTMLIFrameElement | null>(null)
   const [marquee, setMarquee] = useState<{ startX: number; startY: number; currentX: number; currentY: number } | null>(null)
+
+  const previewSlug = document.metadata?.storeSlug || null
+  const runtimePreviewState = useRuntimePreview(previewSlug, iframeRef)
+
+  const externalRects = useMemo(() => {
+    if (!runtimePreviewState.metrics?.sections) return null
+    const map: Record<string, { x: number; y: number; width: number; height: number }> = {}
+    runtimePreviewState.metrics.sections.forEach(s => {
+      map[s.sectionId] = s.rect
+    })
+    return map
+  }, [runtimePreviewState.metrics])
 
   const activePage = document.pages.find(p =>
     canvas.selectedPageId ? p.id === canvas.selectedPageId : p.isHome
@@ -398,6 +414,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
       {/* Canvas frame */}
       <motion.div
         key={canvas.viewport.label}
+        ref={canvasFrameRef}
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.2 }}
@@ -465,64 +482,84 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
             }}
           />
         )}
-        {sections.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full min-h-[500px] text-center p-12">
-            <div className="w-20 h-20 rounded-3xl bg-violet-500/10 border border-violet-500/20
-                            flex items-center justify-center mb-6">
-              <Layers className="w-10 h-10 text-violet-400" />
-            </div>
-            <h3 className="text-lg font-bold text-white mb-2">Pusta strona</h3>
-            <p className="text-slate-500 text-sm mb-8 max-w-xs">
-              Dodaj pierwszą sekcję z panelu komponentów po lewej stronie
-            </p>
-            {onAddSection && (
-              <button
-                onClick={onAddSection}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl
-                           bg-gradient-to-r from-violet-600 to-fuchsia-600
-                           text-white font-bold text-sm hover:shadow-lg hover:shadow-violet-500/30
-                           transition-all hover:scale-105 active:scale-95"
-              >
-                <Plus className="w-4 h-4" />
-                Dodaj sekcję
-              </button>
+
+        {/* Runtime Preview Iframe or Wireframe Fallback */}
+        {previewSlug ? (
+          <iframe
+            ref={iframeRef}
+            src={`/preview-frame/${previewSlug}`}
+            title="Runtime Preview"
+            className="w-full h-full min-h-[600px] border-0 bg-white"
+          />
+        ) : (
+          <>
+            {sections.length === 0 && (
+              <div className="flex flex-col items-center justify-center h-full min-h-[500px] text-center p-12">
+                <div className="w-20 h-20 rounded-3xl bg-violet-500/10 border border-violet-500/20
+                                flex items-center justify-center mb-6">
+                  <Layers className="w-10 h-10 text-violet-400" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Pusta strona</h3>
+                <p className="text-slate-500 text-sm mb-8 max-w-xs">
+                  Dodaj pierwszą sekcję z panelu komponentów po lewej stronie
+                </p>
+                {onAddSection && (
+                  <button
+                    onClick={onAddSection}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl
+                               bg-gradient-to-r from-violet-600 to-fuchsia-600
+                               text-white font-bold text-sm hover:shadow-lg hover:shadow-violet-500/30
+                               transition-all hover:scale-105 active:scale-95"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Dodaj sekcję
+                  </button>
+                )}
+              </div>
             )}
-          </div>
+
+            {sections.map((node, index) => {
+              const isDragSource = isDragging && canvas.dragState?.sectionId === node.id
+              return (
+                <div
+                  key={node.id}
+                  data-section-id={node.id}
+                  data-layer-id={node.id}
+                  style={{ 
+                    minHeight: sectionHeight(node.type),
+                    opacity: isDragSource ? 0.3 : 1,
+                  }}
+                  className={`relative group cursor-pointer transition-all duration-150 select-none
+                    ${!node.visible ? 'opacity-30' : ''}
+                    ${canvas.selectedSectionId === node.id
+                      ? 'ring-2 ring-violet-500 ring-inset'
+                      : canvas.hoveredSectionId === node.id && canvas.selectedSectionId !== node.id
+                        ? 'ring-1 ring-violet-500/40 ring-inset'
+                        : ''
+                    }
+                  `}
+                >
+                  <SectionBlock
+                    node={node}
+                    pageId={activePage!.id}
+                    index={index}
+                    total={sections.length}
+                    isSelected={canvas.selectedSectionId === node.id}
+                    isHovered={canvas.hoveredSectionId === node.id && canvas.selectedSectionId !== node.id}
+                    onSelect={() => handleSelectSection(node.id, activePage!.id)}
+                    onHover={handleHoverSection}
+                  />
+                </div>
+              )
+            })}
+          </>
         )}
 
-        {/* Sections */}
-        {sections.map((node, index) => {
-          const isDragSource = isDragging && canvas.dragState?.sectionId === node.id
-          return (
-            <div
-              key={node.id}
-              style={{ 
-                minHeight: sectionHeight(node.type),
-                opacity: isDragSource ? 0.3 : 1,
-              }}
-              className={`relative group cursor-pointer transition-all duration-150 select-none
-                ${!node.visible ? 'opacity-30' : ''}
-                ${canvas.selectedSectionId === node.id
-                  ? 'ring-2 ring-violet-500 ring-inset'
-                  : canvas.hoveredSectionId === node.id && canvas.selectedSectionId !== node.id
-                    ? 'ring-1 ring-violet-500/40 ring-inset'
-                    : ''
-                }
-              `}
-            >
-              <SectionBlock
-                node={node}
-                pageId={activePage!.id}
-                index={index}
-                total={sections.length}
-                isSelected={canvas.selectedSectionId === node.id}
-                isHovered={canvas.hoveredSectionId === node.id && canvas.selectedSectionId !== node.id}
-                onSelect={() => handleSelectSection(node.id, activePage!.id)}
-                onHover={handleHoverSection}
-              />
-            </div>
-          )
-        })}
+        {/* Selection Overlay — renders on top of sections with external rects support */}
+        <SelectionOverlay
+          containerRef={canvasFrameRef as React.RefObject<HTMLDivElement | null>}
+          externalRects={externalRects}
+        />
 
         {/* Add section button at bottom */}
         {sections.length > 0 && onAddSection && (

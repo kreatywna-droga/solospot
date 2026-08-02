@@ -8,12 +8,17 @@
 }
 
 :root {
+  /* Tenant theme colors — overridden per-store via style prop in /store/[slug]/page.tsx */
   --color-primary: #8b5cf6;
   --color-secondary: #d946ef;
   --color-accent: #f59e0b;
   --color-background: #050508;
   --color-surface: #080a12;
   --color-text: #e2e8f0;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
 }
 
 body {

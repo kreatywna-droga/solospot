@@ -1,0 +1,37 @@
+# Sprint 6 Step 5 — Task Breakdown
+
+## Zadanie 1 — Runtime Pipeline Completion
+- [x] 1.1 Create `packages/runtime-core/src/DefaultRuntimeCompositionEngine.ts`
+- [x] 1.2 Create `packages/runtime-core/src/RuntimeCache.ts` (TTL-based + LRU eviction)
+- [x] 1.3 Add pipeline stages to DefaultRuntimePipeline (cache-check, validate-access, runtime-composition, legacy-fallback)
+- [x] 1.4 Update `packages/runtime-core/src/index.ts` exports
+- [x] 1.5 Update `src/lib/runtime/renderStore.ts` imports (pipeline, composition engine, cache, section registry)
+- [ ] 1.6 Wire full DefaultRuntimePipeline into renderStore() — replace RuntimeResolver
+- [ ] 1.7 Run tsc --noEmit to verify no regressions (pre-existing errors only)
+
+## Zadanie 2 — Builder Preview Runtime
+- [ ] 2.1 Create `src/components/builder/canvas/RuntimePreviewChannel.ts`
+- [ ] 2.2 Create `src/components/builder/canvas/useRuntimePreview.ts`
+- [ ] 2.3 Update `BuilderCanvas.tsx` to use RuntimePreviewChannel
+- [ ] 2.4 Add mode switcher to BuilderTopBar
+- [ ] 2.5 Run tsc --noEmit
+
+## Zadanie 3 — Runtime Performance Foundation
+- [ ] 3.1 Create `packages/runtime-core/src/RuntimeCache.ts`
+- [ ] 3.2 Wire RuntimeCache into renderStore() + pipeline stages
+- [ ] 3.3 Implement renderStoreSection() in renderStore.ts
+- [ ] 3.4 Implement renderStorePartial() in renderStore.ts
+- [ ] 3.5 Run tsc --noEmit
+
+## Zadanie 4 — Testy
+- [ ] 4.1 Create pipeline-composition.test.ts
+- [ ] 4.2 Create preview-channel.test.ts
+- [ ] 4.3 Create runtime-cache.test.ts
+- [ ] 4.4 Create partial-rendering.test.ts
+- [ ] 4.5 Run full vitest suite
+- [ ] 4.6 Run tsc --noEmit
+
+## Zadanie 5 — Dokumentacja
+- [ ] 5.1 Update TODO_SPRINT6_STEP5.progress.md
+- [ ] 5.2 Write Completion Report
+
