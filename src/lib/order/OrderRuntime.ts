@@ -75,6 +75,19 @@ export interface CheckoutResponseDTO {
 // ---------------------------------------------------------------------------
 
 export class OrderRuntime {
+  private static instance: OrderRuntime | null = null;
+
+  public static getInstance(): OrderRuntime {
+    if (!OrderRuntime.instance) {
+      OrderRuntime.instance = new OrderRuntime();
+    }
+    return OrderRuntime.instance;
+  }
+
+  public static resetInstanceForTesting(): void {
+    OrderRuntime.instance = null;
+  }
+
   private readonly eventBus: PlatformEventBusImpl;
   private readonly logger: ConsolePlatformLogger;
   private readonly orderEngine: OrderProcessingEngine;
@@ -84,9 +97,9 @@ export class OrderRuntime {
   /** Inflight request deduplication map for concurrent requests with identical correlationId. */
   private readonly inflightPromises = new Map<string, Promise<CheckoutResponseDTO>>();
 
-  constructor() {
-    this.logger = new ConsolePlatformLogger();
-    this.eventBus = new PlatformEventBusImpl();
+  constructor(options?: { eventBus?: PlatformEventBusImpl; logger?: ConsolePlatformLogger }) {
+    this.logger = options?.logger || new ConsolePlatformLogger();
+    this.eventBus = options?.eventBus || new PlatformEventBusImpl();
     this.logger.setEventBus(this.eventBus);
     this.orderEngine = new OrderProcessingEngine({
       eventBus: this.eventBus,
@@ -269,8 +282,87 @@ export class OrderRuntime {
     return this.orderEngine.getOrder(tenantId, orderId);
   }
 
+  /**
+   * Potwierdza płatność: PAYMENT_PENDING -> PAID
+   */
+  public async confirmPayment(
+    tenantId: string,
+    orderId: string,
+    paymentIntentId = `pi_${Date.now()}`,
+    correlationId?: string,
+  ): Promise<ProcessedOrder> {
+    return this.orderEngine.confirmPayment(tenantId, orderId, paymentIntentId, correlationId);
+  }
+
+  /**
+   * Rozpoczyna realizację: PAID -> PROCESSING
+   */
+  public async startProcessing(
+    tenantId: string,
+    orderId: string,
+    correlationId?: string,
+  ): Promise<ProcessedOrder> {
+    return this.orderEngine.startProcessing(tenantId, orderId, correlationId);
+  }
+
+  /**
+   * Przygotowuje wysyłkę: PROCESSING -> READY_FOR_FULFILLMENT
+   */
+  public async prepareFulfillment(
+    tenantId: string,
+    orderId: string,
+    correlationId?: string,
+  ): Promise<ProcessedOrder> {
+    return this.orderEngine.prepareFulfillment(tenantId, orderId, correlationId);
+  }
+
+  /**
+   * Finalizuje zamówienie: READY_FOR_FULFILLMENT -> FULFILLED
+   */
+  public async fulfillOrder(
+    tenantId: string,
+    orderId: string,
+    correlationId?: string,
+  ): Promise<ProcessedOrder> {
+    return this.orderEngine.fulfillOrder(tenantId, orderId, correlationId);
+  }
+
+  /**
+   * Anuluje zamówienie: PAYMENT_PENDING / PAID -> CANCELLED
+   */
+  public async cancelOrder(
+    tenantId: string,
+    orderId: string,
+    correlationId?: string,
+  ): Promise<ProcessedOrder> {
+    return this.orderEngine.cancelOrder(tenantId, orderId, correlationId);
+  }
+
+  /**
+   * Zwraca zamówienie: FULFILLED -> REFUNDED
+   */
+  public async refundOrder(
+    tenantId: string,
+    orderId: string,
+    correlationId?: string,
+  ): Promise<ProcessedOrder> {
+    return this.orderEngine.refundOrder(tenantId, orderId, correlationId);
+  }
+
   /** Tylko dla testów — umożliwia wstrzyknięcie zamówienia. */
   public setOrderForTesting(order: ProcessedOrder): void {
     this.orderEngine.setOrderForTesting(order);
+  }
+
+  public getOrderProcessingEngine(): OrderProcessingEngine {
+    return this.orderEngine;
+  }
+
+  public getPaymentEngine(): PaymentEngine {
+    return this.paymentEngine;
+  }
+
+  public getEventBus(): PlatformEventBusImpl {
+    return this.eventBus;
   }
 }
