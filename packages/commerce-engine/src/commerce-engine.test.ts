@@ -63,22 +63,46 @@ describe('Commerce Engine', () => {
     expect(cart.tenantId).toBe(tenantId);
     expect(cart.items).toHaveLength(0);
 
-    // 3. Add Item to Cart (qty 2)
+    // 3. Add Items to Cart
     cart = await engine.addItemToCart(tenantId, cart, product, 2);
     expect(cart.items).toHaveLength(1);
     expect(cart.items[0].productId).toBe('prod-item-1');
     expect(cart.items[0].quantity).toBe(2);
     expect(cart.totals.subtotalGross).toBe(10000); // 2 * 5000
 
+    // Create and add a second distinct product to the cart
+    const product2 = await engine.createProduct(tenantId, {
+      id: 'prod-item-2',
+      slug: 'awesome-coaster',
+      name: 'Awesome Coaster',
+      description: 'Protects table surfaces.',
+      categories: ['accessories'],
+      pricing: {
+        priceGross: 2000, // 20.00 PLN
+        priceNet: 1626,
+        taxRate: 23,
+        currency: 'PLN',
+      },
+      inventory: {
+        sku: 'COAST-001',
+        quantityAvailable: 50,
+        allowBackorder: false,
+      },
+      isActive: true,
+    });
+
+    cart = await engine.addItemToCart(tenantId, cart, product2, 1);
+    expect(cart.items).toHaveLength(2);
+    expect(cart.totals.subtotalGross).toBe(12000); // 10000 + 2000
+
     // Apply promo code (SAVE10 gives 10% off subtotalGross)
     cart.couponCode = 'SAVE10';
-    const productsMap = new Map<string, Product>([[product.id, product]]);
-    const recalculatedCart = engine['addItemToCart'] // Check logic recalculate
-    const finalCart = await engine.addItemToCart(tenantId, cart, product, 1); // 2 + 1 = 3 qty
-    expect(finalCart.items[0].quantity).toBe(3);
-    expect(finalCart.totals.subtotalGross).toBe(15000); // 3 * 5000
-    expect(finalCart.totals.discountGross).toBe(1500); // 10% of 15000
-    expect(finalCart.totals.grandTotalGross).toBe(13500); // 15000 - 1500
+    const finalCart = await engine.addItemToCart(tenantId, cart, product, 1); // prod1: 2 + 1 = 3 qty; prod2: 1 qty
+    expect(finalCart.items[0].quantity).toBe(3); // 3 * 5000 = 15000
+    expect(finalCart.items[1].quantity).toBe(1); // 1 * 2000 = 2000
+    expect(finalCart.totals.subtotalGross).toBe(17000); // 15000 + 2000
+    expect(finalCart.totals.discountGross).toBe(1700); // 10% of 17000
+    expect(finalCart.totals.grandTotalGross).toBe(15300); // 17000 - 1700
 
     // 4. Checkout
     const shippingAddress = {
@@ -92,7 +116,7 @@ describe('Commerce Engine', () => {
     let order = await engine.checkoutCart(tenantId, finalCart, shippingAddress);
     expect(order.tenantId).toBe(tenantId);
     expect(order.status).toBe('PENDING_PAYMENT');
-    expect(order.totals.grandTotalGross).toBe(13500);
+    expect(order.totals.grandTotalGross).toBe(15300);
 
     // 5. Confirm Payment
     order = await engine.confirmOrderPayment(tenantId, order, 'pi_stripe_12345');
