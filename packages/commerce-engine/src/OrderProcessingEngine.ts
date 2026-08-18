@@ -151,7 +151,8 @@ export class OrderProcessingEngine {
     items: ProcessedOrderItem[],
     shippingAddress: ShippingDetails,
     currency = 'PLN',
-    correlationId?: string
+    correlationId?: string,
+    totalsOverride?: { subtotalGross?: number; taxTotal?: number; grandTotalGross?: number }
   ): Promise<ProcessedOrder> {
     const cid = correlationId || `ord_create_${Date.now()}`;
     const orderId = `ord_${Math.random().toString(36).substr(2, 9)}`;
@@ -162,16 +163,19 @@ export class OrderProcessingEngine {
     }
 
     // Assume flat tax rate 23% for totals calculation
-    const taxTotal = Math.round(subtotalGross - (subtotalGross / 1.23));
+    const calculatedTax = Math.round(subtotalGross - (subtotalGross / 1.23));
+    const finalSubtotal = totalsOverride?.subtotalGross ?? subtotalGross;
+    const finalTax = totalsOverride?.taxTotal ?? calculatedTax;
+    const finalGrandTotal = totalsOverride?.grandTotalGross ?? subtotalGross;
 
     const order: ProcessedOrder = {
       id: orderId,
       tenantId,
       customerId,
       items,
-      subtotalGross,
-      taxTotal,
-      grandTotalGross: subtotalGross,
+      subtotalGross: finalSubtotal,
+      taxTotal: finalTax,
+      grandTotalGross: finalGrandTotal,
       currency,
       status: 'CREATED',
       shippingAddress,
