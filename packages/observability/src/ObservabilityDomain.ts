@@ -29,3 +29,13 @@ export interface TraceContext {
   correlationId: string;
   organizationId?: string;
 }
+
+export interface SystemHealthSummary {
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  totalChecks: number;
+  healthyCount: number;
+  degradedCount: number;
+  unhealthyCount: number;
+  checks: HealthCheck[];
+  timestamp: string;
+}
