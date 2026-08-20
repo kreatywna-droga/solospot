@@ -49,8 +49,8 @@
 | **SCOPE_AUDIT** | Confined to fidelity + hardening; no roadmap invention, no unrelated changes, no new deps (types only) |
 | **INDEPENDENT_AUDITOR** | Agent 2 (Explore subagent, read-only): Recommendation **PASS** — 8/8 checklist items |
 | **B13_DECISION** | **COMMIT** — **FORMALLY RATIFIED 🔒** (Architect) |
-| **FINAL_COMMIT** | `<FILL_AFTER_COMMIT>` |
-| **POST_COMMIT_VERIFICATION** | `<FILL_AFTER_COMMIT>` — HEAD == SHA; vector+rendering 532/535 PASS; G136 suite 42/42 |
+| **FINAL_COMMIT** | `1de4518` (20 files, +1479/−44) |
+| **POST_COMMIT_VERIFICATION** | HEAD == `1de4518`; G136+G133+G134+G135 = 162/162 PASS; vector+rendering = 532/535 PASS (3 = pre-existing baseline failures, unsuppressed) |
 | **HACP_CHANGED** | FALSE (no changes outside `packages/authoring-studio`) |
 | **WEB_FACTOR_CHANGED** | FALSE |
 | **UNAUTHORIZED_CHANGES** | 0 |
