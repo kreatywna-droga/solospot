@@ -9,4 +9,6 @@ export * from './VectorPenEngine';
 export * from './VectorWorkspaceController';
 export * from './VectorAnimationEngine';
 export * from './VectorBooleanEngine';
+export * from './VectorDocumentSerializer';
+export * from './VectorSvgExporter';
 export * from '../rendering/VectorRenderingBridge';
