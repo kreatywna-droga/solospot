@@ -78,6 +78,7 @@ export class OrderProcessingEngine {
     // Register all order lifecycle events
     const orderEvents = [
       'Order.Created',
+      'Order.Invoiced',
       'Order.PaymentConfirmed',
       'Order.ProcessingStarted',
       'Order.Fulfilled',
@@ -218,6 +219,16 @@ export class OrderProcessingEngine {
     };
 
     this.orders.set(orderId, updatedOrder);
+
+    await this.eventBus.publish({
+      eventId: `evt_ord_inv_${Math.random().toString(36).substr(2, 9)}`,
+      eventType: 'Order.Invoiced',
+      timestamp: new Date().toISOString(),
+      correlationId: cid,
+      tenantId,
+      payload: { orderId },
+    });
+
     return updatedOrder;
   }
 

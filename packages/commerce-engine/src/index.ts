@@ -10,3 +10,5 @@ export * from './InventoryEngine';
 export * from './ShippingProviderAdapter';
 export * from './ShippingEngine';
 export * from './TaxEngine';
+export * from './OrderLifecycleObservabilityEngine';
+export * from './OrderDiagnosticsApi';
