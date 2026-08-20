@@ -1,13 +1,22 @@
 /**
- * VectorRenderingBridge.ts — Sprint S18 Vector Rendering Bridge (ETAP 5)
+ * VectorRenderingBridge.ts — Sprint S18 Vector Rendering Bridge (ETAP 5) / G1-36 Fidelity
  *
  * Bridges VectorNode DTOs into standard RendererCommand DTOs for execution
  * by RenderingEngine & CanvasRenderer.
  *
  * Zero 2nd renderer, zero DOM renderer in domain model. Pure TS DTO compiler.
+ *
+ * G1-36 (VectorRenderingBridge Transform & Stroke Fidelity):
+ * - Full affine transform matrix: translate + rotate-about-center + scale + skew
+ *   (mirrors VectorSvgExporter.getTransformAttribute semantics).
+ * - Stroke fidelity: dashArray, dashOffset, lineJoin, miterLimit, lineCap, stroke opacity.
+ * - Fill fidelity: gradient references (linear/radial) + fill opacity + node opacity.
+ * - Null-safety: corrupted nodes degrade gracefully (never throw).
+ * - Groups remain opacity/visibility containers; children carry their own ABSOLUTE
+ *   transforms (matches VectorSvgExporter + VectorRenderingBridge contract).
  */
 
-import { VectorNode, PolygonNode, RectangleNode, LineNode, PathNode, ShapeGroupNode } from '../vector/VectorDomainModel';
+import { VectorNode, PolygonNode, RectangleNode, LineNode, PathNode, ShapeGroupNode, VectorFill, VectorTransform } from '../vector/VectorDomainModel';
 import { VectorGeometry } from '../vector/VectorGeometry';
 import {
   RendererCommand,
@@ -17,53 +26,59 @@ import {
   DrawLineCommand,
   DrawPathCommand,
   Matrix2DAffine,
+  GradientFillDTO,
 } from './RendererCommand';
+
+const DEFAULT_TRANSFORM: VectorTransform = {
+  x: 0,
+  y: 0,
+  width: 100,
+  height: 100,
+  rotationDeg: 0,
+  scaleX: 1,
+  scaleY: 1,
+  skewX: 0,
+  skewY: 0,
+};
 
 export class VectorRenderingBridge {
   /**
    * Compiles a VectorNode DTO into an array of RendererCommand objects.
    */
   public static buildRenderCommands(node: VectorNode): RendererCommand[] {
-    if (!node || !node.visible || node.opacity <= 0 || !node.transform) {
+    if (!node || typeof node !== 'object' || !node.transform) {
+      return [];
+    }
+    if (node.visible === false || (typeof node.opacity === 'number' && node.opacity <= 0)) {
       return [];
     }
 
     const commands: RendererCommand[] = [];
 
-    // SAVE stack state
     commands.push({ type: 'SAVE' });
 
-    // Transform
-    const transform2D: Matrix2DAffine = [
-      node.transform.scaleX,
-      0,
-      0,
-      node.transform.scaleY,
-      node.transform.x,
-      node.transform.y,
-    ];
-    commands.push({ type: 'SET_TRANSFORM', transform: transform2D });
+    const transform = VectorRenderingBridge.buildAffineTransform(node.transform);
+    commands.push({ type: 'SET_TRANSFORM', transform });
 
-    // Opacity
-    if (node.opacity < 1) {
+    if (typeof node.opacity === 'number' && node.opacity < 1) {
       commands.push({ type: 'SET_OPACITY', opacity: node.opacity });
     }
 
-    // Specific shape draw command
     switch (node.type) {
       case 'rectangle': {
         const rectNode = node as RectangleNode;
         const cornerRadius = typeof rectNode.cornerRadius === 'number'
           ? rectNode.cornerRadius
-          : rectNode.cornerRadius[0];
+          : Array.isArray(rectNode.cornerRadius)
+            ? rectNode.cornerRadius[0] ?? 0
+            : 0;
 
         const cmd: DrawRectCommand = {
           type: 'DRAW_RECT',
           nodeId: rectNode.id,
           bounds: { x: 0, y: 0, width: rectNode.transform.width, height: rectNode.transform.height },
-          fillStyle: rectNode.fill?.color,
-          strokeStyle: rectNode.stroke?.color,
-          strokeWidth: rectNode.stroke?.width,
+          ...VectorRenderingBridge.fillFields(rectNode.fill),
+          ...VectorRenderingBridge.strokeFields(rectNode.stroke),
           cornerRadius,
         };
         commands.push(cmd);
@@ -75,9 +90,8 @@ export class VectorRenderingBridge {
           type: 'DRAW_ELLIPSE',
           nodeId: node.id,
           bounds: { x: 0, y: 0, width: node.transform.width, height: node.transform.height },
-          fillStyle: node.fill?.color,
-          strokeStyle: node.stroke?.color,
-          strokeWidth: node.stroke?.width,
+          ...VectorRenderingBridge.fillFields(node.fill),
+          ...VectorRenderingBridge.strokeFields(node.stroke),
         };
         commands.push(cmd);
         break;
@@ -94,9 +108,8 @@ export class VectorRenderingBridge {
           nodeId: polyNode.id,
           bounds: { x: 0, y: 0, width: polyNode.transform.width, height: polyNode.transform.height },
           points,
-          fillStyle: polyNode.fill?.color,
-          strokeStyle: polyNode.stroke?.color,
-          strokeWidth: polyNode.stroke?.width,
+          ...VectorRenderingBridge.fillFields(polyNode.fill),
+          ...VectorRenderingBridge.strokeFields(polyNode.stroke),
         };
         commands.push(cmd);
         break;
@@ -107,13 +120,11 @@ export class VectorRenderingBridge {
         const cmd: DrawLineCommand = {
           type: 'DRAW_LINE',
           nodeId: lineNode.id,
-          x1: lineNode.x1 - lineNode.transform.x,
-          y1: lineNode.y1 - lineNode.transform.y,
-          x2: lineNode.x2 - lineNode.transform.x,
-          y2: lineNode.y2 - lineNode.transform.y,
-          strokeStyle: lineNode.stroke?.color,
-          strokeWidth: lineNode.stroke?.width,
-          lineCap: lineNode.stroke?.lineCap,
+          x1: (lineNode.x1 ?? 0) - (lineNode.transform.x || 0),
+          y1: (lineNode.y1 ?? 0) - (lineNode.transform.y || 0),
+          x2: (lineNode.x2 ?? 0) - (lineNode.transform.x || 0),
+          y2: (lineNode.y2 ?? 0) - (lineNode.transform.y || 0),
+          ...VectorRenderingBridge.strokeFields(lineNode.stroke),
         };
         commands.push(cmd);
         break;
@@ -125,10 +136,9 @@ export class VectorRenderingBridge {
           type: 'DRAW_PATH',
           nodeId: pathNode.id,
           bounds: { x: 0, y: 0, width: pathNode.transform.width, height: pathNode.transform.height },
-          d: pathNode.d,
-          fillStyle: pathNode.fill?.color,
-          strokeStyle: pathNode.stroke?.color,
-          strokeWidth: pathNode.stroke?.width,
+          d: pathNode.d || '',
+          ...VectorRenderingBridge.fillFields(pathNode.fill),
+          ...VectorRenderingBridge.strokeFields(pathNode.stroke),
         };
         commands.push(cmd);
         break;
@@ -136,17 +146,158 @@ export class VectorRenderingBridge {
 
       case 'group': {
         const groupNode = node as ShapeGroupNode;
-        for (const child of groupNode.children) {
-          const childCmds = VectorRenderingBridge.buildRenderCommands(child);
-          commands.push(...childCmds);
+        if (Array.isArray(groupNode.children)) {
+          for (const child of groupNode.children) {
+            const childCmds = VectorRenderingBridge.buildRenderCommands(child);
+            commands.push(...childCmds);
+          }
         }
         break;
       }
     }
 
-    // RESTORE stack state
     commands.push({ type: 'RESTORE' });
 
     return commands;
+  }
+
+  /**
+   * Builds the full affine matrix matching VectorSvgExporter transform semantics:
+   * translate(x,y) → rotate(deg, cx, cy) → scale(sx, sy) → skewX(deg) → skewY(deg).
+   */
+  public static buildAffineTransform(transform?: Partial<VectorTransform>): Matrix2DAffine {
+    const t: VectorTransform = { ...DEFAULT_TRANSFORM, ...transform };
+
+    const x = typeof t.x === 'number' && Number.isFinite(t.x) ? t.x : 0;
+    const y = typeof t.y === 'number' && Number.isFinite(t.y) ? t.y : 0;
+    const width = typeof t.width === 'number' && Number.isFinite(t.width) ? t.width : 0;
+    const height = typeof t.height === 'number' && Number.isFinite(t.height) ? t.height : 0;
+    const rotationDeg = typeof t.rotationDeg === 'number' && Number.isFinite(t.rotationDeg) ? t.rotationDeg : 0;
+    const scaleX = typeof t.scaleX === 'number' && Number.isFinite(t.scaleX) ? t.scaleX : 1;
+    const scaleY = typeof t.scaleY === 'number' && Number.isFinite(t.scaleY) ? t.scaleY : 1;
+    const skewX = typeof t.skewX === 'number' && Number.isFinite(t.skewX) ? t.skewX : 0;
+    const skewY = typeof t.skewY === 'number' && Number.isFinite(t.skewY) ? t.skewY : 0;
+
+    // Rotation about the node center (cx, cy) — same as SVG exporter rotate(deg cx cy).
+    const cx = width / 2;
+    const cy = height / 2;
+    const rad = (rotationDeg * Math.PI) / 180;
+    const cos = Math.cos(rad);
+    const sin = Math.sin(rad);
+
+    // Skew matrices.
+    const radSkewX = (skewX * Math.PI) / 180;
+    const radSkewY = (skewY * Math.PI) / 180;
+    const tanX = Math.tan(radSkewX);
+    const tanY = Math.tan(radSkewY);
+
+    // Compose: T(x,y) · T(cx,cy) · R(θ) · T(-cx,-cy) · S(sx,sy) · Kx(skewX) · Ky(skewY)
+    // Derived affine (a,b,c,d,e,f):
+    const a = scaleX * cos * (1 + tanX * tanY) - scaleY * sin * tanY;
+    const b = scaleX * sin * (1 + tanX * tanY) + scaleY * cos * tanY;
+    const c = scaleX * cos * tanX - scaleY * sin;
+    const d = scaleX * sin * tanX + scaleY * cos;
+
+    const e = x + cx - cos * cx + sin * cy;
+    const f = y + cy - sin * cx - cos * cy;
+
+    return [a, b, c, d, e, f];
+  }
+
+  /**
+   * Builds fill fidelity fields (color / gradient reference / fill opacity).
+   */
+  private static fillFields(fill?: VectorFill): {
+    fillStyle?: string;
+    fillGradient?: GradientFillDTO;
+    fillOpacity?: number;
+  } {
+    if (!fill || fill.type === 'none') {
+      return { fillStyle: undefined };
+    }
+
+    const fields: { fillStyle?: string; fillGradient?: GradientFillDTO; fillOpacity?: number } = {};
+
+    if (fill.type === 'solid') {
+      fields.fillStyle = fill.color || '#000000';
+    } else if (fill.type === 'linear-gradient' || fill.type === 'radial-gradient') {
+      const stops = (fill.gradientStops || [])
+        .filter((s) => s && typeof s.offset === 'number' && Number.isFinite(s.offset) && typeof s.color === 'string' && s.color.length > 0)
+        .map((s) => ({ offset: s.offset, color: s.color }));
+      fields.fillStyle = fill.color || '#000000';
+      if (stops.length > 0) {
+        fields.fillGradient = {
+          type: fill.type,
+          stops,
+          angleDeg: fill.gradientAngleDeg ?? 0,
+        };
+      }
+    }
+
+    if (typeof fill.opacity === 'number' && fill.opacity < 1) {
+      fields.fillOpacity = fill.opacity;
+    }
+
+    return fields;
+  }
+
+  /**
+   * Builds stroke fidelity fields.
+   */
+  private static strokeFields(stroke?: {
+    color?: string;
+    width?: number;
+    dashArray?: number[];
+    dashOffset?: number;
+    lineCap?: 'butt' | 'round' | 'square';
+    lineJoin?: 'miter' | 'round' | 'bevel';
+    miterLimit?: number;
+    opacity?: number;
+  }): {
+    strokeStyle?: string;
+    strokeWidth?: number;
+    strokeOpacity?: number;
+    strokeDashArray?: number[];
+    strokeDashOffset?: number;
+    strokeLineJoin?: 'miter' | 'round' | 'bevel';
+    strokeMiterLimit?: number;
+    lineCap?: 'butt' | 'round' | 'square';
+  } {
+    if (!stroke || !stroke.color || stroke.width === 0) {
+      return { strokeStyle: undefined };
+    }
+
+    const fields: {
+      strokeStyle?: string;
+      strokeWidth?: number;
+      strokeOpacity?: number;
+      strokeDashArray?: number[];
+      strokeDashOffset?: number;
+      strokeLineJoin?: 'miter' | 'round' | 'bevel';
+      strokeMiterLimit?: number;
+      lineCap?: 'butt' | 'round' | 'square';
+    } = {
+      strokeStyle: stroke.color,
+    };
+
+    if (typeof stroke.width === 'number' && Number.isFinite(stroke.width)) {
+      fields.strokeWidth = stroke.width;
+    }
+    if (typeof stroke.opacity === 'number' && stroke.opacity < 1) {
+      fields.strokeOpacity = stroke.opacity;
+    }
+    if (Array.isArray(stroke.dashArray) && stroke.dashArray.length > 0) {
+      fields.strokeDashArray = stroke.dashArray.filter((v) => Number.isFinite(v));
+    }
+    if (typeof stroke.dashOffset === 'number' && Number.isFinite(stroke.dashOffset) && stroke.dashOffset !== 0) {
+      fields.strokeDashOffset = stroke.dashOffset;
+    }
+    if (stroke.lineJoin) fields.strokeLineJoin = stroke.lineJoin;
+    if (typeof stroke.miterLimit === 'number' && Number.isFinite(stroke.miterLimit)) {
+      fields.strokeMiterLimit = stroke.miterLimit;
+    }
+    if (stroke.lineCap) fields.lineCap = stroke.lineCap;
+
+    return fields;
   }
 }
