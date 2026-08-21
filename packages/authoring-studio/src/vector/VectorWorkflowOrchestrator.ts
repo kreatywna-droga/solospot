@@ -12,6 +12,8 @@ import { VectorEditingCommandSystem, VectorCommandPayload, VectorBatchCommand } 
 import { LayerReorderAction, AlignmentType } from './VectorEditingEngine';
 import { VectorViewportState } from './VectorViewportController';
 import { SnappingOptions } from './VectorSnappingEngine';
+import { VectorEditorInteractionStateMachine } from './VectorEditorInteractionStateMachine';
+import { VectorTransactionRecoveryEngine, CheckpointLevel } from './VectorTransactionRecoveryEngine';
 
 export interface KeyboardEventModifiers {
   readonly ctrlOrCmd?: boolean;
@@ -20,6 +22,16 @@ export interface KeyboardEventModifiers {
 }
 
 export class VectorWorkflowOrchestrator {
+  private static stateMachine = new VectorEditorInteractionStateMachine();
+  private static recoveryEngine = new VectorTransactionRecoveryEngine();
+
+  public static getStateMachine(): VectorEditorInteractionStateMachine {
+    return VectorWorkflowOrchestrator.stateMachine;
+  }
+
+  public static getRecoveryEngine(): VectorTransactionRecoveryEngine {
+    return VectorWorkflowOrchestrator.recoveryEngine;
+  }
   /**
    * Dispatches a single command, updates document SSOT, and pushes 1 transaction to HistoryStack.
    */

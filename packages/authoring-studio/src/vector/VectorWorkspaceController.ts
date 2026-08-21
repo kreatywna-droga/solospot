@@ -55,6 +55,15 @@ export function createVectorWorkspaceState(
 }
 
 export function selectNodes(state: VectorWorkspaceState, nodeIds: string[]): VectorWorkspaceState {
+  if (!Array.isArray(nodeIds)) {
+    return {
+      ...state,
+      snapshot: {
+        ...state.snapshot,
+        selectedIds: [],
+      },
+    };
+  }
   // Validate: only select IDs that exist in the current document tree
   const existingIds = new Set(state.snapshot.nodes.map(n => n.id));
   const validIds = nodeIds.filter(id => existingIds.has(id));
