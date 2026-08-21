@@ -18,6 +18,7 @@
 
 import { VectorNode, PolygonNode, RectangleNode, LineNode, PathNode, ShapeGroupNode, VectorFill, VectorTransform } from '../vector/VectorDomainModel';
 import { VectorGeometry } from '../vector/VectorGeometry';
+import { VectorViewportState } from '../vector/VectorViewportController';
 import {
   RendererCommand,
   DrawRectCommand,
@@ -44,8 +45,12 @@ const DEFAULT_TRANSFORM: VectorTransform = {
 export class VectorRenderingBridge {
   /**
    * Compiles a VectorNode DTO into an array of RendererCommand objects.
+   * Optionally applies viewport transform (zoom & pan) to compiled commands.
    */
-  public static buildRenderCommands(node: VectorNode): RendererCommand[] {
+  public static buildRenderCommands(
+    node: VectorNode,
+    viewportState?: VectorViewportState
+  ): RendererCommand[] {
     if (!node || typeof node !== 'object' || !node.transform) {
       return [];
     }
@@ -57,7 +62,7 @@ export class VectorRenderingBridge {
 
     commands.push({ type: 'SAVE' });
 
-    const transform = VectorRenderingBridge.buildAffineTransform(node.transform);
+    const transform = VectorRenderingBridge.buildAffineTransform(node.transform, viewportState);
     commands.push({ type: 'SET_TRANSFORM', transform });
 
     if (typeof node.opacity === 'number' && node.opacity < 1) {
@@ -148,7 +153,7 @@ export class VectorRenderingBridge {
         const groupNode = node as ShapeGroupNode;
         if (Array.isArray(groupNode.children)) {
           for (const child of groupNode.children) {
-            const childCmds = VectorRenderingBridge.buildRenderCommands(child);
+            const childCmds = VectorRenderingBridge.buildRenderCommands(child, viewportState);
             commands.push(...childCmds);
           }
         }
@@ -164,8 +169,12 @@ export class VectorRenderingBridge {
   /**
    * Builds the full affine matrix matching VectorSvgExporter transform semantics:
    * translate(x,y) → rotate(deg, cx, cy) → scale(sx, sy) → skewX(deg) → skewY(deg).
+   * If viewportState is provided, composes with viewport transform: T_viewport · T_node.
    */
-  public static buildAffineTransform(transform?: Partial<VectorTransform>): Matrix2DAffine {
+  public static buildAffineTransform(
+    transform?: Partial<VectorTransform>,
+    viewportState?: VectorViewportState
+  ): Matrix2DAffine {
     const t: VectorTransform = { ...DEFAULT_TRANSFORM, ...transform };
 
     const x = typeof t.x === 'number' && Number.isFinite(t.x) ? t.x : 0;
@@ -193,13 +202,27 @@ export class VectorRenderingBridge {
 
     // Compose: T(x,y) · T(cx,cy) · R(θ) · T(-cx,-cy) · S(sx,sy) · Kx(skewX) · Ky(skewY)
     // Derived affine (a,b,c,d,e,f):
-    const a = scaleX * cos * (1 + tanX * tanY) - scaleY * sin * tanY;
-    const b = scaleX * sin * (1 + tanX * tanY) + scaleY * cos * tanY;
-    const c = scaleX * cos * tanX - scaleY * sin;
-    const d = scaleX * sin * tanX + scaleY * cos;
+    let a = scaleX * cos * (1 + tanX * tanY) - scaleY * sin * tanY;
+    let b = scaleX * sin * (1 + tanX * tanY) + scaleY * cos * tanY;
+    let c = scaleX * cos * tanX - scaleY * sin;
+    let d = scaleX * sin * tanX + scaleY * cos;
 
-    const e = x + cx - cos * cx + sin * cy;
-    const f = y + cy - sin * cx - cos * cy;
+    let e = x + cx - cos * cx + sin * cy;
+    let f = y + cy - sin * cx - cos * cy;
+
+    // Compose with Viewport Camera transform (zoom & pan) if present:
+    if (viewportState && (viewportState.zoom !== 1 || viewportState.panX !== 0 || viewportState.panY !== 0)) {
+      const z = viewportState.zoom;
+      const px = viewportState.panX;
+      const py = viewportState.panY;
+
+      a = a * z;
+      b = b * z;
+      c = c * z;
+      d = d * z;
+      e = e * z + px;
+      f = f * z + py;
+    }
 
     return [a, b, c, d, e, f];
   }

@@ -11,4 +11,5 @@ export * from './VectorAnimationEngine';
 export * from './VectorBooleanEngine';
 export * from './VectorDocumentSerializer';
 export * from './VectorSvgExporter';
+export * from './VectorViewportController';
 export * from '../rendering/VectorRenderingBridge';
