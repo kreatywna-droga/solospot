@@ -14,6 +14,7 @@ import { VectorEditingEngine, LayerReorderAction, AlignmentType } from './Vector
 import { VectorPathEngine } from './VectorPathEngine';
 import { VectorBooleanTopologyEngine, BooleanTopologyType } from './VectorBooleanTopologyEngine';
 import { VectorCompoundPathEngine, WindingRule } from './VectorCompoundPathEngine';
+import { VectorPathSegmentEditorEngine } from './VectorPathSegmentEditorEngine';
 
 export type VectorCommandType =
   | 'MOVE_NODES'
@@ -32,7 +33,11 @@ export type VectorCommandType =
   | 'REVERSE_PATH'
   | 'MAKE_COMPOUND_PATH'
   | 'RELEASE_COMPOUND_PATH'
-  | 'SET_WINDING_RULE';
+  | 'SET_WINDING_RULE'
+  | 'INSERT_PATH_NODE'
+  | 'DELETE_PATH_NODE'
+  | 'SPLIT_PATH_AT_ANCHOR'
+  | 'JOIN_PATH_SEGMENTS';
 
 export interface VectorCommandPayload {
   readonly type: VectorCommandType;
@@ -47,6 +52,9 @@ export interface VectorCommandPayload {
   readonly topologyType?: BooleanTopologyType;
   readonly cornerRadiusPx?: number;
   readonly windingRule?: WindingRule;
+  readonly segmentIndex?: number;
+  readonly anchorId?: string;
+  readonly tParam?: number;
   readonly origin?: { readonly x: number; readonly y: number };
   readonly propsUpdate?: {
     readonly fill?: any;
@@ -362,6 +370,81 @@ export class VectorEditingCommandSystem {
             return node;
           });
           break;
+        }
+
+        case 'INSERT_PATH_NODE': {
+          if (activeNodes.length === 0) break;
+          const targetSet = new Set(targetIds);
+          nextNodes = snapshot.nodes.map(node => {
+            if (targetSet.has(node.id) && node.type === 'path' && !node.locked) {
+              const res = VectorPathSegmentEditorEngine.insertNodeOnSegment(
+                node as any,
+                command.segmentIndex ?? 0,
+                command.tParam ?? 0.5
+              );
+              return res.success && res.pathNode ? res.pathNode : node;
+            }
+            return node;
+          });
+          break;
+        }
+
+        case 'DELETE_PATH_NODE': {
+          if (activeNodes.length === 0) break;
+          const targetSet = new Set(targetIds);
+          nextNodes = snapshot.nodes.map(node => {
+            if (targetSet.has(node.id) && node.type === 'path' && !node.locked) {
+              const res = VectorPathSegmentEditorEngine.deleteAnchorPoint(node as any, command.anchorId ?? '');
+              return res.success && res.pathNode ? res.pathNode : node;
+            }
+            return node;
+          });
+          break;
+        }
+
+        case 'SPLIT_PATH_AT_ANCHOR': {
+          if (activeNodes.length === 0) break;
+          const targetNode = activeNodes[0];
+          if (targetNode.type !== 'path') break;
+
+          const splitRes = VectorPathSegmentEditorEngine.splitPathAtAnchor(targetNode as any, command.anchorId ?? '');
+          if (!splitRes.success || !splitRes.createdNodes) break;
+
+          const remaining = snapshot.nodes.filter(n => n.id !== targetNode.id);
+          nextNodes = [...remaining, ...splitRes.createdNodes];
+          const newSelected = splitRes.createdNodes.map(n => n.id);
+          return {
+            success: true,
+            snapshot: {
+              nodes: nextNodes,
+              selectedIds: newSelected,
+            },
+            affectedIds: newSelected,
+            errors: [],
+          };
+        }
+
+        case 'JOIN_PATH_SEGMENTS': {
+          if (activeNodes.length < 2) break;
+          const pathA = activeNodes[0];
+          const pathB = activeNodes[1];
+          if (pathA.type !== 'path' || pathB.type !== 'path') break;
+
+          const joinRes = VectorPathSegmentEditorEngine.joinPathSegments(pathA as any, pathB as any);
+          if (!joinRes.success || !joinRes.pathNode) break;
+
+          const removed = new Set([pathA.id, pathB.id]);
+          const remaining = snapshot.nodes.filter(n => !removed.has(n.id));
+          nextNodes = [...remaining, joinRes.pathNode];
+          return {
+            success: true,
+            snapshot: {
+              nodes: nextNodes,
+              selectedIds: [joinRes.pathNode.id],
+            },
+            affectedIds: [joinRes.pathNode.id],
+            errors: [],
+          };
         }
       }
 

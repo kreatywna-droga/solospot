@@ -229,6 +229,56 @@ export class VectorWorkflowOrchestrator {
   }
 
   /**
+   * Inserts a new node on a path segment.
+   */
+  public static insertNodeOnSegmentWorkflow(
+    state: VectorWorkspaceState,
+    segmentIndex: number = 0,
+    tParam: number = 0.5
+  ): VectorWorkspaceState {
+    return VectorWorkflowOrchestrator.dispatchCommand(state, `Insert Node on Segment ${segmentIndex}`, {
+      type: 'INSERT_PATH_NODE',
+      segmentIndex,
+      tParam,
+    });
+  }
+
+  /**
+   * Deletes an anchor point from selected path.
+   */
+  public static deleteAnchorPointWorkflow(
+    state: VectorWorkspaceState,
+    anchorId: string
+  ): VectorWorkspaceState {
+    return VectorWorkflowOrchestrator.dispatchCommand(state, `Delete Anchor Point (${anchorId})`, {
+      type: 'DELETE_PATH_NODE',
+      anchorId,
+    });
+  }
+
+  /**
+   * Splits selected path at specified anchor point.
+   */
+  public static splitPathAtAnchorWorkflow(
+    state: VectorWorkspaceState,
+    anchorId: string
+  ): VectorWorkspaceState {
+    return VectorWorkflowOrchestrator.dispatchCommand(state, `Split Path at Anchor (${anchorId})`, {
+      type: 'SPLIT_PATH_AT_ANCHOR',
+      anchorId,
+    });
+  }
+
+  /**
+   * Joins 2 selected path segments end-to-end.
+   */
+  public static joinPathSegmentsWorkflow(state: VectorWorkspaceState): VectorWorkspaceState {
+    return VectorWorkflowOrchestrator.dispatchCommand(state, 'Join Path Segments', {
+      type: 'JOIN_PATH_SEGMENTS',
+    });
+  }
+
+  /**
    * Keyboard shortcut command dispatcher.
    */
   public static handleKeyboardCommand(
