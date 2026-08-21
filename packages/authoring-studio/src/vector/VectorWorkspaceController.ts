@@ -19,6 +19,8 @@ import { ResizeHandle, VectorGeometry, BoundingBox2D, Point2D } from './VectorGe
 import { VectorPenEngine, PenDrawingSession } from './VectorPenEngine';
 import { HistoryStack, createHistoryStack } from '../../../builder-core/src/HistoryStack';
 
+import { VectorSnappingEngine, SnappingOptions, GuideLine, SnapResult } from './VectorSnappingEngine';
+
 export interface VectorDocumentSnapshot {
   readonly nodes: ReadonlyArray<VectorNode>;
   readonly selectedIds: ReadonlyArray<string>;
@@ -27,6 +29,7 @@ export interface VectorDocumentSnapshot {
 export interface VectorWorkspaceState {
   readonly snapshot: VectorDocumentSnapshot;
   readonly historyStack: HistoryStack<VectorDocumentSnapshot>;
+  readonly activeGuideLines?: ReadonlyArray<GuideLine>;
 }
 
 export function isEqualSnapshots(a: VectorDocumentSnapshot, b: VectorDocumentSnapshot): boolean {
@@ -277,11 +280,12 @@ export function setSelection(
 ): VectorWorkspaceState {
   const validIds = Array.isArray(ids) ? ids.filter(id => typeof id === 'string' && state.snapshot.nodes.some(n => n.id === id)) : [];
   return {
-    ...state,
     snapshot: {
       ...state.snapshot,
       selectedIds: validIds,
     },
+    historyStack: state.historyStack,
+    activeGuideLines: undefined,
   };
 }
 
@@ -401,6 +405,151 @@ export function moveSelectedNodes(
     return {
       snapshot: nextSnapshot,
       historyStack: nextHistoryStack,
+    };
+  } catch (_error) {
+    return state;
+  }
+}
+
+/**
+ * Moves selected nodes with real-time snapping calculations and returns updated state with transient guide lines.
+ */
+export function moveSelectedNodesWithSnapping(
+  state: VectorWorkspaceState,
+  dx: number,
+  dy: number,
+  options: SnappingOptions = {}
+): VectorWorkspaceState {
+  try {
+    const { selectedIds, nodes } = state.snapshot;
+    if (selectedIds.length === 0) return state;
+
+    const validDx = Number.isFinite(dx) ? dx : 0;
+    const validDy = Number.isFinite(dy) ? dy : 0;
+
+    const selectedNodes = nodes.filter(n => selectedIds.includes(n.id) && !n.locked);
+    if (selectedNodes.length === 0) return state;
+
+    const targetBounds = VectorEditingEngine.computeSelectionBounds(selectedNodes);
+    if (!targetBounds) return state;
+
+    // Shift target bounds by (validDx, validDy)
+    const movedBounds: BoundingBox2D = {
+      ...targetBounds,
+      x: targetBounds.x + validDx,
+      y: targetBounds.y + validDy,
+    };
+
+    const referenceNodes = nodes.filter(n => !selectedIds.includes(n.id));
+
+    let snapResult: SnapResult;
+    if (options.snapToGrid) {
+      const gridResult = VectorSnappingEngine.computeGridSnap(movedBounds, options.gridSizePx, options.snapThresholdPx);
+      snapResult = {
+        snappedDeltaX: gridResult.snappedDeltaX,
+        snappedDeltaY: gridResult.snappedDeltaY,
+        snappedX: gridResult.snappedX,
+        snappedY: gridResult.snappedY,
+        matches: [],
+        guides: gridResult.guides,
+      };
+    } else {
+      snapResult = VectorSnappingEngine.computeSnapDelta(movedBounds, referenceNodes, options);
+    }
+
+    const finalDx = validDx + snapResult.snappedDeltaX;
+    const finalDy = validDy + snapResult.snappedDeltaY;
+
+    if (finalDx === 0 && finalDy === 0) {
+      return {
+        ...state,
+        activeGuideLines: snapResult.guides,
+      };
+    }
+
+    const selectedSet = new Set(selectedIds);
+    const nextNodes = nodes.map((node) => {
+      if (selectedSet.has(node.id) && !node.locked) {
+        return VectorEditingEngine.moveShape(node, finalDx, finalDy);
+      }
+      return node;
+    });
+
+    const nextSnapshot: VectorDocumentSnapshot = {
+      ...state.snapshot,
+      nodes: nextNodes,
+    };
+
+    if (isEqualSnapshots(state.snapshot, nextSnapshot)) {
+      return {
+        ...state,
+        activeGuideLines: snapResult.guides,
+      };
+    }
+
+    const nextHistoryStack = state.historyStack.push(nextSnapshot, 'Move Nodes');
+
+    return {
+      snapshot: nextSnapshot,
+      historyStack: nextHistoryStack,
+      activeGuideLines: snapResult.guides,
+    };
+  } catch (_error) {
+    return state;
+  }
+}
+
+/**
+ * Scales selected nodes with real-time snapping calculations.
+ */
+export function scaleSelectedNodesWithSnapping(
+  state: VectorWorkspaceState,
+  scaleX: number,
+  scaleY: number,
+  origin?: { x: number; y: number },
+  options: SnappingOptions = {}
+): VectorWorkspaceState {
+  try {
+    const { selectedIds, nodes } = state.snapshot;
+    if (selectedIds.length === 0) return state;
+
+    const selectedNodes = nodes.filter(n => selectedIds.includes(n.id) && !n.locked);
+    if (selectedNodes.length === 0) return state;
+
+    const scaledNodes = VectorEditingEngine.scaleShapes(selectedNodes, scaleX, scaleY, origin);
+    const scaledBounds = VectorEditingEngine.computeSelectionBounds(scaledNodes);
+    if (!scaledBounds) return state;
+
+    const referenceNodes = nodes.filter(n => !selectedIds.includes(n.id));
+    const snapResult = VectorSnappingEngine.computeSnapDelta(scaledBounds, referenceNodes, options);
+
+    const scaledMap = new Map(scaledNodes.map(n => [n.id, n]));
+    const nextNodes = nodes.map((node) => {
+      if (scaledMap.has(node.id)) {
+        const sNode = scaledMap.get(node.id)!;
+        return VectorEditingEngine.moveShape(sNode, snapResult.snappedDeltaX, snapResult.snappedDeltaY);
+      }
+      return node;
+    });
+
+    const nextSnapshot: VectorDocumentSnapshot = {
+      ...state.snapshot,
+      nodes: nextNodes,
+    };
+
+    if (isEqualSnapshots(state.snapshot, nextSnapshot)) {
+      return {
+        ...state,
+        activeGuideLines: snapResult.guides,
+      };
+    }
+
+    const nextHistoryStack = state.historyStack.push(nextSnapshot, `Scale Nodes (${scaleX}, ${scaleY})`);
+
+    return {
+      snapshot: nextSnapshot,
+      historyStack: nextHistoryStack,
+      activeGuideLines: snapResult.guides,
     };
   } catch (_error) {
     return state;
