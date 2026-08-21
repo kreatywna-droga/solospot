@@ -48,6 +48,7 @@ export interface TransformSession {
 export interface TransformSessionOptions extends SnappingOptions {
   lockAspectRatio?: boolean;
   centerOriginScaling?: boolean;
+  shiftKey?: boolean;
 }
 
 export class VectorTransformInteractionEngine {
@@ -190,8 +191,8 @@ export class VectorTransformInteractionEngine {
           }
 
           guides = snapRes.guides;
-          const snappedSelected = VectorEditingEngine.moveShapes(scaledSelected, snapRes.snappedDeltaX, snapRes.snappedDeltaY);
-          const snappedMap = new Map(snappedSelected.map(n => [n.id, n]));
+          const snappedSelected = scaledSelected.map((n: VectorNode) => VectorEditingEngine.moveShape(n, snapRes.snappedDeltaX, snapRes.snappedDeltaY));
+          const snappedMap = new Map(snappedSelected.map((n: VectorNode) => [n.id, n]));
           nextNodes = initialSnapshot.nodes.map(n => snappedMap.get(n.id) || n);
         } else {
           const scaledMap = new Map(scaledSelected.map(n => [n.id, n]));

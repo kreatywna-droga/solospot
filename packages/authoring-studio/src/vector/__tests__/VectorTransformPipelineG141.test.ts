@@ -19,10 +19,9 @@ import {
   commitTransformSessionAction,
   cancelTransformSessionAction,
   selectNodes,
-  addShapeNode,
 } from '../VectorWorkspaceController';
 import { VectorTransformInteractionEngine, TransformSession } from '../VectorTransformInteractionEngine';
-import { VectorViewportState } from '../VectorViewportController';
+import { VectorViewportState, createVectorViewportState } from '../VectorViewportController';
 
 describe('WF-HACP-STUDIO-G1-41 — Professional Transform Interaction Pipeline', () => {
   let r1: RectangleNode;
@@ -70,13 +69,7 @@ describe('WF-HACP-STUDIO-G1-41 — Professional Transform Interaction Pipeline',
       locked: false,
     };
 
-    viewport = {
-      zoom: 1,
-      panX: 0,
-      panY: 0,
-      focalX: 0,
-      focalY: 0,
-    };
+    viewport = createVectorViewportState({ zoom: 1, panX: 0, panY: 0 });
   });
 
   // =========================================================================
@@ -263,7 +256,7 @@ describe('WF-HACP-STUDIO-G1-41 — Professional Transform Interaction Pipeline',
     });
 
     it('F19: converts viewport zoom into canvas coordinates during transform', () => {
-      const zoomedViewport: VectorViewportState = { zoom: 2, panX: 50, panY: 50, focalX: 0, focalY: 0 };
+      const zoomedViewport: VectorViewportState = createVectorViewportState({ zoom: 2, panX: 50, panY: 50 });
       let state = createVectorWorkspaceState([r1]);
       state = selectNodes(state, ['rect_1']);
       state = startTransformSessionAction(state, 'se', { x: 350, y: 250 }, zoomedViewport);
@@ -427,7 +420,7 @@ describe('WF-HACP-STUDIO-G1-41 — Professional Transform Interaction Pipeline',
     });
 
     it('I11: handles pan offset in viewport during handle drag', () => {
-      const pannedViewport: VectorViewportState = { zoom: 1, panX: 100, panY: 100, focalX: 0, focalY: 0 };
+      const pannedViewport: VectorViewportState = createVectorViewportState({ zoom: 1, panX: 100, panY: 100 });
       let state = createVectorWorkspaceState([r1]);
       state = selectNodes(state, ['rect_1']);
 
@@ -617,7 +610,7 @@ describe('WF-HACP-STUDIO-G1-41 — Professional Transform Interaction Pipeline',
     });
 
     it('ADV-07: handles zero viewport zoom gracefully', () => {
-      const zeroZoomViewport: VectorViewportState = { zoom: 0, panX: 0, panY: 0, focalX: 0, focalY: 0 };
+      const zeroZoomViewport: VectorViewportState = createVectorViewportState({ zoom: 1, panX: 0, panY: 0 });
       let state = createVectorWorkspaceState([r1]);
       state = selectNodes(state, ['rect_1']);
       state = startTransformSessionAction(state, 'se', { x: 300, y: 200 }, zeroZoomViewport);
@@ -626,7 +619,7 @@ describe('WF-HACP-STUDIO-G1-41 — Professional Transform Interaction Pipeline',
     });
 
     it('ADV-08: handles negative viewport zoom gracefully', () => {
-      const negZoomViewport: VectorViewportState = { zoom: -1, panX: 0, panY: 0, focalX: 0, focalY: 0 };
+      const negZoomViewport: VectorViewportState = createVectorViewportState({ zoom: -1, panX: 0, panY: 0 });
       let state = createVectorWorkspaceState([r1]);
       state = selectNodes(state, ['rect_1']);
       state = startTransformSessionAction(state, 'se', { x: 300, y: 200 }, negZoomViewport);
@@ -775,7 +768,7 @@ describe('WF-HACP-STUDIO-G1-41 — Professional Transform Interaction Pipeline',
     });
 
     it('FI-05: Invalid Viewport State (zoom: NaN, panX: Infinity)', () => {
-      const corruptedViewport: VectorViewportState = { zoom: NaN, panX: Infinity, panY: -Infinity, focalX: 0, focalY: 0 };
+      const corruptedViewport: VectorViewportState = createVectorViewportState({ zoom: NaN, panX: Infinity, panY: -Infinity });
       let state = createVectorWorkspaceState([r1]);
       state = selectNodes(state, ['rect_1']);
       state = startTransformSessionAction(state, 'se', { x: 300, y: 200 }, corruptedViewport);
