@@ -20,6 +20,8 @@ import { VectorPenEngine, PenDrawingSession } from './VectorPenEngine';
 import { HistoryStack, createHistoryStack } from '../../../builder-core/src/HistoryStack';
 
 import { VectorSnappingEngine, SnappingOptions, GuideLine, SnapResult } from './VectorSnappingEngine';
+import { VectorTransformInteractionEngine, TransformSession, TransformHandleType, TransformSessionOptions } from './VectorTransformInteractionEngine';
+import { VectorViewportState } from './VectorViewportController';
 
 export interface VectorDocumentSnapshot {
   readonly nodes: ReadonlyArray<VectorNode>;
@@ -30,6 +32,7 @@ export interface VectorWorkspaceState {
   readonly snapshot: VectorDocumentSnapshot;
   readonly historyStack: HistoryStack<VectorDocumentSnapshot>;
   readonly activeGuideLines?: ReadonlyArray<GuideLine>;
+  readonly activeTransformSession?: TransformSession;
 }
 
 export function isEqualSnapshots(a: VectorDocumentSnapshot, b: VectorDocumentSnapshot): boolean {
@@ -550,6 +553,114 @@ export function scaleSelectedNodesWithSnapping(
       snapshot: nextSnapshot,
       historyStack: nextHistoryStack,
       activeGuideLines: snapResult.guides,
+    };
+  } catch (_error) {
+    return state;
+  }
+}
+
+/**
+ * Starts an interactive transform session. Does NOT push to HistoryStack.
+ */
+export function startTransformSessionAction(
+  state: VectorWorkspaceState,
+  handle: TransformHandleType,
+  pointerScreen: Point2D,
+  viewport?: VectorViewportState
+): VectorWorkspaceState {
+  try {
+    const session = VectorTransformInteractionEngine.startSession(state.snapshot, handle, pointerScreen, viewport);
+    if (!session) return state;
+
+    return {
+      ...state,
+      activeTransformSession: session,
+      activeGuideLines: [],
+    };
+  } catch (_error) {
+    return state;
+  }
+}
+
+/**
+ * Updates an active transform session with new pointer position and options. Does NOT push to HistoryStack.
+ */
+export function updateTransformSessionAction(
+  state: VectorWorkspaceState,
+  pointerScreen: Point2D,
+  viewport?: VectorViewportState,
+  options: TransformSessionOptions = {}
+): VectorWorkspaceState {
+  try {
+    if (!state.activeTransformSession) return state;
+
+    const updatedSession = VectorTransformInteractionEngine.updateSession(
+      state.activeTransformSession,
+      pointerScreen,
+      viewport,
+      options
+    );
+
+    return {
+      ...state,
+      snapshot: updatedSession.currentSnapshot,
+      activeTransformSession: updatedSession,
+      activeGuideLines: updatedSession.activeGuideLines,
+    };
+  } catch (_error) {
+    return state;
+  }
+}
+
+/**
+ * Commits an active transform session to document SSOT and pushes 1 transaction to HistoryStack.
+ */
+export function commitTransformSessionAction(
+  state: VectorWorkspaceState
+): VectorWorkspaceState {
+  try {
+    if (!state.activeTransformSession) return state;
+
+    const session = state.activeTransformSession;
+    const finalSnapshot = session.currentSnapshot;
+
+    if (isEqualSnapshots(session.initialSnapshot, finalSnapshot)) {
+      return {
+        snapshot: session.initialSnapshot,
+        historyStack: state.historyStack,
+        activeGuideLines: undefined,
+        activeTransformSession: undefined,
+      };
+    }
+
+    const nextHistoryStack = state.historyStack.push(finalSnapshot, `Transform (${session.handle})`);
+
+    return {
+      snapshot: finalSnapshot,
+      historyStack: nextHistoryStack,
+      activeGuideLines: undefined,
+      activeTransformSession: undefined,
+    };
+  } catch (_error) {
+    return state;
+  }
+}
+
+/**
+ * Cancels an active transform session, reverting to initial snapshot with 0 HistoryStack entries.
+ */
+export function cancelTransformSessionAction(
+  state: VectorWorkspaceState
+): VectorWorkspaceState {
+  try {
+    if (!state.activeTransformSession) return state;
+
+    const session = state.activeTransformSession;
+    return {
+      snapshot: session.initialSnapshot,
+      historyStack: state.historyStack,
+      activeGuideLines: undefined,
+      activeTransformSession: undefined,
     };
   } catch (_error) {
     return state;
