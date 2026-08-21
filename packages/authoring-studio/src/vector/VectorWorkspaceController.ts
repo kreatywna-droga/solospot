@@ -269,6 +269,271 @@ export function reorderSelectedNodes(
 }
 
 /**
+ * Sets explicit selection array. Does not mutate HistoryStack.
+ */
+export function setSelection(
+  state: VectorWorkspaceState,
+  ids: string[]
+): VectorWorkspaceState {
+  const validIds = Array.isArray(ids) ? ids.filter(id => typeof id === 'string' && state.snapshot.nodes.some(n => n.id === id)) : [];
+  return {
+    ...state,
+    snapshot: {
+      ...state.snapshot,
+      selectedIds: validIds,
+    },
+  };
+}
+
+/**
+ * Adds IDs to existing selection. Does not mutate HistoryStack.
+ */
+export function addToSelection(
+  state: VectorWorkspaceState,
+  ids: string[]
+): VectorWorkspaceState {
+  const validIds = Array.isArray(ids) ? ids.filter(id => typeof id === 'string' && state.snapshot.nodes.some(n => n.id === id)) : [];
+  const currentSet = new Set(state.snapshot.selectedIds);
+  validIds.forEach(id => currentSet.add(id));
+  return {
+    ...state,
+    snapshot: {
+      ...state.snapshot,
+      selectedIds: Array.from(currentSet),
+    },
+  };
+}
+
+/**
+ * Removes IDs from current selection. Does not mutate HistoryStack.
+ */
+export function removeFromSelection(
+  state: VectorWorkspaceState,
+  ids: string[]
+): VectorWorkspaceState {
+  const removeSet = new Set(Array.isArray(ids) ? ids : []);
+  const nextSelected = state.snapshot.selectedIds.filter(id => !removeSet.has(id));
+  return {
+    ...state,
+    snapshot: {
+      ...state.snapshot,
+      selectedIds: nextSelected,
+    },
+  };
+}
+
+/**
+ * Toggles selection state of a single node ID.
+ */
+export function toggleSelection(
+  state: VectorWorkspaceState,
+  id: string
+): VectorWorkspaceState {
+  if (typeof id !== 'string' || !state.snapshot.nodes.some(n => n.id === id)) {
+    return state;
+  }
+  const currentSet = new Set(state.snapshot.selectedIds);
+  if (currentSet.has(id)) {
+    currentSet.delete(id);
+  } else {
+    currentSet.add(id);
+  }
+  return {
+    ...state,
+    snapshot: {
+      ...state.snapshot,
+      selectedIds: Array.from(currentSet),
+    },
+  };
+}
+
+/**
+ * Clears document selection (sets selectedIds to []).
+ */
+export function clearSelection(
+  state: VectorWorkspaceState
+): VectorWorkspaceState {
+  if (state.snapshot.selectedIds.length === 0) return state;
+  return {
+    ...state,
+    snapshot: {
+      ...state.snapshot,
+      selectedIds: [],
+    },
+  };
+}
+
+/**
+ * Moves selected nodes by (dx, dy) in document space and commits HistoryStack transaction.
+ */
+export function moveSelectedNodes(
+  state: VectorWorkspaceState,
+  dx: number,
+  dy: number
+): VectorWorkspaceState {
+  try {
+    const { selectedIds, nodes } = state.snapshot;
+    if (selectedIds.length === 0) return state;
+
+    const validDx = Number.isFinite(dx) ? dx : 0;
+    const validDy = Number.isFinite(dy) ? dy : 0;
+    if (validDx === 0 && validDy === 0) return state;
+
+    const selectedSet = new Set(selectedIds);
+    const nextNodes = nodes.map((node) => {
+      if (selectedSet.has(node.id) && !node.locked) {
+        return VectorEditingEngine.moveShape(node, validDx, validDy);
+      }
+      return node;
+    });
+
+    const nextSnapshot: VectorDocumentSnapshot = {
+      ...state.snapshot,
+      nodes: nextNodes,
+    };
+
+    if (isEqualSnapshots(state.snapshot, nextSnapshot)) {
+      return state;
+    }
+
+    const nextHistoryStack = state.historyStack.push(nextSnapshot, 'Move Nodes');
+
+    return {
+      snapshot: nextSnapshot,
+      historyStack: nextHistoryStack,
+    };
+  } catch (_error) {
+    return state;
+  }
+}
+
+/**
+ * Scales selected nodes relative to center or custom origin and commits HistoryStack transaction.
+ */
+export function scaleSelectedNodes(
+  state: VectorWorkspaceState,
+  scaleX: number,
+  scaleY: number,
+  origin?: { x: number; y: number },
+  lockAspectRatio: boolean = false
+): VectorWorkspaceState {
+  try {
+    const { selectedIds, nodes } = state.snapshot;
+    if (selectedIds.length === 0) return state;
+
+    const selectedNodes = nodes.filter(n => selectedIds.includes(n.id) && !n.locked);
+    if (selectedNodes.length === 0) return state;
+
+    const scaledNodes = VectorEditingEngine.scaleShapes(selectedNodes, scaleX, scaleY, origin, lockAspectRatio);
+    const scaledMap = new Map(scaledNodes.map(n => [n.id, n]));
+
+    const nextNodes = nodes.map(n => scaledMap.get(n.id) || n);
+    const nextSnapshot: VectorDocumentSnapshot = {
+      ...state.snapshot,
+      nodes: nextNodes,
+    };
+
+    if (isEqualSnapshots(state.snapshot, nextSnapshot)) {
+      return state;
+    }
+
+    const nextHistoryStack = state.historyStack.push(nextSnapshot, `Scale Nodes (${scaleX}, ${scaleY})`);
+
+    return {
+      snapshot: nextSnapshot,
+      historyStack: nextHistoryStack,
+    };
+  } catch (_error) {
+    return state;
+  }
+}
+
+/**
+ * Rotates selected nodes by angleDeg relative to center or custom origin and commits HistoryStack transaction.
+ */
+export function rotateSelectedNodes(
+  state: VectorWorkspaceState,
+  angleDeg: number,
+  origin?: { x: number; y: number }
+): VectorWorkspaceState {
+  try {
+    const { selectedIds, nodes } = state.snapshot;
+    if (selectedIds.length === 0) return state;
+
+    const selectedNodes = nodes.filter(n => selectedIds.includes(n.id) && !n.locked);
+    if (selectedNodes.length === 0) return state;
+
+    const rotatedNodes = VectorEditingEngine.rotateShapes(selectedNodes, angleDeg, origin);
+    const rotatedMap = new Map(rotatedNodes.map(n => [n.id, n]));
+
+    const nextNodes = nodes.map(n => rotatedMap.get(n.id) || n);
+    const nextSnapshot: VectorDocumentSnapshot = {
+      ...state.snapshot,
+      nodes: nextNodes,
+    };
+
+    if (isEqualSnapshots(state.snapshot, nextSnapshot)) {
+      return state;
+    }
+
+    const nextHistoryStack = state.historyStack.push(nextSnapshot, `Rotate Nodes (${angleDeg}°)`);
+
+    return {
+      snapshot: nextSnapshot,
+      historyStack: nextHistoryStack,
+    };
+  } catch (_error) {
+    return state;
+  }
+}
+
+/**
+ * Applies composed translation, scale, and rotation to selected nodes and commits 1 HistoryStack transaction.
+ */
+export function transformSelectedNodes(
+  state: VectorWorkspaceState,
+  delta: {
+    dx?: number;
+    dy?: number;
+    scaleX?: number;
+    scaleY?: number;
+    rotateDeg?: number;
+    origin?: { x: number; y: number };
+    lockAspectRatio?: boolean;
+  }
+): VectorWorkspaceState {
+  try {
+    const { selectedIds, nodes } = state.snapshot;
+    if (selectedIds.length === 0) return state;
+
+    const selectedNodes = nodes.filter(n => selectedIds.includes(n.id) && !n.locked);
+    if (selectedNodes.length === 0) return state;
+
+    const transformedNodes = VectorEditingEngine.transformShapesComposed(selectedNodes, delta);
+    const transformedMap = new Map(transformedNodes.map(n => [n.id, n]));
+
+    const nextNodes = nodes.map(n => transformedMap.get(n.id) || n);
+    const nextSnapshot: VectorDocumentSnapshot = {
+      ...state.snapshot,
+      nodes: nextNodes,
+    };
+
+    if (isEqualSnapshots(state.snapshot, nextSnapshot)) {
+      return state;
+    }
+
+    const nextHistoryStack = state.historyStack.push(nextSnapshot, 'Transform Nodes');
+
+    return {
+      snapshot: nextSnapshot,
+      historyStack: nextHistoryStack,
+    };
+  } catch (_error) {
+    return state;
+  }
+}
+
+/**
  * Aligns selected nodes (left, center, right, top, middle, bottom).
  * Requires at least 2 selected nodes.
  */
@@ -549,45 +814,6 @@ export function duplicateSelectedNodes(
   }
 }
 
-/**
- * Moves selected nodes by dx, dy.
- */
-export function moveSelectedNodes(
-  state: VectorWorkspaceState,
-  dx: number,
-  dy: number
-): VectorWorkspaceState {
-  try {
-    const { selectedIds, nodes } = state.snapshot;
-    if (selectedIds.length === 0 || (dx === 0 && dy === 0)) return state;
-
-    const selectedSet = new Set(selectedIds);
-    const nextNodes = nodes.map(node => {
-      if (selectedSet.has(node.id) && !node.locked) {
-        return VectorEditingEngine.moveShape(node, dx, dy);
-      }
-      return node;
-    });
-
-    const nextSnapshot: VectorDocumentSnapshot = {
-      ...state.snapshot,
-      nodes: nextNodes,
-    };
-
-    if (isEqualSnapshots(state.snapshot, nextSnapshot)) {
-      return state;
-    }
-
-    const nextHistoryStack = state.historyStack.push(nextSnapshot, 'Move Nodes');
-
-    return {
-      snapshot: nextSnapshot,
-      historyStack: nextHistoryStack,
-    };
-  } catch (_error) {
-    return state;
-  }
-}
 
 /**
  * Loads and restores a serialized VectorDocument payload.
@@ -774,40 +1000,6 @@ export function flipSelectedNodes(
   }
 }
 
-/**
- * Rotates selected nodes by deltaDeg degrees.
- */
-export function rotateSelectedNodes(
-  state: VectorWorkspaceState,
-  deltaDeg: number
-): VectorWorkspaceState {
-  try {
-    const { selectedIds, nodes } = state.snapshot;
-    if (selectedIds.length === 0 || deltaDeg === 0) return state;
-
-    const selectedSet = new Set(selectedIds);
-    const nextNodes = nodes.map(node => {
-      if (selectedSet.has(node.id)) {
-        return VectorEditingEngine.rotateShape(node, node.transform.rotationDeg + deltaDeg);
-      }
-      return node;
-    });
-
-    const nextSnapshot: VectorDocumentSnapshot = {
-      ...state.snapshot,
-      nodes: nextNodes,
-    };
-
-    const nextHistoryStack = state.historyStack.push(nextSnapshot, `Rotate ${deltaDeg}°`);
-
-    return {
-      snapshot: nextSnapshot,
-      historyStack: nextHistoryStack,
-    };
-  } catch (_error) {
-    return state;
-  }
-}
 
 /**
  * Distributes selected nodes evenly along horizontal or vertical axis.

@@ -199,6 +199,176 @@ export class VectorEditingEngine {
   }
 
   /**
+   * Computes bounding box of 1 or more selected shapes in document space.
+   */
+  public static computeSelectionBounds(nodes: VectorNode[]): BoundingBox2D | null {
+    if (!nodes || nodes.length === 0) return null;
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    for (const node of nodes) {
+      if (!node || typeof node !== 'object' || !node.transform) continue;
+      const b = VectorGeometry.computeBoundingBox(node);
+      minX = Math.min(minX, b.x);
+      minY = Math.min(minY, b.y);
+      maxX = Math.max(maxX, b.x + b.width);
+      maxY = Math.max(maxY, b.y + b.height);
+    }
+
+    if (!Number.isFinite(minX) || !Number.isFinite(minY) || !Number.isFinite(maxX) || !Number.isFinite(maxY)) {
+      return null;
+    }
+
+    return {
+      x: minX,
+      y: minY,
+      width: Math.max(0, maxX - minX),
+      height: Math.max(0, maxY - minY),
+    };
+  }
+
+  /**
+   * Scales shapes relative to selection center or custom transform origin.
+   */
+  public static scaleShapes(
+    nodes: VectorNode[],
+    scaleX: number,
+    scaleY: number,
+    origin?: { x: number; y: number },
+    lockAspectRatio: boolean = false
+  ): VectorNode[] {
+    if (!nodes || nodes.length === 0) return [];
+
+    let sx = Number.isFinite(scaleX) ? scaleX : 1.0;
+    let sy = Number.isFinite(scaleY) ? scaleY : 1.0;
+
+    // Safeguard near-zero scaling
+    if (Math.abs(sx) < 1e-6) sx = 1e-6 * (sx < 0 ? -1 : 1);
+    if (Math.abs(sy) < 1e-6) sy = 1e-6 * (sy < 0 ? -1 : 1);
+
+    if (lockAspectRatio) {
+      const maxS = Math.max(Math.abs(sx), Math.abs(sy));
+      sx = maxS * (sx < 0 ? -1 : 1);
+      sy = maxS * (sy < 0 ? -1 : 1);
+    }
+
+    const bounds = origin ?? VectorEditingEngine.computeSelectionBounds(nodes);
+    const ox = bounds ? (origin ? origin.x : bounds.x + bounds.width / 2) : 0;
+    const oy = bounds ? (origin ? origin.y : bounds.y + bounds.height / 2) : 0;
+
+    return nodes.map((node) => {
+      if (!node || typeof node !== 'object' || !node.transform) return node;
+
+      const { x, y, width, height } = node.transform;
+      const nx = ox + (x - ox) * sx;
+      const ny = oy + (y - oy) * sy;
+      const nw = Math.max(1e-6, width * Math.abs(sx));
+      const nh = Math.max(1e-6, height * Math.abs(sy));
+
+      return {
+        ...node,
+        transform: {
+          ...node.transform,
+          x: nx,
+          y: ny,
+          width: nw,
+          height: nh,
+        },
+      };
+    });
+  }
+
+  /**
+   * Rotates shapes by angleDeg relative to selection center or custom transform origin.
+   */
+  public static rotateShapes(
+    nodes: VectorNode[],
+    angleDeg: number,
+    origin?: { x: number; y: number }
+  ): VectorNode[] {
+    if (!nodes || nodes.length === 0) return [];
+
+    const validAngle = Number.isFinite(angleDeg) ? angleDeg : 0;
+    if (validAngle === 0) return [...nodes];
+
+    const bounds = origin ?? VectorEditingEngine.computeSelectionBounds(nodes);
+    const ox = bounds ? (origin ? origin.x : bounds.x + bounds.width / 2) : 0;
+    const oy = bounds ? (origin ? origin.y : bounds.y + bounds.height / 2) : 0;
+
+    const rad = validAngle * (Math.PI / 180);
+    const cos = Math.cos(rad);
+    const sin = Math.sin(rad);
+
+    return nodes.map((node) => {
+      if (!node || typeof node !== 'object' || !node.transform) return node;
+
+      const { x, y, width, height, rotationDeg } = node.transform;
+      // Center of shape bounding box
+      const cx = x + width / 2;
+      const cy = y + height / 2;
+
+      // Rotate center point around origin (ox, oy)
+      const dx = cx - ox;
+      const dy = cy - oy;
+      const rcx = ox + dx * cos - dy * sin;
+      const rcy = oy + dx * sin + dy * cos;
+
+      const newRot = ((rotationDeg + validAngle) % 360 + 360) % 360;
+
+      return {
+        ...node,
+        transform: {
+          ...node.transform,
+          x: rcx - width / 2,
+          y: rcy - height / 2,
+          rotationDeg: newRot,
+        },
+      };
+    });
+  }
+
+  /**
+   * Applies composed translation, scaling, and rotation transformations.
+   */
+  public static transformShapesComposed(
+    nodes: VectorNode[],
+    delta: {
+      dx?: number;
+      dy?: number;
+      scaleX?: number;
+      scaleY?: number;
+      rotateDeg?: number;
+      origin?: { x: number; y: number };
+      lockAspectRatio?: boolean;
+    }
+  ): VectorNode[] {
+    if (!nodes || nodes.length === 0) return [];
+
+    let result = nodes.filter(n => n && typeof n === 'object' && n.transform);
+
+    if (delta.dx || delta.dy) {
+      const dx = Number.isFinite(delta.dx) ? delta.dx! : 0;
+      const dy = Number.isFinite(delta.dy) ? delta.dy! : 0;
+      result = result.map(n => VectorEditingEngine.moveShape(n, dx, dy));
+    }
+
+    if (delta.scaleX !== undefined || delta.scaleY !== undefined) {
+      const sx = delta.scaleX ?? 1.0;
+      const sy = delta.scaleY ?? 1.0;
+      result = VectorEditingEngine.scaleShapes(result, sx, sy, delta.origin, delta.lockAspectRatio);
+    }
+
+    if (delta.rotateDeg) {
+      result = VectorEditingEngine.rotateShapes(result, delta.rotateDeg, delta.origin);
+    }
+
+    return result;
+  }
+
+  /**
    * Translates a vector shape by dx, dy.
    */
   public static moveShape(node: VectorNode, dx: number, dy: number): VectorNode {
