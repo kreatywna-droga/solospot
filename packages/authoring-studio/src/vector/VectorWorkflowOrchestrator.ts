@@ -194,6 +194,41 @@ export class VectorWorkflowOrchestrator {
   }
 
   /**
+   * Combines selected paths into a single Compound Path.
+   */
+  public static makeCompoundPathWorkflow(
+    state: VectorWorkspaceState,
+    windingRule: any = 'evenodd'
+  ): VectorWorkspaceState {
+    return VectorWorkflowOrchestrator.dispatchCommand(state, `Make Compound Path (${windingRule})`, {
+      type: 'MAKE_COMPOUND_PATH',
+      windingRule,
+    });
+  }
+
+  /**
+   * Releases selected Compound Path back into individual paths.
+   */
+  public static releaseCompoundPathWorkflow(state: VectorWorkspaceState): VectorWorkspaceState {
+    return VectorWorkflowOrchestrator.dispatchCommand(state, 'Release Compound Path', {
+      type: 'RELEASE_COMPOUND_PATH',
+    });
+  }
+
+  /**
+   * Updates fill rule / winding rule on selected path.
+   */
+  public static setWindingRuleWorkflow(
+    state: VectorWorkspaceState,
+    windingRule: any
+  ): VectorWorkspaceState {
+    return VectorWorkflowOrchestrator.dispatchCommand(state, `Set Winding Rule (${windingRule})`, {
+      type: 'SET_WINDING_RULE',
+      windingRule,
+    });
+  }
+
+  /**
    * Keyboard shortcut command dispatcher.
    */
   public static handleKeyboardCommand(

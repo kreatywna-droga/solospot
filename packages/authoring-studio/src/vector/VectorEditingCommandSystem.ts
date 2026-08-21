@@ -13,6 +13,7 @@ import { VectorEditingEngine, LayerReorderAction, AlignmentType } from './Vector
 
 import { VectorPathEngine } from './VectorPathEngine';
 import { VectorBooleanTopologyEngine, BooleanTopologyType } from './VectorBooleanTopologyEngine';
+import { VectorCompoundPathEngine, WindingRule } from './VectorCompoundPathEngine';
 
 export type VectorCommandType =
   | 'MOVE_NODES'
@@ -28,7 +29,10 @@ export type VectorCommandType =
   | 'UPDATE_NODE_PROPS'
   | 'BOOLEAN_TOPOLOGY'
   | 'SMOOTH_PATH_CORNERS'
-  | 'REVERSE_PATH';
+  | 'REVERSE_PATH'
+  | 'MAKE_COMPOUND_PATH'
+  | 'RELEASE_COMPOUND_PATH'
+  | 'SET_WINDING_RULE';
 
 export interface VectorCommandPayload {
   readonly type: VectorCommandType;
@@ -42,6 +46,7 @@ export interface VectorCommandPayload {
   readonly reorderAction?: LayerReorderAction;
   readonly topologyType?: BooleanTopologyType;
   readonly cornerRadiusPx?: number;
+  readonly windingRule?: WindingRule;
   readonly origin?: { readonly x: number; readonly y: number };
   readonly propsUpdate?: {
     readonly fill?: any;
@@ -299,6 +304,60 @@ export class VectorEditingCommandSystem {
             if (targetSet.has(node.id) && node.type === 'path' && !node.locked) {
               const res = VectorPathEngine.reversePath(node as any);
               return res.success ? res.pathNode : node;
+            }
+            return node;
+          });
+          break;
+        }
+
+        case 'MAKE_COMPOUND_PATH': {
+          if (activeNodes.length < 2) break;
+          const compoundRes = VectorCompoundPathEngine.combineSubPaths(activeNodes, command.windingRule || 'evenodd');
+          if (!compoundRes.success || !compoundRes.compoundNode) break;
+
+          const removedSet = new Set(compoundRes.affectedSourceIds);
+          const remaining = snapshot.nodes.filter(n => !removedSet.has(n.id));
+          nextNodes = [...remaining, compoundRes.compoundNode];
+          return {
+            success: true,
+            snapshot: {
+              nodes: nextNodes,
+              selectedIds: [compoundRes.compoundNode.id],
+            },
+            affectedIds: [compoundRes.compoundNode.id],
+            errors: [],
+          };
+        }
+
+        case 'RELEASE_COMPOUND_PATH': {
+          if (activeNodes.length === 0) break;
+          const targetNode = activeNodes[0];
+          if (targetNode.type !== 'path') break;
+
+          const releaseRes = VectorCompoundPathEngine.releaseSubPaths(targetNode as any);
+          if (!releaseRes.success || releaseRes.releasedNodes.length === 0) break;
+
+          const remaining = snapshot.nodes.filter(n => n.id !== targetNode.id);
+          nextNodes = [...remaining, ...releaseRes.releasedNodes];
+          const newSelectedIds = releaseRes.releasedNodes.map(n => n.id);
+          return {
+            success: true,
+            snapshot: {
+              nodes: nextNodes,
+              selectedIds: newSelectedIds,
+            },
+            affectedIds: newSelectedIds,
+            errors: [],
+          };
+        }
+
+        case 'SET_WINDING_RULE': {
+          if (activeNodes.length === 0 || !command.windingRule) break;
+          const targetSet = new Set(targetIds);
+          nextNodes = snapshot.nodes.map(node => {
+            if (targetSet.has(node.id) && node.type === 'path' && !node.locked) {
+              const res = VectorCompoundPathEngine.setWindingRule(node as any, command.windingRule!);
+              return res.success && res.compoundNode ? res.compoundNode : node;
             }
             return node;
           });

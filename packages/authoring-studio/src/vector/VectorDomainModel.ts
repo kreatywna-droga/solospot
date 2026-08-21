@@ -117,6 +117,8 @@ export interface PathNode extends BaseVectorNode {
   readonly anchors?: ReadonlyArray<VectorPathAnchor> | VectorPathAnchor[];
   readonly closed?: boolean;
   readonly cornerRadius?: CornerRadius;
+  readonly fillRule?: 'nonzero' | 'evenodd';
+  readonly subPaths?: any[];
 }
 
 export interface ShapeGroupNode extends BaseVectorNode {

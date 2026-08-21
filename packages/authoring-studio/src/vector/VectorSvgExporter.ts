@@ -247,7 +247,8 @@ export class VectorSvgExporter {
       }
 
       case 'path': {
-        return `${indent}<path ${baseAttrs} d="${node.d || ''}" />`;
+        const fillRuleAttr = node.fillRule ? ` fill-rule="${node.fillRule}"` : '';
+        return `${indent}<path ${baseAttrs}${fillRuleAttr} d="${node.d || ''}" />`;
       }
 
       default:
