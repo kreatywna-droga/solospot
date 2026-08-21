@@ -43,9 +43,13 @@ export interface Workspace {
 export interface Organization {
   id: string;
   name: string;
+  slug?: string;
+  ownerId?: string;
+  status?: string;
   billingEmail?: string;
   timezone?: string;
-  createdAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Tenant {

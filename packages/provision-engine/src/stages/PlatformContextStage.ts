@@ -20,7 +20,7 @@ export class PlatformContextStage implements ProvisionStage {
       .setStatus('ACTIVE')
       .setDomains({ primary: `${tenantId}.webfactor.io` })
       .setPlan({ tier, limits: { maxUsers: tier === 'ENTERPRISE' ? 500 : 10 } })
-      .setCapabilities(context.resolvedCapabilities || ['BASIC_STORE'])
+      .setCapabilities(Array.from(context.resolvedCapabilities || ['BASIC_STORE']))
       .setMetadata({
         cacheKey: `tenant:${tenantId}`,
         lastRefresh: new Date().toISOString(),

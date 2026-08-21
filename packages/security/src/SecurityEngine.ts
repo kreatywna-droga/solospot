@@ -4,6 +4,8 @@ export class SecurityEngine {
   private configs: Map<string, SecurityConfig> = new Map();
   private requests: Map<string, { count: number; windowStart: number }> = new Map();
 
+  constructor(_options?: { enableRateLimiting?: boolean; rateLimitMax?: number }) {}
+
   applyConfig(organizationId: string, config: SecurityConfig): void {
     this.configs.set(organizationId, config);
   }

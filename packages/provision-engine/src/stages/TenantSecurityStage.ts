@@ -28,7 +28,7 @@ export class TenantSecurityStage implements ProvisionStage {
     const result = this.securityManager.createTenant({
       organization: org,
       tier,
-      capabilities: context.resolvedCapabilities || ['BASIC_STORE'],
+      capabilities: Array.from(context.resolvedCapabilities || ['BASIC_STORE']),
       primaryDomain: `${tenantId}.webfactor.io`,
     });
 

@@ -34,6 +34,7 @@ export interface VectorStroke {
   readonly lineJoin?: LineJoin;
   readonly miterLimit?: number;
   readonly opacity?: number;
+  readonly style?: string;
 }
 
 export type CornerRadius = number | readonly [number, number, number, number]; // uniform or [tl, tr, br, bl]
@@ -52,18 +53,18 @@ export interface VectorTransform {
 
 export interface BaseVectorNode {
   readonly id: string;
-  readonly name: string;
+  readonly name?: string;
   readonly transform: VectorTransform;
-  readonly opacity: number;
-  readonly visible: boolean;
-  readonly locked: boolean;
+  readonly opacity?: number;
+  readonly visible?: boolean;
+  readonly locked?: boolean;
   readonly fill?: VectorFill;
   readonly stroke?: VectorStroke;
 }
 
 export interface RectangleNode extends BaseVectorNode {
   readonly type: 'rectangle';
-  readonly cornerRadius: CornerRadius;
+  readonly cornerRadius?: CornerRadius;
 }
 
 export interface EllipseNode extends BaseVectorNode {
@@ -113,6 +114,8 @@ export interface PathNode extends BaseVectorNode {
   readonly d: string; // SVG Path string
   readonly commands?: PathCommandDTO[];
   readonly pathData?: VectorPathData;
+  readonly anchors?: ReadonlyArray<VectorPathAnchor> | VectorPathAnchor[];
+  readonly closed?: boolean;
 }
 
 export interface ShapeGroupNode extends BaseVectorNode {

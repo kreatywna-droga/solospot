@@ -13,6 +13,7 @@ export type ReleaseStatus = 'Ready' | 'Conditionally Ready' | 'Not Ready';
 // ---------------------------------------------------------------------------
 export type ReleaseGateCategory =
   | 'architecture_freeze'
+  | 'architecture_compliance'
   | 'public_api_stability'
   | 'configuration_completeness'
   | 'security_compliance'
@@ -120,6 +121,7 @@ export interface ReleaseSnapshot {
   hasRootReadme: boolean;
   unresolvedBlockersCount: number;
   intelligence: IntelligenceReportSnapshot;
+  hasUnapprovedArchitectureFreeze?: boolean;
 }
 
 // ---------------------------------------------------------------------------

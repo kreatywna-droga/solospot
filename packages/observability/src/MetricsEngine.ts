@@ -3,26 +3,26 @@ import { Metric, MetricType, HealthCheck, TraceContext } from './ObservabilityDo
 export class MetricsEngine {
   private metrics: Map<string, Metric[]> = new Map();
 
-  record(type: MetricType, value: number, labels: Record<string, string> = {}): void {
+  record(type: MetricType | string, value: number, labels: Record<string, string> = {}): void {
     const metric: Metric = {
       id: `metric-${Date.now()}`,
-      type,
+      type: type as MetricType,
       value,
       labels,
       timestamp: new Date().toISOString()
     };
 
-    const existing = this.metrics.get(type) || [];
+    const existing = this.metrics.get(type as string) || [];
     existing.push(metric);
-    this.metrics.set(type, existing);
+    this.metrics.set(type as string, existing);
   }
 
-  getMetrics(type: MetricType, since?: string): Metric[] {
-    const all = this.metrics.get(type) || [];
+  getMetrics(type: MetricType | string, since?: string): Metric[] {
+    const all = this.metrics.get(type as string) || [];
     return since ? all.filter(m => m.timestamp >= since) : all;
   }
 
-  getSummary(type: MetricType): { avg: number; min: number; max: number; count: number } {
+  getSummary(type: MetricType | string): { avg: number; min: number; max: number; count: number } {
     const metrics = this.getMetrics(type);
     if (metrics.length === 0) return { avg: 0, min: 0, max: 0, count: 0 };
 

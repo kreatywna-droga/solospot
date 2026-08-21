@@ -93,9 +93,9 @@ export class TenantSecurityManager {
 
     const context = new TenantContextBuilder()
       .setTenantId(org.id)
-      .setSlug(org.slug)
+      .setSlug(org.slug || org.id)
       .setStatus(status)
-      .setDomains({ primary: `${org.slug}.webfactor.io` })
+      .setDomains({ primary: `${org.slug || org.id}.webfactor.io` })
       .setPlan({ tier: 'FREE', limits: { maxUsers: 10 } })
       .setCapabilities(['BASIC_STORE'])
       .setMetadata({

@@ -33,6 +33,7 @@ export class DeploymentDiagnosticsProbe {
 
     // Register health check probe for deployment pipeline
     this.healthCheckEngine.registerCheck('deployment_pipeline_health', async () => ({
+      component: 'deployment_pipeline_health',
       status: 'healthy',
       details: { probeEngine: 'DeploymentDiagnosticsProbe', state: 'OPERATIONAL' },
     }));

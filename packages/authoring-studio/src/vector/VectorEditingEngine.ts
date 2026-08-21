@@ -255,9 +255,9 @@ export class VectorEditingEngine {
       sy = maxS * (sy < 0 ? -1 : 1);
     }
 
-    const bounds = origin ?? VectorEditingEngine.computeSelectionBounds(nodes);
-    const ox = bounds ? (origin ? origin.x : bounds.x + bounds.width / 2) : 0;
-    const oy = bounds ? (origin ? origin.y : bounds.y + bounds.height / 2) : 0;
+    const selBounds = origin ? null : VectorEditingEngine.computeSelectionBounds(nodes);
+    const ox = origin ? origin.x : (selBounds ? selBounds.x + selBounds.width / 2 : 0);
+    const oy = origin ? origin.y : (selBounds ? selBounds.y + selBounds.height / 2 : 0);
 
     return nodes.map((node) => {
       if (!node || typeof node !== 'object' || !node.transform) return node;
@@ -294,9 +294,9 @@ export class VectorEditingEngine {
     const validAngle = Number.isFinite(angleDeg) ? angleDeg : 0;
     if (validAngle === 0) return [...nodes];
 
-    const bounds = origin ?? VectorEditingEngine.computeSelectionBounds(nodes);
-    const ox = bounds ? (origin ? origin.x : bounds.x + bounds.width / 2) : 0;
-    const oy = bounds ? (origin ? origin.y : bounds.y + bounds.height / 2) : 0;
+    const selBounds = origin ? null : VectorEditingEngine.computeSelectionBounds(nodes);
+    const ox = origin ? origin.x : (selBounds ? selBounds.x + selBounds.width / 2 : 0);
+    const oy = origin ? origin.y : (selBounds ? selBounds.y + selBounds.height / 2 : 0);
 
     const rad = validAngle * (Math.PI / 180);
     const cos = Math.cos(rad);

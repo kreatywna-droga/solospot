@@ -5,6 +5,7 @@ export interface ProvisionContext {
   readonly request: ProvisionRequest;
   readonly storeConfig?: StoreConfig;
   readonly installedPackages: ReadonlyArray<string>;
+  readonly resolvedCapabilities?: ReadonlyArray<string>;
   readonly deploymentUrl?: string;
   readonly metadata: Record<string, unknown>;
 }

@@ -103,13 +103,14 @@ export class ProvisioningApiGateway {
       };
     } else {
       const failedStage = result.stageResults.find(s => !s.success);
-      const errDetail = failedStage ? `${failedStage.stageName}: ${failedStage.errors.join('; ')}` : 'Unknown error';
+      const errorsStr = failedStage?.errors ? failedStage.errors.join('; ') : 'Unknown error';
+      const errDetail = failedStage ? `${failedStage.stageName}: ${errorsStr}` : 'Unknown error';
       return {
         httpStatus: 500,
         tenantId,
         storeId,
         success: false,
-        stageSummary: `Pipeline failed at stage '${failedStage?.stageName}': ${failedStage?.errors.join('; ')}`,
+        stageSummary: `Pipeline failed at stage '${failedStage?.stageName}': ${errorsStr}`,
         result,
         errorMessage: errDetail,
         timestamp: new Date().toISOString(),

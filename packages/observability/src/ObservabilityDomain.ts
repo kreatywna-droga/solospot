@@ -5,7 +5,10 @@ export enum MetricType {
   REQUEST_DURATION = 'request_duration',
   ERROR_COUNT = 'error_count',
   CACHE_HIT = 'cache_hit',
-  DATABASE_QUERIES = 'database_queries'
+  DATABASE_QUERIES = 'database_queries',
+  COUNTER = 'counter',
+  HISTOGRAM = 'histogram',
+  GAUGE = 'gauge'
 }
 
 export interface Metric {
@@ -21,6 +24,7 @@ export interface HealthCheck {
   status: 'healthy' | 'degraded' | 'unhealthy';
   latencyMs?: number;
   error?: string;
+  details?: Record<string, any>;
 }
 
 export interface TraceContext {
