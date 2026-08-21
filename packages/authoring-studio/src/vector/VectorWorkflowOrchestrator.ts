@@ -279,6 +279,37 @@ export class VectorWorkflowOrchestrator {
   }
 
   /**
+   * Creates a vector clipping mask from selected shapes.
+   */
+  public static createVectorMaskWorkflow(state: VectorWorkspaceState): VectorWorkspaceState {
+    return VectorWorkflowOrchestrator.dispatchCommand(state, 'Create Vector Mask', {
+      type: 'CREATE_VECTOR_MASK',
+    });
+  }
+
+  /**
+   * Releases a vector mask group back to individual shapes.
+   */
+  public static releaseVectorMaskWorkflow(state: VectorWorkspaceState): VectorWorkspaceState {
+    return VectorWorkflowOrchestrator.dispatchCommand(state, 'Release Vector Mask', {
+      type: 'RELEASE_VECTOR_MASK',
+    });
+  }
+
+  /**
+   * Sets mask CSG topology operation.
+   */
+  public static setMaskTopologyWorkflow(
+    state: VectorWorkspaceState,
+    topologyType: any = 'union'
+  ): VectorWorkspaceState {
+    return VectorWorkflowOrchestrator.dispatchCommand(state, `Set Mask Topology (${topologyType})`, {
+      type: 'SET_MASK_TOPOLOGY',
+      topologyType,
+    });
+  }
+
+  /**
    * Keyboard shortcut command dispatcher.
    */
   public static handleKeyboardCommand(

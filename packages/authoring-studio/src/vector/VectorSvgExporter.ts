@@ -47,7 +47,7 @@ export class VectorSvgExporter {
     const defsString = defs.length > 0 ? `\n  <defs>\n${defs.join('\n')}\n  </defs>` : '';
 
     const nodesString = snapshot.nodes
-      .filter((n) => n.visible)
+      .filter((n) => n.visible !== false)
       .map((n) => this.renderNode(n, '    ', new Set<string>()))
       .join('\n');
 
@@ -59,8 +59,13 @@ export class VectorSvgExporter {
     const gradientIds = new Set<string>();
 
     const traverse = (node: VectorNode, ancestors: Set<string>) => {
-      if (!node.visible) return;
+      if (node.visible === false) return;
       this.extractGradient(node.fill, node.id + '_fill', defs, gradientIds);
+
+      if (node.clipPathId) {
+        defs.push(`    <clipPath id="${node.clipPathId}">\n      <rect x="0" y="0" width="${node.transform.width}" height="${node.transform.height}" />\n    </clipPath>`);
+      }
+
       if (node.type === 'group') {
         if (ancestors.has(node.id)) return;
         const nextAncestors = new Set(ancestors);
@@ -168,7 +173,7 @@ export class VectorSvgExporter {
   }
 
   private static renderNode(node: VectorNode, indent: string, ancestors: Set<string>): string {
-    if (!node.visible) return '';
+    if (node.visible === false) return '';
 
     if (node.type === 'group') {
       if (ancestors.has(node.id)) {
@@ -180,13 +185,14 @@ export class VectorSvgExporter {
 
       const groupAttrs = [
         node.id ? `id="${node.id}"` : '',
+        node.clipPathId ? `clip-path="url(#${node.clipPathId})"` : '',
         node.opacity !== undefined && node.opacity < 1 ? `opacity="${node.opacity}"` : '',
       ]
         .filter(Boolean)
         .join(' ');
 
       const childrenStr = node.children
-        .filter((c) => c.visible)
+        .filter((c) => c.visible !== false)
         .map((c) => this.renderNode(c, indent + '  ', nextAncestors))
         .join('\n');
 

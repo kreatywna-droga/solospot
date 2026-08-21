@@ -60,6 +60,10 @@ export interface BaseVectorNode {
   readonly locked?: boolean;
   readonly fill?: VectorFill;
   readonly stroke?: VectorStroke;
+  readonly isMask?: boolean;
+  readonly clipPathId?: string;
+  readonly isMaskGroup?: boolean;
+  readonly maskTopology?: string;
 }
 
 export interface RectangleNode extends BaseVectorNode {

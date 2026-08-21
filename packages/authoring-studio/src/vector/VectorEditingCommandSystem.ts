@@ -15,6 +15,7 @@ import { VectorPathEngine } from './VectorPathEngine';
 import { VectorBooleanTopologyEngine, BooleanTopologyType } from './VectorBooleanTopologyEngine';
 import { VectorCompoundPathEngine, WindingRule } from './VectorCompoundPathEngine';
 import { VectorPathSegmentEditorEngine } from './VectorPathSegmentEditorEngine';
+import { VectorCompoundTopologyMaskEngine } from './VectorCompoundTopologyMaskEngine';
 
 export type VectorCommandType =
   | 'MOVE_NODES'
@@ -37,7 +38,10 @@ export type VectorCommandType =
   | 'INSERT_PATH_NODE'
   | 'DELETE_PATH_NODE'
   | 'SPLIT_PATH_AT_ANCHOR'
-  | 'JOIN_PATH_SEGMENTS';
+  | 'JOIN_PATH_SEGMENTS'
+  | 'CREATE_VECTOR_MASK'
+  | 'RELEASE_VECTOR_MASK'
+  | 'SET_MASK_TOPOLOGY';
 
 export interface VectorCommandPayload {
   readonly type: VectorCommandType;
@@ -445,6 +449,61 @@ export class VectorEditingCommandSystem {
             affectedIds: [joinRes.pathNode.id],
             errors: [],
           };
+        }
+
+        case 'CREATE_VECTOR_MASK': {
+          if (activeNodes.length < 2) break;
+          const maskShape = activeNodes[0];
+          const targetShapes = activeNodes.slice(1);
+
+          const maskRes = VectorCompoundTopologyMaskEngine.createVectorMask(maskShape, targetShapes);
+          if (!maskRes.success || !maskRes.maskedNode) break;
+
+          const removedSet = new Set(maskRes.affectedSourceIds);
+          const remaining = snapshot.nodes.filter(n => !removedSet.has(n.id));
+          nextNodes = [...remaining, maskRes.maskedNode];
+          return {
+            success: true,
+            snapshot: {
+              nodes: nextNodes,
+              selectedIds: [maskRes.maskedNode.id],
+            },
+            affectedIds: [maskRes.maskedNode.id],
+            errors: [],
+          };
+        }
+
+        case 'RELEASE_VECTOR_MASK': {
+          if (activeNodes.length === 0) break;
+          const targetNode = activeNodes[0];
+          const releaseRes = VectorCompoundTopologyMaskEngine.releaseVectorMask(targetNode);
+          if (!releaseRes.success || !releaseRes.releasedNodes) break;
+
+          const remaining = snapshot.nodes.filter(n => n.id !== targetNode.id);
+          nextNodes = [...remaining, ...releaseRes.releasedNodes];
+          const newSelected = releaseRes.releasedNodes.map(n => n.id);
+          return {
+            success: true,
+            snapshot: {
+              nodes: nextNodes,
+              selectedIds: newSelected,
+            },
+            affectedIds: newSelected,
+            errors: [],
+          };
+        }
+
+        case 'SET_MASK_TOPOLOGY': {
+          if (activeNodes.length === 0) break;
+          const targetSet = new Set(targetIds);
+          nextNodes = snapshot.nodes.map(node => {
+            if (targetSet.has(node.id) && !node.locked) {
+              const res = VectorCompoundTopologyMaskEngine.applyCompoundMaskTopology(node, command.topologyType || 'union');
+              return res.success && res.maskedNode ? res.maskedNode : node;
+            }
+            return node;
+          });
+          break;
         }
       }
 
