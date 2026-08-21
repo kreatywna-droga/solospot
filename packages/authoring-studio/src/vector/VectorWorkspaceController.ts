@@ -304,6 +304,127 @@ export function alignSelectedNodes(
 }
 
 /**
+ * Aligns selected nodes to canvas or artboard bounds (left, center, right, top, middle, bottom).
+ * Operates on 1 or more selected nodes.
+ */
+export function alignSelectedNodesToCanvas(
+  state: VectorWorkspaceState,
+  alignment: AlignmentType,
+  canvasBounds?: BoundingBox2D
+): VectorWorkspaceState {
+  try {
+    const { selectedIds, nodes } = state.snapshot;
+    if (selectedIds.length === 0) return state;
+
+    const selectedNodes = nodes.filter(n => selectedIds.includes(n.id) && !n.locked);
+    if (selectedNodes.length === 0) return state;
+
+    const alignedNodes = VectorEditingEngine.alignShapesToCanvas(selectedNodes, alignment, canvasBounds);
+    const alignedMap = new Map(alignedNodes.map(n => [n.id, n]));
+
+    const nextNodes = nodes.map(n => alignedMap.get(n.id) || n);
+    const nextSnapshot: VectorDocumentSnapshot = {
+      ...state.snapshot,
+      nodes: nextNodes,
+    };
+
+    if (isEqualSnapshots(state.snapshot, nextSnapshot)) {
+      return state;
+    }
+
+    const nextHistoryStack = state.historyStack.push(nextSnapshot, `Align ${alignment} to Canvas`);
+
+    return {
+      snapshot: nextSnapshot,
+      historyStack: nextHistoryStack,
+    };
+  } catch (_error) {
+    return state;
+  }
+}
+
+/**
+ * Distributes selected nodes sequentially with exact pixel gap spacing.
+ * Requires at least 2 selected nodes.
+ */
+export function distributeSelectedNodesWithGap(
+  state: VectorWorkspaceState,
+  axis: DistributionType,
+  gapPx: number = 20
+): VectorWorkspaceState {
+  try {
+    const { selectedIds, nodes } = state.snapshot;
+    if (selectedIds.length < 2) return state;
+
+    const selectedNodes = nodes.filter(n => selectedIds.includes(n.id) && !n.locked);
+    if (selectedNodes.length < 2) return state;
+
+    const distributedNodes = VectorEditingEngine.distributeShapesWithGap(selectedNodes, axis, gapPx);
+    const distMap = new Map(distributedNodes.map(n => [n.id, n]));
+
+    const nextNodes = nodes.map(n => distMap.get(n.id) || n);
+    const nextSnapshot: VectorDocumentSnapshot = {
+      ...state.snapshot,
+      nodes: nextNodes,
+    };
+
+    if (isEqualSnapshots(state.snapshot, nextSnapshot)) {
+      return state;
+    }
+
+    const nextHistoryStack = state.historyStack.push(nextSnapshot, `Distribute ${axis} Gap ${gapPx}px`);
+
+    return {
+      snapshot: nextSnapshot,
+      historyStack: nextHistoryStack,
+    };
+  } catch (_error) {
+    return state;
+  }
+}
+
+/**
+ * Arranges selected nodes into a multi-column grid layout with custom column count and gaps.
+ * Operates on 1 or more selected nodes.
+ */
+export function arrangeSelectedNodesInGrid(
+  state: VectorWorkspaceState,
+  columns: number = 3,
+  gapX: number = 20,
+  gapY: number = 20
+): VectorWorkspaceState {
+  try {
+    const { selectedIds, nodes } = state.snapshot;
+    if (selectedIds.length === 0) return state;
+
+    const selectedNodes = nodes.filter(n => selectedIds.includes(n.id) && !n.locked);
+    if (selectedNodes.length === 0) return state;
+
+    const arrangedNodes = VectorEditingEngine.arrangeShapesInGrid(selectedNodes, columns, gapX, gapY);
+    const arrangedMap = new Map(arrangedNodes.map(n => [n.id, n]));
+
+    const nextNodes = nodes.map(n => arrangedMap.get(n.id) || n);
+    const nextSnapshot: VectorDocumentSnapshot = {
+      ...state.snapshot,
+      nodes: nextNodes,
+    };
+
+    if (isEqualSnapshots(state.snapshot, nextSnapshot)) {
+      return state;
+    }
+
+    const nextHistoryStack = state.historyStack.push(nextSnapshot, `Grid Layout ${columns} Cols`);
+
+    return {
+      snapshot: nextSnapshot,
+      historyStack: nextHistoryStack,
+    };
+  } catch (_error) {
+    return state;
+  }
+}
+
+/**
  * Groups selected nodes into a ShapeGroupNode.
  */
 export function groupSelectedNodes(
