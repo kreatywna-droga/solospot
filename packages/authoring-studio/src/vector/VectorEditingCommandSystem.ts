@@ -11,6 +11,9 @@ import { VectorNode, CornerRadius } from './VectorDomainModel';
 import { VectorDocumentSnapshot, isEqualSnapshots } from './VectorWorkspaceController';
 import { VectorEditingEngine, LayerReorderAction, AlignmentType } from './VectorEditingEngine';
 
+import { VectorPathEngine } from './VectorPathEngine';
+import { VectorBooleanTopologyEngine, BooleanTopologyType } from './VectorBooleanTopologyEngine';
+
 export type VectorCommandType =
   | 'MOVE_NODES'
   | 'SCALE_NODES'
@@ -22,7 +25,10 @@ export type VectorCommandType =
   | 'DELETE_NODES'
   | 'REORDER_LAYERS'
   | 'NUDGE_NODES'
-  | 'UPDATE_NODE_PROPS';
+  | 'UPDATE_NODE_PROPS'
+  | 'BOOLEAN_TOPOLOGY'
+  | 'SMOOTH_PATH_CORNERS'
+  | 'REVERSE_PATH';
 
 export interface VectorCommandPayload {
   readonly type: VectorCommandType;
@@ -34,6 +40,8 @@ export interface VectorCommandPayload {
   readonly angleDeg?: number;
   readonly alignment?: AlignmentType;
   readonly reorderAction?: LayerReorderAction;
+  readonly topologyType?: BooleanTopologyType;
+  readonly cornerRadiusPx?: number;
   readonly origin?: { readonly x: number; readonly y: number };
   readonly propsUpdate?: {
     readonly fill?: any;
@@ -246,6 +254,51 @@ export class VectorEditingCommandSystem {
                 ...node,
                 ...command.propsUpdate,
               };
+            }
+            return node;
+          });
+          break;
+        }
+
+        case 'BOOLEAN_TOPOLOGY': {
+          if (!command.topologyType || activeNodes.length < 2) break;
+          const topoRes = VectorBooleanTopologyEngine.executeBooleanTopology(activeNodes, command.topologyType);
+          if (!topoRes.success || !topoRes.resultNode) break;
+
+          const removedSet = new Set(topoRes.affectedSourceIds);
+          const remainingNodes = snapshot.nodes.filter(n => !removedSet.has(n.id));
+          nextNodes = [...remainingNodes, topoRes.resultNode];
+          return {
+            success: true,
+            snapshot: {
+              nodes: nextNodes,
+              selectedIds: [topoRes.resultNode.id],
+            },
+            affectedIds: [topoRes.resultNode.id],
+            errors: [],
+          };
+        }
+
+        case 'SMOOTH_PATH_CORNERS': {
+          if (activeNodes.length === 0) break;
+          const targetSet = new Set(targetIds);
+          nextNodes = snapshot.nodes.map(node => {
+            if (targetSet.has(node.id) && node.type === 'path' && !node.locked) {
+              const res = VectorPathEngine.applyCornerSmoothing(node as any, { radiusPx: command.cornerRadiusPx ?? 10 });
+              return res.success ? res.pathNode : node;
+            }
+            return node;
+          });
+          break;
+        }
+
+        case 'REVERSE_PATH': {
+          if (activeNodes.length === 0) break;
+          const targetSet = new Set(targetIds);
+          nextNodes = snapshot.nodes.map(node => {
+            if (targetSet.has(node.id) && node.type === 'path' && !node.locked) {
+              const res = VectorPathEngine.reversePath(node as any);
+              return res.success ? res.pathNode : node;
             }
             return node;
           });

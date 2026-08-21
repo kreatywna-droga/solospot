@@ -159,6 +159,41 @@ export class VectorWorkflowOrchestrator {
   }
 
   /**
+   * Applies Boolean Topology operation (union, difference, intersection, exclusion).
+   */
+  public static applyBooleanTopologyWorkflow(
+    state: VectorWorkspaceState,
+    topologyType: any
+  ): VectorWorkspaceState {
+    return VectorWorkflowOrchestrator.dispatchCommand(state, `Boolean Topology (${topologyType})`, {
+      type: 'BOOLEAN_TOPOLOGY',
+      topologyType,
+    });
+  }
+
+  /**
+   * Smooths path corners for selected path shape.
+   */
+  public static smoothSelectedPathCornersWorkflow(
+    state: VectorWorkspaceState,
+    radiusPx: number = 10
+  ): VectorWorkspaceState {
+    return VectorWorkflowOrchestrator.dispatchCommand(state, `Smooth Path Corners (${radiusPx}px)`, {
+      type: 'SMOOTH_PATH_CORNERS',
+      cornerRadiusPx: radiusPx,
+    });
+  }
+
+  /**
+   * Reverses winding direction of selected path shape.
+   */
+  public static reverseSelectedPathWorkflow(state: VectorWorkspaceState): VectorWorkspaceState {
+    return VectorWorkflowOrchestrator.dispatchCommand(state, 'Reverse Path Winding', {
+      type: 'REVERSE_PATH',
+    });
+  }
+
+  /**
    * Keyboard shortcut command dispatcher.
    */
   public static handleKeyboardCommand(
