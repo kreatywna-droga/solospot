@@ -392,7 +392,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
     it('F25: supports boolean topology subtraction within cross-subsystem transaction', () => {
       const state = createVectorWorkspaceState([p1, p2]);
       const op: CrossSubsystemOperation = (snap) => {
-        const topoRes = VectorBooleanTopologyEngine.executeBooleanTopology(snap.nodes as any, 'subtract');
+        const topoRes = VectorBooleanTopologyEngine.executeBooleanTopology(snap.nodes as any, 'difference');
         return { nodes: [topoRes.resultNode!], selectedIds: [topoRes.resultNode!.id] };
       };
 
@@ -404,7 +404,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
     it('F26: supports boolean topology intersection within cross-subsystem transaction', () => {
       const state = createVectorWorkspaceState([p1, p2]);
       const op: CrossSubsystemOperation = (snap) => {
-        const topoRes = VectorBooleanTopologyEngine.executeBooleanTopology(snap.nodes as any, 'intersect');
+        const topoRes = VectorBooleanTopologyEngine.executeBooleanTopology(snap.nodes as any, 'intersection');
         return { nodes: [topoRes.resultNode!], selectedIds: [topoRes.resultNode!.id] };
       };
 
@@ -688,7 +688,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       const state = createVectorWorkspaceState([r1]);
       const op: CrossSubsystemOperation = (snap) => ({
         ...snap,
-        nodes: snap.nodes.map(n => ({ ...n, fill: { color: '#00ff00' } })),
+        nodes: snap.nodes.map(n => ({ ...n, fill: { type: 'solid', color: '#00ff00' } })),
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Fill Update');
@@ -1051,7 +1051,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
       const styleOp: CrossSubsystemOperation = (s) => ({
         ...s,
-        nodes: s.nodes.map(n => ({ ...n, fill: { color: '#123456' }, opacity: 0.85 })),
+        nodes: s.nodes.map(n => ({ ...n, fill: { type: 'solid', color: '#123456' }, opacity: 0.85 })),
       });
 
       const res = executeCrossSubsystemTransaction(state, [geomOp, styleOp], 'Geom + Style');
