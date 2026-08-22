@@ -9,11 +9,14 @@
 
 import { VectorWorkspaceState, VectorDocumentSnapshot, isEqualSnapshots } from './VectorWorkspaceController';
 import { VectorEditingCommandSystem, VectorCommandPayload, VectorBatchCommand } from './VectorEditingCommandSystem';
-import { LayerReorderAction, AlignmentType } from './VectorEditingEngine';
+import { LayerReorderAction, AlignmentType, VectorEditingEngine } from './VectorEditingEngine';
 import { VectorViewportState } from './VectorViewportController';
-import { SnappingOptions } from './VectorSnappingEngine';
+import { VectorSnappingEngine, SnappingOptions } from './VectorSnappingEngine';
 import { VectorEditorInteractionStateMachine } from './VectorEditorInteractionStateMachine';
 import { VectorTransactionRecoveryEngine, CheckpointLevel } from './VectorTransactionRecoveryEngine';
+import { VectorBooleanTopologyEngine } from './VectorBooleanTopologyEngine';
+import { VectorCompoundTopologyMaskEngine } from './VectorCompoundTopologyMaskEngine';
+import { VectorCrossSubsystemTransaction, CrossSubsystemOperation, CrossSubsystemTransactionResult } from './VectorCrossSubsystemTransaction';
 
 export interface KeyboardEventModifiers {
   readonly ctrlOrCmd?: boolean;
@@ -319,6 +322,127 @@ export class VectorWorkflowOrchestrator {
       type: 'SET_MASK_TOPOLOGY',
       topologyType,
     });
+  }
+
+  /**
+   * Executes a cross-subsystem transform-with-snapping transaction.
+   * Coordinates VectorTransformInteractionEngine + VectorSnappingEngine + HistoryStack
+   * under a single atomic boundary: BEGIN → PREPARE → EXECUTE (transform + snap) → VALIDATE → COMMIT.
+   * On failure: rollback to baseline snapshot, zero HistoryStack entries.
+   */
+  public static executeCrossSubsystemTransformSnapTransaction(
+    state: VectorWorkspaceState,
+    deltaX: number,
+    deltaY: number
+  ): CrossSubsystemTransactionResult {
+    const operations: ReadonlyArray<CrossSubsystemOperation> = [
+      (snapshot: VectorDocumentSnapshot) => {
+        // Step 1: Apply transform via command system
+        const cmdRes = VectorEditingCommandSystem.executeCommand(
+          snapshot,
+          { type: 'NUDGE_NODES', deltaX, deltaY }
+        );
+        if (!cmdRes.success || !cmdRes.snapshot) return snapshot;
+        return cmdRes.snapshot;
+      },
+      (snapshot: VectorDocumentSnapshot) => {
+        // Step 2: Apply snapping calculations
+        const { selectedIds } = snapshot;
+        if (!selectedIds || selectedIds.length === 0) return snapshot;
+        const selectedNodes = snapshot.nodes.filter(
+          (n: any) => selectedIds.includes(n.id) && !n.locked
+        );
+        if (selectedNodes.length === 0) return snapshot;
+        const targetNodes = snapshot.nodes.filter(
+          (n: any) => !selectedIds.includes(n.id)
+        );
+        const bounds = VectorEditingEngine.computeSelectionBounds(selectedNodes);
+        if (!bounds) return snapshot;
+
+        const snapResult = VectorSnappingEngine.computeSnapDelta(
+          bounds,
+          targetNodes,
+          {}
+        );
+        const finalDx = snapResult.snappedDeltaX;
+        const finalDy = snapResult.snappedDeltaY;
+        if (finalDx === 0 && finalDy === 0) return snapshot;
+        const movedNodes = selectedNodes.map((n: any) =>
+          VectorEditingEngine.moveShape(n, finalDx, finalDy)
+        );
+        const movedMap = new Map(movedNodes.map((n: any) => [n.id, n]));
+        const nextNodes = snapshot.nodes.map((n: any) =>
+          movedMap.has(n.id) ? movedMap.get(n.id)! : n
+        );
+        return { nodes: [...nextNodes], selectedIds: selectedIds };
+      },
+    ];
+
+    return VectorCrossSubsystemTransaction.executeCrossSubsystemTransaction(
+      state,
+      operations,
+      'Transform with Snapping'
+    );
+  }
+
+  /**
+   * Executes a cross-subsystem path-boolean-mask transaction.
+   * Coordinates VectorPathEngine + VectorBooleanTopologyEngine + VectorCompoundTopologyMaskEngine
+   * under a single atomic boundary: BEGIN → PREPARE → EXECUTE (boolean + mask) → VALIDATE → COMMIT.
+   * On failure: rollback to baseline snapshot, zero HistoryStack entries.
+   */
+  public static executeCrossSubsystemPathBooleanMaskTransaction(
+    state: VectorWorkspaceState,
+    topologyType: any,
+    maskShapeId: string,
+    targetShapeIds: ReadonlyArray<string>
+  ): CrossSubsystemTransactionResult {
+    const operations: ReadonlyArray<CrossSubsystemOperation> = [
+      (snapshot: VectorDocumentSnapshot) => {
+        // Step 1: Apply boolean topology operation
+        const targetSet = new Set([maskShapeId, ...targetShapeIds]);
+        const activeNodes = snapshot.nodes.filter(
+          (n: any) => targetSet.has(n.id) && !n.locked
+        );
+        if (activeNodes.length < 2) return snapshot;
+        const topoRes = VectorBooleanTopologyEngine.executeBooleanTopology(
+          activeNodes,
+          topologyType
+        );
+        if (!topoRes.success || !topoRes.resultNode) return snapshot;
+        const removedSet = new Set(topoRes.affectedSourceIds);
+        const remainingNodes = snapshot.nodes.filter((n: any) => !removedSet.has(n.id));
+        const nextNodes = [...remainingNodes, topoRes.resultNode];
+        return { nodes: nextNodes, selectedIds: [topoRes.resultNode.id] };
+      },
+      (snapshot: VectorDocumentSnapshot) => {
+        // Step 2: Apply mask topology on the boolean result
+        const resultNode = snapshot.nodes.find(
+          (n: any) => n.id === (snapshot.selectedIds[0] || '')
+        );
+        if (!resultNode) return snapshot;
+        const targetSet = new Set([resultNode.id]);
+        const activeNodes = snapshot.nodes.filter(
+          (n: any) => targetSet.has(n.id) && !n.locked
+        );
+        if (activeNodes.length === 0) return snapshot;
+        const maskRes = VectorCompoundTopologyMaskEngine.applyCompoundMaskTopology(
+          activeNodes[0],
+          'union'
+        );
+        if (!maskRes.success) return snapshot;
+        const removedSet = new Set(maskRes.affectedSourceIds || []);
+        const remainingNodes = snapshot.nodes.filter((n: any) => !removedSet.has(n.id));
+        const nextNodes = [...remainingNodes, maskRes.maskedNode!];
+        return { nodes: nextNodes, selectedIds: [maskRes.maskedNode!.id] };
+      },
+    ];
+
+    return VectorCrossSubsystemTransaction.executeCrossSubsystemTransaction(
+      state,
+      operations,
+      'Path Boolean + Mask'
+    );
   }
 
   /**
