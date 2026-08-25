@@ -4,3 +4,4 @@
 
 export * from './PageSectionBlockCompositionEngine';
 export * from './PageBuilderInteractionEngine';
+export * from './PageBuilderCanvasRuntimeAdapter';
