@@ -1,5 +1,5 @@
 /**
- * composition/index.ts — Module Exports for Page Section, Router, Commerce, Publishing & Form Submission Engines
+ * composition/index.ts — Module Exports for Page Section, Router, Commerce, Publishing, Form & Telemetry Engines
  */
 
 export * from './PageSectionBlockCompositionEngine';
@@ -9,3 +9,4 @@ export * from './MultiPageNavigationRouterEngine';
 export * from './StorefrontCartCheckoutDrawerEngine';
 export * from './SitePublishingDeploymentBridgeEngine';
 export * from './StorefrontFormSubmissionBridgeEngine';
+export * from './StorefrontAnalyticsTelemetryBridgeEngine';
