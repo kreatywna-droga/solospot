@@ -1,5 +1,5 @@
 /**
- * composition/index.ts — Module Exports for Page Section, Router, Commerce, Publishing, Form, Telemetry, Theme, I18n, Promo & Media Asset Engines
+ * composition/index.ts — Module Exports for Composition Engines G1-54 through G1-66
  */
 
 export * from './PageSectionBlockCompositionEngine';
@@ -14,3 +14,4 @@ export * from './StorefrontA11yThemeCustomizerBridgeEngine';
 export * from './StorefrontI18nLocalizationBridgeEngine';
 export * from './StorefrontPromoDiscountBridgeEngine';
 export * from './StorefrontMediaAssetOptimizationBridgeEngine';
+export * from './StorefrontCustomerAuthBridgeEngine';
