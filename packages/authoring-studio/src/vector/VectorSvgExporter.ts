@@ -22,7 +22,8 @@
 import {
   VectorNode,
   VectorTransform,
-  VectorFill
+  VectorFill,
+  VectorConstraintEdge
 } from './VectorDomainModel';
 import { VectorDocumentSnapshot } from './VectorWorkspaceController';
 import { VectorGeometry } from './VectorGeometry';
@@ -48,7 +49,7 @@ export class VectorSvgExporter {
 
     const nodesString = snapshot.nodes
       .filter((n) => n.visible !== false)
-      .map((n) => this.renderNode(n, '    ', new Set<string>()))
+      .map((n) => this.renderNode(n, '    ', new Set<string>(), snapshot.constraintEdges))
       .join('\n');
 
     return `${svgHeader}${defsString}\n${nodesString}\n</svg>`;
@@ -172,8 +173,13 @@ export class VectorSvgExporter {
     return transforms.length > 0 ? `transform="${transforms.join(' ')}"` : '';
   }
 
-  private static renderNode(node: VectorNode, indent: string, ancestors: Set<string>): string {
+  private static renderNode(node: VectorNode, indent: string, ancestors: Set<string>, constraintEdges?: ReadonlyArray<VectorConstraintEdge>): string {
     if (node.visible === false) return '';
+
+    const edge = (constraintEdges || []).find(e => e.sourceNodeId === node.id || e.targetNodeId === node.id);
+    const hConstraint = node.constraints?.horizontal || edge?.horizontal || 'MIN';
+    const vConstraint = node.constraints?.vertical || edge?.vertical || 'CENTER';
+    const hasConstraint = Boolean(node.constraints || edge);
 
     if (node.type === 'group') {
       if (ancestors.has(node.id)) {
@@ -187,13 +193,14 @@ export class VectorSvgExporter {
         node.id ? `id="${node.id}"` : '',
         node.clipPathId ? `clip-path="url(#${node.clipPathId})"` : '',
         node.opacity !== undefined && node.opacity < 1 ? `opacity="${node.opacity}"` : '',
+        hasConstraint ? `data-constraint-h="${hConstraint}" data-constraint-v="${vConstraint}"` : '',
       ]
         .filter(Boolean)
         .join(' ');
 
       const childrenStr = node.children
         .filter((c) => c.visible !== false)
-        .map((c) => this.renderNode(c, indent + '  ', nextAncestors))
+        .map((c) => this.renderNode(c, indent + '  ', nextAncestors, constraintEdges))
         .join('\n');
 
       const open = groupAttrs ? `<g ${groupAttrs}>` : '<g>';
@@ -203,13 +210,16 @@ export class VectorSvgExporter {
     const style = this.getStyleAttributes(node);
     const transform = this.getTransformAttribute(node.transform);
     const idAttr = node.id ? `id="${node.id}"` : '';
-    const baseAttrs = `${idAttr} ${style} ${transform}`.trim();
+    const constraintAttr = hasConstraint ? `data-constraint-h="${hConstraint}" data-constraint-v="${vConstraint}"` : '';
+    const baseAttrs = `${idAttr} ${style} ${transform} ${constraintAttr}`.trim();
 
     const t = node.transform || DEFAULT_TRANSFORM_FALLBACK;
 
-    switch (node.type) {
+    const n = node as any;
+    switch (node.type as string) {
+      case 'rect':
       case 'rectangle': {
-        const r = node.cornerRadius;
+        const r = n.cornerRadius;
         let rx = 0;
         let ry = 0;
         if (typeof r === 'number') {
@@ -234,27 +244,27 @@ export class VectorSvgExporter {
       }
 
       case 'polygon': {
-        const sides = typeof node.sides === 'number' && node.sides >= 3 ? node.sides : 3;
+        const sides = typeof n.sides === 'number' && n.sides >= 3 ? n.sides : 3;
         const pts = VectorGeometry.polygonGeometry(sides, t.width / 2, {
           x: t.width / 2,
           y: t.height / 2,
-        }, node.starRatio);
+        }, n.starRatio);
 
         const pointsStr = pts.map((p) => `${p.x},${p.y}`).join(' ');
         return `${indent}<polygon ${baseAttrs} points="${pointsStr}" />`;
       }
 
       case 'line': {
-        const rx1 = (node.x1 || 0) - t.x;
-        const ry1 = (node.y1 || 0) - t.y;
-        const rx2 = (node.x2 || 0) - t.x;
-        const ry2 = (node.y2 || 0) - t.y;
+        const rx1 = (n.x1 || 0) - t.x;
+        const ry1 = (n.y1 || 0) - t.y;
+        const rx2 = (n.x2 || 0) - t.x;
+        const ry2 = (n.y2 || 0) - t.y;
         return `${indent}<line ${baseAttrs} x1="${rx1}" y1="${ry1}" x2="${rx2}" y2="${ry2}" />`;
       }
 
       case 'path': {
-        const fillRuleAttr = node.fillRule ? ` fill-rule="${node.fillRule}"` : '';
-        return `${indent}<path ${baseAttrs}${fillRuleAttr} d="${node.d || ''}" />`;
+        const fillRuleAttr = n.fillRule ? ` fill-rule="${n.fillRule}"` : '';
+        return `${indent}<path ${baseAttrs}${fillRuleAttr} d="${n.d || ''}" />`;
       }
 
       default:

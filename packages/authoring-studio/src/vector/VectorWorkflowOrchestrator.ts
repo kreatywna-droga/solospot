@@ -22,6 +22,7 @@ import { VectorWorkflowDefinition, WorkflowExecutionStep } from './VectorWorkflo
 import { VectorConstraintGraphEngine } from './VectorConstraintGraphEngine';
 import { VectorConstraintSolverEngine, SolverOptions } from './VectorConstraintSolverEngine';
 import { VectorConstraintConflictResolutionEngine, ConflictResolutionStrategy } from './VectorConstraintConflictResolutionEngine';
+import { VectorConstraintTransactionPlannerEngine, PlannedOperation, VectorConstraintTransactionPlan } from './VectorConstraintTransactionPlannerEngine';
 import { BoundingBox } from './VectorConstraintLayoutEngine';
 
 export interface KeyboardEventModifiers {
@@ -386,7 +387,7 @@ export class VectorWorkflowOrchestrator {
             const nextNodes = snapshot.nodes.map((n: any) =>
               movedMap.has(n.id) ? movedMap.get(n.id)! : n
             );
-            return { nodes: [...nextNodes], selectedIds: selectedIds };
+            return { nodes: [...nextNodes], selectedIds: selectedIds, constraintEdges: snapshot.constraintEdges || [] };
           }
         }
       ]
@@ -424,7 +425,7 @@ export class VectorWorkflowOrchestrator {
             const removedSet = new Set(topoRes.affectedSourceIds);
             const remainingNodes = snapshot.nodes.filter((n: any) => !removedSet.has(n.id));
             const nextNodes = [...remainingNodes, topoRes.resultNode];
-            return { nodes: nextNodes, selectedIds: [topoRes.resultNode.id] };
+            return { nodes: nextNodes, selectedIds: [topoRes.resultNode.id], constraintEdges: snapshot.constraintEdges || [] };
           }
         },
         {
@@ -447,7 +448,7 @@ export class VectorWorkflowOrchestrator {
             const removedSet = new Set(maskRes.affectedSourceIds || []);
             const remainingNodes = snapshot.nodes.filter((n: any) => !removedSet.has(n.id));
             const nextNodes = [...remainingNodes, maskRes.maskedNode!];
-            return { nodes: nextNodes, selectedIds: [maskRes.maskedNode!.id] };
+            return { nodes: nextNodes, selectedIds: [maskRes.maskedNode!.id], constraintEdges: snapshot.constraintEdges || [] };
           }
         }
       ]
@@ -611,6 +612,83 @@ export class VectorWorkflowOrchestrator {
     strategy: ConflictResolutionStrategy = 'remove_conflicting_constraint'
   ): WorkflowExecutionResult {
     const workflow = this.resolveConstraintConflictsWorkflow(strategy);
+    return VectorDeterministicWorkflowEngine.executeWorkflow(state, workflow);
+  }
+
+  /**
+   * Plans a vector constraint transaction predictively without mutating SSOT or HistoryStack.
+   */
+  public static planConstraintTransaction(
+    state: VectorWorkspaceState,
+    operations: ReadonlyArray<PlannedOperation>,
+    strategy: ConflictResolutionStrategy = 'remove_conflicting_constraint'
+  ): VectorConstraintTransactionPlan {
+    const snapshot = state?.snapshot || { nodes: [], selectedIds: [], constraintEdges: [] };
+    return VectorConstraintTransactionPlannerEngine.generatePlan(snapshot, operations, strategy);
+  }
+
+  /**
+   * Generates an optimistic preview of a transaction plan without committing or mutating workspace state.
+   */
+  public static previewConstraintTransaction(
+    state: VectorWorkspaceState,
+    plan: VectorConstraintTransactionPlan
+  ): VectorDocumentSnapshot {
+    if (!plan) return state?.snapshot || { nodes: [], selectedIds: [], constraintEdges: [] };
+    return VectorConstraintTransactionPlannerEngine.previewPlan(plan);
+  }
+
+  /**
+   * Executes a planned constraint transaction through deterministic workflow engine.
+   * Commits exactly 1 history stack transaction on success, or 0 on failure/rollback.
+   */
+  public static executePlannedConstraintTransaction(
+    state: VectorWorkspaceState,
+    plan: VectorConstraintTransactionPlan
+  ): WorkflowExecutionResult {
+    if (!state || !plan) {
+      return {
+        success: false,
+        state: state || { snapshot: { nodes: [], selectedIds: [], constraintEdges: [] }, historyStack: {} as any },
+        error: 'Invalid state or transaction plan'
+      };
+    }
+
+    const validation = VectorConstraintTransactionPlannerEngine.validatePlan(plan, state.snapshot);
+    if (!validation.isValid) {
+      return {
+        success: false,
+        state,
+        error: `Plan validation failed: ${validation.errors.join('; ')}`
+      };
+    }
+
+    const workflow: VectorWorkflowDefinition = {
+      workflowId: `planned_tx_${plan.planId}`,
+      description: `Planned Vector Constraint Transaction (${plan.orderedOperations.length} ops)`,
+      steps: [
+        {
+          id: 'step_1_validate_preflight',
+          operation: (snapshot: VectorDocumentSnapshot) => {
+            if (!plan.validationPlan.preFlightPassed) {
+              return new Error(plan.validationPlan.validationError || 'Pre-flight validation failed');
+            }
+            return snapshot;
+          }
+        },
+        {
+          id: 'step_2_apply_and_solve_plan',
+          operation: (snapshot: VectorDocumentSnapshot) => {
+            const previewSnapshot = VectorConstraintTransactionPlannerEngine.previewPlan(plan);
+            if (!previewSnapshot || !Array.isArray(previewSnapshot.nodes)) {
+              return new Error('Execution step failed to generate valid preview snapshot');
+            }
+            return previewSnapshot;
+          }
+        }
+      ]
+    };
+
     return VectorDeterministicWorkflowEngine.executeWorkflow(state, workflow);
   }
 
