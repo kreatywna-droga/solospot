@@ -20,6 +20,7 @@ import { VectorCrossSubsystemTransaction, CrossSubsystemOperation, CrossSubsyste
 import { VectorDeterministicWorkflowEngine, WorkflowExecutionResult } from './VectorDeterministicWorkflowEngine';
 import { VectorWorkflowDefinition, WorkflowExecutionStep } from './VectorWorkflowDefinition';
 import { VectorConstraintGraphEngine } from './VectorConstraintGraphEngine';
+import { VectorConstraintSolverEngine, SolverOptions } from './VectorConstraintSolverEngine';
 import { BoundingBox } from './VectorConstraintLayoutEngine';
 
 export interface KeyboardEventModifiers {
@@ -503,6 +504,35 @@ export class VectorWorkflowOrchestrator {
               ...snapshot,
               nodes: res.nodes
             };
+          }
+        }
+      ]
+    };
+    return VectorDeterministicWorkflowEngine.executeWorkflow(state, workflow);
+  }
+
+  /**
+   * Executes a high-level constraint solver transaction.
+   * Runs iterative fixed-point solver, validates stability, and commits 1 history entry on success or 0 entries on error/failure.
+   */
+  public static executeConstraintSolveTransaction(
+    state: VectorWorkspaceState,
+    changedNodeIds: string[],
+    explicitMutations: Map<string, BoundingBox> = new Map(),
+    options: SolverOptions = {}
+  ): WorkflowExecutionResult {
+    const workflow: VectorWorkflowDefinition = {
+      workflowId: `constraint_solve_${Date.now()}`,
+      description: 'Cross-Subsystem Constraint Solver Transaction',
+      steps: [
+        {
+          id: 'step_1_solve_constraints',
+          operation: (snapshot: VectorDocumentSnapshot) => {
+            const res = VectorConstraintSolverEngine.resolveIncremental(snapshot, changedNodeIds, explicitMutations, options);
+            if (!res.success || !res.snapshot) {
+              return snapshot; // Failure or instability, rollback to baseline snapshot
+            }
+            return res.snapshot;
           }
         }
       ]
