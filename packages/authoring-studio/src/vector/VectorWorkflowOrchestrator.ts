@@ -739,4 +739,60 @@ export class VectorWorkflowOrchestrator {
 
     return state;
   }
+
+  /**
+   * (Sprint G1-54 / HACP) Executes a Page Section Add transaction.
+   */
+  public static executeAddPageSectionTransaction(
+    state: VectorWorkspaceState,
+    sectionType: any,
+    presetId?: string
+  ): WorkflowExecutionResult {
+    const { PageSectionBlockCompositionEngine } = require('../composition/PageSectionBlockCompositionEngine');
+    const doc = PageSectionBlockCompositionEngine.createPageComposition('Active Page Composition');
+    const updatedDoc = PageSectionBlockCompositionEngine.addSection(doc, sectionType, presetId);
+    const nextSnapshot = PageSectionBlockCompositionEngine.toVectorDocumentSnapshot(updatedDoc);
+
+    const workflow: VectorWorkflowDefinition = {
+      workflowId: `wf_add_section_${Date.now()}`,
+      description: `Add Section (${sectionType})`,
+      steps: [
+        {
+          id: 'step_1_add_section',
+          operation: () => nextSnapshot
+        }
+      ]
+    };
+
+    return VectorDeterministicWorkflowEngine.executeWorkflow(state, workflow);
+  }
+
+  /**
+   * (Sprint G1-54 / HACP) Executes a Page Section Remove transaction.
+   */
+  public static executeRemovePageSectionTransaction(
+    state: VectorWorkspaceState,
+    sectionId: string
+  ): WorkflowExecutionResult {
+    const workflow: VectorWorkflowDefinition = {
+      workflowId: `wf_remove_section_${Date.now()}`,
+      description: `Remove Section (${sectionId})`,
+      steps: [
+        {
+          id: 'step_1_remove_section',
+          operation: (snapshot: VectorDocumentSnapshot) => {
+            const nextNodes = snapshot.nodes.filter((n: any) => n.id !== sectionId && !n.id.startsWith(`${sectionId}_`));
+            const nextEdges = (snapshot.constraintEdges || []).filter((e: any) => e.sourceNodeId !== sectionId && e.targetNodeId !== sectionId);
+            return {
+              nodes: nextNodes,
+              selectedIds: nextNodes.length > 0 ? [nextNodes[0].id] : [],
+              constraintEdges: nextEdges
+            };
+          }
+        }
+      ]
+    };
+
+    return VectorDeterministicWorkflowEngine.executeWorkflow(state, workflow);
+  }
 }
