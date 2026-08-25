@@ -17,6 +17,10 @@ import { VectorTransactionRecoveryEngine, CheckpointLevel } from './VectorTransa
 import { VectorBooleanTopologyEngine } from './VectorBooleanTopologyEngine';
 import { VectorCompoundTopologyMaskEngine } from './VectorCompoundTopologyMaskEngine';
 import { VectorCrossSubsystemTransaction, CrossSubsystemOperation, CrossSubsystemTransactionResult } from './VectorCrossSubsystemTransaction';
+import { VectorDeterministicWorkflowEngine, WorkflowExecutionResult } from './VectorDeterministicWorkflowEngine';
+import { VectorWorkflowDefinition, WorkflowExecutionStep } from './VectorWorkflowDefinition';
+import { VectorConstraintGraphEngine } from './VectorConstraintGraphEngine';
+import { BoundingBox } from './VectorConstraintLayoutEngine';
 
 export interface KeyboardEventModifiers {
   readonly ctrlOrCmd?: boolean;
@@ -334,115 +338,176 @@ export class VectorWorkflowOrchestrator {
     state: VectorWorkspaceState,
     deltaX: number,
     deltaY: number
-  ): CrossSubsystemTransactionResult {
-    const operations: ReadonlyArray<CrossSubsystemOperation> = [
-      (snapshot: VectorDocumentSnapshot) => {
-        // Step 1: Apply transform via command system
-        const cmdRes = VectorEditingCommandSystem.executeCommand(
-          snapshot,
-          { type: 'NUDGE_NODES', deltaX, deltaY }
-        );
-        if (!cmdRes.success || !cmdRes.snapshot) return snapshot;
-        return cmdRes.snapshot;
-      },
-      (snapshot: VectorDocumentSnapshot) => {
-        // Step 2: Apply snapping calculations
-        const { selectedIds } = snapshot;
-        if (!selectedIds || selectedIds.length === 0) return snapshot;
-        const selectedNodes = snapshot.nodes.filter(
-          (n: any) => selectedIds.includes(n.id) && !n.locked
-        );
-        if (selectedNodes.length === 0) return snapshot;
-        const targetNodes = snapshot.nodes.filter(
-          (n: any) => !selectedIds.includes(n.id)
-        );
-        const bounds = VectorEditingEngine.computeSelectionBounds(selectedNodes);
-        if (!bounds) return snapshot;
+  ): WorkflowExecutionResult {
+    const workflow: VectorWorkflowDefinition = {
+      workflowId: `wf_transform_snap_${Date.now()}`,
+      description: 'Transform with Snapping',
+      steps: [
+        {
+          id: 'step_1_transform',
+          operation: (snapshot: VectorDocumentSnapshot) => {
+            const cmdRes = VectorEditingCommandSystem.executeCommand(
+              snapshot,
+              { type: 'NUDGE_NODES', deltaX, deltaY }
+            );
+            if (!cmdRes.success || !cmdRes.snapshot) return snapshot;
+            return cmdRes.snapshot;
+          }
+        },
+        {
+          id: 'step_2_snap',
+          operation: (snapshot: VectorDocumentSnapshot) => {
+            const { selectedIds } = snapshot;
+            if (!selectedIds || selectedIds.length === 0) return snapshot;
+            const selectedNodes = snapshot.nodes.filter(
+              (n: any) => selectedIds.includes(n.id) && !n.locked
+            );
+            if (selectedNodes.length === 0) return snapshot;
+            const targetNodes = snapshot.nodes.filter(
+              (n: any) => !selectedIds.includes(n.id)
+            );
+            const bounds = VectorEditingEngine.computeSelectionBounds(selectedNodes);
+            if (!bounds) return snapshot;
 
-        const snapResult = VectorSnappingEngine.computeSnapDelta(
-          bounds,
-          targetNodes,
-          {}
-        );
-        const finalDx = snapResult.snappedDeltaX;
-        const finalDy = snapResult.snappedDeltaY;
-        if (finalDx === 0 && finalDy === 0) return snapshot;
-        const movedNodes = selectedNodes.map((n: any) =>
-          VectorEditingEngine.moveShape(n, finalDx, finalDy)
-        );
-        const movedMap = new Map(movedNodes.map((n: any) => [n.id, n]));
-        const nextNodes = snapshot.nodes.map((n: any) =>
-          movedMap.has(n.id) ? movedMap.get(n.id)! : n
-        );
-        return { nodes: [...nextNodes], selectedIds: selectedIds };
-      },
-    ];
+            const snapResult = VectorSnappingEngine.computeSnapDelta(
+              bounds,
+              targetNodes,
+              {}
+            );
+            const finalDx = snapResult.snappedDeltaX;
+            const finalDy = snapResult.snappedDeltaY;
+            if (finalDx === 0 && finalDy === 0) return snapshot;
+            const movedNodes = selectedNodes.map((n: any) =>
+              VectorEditingEngine.moveShape(n, finalDx, finalDy)
+            );
+            const movedMap = new Map(movedNodes.map((n: any) => [n.id, n]));
+            const nextNodes = snapshot.nodes.map((n: any) =>
+              movedMap.has(n.id) ? movedMap.get(n.id)! : n
+            );
+            return { nodes: [...nextNodes], selectedIds: selectedIds };
+          }
+        }
+      ]
+    };
 
-    return VectorCrossSubsystemTransaction.executeCrossSubsystemTransaction(
-      state,
-      operations,
-      'Transform with Snapping'
-    );
+    return VectorDeterministicWorkflowEngine.executeWorkflow(state, workflow);
   }
 
   /**
-   * Executes a cross-subsystem path-boolean-mask transaction.
-   * Coordinates VectorPathEngine + VectorBooleanTopologyEngine + VectorCompoundTopologyMaskEngine
-   * under a single atomic boundary: BEGIN → PREPARE → EXECUTE (boolean + mask) → VALIDATE → COMMIT.
-   * On failure: rollback to baseline snapshot, zero HistoryStack entries.
+   * (Sprint G1-48 / HACP) Executes a multi-subsystem Path Boolean followed by Compound Mask topology operation.
    */
   public static executeCrossSubsystemPathBooleanMaskTransaction(
     state: VectorWorkspaceState,
     topologyType: any,
     maskShapeId: string,
     targetShapeIds: ReadonlyArray<string>
-  ): CrossSubsystemTransactionResult {
-    const operations: ReadonlyArray<CrossSubsystemOperation> = [
-      (snapshot: VectorDocumentSnapshot) => {
-        // Step 1: Apply boolean topology operation
-        const targetSet = new Set([maskShapeId, ...targetShapeIds]);
-        const activeNodes = snapshot.nodes.filter(
-          (n: any) => targetSet.has(n.id) && !n.locked
-        );
-        if (activeNodes.length < 2) return snapshot;
-        const topoRes = VectorBooleanTopologyEngine.executeBooleanTopology(
-          activeNodes,
-          topologyType
-        );
-        if (!topoRes.success || !topoRes.resultNode) return snapshot;
-        const removedSet = new Set(topoRes.affectedSourceIds);
-        const remainingNodes = snapshot.nodes.filter((n: any) => !removedSet.has(n.id));
-        const nextNodes = [...remainingNodes, topoRes.resultNode];
-        return { nodes: nextNodes, selectedIds: [topoRes.resultNode.id] };
-      },
-      (snapshot: VectorDocumentSnapshot) => {
-        // Step 2: Apply mask topology on the boolean result
-        const resultNode = snapshot.nodes.find(
-          (n: any) => n.id === (snapshot.selectedIds[0] || '')
-        );
-        if (!resultNode) return snapshot;
-        const targetSet = new Set([resultNode.id]);
-        const activeNodes = snapshot.nodes.filter(
-          (n: any) => targetSet.has(n.id) && !n.locked
-        );
-        if (activeNodes.length === 0) return snapshot;
-        const maskRes = VectorCompoundTopologyMaskEngine.applyCompoundMaskTopology(
-          activeNodes[0],
-          'union'
-        );
-        if (!maskRes.success) return snapshot;
-        const removedSet = new Set(maskRes.affectedSourceIds || []);
-        const remainingNodes = snapshot.nodes.filter((n: any) => !removedSet.has(n.id));
-        const nextNodes = [...remainingNodes, maskRes.maskedNode!];
-        return { nodes: nextNodes, selectedIds: [maskRes.maskedNode!.id] };
-      },
-    ];
+  ): WorkflowExecutionResult {
+    const workflow: VectorWorkflowDefinition = {
+      workflowId: `wf_path_bool_mask_${Date.now()}`,
+      description: 'Path Boolean + Mask',
+      steps: [
+        {
+          id: 'step_1_boolean',
+          operation: (snapshot: VectorDocumentSnapshot) => {
+            const targetSet = new Set([maskShapeId, ...targetShapeIds]);
+            const activeNodes = snapshot.nodes.filter(
+              (n: any) => targetSet.has(n.id) && !n.locked
+            );
+            if (activeNodes.length < 2) return snapshot;
+            const topoRes = VectorBooleanTopologyEngine.executeBooleanTopology(
+              activeNodes,
+              topologyType
+            );
+            if (!topoRes.success || !topoRes.resultNode) return snapshot;
+            const removedSet = new Set(topoRes.affectedSourceIds);
+            const remainingNodes = snapshot.nodes.filter((n: any) => !removedSet.has(n.id));
+            const nextNodes = [...remainingNodes, topoRes.resultNode];
+            return { nodes: nextNodes, selectedIds: [topoRes.resultNode.id] };
+          }
+        },
+        {
+          id: 'step_2_mask',
+          operation: (snapshot: VectorDocumentSnapshot) => {
+            const resultNode = snapshot.nodes.find(
+              (n: any) => n.id === (snapshot.selectedIds[0] || '')
+            );
+            if (!resultNode) return snapshot;
+            const targetSet = new Set([resultNode.id]);
+            const activeNodes = snapshot.nodes.filter(
+              (n: any) => targetSet.has(n.id) && !n.locked
+            );
+            if (activeNodes.length === 0) return snapshot;
+            const maskRes = VectorCompoundTopologyMaskEngine.applyCompoundMaskTopology(
+              activeNodes[0],
+              'union'
+            );
+            if (!maskRes.success) return snapshot;
+            const removedSet = new Set(maskRes.affectedSourceIds || []);
+            const remainingNodes = snapshot.nodes.filter((n: any) => !removedSet.has(n.id));
+            const nextNodes = [...remainingNodes, maskRes.maskedNode!];
+            return { nodes: nextNodes, selectedIds: [maskRes.maskedNode!.id] };
+          }
+        }
+      ]
+    };
 
-    return VectorCrossSubsystemTransaction.executeCrossSubsystemTransaction(
-      state,
-      operations,
-      'Path Boolean + Mask'
-    );
+    return VectorDeterministicWorkflowEngine.executeWorkflow(state, workflow);
+  }
+
+  /**
+   * Defines and executes a deterministic workflow for responsive transformations.
+   * This guarantees that constraints are applied in a single transactional step.
+   */
+  public static executeCrossSubsystemResponsiveTransformTransaction(
+    state: VectorWorkspaceState,
+    commandPayload: VectorCommandPayload
+  ): WorkflowExecutionResult {
+    const workflow: VectorWorkflowDefinition = {
+      workflowId: `responsive_transform_${Date.now()}`,
+      description: 'Cross-Subsystem Responsive Transform Transaction',
+      steps: [
+        {
+          id: 'step_1_transform_and_constrain',
+          operation: (snapshot: VectorDocumentSnapshot) => {
+            const res = VectorEditingCommandSystem.executeCommand(snapshot, commandPayload);
+            return res.success ? res.snapshot : snapshot;
+          }
+        }
+      ]
+    };
+    return VectorDeterministicWorkflowEngine.executeWorkflow(state, workflow);
+  }
+
+  /**
+   * Executes a high-level deterministic constraint graph resolution transaction.
+   * Creates graph, detects cycles, resolves affected nodes, validates output snapshot,
+   * and commits exactly 1 transaction on success or 0 transactions on failure/error.
+   */
+  public static executeConstraintGraphResolutionTransaction(
+    state: VectorWorkspaceState,
+    explicitMutations: Map<string, BoundingBox> = new Map()
+  ): WorkflowExecutionResult {
+    const workflow: VectorWorkflowDefinition = {
+      workflowId: `constraint_graph_resolution_${Date.now()}`,
+      description: 'Cross-Subsystem Constraint Graph Resolution Transaction',
+      steps: [
+        {
+          id: 'step_1_resolve_constraint_graph',
+          operation: (snapshot: VectorDocumentSnapshot) => {
+            const graph = VectorConstraintGraphEngine.buildConstraintGraph(snapshot);
+            const res = VectorConstraintGraphEngine.resolveConstraintGraph(graph, snapshot, explicitMutations);
+            if (!res.success || !res.nodes) {
+              return snapshot; // Pre-flight failure, rollback to original snapshot
+            }
+            return {
+              ...snapshot,
+              nodes: res.nodes
+            };
+          }
+        }
+      ]
+    };
+    return VectorDeterministicWorkflowEngine.executeWorkflow(state, workflow);
   }
 
   /**
