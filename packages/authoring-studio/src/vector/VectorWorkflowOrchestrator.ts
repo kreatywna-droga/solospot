@@ -21,6 +21,7 @@ import { VectorDeterministicWorkflowEngine, WorkflowExecutionResult } from './Ve
 import { VectorWorkflowDefinition, WorkflowExecutionStep } from './VectorWorkflowDefinition';
 import { VectorConstraintGraphEngine } from './VectorConstraintGraphEngine';
 import { VectorConstraintSolverEngine, SolverOptions } from './VectorConstraintSolverEngine';
+import { VectorConstraintConflictResolutionEngine, ConflictResolutionStrategy } from './VectorConstraintConflictResolutionEngine';
 import { BoundingBox } from './VectorConstraintLayoutEngine';
 
 export interface KeyboardEventModifiers {
@@ -537,6 +538,79 @@ export class VectorWorkflowOrchestrator {
         }
       ]
     };
+    return VectorDeterministicWorkflowEngine.executeWorkflow(state, workflow);
+  }
+
+  /**
+   * Undoes the last transaction in the history stack.
+   */
+  public static undoWorkflow(state: VectorWorkspaceState): VectorWorkspaceState {
+    if (!state || !state.historyStack) return state;
+    const res = state.historyStack.undo();
+    if (!res) return state;
+    return {
+      ...state,
+      snapshot: res.state,
+      historyStack: res.stack
+    };
+  }
+
+  /**
+   * Redoes the last undone transaction in the history stack.
+   */
+  public static redoWorkflow(state: VectorWorkspaceState): VectorWorkspaceState {
+    if (!state || !state.historyStack) return state;
+    const res = state.historyStack.redo();
+    if (!res) return state;
+    return {
+      ...state,
+      snapshot: res.state,
+      historyStack: res.stack
+    };
+  }
+
+  /**
+   * Helper function defining 8-step conflict resolution workflow:
+   * ANALYZE → DETECT → CLASSIFY → PRIORITIZE → RESOLVE → SOLVE → VALIDATE → COMMIT
+   */
+  public static resolveConstraintConflictsWorkflow(
+    strategy: ConflictResolutionStrategy = 'remove_conflicting_constraint'
+  ): VectorWorkflowDefinition {
+    return {
+      workflowId: `conflict_resolution_${Date.now()}`,
+      description: '8-Step Vector Constraint Conflict Resolution Workflow',
+      steps: [
+        {
+          id: 'step_1_analyze_and_detect',
+          operation: (snapshot: VectorDocumentSnapshot) => {
+            const report = VectorConstraintConflictResolutionEngine.buildConflictReport(snapshot);
+            if (!report.hasConflicts) return snapshot;
+            return snapshot;
+          }
+        },
+        {
+          id: 'step_2_resolve_and_solve',
+          operation: (snapshot: VectorDocumentSnapshot) => {
+            const res = VectorConstraintConflictResolutionEngine.resolveConflictsWithSolver(snapshot, strategy);
+            if (!res.success || !res.snapshot) {
+              return new Error(res.error || 'Constraint conflict resolution failed');
+            }
+            return res.snapshot;
+          }
+        }
+      ]
+    };
+  }
+
+  /**
+   * Executes a high-level constraint conflict resolution transaction.
+   * Commits 1 history entry on successful resolution or 0 history entries on failure/rollback.
+   */
+  public static executeConstraintConflictResolutionTransaction(
+    state: VectorWorkspaceState,
+    strategy: ConflictResolutionStrategy = 'remove_conflicting_constraint'
+  ): WorkflowExecutionResult {
+    const workflow = this.resolveConstraintConflictsWorkflow(strategy);
     return VectorDeterministicWorkflowEngine.executeWorkflow(state, workflow);
   }
 

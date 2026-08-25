@@ -14,6 +14,7 @@ export * from './VectorSvgExporter';
 export * from './VectorConstraintLayoutEngine';
 export * from './VectorConstraintGraphEngine';
 export * from './VectorConstraintSolverEngine';
+export * from './VectorConstraintConflictResolutionEngine';
 export * from './VectorWorkflowOrchestrator';
 export * from './VectorDeterministicWorkflowEngine';
 export * from './VectorCrossSubsystemTransaction';

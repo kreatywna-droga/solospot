@@ -39,10 +39,11 @@ export class VectorTransactionRecoveryEngine {
     const id = `cp_${level.toLowerCase()}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
     const safeSelected = Array.isArray(selectedIds) ? selectedIds : [];
     
-    // Deep clone snapshot nodes and transform objects to prevent mutation leaks
+    // Deep clone snapshot nodes, transform objects, and constraint edges to prevent mutation leaks
     const clonedSnapshot: VectorDocumentSnapshot = {
       nodes: snapshot.nodes.map(n => ({ ...n, transform: { ...n.transform } })),
       selectedIds: [...safeSelected],
+      constraintEdges: [...(snapshot.constraintEdges || [])],
     };
 
     const checkpoint: RecoveryCheckpointDTO = {
@@ -67,6 +68,7 @@ export class VectorTransactionRecoveryEngine {
     return {
       nodes: cp.snapshot.nodes.map(n => ({ ...n, transform: { ...n.transform } })),
       selectedIds: [...cp.selectedIds],
+      constraintEdges: [...(cp.snapshot.constraintEdges || [])],
     };
   }
 
@@ -81,6 +83,7 @@ export class VectorTransactionRecoveryEngine {
     return {
       nodes: cp.snapshot.nodes.map(n => ({ ...n, transform: { ...n.transform } })),
       selectedIds: [...cp.selectedIds],
+      constraintEdges: [...(cp.snapshot.constraintEdges || [])],
     };
   }
 
@@ -92,12 +95,13 @@ export class VectorTransactionRecoveryEngine {
     fallbackSnapshot: VectorDocumentSnapshot
   ): VectorDocumentSnapshot {
     if (!fallbackSnapshot || !Array.isArray(fallbackSnapshot.nodes)) {
-      return { nodes: [], selectedIds: [] };
+      return { nodes: [], selectedIds: [], constraintEdges: [] };
     }
 
     return {
       nodes: fallbackSnapshot.nodes.map(n => ({ ...n, transform: { ...n.transform } })),
       selectedIds: [...(fallbackSnapshot.selectedIds || [])],
+      constraintEdges: [...(fallbackSnapshot.constraintEdges || [])],
     };
   }
 

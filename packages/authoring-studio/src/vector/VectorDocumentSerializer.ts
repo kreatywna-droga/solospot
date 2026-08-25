@@ -15,6 +15,7 @@ export interface VectorDocumentDTO {
   updatedAt: number;
   nodes: VectorNode[];
   selectedIds: string[];
+  constraintEdges?: any[];
   metadata?: Record<string, unknown>;
 }
 
@@ -43,6 +44,7 @@ export class VectorDocumentSerializer {
       updatedAt: Date.now(),
       nodes: snapshot.nodes as VectorNode[],
       selectedIds: snapshot.selectedIds as string[],
+      constraintEdges: (snapshot.constraintEdges || []) as any[],
       metadata,
     };
 
@@ -100,6 +102,7 @@ export class VectorDocumentSerializer {
       const snapshot: VectorDocumentSnapshot = {
         nodes: validatedNodes,
         selectedIds: validatedSelectedIds,
+        constraintEdges: (dto.constraintEdges || []) as any[],
       };
 
       return {
@@ -162,6 +165,14 @@ export class VectorDocumentSerializer {
     const locked = typeof raw.locked === 'boolean' ? raw.locked : false;
     const opacity = typeof raw.opacity === 'number' && Number.isFinite(raw.opacity) ? Math.max(0, Math.min(1, raw.opacity)) : 1;
 
+    let constraints = undefined;
+    if (raw.constraints && typeof raw.constraints === 'object') {
+      const { horizontal, vertical } = raw.constraints;
+      const validH = ['MIN', 'MAX', 'CENTER', 'STRETCH', 'SCALE'].includes(horizontal) ? horizontal : 'MIN';
+      const validV = ['MIN', 'MAX', 'CENTER', 'STRETCH', 'SCALE'].includes(vertical) ? vertical : 'MIN';
+      constraints = { horizontal: validH, vertical: validV };
+    }
+
     if (raw.type === 'group') {
       const children: VectorNode[] = [];
       if (Array.isArray(raw.children)) {
@@ -184,6 +195,7 @@ export class VectorDocumentSerializer {
         fill,
         stroke,
         children,
+        constraints,
         ...(raw.isMask !== undefined ? { isMask: raw.isMask } : {}),
         ...(raw.clipPathId !== undefined ? { clipPathId: raw.clipPathId } : {}),
         ...(raw.isMaskGroup !== undefined ? { isMaskGroup: raw.isMaskGroup } : {}),
@@ -199,6 +211,7 @@ export class VectorDocumentSerializer {
       stroke,
       visible,
       opacity,
+      constraints,
       ...(raw.isMask !== undefined ? { isMask: raw.isMask } : {}),
       ...(raw.clipPathId !== undefined ? { clipPathId: raw.clipPathId } : {}),
       ...(raw.isMaskGroup !== undefined ? { isMaskGroup: raw.isMaskGroup } : {}),
