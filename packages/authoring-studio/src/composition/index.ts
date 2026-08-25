@@ -1,5 +1,5 @@
 /**
- * composition/index.ts — Module Exports for Composition Engines G1-54 through G1-74
+ * composition/index.ts — Module Exports for Composition Engines G1-54 through G1-75
  */
 
 export * from './PageSectionBlockCompositionEngine';
@@ -23,3 +23,4 @@ export * from './StorefrontProductReviewRatingBridgeEngine';
 export * from './StorefrontWishlistSavedItemsBridgeEngine';
 export * from './StorefrontTaxShippingCalculatorBridgeEngine';
 export * from './StorefrontNotificationBannerBridgeEngine';
+export * from './StorefrontCustomerSupportTicketBridgeEngine';
