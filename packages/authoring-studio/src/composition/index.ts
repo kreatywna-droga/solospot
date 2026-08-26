@@ -81,6 +81,8 @@ export * from './StorefrontMerchantNotificationQueueEngine';
 export * from './StorefrontContentSecurityPolicyEngine';
 export * from './StorefrontMerchantDataMigrationEngine';
 export * from './StorefrontTaxExemptionCertificateEngine';
+export * from './StorefrontVendorMarketplacePayoutEngine';
+
 
 
 
