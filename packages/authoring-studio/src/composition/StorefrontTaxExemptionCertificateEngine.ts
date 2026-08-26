@@ -36,6 +36,9 @@ export interface TaxExemptionCertificateEngineStateDTO {
   readonly certificates: Record<string, TaxExemptionCertificateDTO>; // certificateId -> dto
 }
 
+/**
+ * @deprecated StorefrontTaxExemptionCertificateEngine is merged into StorefrontTaxComplianceEngine. Use StorefrontTaxComplianceEngine instead. (G1-164 MERGE)
+ */
 export class StorefrontTaxExemptionCertificateEngine {
   private readonly tenantId: string;
   private certificates: Map<string, TaxExemptionCertificateDTO> = new Map();
@@ -43,6 +46,7 @@ export class StorefrontTaxExemptionCertificateEngine {
   constructor(tenantId = 'default_tenant') {
     this.tenantId = tenantId;
   }
+
 
   /**
    * Registers a customer B2B tax exemption certificate.
