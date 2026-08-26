@@ -102,7 +102,7 @@ describe('Payment Engine', () => {
     const tenantA = 'tenant-a';
     const tenantB = 'tenant-b';
 
-    let intentA = await engine.createPaymentIntent(tenantA, 'ord-a', 5000, 'PLN', mockStripeAdapter);
+    const intentA = await engine.createPaymentIntent(tenantA, 'ord-a', 5000, 'PLN', mockStripeAdapter);
 
     // Tenant B trying to process Tenant A's intent -> throws
     await expect(

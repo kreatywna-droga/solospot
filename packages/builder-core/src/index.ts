@@ -370,3 +370,139 @@ export {
   validateGridItemProps,
 } from './GridTypes';
 
+// Animation Engine Domain Types (PM29)
+export type {
+  AnimationTimeline,
+  AnimationClip,
+  PropertyAnimationTrack,
+  AnimationKeyframe,
+  AnimationTrigger,
+  PlaybackOptions,
+  ResponsiveAnimationTimeline,
+  EasingCurve,
+  FillMode,
+  AnimationDirection,
+  TriggerType,
+} from './animation/AnimationTypes';
+
+export { AnimationValidator } from './animation/AnimationValidator';
+export { AnimationSerializer } from './animation/AnimationSerializer';
+
+// Animation Runtime Foundation (PM30)
+export { EasingEngine } from './animation/EasingEngine';
+export { TimelineEvaluator } from './animation/TimelineEvaluator';
+export { PlaybackController } from './animation/PlaybackController';
+export type { PlaybackState } from './animation/PlaybackController';
+
+// Animation Interpolation Engine (PM31)
+export { AnimationInterpolator } from './animation/AnimationInterpolator';
+export { AnimationColorInterpolator } from './animation/AnimationColorInterpolator';
+export { AnimationTransformInterpolator } from './animation/AnimationTransformInterpolator';
+export { AnimationUnitParser } from './animation/AnimationUnitParser';
+export { AnimationInterpolation } from './animation/AnimationInterpolation';
+export type { ParsedUnit } from './animation/AnimationUnitParser';
+export type { RGBAColor } from './animation/AnimationColorInterpolator';
+
+
+// Animation Runtime Contracts & Engine (PM30)
+export type {
+  PlaybackStatus,
+  RuntimePlaybackDirection,
+  RuntimeFrame,
+  RuntimeTrack,
+  RuntimeEvaluationResult,
+  RuntimeState,
+  InterpolationType,
+  InterpolationResult,
+  PropertyInterpolator,
+  RuntimeInterpolationContext,
+  RuntimeFrameBatch,
+  RuntimeTick,
+  RuntimePlaybackSnapshot,
+  RuntimeEvaluationContext,
+} from './animation/AnimationRuntimeTypes';
+export { AnimationPlaybackController } from './animation/AnimationPlaybackController';
+export type { PlaybackControllerConfig } from './animation/AnimationPlaybackController';
+export { AnimationTimelineEvaluator } from './animation/AnimationTimelineEvaluator';
+export {
+  easeLinear,
+  easeIn,
+  easeOut,
+  easeInOut,
+  resolveEasing,
+} from './animation/AnimationEasing';
+export type { EasingName } from './animation/AnimationEasing';
+export { AnimationRuntimeBridge } from './animation/AnimationRuntimeBridge';
+export type { AnimationRuntimeBridgeConfig } from './animation/AnimationRuntimeBridge';
+export { RuntimeFrameAssembler } from './animation/RuntimeFrameAssembler';
+export { interpolateFrame } from './animation/RuntimeFrameAssembler';
+export { RuntimeFrameCache } from './animation/RuntimeFrameCache';
+export type { RuntimeFrameCacheOptions } from './animation/RuntimeFrameCache';
+export { RuntimeScheduler } from './animation/RuntimeScheduler';
+export type { RuntimeSchedulerConfig } from './animation/RuntimeScheduler';
+
+// Animation Trigger Engine & Event Integration (PM33)
+export type { TriggerState, TriggerStateMap } from './animation/AnimationTriggerState';
+export {
+  createTriggerStateMap,
+  createTriggerState,
+  transitionTriggerState,
+  getTriggerState,
+  isTriggerSatisfied,
+} from './animation/AnimationTriggerState';
+
+export type { TriggerViewport, AnimationTriggerContext } from './animation/AnimationTriggerContext';
+export { createTriggerContext } from './animation/AnimationTriggerContext';
+
+export type { TriggerDecision } from './animation/AnimationTriggerEvaluator';
+export {
+  shouldStart,
+  evaluateTrigger,
+  resolveTriggerType,
+} from './animation/AnimationTriggerEvaluator';
+
+export { AnimationTriggerEngine } from './animation/AnimationTriggerEngine';
+export type {
+  TriggerEvaluationResult,
+  MultiTriggerEvaluationResult,
+} from './animation/AnimationTriggerEngine';
+
+// Runtime Preview Adapter Contract & Bridge (PM34)
+export type {
+  PreviewTriggerMessageType,
+  BasePreviewTriggerMessage,
+  ScrollPreviewMessage,
+  HoverPreviewMessage,
+  ClickPreviewMessage,
+  IntersectionPreviewMessage,
+  ViewportResizePreviewMessage,
+  PreviewTriggerMessage,
+} from './animation/AnimationPreviewContract';
+
+export {
+  createScrollMessage,
+  createHoverMessage,
+  createClickMessage,
+  createIntersectionMessage,
+  createViewportResizeMessage,
+} from './animation/AnimationPreviewContract';
+
+export { AnimationRuntimePreviewAdapter } from './animation/AnimationRuntimePreviewAdapter';
+export type {
+  AdapterProcessingResult,
+  TriggerEvaluationReport,
+  AdapterTriggerEvaluationResult,
+} from './animation/AnimationRuntimePreviewAdapter';
+
+export { AnimationTriggerBridge } from './animation/AnimationTriggerBridge';
+
+export {
+  AnimationRuntimePreviewBridge,
+} from './animation/AnimationRuntimePreviewBridge';
+export type {
+  PreviewTriggerFrameResult,
+} from './animation/AnimationRuntimePreviewBridge';
+
+// Real Rendering Engine (Sprint S10)
+export * from './rendering';
+

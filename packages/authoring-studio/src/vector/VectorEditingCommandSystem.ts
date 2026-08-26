@@ -41,7 +41,8 @@ export type VectorCommandType =
   | 'JOIN_PATH_SEGMENTS'
   | 'CREATE_VECTOR_MASK'
   | 'RELEASE_VECTOR_MASK'
-  | 'SET_MASK_TOPOLOGY';
+  | 'SET_MASK_TOPOLOGY'
+  | 'SET_CONSTRAINTS';
 
 export interface VectorCommandPayload {
   readonly type: VectorCommandType;
@@ -60,6 +61,7 @@ export interface VectorCommandPayload {
   readonly anchorId?: string;
   readonly tParam?: number;
   readonly origin?: { readonly x: number; readonly y: number };
+  readonly constraints?: import('./VectorDomainModel').VectorConstraints;
   readonly propsUpdate?: {
     readonly fill?: any;
     readonly stroke?: any;
@@ -270,6 +272,21 @@ export class VectorEditingCommandSystem {
               return {
                 ...node,
                 ...command.propsUpdate,
+              };
+            }
+            return node;
+          });
+          break;
+        }
+
+        case 'SET_CONSTRAINTS': {
+          if (!command.constraints) break;
+          const targetSet = new Set(targetIds);
+          nextNodes = snapshot.nodes.map(node => {
+            if (targetSet.has(node.id) && !node.locked) {
+              return {
+                ...node,
+                constraints: command.constraints,
               };
             }
             return node;
@@ -512,6 +529,7 @@ export class VectorEditingCommandSystem {
         snapshot: {
           nodes: nextNodes,
           selectedIds: snapshot.selectedIds,
+          constraintEdges: snapshot.constraintEdges || [],
         },
         affectedIds,
         errors: [],

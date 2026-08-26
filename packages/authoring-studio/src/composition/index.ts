@@ -39,3 +39,5 @@ export * from './StorefrontEmailNotificationBridgeEngine';
 export * from './StorefrontAnalyticsConversionEngine';
 export * from './StorefrontMerchantDashboardRuntimeEngine';
 export * from './StorefrontProductionReadinessOrchestrator';
+export * from './StorefrontPaymentReliabilityEngine';
+

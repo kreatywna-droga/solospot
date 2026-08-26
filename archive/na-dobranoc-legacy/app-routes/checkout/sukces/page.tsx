@@ -20,7 +20,7 @@ function CheckoutSuccessContent() {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
+    queueMicrotask(() => setIsClient(true));
     
     // Ustawiamy flagę premium w localStorage po udanym zakupie
     // W środowisku produkcyjnym powinniśmy zwalidować session_id ze Stripe

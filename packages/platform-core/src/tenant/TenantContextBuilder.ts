@@ -63,7 +63,7 @@ export class TenantContextBuilder {
     Object.freeze(obj);
     Object.getOwnPropertyNames(obj).forEach((prop) => {
       if (
-        obj.hasOwnProperty(prop) &&
+        Object.prototype.hasOwnProperty.call(obj, prop) &&
         obj[prop] !== null &&
         (typeof obj[prop] === 'object' || typeof obj[prop] === 'function') &&
         !Object.isFrozen(obj[prop])

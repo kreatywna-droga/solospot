@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "builder-core/*": ["../builder-core/src/*"]
+    }
+  },
+  "include": [
+    "src/timeline/TimelinePlaybackSession.ts",
+    "src/timeline/TimelineTransportController.ts",
+    "src/timeline/TimelineStudioBridge.ts",
+    "src/timeline/TimelineSelectionSync.ts",
+    "src/timeline/TimelineSelection.ts",
+    "src/timeline/TimelineViewport.ts",
+    "src/timeline/TimelineCursor.ts",
+    "src/timeline/TimelineGrid.ts",
+    "src/timeline/timelineDocumentBinding.ts",
+    "src/timeline/index.ts",
+    "src/timeline/__tests__/TimelineStudioIntegrationE2E.test.ts",
+    "src/timeline/__tests__/TimelineE2EWorkflow.test.ts"
+  ]
+}

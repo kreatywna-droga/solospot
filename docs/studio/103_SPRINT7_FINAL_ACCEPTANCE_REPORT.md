@@ -1,5 +1,12 @@
 # 103. Sprint 7 Final Acceptance Report (Inspector 2.0)
 
+> [!IMPORTANT]
+> **STATUS: Requires Re-ratification**
+> 
+> Status dokumentu nie został jeszcze formalnie zatwierdzony przez Architekta.
+> Dokument opisuje wykonane prace, jednak jedynym źródłem prawdy o statusie sprintów pozostaje:
+> `docs/studio/99_IMPLEMENTATION_CHECKLIST.md`
+
 > Prepared by Agent 2 (Platform Engineering Maintenance)  
 > Target: Sprint 7 Final Acceptance Audit (PM20)  
 > Status: 🟢 APPROVED (PASS)

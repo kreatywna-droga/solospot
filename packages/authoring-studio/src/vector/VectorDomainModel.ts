@@ -45,16 +45,39 @@ export interface VectorTransform {
   readonly width: number;
   readonly height: number;
   readonly rotationDeg: number;
+  readonly rotation?: number;
   readonly scaleX: number;
   readonly scaleY: number;
   readonly skewX: number;
   readonly skewY: number;
 }
 
+export type HorizontalConstraint = 'MIN' | 'MAX' | 'CENTER' | 'STRETCH' | 'SCALE';
+export type VerticalConstraint = 'MIN' | 'MAX' | 'CENTER' | 'STRETCH' | 'SCALE';
+
+export interface VectorConstraints {
+  readonly horizontal: HorizontalConstraint;
+  readonly vertical: VerticalConstraint;
+}
+
+export interface VectorConstraintEdge {
+  readonly id: string;
+  readonly sourceNodeId: string; // The node being constrained (dependent)
+  readonly targetNodeId: string; // The node to which it is anchored (dependency)
+  readonly horizontal?: HorizontalConstraint;
+  readonly vertical?: VerticalConstraint;
+}
+
+export const DEFAULT_CONSTRAINTS: VectorConstraints = {
+  horizontal: 'MIN',
+  vertical: 'MIN',
+};
+
 export interface BaseVectorNode {
   readonly id: string;
   readonly name?: string;
   readonly transform: VectorTransform;
+  readonly constraints?: VectorConstraints;
   readonly opacity?: number;
   readonly visible?: boolean;
   readonly locked?: boolean;
@@ -67,7 +90,7 @@ export interface BaseVectorNode {
 }
 
 export interface RectangleNode extends BaseVectorNode {
-  readonly type: 'rectangle';
+  readonly type: 'rectangle' | 'rect';
   readonly cornerRadius?: CornerRadius;
 }
 

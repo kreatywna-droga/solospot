@@ -1,0 +1,28 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "builder-core/*": ["../builder-core/src/*"]
+    }
+  },
+  "include": [
+    "src/timeline/TimelineSelection.ts",
+    "src/timeline/TimelineViewport.ts",
+    "src/timeline/TimelineCursor.ts",
+    "src/timeline/TimelineGrid.ts",
+    "src/timeline/timelineDocumentBinding.ts",
+    "src/timeline/TimelinePanel.tsx",
+    "src/timeline/TimelinePanelAdapter.ts",
+    "src/timeline/timelinePropertyFields.ts",
+    "src/timeline/TimelineCommands.ts",
+    "src/timeline/index.ts",
+    "src/timeline/__tests__/TimelineE2EWorkflow.test.ts",
+    "src/timeline/__tests__/TimelineDocumentBinding.test.ts",
+    "src/timeline/__tests__/TimelineSelection.test.ts",
+    "src/timeline/__tests__/TimelineViewport.test.ts",
+    "src/timeline/__tests__/TimelineCursor.test.ts",
+    "src/timeline/__tests__/TimelineGrid.test.ts"
+  ]
+}

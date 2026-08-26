@@ -62,7 +62,7 @@ export default function StoresPage() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { void load(); }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();

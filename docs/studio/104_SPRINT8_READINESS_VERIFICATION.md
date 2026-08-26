@@ -1,5 +1,12 @@
 # 104. Sprint 8 Readiness Verification (Animation Engine)
 
+> [!IMPORTANT]
+> **STATUS: Requires Re-ratification**
+> 
+> Status dokumentu nie został jeszcze formalnie zatwierdzony przez Architekta.
+> Dokument opisuje wykonane prace, jednak jedynym źródłem prawdy o statusie sprintów pozostaje:
+> `docs/studio/99_IMPLEMENTATION_CHECKLIST.md`
+
 > Prepared by Agent 2 (Platform Engineering Maintenance)  
 > Target: Sprint 8 Readiness Audit (PM21)  
 > Status: 🟢 READY FOR EXECUTION

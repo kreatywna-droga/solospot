@@ -51,7 +51,7 @@ describe('HistoryStack.push', () => {
 
 describe('HistoryStack.undo', () => {
   it('undo returns previous state', () => {
-    let s = createHistoryStack<string>().push('a', 'A').push('b', 'B');
+    const s = createHistoryStack<string>().push('a', 'A').push('b', 'B');
     const result = s.undo();
     expect(result).not.toBeNull();
     expect(result!.state).toBe('a');
@@ -66,7 +66,7 @@ describe('HistoryStack.undo', () => {
   });
 
   it('multiple undos', () => {
-    let s = createHistoryStack<number>()
+    const s = createHistoryStack<number>()
       .push(10, 'ten')
       .push(20, 'twenty')
       .push(30, 'thirty');
@@ -105,7 +105,7 @@ describe('HistoryStack.redo', () => {
 
 describe('HistoryStack redo-future discard', () => {
   it('pushing after undo discards redo future', () => {
-    let s = createHistoryStack<number>()
+    const s = createHistoryStack<number>()
       .push(1, 'one')
       .push(2, 'two')
       .push(3, 'three');

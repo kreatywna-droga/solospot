@@ -326,7 +326,7 @@ export class CodeQualityAnalyzer {
         const line = lines[i].trim();
         const lineNo = i + 1;
 
-        if (line.startsWith('//') && line.length > 20 && /[;{}()]/.test(line)) {
+if (line.startsWith('//') && line.length > 3 && /[;{}()]/.test(line)) {
           commentedLinesCount++;
         }
 

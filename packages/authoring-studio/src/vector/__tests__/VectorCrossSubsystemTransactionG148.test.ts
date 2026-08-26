@@ -111,7 +111,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Move X');
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes[0].transform.x).toBe(50);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.x).toBe(50);
     });
 
     it('F02: executes 2-stage multi-subsystem transaction (Transform + Snapping)', () => {
@@ -120,7 +120,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = VectorWorkflowOrchestrator.executeCrossSubsystemTransformSnapTransaction(state, 30, 0);
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes[0].transform.x).toBe(40);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.x).toBe(40);
     });
 
     it('F03: executes 2-stage multi-subsystem transaction (Path Boolean + Mask)', () => {
@@ -133,7 +133,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       );
 
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes.length).toBe(1);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes.length).toBe(1);
     });
 
     it('F04: pushes exactly 1 transaction to HistoryStack on successful transaction', () => {
@@ -145,7 +145,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Move Y');
-      expect(res.snapshot.historyStack.entries.length).toBe(initialStackLen + 1);
+      expect(((res as any).state ?? (res as any).snapshot).historyStack.entries.length).toBe(initialStackLen + 1);
     });
 
     it('F05: pushes 0 transactions to HistoryStack on failed transaction', () => {
@@ -157,7 +157,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [failingOp], 'Failing Op');
       expect(res.success).toBe(false);
-      expect(res.snapshot.historyStack.entries.length).toBe(initialStackLen);
+      expect(((res as any).state ?? (res as any).snapshot).historyStack.entries.length).toBe(initialStackLen);
     });
 
     it('F06: restores initial document snapshot on transaction failure', () => {
@@ -172,7 +172,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [op1, failingOp], 'Multi-step Failure');
       expect(res.success).toBe(false);
-      expect(res.snapshot.snapshot.nodes[0].transform.x).toBe(10);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.x).toBe(10);
     });
 
     it('F07: captures checkpoint ID during transaction execution', () => {
@@ -203,22 +203,22 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [op1, op2, op3], '3-Stage Op');
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes[0].transform.x).toBe(20);
-      expect(res.snapshot.snapshot.nodes[0].transform.y).toBe(30);
-      expect(res.snapshot.snapshot.nodes[0].opacity).toBe(0.5);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.x).toBe(20);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.y).toBe(30);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].opacity).toBe(0.5);
     });
 
     it('F09: rejects invalid workspace state gracefully', () => {
       const res = executeCrossSubsystemTransaction(null as any, [], 'Invalid');
       expect(res.success).toBe(false);
-      expect(res.errors).toContain('Invalid workspace state for transaction.');
+      expect(((res as any).error ? [(res as any).error] : (res as any).errors)).toContain('Invalid workspace state for transaction.');
     });
 
     it('F10: handles empty operations array without state mutation', () => {
       const state = createVectorWorkspaceState([r1]);
       const res = executeCrossSubsystemTransaction(state, [], 'Empty');
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes).toEqual(state.snapshot.nodes);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes).toEqual(state.snapshot.nodes);
     });
 
     it('F11: handles no-op operations cleanly without history contamination', () => {
@@ -228,7 +228,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [noOp], 'No-Op');
       expect(res.success).toBe(true);
-      expect(res.snapshot.historyStack.entries.length).toBe(initialStackLen + 1);
+      expect(((res as any).state ?? (res as any).snapshot).historyStack.entries.length).toBe(initialStackLen + 1);
     });
 
     it('F12: clears transient activeTransformSession on commit', () => {
@@ -241,7 +241,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Clear Transient');
-      expect(res.snapshot.activeTransformSession).toBeUndefined();
+      expect(((res as any).state ?? (res as any).snapshot).activeTransformSession).toBeUndefined();
     });
 
     it('F13: clears transient activeGuideLines on commit', () => {
@@ -254,7 +254,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Clear Guides');
-      expect(res.snapshot.activeGuideLines).toBeUndefined();
+      expect(((res as any).state ?? (res as any).snapshot).activeGuideLines).toBeUndefined();
     });
 
     it('F14: clears transient activeTransformSession on rollback', () => {
@@ -263,7 +263,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       const failingOp: CrossSubsystemOperation = () => { throw new Error('Fail'); };
 
       const res = executeCrossSubsystemTransaction(state, [failingOp], 'Fail Clear Transient');
-      expect(res.snapshot.activeTransformSession).toBeUndefined();
+      expect(((res as any).state ?? (res as any).snapshot).activeTransformSession).toBeUndefined();
     });
 
     it('F15: clears transient activeGuideLines on rollback', () => {
@@ -272,7 +272,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       const failingOp: CrossSubsystemOperation = () => { throw new Error('Fail'); };
 
       const res = executeCrossSubsystemTransaction(state, [failingOp], 'Fail Clear Guides');
-      expect(res.snapshot.activeGuideLines).toBeUndefined();
+      expect(((res as any).state ?? (res as any).snapshot).activeGuideLines).toBeUndefined();
     });
 
     it('F16: preserves selection state across successful transaction', () => {
@@ -285,7 +285,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Preserve Selection');
-      expect(res.snapshot.snapshot.selectedIds).toEqual(['rect_1', 'rect_2']);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.selectedIds).toEqual(['rect_1', 'rect_2']);
     });
 
     it('F17: updates selection state when operation modifies selectedIds', () => {
@@ -296,7 +296,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Update Selection');
-      expect(res.snapshot.snapshot.selectedIds).toEqual(['rect_2']);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.selectedIds).toEqual(['rect_2']);
     });
 
     it('F18: returns errors array on operation exception', () => {
@@ -304,7 +304,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       const failingOp: CrossSubsystemOperation = () => { throw new Error('Custom Error Msg'); };
 
       const res = executeCrossSubsystemTransaction(state, [failingOp], 'Error Msg');
-      expect(res.errors).toContain('Custom Error Msg');
+      expect(((res as any).error ? [(res as any).error] : (res as any).errors)).toContain('Custom Error Msg');
     });
 
     it('F19: returns error when operation returns invalid non-array nodes snapshot', () => {
@@ -313,7 +313,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [badOp], 'Bad Snapshot');
       expect(res.success).toBe(false);
-      expect(res.errors[0]).toContain('returned an invalid snapshot');
+      expect(((res as any).error ? [(res as any).error] : (res as any).errors)[0]).toContain('returned an invalid snapshot');
     });
 
     it('F20: supports 5 sequential operations in a single atomic transaction', () => {
@@ -328,7 +328,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, ops, '5-Step Atomic');
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes[0].transform.width).toBe(120);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.width).toBe(120);
     });
 
     it('F21: aborts immediately on step 3 of 5 when step 3 fails, skipping steps 4 and 5', () => {
@@ -348,7 +348,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       expect(res.success).toBe(false);
       expect(step4Ran).toBe(false);
       expect(step5Ran).toBe(false);
-      expect(res.snapshot.snapshot.nodes[0].transform.x).toBe(10);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.x).toBe(10);
     });
 
     it('F22: supports vector mask creation within cross-subsystem transaction', () => {
@@ -360,7 +360,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Mask Transaction');
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes.length).toBe(1);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes.length).toBe(1);
     });
 
     it('F23: supports vector mask release within cross-subsystem transaction', () => {
@@ -374,7 +374,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Release Mask Transaction');
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes.length).toBe(2);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes.length).toBe(2);
     });
 
     it('F24: supports boolean topology union within cross-subsystem transaction', () => {
@@ -386,7 +386,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Boolean Union Transaction');
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes.length).toBe(1);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes.length).toBe(1);
     });
 
     it('F25: supports boolean topology subtraction within cross-subsystem transaction', () => {
@@ -398,7 +398,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Boolean Subtract Transaction');
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes.length).toBe(1);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes.length).toBe(1);
     });
 
     it('F26: supports boolean topology intersection within cross-subsystem transaction', () => {
@@ -410,7 +410,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Boolean Intersect Transaction');
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes.length).toBe(1);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes.length).toBe(1);
     });
 
     it('F27: deep clones node transform coordinates during transaction rollback', () => {
@@ -421,7 +421,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       };
 
       const res = executeCrossSubsystemTransaction(state, [badOp], 'Deep Clone Rollback');
-      expect(res.snapshot.snapshot.nodes[0].transform.x).toBe(10);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.x).toBe(10);
     });
 
     it('F28: maintains document snapshot immutability during transaction execution', () => {
@@ -446,7 +446,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
           nodes: snap.nodes.map(n => ({ ...n, transform: { ...n.transform, x: n.transform.x + 10 } })),
         });
         const res = executeCrossSubsystemTransaction(state, [op], `Step ${i}`);
-        state = res.snapshot;
+        state = ((res as any).state ?? (res as any).snapshot);
       }
 
       expect(state.snapshot.nodes[0].transform.x).toBe(110);
@@ -463,7 +463,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       const state = createVectorWorkspaceState([]);
       const res = executeCrossSubsystemTransaction(state, [], 'Empty Nodes');
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes).toHaveLength(0);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes).toHaveLength(0);
     });
 
     it('F32: handles single node deletion in transaction', () => {
@@ -476,7 +476,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Delete Node');
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes).toHaveLength(0);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes).toHaveLength(0);
     });
 
     it('F33: handles node addition in transaction', () => {
@@ -488,7 +488,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Add Node');
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes).toHaveLength(2);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes).toHaveLength(2);
     });
 
     it('F34: handles node reordering in transaction', () => {
@@ -500,7 +500,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Reorder Nodes');
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes[0].id).toBe('rect_2');
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].id).toBe('rect_2');
     });
 
     it('F35: handles group creation inside transaction', () => {
@@ -517,7 +517,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Group Nodes');
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes[0].type).toBe('group');
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].type).toBe('group');
     });
   });
 
@@ -533,7 +533,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Move 100');
-      state = res.snapshot;
+      state = ((res as any).state ?? (res as any).snapshot);
 
       const undoRes = state.historyStack.undo();
       if (undoRes) state = { snapshot: undoRes.state, historyStack: undoRes.stack };
@@ -549,7 +549,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Move 100');
-      state = res.snapshot;
+      state = ((res as any).state ?? (res as any).snapshot);
 
       const undoRes = state.historyStack.undo();
       if (undoRes) state = { snapshot: undoRes.state, historyStack: undoRes.stack };
@@ -568,7 +568,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Move Y 50');
-      const json = VectorDocumentSerializer.serializeVectorDocument(res.snapshot.snapshot);
+      const json = VectorDocumentSerializer.serializeVectorDocument(((res as any).state ?? (res as any).snapshot).snapshot);
       const restored = VectorDocumentSerializer.restoreVectorDocument(json);
 
       expect(restored.snapshot!.nodes[0].transform.y).toBe(50);
@@ -582,7 +582,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Move X 80');
-      const svg = VectorSvgExporter.exportToSvgString(res.snapshot.snapshot);
+      const svg = VectorSvgExporter.exportToSvgString(((res as any).state ?? (res as any).snapshot).snapshot);
 
       expect(svg).toContain('transform="translate(80, 10)"');
     });
@@ -592,7 +592,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       state = selectNodes(state, ['rect_1']);
 
       const res = VectorWorkflowOrchestrator.executeCrossSubsystemTransformSnapTransaction(state, 40, 0);
-      const svg = VectorSvgExporter.exportToSvgString(res.snapshot.snapshot);
+      const svg = VectorSvgExporter.exportToSvgString(((res as any).state ?? (res as any).snapshot).snapshot);
 
       expect(svg).toContain('<svg');
     });
@@ -606,7 +606,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
         ['path_2']
       );
 
-      const json = VectorDocumentSerializer.serializeVectorDocument(res.snapshot.snapshot);
+      const json = VectorDocumentSerializer.serializeVectorDocument(((res as any).state ?? (res as any).snapshot).snapshot);
       const restored = VectorDocumentSerializer.restoreVectorDocument(json);
 
       expect(restored.snapshot!.nodes.length).toBe(1);
@@ -646,7 +646,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Group Transform');
-      expect(res.snapshot.snapshot.nodes[0].transform.x).toBe(10);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.x).toBe(10);
     });
 
     it('I10: preserves non-modified shapes untouched during targeted shape transaction', () => {
@@ -657,8 +657,8 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Targeted Op');
-      expect(res.snapshot.snapshot.nodes.find(n => n.id === 'rect_2')?.opacity).toBe(1);
-      expect(res.snapshot.snapshot.nodes.find(n => n.id === 'rect_3')?.opacity).toBe(1);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes.find(n => n.id === 'rect_2')?.opacity).toBe(1);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes.find(n => n.id === 'rect_3')?.opacity).toBe(1);
     });
 
     it('I11: integrates cross-subsystem transaction with multiple shape opacity updates', () => {
@@ -669,8 +669,8 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Multi Opacity');
-      expect(res.snapshot.snapshot.nodes[0].opacity).toBe(0.6);
-      expect(res.snapshot.snapshot.nodes[1].opacity).toBe(0.6);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].opacity).toBe(0.6);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[1].opacity).toBe(0.6);
     });
 
     it('I12: integrates cross-subsystem transaction with stroke updates', () => {
@@ -681,7 +681,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Stroke Update');
-      expect(res.snapshot.snapshot.nodes[0].stroke?.color).toBe('#ff0000');
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].stroke?.color).toBe('#ff0000');
     });
 
     it('I13: integrates cross-subsystem transaction with fill updates', () => {
@@ -692,7 +692,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Fill Update');
-      expect(res.snapshot.snapshot.nodes[0].fill?.color).toBe('#00ff00');
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].fill?.color).toBe('#00ff00');
     });
 
     it('I14: integrates cross-subsystem transaction with lock toggling', () => {
@@ -703,7 +703,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Lock Node');
-      expect(res.snapshot.snapshot.nodes[0].locked).toBe(true);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].locked).toBe(true);
     });
 
     it('I15: integrates cross-subsystem transaction with visibility toggling', () => {
@@ -714,7 +714,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Hide Node');
-      expect(res.snapshot.snapshot.nodes[0].visible).toBe(false);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].visible).toBe(false);
     });
 
     it('I16: integrates cross-subsystem transaction with rotation transform', () => {
@@ -725,7 +725,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Rotate 45');
-      expect(res.snapshot.snapshot.nodes[0].transform.rotationDeg).toBe(45);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.rotationDeg).toBe(45);
     });
 
     it('I17: integrates cross-subsystem transaction with scale transform', () => {
@@ -736,7 +736,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Scale 2x');
-      expect(res.snapshot.snapshot.nodes[0].transform.scaleX).toBe(2);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.scaleX).toBe(2);
     });
 
     it('I18: integrates cross-subsystem transaction with skew transform', () => {
@@ -747,7 +747,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Skew 10');
-      expect(res.snapshot.snapshot.nodes[0].transform.skewX).toBe(10);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.skewX).toBe(10);
     });
 
     it('I19: integrates cross-subsystem transaction with path D attribute modification', () => {
@@ -758,7 +758,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Modify Path D');
-      expect((res.snapshot.snapshot.nodes[0] as PathNode).d).toBe('M 0 0 L 200 200 Z');
+      expect((((res as any).state ?? (res as any).snapshot).snapshot.nodes[0] as PathNode).d).toBe('M 0 0 L 200 200 Z');
     });
 
     it('I20: maintains document integrity across 20 sequential transactions', () => {
@@ -770,7 +770,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
           nodes: snap.nodes.map(n => ({ ...n, transform: { ...n.transform, x: n.transform.x + 1 } })),
         });
         const res = executeCrossSubsystemTransaction(state, [op], `Step ${i}`);
-        state = res.snapshot;
+        state = ((res as any).state ?? (res as any).snapshot);
       }
 
       expect(state.snapshot.nodes[0].transform.x).toBe(30);
@@ -786,7 +786,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Clear Selection');
-      expect(res.snapshot.snapshot.selectedIds).toHaveLength(0);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.selectedIds).toHaveLength(0);
     });
 
     it('I22: integrates cross-subsystem transaction with selective node locking', () => {
@@ -797,8 +797,8 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Lock Rect 1');
-      expect(res.snapshot.snapshot.nodes[0].locked).toBe(true);
-      expect(res.snapshot.snapshot.nodes[1].locked).toBe(false);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].locked).toBe(true);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[1].locked).toBe(false);
     });
 
     it('I23: integrates cross-subsystem transaction with multiple shape deletion', () => {
@@ -810,7 +810,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Delete Rects 1 & 2');
-      expect(res.snapshot.snapshot.nodes).toHaveLength(1);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes).toHaveLength(1);
     });
 
     it('I24: integrates cross-subsystem transaction with custom node naming', () => {
@@ -821,7 +821,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Rename');
-      expect(res.snapshot.snapshot.nodes[0].name).toBe('Renamed Node');
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].name).toBe('Renamed Node');
     });
 
     it('I25: verifies HistoryStack description string preservation', () => {
@@ -832,7 +832,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Unique Description 123');
-      const latestEntry = res.snapshot.historyStack.entries[res.snapshot.historyStack.currentIndex];
+      const latestEntry = ((res as any).state ?? (res as any).snapshot).historyStack.entries[((res as any).state ?? (res as any).snapshot).historyStack.currentIndex];
 
       expect(latestEntry.label).toBe('Unique Description 123');
     });
@@ -853,7 +853,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
         ['path_2']
       );
 
-      const json = VectorDocumentSerializer.serializeVectorDocument(res.snapshot.snapshot);
+      const json = VectorDocumentSerializer.serializeVectorDocument(((res as any).state ?? (res as any).snapshot).snapshot);
       const restored = VectorDocumentSerializer.restoreVectorDocument(json);
       const svg = VectorSvgExporter.exportToSvgString(restored.snapshot!);
 
@@ -865,7 +865,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       state = selectNodes(state, ['rect_1']);
 
       const res = VectorWorkflowOrchestrator.executeCrossSubsystemTransformSnapTransaction(state, 50, 50);
-      state = res.snapshot;
+      state = ((res as any).state ?? (res as any).snapshot);
 
       // Undo
       let undoRes = state.historyStack.undo();
@@ -889,7 +889,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, ops, 'Failed Boolean Op');
       expect(res.success).toBe(false);
-      expect(res.snapshot.snapshot).toEqual(initialSnap);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot).toEqual(initialSnap);
     });
 
     it('E2E-04: User Intent: Sequential Multi-Subsystem Transformations Pipeline', () => {
@@ -898,7 +898,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       for (let i = 0; i < 5; i++) {
         state = selectNodes(state, ['rect_1']);
         const res = VectorWorkflowOrchestrator.executeCrossSubsystemTransformSnapTransaction(state, 10, 10);
-        state = res.snapshot;
+        state = ((res as any).state ?? (res as any).snapshot);
       }
 
       expect(state.snapshot.nodes[0].transform.x).toBe(60);
@@ -917,7 +917,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [createOp, releaseOp], 'Mask Lifecycle');
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes).toHaveLength(2);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes).toHaveLength(2);
     });
 
     it('E2E-06: User Intent: Deep Rollback of 10 Sequential Cross-Subsystem Transactions', () => {
@@ -930,7 +930,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
           nodes: snap.nodes.map(n => ({ ...n, transform: { ...n.transform, x: n.transform.x + 5 } })),
         });
         const res = executeCrossSubsystemTransaction(state, [op], `Step ${i}`);
-        state = res.snapshot;
+        state = ((res as any).state ?? (res as any).snapshot);
       }
 
       // Rollback all 10 steps via undo
@@ -950,9 +950,9 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Align & Distribute');
-      expect(res.snapshot.snapshot.nodes[0].transform.x).toBe(0);
-      expect(res.snapshot.snapshot.nodes[1].transform.x).toBe(100);
-      expect(res.snapshot.snapshot.nodes[2].transform.x).toBe(200);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.x).toBe(0);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[1].transform.x).toBe(100);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[2].transform.x).toBe(200);
     });
 
     it('E2E-08: User Intent: Group Hierarchy Transform + Layer Reorder in Single Step', () => {
@@ -970,7 +970,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Reorder Group');
-      expect(res.snapshot.snapshot.nodes[0].id).toBe('rect_3');
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].id).toBe('rect_3');
     });
 
     it('E2E-09: User Intent: SVG Export Fidelity Preserved after Cross-Subsystem Transaction', () => {
@@ -981,7 +981,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Resize');
-      const svg = VectorSvgExporter.exportToSvgString(res.snapshot.snapshot);
+      const svg = VectorSvgExporter.exportToSvgString(((res as any).state ?? (res as any).snapshot).snapshot);
 
       expect(svg).toContain('width="300"');
       expect(svg).toContain('height="300"');
@@ -995,7 +995,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Opacity Pipeline');
-      const json = VectorDocumentSerializer.serializeVectorDocument(res.snapshot.snapshot);
+      const json = VectorDocumentSerializer.serializeVectorDocument(((res as any).state ?? (res as any).snapshot).snapshot);
       const restored = VectorDocumentSerializer.restoreVectorDocument(json);
 
       expect(restored.snapshot!.nodes[0].opacity).toBe(0.75);
@@ -1025,8 +1025,8 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Batch 50');
-      expect(res.snapshot.snapshot.nodes).toHaveLength(50);
-      expect(res.snapshot.snapshot.nodes[49].opacity).toBe(0.9);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes).toHaveLength(50);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[49].opacity).toBe(0.9);
     });
 
     it('E2E-13: User Intent: Cancellation at Step 2 of 3 Restores Initial State', () => {
@@ -1040,7 +1040,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       ];
 
       const res = executeCrossSubsystemTransaction(state, ops, 'Cancel Test');
-      expect(res.snapshot.snapshot).toEqual(initialSnap);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot).toEqual(initialSnap);
     });
 
     it('E2E-14: User Intent: Multi-Subsystem Geometry & Style Transformation Combined', () => {
@@ -1055,8 +1055,8 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [geomOp, styleOp], 'Geom + Style');
-      expect(res.snapshot.snapshot.nodes[0].transform.x).toBe(75);
-      expect(res.snapshot.snapshot.nodes[0].fill?.color).toBe('#123456');
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.x).toBe(75);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].fill?.color).toBe('#123456');
     });
 
     it('E2E-15: User Intent: Deep State Verification across 3 Redo Steps', () => {
@@ -1091,7 +1091,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = VectorWorkflowOrchestrator.executeCrossSubsystemTransformSnapTransaction(state, 20, 0);
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes[0].transform.x).toBe(30);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.x).toBe(30);
     });
 
     it('E2E-17: User Intent: Multi-Shape Boolean Union and Mask Generation', () => {
@@ -1116,7 +1116,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [failingOp], 'Custom Error');
       expect(res.success).toBe(false);
-      expect(res.errors[0]).toBe('Custom Error');
+      expect(((res as any).error ? [(res as any).error] : (res as any).errors)[0]).toBe('Custom Error');
     });
 
     it('E2E-19: User Intent: Preserves Lock Attribute across Cross-Subsystem Transaction', () => {
@@ -1126,7 +1126,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       const op: CrossSubsystemOperation = (s) => ({ ...s });
       const res = executeCrossSubsystemTransaction(state, [op], 'Lock Check');
 
-      expect(res.snapshot.snapshot.nodes[0].locked).toBe(true);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].locked).toBe(true);
     });
 
     it('E2E-20: User Intent: Preserves Visible Attribute across Cross-Subsystem Transaction', () => {
@@ -1136,7 +1136,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       const op: CrossSubsystemOperation = (s) => ({ ...s });
       const res = executeCrossSubsystemTransaction(state, [op], 'Visible Check');
 
-      expect(res.snapshot.snapshot.nodes[0].visible).toBe(false);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].visible).toBe(false);
     });
   });
 
@@ -1153,7 +1153,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [op], 'NaN Test');
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes[0].transform.x).toBeNaN();
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.x).toBeNaN();
     });
 
     it('ADV-02: handles operation returning Infinity coordinates gracefully', () => {
@@ -1165,7 +1165,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Infinity Test');
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes[0].transform.y).toBe(Infinity);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.y).toBe(Infinity);
     });
 
     it('ADV-03: handles operation throwing non-Error string exception', () => {
@@ -1174,7 +1174,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [op], 'String Throw');
       expect(res.success).toBe(false);
-      expect(res.errors).toContain('String Exception');
+      expect(((res as any).error ? [(res as any).error] : (res as any).errors)).toContain('String Exception');
     });
 
     it('ADV-04: handles operation throwing null exception', () => {
@@ -1226,7 +1226,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, ops, '100 Ops');
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes[0].transform.x).toBe(99);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.x).toBe(99);
     });
 
     it('ADV-10: handles extreme coordinate transforms (1e12, 1e12)', () => {
@@ -1237,7 +1237,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Extreme Coords');
-      expect(res.snapshot.snapshot.nodes[0].transform.x).toBe(1e12);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.x).toBe(1e12);
     });
 
     it('ADV-11: handles extreme negative coordinate transforms (-1e12, -1e12)', () => {
@@ -1248,7 +1248,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Extreme Neg Coords');
-      expect(res.snapshot.snapshot.nodes[0].transform.x).toBe(-1e12);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.x).toBe(-1e12);
     });
 
     it('ADV-12: handles extreme zero scale (0, 0)', () => {
@@ -1259,7 +1259,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Zero Scale');
-      expect(res.snapshot.snapshot.nodes[0].transform.scaleX).toBe(0);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.scaleX).toBe(0);
     });
 
     it('ADV-13: handles negative scale (-1, -1)', () => {
@@ -1270,7 +1270,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Negative Scale');
-      expect(res.snapshot.snapshot.nodes[0].transform.scaleX).toBe(-1);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.scaleX).toBe(-1);
     });
 
     it('ADV-14: handles extreme rotation angle (7200 degrees)', () => {
@@ -1281,7 +1281,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'High Rotation');
-      expect(res.snapshot.snapshot.nodes[0].transform.rotationDeg).toBe(7200);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.rotationDeg).toBe(7200);
     });
 
     it('ADV-15: handles negative rotation angle (-720 degrees)', () => {
@@ -1292,7 +1292,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Neg Rotation');
-      expect(res.snapshot.snapshot.nodes[0].transform.rotationDeg).toBe(-720);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.rotationDeg).toBe(-720);
     });
 
     it('ADV-16: handles operation on locked node', () => {
@@ -1305,7 +1305,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Locked Test');
-      expect(res.snapshot.snapshot.nodes[0].transform.x).toBe(10);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.x).toBe(10);
     });
 
     it('ADV-17: handles empty string description', () => {
@@ -1339,7 +1339,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Duplicate Nodes');
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes).toHaveLength(2);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes).toHaveLength(2);
     });
 
     it('ADV-20: handles empty selectedIds in operation output', () => {
@@ -1352,7 +1352,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Empty Selection');
-      expect(res.snapshot.snapshot.selectedIds).toHaveLength(0);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.selectedIds).toHaveLength(0);
     });
 
     it('ADV-21: handles undefined selectedIds in operation output', () => {
@@ -1376,7 +1376,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], '1000 Nodes');
-      expect(res.snapshot.snapshot.nodes).toHaveLength(1000);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes).toHaveLength(1000);
     });
 
     it('ADV-23: handles transform-snapping on zero delta (0, 0)', () => {
@@ -1385,7 +1385,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = VectorWorkflowOrchestrator.executeCrossSubsystemTransformSnapTransaction(state, 0, 0);
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes[0].transform.x).toBe(10);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.x).toBe(10);
     });
 
     it('ADV-24: handles transform-snapping with empty selection', () => {
@@ -1393,7 +1393,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       const res = VectorWorkflowOrchestrator.executeCrossSubsystemTransformSnapTransaction(state, 50, 50);
 
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes[0].transform.x).toBe(10);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.x).toBe(10);
     });
 
     it('ADV-25: handles transform-snapping on locked selection', () => {
@@ -1402,7 +1402,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       state = selectNodes(state, ['rect_1']);
 
       const res = VectorWorkflowOrchestrator.executeCrossSubsystemTransformSnapTransaction(state, 50, 50);
-      expect(res.snapshot.snapshot.nodes[0].transform.x).toBe(10);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.x).toBe(10);
     });
 
     it('ADV-26: handles path-boolean-mask transaction with non-existent mask shape ID', () => {
@@ -1415,7 +1415,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       );
 
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes.length).toBe(2);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes.length).toBe(2);
     });
 
     it('ADV-27: handles path-boolean-mask transaction with empty target shapes array', () => {
@@ -1428,7 +1428,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       );
 
       expect(res.success).toBe(true);
-      expect(res.snapshot.snapshot.nodes.length).toBe(1);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes.length).toBe(1);
     });
 
     it('ADV-28: handles path-boolean-mask transaction with locked mask shape', () => {
@@ -1442,7 +1442,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
         ['path_2']
       );
 
-      expect(res.snapshot.snapshot.nodes.length).toBe(2);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes.length).toBe(2);
     });
 
     it('ADV-29: handles path-boolean-mask transaction with locked target shape', () => {
@@ -1456,7 +1456,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
         ['path_2']
       );
 
-      expect(res.snapshot.snapshot.nodes.length).toBe(2);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes.length).toBe(2);
     });
 
     it('ADV-30: handles operation that mutates transform width and height to zero', () => {
@@ -1467,7 +1467,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Zero Dimensions');
-      expect(res.snapshot.snapshot.nodes[0].transform.width).toBe(0);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.width).toBe(0);
     });
 
     it('ADV-31: handles operation that removes all properties except id and type', () => {
@@ -1487,7 +1487,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Opacity > 1');
-      expect(res.snapshot.snapshot.nodes[0].opacity).toBe(5.0);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].opacity).toBe(5.0);
     });
 
     it('ADV-33: handles operation that sets negative opacity', () => {
@@ -1498,7 +1498,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Negative Opacity');
-      expect(res.snapshot.snapshot.nodes[0].opacity).toBe(-0.5);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].opacity).toBe(-0.5);
     });
 
     it('ADV-34: handles rapid rollback calls', () => {
@@ -1520,7 +1520,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Complex Path');
-      expect((res.snapshot.snapshot.nodes[0] as PathNode).d).toContain('C 10 20');
+      expect((((res as any).state ?? (res as any).snapshot).snapshot.nodes[0] as PathNode).d).toContain('C 10 20');
     });
 
     it('ADV-36: handles operation on node with zero-length string id', () => {
@@ -1592,7 +1592,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Null Fill');
-      expect(res.snapshot.snapshot.nodes[0].fill).toBeNull();
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].fill).toBeNull();
     });
 
     it('ADV-42: handles operation with null stroke object', () => {
@@ -1603,7 +1603,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Null Stroke');
-      expect(res.snapshot.snapshot.nodes[0].stroke).toBeNull();
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].stroke).toBeNull();
     });
 
     it('ADV-43: handles operation with negative width and height', () => {
@@ -1614,7 +1614,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Negative Dimensions');
-      expect(res.snapshot.snapshot.nodes[0].transform.width).toBe(-50);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.width).toBe(-50);
     });
 
     it('ADV-44: handles repeated executeCrossSubsystemTransaction invocations in parallel loop', () => {
@@ -1638,7 +1638,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Custom Attribute');
-      expect((res.snapshot.snapshot.nodes[0] as any).customData).toBe('test_value');
+      expect((((res as any).state ?? (res as any).snapshot).snapshot.nodes[0] as any).customData).toBe('test_value');
     });
   });
 
@@ -1659,7 +1659,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [op1, op2], 'Fail Step 2');
       expect(res.success).toBe(false);
-      expect(res.snapshot.snapshot.nodes[0].transform.x).toBe(10);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.x).toBe(10);
     });
 
     it('FI-03: Failure After Subsystem 2 Execution', () => {
@@ -1670,7 +1670,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [op1, op2, op3], 'Fail Step 3');
       expect(res.success).toBe(false);
-      expect(res.snapshot.snapshot.nodes[0].transform.x).toBe(10);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.x).toBe(10);
     });
 
     it('FI-04: Failure After Subsystem 3 Execution', () => {
@@ -1682,7 +1682,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const res = executeCrossSubsystemTransaction(state, [op1, op2, op3, op4], 'Fail Step 4');
       expect(res.success).toBe(false);
-      expect(res.snapshot.snapshot.nodes[0].opacity).toBe(1);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].opacity).toBe(1);
     });
 
     it('FI-05: Failure During Snapshot Validation (Non-Array Nodes)', () => {
@@ -1736,7 +1736,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       const failingOp: CrossSubsystemOperation = () => { throw new Error('Simulated Crash'); };
 
       const res = executeCrossSubsystemTransaction(state, [failingOp], 'Fail Recovery');
-      expect(res.snapshot.snapshot.nodes).toEqual(state.snapshot.nodes);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes).toEqual(state.snapshot.nodes);
     });
 
     it('FI-11: Failure Injection: Corrupted Coordinate NaN Recovery', () => {
@@ -1745,7 +1745,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       const op2: CrossSubsystemOperation = () => { throw new Error('Abort on NaN'); };
 
       const res = executeCrossSubsystemTransaction(state, [op1, op2], 'NaN Abort');
-      expect(res.snapshot.snapshot.nodes[0].transform.x).toBe(10);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.x).toBe(10);
     });
 
     it('FI-12: Failure Injection: Corrupted Coordinate Infinity Recovery', () => {
@@ -1754,7 +1754,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       const op2: CrossSubsystemOperation = () => { throw new Error('Abort on Infinity'); };
 
       const res = executeCrossSubsystemTransaction(state, [op1, op2], 'Inf Abort');
-      expect(res.snapshot.snapshot.nodes[0].transform.y).toBe(10);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.y).toBe(10);
     });
 
     it('FI-13: Failure Injection: Undefined Transform Object Ingestion', () => {
@@ -1782,7 +1782,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       state = selectNodes(state, ['rect_1']);
 
       const res = VectorWorkflowOrchestrator.executeCrossSubsystemTransformSnapTransaction(state, 50, 50);
-      expect(res.snapshot.snapshot.nodes[0].transform.x).toBe(10);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes[0].transform.x).toBe(10);
     });
 
     it('FI-16: Failure Injection: Non-Existent Target Shape in Boolean Operation', () => {
@@ -1794,7 +1794,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
         ['non_existent']
       );
 
-      expect(res.snapshot.snapshot.nodes).toHaveLength(1);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes).toHaveLength(1);
     });
 
     it('FI-17: Failure Injection: Non-Existent Mask Shape in Mask Operation', () => {
@@ -1806,7 +1806,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
         ['path_1']
       );
 
-      expect(res.snapshot.snapshot.nodes).toHaveLength(1);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes).toHaveLength(1);
     });
 
     it('FI-18: Failure Injection: Operation Returning Primitive String Instead of Object', () => {

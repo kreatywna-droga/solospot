@@ -1,6 +1,7 @@
 'use client'
-import { Package } from 'lucide-react'
+import { Package, ShoppingCart } from 'lucide-react'
 import type { SectionComponentProps } from '@/lib/runtime/RuntimeTypes'
+import { useCart } from '@/lib/cart/CartStore'
 
 function formatPrice(price: number, currency: string) {
   const symbols: Record<string, string> = { PLN: 'zł', EUR: '€', USD: '$' }
@@ -10,6 +11,27 @@ function formatPrice(price: number, currency: string) {
 export function ProductGridSection({ section, theme, products }: SectionComponentProps) {
   const config = section.config as { title?: string; count?: number }
   const displayProducts = products?.slice(0, config.count || 8) || []
+  const { state, dispatch } = useCart()
+
+  const handleAddToCart = (product: { id: string; name: string; price: number; currency: string; images: string[] }) => {
+    const existingItem = state.items.find(i => i.productId === product.id)
+    if (existingItem) {
+      dispatch({ type: 'UPDATE_QUANTITY', payload: { productId: product.id, quantity: existingItem.quantity + 1 } })
+    } else {
+      dispatch({
+        type: 'ADD_ITEM',
+        payload: {
+          productId: product.id,
+          name: product.name,
+          price: product.price,
+          currency: product.currency,
+          image: product.images[0] || '',
+          quantity: 1,
+        },
+      })
+    }
+  }
+
   return (
     <section className="py-16 lg:py-24 px-4" style={{ backgroundColor: '#ffffff', fontFamily: theme.font }}>
       <div className="max-w-7xl mx-auto">
@@ -32,6 +54,17 @@ export function ProductGridSection({ section, theme, products }: SectionComponen
                 </div>
                 <h3 className="font-medium text-sm lg:text-base" style={{ color: theme.primaryColor }}>{p.name}</h3>
                 <p className="font-bold mt-1" style={{ color: theme.secondaryColor }}>{formatPrice(p.price, p.currency)}</p>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleAddToCart(p)
+                  }}
+                  className="mt-2 w-full px-3 py-2 rounded-lg text-white text-sm font-medium flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
+                  style={{ background: `linear-gradient(to right, ${theme.primaryColor}, ${theme.secondaryColor})` }}
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  Do koszyka
+                </button>
               </div>
             ))}
           </div>

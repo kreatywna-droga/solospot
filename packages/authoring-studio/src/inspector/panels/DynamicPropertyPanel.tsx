@@ -1,6 +1,10 @@
 import * as React from 'react';
-import { InspectorGroup } from '@web-factor/builder-core/src/InspectorRuntime';
-import { PropSchema } from '@web-factor/builder-core/src/ComponentRegistry';
+import type { InspectorGroup } from '../../../../builder-core/src/InspectorRuntime';
+import type { PropSchema } from '../../../../builder-core/src/ComponentRegistry';
+import { propertyFieldRegistry } from '../registry/propertyFieldRegistry';
+import { toPropertyFieldDefinition } from './schemaAdapter';
+import { WidgetField } from '../widgets/WidgetField';
+import type { Breakpoint, PropertyFieldDefinition } from '../registry/types';
 
 export interface DynamicPropertyPanelProps {
   group: InspectorGroup;
@@ -9,93 +13,77 @@ export interface DynamicPropertyPanelProps {
   breakpoint: 'desktop' | 'tablet' | 'mobile';
 }
 
+/**
+ * DynamicPropertyPanel — Sprint 7 Recovery (P1)
+ *
+ * Refactored to resolve widgets EXCLUSIVELY via the PropertyRegistry.
+ * The previous implementation used a switch/case on field.type — that
+ * has been removed. Field metadata is produced by the schemaAdapter
+ * (PropSchema → PropertyFieldDefinition), and the widget component is
+ * looked up through `propertyFieldRegistry.getWidget(field.widget)`.
+ *
+ * There is NO switch/case, NO local field definitions, NO hardcoded inputs.
+ *
+ * @agent Agent 1 — Inspector Core Engineer (Sprint 7 Recovery)
+ * @status IN PROGRESS — READY FOR PM26 REVIEW
+ */
+
 export const DynamicPropertyPanel: React.FC<DynamicPropertyPanelProps> = ({
   group,
   currentProps,
   onPropChange,
   breakpoint
 }) => {
-  const renderField = (field: PropSchema) => {
-    // Resolving value with basic fallback
-    const rawValue = currentProps[field.key] ?? field.defaultValue ?? '';
-    
-    // Simplistic handling of breakpoint overrides (assuming value could be an object { desktop, tablet, mobile })
-    const isResponsive = typeof rawValue === 'object' && rawValue !== null && 'desktop' in rawValue;
-    const value = isResponsive ? (rawValue as any)[breakpoint] ?? '' : rawValue;
+  const renderField = (schema: PropSchema, breakpointKey: Breakpoint) => {
+    // Map PropSchema → PropertyFieldDefinition (pure adapter, no switch).
+    const definition = toPropertyFieldDefinition(schema);
+
+    // Resolve the widget component exclusively from the registry.
+    const Widget = propertyFieldRegistry.getWidget(definition.widget);
+    if (!Widget) {
+      return (
+        <span className="text-[11px] text-slate-600 italic">
+          Unsupported field type: {definition.widget}
+        </span>
+      );
+    }
+
+    // Resolve value (respecting responsive overrides).
+    const rawValue = currentProps[schema.key] ?? schema.defaultValue ?? '';
+    const isResponsive =
+      typeof rawValue === 'object' && rawValue !== null && 'desktop' in rawValue;
+    const value = isResponsive
+      ? (rawValue as Record<string, unknown>)[breakpointKey] ?? ''
+      : rawValue;
 
     const handleChange = (newVal: unknown) => {
       if (isResponsive) {
-        onPropChange(field.key, { ...rawValue as any, [breakpoint]: newVal });
+        onPropChange(schema.key, {
+          ...(rawValue as Record<string, unknown>),
+          [breakpointKey]: newVal,
+        });
       } else {
-        onPropChange(field.key, newVal);
+        onPropChange(schema.key, newVal);
       }
     };
 
-    switch (field.type) {
-      case 'string':
-      case 'text':
-        return (
-          <input 
-            type="text" 
-            value={value as string} 
-            onChange={e => handleChange(e.target.value)} 
-          />
-        );
-      case 'number':
-        return (
-          <input 
-            type="number" 
-            value={value as number} 
-            onChange={e => handleChange(Number(e.target.value))} 
-          />
-        );
-      case 'boolean':
-        return (
-          <input 
-            type="checkbox" 
-            checked={Boolean(value)} 
-            onChange={e => handleChange(e.target.checked)} 
-          />
-        );
-      case 'select':
-        if ('options' in field) {
-          return (
-            <select value={value as string} onChange={e => handleChange(e.target.value)}>
-              {field.options.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-          );
-        }
-        return null;
-      case 'color':
-        return (
-          <div className="color-picker-wrapper">
-            <input 
-              type="color" 
-              value={value as string} 
-              onChange={e => handleChange(e.target.value)} 
-            />
-            <input 
-              type="text" 
-              value={value as string} 
-              onChange={e => handleChange(e.target.value)} 
-            />
-          </div>
-        );
-      default:
-        return <span>Unsupported field type: {field.type}</span>;
-    }
+    return (
+      <WidgetField field={definition}>
+        <Widget
+          value={value}
+          onChange={handleChange}
+          field={definition}
+          breakpoint={breakpointKey}
+        />
+      </WidgetField>
+    );
   };
 
   return (
     <div className="dynamic-property-panel">
       {group.fields.map(field => (
-        <div className="property-field" key={field.key}>
-          <label className="property-label">{field.label}</label>
-          <div className="property-input">
-            {renderField(field)}
-          </div>
+        <div className="property-field" key={String(field.key)}>
+          {renderField(field, breakpoint)}
         </div>
       ))}
     </div>

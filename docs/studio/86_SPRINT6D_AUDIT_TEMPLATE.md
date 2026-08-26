@@ -48,3 +48,13 @@
 
 - **Overall Status**: [Ready | Conditionally Ready | Not Ready]
 - **Unresolved Risks**: [List or "None"]
+
+---
+
+## 5. Standard zgodności (od PM33)
+
+Raport **musi** być zgodny z zamrożonym standardem Code Evidence Audit zdefiniowanym w jedynym źródle prawdy (SSOT):
+
+> **`docs/studio/121_CODE_EVIDENCE_AUDIT_PROTOCOL_FREEZE_v1.0.md`**
+
+Obejmuje to: klasyfikację źródeł dowodów (**Evidence Provenance**), pole **Verification Method** oraz format **Quality Gates** (Status / Evidence Source / Independent Execution).

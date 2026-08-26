@@ -46,3 +46,13 @@ A release candidate is declared **GREEN RELEASE** only if:
 1. **Critical Security or Architecture Finding**: Immediate BLOCKER. Revert commit or fix violation before re-auditing.
 2. **Sub-Optimal Health Score (<80)**: Refer to `PlatformReportGenerator` recommendations and address P1 priority items.
 3. **Missing Documentation**: Update package README or ADR before final approval.
+
+---
+
+## 5. Standard raportowania audytów (od PM33)
+
+Od **PM33** obowiązuje zamrożony standard raportowania audytów architektonicznych. Format raportu, klasyfikacja źródeł dowodów (**Evidence Provenance**), pole **Verification Method** oraz format **Quality Gates** są zdefiniowane w jedynym źródle prawdy (SSOT):
+
+> **`docs/studio/121_CODE_EVIDENCE_AUDIT_PROTOCOL_FREEZE_v1.0.md`**
+
+Wszystkie audyty (w tym platform audit) **muszą** oznaczać każde źródło dowodu kategorią `Repository Verified` / `Diff Verified` / `Evidence Verified` / `Not Independently Reproduced` oraz raportować bramki (TypeScript, Vitest, Build) w formacie `Status` / `Evidence Source` / `Independent Execution`. Szczegóły w dokumencie 121.

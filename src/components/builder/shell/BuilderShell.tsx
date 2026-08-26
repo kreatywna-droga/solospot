@@ -25,15 +25,11 @@
 import { useState, useCallback, useEffect } from 'react'
 import { BuilderProvider, useBuilder, useBuilderHistory } from '../state/BuilderProvider'
 import { BuilderCanvas } from '../canvas/BuilderCanvas'
-import { InspectorPanel } from '../inspector/InspectorPanel'
+import { InspectorShellAdapter } from '../../../../packages/authoring-studio/src/inspector/InspectorShellAdapter'
 import { BuilderTopBar, StudioTab } from './BuilderTopBar'
 import { BuilderLeftSidebar } from './BuilderLeftSidebar'
 import { BuilderBottomBar } from './BuilderBottomBar'
 import { BuilderDocument, BuilderMetadata, BuilderTheme, createBuilderDocument } from '../../../../packages/builder-core/src/BuilderDocument'
-import { initializeBuiltinFields } from '../inspector/propertyFieldRegistry'
-
-// Initialize built-in field renderers once (module-level)
-initializeBuiltinFields()
 
 // ---------------------------------------------------------------------------
 // Breadcrumbs
@@ -72,8 +68,21 @@ interface BuilderShellProps {
 export function BuilderShell({ storeId, onSave, saving }: BuilderShellProps) {
   const [activeTab, setActiveTab] = useState<StudioTab>('layers')
   const [leftSidebarVisible, setLeftSidebarVisible] = useState(true)
-  const { dispatch } = useBuilder()
+  const { dispatch, canvas } = useBuilder()
   // Keyboard handled by KeyboardController in core — BuilderShell is "głupi"
+
+  const handleInspectorPropChange = useCallback(
+    (key: string, value: unknown) => {
+      if (!canvas.selectedSectionId || !canvas.selectedPageId) return
+      dispatch({
+        type: 'UPDATE_PROPS',
+        pageId: canvas.selectedPageId,
+        sectionId: canvas.selectedSectionId,
+        props: { [key]: value },
+      })
+    },
+    [dispatch, canvas.selectedSectionId, canvas.selectedPageId],
+  )
 
   return (
     <div className="h-screen bg-[#050508] text-white flex flex-col overflow-hidden select-none">
@@ -105,9 +114,12 @@ export function BuilderShell({ storeId, onSave, saving }: BuilderShellProps) {
           <BuilderCanvas onAddSection={() => setActiveTab('layers')} />
         </main>
 
-        {/* Inspector (Right Panel) */}
+        {/* Inspector (Right Panel) — Inspector 2.0 (PM28 Architecture) */}
         <aside className="w-72 border-l border-white/10 bg-[#06060c] flex flex-col overflow-hidden flex-shrink-0">
-          <InspectorPanel />
+          <InspectorShellAdapter
+            sectionId={canvas.selectedSectionId}
+            onPropChange={handleInspectorPropChange}
+          />
         </aside>
       </div>
 

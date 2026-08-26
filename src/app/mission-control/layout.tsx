@@ -82,12 +82,12 @@ export default function MissionControlLayout({
             >
               <LayoutDashboard className="w-3.5 h-3.5" /> Powrót do panelu głównego
             </Link>
-            <a
+            <Link
               href="/"
               className="text-xs text-slate-500 hover:text-white transition-colors"
             >
               Strona główna
-            </a>
+            </Link>
           </div>
         </header>
 

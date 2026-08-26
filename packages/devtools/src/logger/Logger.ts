@@ -43,11 +43,10 @@ export class Logger {
     this.enabled = false;
   }
 
-  public isEnabled(): boolean {
+public isEnabled(messageLevel?: LogLevel): boolean {
     if (!this.enabled) return false;
-    if (this.isProduction && this.productionSilentMode && this.level < LogLevel.ERROR) {
-      return false;
-    }
+    // If checking a specific message level, also verify it meets the configured level threshold
+    if (messageLevel !== undefined && messageLevel < this.level) return false;
     return true;
   }
 
@@ -94,9 +93,13 @@ export class Logger {
     this.log(LogLevel.ERROR, message, args);
   }
 
-  private log(level: LogLevel, message: string, args: any[]): void {
+private log(level: LogLevel, message: string, args: any[]): void {
     if (!this.isEnabled()) return;
     if (level < this.level) return;
+    // Production silent mode: suppress everything below ERROR
+    if (this.isProduction && this.productionSilentMode && level < LogLevel.ERROR) {
+      return;
+    }
 
     const entry: LogEntry = {
       timestamp: new Date().toISOString(),

@@ -1,5 +1,5 @@
 export type TenantStatus = 'CREATED' | 'PROVISIONING' | 'ACTIVE' | 'DEACTIVATED' | 'SUSPENDED';
-export type StoreStatus = 'CREATED' | 'LOADING' | 'READY' | 'DISPOSED';
+export type StoreStatus = 'CREATED' | 'LOADING' | 'READY' | 'ERROR' | 'DISPOSED';
 
 export interface Tenant {
   id: string;

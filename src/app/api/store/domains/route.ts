@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     const { domain } = body;
 
     // Validate domain format (allow null/empty to clear custom domain)
-    let cleanDomain = domain ? domain.trim().toLowerCase() : null;
+    const cleanDomain = domain ? domain.trim().toLowerCase() : null;
     if (cleanDomain && !/^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}$/i.test(cleanDomain)) {
       return NextResponse.json({ success: false, error: 'Invalid domain format' }, { status: 400 });
     }

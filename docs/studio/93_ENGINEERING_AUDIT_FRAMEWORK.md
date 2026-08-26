@@ -33,3 +33,5 @@ Audit Techniczny ➔ Audit Architektoniczny ➔ Audit Dokumentacji ➔ Audit Wyd
 ## 3. Raport Końcowy Audytu (Audit Report Template)
 
 Każdy audyt kończy się wygenerowaniem formalnego raportu podsumowującego z podaniem wskaźników PASS/FAIL, listą znalezionych niezgodności oraz przypisanymi akcjami korygującymi (Corrective Actions) do rozwiązania w najbliższym sprincie.
+
+> **Standard raportowania (od PM33):** Format raportu, klasyfikacja źródeł dowodów (Evidence Provenance), pole Verification Method oraz format Quality Gates są zdefiniowane w **Single Source of Truth**: `121_CODE_EVIDENCE_AUDIT_PROTOCOL_FREEZE_v1.0.md`. Wszystkie raporty audytowe od PM33 **muszą** być zgodne z tym standardem.

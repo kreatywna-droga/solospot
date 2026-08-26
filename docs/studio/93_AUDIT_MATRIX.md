@@ -24,3 +24,13 @@
 - **`PRODUCT_AUDIT`**: 5-module feature sprint audit executed at the end of Product Engineering sprints.
 - **`ARCHITECTURE_AUDIT`**: Specialized check evaluating layer boundaries, ADRs, and circular dependencies.
 - **`RELEASE_AUDIT`**: Full 10-module master audit required prior to tagging production release candidates.
+
+---
+
+## 3. Standard raportowania (od PM33)
+
+Od **PM33** wszystkie audyty **muszą** być zgodne z zamrożonym standardem Code Evidence Audit zdefiniowanym w jedynym źródle prawdy (SSOT):
+
+> **`docs/studio/121_CODE_EVIDENCE_AUDIT_PROTOCOL_FREEZE_v1.0.md`**
+
+Obejmuje to: klasyfikację źródeł dowodów (**Evidence Provenance**), pole **Verification Method** oraz format **Quality Gates** (Status / Evidence Source / Independent Execution).

@@ -177,16 +177,7 @@ export function LayerTree() {
     canvas.selectedPageId ? p.id === canvas.selectedPageId : p.isHome
   ) ?? document.pages[0]
 
-  const handleSelect = useCallback((sectionId: string) => {
-    const parentId = findParent(activePage.sections, sectionId)
-    const targetId = parentId || sectionId
-    dispatch({
-      type: 'CANVAS',
-      action: { type: 'SELECT_SECTION', sectionId: targetId, pageId: activePage?.id ?? null },
-    })
-  }, [dispatch, activePage])
-
-  function findParent(sections: SectionNode[], childId: string): string | null {
+  const findParent = (sections: SectionNode[], childId: string): string | null => {
     for (const section of sections) {
       if (section.children.some(child => child.id === childId)) {
         return section.id
@@ -196,6 +187,15 @@ export function LayerTree() {
     }
     return null
   }
+
+  const handleSelect = useCallback((sectionId: string) => {
+    const parentId = findParent(activePage.sections, sectionId)
+    const targetId = parentId || sectionId
+    dispatch({
+      type: 'CANVAS',
+      action: { type: 'SELECT_SECTION', sectionId: targetId, pageId: activePage?.id ?? null },
+    })
+  }, [dispatch, activePage])
 
   if (!activePage) {
     return (

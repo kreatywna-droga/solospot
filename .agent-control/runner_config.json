@@ -1,0 +1,27 @@
+{
+  "version": "1.0",
+  "defaultStrategy": "signal",
+  "strategies": {
+    "signal": {
+      "enabled": true,
+      "signalPath": ".agent-control/DISPATCH.json"
+    },
+    "command": {
+      "enabled": false,
+      "commandTemplate": "opencode run --task {TASK_ID}"
+    },
+    "acp": {
+      "enabled": false,
+      "executable": "opencode",
+      "timeoutMs": 180000,
+      "models": {
+        "developer": "opencode/deepseek-v4-flash-free",
+        "auditor": "opencode/nemotron-3-ultra-free",
+        "orchestrator": "opencode/mimo-v2.5-free",
+        "planner": "opencode/mimo-v2.5-free",
+        "fallback": "opencode/big-pickle"
+      }
+    }
+  },
+  "lockTimeoutMs": 30000
+}

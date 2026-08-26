@@ -82,7 +82,7 @@ export class VectorConstraintSolverEngine {
           code: 'CYCLE_DETECTED',
           sourceNodeId: cycleRes.error.sourceNodeId,
           affectedNodeIds: cycleRes.error.affectedNodeIds,
-          constraintIds: snapshot.constraintEdges.map(e => e.id),
+          constraintIds: (snapshot.constraintEdges || []).map(e => e.id),
           dependencyChain: cycleRes.error.dependencyChain,
           reason: cycleRes.error.reason,
           recoverability: false
@@ -166,8 +166,8 @@ export class VectorConstraintSolverEngine {
           error: {
             code: 'CONTRADICTORY_CONSTRAINTS',
             sourceNodeId: changedNodeIds[0] || 'unknown',
-            affectedNodeIds,
-            constraintIds: snapshot.constraintEdges.map(e => e.id),
+            affectedNodeIds: affectedNodes,
+            constraintIds: (snapshot.constraintEdges || []).map(e => e.id),
             dependencyChain: affectedNodes,
             reason: e.message || 'Constraint evaluation failed',
             recoverability: false
@@ -208,8 +208,8 @@ export class VectorConstraintSolverEngine {
         error: {
           code: 'MAX_ITERATIONS_EXCEEDED',
           sourceNodeId: changedNodeIds[0] || 'unknown',
-          affectedNodeIds,
-          constraintIds: snapshot.constraintEdges.map(e => e.id),
+          affectedNodeIds: affectedNodes,
+          constraintIds: (snapshot.constraintEdges || []).map(e => e.id),
           dependencyChain: affectedNodes,
           reason: `Solver failed to reach fixed-point stability within ${maxIterations} iterations`,
           recoverability: false

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import {
   Users, Store, CreditCard, Activity, AlertCircle, Zap, LayoutDashboard,
@@ -114,11 +114,13 @@ export default function MissionControlPage() {
   const totalRevenue = orders.filter(o => o.status === 'PAID').reduce((sum, o) => sum + o.amount, 0)
   const totalTenants = tenants.length
 
+  const now24hAgo = React.useMemo(() => Date.now() - 86400000, [])
+
   const kpis = [
     { label: 'Tenanci', value: totalTenants, change: '—', icon: Users, color: 'violet', trend: 'neutral' },
     { label: 'Aktywne sklepy', value: activeStores, change: '—', icon: Store, color: 'emerald', trend: 'neutral' },
     { label: 'Przychód (30d)', value: (totalRevenue / 100).toLocaleString('pl-PL') + ' PLN', change: '—', icon: DollarSign, color: 'amber', trend: 'neutral' },
-    { label: 'Zamówienia (24h)', value: orders.filter(o => new Date(o.createdAt) > new Date(Date.now() - 86400000)).length, change: '—', icon: ShoppingCart, color: 'violet', trend: 'neutral' },
+    { label: 'Zamówienia (24h)', value: orders.filter(o => new Date(o.createdAt).getTime() > now24hAgo).length, change: '—', icon: ShoppingCart, color: 'violet', trend: 'neutral' },
     { label: 'Konwersja', value: totalTenants > 0 ? ((completedPayments / totalTenants) * 100).toFixed(1) + '%' : '0%', change: '—', icon: TrendingUp, color: 'blue', trend: 'neutral' },
     { label: 'Uptime platformy', value: health.length > 0 && health[0].status === 'operational' ? '100%' : 'Brak', change: '—', icon: Shield, color: 'cyan', trend: 'neutral' },
   ]

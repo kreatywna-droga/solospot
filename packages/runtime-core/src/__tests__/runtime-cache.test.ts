@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { RuntimeCache } from '../RuntimeCache';
 
 describe('RuntimeCache', () => {
@@ -39,12 +39,15 @@ describe('RuntimeCache', () => {
       expect(retrieved).toBeUndefined();
     });
 
-    it('returns undefined for expired items (ttl=-1 means expired already)', () => {
-      // TTL of 0 means expiresAt=0 which means no-expiry (PREVIEW mode pattern)
-      // TTL of -1 means Date.now() - 1 which is immediately expired
-      cache.set('key1', { value: 123 }, -1);
-      const retrieved = cache.get('key1');
+it('returns undefined for expired items', () => {
+      vi.useFakeTimers();
+      // Set with ttl=1000ms (1 second)
+      cache.set('key1', { value: 123 }, 1000);
+      // Advance time beyond TTL
+      vi.advanceTimersByTime(1001);
+      const retrieved = cache.get<{ value: number }>('key1');
       expect(retrieved).toBeUndefined();
+      vi.useRealTimers();
     });
   });
 

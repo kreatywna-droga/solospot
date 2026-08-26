@@ -132,7 +132,7 @@ export class UploadEngine {
     signal: AbortSignal
   ): Promise<Asset> {
     const totalSize = file.size;
-    let uploadedSize = 0;
+    const uploadedSize = 0;
 
     if (totalSize <= this.options.chunkSize) {
       const asset = await this.storage.upload(file as File | Buffer | ReadableStream<Uint8Array>, {

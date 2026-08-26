@@ -33,3 +33,13 @@ Przygotowanie Danych ➔ Audyt Metryk ➔ Przegląd Checklisty ➔ Ocena Ryzyk �
 ### 2.3 Działania Korygujące (Corrective Actions)
 * Każde naruszenie generuje zadanie korygujące przypisywane do kolejnego sprintu z priorytetem P1.
 * Po zakończeniu przeglądu aktualizowane są dokumenty `37_STUDIO_SUBSYSTEM_ROADMAP.md` oraz `99_IMPLEMENTATION_CHECKLIST.md`.
+
+---
+
+## 3. Standard raportowania governance (od PM33)
+
+Od **PM33** raporty governance i audytowe **muszą** być zgodne z zamrożonym standardem Code Evidence Audit zdefiniowanym w jedynym źródle prawdy (SSOT):
+
+> **`docs/studio/121_CODE_EVIDENCE_AUDIT_PROTOCOL_FREEZE_v1.0.md`**
+
+Dotyczy to w szczególności klasyfikacji źródeł dowodów (**Evidence Provenance**), pola **Verification Method** oraz formatu **Quality Gates** (TypeScript / Vitest / Build). Zmiany tego standardu wymagają decyzji Architekta, osobnego zadania governance, aktualizacji dokumentu 121 i obowiązują od kolejnego PM (Governance Change Process — sekcja 8 dokumentu 121).

@@ -1,17 +1,35 @@
-import * as React from 'react';
-import { DynamicPropertyPanel } from './DynamicPropertyPanel';
-import { InspectorGroup } from '@web-factor/builder-core/src/InspectorRuntime';
+'use client';
 
-export const TypographyPanel: React.FC<{
-  group: InspectorGroup;
-  currentProps: Record<string, unknown>;
-  onPropChange: (key: string, value: unknown) => void;
-  breakpoint: 'desktop' | 'tablet' | 'mobile';
-}> = (props) => {
+import * as React from 'react';
+import { InspectorPanelFields } from './InspectorPanelFields';
+import type { PanelProps } from './panelTypes';
+
+/**
+ * TypographyPanel — Sprint 7.1 Inspector 2.0 UI Layer
+ *
+ * Renders typography-related fields (font, size, weight, etc.).
+ * Pure presentation — renders exclusively via InspectorPanelFields.
+ * No business logic, no switch(type).
+ *
+ * @agent Agent 3 — Supporting Implementation Engineer
+ * @status READY FOR INTEGRATION BY AGENT 1
+ */
+export const TypographyPanel: React.FC<PanelProps> = ({
+  fields,
+  values,
+  onChange,
+  renderField,
+}) => {
   return (
     <div className="typography-panel">
-      {/* Custom typography logic could go here */}
-      <DynamicPropertyPanel {...props} />
+      <InspectorPanelFields
+        fields={fields}
+        values={values}
+        onChange={onChange}
+        renderField={renderField}
+      />
     </div>
   );
 };
+
+export default React.memo(TypographyPanel);

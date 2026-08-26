@@ -35,7 +35,7 @@ export class VectorConstraintGraphEngine {
    */
   public static buildConstraintGraph(snapshot: VectorDocumentSnapshot): ConstraintGraph {
     const nodeMap = new Map<string, VectorNode>(snapshot.nodes.map(n => [n.id, n]));
-    const edges = [...snapshot.constraintEdges].sort((a, b) => a.id.localeCompare(b.id));
+    const edges = [...(snapshot.constraintEdges || [])].sort((a, b) => a.id.localeCompare(b.id));
 
     const adjacencyList: GraphAdjacencyList = {};
     const reverseAdjacencyList: GraphAdjacencyList = {};
@@ -138,12 +138,14 @@ export class VectorConstraintGraphEngine {
    */
   public static getDependencies(graph: ConstraintGraph | GraphAdjacencyList, nodeId: string): string[] {
     if ('reverseAdjacencyList' in graph) {
-      return graph.reverseAdjacencyList[nodeId] ? [...graph.reverseAdjacencyList[nodeId]] : [];
+      const rev = graph.reverseAdjacencyList as Record<string, string[]>;
+      return rev[nodeId] ? [...rev[nodeId]] : [];
     }
     // Infer from GraphAdjacencyList (which maps Target -> [Dependents])
     const deps: string[] = [];
-    for (const [targetId, sources] of Object.entries(graph)) {
-      if (sources.includes(nodeId)) {
+    const adjDict = graph as Record<string, string[]>;
+    for (const [targetId, sources] of Object.entries(adjDict)) {
+      if (Array.isArray(sources) && sources.includes(nodeId)) {
         deps.push(targetId);
       }
     }
@@ -154,7 +156,7 @@ export class VectorConstraintGraphEngine {
    * Returns list of node IDs that depend on a given node.
    */
   public static getDependents(graph: ConstraintGraph | GraphAdjacencyList, nodeId: string): string[] {
-    const adj = 'adjacencyList' in graph ? graph.adjacencyList : graph;
+    const adj = ('adjacencyList' in graph ? graph.adjacencyList : graph) as Record<string, string[]>;
     return adj[nodeId] ? [...adj[nodeId]] : [];
   }
 
@@ -173,7 +175,7 @@ export class VectorConstraintGraphEngine {
     cyclePath: string[];
     error?: ConstraintGraphError;
   } {
-    const adj = 'adjacencyList' in graph ? graph.adjacencyList : graph;
+    const adj = ('adjacencyList' in graph ? graph.adjacencyList : graph) as Record<string, string[]>;
     const visited = new Set<string>();
     const visiting = new Set<string>();
     const stack: string[] = [];
@@ -196,7 +198,7 @@ export class VectorConstraintGraphEngine {
       visiting.add(nodeId);
       stack.push(nodeId);
 
-      const dependents = (adj[nodeId] || []).slice().sort((a, b) => a.localeCompare(b));
+      const dependents = (adj[nodeId] || []).slice().sort((a: string, b: string) => a.localeCompare(b));
       for (const dep of dependents) {
         if (dfs(dep)) {
           return true;
@@ -243,7 +245,7 @@ export class VectorConstraintGraphEngine {
    * Calculates deterministic resolution order with stable tie-breaking.
    */
   public static calculateResolutionOrder(graph: ConstraintGraph | GraphAdjacencyList): string[] {
-    const adj = 'adjacencyList' in graph ? graph.adjacencyList : graph;
+    const adj = ('adjacencyList' in graph ? graph.adjacencyList : graph) as Record<string, string[]>;
     const cycleRes = this.detectCycle(adj);
     if (cycleRes.hasCycle) {
       throw new Error(`VectorConstraintGraphEngine: Cycle detected during topological sort: ${cycleRes.cyclePath.join(' -> ')}`);
@@ -254,7 +256,7 @@ export class VectorConstraintGraphEngine {
 
     for (const node of nodes) {
       if (inDegree[node] === undefined) inDegree[node] = 0;
-      for (const target of adj[node]) {
+      for (const target of adj[node] || []) {
         if (inDegree[target] === undefined) inDegree[target] = 0;
         inDegree[target]++;
       }
@@ -268,7 +270,7 @@ export class VectorConstraintGraphEngine {
       const current = zeroInDegree.shift()!;
       result.push(current);
 
-      const dependents = (adj[current] || []).slice().sort((a, b) => a.localeCompare(b));
+      const dependents = ((adj as Record<string, string[]>)[current] || []).slice().sort((a: string, b: string) => a.localeCompare(b));
       for (const dep of dependents) {
         inDegree[dep]--;
         if (inDegree[dep] === 0) {
@@ -288,7 +290,7 @@ export class VectorConstraintGraphEngine {
    * Returns a Set of all node IDs reachable from the initial set of mutated nodes.
    */
   public static getAffectedSubgraph(graph: ConstraintGraph | GraphAdjacencyList, initialNodes: string[]): Set<string> {
-    const adj = 'adjacencyList' in graph ? graph.adjacencyList : graph;
+    const adj = ('adjacencyList' in graph ? graph.adjacencyList : graph) as Record<string, string[]>;
     const affected = new Set<string>();
     const queue = [...initialNodes].sort((a, b) => a.localeCompare(b));
 
@@ -296,7 +298,7 @@ export class VectorConstraintGraphEngine {
       const current = queue.shift()!;
       if (!affected.has(current)) {
         affected.add(current);
-        const dependents = (adj[current] || []).slice().sort((a, b) => a.localeCompare(b));
+        const dependents = (adj[current] || []).slice().sort((a: string, b: string) => a.localeCompare(b));
         for (const dep of dependents) {
           queue.push(dep);
         }
@@ -431,7 +433,7 @@ export class VectorConstraintGraphEngine {
 
     // Group edges by source Node ID and sort deterministically
     const edgesBySource = new Map<string, { h?: VectorConstraintEdge; v?: VectorConstraintEdge }>();
-    const sortedEdges = [...snapshot.constraintEdges].sort((a, b) => a.targetNodeId.localeCompare(b.targetNodeId));
+    const sortedEdges = [...(snapshot.constraintEdges || [])].sort((a, b) => a.targetNodeId.localeCompare(b.targetNodeId));
 
     for (const edge of sortedEdges) {
       if (!edgesBySource.has(edge.sourceNodeId)) {

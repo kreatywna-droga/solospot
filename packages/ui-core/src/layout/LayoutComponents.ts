@@ -1,4 +1,4 @@
-import { spacing, containerWidths } from '@web-factor/design-tokens';
+import { spacing, containerWidths } from '../../../design-tokens/src';
 
 export interface StackProps {
   gap?: keyof typeof spacing | string;

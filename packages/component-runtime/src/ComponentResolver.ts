@@ -61,8 +61,8 @@ export class ComponentResolver {
 
   private async loadComponent(manifest: ComponentManifest): Promise<React.ComponentType<Record<string, any>>> {
     try {
-      const module = await manifest.runtime.loader();
-      const Component = module.default;
+      const loadedModule = await manifest.runtime.loader();
+      const Component = loadedModule.default;
 
       if (!Component || typeof Component !== 'function') {
         throw new Error(`Component '${manifest.id}' does not export a default React component`);

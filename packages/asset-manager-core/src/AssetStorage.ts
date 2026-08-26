@@ -134,12 +134,12 @@ export class StorageFactory {
   static async create(type: string, config: StorageConfig = {}): Promise<AssetStorage> {
     switch (type.toLowerCase()) {
       case 'local': {
-        const module = await import('./providers/LocalAssetStorage');
-        return new module.LocalAssetStorage(config);
+        const localStorageModule = await import('./providers/LocalAssetStorage');
+        return new localStorageModule.LocalAssetStorage(config);
       }
       case 'memory': {
-        const module = await import('./providers/LocalAssetStorage');
-        return new module.LocalAssetStorage({ ...config, basePath: 'mem:' });
+        const memStorageModule = await import('./providers/LocalAssetStorage');
+        return new memStorageModule.LocalAssetStorage({ ...config, basePath: 'mem:' });
       }
       default:
         throw new Error(`Unsupported storage type: ${type}`);

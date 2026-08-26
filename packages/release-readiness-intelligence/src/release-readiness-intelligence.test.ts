@@ -121,15 +121,15 @@ describe('ReleaseReadinessValidator — evaluateGates & Status Derivation', () =
     expect(results.find((g) => g.gateId === 'GATE-001')?.passed).toBe(false);
   });
 
-  it('derives status "Conditionally Ready" when optional gates fail but mandatory pass', () => {
-    const snapshot = makeSnapshot({ intelligence: { performanceHealthScore: 70 } });
+it('derives status "Conditionally Ready" when optional gates fail but mandatory pass', () => {
+    const snapshot = makeSnapshot({ intelligence: { documentationHealthScore: 70 } });
     const gates = DEFAULT_RELEASE_GATES;
     const risks = ReleaseReadinessAnalyzer.analyzeAll(snapshot, gates);
     const results = ReleaseReadinessValidator.evaluateGates(gates, snapshot, risks);
     const status = ReleaseReadinessValidator.deriveStatus(results, risks);
 
     expect(status).toBe('Conditionally Ready');
-    expect(results.find((g) => g.gateId === 'GATE-006')?.passed).toBe(false);
+    expect(results.find((g) => g.gateId === 'GATE-007')?.passed).toBe(false);
   });
 });
 

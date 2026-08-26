@@ -219,7 +219,7 @@ export class CustomerAccountEngine {
     };
 
     // If new address is default, reset existing defaults of the same type
-    let updatedAddresses = customer.addresses.map((addr) => {
+    const updatedAddresses = customer.addresses.map((addr) => {
       if (newAddress.isDefault && addr.type === newAddress.type) {
         return { ...addr, isDefault: false };
       }

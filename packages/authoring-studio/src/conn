@@ -1,0 +1,88 @@
+/**
+ * ConnectorPermissions.ts — Sprint S8 Connector Framework (ETAP 1)
+ *
+ * Granular permission model for connector operations.
+ *
+ * NO DOM, NO React, NO Browser API, ZERO Runtime execution.
+ */
+
+export type ConnectorPermissionLevel = 'granted' | 'denied' | 'prompt';
+
+export type ConnectorPermissionAction =
+    | 'read'
+    | 'write'
+    | 'delete'
+    | 'import'
+    | 'export'
+    | 'sync'
+    | 'manage_credentials';
+
+export interface ConnectorPermissionsConfig {
+    readonly connectorId: string;
+    readonly grantedActions: ReadonlyArray<ConnectorPermissionAction>;
+    readonly deniedActions: ReadonlyArray<ConnectorPermissionAction>;
+}
+
+export interface ConnectorPermissionCheck {
+    readonly connectorId: string;
+    readonly action: ConnectorPermissionAction;
+    readonly level: ConnectorPermissionLevel;
+}
+
+export function createConnectorPermissionsConfig(
+    connectorId: string,
+    grantedActions: ReadonlyArray<ConnectorPermissionAction> = [],
+    deniedActions: ReadonlyArray<ConnectorPermissionAction> = []
+): ConnectorPermissionsConfig {
+    return {
+        connectorId,
+        grantedActions: [...grantedActions],
+        deniedActions: [...deniedActions],
+    };
+}
+
+export function checkConnectorPermission(
+    config: ConnectorPermissionsConfig,
+    action: ConnectorPermissionAction
+): ConnectorPermissionLevel {
+    if (config.deniedActions.includes(action)) {
+        return 'denied';
+    }
+    if (config.grantedActions.includes(action)) {
+        return 'granted';
+    }
+    return 'prompt';
+}
+
+export function grantConnectorAction(
+    config: ConnectorPermissionsConfig,
+    action: ConnectorPermissionAction
+): ConnectorPermissionsConfig {
+    return {
+        ...config,
+        grantedActions: config.grantedActions.includes(action)
+            ? config.grantedActions
+            : [...config.grantedActions, action],
+        deniedActions: config.deniedActions.filter((a) => a !== action),
+    };
+}
+
+export function denyConnectorAction(
+    config: ConnectorPermissionsConfig,
+    action: ConnectorPermissionAction
+): ConnectorPermissionsConfig {
+    return {
+        ...config,
+        grantedActions: config.grantedActions.filter((a) => a !== action),
+        deniedActions: config.deniedActions.includes(action)
+            ? config.deniedActions
+            : [...config.deniedActions, action],
+    };
+}
+
+export function hasConnectorPermission(
+    config: ConnectorPermissionsConfig,
+    action: ConnectorPermissionAction
+): boolean {
+    return checkConnectorPermission(config, action) === 'granted';
+}

@@ -78,13 +78,13 @@ export class DefaultStoreManager implements StoreManager {
         .withStage(new StoreConfigStage())
         .build();
 
-      let provisionEngine: DefaultProvisionEngine;
+      const engineHolder: { current?: DefaultProvisionEngine } = {};
 
       const publishEngine = new PublishEngineBuilder()
         .withAssetPipeline(assetPipeline)
         .withDeploymentRegistry(registry)
         .withStoreConfigLoader(async (tenantId, storeId) => {
-          const config = provisionEngine?.getProvisionedConfig(storeId);
+          const config = engineHolder.current?.getProvisionedConfig(storeId);
           if (!config) {
             throw new Error(`Config not found for store: ${storeId}`);
           }
@@ -96,10 +96,11 @@ export class DefaultStoreManager implements StoreManager {
         }))
         .build();
 
-      provisionEngine = new DefaultProvisionEngine({
+      const provisionEngine = new DefaultProvisionEngine({
         pipeline,
         publishEngine
       });
+      engineHolder.current = provisionEngine;
 
       this.provisionEngine = provisionEngine;
       this.publishEngine = publishEngine;

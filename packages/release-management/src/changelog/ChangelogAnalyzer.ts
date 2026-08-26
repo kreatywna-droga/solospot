@@ -12,7 +12,7 @@ export class ChangelogAnalyzer {
     const entries: ChangelogEntry[] = [];
     const versionHeaderRegex = /##\s*\[?([0-9]+\.[0-9]+\.[0-9]+[^\]\s]*)\]?(?:\s*-\s*([0-9]{4}-[0-9]{2}-[0-9]{2}))?/g;
 
-    const sections = markdownContent.split(/##\s+/);
+    const sections = markdownContent.split(/\n\s*##(?!#)\s+/);
 
     for (const sec of sections) {
       if (!sec.trim()) continue;

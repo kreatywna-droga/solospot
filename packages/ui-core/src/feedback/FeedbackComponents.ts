@@ -1,4 +1,4 @@
-import { colors, borderRadius, spacing } from '@web-factor/design-tokens';
+import { colors, borderRadius, spacing } from '../../../design-tokens/src';
 
 export interface AlertProps {
   title?: string;

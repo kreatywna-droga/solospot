@@ -1,5 +1,10 @@
 # C16.99 — WEB FACTOR Studio 2.0 Implementation Checklist
 
+> [!NOTE]
+> **SINGLE SOURCE OF TRUTH**
+> 
+> Wszystkie statusy sprintów mają być odczytywane wyłącznie z tego dokumentu.
+
 > **Epic:** C16 — WEB FACTOR Studio 2.0  
 > **Dokument:** 99_IMPLEMENTATION_CHECKLIST.md  
 > **Status:** Architecture Baseline v2.0 — APPROVED & FROZEN 🔒 | EP1–EP23 Platform PASS ✅ (2026-07-30)  
@@ -303,13 +308,27 @@ STATUS: ALL PASS ✅ (2026-07-30)
 
 ---
 
-## ETAP 3 — Visual Builder (Przyszłe Sprinty Agenta 1)
+### Sprint 6 — Commerce & Storefront Finalization
+- [x] Sprint 6 Step 1-5 — Commerce Core, Checkout, Payment & Order Engines ✅
+- [x] Sprint 6 Step 6 — Commerce Product Experience (Cart, Checkout, Order Status) ✅
+- [x] PM24 Architecture Audit — 119_SPRINT6_STEP6_FINAL_ARCHITECTURE_AUDIT.md 🟢 PASS ✅
+
+**Status:** ✅ Sprint 6 definitywnie zamknięty — PM24 PASS
 
 ---
 
-### Sprint 7 — Inspector 2.0
-- [x] Inspector Core Accordions & Property Fields
-- [x] Integracja z pakietem `@web-factor/ui-core` i `@web-factor/design-tokens`
+## ETAP 3 — Visual Builder
+
+---
+
+### Sprint 7 — Inspector 2.0 (Etapy 7.1 – 7.6) 🚀 [W TRAKCIE]
+- [ ] Sprint 7.1 — Inspector Foundation (Shell, Panel, Registry, Runtime)
+- [ ] Sprint 7.2 — Property System (Property Registry, Metadata, Validation, Responsive)
+- [ ] Sprint 7.3 — Advanced Editors (Color Picker, Gradient, Shadow, Border, Typography, Spacing, Flex, Grid)
+- [ ] Sprint 7.4 — Responsive Inspector (Desktop, Tablet, Mobile, Overrides)
+- [ ] Sprint 7.5 — Realtime Synchronization (Granular UPDATE_PROPS, Zero Full Refresh, Performance)
+- [ ] Sprint 7.6 — Inspector Production Polish (Accessibility, Shortcuts, History, Quality Gates)
+
 
 ---
 

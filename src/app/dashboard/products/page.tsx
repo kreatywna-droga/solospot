@@ -61,7 +61,7 @@ export default function ProductsPage() {
     finally { setLoading(false) }
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { void load() }, [])
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()

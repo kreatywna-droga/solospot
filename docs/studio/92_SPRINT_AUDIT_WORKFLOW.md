@@ -45,3 +45,13 @@
 
 ### Phase 5: Approval & Checklist Update
 - Subsystem freeze marked **APPROVED**, checklist `99_IMPLEMENTATION_CHECKLIST.md` updated with `[x]`, sprint closed cleanly.
+
+---
+
+## 3. Standard raportowania (od PM33)
+
+Od **PM33** format raportu audytowego, klasyfikacja źródeł dowodów (**Evidence Provenance**), pole **Verification Method** oraz format **Quality Gates** są zdefiniowane w jedynym źródle prawdy (SSOT):
+
+> **`docs/studio/121_CODE_EVIDENCE_AUDIT_PROTOCOL_FREEZE_v1.0.md`**
+
+Wszystkie raporty audytowe produkowane w fazach 2–4 **muszą** oznaczać każde źródło dowodu kategorią `Repository Verified` / `Diff Verified` / `Evidence Verified` / `Not Independently Reproduced` oraz raportować bramki w nowym formacie. Szczegóły w dokumencie 121.

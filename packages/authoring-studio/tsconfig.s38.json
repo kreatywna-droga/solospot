@@ -1,0 +1,25 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "builder-core/*": ["../builder-core/src/*"]
+    }
+  },
+  "include": [
+    "src/preview/PreviewRuntimeCoordinator.ts",
+    "src/preview/LiveScrubbingEngine.ts",
+    "src/preview/PreviewPlayheadSync.ts",
+    "src/preview/PreviewSelectionSync.ts",
+    "src/preview/KeyframeDragPreview.ts",
+    "src/preview/index.ts",
+    "src/preview/__tests__/TimelineLiveCanvasSyncE2E.test.ts",
+    "src/timeline/TimelinePlaybackSession.ts",
+    "src/timeline/TimelineTransportController.ts",
+    "src/timeline/TimelineStudioBridge.ts",
+    "src/timeline/TimelineSelectionSync.ts",
+    "src/timeline/timelineDocumentBinding.ts",
+    "src/ui/runtime/TimelineRuntimeConnector.ts"
+  ]
+}

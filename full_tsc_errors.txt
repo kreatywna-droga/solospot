@@ -1,0 +1,22 @@
+﻿.next/types/validator.ts(567,31): error TS2344: Type 'typeof import("C:/Users/HP/Documents/GOOGLE ANTIGRAVITY APK/WEB FACTOR/src/app/api/store/order/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/store/order/[id]">'.
+  Types of property 'GET' are incompatible.
+    Type '(req: Request, { params }: { params: { id: string; }; }) => Promise<NextResponse<unknown>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+packages/authoring-studio/src/inspector/__tests__/StateConsistency.test.ts(16,8): error TS2307: Cannot find module '../../../../src/test-utils' or its corresponding type declarations.
+packages/authoring-studio/src/inspector/panels/__tests__/DynamicPropertyPanel.test.ts(16,8): error TS2307: Cannot find module '../../../../../src/test-utils' or its corresponding type declarations.
+packages/builder-core/src/animation/__tests__/AnimationColorInterpolator.test.ts(7,10): error TS2305: Module '"../AnimationColorInterpolator"' has no exported member 'parseColor'.
+packages/builder-core/src/animation/__tests__/AnimationColorInterpolator.test.ts(7,22): error TS2305: Module '"../AnimationColorInterpolator"' has no exported member 'interpolateColor'.
+packages/builder-core/src/animation/__tests__/AnimationInterpolator.test.ts(7,10): error TS2305: Module '"../AnimationInterpolator"' has no exported member 'interpolateNumber'.
+packages/builder-core/src/animation/__tests__/AnimationInterpolator.test.ts(7,29): error TS2305: Module '"../AnimationInterpolator"' has no exported member 'interpolateUnit'.
+packages/builder-core/src/animation/__tests__/AnimationInterpolator.test.ts(7,46): error TS2305: Module '"../AnimationInterpolator"' has no exported member 'interpolateProperty'.
+packages/builder-core/src/animation/__tests__/AnimationTransformInterpolator.test.ts(8,3): error TS2305: Module '"../AnimationTransformInterpolator"' has no exported member 'parseTransformFunction'.
+packages/builder-core/src/animation/__tests__/AnimationTransformInterpolator.test.ts(9,3): error TS2305: Module '"../AnimationTransformInterpolator"' has no exported member 'parseTransformList'.
+packages/builder-core/src/animation/__tests__/AnimationTransformInterpolator.test.ts(10,3): error TS2305: Module '"../AnimationTransformInterpolator"' has no exported member 'interpolateTransform'.
+packages/builder-core/src/animation/__tests__/AnimationUnitParser.test.ts(7,10): error TS2724: '"../AnimationUnitParser"' has no exported member named 'parseUnit'. Did you mean 'ParsedUnit'?
+packages/builder-core/src/animation/__tests__/AnimationUnitParser.test.ts(7,21): error TS2305: Module '"../AnimationUnitParser"' has no exported member 'areUnitsCompatible'.
+packages/builder-core/src/animation/__tests__/AnimationUnitParser.test.ts(7,41): error TS2305: Module '"../AnimationUnitParser"' has no exported member 'isSupportedUnit'.
+packages/builder-core/src/index.ts(402,10): error TS2300: Duplicate identifier 'AnimationInterpolation'.
+packages/builder-core/src/index.ts(409,10): error TS2300: Duplicate identifier 'AnimationInterpolation'.

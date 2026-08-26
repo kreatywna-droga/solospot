@@ -97,6 +97,6 @@ describe('Platform Intelligence Orchestrator (PM13 Enhancements)', () => {
     expect(md).toContain('Runtime Cache & Performance Health');
     expect(md).toContain('Cache Hit Ratio');
     expect(json).toContain('runtimeCacheHealth');
-    expect(csv).toContain('RuntimeCache,cache_health');
+expect(csv).toContain('"RuntimeCache","cache_health"');
   });
 });

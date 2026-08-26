@@ -1,28 +1,62 @@
-/**
- * @vitest-environment jsdom
- */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { RuntimePreviewChannel } from '../RuntimePreviewChannel'
 
+// Mock window.postMessage and addEventListener
+function createMockWindow() {
+  const listeners = new Map<string, Set<(...args: any[]) => void>>()
+  return {
+    addEventListener: vi.fn((type: string, handler: (...args: any[]) => void) => {
+      if (!listeners.has(type)) listeners.set(type, new Set())
+      listeners.get(type)!.add(handler)
+    }),
+    removeEventListener: vi.fn((type: string, handler: (...args: any[]) => void) => {
+      listeners.get(type)?.delete(handler)
+    }),
+    dispatchEvent: vi.fn((event: MessageEvent) => {
+      for (const handler of listeners.get('message') ?? []) {
+        handler(event)
+      }
+    }),
+    // Helper to simulate a postMessage from iframe
+    _simulateMessage: (data: any, origin: string) => {
+      const event = { data, origin } as MessageEvent
+      for (const handler of listeners.get('message') ?? []) {
+        handler(event)
+      }
+    },
+  }
+}
+
 describe('RuntimePreviewChannel', () => {
   let channel: RuntimePreviewChannel
-  let mockIframe: HTMLIFrameElement
+  let mockIframe: any
   let postMessageSpy: ReturnType<typeof vi.fn>
+  let mockWindow: ReturnType<typeof createMockWindow>
 
   beforeEach(() => {
+    mockWindow = createMockWindow()
+
+    // Replace global window methods
+    vi.stubGlobal('window', {
+      location: { origin: 'http://localhost' },
+      addEventListener: mockWindow.addEventListener,
+      removeEventListener: mockWindow.removeEventListener,
+    })
+
     channel = new RuntimePreviewChannel('http://localhost')
     postMessageSpy = vi.fn()
     mockIframe = {
       contentWindow: { postMessage: postMessageSpy },
-    } as unknown as HTMLIFrameElement
+    }
   })
 
   afterEach(() => {
     channel.detach()
+    vi.unstubAllGlobals()
   })
 
   it('attaches and detaches to iframe without errors', () => {
-    expect(() => channel.attach(mockIframe)).not.toThrow()
+    expect(() => channel.attach(mockIframe as any)).not.toThrow()
     expect(() => channel.detach()).not.toThrow()
   })
 
@@ -38,7 +72,7 @@ describe('RuntimePreviewChannel', () => {
   })
 
   it('sends UPDATE_DOCUMENT payload to iframe contentWindow', () => {
-    channel.attach(mockIframe)
+    channel.attach(mockIframe as any)
     const payload = {
       sections: [{ id: 's1', type: 'hero', label: 'Hero', props: {}, order: 0, visible: true }],
       theme: { primaryColor: '#7c3aed', secondaryColor: '#ec4899', font: 'Inter' },
@@ -52,7 +86,7 @@ describe('RuntimePreviewChannel', () => {
   })
 
   it('sends SET_VIEWPORT payload to iframe contentWindow', () => {
-    channel.attach(mockIframe)
+    channel.attach(mockIframe as any)
     channel.sendViewport({ width: 768, height: 800 })
     expect(postMessageSpy).toHaveBeenCalledWith(
       { type: 'SET_VIEWPORT', payload: { width: 768, height: 800 } },
@@ -61,7 +95,7 @@ describe('RuntimePreviewChannel', () => {
   })
 
   it('sends UPDATE_PROPS payload to iframe contentWindow', () => {
-    channel.attach(mockIframe)
+    channel.attach(mockIframe as any)
     channel.sendSectionUpdate('s-hero', { title: 'Hello' })
     expect(postMessageSpy).toHaveBeenCalledWith(
       { type: 'UPDATE_PROPS', payload: { sectionId: 's-hero', props: { title: 'Hello' } } },
@@ -70,37 +104,33 @@ describe('RuntimePreviewChannel', () => {
   })
 
   it('invokes onRuntimeReady callback when RUNTIME_READY postMessage is received', () => {
-    channel.attach(mockIframe)
+    channel.attach(mockIframe as any)
     const readyCallback = vi.fn()
     channel.onRuntimeReady(readyCallback)
 
-    window.dispatchEvent(
-      new MessageEvent('message', {
-        origin: 'http://localhost',
-        data: { type: 'RUNTIME_READY' },
-      })
+    mockWindow._simulateMessage(
+      { type: 'RUNTIME_READY' },
+      'http://localhost'
     )
 
     expect(readyCallback).toHaveBeenCalledTimes(1)
   })
 
   it('invokes onSectionSelected callback when SECTION_SELECTED postMessage is received', () => {
-    channel.attach(mockIframe)
+    channel.attach(mockIframe as any)
     const selectCallback = vi.fn()
     channel.onSectionSelected(selectCallback)
 
-    window.dispatchEvent(
-      new MessageEvent('message', {
-        origin: 'http://localhost',
-        data: { type: 'SECTION_SELECTED', payload: { sectionId: 's1', pageId: 'home' } },
-      })
+    mockWindow._simulateMessage(
+      { type: 'SECTION_SELECTED', payload: { sectionId: 's1', pageId: 'home' } },
+      'http://localhost'
     )
 
     expect(selectCallback).toHaveBeenCalledWith({ sectionId: 's1', pageId: 'home' })
   })
 
   it('invokes onSectionsMetrics callback when SECTIONS_METRICS postMessage is received', () => {
-    channel.attach(mockIframe)
+    channel.attach(mockIframe as any)
     const metricsCallback = vi.fn()
     channel.onSectionsMetrics(metricsCallback)
 
@@ -110,42 +140,36 @@ describe('RuntimePreviewChannel', () => {
       ],
     }
 
-    window.dispatchEvent(
-      new MessageEvent('message', {
-        origin: 'http://localhost',
-        data: { type: 'SECTIONS_METRICS', payload: metricsData },
-      })
+    mockWindow._simulateMessage(
+      { type: 'SECTIONS_METRICS', payload: metricsData },
+      'http://localhost'
     )
 
     expect(metricsCallback).toHaveBeenCalledWith(metricsData)
   })
 
   it('ignores messages from unknown origins', () => {
-    channel.attach(mockIframe)
+    channel.attach(mockIframe as any)
     const readyCallback = vi.fn()
     channel.onRuntimeReady(readyCallback)
 
-    window.dispatchEvent(
-      new MessageEvent('message', {
-        origin: 'http://evil.com',
-        data: { type: 'RUNTIME_READY' },
-      })
+    mockWindow._simulateMessage(
+      { type: 'RUNTIME_READY' },
+      'http://evil.com'
     )
 
     expect(readyCallback).not.toHaveBeenCalled()
   })
 
   it('does not call callbacks after detach', () => {
-    channel.attach(mockIframe)
+    channel.attach(mockIframe as any)
     const readyCallback = vi.fn()
     channel.onRuntimeReady(readyCallback)
     channel.detach()
 
-    window.dispatchEvent(
-      new MessageEvent('message', {
-        origin: 'http://localhost',
-        data: { type: 'RUNTIME_READY' },
-      })
+    mockWindow._simulateMessage(
+      { type: 'RUNTIME_READY' },
+      'http://localhost'
     )
 
     expect(readyCallback).not.toHaveBeenCalled()

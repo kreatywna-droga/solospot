@@ -1,6 +1,6 @@
 import { RuntimeModule, ModuleFactory as ModuleFactoryInterface } from '../../runtime-core/src/RuntimeEngine';
 
-export interface ModuleFactory extends ModuleFactoryInterface {}
+export type ModuleFactory = ModuleFactoryInterface;
 
 export interface RuntimeModuleConstructor {
   new (...args: unknown[]): RuntimeModule;

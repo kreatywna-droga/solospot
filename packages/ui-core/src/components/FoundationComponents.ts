@@ -1,4 +1,4 @@
-import { colors, spacing, borderRadius } from '@web-factor/design-tokens';
+import { colors, spacing, borderRadius } from '../../../design-tokens/src';
 
 export interface ButtonProps {
   label: string;

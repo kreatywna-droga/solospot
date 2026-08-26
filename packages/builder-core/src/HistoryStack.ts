@@ -47,12 +47,12 @@ export interface HistoryStack<T> {
    * Undo one step. Returns null if at the beginning.
    * Returns { stack, state } where state is the previous document.
    */
-  undo(): { stack: HistoryStack<T>; state: T } | null;
+  undo(): { stack: HistoryStack<T>; history: HistoryStack<T>; state: T } | null;
 
   /**
    * Redo one step. Returns null if at the tip.
    */
-  redo(): { stack: HistoryStack<T>; state: T } | null;
+  redo(): { stack: HistoryStack<T>; history: HistoryStack<T>; state: T } | null;
 
   /** Peek at the current state without changing the stack. */
   peek(): T | null;
@@ -115,8 +115,10 @@ function buildStack<T>(
       if (currentIndex <= 0) return null;
       const prevIndex = currentIndex - 1;
       const prevState = entries[prevIndex].state;
+      const newStack = buildStack<T>(entries, prevIndex, maxEntries);
       return {
-        stack: buildStack<T>(entries, prevIndex, maxEntries),
+        stack: newStack,
+        history: newStack,
         state: prevState,
       };
     },
@@ -125,8 +127,10 @@ function buildStack<T>(
       if (currentIndex >= entries.length - 1) return null;
       const nextIndex = currentIndex + 1;
       const nextState = entries[nextIndex].state;
+      const newStack = buildStack<T>(entries, nextIndex, maxEntries);
       return {
-        stack: buildStack<T>(entries, nextIndex, maxEntries),
+        stack: newStack,
+        history: newStack,
         state: nextState,
       };
     },

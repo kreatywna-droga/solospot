@@ -142,14 +142,14 @@ describe('ProvisionEngine Integration & E2E Flow', () => {
         .build();
 
       // 2. Create ProvisionEngine instance
-      let provisionEngine: DefaultProvisionEngine;
+      const engineHolder: { current?: DefaultProvisionEngine } = {};
 
       // 3. Build PublishEngine with correct builder APIs
       publishEngine = new PublishEngineBuilder()
         .withAssetPipeline(assetPipeline)
         .withDeploymentRegistry(registry)
         .withStoreConfigLoader(async (tenantId, storeId) => {
-          const config = provisionEngine.getProvisionedConfig(storeId);
+          const config = engineHolder.current?.getProvisionedConfig(storeId);
           if (!config) {
             throw new Error(`Config not found for store: ${storeId}`);
           }
@@ -161,10 +161,11 @@ describe('ProvisionEngine Integration & E2E Flow', () => {
         }))
         .build();
 
-      provisionEngine = new DefaultProvisionEngine({
+      const provisionEngine = new DefaultProvisionEngine({
         pipeline,
         publishEngine
       });
+      engineHolder.current = provisionEngine;
 
       // 4. Trigger E2E Provisioning
       const request = createProvisionRequest({
@@ -218,13 +219,13 @@ describe('ProvisionEngine Integration & E2E Flow', () => {
         hasher: new CryptoAssetHasher()
       });
 
-      let provisionEngine: DefaultProvisionEngine;
+      const engineHolder2: { current?: DefaultProvisionEngine } = {};
 
       publishEngine = new PublishEngineBuilder()
         .withAssetPipeline(failingAssetPipeline)
         .withDeploymentRegistry(registry)
         .withStoreConfigLoader(async (tenantId, storeId) => {
-          return provisionEngine.getProvisionedConfig(storeId)!;
+          return engineHolder2.current?.getProvisionedConfig(storeId)!;
         })
         .withTargetResolver(async (tenantId, storeId) => ({
           type: 'local',
@@ -232,10 +233,11 @@ describe('ProvisionEngine Integration & E2E Flow', () => {
         }))
         .build();
 
-      provisionEngine = new DefaultProvisionEngine({
+      const provisionEngine = new DefaultProvisionEngine({
         pipeline,
         publishEngine
       });
+      engineHolder2.current = provisionEngine;
 
       const request = createProvisionRequest({
         tenantId: 'tenant-fail-pub',

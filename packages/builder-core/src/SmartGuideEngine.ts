@@ -559,9 +559,10 @@ class SnapCalculator implements GuideCalculator {
     return [];
   }
 
-  /**
+/**
    * Compute snap guidance from a set of guides.
    * Pure function — separate from the calculator interface.
+   * Only snap to ALIGNMENT and CENTER guides — DISTANCE and SPACING guides are informational only.
    */
   computeSnap(
     currentPosition: { x: number; y: number; width: number; height: number },
@@ -575,6 +576,8 @@ class SnapCalculator implements GuideCalculator {
     const activeGuides: SmartGuide[] = [];
 
     for (const guide of guides) {
+      // Only snap to alignment and center guides — distance and spacing guides are visual only
+      if (guide.type !== 'ALIGNMENT' && guide.type !== 'CENTER') continue;
       if (guide.orientation === 'VERTICAL') {
         // Snap to vertical guide
         const dragCenterX = currentPosition.x + currentPosition.width / 2;
@@ -648,10 +651,11 @@ class GuideAggregator {
   aggregate(allGuides: ReadonlyArray<ReadonlyArray<SmartGuide>>): ReadonlyArray<SmartGuide> {
     const flat = allGuides.flat();
 
-    // Deduplicate: same position + orientation = keep the one with highest priority
+// Deduplicate: same position + orientation + type = keep the one with highest priority
+    // Different guide types at the same position should both be shown (e.g., SPACING + ALIGNMENT)
     const map = new Map<string, SmartGuide>();
     for (const guide of flat) {
-      const key = `${guide.orientation}:${Math.round(guide.position)}`;
+      const key = `${guide.type}:${guide.orientation}:${Math.round(guide.position)}`;
       const existing = map.get(key);
       if (!existing || guide.priority > existing.priority) {
         map.set(key, guide);

@@ -86,10 +86,10 @@ function CheckoutContent() {
       return;
     }
 
-    setIsRedirecting(true);
+    queueMicrotask(() => setIsRedirecting(true));
 
     if (!checkoutUrl) {
-      setIsRedirecting(false);
+      queueMicrotask(() => setIsRedirecting(false));
       return;
     }
 

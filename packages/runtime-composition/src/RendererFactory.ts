@@ -1,6 +1,6 @@
 import { StoreRenderer, RendererFactory as RendererFactoryInterface } from '../../runtime-core/src/RuntimeEngine';
 
-export interface RendererFactory extends RendererFactoryInterface {}
+export type RendererFactory = RendererFactoryInterface;
 
 export interface RendererConstructor {
   new (...args: unknown[]): StoreRenderer;

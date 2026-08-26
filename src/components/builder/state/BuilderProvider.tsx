@@ -77,8 +77,7 @@ export function BuilderProvider({
   children,
 }: BuilderProviderProps) {
   // Create the memory channel once (stable reference)
-  const previewChannelRef = useRef<MemoryChannelPair>(createMemoryChannel())
-  const previewChannel = previewChannelRef.current
+  const previewChannel = useMemo(() => createMemoryChannel(), [])
 
   // Registry — use provided or create default
   const registry = useMemo(

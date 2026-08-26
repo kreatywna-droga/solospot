@@ -1,46 +1,50 @@
-# Sprint 6 Step 5 — Finalizacja (TODO tracking)
+# Sprint 6 Step 6 — Commerce Product Experience (TODO)
 
-> Plan zatwierdzony. Kolejność: P0 → P1 → P2 → P3 → P4 → P5
-> Status: IN PROGRESS
+> Status: ✅ ACCEPTED (PM25 PASS)
+> Zatwierdzony plan z korektami (Guest Checkout, cienkie UI, pełne użycie commerce-engine)
 
-## P0 — Stabilizacja Runtime 🔄
-- [ ] 0.1 Naprawić `useRuntimePreview.ts` (bug viewport `height: vp.width`, indentacja, obsługa `SECTIONS_METRICS`)
-- [ ] 0.2 Usunąć martwy kod z `renderStore.ts` (`buildTenantContext(slug)`, `runtimeContextCache`; `clearRuntimeContextCache` → no-op jeżeli API publiczne)
-- [ ] 0.3 Przepiąć `src/app/preview/[storeId]/page.tsx` na `renderStore({ slug, mode: 'PREVIEW' })`
-- [ ] 0.4 Zweryfikować użycie `clearRuntimeContextCache` / `clearRenderStoreCache` w kodzie
+## Zasady architektoniczne (Korekty zatwierdzone)
+1. CartStore = tylko stan UI + LocalStorage + delegacja do `CartRuntime`/`CartManager` — BEZ logiki koszyka
+2. `/api/store/checkout` = wyłącznie orkiestracja (CheckoutFlow → OrderProcessingEngine → PaymentEngine → PaymentFactory) — BEZ logiki biznesowej w Route Handlerze
+3. CartSection NIE rozbudowuje ProductGridSection — zdarzenie "Add to Cart" → CartRuntime → CartStore → Navbar Badge
+4. Zakres Step 6 = Guest Checkout + zapis zamówienia + status zamówienia (pełny Customer Runtime w osobnym sprincie)
+5. Testy: node env, bez jsdom; obowiązkowo test Webhook → Payment.Completed → OrderProcessingEngine → Order Status
 
-## P1 — Builder Runtime Preview
-- [ ] 1.1 NOWY `src/app/preview-frame/[slug]/page.tsx` — cienki adapter iframe (Runtime → SectionRenderer → postMessage → Builder)
-- [ ] 1.2 EDYCJA `RuntimePreviewChannel.ts` — dodać `SECTIONS_METRICS` + `onMetrics`
-- [ ] 1.3 EDYCJA `useOverlay.ts` — opcja `externalRects` (recty z iframe, fallback `querySelector`)
-- [ ] 1.4 EDYCJA `SelectionOverlay.tsx` — przekazać `externalRects`
-- [ ] 1.5 PRZEBUDOWA `BuilderCanvas.tsx` — iframe Runtime + overlays (Selection, Grid, SmartGuides, Ghost, Drop) + fallback wireframe
-- [ ] 1.6 EDYCJA `useRuntimePreview.ts` — finalizacja (metrics state, re-send na RUNTIME_READY)
+## Kolejność implementacji
 
-## P2 — Runtime Modes
-- [ ] 2.1 EDYCJA `BuilderTopBar.tsx` — segmented control LIVE/PREVIEW/EXPORT → `SET_RUNTIME_MODE` (enum `RuntimeMode`, bez stringów)
+### Faza 1 — Commerce API ✅
+- [x] 1.1 Utworzyć `src/app/api/store/checkout/route.ts` (POST, tenant-scoped, orkiestracja)
+- [x] 1.2 Utworzyć `src/lib/order/OrderRuntime.ts` (cienki wrapper wokół CheckoutFlow/OrderProcessingEngine/PaymentEngine — mapowanie DTO, zero logiki biznesowej)
 
-## P3 — Overlay (zawarte w P1; weryfikacja)
-- [ ] 3.1 Upewnić się, że Builder nie wykonuje `querySelector()` wewnątrz iframe (tylko `externalRects`)
+### Faza 2 — Cart Runtime Integration ✅
+- [x] 2.1 Utworzyć `src/lib/cart/CartStore.tsx` (client-side store: LocalStorage persistence + React context, delegacja do CartManager)
+- [x] 2.2 Utworzyć `src/lib/cart/cartAdapter.ts` (mapowanie `Product` → `commerce-engine Product` dla CartManager)
 
-## P4 — Testy
-- [ ] 4.1 NOWY `packages/runtime-core/src/__tests__/runtime-cache.test.ts` (TTL, LRU, hit/miss, invalidate, clear, stats)
-- [ ] 4.2 NOWY `src/components/builder/canvas/__tests__/preview-channel.test.ts` (protokół postMessage, mock window)
-- [ ] 4.3 NOWY `src/lib/runtime/__tests__/partial-rendering.test.ts` (`renderStoreSection`/`renderStorePartial`)
-- [ ] 4.4 NOWY `packages/builder-core/src/__tests__/builder-runtime-sync.test.ts` (selekcja + sync preview)
-- [ ] 4.5 `npx tsc --noEmit` — naprawić nowe błędy (bez jsdom/testing-library)
-- [ ] 4.6 `npx vitest run` — naprawić błędy
+### Faza 3 — Storefront ✅
+- [x] 3.1 Utworzyć `src/app/store/[slug]/cart/page.tsx` (koszyk: CRUD, ilości, LocalStorage)
+- [x] 3.2 Utworzyć `src/app/store/[slug]/checkout/page.tsx` (checkout: adres + PaymentFactory/CheckoutFlow/PaymentEngine)
+- [x] 3.3 Utworzyć `src/app/store/[slug]/order/[id]/page.tsx` (status ze OrderProcessingEngine)
+- [x] 3.4 Utworzyć `src/app/store/[slug]/order/success/page.tsx` (potwierdzenie)
 
-## P5 — Dokumentacja
-- [ ] 5.1 NOWY `docs/studio/106_SPRINT6_STEP5_COMPLETION_REPORT.md` (+ sekcja Known Limitations)
-- [ ] 5.2 Aktualizacja `TODO_SPRINT6_STEP5.md`, `.progress.md`, `.todo`, `SPRINT6_STEP5_TODO.md`, `TODO.md`
+### Faza 4 — Builder Integration ✅
+- [x] 4.1 Utworzyć CartSection (Navbar cart badge z licznikiem) + zdarzenie "Add to Cart" w ProductGridSection
 
-## Exit Criteria
-- [ ] renderStore() działa przez DefaultRuntimePipeline (legacy tylko fallback)
-- [ ] BuilderCanvas renderuje Runtime przez iframe
-- [ ] Selection/Hover/Overlay działają przez PreviewChannel (externalRects)
-- [ ] Przełącznik LIVE/PREVIEW/EXPORT działa
-- [ ] `npx tsc --noEmit` bez nowych błędów
-- [ ] `npx vitest run` przechodzi
-- [ ] Dokumentacja (106 + TODO) zaktualizowana
+### Faza 5 — Testy (node env, bez jsdom) ✅
+- [x] 5.1 `src/lib/cart/__tests__/cart-store.test.ts`
+- [x] 5.2 `src/lib/order/__tests__/order-runtime.test.ts` (Checkout → PaymentEngine → OrderProcessingEngine)
+- [x] 5.3 `src/app/api/store/checkout/__tests__/checkout-route.test.ts`
+- [x] 5.4 Webhook → Payment.Completed → OrderProcessingEngine → Order Status test
+- [x] 5.5 `npx tsc --noEmit` — 0 errors
+- [x] 5.6 `npx vitest run` — 0 failed
+- [x] 5.7 `npm run build` — GREEN
+
+### Faza 6 — Dokumentacja ✅
+- [x] 6.1 `TODO_SPRINT6_STEP6.md`
+- [x] 6.2 `TODO_SPRINT6_STEP6.progress.md`
+- [x] 6.3 `docs/studio/115_SPRINT6_STEP6_COMPLETION_REPORT.md` (z sekcją Reused Components)
+
+## Bramka końcowa
+- `npx vitest run` → 0 failed (190 files / 1922 tests)
+- `npx tsc --noEmit` → 0 errors
+- `npm run build` → GREEN
 

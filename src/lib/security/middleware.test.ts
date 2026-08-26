@@ -135,8 +135,8 @@ describe('Platform Security Middleware Boundary tests', () => {
     });
     const res = await middleware(req);
     expect(res.status).toBe(200);
-    // Rewritten URL has path '/s/store-123/products'
-    expect(res.headers.get('x-middleware-rewrite')).toContain('/s/store-123/products');
+// Rewritten URL has path '/store/my-shop/products'
+    expect(res.headers.get('x-middleware-rewrite')).toContain('/store/my-shop/products');
   });
 
   it('should return 503 Service Unavailable for suspended tenant storefront', async () => {

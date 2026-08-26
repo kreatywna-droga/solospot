@@ -148,7 +148,7 @@ export class MemoryAssetLibrary implements AssetLibrary {
     offset?: number;
   }): Promise<Asset[]> {
     const lowerQuery = query.toLowerCase();
-    let results = await this.list(options);
+    const results = await this.list(options);
 
     return results.filter(asset => 
       asset.name.toLowerCase().includes(lowerQuery) ||

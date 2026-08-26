@@ -74,13 +74,13 @@ describe('Provision Engine — Tenant Isolation & Robustness', () => {
         .withStage(new StoreConfigStage())
         .build();
 
-      let engine: DefaultProvisionEngine;
+      const engineHolder1: { current?: DefaultProvisionEngine } = {};
 
       const publishEngine = new PublishEngineBuilder()
         .withAssetPipeline(assetPipeline)
         .withDeploymentRegistry(registry)
         .withStoreConfigLoader(async (tenantId, storeId) => {
-          return engine.getProvisionedConfig(storeId)!;
+          return engineHolder1.current?.getProvisionedConfig(storeId)!;
         })
         .withTargetResolver(async (tenantId, storeId) => ({
           type: 'local',
@@ -88,10 +88,11 @@ describe('Provision Engine — Tenant Isolation & Robustness', () => {
         }))
         .build();
 
-      engine = new DefaultProvisionEngine({
+      const engine = new DefaultProvisionEngine({
         pipeline,
         publishEngine
       });
+      engineHolder1.current = engine;
 
       const promises = Array.from({ length: concurrencyCount }).map(async (_, idx) => {
         const id = idx + 1;
@@ -241,12 +242,12 @@ describe('Provision Engine — Tenant Isolation & Robustness', () => {
         .withStage(new StoreConfigStage())
         .build();
 
-      let engine: DefaultProvisionEngine;
+      const engineHolder: { current?: DefaultProvisionEngine } = {};
       const publishEngine = new PublishEngineBuilder()
         .withAssetPipeline(assetPipeline)
         .withDeploymentRegistry(registry)
         .withStoreConfigLoader(async (tenantId, storeId) => {
-          return engine.getProvisionedConfig(storeId)!;
+          return engineHolder.current?.getProvisionedConfig(storeId)!;
         })
         .withTargetResolver(async (tenantId, storeId) => ({
           type: 'local',
@@ -254,11 +255,12 @@ describe('Provision Engine — Tenant Isolation & Robustness', () => {
         }))
         .build();
 
-      engine = new DefaultProvisionEngine({
+      const engine = new DefaultProvisionEngine({
         pipeline,
         publishEngine,
         onEvent: (event) => events.push(event)
       });
+      engineHolder.current = engine;
 
       const request = createProvisionRequest({
         tenantId: 'tenant-obs',

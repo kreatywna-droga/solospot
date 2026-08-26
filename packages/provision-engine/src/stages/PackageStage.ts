@@ -1,6 +1,6 @@
 import { ProvisionStage } from '../ProvisionStage';
 import { ProvisionContext, extendProvisionContext } from '../ProvisionContext';
-import { MarketplaceInstaller } from '../../../package-registry/src';
+import type { MarketplaceInstaller } from '../../../package-registry/src/marketplace/MarketplaceInstaller';
 
 export class PackageStage implements ProvisionStage {
   readonly name = 'packages';
@@ -18,7 +18,7 @@ export class PackageStage implements ProvisionStage {
       const plan = await this.installer.createInstallationPlan(requestedPackages, coreVersion);
       await this.installer.install(plan, context.request.tenantId, context.request.storeId);
 
-      const installed = plan.steps.map(s => s.packageId);
+const installed = plan.steps.map((s: { packageId: string }) => s.packageId);
 
       return extendProvisionContext(context, {
         installedPackages: installed,

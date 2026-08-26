@@ -74,10 +74,10 @@ const SECRET_PATTERNS: Array<{
     regex: /-----BEGIN (?:RSA |EC |PGP |OPENSSH )?PRIVATE KEY-----/g,
     severity: 'critical',
   },
-  {
+{
     name: 'Generic API Key / Secret Token',
     type: 'api_key_hardcoded',
-    regex: /(?:api[_-]?key|secret[_-]?token|auth[_-]?token|db[_-]?password)\s*[:=]\s*["'][A-Za-z0-9+/=_-]{16,}["']/gi,
+    regex: /(?:api[_-]?key|secret[_-]?token|auth[_-]?token|db[_-]?password)\s*[:=]\s*\\?["'][A-Za-z0-9+/=_-]{16,}\\?["']/gi,
     severity: 'error',
   },
   {

@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "typecheck:s27": "tsc -p packages/authoring-studio/tsconfig.s27.json --noEmit",
+    "typecheck:s36": "tsc -p packages/authoring-studio/tsconfig.s36.json --noEmit",
+    "typecheck:s37": "tsc -p packages/authoring-studio/tsconfig.s37.json --noEmit",
+    "typecheck:s38": "tsc -p packages/authoring-studio/tsconfig.s38.json --noEmit"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
@@ -27,6 +31,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@tailwindcss/typography": "^0.5.16",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

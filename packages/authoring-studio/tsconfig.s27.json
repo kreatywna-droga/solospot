@@ -1,0 +1,28 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "builder-core/*": ["../builder-core/src/*"]
+    }
+  },
+  "include": [
+    "src/export/ExportWorkspaceModel.ts",
+    "src/export/RenderQueueEngine.ts",
+    "src/export/RenderProgressTracker.ts",
+    "src/export/OutputManager.ts",
+    "src/export/PublishingBridge.ts",
+    "src/export/ReleaseWorkflowEngine.ts",
+    "src/export/RenderErrorRecovery.ts",
+    "src/export/ExportCenterPanel.tsx",
+    "src/export/index.ts",
+    "src/export/__tests__/ExportCenterPanel.test.tsx",
+    "src/export/__tests__/OutputManager.test.ts",
+    "src/export/__tests__/PublishingBridge.test.ts",
+    "src/export/__tests__/ReleaseWorkflow.test.ts",
+    "src/export/__tests__/RenderErrorRecovery.test.ts",
+    "src/export/__tests__/RenderProgress.test.ts",
+    "src/export/__tests__/RenderQueue.test.ts"
+  ]
+}

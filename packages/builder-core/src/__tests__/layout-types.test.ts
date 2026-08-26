@@ -139,16 +139,18 @@ describe('positionToCSS', () => {
     expect(result.zIndex).toBeUndefined();
   });
 
-  it('should handle fixed position', () => {
+it('should handle fixed position', () => {
     const result = positionToCSS({ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0 });
     expect(result.position).toBe('fixed');
-    expect(result.top).toBe('0px');
+    // positionToCSS excludes zero values (top: 0 is not emitted)
+    expect(result.top).toBeUndefined();
   });
 
   it('should handle sticky position', () => {
     const result = positionToCSS({ position: 'sticky', top: 0 });
     expect(result.position).toBe('sticky');
-    expect(result.top).toBe('0px');
+    // positionToCSS excludes zero values (top: 0 is not emitted)
+    expect(result.top).toBeUndefined();
   });
 
   it('should not include zero coordinates for absolute', () => {

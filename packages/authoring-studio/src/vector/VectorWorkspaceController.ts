@@ -10,7 +10,7 @@
  * NO DOM, NO React, NO requestAnimationFrame.
  */
 
-import { VectorNode, ShapeGroupNode, PathNode, VectorNodeType, VectorFill, VectorStroke } from './VectorDomainModel';
+import { VectorNode, ShapeGroupNode, PathNode, VectorNodeType, VectorFill, VectorStroke, VectorConstraintEdge } from './VectorDomainModel';
 import { VectorBooleanEngine, BooleanOperation } from './VectorBooleanEngine';
 import { VectorEditingEngine, LayerReorderAction, AlignmentType, DistributionType } from './VectorEditingEngine';
 import { VectorDocumentSerializer } from './VectorDocumentSerializer';
@@ -26,6 +26,7 @@ import { VectorViewportState } from './VectorViewportController';
 export interface VectorDocumentSnapshot {
   readonly nodes: ReadonlyArray<VectorNode>;
   readonly selectedIds: ReadonlyArray<string>;
+  readonly constraintEdges: ReadonlyArray<VectorConstraintEdge>;
 }
 
 export interface VectorWorkspaceState {
@@ -37,17 +38,19 @@ export interface VectorWorkspaceState {
 
 export function isEqualSnapshots(a: VectorDocumentSnapshot, b: VectorDocumentSnapshot): boolean {
   if (a === b) return true;
-  if (a.nodes === b.nodes && a.selectedIds === b.selectedIds) return true;
+  if (a.nodes === b.nodes && a.selectedIds === b.selectedIds && a.constraintEdges === b.constraintEdges) return true;
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
 export function createVectorWorkspaceState(
   initialNodes: VectorNode[] = [],
-  initialSelectedIds: string[] = []
+  initialSelectedIds: string[] = [],
+  initialEdges: VectorConstraintEdge[] = []
 ): VectorWorkspaceState {
   const snapshot: VectorDocumentSnapshot = {
     nodes: [...initialNodes],
     selectedIds: [...initialSelectedIds],
+    constraintEdges: [...initialEdges],
   };
   const historyStack = createHistoryStack<VectorDocumentSnapshot>(50).push(snapshot, 'Initial State');
   
@@ -141,6 +144,7 @@ export function executeBooleanOperation(
     const nextSnapshot: VectorDocumentSnapshot = {
       nodes: filteredNodes,
       selectedIds: [resultNode.id], // Automatically select the new resulting boolean node
+      constraintEdges: state.snapshot.constraintEdges || [],
     };
 
     const nextHistoryStack = state.historyStack.push(nextSnapshot, `Boolean ${operation}`);
@@ -192,6 +196,7 @@ export function addNode(
   const nextSnapshot: VectorDocumentSnapshot = {
     nodes: nextNodes,
     selectedIds: [newNode.id],
+    constraintEdges: state.snapshot.constraintEdges || [],
   };
 
   const nextHistoryStack = state.historyStack.push(nextSnapshot, `Add ${newNode.name || newNode.id}`);
@@ -215,6 +220,7 @@ export function deleteSelectedNodes(
   const nextSnapshot: VectorDocumentSnapshot = {
     nodes: nextNodes,
     selectedIds: [],
+    constraintEdges: state.snapshot.constraintEdges || [],
   };
 
   const nextHistoryStack = state.historyStack.push(nextSnapshot, 'Delete Nodes');

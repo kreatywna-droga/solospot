@@ -1,5 +1,12 @@
 # Document Deprecation Policy — WEB FACTOR Studio 2.0
 
+> [!IMPORTANT]
+> **STATUS: Requires Re-ratification**
+> 
+> Status dokumentu nie został jeszcze formalnie zatwierdzony przez Architekta.
+> Dokument opisuje wykonane prace, jednak jedynym źródłem prawdy o statusie sprintów pozostaje:
+> `docs/studio/99_IMPLEMENTATION_CHECKLIST.md`
+
 > **Epic:** C16 — WEB FACTOR Studio 2.0  
 > **Dokument:** 104_DOCUMENT_DEPRECATION_POLICY.md  
 > **Status:** Governance Standard  

@@ -27,6 +27,7 @@ import {
   createShapeGroupNode,
 } from './VectorDomainModel';
 import { VectorGeometry, BoundingBox2D, ResizeHandle } from './VectorGeometry';
+import { VectorConstraintLayoutEngine } from './VectorConstraintLayoutEngine';
 
 export type AlignmentType = 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom';
 export type DistributionType = 'horizontal' | 'vertical';
@@ -268,7 +269,7 @@ export class VectorEditingEngine {
       const nw = Math.max(1e-6, width * Math.abs(sx));
       const nh = Math.max(1e-6, height * Math.abs(sy));
 
-      return {
+      let newNode = {
         ...node,
         transform: {
           ...node.transform,
@@ -277,7 +278,17 @@ export class VectorEditingEngine {
           width: nw,
           height: nh,
         },
-      };
+      } as VectorNode;
+
+      if (newNode.type === 'group' && newNode.children && newNode.children.length > 0) {
+        newNode.children = VectorConstraintLayoutEngine.applyGroupConstraints(
+          newNode.children,
+          { x, y, width, height },
+          { x: nx, y: ny, width: nw, height: nh }
+        );
+      }
+
+      return newNode;
     });
   }
 
