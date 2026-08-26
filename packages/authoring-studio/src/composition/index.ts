@@ -43,6 +43,8 @@ export * from './StorefrontPaymentReliabilityEngine';
 export * from './StorefrontWebhookEventProcessingEngine';
 export * from './StorefrontOrderConsistencyEngine';
 export * from './StorefrontInventoryReservationEngine';
+export * from './StorefrontCartPersistenceEngine';
+
 
 
 
