@@ -110,9 +110,35 @@ export class StorefrontVendorMarketplacePayoutEngine {
     return dto;
   }
 
+  /**
+   * Calculates 1099 / W-8BEN tax withholding deduction for marketplace vendors (G1-177 EXTEND).
+   */
+  public calculateVendorTaxWithholding(vendorEarnings: number, withholdingRatePercent = 24.0): {
+    grossEarnings: number;
+    withholdingRatePercent: number;
+    withheldTaxAmount: number;
+    netPayoutAmount: number;
+  } {
+    if (typeof vendorEarnings !== 'number' || vendorEarnings < 0) {
+      throw new Error('vendorEarnings must be a non-negative number');
+    }
+
+    const grossEarnings = Math.round(vendorEarnings * 100) / 100;
+    const withheldTaxAmount = Math.round((grossEarnings * (withholdingRatePercent / 100)) * 100) / 100;
+    const netPayoutAmount = Math.round((grossEarnings - withheldTaxAmount) * 100) / 100;
+
+    return {
+      grossEarnings,
+      withholdingRatePercent,
+      withheldTaxAmount,
+      netPayoutAmount
+    };
+  }
+
   public getOrderSplit(orderId: string): OrderVendorSplitResultDTO | undefined {
     return this.vendorSplits.get(orderId.trim());
   }
+
 
   public getTenantId(): string {
     return this.tenantId;
