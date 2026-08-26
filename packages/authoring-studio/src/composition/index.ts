@@ -53,6 +53,8 @@ export * from './StorefrontAuditLogEngine';
 export * from './StorefrontRateLimitAbuseProtectionEngine';
 export * from './StorefrontConsentPrivacyEngine';
 export * from './StorefrontCustomerDataExportDeletionEngine';
+export * from './StorefrontPerformanceOptimizationEngine';
+
 
 
 
