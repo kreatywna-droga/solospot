@@ -37,6 +37,14 @@ export class StorefrontCustomerSegmentationEngine {
   private vipFrequencyThreshold: number;
   private atRiskRecencyDaysThreshold: number;
   private customerScores: Map<string, CustomerRfmScoreDTO> = new Map();
+  // O(1) Tier Index Maps (G1-148 REFACTOR)
+  private tierIndexes: Map<CustomerTier, Set<string>> = new Map([
+    ['VIP', new Set()],
+    ['REGULAR', new Set()],
+    ['NEW', new Set()],
+    ['AT_RISK', new Set()],
+    ['INACTIVE', new Set()]
+  ]);
 
   constructor(
     tenantId = 'default_tenant',
@@ -49,6 +57,7 @@ export class StorefrontCustomerSegmentationEngine {
     this.vipFrequencyThreshold = vipFrequencyThreshold;
     this.atRiskRecencyDaysThreshold = atRiskRecencyDaysThreshold;
   }
+
 
   /**
    * Evaluates customer purchase metrics to compute composite RFM score and assign segment tier.
@@ -120,13 +129,31 @@ export class StorefrontCustomerSegmentationEngine {
       evaluatedAtMs: Date.now()
     };
 
+    // Remove from previous tier indexes
+    this.tierIndexes.forEach(set => set.delete(cleanCustomerId));
+    let set = this.tierIndexes.get(assignedTier as any);
+    if (!set) {
+      set = new Set();
+      this.tierIndexes.set(assignedTier as any, set);
+    }
+    set.add(cleanCustomerId);
+
     this.customerScores.set(cleanCustomerId, dto);
     return dto;
+  }
+
+  /**
+   * Fast O(1) retrieval of customer IDs assigned to a target tier.
+   */
+  public getCustomersInTier(tier: string): ReadonlyArray<string> {
+    const set = this.tierIndexes.get(tier as any);
+    return set ? Array.from(set) : [];
   }
 
   public getCustomerScore(customerId: string): CustomerRfmScoreDTO | undefined {
     return this.customerScores.get(customerId.trim());
   }
+
 
   public getTenantId(): string {
     return this.tenantId;
