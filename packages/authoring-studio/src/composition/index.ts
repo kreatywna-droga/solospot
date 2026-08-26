@@ -56,6 +56,8 @@ export * from './StorefrontCustomerDataExportDeletionEngine';
 export * from './StorefrontPerformanceOptimizationEngine';
 export * from './StorefrontObservabilityHealthEngine';
 export * from './StorefrontBackupRecoveryEngine';
+export * from './StorefrontTenantIsolationAuditEngine';
+
 
 
 
