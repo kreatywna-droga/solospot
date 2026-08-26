@@ -138,9 +138,33 @@ export class StorefrontPreOrderBackorderEngine {
     return updated;
   }
 
+  /**
+   * Updates the estimated restock release date for pre-orders/backorders (G1-161 EXTEND).
+   */
+  public updateExpectedReleaseDate(reservationId: string, releaseTimestampMs: number): ProductReservationDTO {
+    const res = this.reservations.get(reservationId.trim());
+    if (!res) {
+      throw new Error(`Reservation ${reservationId} not found`);
+    }
+
+    if (releaseTimestampMs <= Date.now()) {
+      throw new Error('releaseTimestampMs must be in the future');
+    }
+
+    const updated: ProductReservationDTO = {
+      ...res,
+      expectedReleaseTimestampMs: releaseTimestampMs,
+      updatedAtMs: Date.now()
+    };
+
+    this.reservations.set(res.reservationId, updated);
+    return updated;
+  }
+
   public getReservation(reservationId: string): ProductReservationDTO | undefined {
     return this.reservations.get(reservationId.trim());
   }
+
 
 
   public getTenantId(): string {
