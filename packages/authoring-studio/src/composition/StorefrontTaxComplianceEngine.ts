@@ -220,9 +220,41 @@ export class StorefrontTaxComplianceEngine {
     };
   }
 
+  /**
+   * Registers a customer B2B tax exemption certificate with expiration support (G1-143 MERGE).
+   */
+  public registerExemptionCertificateDetailed(params: {
+    certificateId: string;
+    customerId: string;
+    companyName: string;
+    certificateNumber: string;
+    issuingStateCountryCode: string;
+    validityDays?: number;
+  }): { certificateId: string; customerId: string; certificateNumber: string; expiresAtMs: number } {
+    const { certificateId, customerId, companyName, certificateNumber, issuingStateCountryCode } = params;
+
+    if (!certificateId || !customerId || !companyName || !certificateNumber || !issuingStateCountryCode) {
+      throw new Error('certificateId, customerId, companyName, certificateNumber, and issuingStateCountryCode are required');
+    }
+
+    const now = Date.now();
+    const validityDays = params.validityDays ?? 365;
+    const expiresAtMs = now + validityDays * 86400000;
+
+    this.taxExemptCertificates.set(customerId.trim(), certificateNumber.trim());
+
+    return {
+      certificateId: certificateId.trim(),
+      customerId: customerId.trim(),
+      certificateNumber: certificateNumber.trim(),
+      expiresAtMs
+    };
+  }
+
   public getTenantId(): string {
     return this.tenantId;
   }
+
 
 
   public exportState(): TaxComplianceEngineStateDTO {
