@@ -90,6 +90,8 @@ export * from './StorefrontCustomerActivityStreamEngine';
 export * from './StorefrontEndToEndJourneyOrchestratorV3';
 export * from './StorefrontLongHorizonProductEvolutionOrchestratorV3';
 export * from './StorefrontCartAbandonmentRecoveryEngine';
+export * from './StorefrontCustomerConsentPrivacyEngine';
+
 
 
 
