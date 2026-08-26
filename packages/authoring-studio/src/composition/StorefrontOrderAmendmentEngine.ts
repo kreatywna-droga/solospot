@@ -99,9 +99,39 @@ export class StorefrontOrderAmendmentEngine {
     return dto;
   }
 
+  /**
+   * Substitutes an item in an order with recovery handling for equal-value zero-delta swaps (G1-159 RECOVER).
+   */
+  public substituteOrderItem(params: {
+    amendmentId: string;
+    orderId: string;
+    oldProductId: string;
+    newProductId: string;
+    newUnitPrice: number;
+    quantity: number;
+    originalOrderTotal: number;
+  }): OrderAmendmentResultDTO {
+    const { amendmentId, orderId, newProductId, newUnitPrice, quantity, originalOrderTotal } = params;
+
+    const newItem: AmendedLineItemDTO = {
+      productId: newProductId.trim(),
+      quantity,
+      unitPrice: newUnitPrice
+    };
+
+    return this.applyOrderAmendment({
+      amendmentId,
+      orderId,
+      originalTotal: originalOrderTotal,
+      updatedItems: [newItem]
+    });
+  }
+
+
   public getAmendment(amendmentId: string): OrderAmendmentResultDTO | undefined {
     return this.amendments.get(amendmentId.trim());
   }
+
 
   public getTenantId(): string {
     return this.tenantId;
