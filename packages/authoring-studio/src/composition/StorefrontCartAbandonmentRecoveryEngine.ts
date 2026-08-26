@@ -126,9 +126,27 @@ export class StorefrontCartAbandonmentRecoveryEngine {
     return updated;
   }
 
+  /**
+   * Purges expired recovery token records from in-memory map to prevent memory leaks (G1-176 REFACTOR).
+   */
+  public purgeExpiredRecoveryTokens(): number {
+    const now = Date.now();
+    let purgedCount = 0;
+
+    for (const [key, record] of this.records.entries()) {
+      if (record.status === 'EXPIRED' || (record.status === 'ABANDONED' && now > record.expiresAtMs)) {
+        this.records.delete(key);
+        purgedCount++;
+      }
+    }
+
+    return purgedCount;
+  }
+
   public getRecord(recoveryId: string): CartAbandonmentRecordDTO | undefined {
     return this.records.get(recoveryId.trim());
   }
+
 
   public getTenantId(): string {
     return this.tenantId;
