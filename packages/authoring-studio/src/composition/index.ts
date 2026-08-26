@@ -78,6 +78,8 @@ export * from './StorefrontMultiLocationInventoryEngine';
 export * from './StorefrontB2BQuoteEngine';
 export * from './StorefrontOrderAmendmentEngine';
 export * from './StorefrontMerchantNotificationQueueEngine';
+export * from './StorefrontContentSecurityPolicyEngine';
+
 
 
 
