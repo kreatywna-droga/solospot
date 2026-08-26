@@ -150,6 +150,20 @@ export class StorefrontCustomerSegmentationEngine {
     return set ? Array.from(set) : [];
   }
 
+  /**
+   * Evaluates RFM segmentations for a batch of customers (G1-171 EXTEND).
+   */
+  public batchEvaluateCustomerSegments(
+    customers: ReadonlyArray<{
+      customerId: string;
+      recencyDays: number;
+      frequencyCount: number;
+      totalMonetarySpent: number;
+    }>
+  ): ReadonlyArray<CustomerRfmScoreDTO> {
+    return customers.map(c => this.evaluateCustomerSegment(c));
+  }
+
   public getCustomerScore(customerId: string): CustomerRfmScoreDTO | undefined {
     return this.customerScores.get(customerId.trim());
   }
