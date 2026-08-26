@@ -167,9 +167,17 @@ export class StorefrontB2BQuoteEngine {
       throw new Error(`Quote ${quoteId} not found`);
     }
 
+    const now = Date.now();
+    if (now > quote.validUntilMs) {
+      const expired: B2BQuoteDTO = { ...quote, status: 'EXPIRED', updatedAtMs: now };
+      this.quotes.set(quote.quoteId, expired);
+      throw new Error(`Quote ${quoteId} has expired and cannot be converted`);
+    }
+
     if (quote.status !== 'APPROVED') {
       throw new Error(`Only quotes in APPROVED status can be converted to an order (current: ${quote.status})`);
     }
+
 
     const updated: B2BQuoteDTO = {
       ...quote,
