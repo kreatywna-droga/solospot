@@ -170,9 +170,28 @@ export class StorefrontSubscriptionBillingEngine {
     }
   }
 
+  /**
+   * Refactored dunning retry payment handler (G1-157 REFACTOR).
+   */
+  public retryDunningPayment(subscriptionId: string, isPaymentSuccessful: boolean): CustomerSubscriptionDTO {
+    const sub = this.subscriptions.get(subscriptionId.trim());
+    if (!sub) {
+      throw new Error(`Subscription ${subscriptionId} not found`);
+    }
+
+    const plan = this.plans.get(sub.planId);
+    if (!plan) {
+      throw new Error(`Plan ${sub.planId} not found for subscription ${subscriptionId}`);
+    }
+
+    return this.processBillingCycle(sub.subscriptionId, isPaymentSuccessful);
+  }
+
+
   public getSubscription(subscriptionId: string): CustomerSubscriptionDTO | undefined {
     return this.subscriptions.get(subscriptionId.trim());
   }
+
 
   public getPlan(planId: string): SubscriptionPlanDTO | undefined {
     return this.plans.get(planId.trim());
