@@ -98,10 +98,10 @@ export class StorefrontCustomerConsentPrivacyEngine {
       tenantId: this.tenantId,
       customerId: customerId.trim(),
       customerEmail: customerEmail.trim(),
-      status: 'PENDING',
-      requestedAtMs: now,
-      updatedAtMs: now
+      status: 'REQUESTED',
+      requestedAtMs: now
     };
+
 
     this.deletionRequests.set(dto.requestId, dto);
     return dto;
