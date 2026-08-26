@@ -64,6 +64,8 @@ export * from './StorefrontFraudRiskScoringEngine';
 export * from './StorefrontSubscriptionBillingEngine';
 export * from './StorefrontOrderFulfillmentTrackingEngine';
 export * from './StorefrontTaxComplianceEngine';
+export * from './StorefrontGiftCardVoucherEngine';
+
 
 
 
