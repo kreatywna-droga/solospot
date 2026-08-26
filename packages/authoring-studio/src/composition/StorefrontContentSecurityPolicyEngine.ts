@@ -52,9 +52,31 @@ export class StorefrontContentSecurityPolicyEngine {
   }
 
   /**
+   * Generates a unique, high-entropy cryptographic CSP nonce for dynamic inline script execution (G1-173 HARDEN).
+   */
+  public generateScriptCspNonce(): string {
+    const timestamp = Date.now().toString(36);
+    let hash = 0;
+    for (let i = 0; i < timestamp.length; i++) {
+      hash = (hash << 5) - hash + timestamp.charCodeAt(i);
+      hash |= 0;
+    }
+    const nonce = `nonce-${Math.abs(hash).toString(16)}-${Math.floor(Math.random() * 1e9).toString(36)}`;
+    // Automatically register nonce in script-src directive
+    if (!this.directives.scriptSrc.includes(`'${nonce}'`)) {
+      this.directives = {
+        ...this.directives,
+        scriptSrc: [...this.directives.scriptSrc, `'${nonce}'`]
+      };
+    }
+    return nonce;
+  }
+
+  /**
    * Configures CSP directive whitelists for the published storefront site.
    */
   public updateDirectives(directives: Partial<CspDirectivesDTO>): CspDirectivesDTO {
+
     this.directives = {
       defaultSrc: directives.defaultSrc ? [...directives.defaultSrc] : this.directives.defaultSrc,
       scriptSrc: directives.scriptSrc ? [...directives.scriptSrc] : this.directives.scriptSrc,
