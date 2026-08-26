@@ -92,6 +92,8 @@ export * from './StorefrontLongHorizonProductEvolutionOrchestratorV3';
 export * from './StorefrontCartAbandonmentRecoveryEngine';
 export * from './StorefrontCustomerConsentPrivacyEngine';
 export * from './StorefrontOrderSlaFulfillmentMonitorEngine';
+export * from './StorefrontAffiliateReferralPayoutEngine';
+
 
 
 
