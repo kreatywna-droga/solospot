@@ -68,6 +68,8 @@ export * from './StorefrontGiftCardVoucherEngine';
 export * from './StorefrontCustomerSegmentationEngine';
 export * from './StorefrontLoyaltyRewardsEngine';
 export * from './StorefrontAffiliateReferralEngine';
+export * from './StorefrontProductSearchSynonymEngine';
+
 
 
 
