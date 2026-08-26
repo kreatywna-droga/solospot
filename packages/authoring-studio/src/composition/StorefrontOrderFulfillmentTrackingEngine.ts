@@ -131,9 +131,41 @@ export class StorefrontOrderFulfillmentTrackingEngine {
     return updated;
   }
 
+  /**
+   * Generates a carrier shipping label with barcode payload (G1-151 EXTEND).
+   */
+  public generateShippingLabel(params: {
+    shipmentId: string;
+    weightKg: number;
+    dimensionsCm?: { length: number; width: number; height: number };
+  }): { shipmentId: string; barcodeUrl: string; labelPdfUrl: string; weightKg: number } {
+    const { shipmentId, weightKg } = params;
+
+    const shipment = this.shipments.get(shipmentId.trim());
+    if (!shipment) {
+      throw new Error(`Shipment ${shipmentId} not found`);
+    }
+
+    if (weightKg <= 0) {
+      throw new Error('weightKg must be positive');
+    }
+
+    const now = Date.now();
+    const barcodeUrl = `https://labels.example.com/barcodes/${shipment.carrierCode}_${shipment.trackingNumber}.png`;
+    const labelPdfUrl = `https://labels.example.com/pdf/${shipment.shipmentId}_${now}.pdf`;
+
+    return {
+      shipmentId: shipment.shipmentId,
+      barcodeUrl,
+      labelPdfUrl,
+      weightKg
+    };
+  }
+
   public getShipment(shipmentId: string): ShipmentTrackingDTO | undefined {
     return this.shipments.get(shipmentId.trim());
   }
+
 
   public getTenantId(): string {
     return this.tenantId;
