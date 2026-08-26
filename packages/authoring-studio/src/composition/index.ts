@@ -71,6 +71,8 @@ export * from './StorefrontAffiliateReferralEngine';
 export * from './StorefrontProductSearchSynonymEngine';
 export * from './StorefrontPreOrderBackorderEngine';
 export * from './StorefrontDigitalAssetDeliveryEngine';
+export * from './StorefrontMerchantPayoutReconciliationEngine';
+
 
 
 
