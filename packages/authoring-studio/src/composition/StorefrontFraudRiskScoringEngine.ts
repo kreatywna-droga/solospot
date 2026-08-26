@@ -60,6 +60,17 @@ export class StorefrontFraudRiskScoringEngine {
   }
 
   /**
+   * Adds a new disposable email domain to the blocklist (G1-154 HARDEN).
+   */
+  public addDisposableEmailDomain(domain: string): void {
+    if (domain) {
+      StorefrontFraudRiskScoringEngine.DISPOSABLE_EMAIL_DOMAINS.add(domain.trim().toLowerCase());
+    }
+  }
+
+
+
+  /**
    * Evaluates order metadata against fraud heuristics to compute an overall risk score.
    */
   public evaluateOrderRisk(params: {
