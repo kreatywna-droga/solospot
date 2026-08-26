@@ -48,6 +48,8 @@ export * from './StorefrontCustomerAddressEngine';
 export * from './StorefrontOrderInvoiceEngine';
 export * from './StorefrontMerchantProductImportExportEngine';
 export * from './StorefrontBulkProductOperationsEngine';
+export * from './StorefrontMerchantRolePermissionEngine';
+
 
 
 
