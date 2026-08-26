@@ -109,9 +109,33 @@ export class StorefrontPreOrderBackorderEngine {
     return allocated;
   }
 
+  /**
+   * Cancels a pre-order or backorder reservation (G1-145 RECOVER).
+   */
+  public cancelReservation(reservationId: string): ProductReservationDTO {
+    const res = this.reservations.get(reservationId.trim());
+    if (!res) {
+      throw new Error(`Reservation ${reservationId} not found`);
+    }
+
+    if (res.status === 'FULFILLED') {
+      throw new Error(`Reservation ${reservationId} has already been fulfilled and cannot be canceled`);
+    }
+
+    const updated: ProductReservationDTO = {
+      ...res,
+      status: 'CANCELED',
+      updatedAtMs: Date.now()
+    };
+
+    this.reservations.set(res.reservationId, updated);
+    return updated;
+  }
+
   public getReservation(reservationId: string): ProductReservationDTO | undefined {
     return this.reservations.get(reservationId.trim());
   }
+
 
   public getTenantId(): string {
     return this.tenantId;
