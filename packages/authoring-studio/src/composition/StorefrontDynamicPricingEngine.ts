@@ -147,6 +147,28 @@ export class StorefrontDynamicPricingEngine {
     };
   }
 
+  /**
+   * Enforces minimum price floor ratio to prevent zero/negative price multiplier glitches (G1-169 RECOVER).
+   */
+  public calculateDynamicPriceWithFloor(params: {
+    basePrice: number;
+    minimumPriceFloor: number;
+    targetCurrency?: string;
+    quantity?: number;
+  }): DynamicPriceEvaluationResultDTO {
+    const { basePrice, minimumPriceFloor } = params;
+
+    if (minimumPriceFloor <= 0) {
+      throw new Error('minimumPriceFloor must be greater than zero');
+    }
+
+    const effectiveBasePrice = Math.max(basePrice, minimumPriceFloor);
+    return this.calculateDynamicPrice({
+      ...params,
+      basePrice: effectiveBasePrice
+    });
+  }
+
   public getRate(currencyCode: string): CurrencyExchangeRateDTO | undefined {
     return this.rates.get(currencyCode.trim().toUpperCase());
   }
