@@ -73,6 +73,8 @@ export * from './StorefrontPreOrderBackorderEngine';
 export * from './StorefrontDigitalAssetDeliveryEngine';
 export * from './StorefrontMerchantPayoutReconciliationEngine';
 export * from './StorefrontProductBundlingEngine';
+export * from './StorefrontCustomerFeedbackSurveyEngine';
+
 
 
 
