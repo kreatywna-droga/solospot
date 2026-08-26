@@ -87,6 +87,8 @@ export * from './StorefrontCheckoutFieldCustomizerEngine';
 export * from './StorefrontRmaReturnOrchestratorEngine';
 export * from './StorefrontMultiStoreBranchEngine';
 export * from './StorefrontCustomerActivityStreamEngine';
+export * from './StorefrontEndToEndJourneyOrchestratorV3';
+
 
 
 
