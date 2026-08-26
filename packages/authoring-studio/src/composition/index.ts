@@ -83,6 +83,8 @@ export * from './StorefrontMerchantDataMigrationEngine';
 export * from './StorefrontTaxExemptionCertificateEngine';
 export * from './StorefrontVendorMarketplacePayoutEngine';
 export * from './StorefrontChannelListingSyncEngine';
+export * from './StorefrontCheckoutFieldCustomizerEngine';
+
 
 
 
