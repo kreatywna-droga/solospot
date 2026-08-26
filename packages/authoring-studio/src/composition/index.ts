@@ -93,6 +93,8 @@ export * from './StorefrontCartAbandonmentRecoveryEngine';
 export * from './StorefrontCustomerConsentPrivacyEngine';
 export * from './StorefrontOrderSlaFulfillmentMonitorEngine';
 export * from './StorefrontAffiliateReferralPayoutEngine';
+export * from './StorefrontCustomLoyaltyRewardProgramEngine';
+
 
 
 
