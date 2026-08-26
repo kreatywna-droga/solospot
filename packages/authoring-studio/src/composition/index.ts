@@ -46,6 +46,8 @@ export * from './StorefrontInventoryReservationEngine';
 export * from './StorefrontCartPersistenceEngine';
 export * from './StorefrontCustomerAddressEngine';
 export * from './StorefrontOrderInvoiceEngine';
+export * from './StorefrontMerchantProductImportExportEngine';
+
 
 
 
