@@ -58,6 +58,8 @@ export * from './StorefrontObservabilityHealthEngine';
 export * from './StorefrontBackupRecoveryEngine';
 export * from './StorefrontTenantIsolationAuditEngine';
 export * from './StorefrontEndToEndJourneyOrchestrator';
+export * from './StorefrontEnterpriseProductionReadinessOrchestratorV2';
+
 
 
 
