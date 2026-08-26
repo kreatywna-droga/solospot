@@ -136,9 +136,41 @@ export class StorefrontCustomerActivityStreamEngine {
     };
   }
 
+  /**
+   * Records a CSAT / NPS post-purchase feedback survey score directly onto customer activity stream (G1-162 MERGE).
+   */
+  public recordCsatFeedbackResponse(params: {
+    eventId: string;
+    sessionId: string;
+    customerId: string;
+    ratingScore: number; // 1 to 10
+    commentText?: string;
+  }): CustomerActivityEventDTO {
+    const { eventId, sessionId, customerId, ratingScore } = params;
+
+    if (ratingScore < 1 || ratingScore > 10) {
+      throw new Error('ratingScore must be between 1 and 10');
+    }
+
+    return this.trackEvent({
+      eventId,
+      sessionId,
+      customerId,
+      eventType: 'FEEDBACK_SUBMITTED',
+      pathOrUrl: '/survey/post-purchase',
+      metadata: {
+        ratingScore: String(ratingScore),
+        commentText: params.commentText ?? '',
+        sentimentCategory: ratingScore >= 9 ? 'PROMOTER' : ratingScore >= 7 ? 'PASSIVE' : 'DETRACTOR'
+      }
+    });
+  }
+
+
   public getEvent(eventId: string): CustomerActivityEventDTO | undefined {
     return this.events.get(eventId.trim());
   }
+
 
   public getTenantId(): string {
     return this.tenantId;
