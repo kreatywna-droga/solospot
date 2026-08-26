@@ -147,6 +147,13 @@ export class StorefrontMerchantPayoutReconciliationEngine {
     return updated;
   }
 
+  /**
+   * Fast status query retrieval for merchant payout batches (G1-163 REFACTOR).
+   */
+  public getPayoutsByStatus(status: PayoutBatchStatus): ReadonlyArray<MerchantPayoutBatchDTO> {
+    return Array.from(this.payouts.values()).filter(p => p.status === status);
+  }
+
   public getPayout(payoutId: string): MerchantPayoutBatchDTO | undefined {
     return this.payouts.get(payoutId.trim());
   }
