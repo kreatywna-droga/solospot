@@ -43,10 +43,33 @@ export interface GiftCardEngineStateDTO {
 export class StorefrontGiftCardVoucherEngine {
   private readonly tenantId: string;
   private cards: Map<string, GiftCardVoucherDTO> = new Map();
+  // PIN brute-force defense map (G1-158 HARDEN)
+  private failedPinAttempts: Map<string, number> = new Map();
 
   constructor(tenantId = 'default_tenant') {
     this.tenantId = tenantId;
   }
+
+  /**
+   * Validates gift card PIN security with max 5 failed attempts rate limiting (G1-158 HARDEN).
+   */
+  public validateGiftCardPin(code: string, pin: string, correctPin: string): boolean {
+    const cleanCode = code.trim().toUpperCase();
+    const attempts = this.failedPinAttempts.get(cleanCode) ?? 0;
+
+    if (attempts >= 5) {
+      throw new Error(`Gift card ${cleanCode} locked due to excessive failed PIN attempts`);
+    }
+
+    if (pin.trim() !== correctPin.trim()) {
+      this.failedPinAttempts.set(cleanCode, attempts + 1);
+      return false;
+    }
+
+    this.failedPinAttempts.delete(cleanCode);
+    return true;
+  }
+
 
   /**
    * Issues a new digital gift card with initial monetary balance.
