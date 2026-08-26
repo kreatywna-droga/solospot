@@ -180,6 +180,30 @@ export class StorefrontFraudRiskScoringEngine {
     return result;
   }
 
+  /**
+   * Enforces strict [0, 100] percentage bounds clamping on custom risk score inputs (G1-178 RECOVER).
+   */
+  public evaluateCustomRiskScoreWithClamping(rawScore: number): {
+    clampedScore: number;
+    riskLevel: FraudRiskLevel;
+  } {
+    const clampedScore = Math.max(0, Math.min(100, Math.round(rawScore)));
+    let riskLevel: FraudRiskLevel = 'LOW';
+    if (clampedScore >= this.criticalRiskThresholdScore) {
+      riskLevel = 'CRITICAL';
+    } else if (clampedScore >= this.highRiskThresholdScore) {
+      riskLevel = 'HIGH';
+    } else if (clampedScore >= 20) {
+      riskLevel = 'MEDIUM';
+    }
+    return { clampedScore, riskLevel };
+  }
+
+  public getTenantId(): string {
+    return this.tenantId;
+  }
+
+
   public getEvaluation(orderId: string): FraudEvaluationResultDTO | undefined {
     return this.evaluations.get(orderId.trim());
   }
