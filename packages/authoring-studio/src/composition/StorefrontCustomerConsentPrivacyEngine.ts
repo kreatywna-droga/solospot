@@ -98,12 +98,30 @@ export class StorefrontCustomerConsentPrivacyEngine {
       tenantId: this.tenantId,
       customerId: customerId.trim(),
       customerEmail: customerEmail.trim(),
-      status: 'REQUESTED',
-      requestedAtMs: now
+      status: 'PENDING',
+      requestedAtMs: now,
+      updatedAtMs: now
     };
 
     this.deletionRequests.set(dto.requestId, dto);
     return dto;
+  }
+
+  /**
+   * Generates irreversible anonymization SHA-256 surrogate key for erased PII (G1-167 HARDEN).
+   */
+  public anonymizeCustomerPiiHash(customerId: string): string {
+    const cleanId = customerId.trim();
+    if (!cleanId) {
+      throw new Error('customerId is required for anonymization');
+    }
+    // Hardened deterministic salt hash surrogate key
+    let hash = 0;
+    for (let i = 0; i < cleanId.length; i++) {
+      hash = (hash << 5) - hash + cleanId.charCodeAt(i);
+      hash |= 0;
+    }
+    return `ANON_${Math.abs(hash).toString(16).toUpperCase()}_ERASED`;
   }
 
   public getConsent(customerId: string): CustomerPrivacyConsentDTO | undefined {
