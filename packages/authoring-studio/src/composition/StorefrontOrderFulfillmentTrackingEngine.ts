@@ -162,9 +162,41 @@ export class StorefrontOrderFulfillmentTrackingEngine {
     };
   }
 
+  /**
+   * Generates a digital product download link token for hybrid digital/physical order fulfillment (G1-152 MERGE).
+   */
+  public generateDigitalDownloadToken(params: {
+    orderId: string;
+    digitalAssetId: string;
+    customerId: string;
+    maxDownloads?: number;
+    validityHours?: number;
+  }): { orderId: string; digitalAssetId: string; downloadToken: string; downloadUrl: string; expiresAtMs: number } {
+    const { orderId, digitalAssetId, customerId } = params;
+
+    if (!orderId || !digitalAssetId || !customerId) {
+      throw new Error('orderId, digitalAssetId, and customerId are required');
+    }
+
+    const now = Date.now();
+    const validityHours = params.validityHours ?? 72; // 72h default
+    const expiresAtMs = now + validityHours * 3600000;
+    const downloadToken = `dl_${now}_${Math.random().toString(36).substring(2, 10)}`;
+    const downloadUrl = `https://downloads.example.com/assets/${digitalAssetId.trim()}?token=${downloadToken}`;
+
+    return {
+      orderId: orderId.trim(),
+      digitalAssetId: digitalAssetId.trim(),
+      downloadToken,
+      downloadUrl,
+      expiresAtMs
+    };
+  }
+
   public getShipment(shipmentId: string): ShipmentTrackingDTO | undefined {
     return this.shipments.get(shipmentId.trim());
   }
+
 
 
   public getTenantId(): string {
