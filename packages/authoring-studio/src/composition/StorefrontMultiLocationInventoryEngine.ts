@@ -168,9 +168,40 @@ export class StorefrontMultiLocationInventoryEngine {
     };
   }
 
+  /**
+   * Releases previously reserved inventory quantity back to available location stock (G1-165 RECOVER).
+   */
+  public releaseReservedStock(productId: string, locationId: string, releaseQuantity: number): LocationStockDTO {
+    const prodId = productId.trim();
+    const locId = locationId.trim();
+
+    const productLocations = this.stockMap.get(prodId);
+    if (!productLocations || !productLocations.has(locId)) {
+      throw new Error(`Location ${locId} for product ${prodId} not found`);
+    }
+
+    if (releaseQuantity <= 0) {
+      throw new Error('releaseQuantity must be positive');
+    }
+
+    const currentLoc = productLocations.get(locId)!;
+    const newReserved = Math.max(0, currentLoc.reservedQuantity - releaseQuantity);
+    const newAvailable = currentLoc.stockQuantity - newReserved;
+
+    const updatedLoc: LocationStockDTO = {
+      ...currentLoc,
+      reservedQuantity: newReserved,
+      availableQuantity: newAvailable
+    };
+
+    productLocations.set(locId, updatedLoc);
+    return updatedLoc;
+  }
+
   public getTenantId(): string {
     return this.tenantId;
   }
+
 
   public exportState(): MultiLocationInventoryEngineStateDTO {
     const record: Record<string, Record<string, LocationStockDTO>> = {};
