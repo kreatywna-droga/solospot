@@ -158,9 +158,33 @@ export class StorefrontB2BQuoteEngine {
     return updated;
   }
 
+  /**
+   * Converts an APPROVED B2B quote into a final order (G1-153 RECOVER).
+   */
+  public convertQuoteToOrder(quoteId: string): B2BQuoteDTO {
+    const quote = this.quotes.get(quoteId.trim());
+    if (!quote) {
+      throw new Error(`Quote ${quoteId} not found`);
+    }
+
+    if (quote.status !== 'APPROVED') {
+      throw new Error(`Only quotes in APPROVED status can be converted to an order (current: ${quote.status})`);
+    }
+
+    const updated: B2BQuoteDTO = {
+      ...quote,
+      status: 'CONVERTED',
+      updatedAtMs: Date.now()
+    };
+
+    this.quotes.set(quote.quoteId, updated);
+    return updated;
+  }
+
   public getQuote(quoteId: string): B2BQuoteDTO | undefined {
     return this.quotes.get(quoteId.trim());
   }
+
 
   public getTenantId(): string {
     return this.tenantId;
