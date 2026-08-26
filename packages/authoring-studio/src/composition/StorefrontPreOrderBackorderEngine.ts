@@ -12,6 +12,12 @@ export type OrderReservationType = 'PRE_ORDER' | 'BACKORDER';
 
 export type ReservationStatus = 'QUEUED' | 'ALLOCATED' | 'FULFILLED' | 'CANCELED';
 
+/**
+ * @deprecated LegacyPreOrderStatus is deprecated. Use ReservationStatus instead. (G1-147 DEPRECATE)
+ */
+export type LegacyPreOrderStatus = ReservationStatus;
+
+
 export interface ProductReservationDTO {
   readonly reservationId: string;
   readonly tenantId: string;
