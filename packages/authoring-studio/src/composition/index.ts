@@ -60,6 +60,8 @@ export * from './StorefrontTenantIsolationAuditEngine';
 export * from './StorefrontEndToEndJourneyOrchestrator';
 export * from './StorefrontEnterpriseProductionReadinessOrchestratorV2';
 export * from './StorefrontDynamicPricingEngine';
+export * from './StorefrontFraudRiskScoringEngine';
+
 
 
 
