@@ -41,5 +41,7 @@ export * from './StorefrontMerchantDashboardRuntimeEngine';
 export * from './StorefrontProductionReadinessOrchestrator';
 export * from './StorefrontPaymentReliabilityEngine';
 export * from './StorefrontWebhookEventProcessingEngine';
+export * from './StorefrontOrderConsistencyEngine';
+
 
 
