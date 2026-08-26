@@ -90,15 +90,21 @@ export class StorefrontVendorMarketplacePayoutEngine {
     });
 
     const now = Date.now();
+    const roundedOrderTotal = Math.round(orderTotalAmount * 100) / 100;
+    const roundedPlatformCommission = Math.round(totalPlatformCommission * 100) / 100;
+    // Guaranteed penny-exact balance check (G1-149 RECOVER)
+    const roundedVendorEarnings = Math.round((roundedOrderTotal - roundedPlatformCommission) * 100) / 100;
+
     const dto: OrderVendorSplitResultDTO = {
       orderId: orderId.trim(),
       tenantId: this.tenantId,
-      orderTotalAmount: Math.round(orderTotalAmount * 100) / 100,
-      totalPlatformCommission: Math.round(totalPlatformCommission * 100) / 100,
-      totalVendorEarnings: Math.round(totalVendorEarnings * 100) / 100,
+      orderTotalAmount: roundedOrderTotal,
+      totalPlatformCommission: roundedPlatformCommission,
+      totalVendorEarnings: roundedVendorEarnings,
       vendorSplits,
       calculatedAtMs: now
     };
+
 
     this.vendorSplits.set(dto.orderId, dto);
     return dto;
