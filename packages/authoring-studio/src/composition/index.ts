@@ -66,6 +66,8 @@ export * from './StorefrontOrderFulfillmentTrackingEngine';
 export * from './StorefrontTaxComplianceEngine';
 export * from './StorefrontGiftCardVoucherEngine';
 export * from './StorefrontCustomerSegmentationEngine';
+export * from './StorefrontLoyaltyRewardsEngine';
+
 
 
 
