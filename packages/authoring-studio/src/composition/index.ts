@@ -42,6 +42,8 @@ export * from './StorefrontProductionReadinessOrchestrator';
 export * from './StorefrontPaymentReliabilityEngine';
 export * from './StorefrontWebhookEventProcessingEngine';
 export * from './StorefrontOrderConsistencyEngine';
+export * from './StorefrontInventoryReservationEngine';
+
 
 
 
