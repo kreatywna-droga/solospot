@@ -158,9 +158,72 @@ export class StorefrontTaxComplianceEngine {
     };
   }
 
+  /**
+   * Calculates Canadian Provincial Tax (GST 5% + PST/HST depending on Province).
+   */
+  public calculateCanadianProvincialTax(params: {
+    subtotalAmount: number;
+    provinceCode: string; // e.g. 'ON', 'BC', 'QC', 'AB'
+    isTaxExempt?: boolean;
+  }): TaxCalculationResultDTO {
+    const { subtotalAmount, provinceCode } = params;
+
+    if (typeof subtotalAmount !== 'number' || subtotalAmount < 0 || !provinceCode) {
+      throw new Error('subtotalAmount must be non-negative and provinceCode is required');
+    }
+
+    if (params.isTaxExempt) {
+      return {
+        subtotalAmount,
+        countryCode: 'CA',
+        regionStateCode: provinceCode.trim().toUpperCase(),
+        productCategory: 'PHYSICAL_GOODS',
+        isTaxExempt: true,
+        appliedTaxPercent: 0,
+        taxAmount: 0,
+        totalWithTax: subtotalAmount
+      };
+    }
+
+    const prov = provinceCode.trim().toUpperCase();
+    let appliedTaxPercent = 5; // Federal GST 5% default
+
+    // Canadian HST/PST Rates
+    const hstRates: Record<string, number> = {
+      ON: 13, // 13% HST
+      NB: 15, // 15% HST
+      NL: 15, // 15% HST
+      NS: 15, // 15% HST
+      PE: 15, // 15% HST
+      BC: 12, // 5% GST + 7% PST = 12%
+      QC: 14.975, // 5% GST + 9.975% QST = 14.975%
+      SK: 11, // 5% GST + 6% PST = 11%
+      MB: 12  // 5% GST + 7% RST = 12%
+    };
+
+    if (hstRates[prov]) {
+      appliedTaxPercent = hstRates[prov];
+    }
+
+    const taxAmount = Math.round((subtotalAmount * (appliedTaxPercent / 100)) * 100) / 100;
+    const totalWithTax = Math.round((subtotalAmount + taxAmount) * 100) / 100;
+
+    return {
+      subtotalAmount,
+      countryCode: 'CA',
+      regionStateCode: prov,
+      productCategory: 'PHYSICAL_GOODS',
+      isTaxExempt: false,
+      appliedTaxPercent,
+      taxAmount,
+      totalWithTax
+    };
+  }
+
   public getTenantId(): string {
     return this.tenantId;
   }
+
 
   public exportState(): TaxComplianceEngineStateDTO {
     const rateRecord: Record<string, TaxJurisdictionRateDTO> = {};
