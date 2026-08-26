@@ -74,6 +74,8 @@ export * from './StorefrontDigitalAssetDeliveryEngine';
 export * from './StorefrontMerchantPayoutReconciliationEngine';
 export * from './StorefrontProductBundlingEngine';
 export * from './StorefrontCustomerFeedbackSurveyEngine';
+export * from './StorefrontMultiLocationInventoryEngine';
+
 
 
 
