@@ -50,6 +50,8 @@ export * from './StorefrontMerchantProductImportExportEngine';
 export * from './StorefrontBulkProductOperationsEngine';
 export * from './StorefrontMerchantRolePermissionEngine';
 export * from './StorefrontAuditLogEngine';
+export * from './StorefrontRateLimitAbuseProtectionEngine';
+
 
 
 
