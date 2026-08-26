@@ -78,18 +78,24 @@ export class StorefrontContentSecurityPolicyEngine {
     const now = Date.now();
     const requestNonce = `nonce_${now}_${Math.random().toString(36).substring(2, 10)}`;
 
-    const scriptSrcWithNonce = [...this.directives.scriptSrc, `'nonce-${requestNonce}'`].join(' ');
+    // Sanitize CRLF injection in directive strings (G1-144 HARDEN)
+    const sanitize = (str: string) => str.replace(/[\r\n]/g, '').trim();
+
+    const scriptSrcWithNonce = [...this.directives.scriptSrc.map(sanitize), `'nonce-${requestNonce}'`].join(' ');
     const parts: string[] = [
-      `default-src ${this.directives.defaultSrc.join(' ')}`,
+      `default-src ${this.directives.defaultSrc.map(sanitize).join(' ')}`,
       `script-src ${scriptSrcWithNonce}`,
-      `style-src ${this.directives.styleSrc.join(' ')}`,
-      `img-src ${this.directives.imgSrc.join(' ')}`,
-      `connect-src ${this.directives.connectSrc.join(' ')}`,
-      `frame-ancestors ${this.directives.frameAncestors.join(' ')}`
+      `style-src ${this.directives.styleSrc.map(sanitize).join(' ')}`,
+      `img-src ${this.directives.imgSrc.map(sanitize).join(' ')}`,
+      `connect-src ${this.directives.connectSrc.map(sanitize).join(' ')}`,
+      `frame-ancestors ${this.directives.frameAncestors.map(sanitize).join(' ')}`,
+      "object-src 'none'",
+      "base-uri 'self'",
+      "upgrade-insecure-requests"
     ];
 
     if (this.directives.reportUri) {
-      parts.push(`report-uri ${this.directives.reportUri}`);
+      parts.push(`report-uri ${sanitize(this.directives.reportUri)}`);
     }
 
     const cspHeaderValue = parts.join('; ');
@@ -103,6 +109,7 @@ export class StorefrontContentSecurityPolicyEngine {
       generatedAtMs: now
     };
   }
+
 
   public getTenantId(): string {
     return this.tenantId;
