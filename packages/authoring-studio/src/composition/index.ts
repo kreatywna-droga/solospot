@@ -77,6 +77,8 @@ export * from './StorefrontCustomerFeedbackSurveyEngine';
 export * from './StorefrontMultiLocationInventoryEngine';
 export * from './StorefrontB2BQuoteEngine';
 export * from './StorefrontOrderAmendmentEngine';
+export * from './StorefrontMerchantNotificationQueueEngine';
+
 
 
 
