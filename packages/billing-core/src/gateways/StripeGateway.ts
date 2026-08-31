@@ -1,4 +1,4 @@
-import { PaymentGateway, PaymentIntent } from '../PaymentGateway';
+import { PaymentGateway, BillingPaymentIntent } from '../PaymentGateway';
 import { Invoice } from '../BillingDomain';
 
 export class StripeGateway extends PaymentGateway {
@@ -9,7 +9,7 @@ export class StripeGateway extends PaymentGateway {
     this.apiKey = apiKey;
   }
 
-  async createPaymentIntent(invoice: Invoice): Promise<PaymentIntent> {
+  async createPaymentIntent(invoice: Invoice): Promise<BillingPaymentIntent> {
     return {
       id: `pi-${Date.now()}`,
       amount: invoice.amount,

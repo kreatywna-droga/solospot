@@ -133,10 +133,11 @@ export class PlatformContractRecovery {
    * Escalates an inconsistency for manual resolution.
    */
   escalate(inconsistency: ContractInconsistency): ContractInconsistency {
-    const escalated: ContractInconsistency = {
+        const escalated: ContractInconsistency = {
       ...inconsistency,
       severity: inconsistency.severity === 'LOW' ? 'MEDIUM' : inconsistency.severity,
       resolutionStrategy: 'ESCALATE',
+      resolvedAtMs: Date.now(),
     };
     this.replaceInconsistency(escalated);
     return escalated;

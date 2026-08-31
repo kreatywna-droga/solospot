@@ -1,7 +1,7 @@
 import { Invoice, InvoiceStatus } from './BillingDomain';
 import { Subscription } from '../../platform-identity/src/PlatformIdentity';
 
-export interface PaymentIntent {
+export interface BillingPaymentIntent {
   id: string;
   amount: number;
   currency: string;
@@ -10,7 +10,7 @@ export interface PaymentIntent {
 }
 
 export abstract class PaymentGateway {
-  abstract createPaymentIntent(invoice: Invoice): Promise<PaymentIntent>;
+  abstract createPaymentIntent(invoice: Invoice): Promise<BillingPaymentIntent>;
   abstract confirmPayment(intentId: string): Promise<boolean>;
   abstract cancelPayment(intentId: string): Promise<boolean>;
   abstract refundPayment(intentId: string, amount?: number): Promise<boolean>;

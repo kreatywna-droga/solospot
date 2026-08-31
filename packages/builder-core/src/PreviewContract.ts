@@ -14,6 +14,24 @@
  * Two channel implementations:
  *   createPostMessageChannel — for iframe-based preview (browser)
  *   createMemoryChannel      — for testing, SSR, and in-process preview
+ *
+ * DOM/BROWSER API EXCEPTION (A-117):
+ *   builder-core enforces a strict NO DOM/Browser API rule. This file is
+ *   a documented exception: createPostMessageChannel uses window.addEventListener
+ *   and window.postMessage for iframe-based preview communication.
+ *
+ *   This exception exists because:
+ *     1. The preview channel MUST be an architectural abstraction (PreviewChannel
+ *        interface) that works in both browser and non-browser contexts.
+ *     2. Moving this function to authoring-studio would leak preview-runtime
+ *        concerns into the UI layer and break the builder-core/authoring-studio
+ *        dependency boundary.
+ *     3. The memory channel (createMemoryChannel) provides a DOM-free alternative
+ *        for testing, SSR, and in-process preview.
+ *
+ *   RULE: Callers MUST ensure createPostMessageChannel is only invoked in
+ *   browser contexts (i.e., where `window` is defined). This function is NOT
+ *   safe for server-side rendering or Node.js environments.
  */
 
 import { PreviewMessage, PreviewAck } from './PreviewMessage';
@@ -45,6 +63,18 @@ export interface PreviewChannel {
 
 const PREVIEW_ORIGIN_KEY = '__wf_preview__';
 
+/**
+ * Creates a preview channel backed by `window.postMessage` for iframe-based
+ * preview communication.
+ *
+ * @browserOnly — This function accesses DOM APIs (`window.addEventListener`,
+ * `window.postMessage`) and MUST only be called in browser contexts.
+ * For SSR, testing, or in-process preview, use {@link createMemoryChannel} instead.
+ *
+ * @param targetWindow - The target iframe's contentWindow to post messages to.
+ * @param targetOrigin - Allowed origin for postMessage (default: '*' for dev).
+ * @returns A PreviewChannel instance bound to the iframe's message channel.
+ */
 export function createPostMessageChannel(targetWindow: Window, targetOrigin = '*'): PreviewChannel {
   const ackHandlers = new Set<(ack: PreviewAck) => void>();
   let destroyed = false;

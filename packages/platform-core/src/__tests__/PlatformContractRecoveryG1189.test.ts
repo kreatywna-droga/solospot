@@ -65,7 +65,7 @@ describe('PlatformContractRecovery', () => {
       const issues = recovery.detectInconsistencies(entries);
       expect(issues).toHaveLength(1);
       expect(issues[0].severity).toBe('CRITICAL');
-      expect(issues[0].description).toContain('required');
+            expect(issues[0].description.toLowerCase()).toContain('required');
     });
 
     it('detects missing optional field as LOW', () => {

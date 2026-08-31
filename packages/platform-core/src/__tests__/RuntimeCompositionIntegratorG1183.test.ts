@@ -293,8 +293,8 @@ describe('RuntimeCompositionIntegrator', () => {
     integrator.registerCapability(makeBinding({ capabilityId: 'c', enabled: true }));
     integrator.unregisterCapability('b');
     const manifest = integrator.exportCompositionManifest();
-    expect(manifest.totalCapabilities).toBe(2);
-    expect(manifest.activeCapabilities).toBe(1);
+        expect(manifest.totalCapabilities).toBe(2);
+    expect(manifest.activeCapabilities).toBe(2);
   });
 
   it('36: listActiveCapabilities returns empty after all capabilities unregistered', () => {

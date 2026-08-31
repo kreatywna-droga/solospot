@@ -157,7 +157,7 @@ export class PackageLifecycleValidator {
 
     for (const record of this._records.values()) {
       const timestamp = this.getRelevantTimestamp(record);
-      if (timestamp !== undefined && now - timestamp > thresholdMs) {
+            if (timestamp !== undefined && now - timestamp >= thresholdMs) {
         stale.push(record);
       }
     }
