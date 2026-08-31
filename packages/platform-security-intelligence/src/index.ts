@@ -1,4 +1,9 @@
 // Security Model API
+//
+// @deprecated This package is DEPRECATED as of G1-298 (ETAP 10).
+// Use `security-intelligence` instead, which has the same classes plus
+// 11+ checks including `postMessage("*")`, JWT detection, and more.
+// This package is scheduled for REMOVAL in a future ETAP.
 export { DEFAULT_SECURITY_POLICY } from './model/SecurityModel';
 export type {
   SecuritySeverity,

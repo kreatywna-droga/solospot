@@ -57,16 +57,16 @@ export class OrderProcessingEngine {
   private readonly logger: ConsolePlatformLogger;
   private readonly orders = new Map<string, ProcessedOrder>(); // In-memory simulated repository
 
-  private readonly allowedTransitions: Record<ProcessedOrderState, Set<ProcessedOrderState>> = {
-    CREATED: new Set(['PAYMENT_PENDING']),
-    PAYMENT_PENDING: new Set(['PAID', 'CANCELLED']),
-    PAID: new Set(['PROCESSING', 'CANCELLED']),
-    PROCESSING: new Set(['READY_FOR_FULFILLMENT']),
-    READY_FOR_FULFILLMENT: new Set(['FULFILLED']),
-    FULFILLED: new Set(['REFUNDED']),
-    CANCELLED: new Set([]),
-    REFUNDED: new Set([]),
-  };
+  private readonly allowedTransitions = {
+    CREATED: ['PAYMENT_PENDING'],
+    PAYMENT_PENDING: ['PAID', 'CANCELLED'],
+    PAID: ['PROCESSING', 'CANCELLED', 'REFUNDED'],
+    PROCESSING: ['READY_FOR_FULFILLMENT', 'REFUNDED'],
+    READY_FOR_FULFILLMENT: ['FULFILLED', 'REFUNDED'],
+    FULFILLED: ['REFUNDED'],
+    CANCELLED: [],
+    REFUNDED: [],
+  } as const satisfies Record<string, readonly ProcessedOrderState[]>;
 
   constructor(options: {
     eventBus: PlatformEventBusImpl;
@@ -105,6 +105,80 @@ export class OrderProcessingEngine {
         }
       }
     });
+
+    this.eventBus.subscribe<{ orderId?: string; paymentIntentId?: string }>('Payment.Failed', async (event) => {
+      const { orderId } = event.payload;
+      const tenantId = event.tenantId;
+      if (!tenantId || !orderId) return;
+      try {
+        const order = this.orders.get(orderId);
+        if (!order || order.status !== 'PAYMENT_PENDING') return;
+        this.transitionState(order.status, 'CANCELLED', orderId);
+        order.status = 'CANCELLED';
+        order.updatedAt = new Date().toISOString();
+        this.orders.set(orderId, order);
+        this.eventBus.publish({
+          eventId: `evt_${Date.now()}_cancel`,
+          eventType: 'Order.Cancelled',
+          timestamp: new Date().toISOString(),
+          correlationId: event.correlationId ?? `auto_cancel_${orderId}`,
+          tenantId,
+          payload: { orderId, reason: 'payment_failed' },
+        });
+        this.logger.info({
+          message: `Order ${orderId} auto-cancelled due to Payment.Failed`,
+          tenantId,
+          metadata: { orderId },
+        });
+      } catch (err: any) {
+        this.logger.error({
+          message: `Auto-cancel on Payment.Failed failed for order ${orderId}: ${err.message}`,
+          tenantId,
+          error: err,
+        });
+      }
+    });
+
+    this.eventBus.subscribe<{ orderId?: string; paymentIntentId?: string }>('Payment.Refunded', async (event) => {
+      const { orderId } = event.payload;
+      const tenantId = event.tenantId;
+      if (!tenantId || !orderId) return;
+      try {
+        const order = this.orders.get(orderId);
+        if (!order) return;
+        if (order.status !== 'PAID' && order.status !== 'FULFILLED' && order.status !== 'PROCESSING') {
+          this.logger.warn({
+            message: `Payment.Refunded for order ${orderId} in unexpected state ${order.status}; skipping transition`,
+            tenantId,
+            metadata: { orderId },
+          });
+          return;
+        }
+        this.transitionState(order.status, 'REFUNDED', orderId);
+        order.status = 'REFUNDED';
+        order.updatedAt = new Date().toISOString();
+        this.orders.set(orderId, order);
+        this.eventBus.publish({
+          eventId: `evt_${Date.now()}_refund`,
+          eventType: 'Order.Refunded',
+          timestamp: new Date().toISOString(),
+          correlationId: event.correlationId ?? `auto_refund_${orderId}`,
+          tenantId,
+          payload: { orderId, paymentIntentId: event.payload.paymentIntentId },
+        });
+        this.logger.info({
+          message: `Order ${orderId} transitioned to REFUNDED on Payment.Refunded`,
+          tenantId,
+          metadata: { orderId },
+        });
+      } catch (err: any) {
+        this.logger.error({
+          message: `Auto-refund on Payment.Refunded failed for order ${orderId}: ${err.message}`,
+          tenantId,
+          error: err,
+        });
+      }
+    });
   }
 
   private enforceTenantIsolation(tenantId: string, targetTenantId: string, contextMessage: string): void {
@@ -116,11 +190,33 @@ export class OrderProcessingEngine {
   }
 
   private transitionState(current: ProcessedOrderState, target: ProcessedOrderState, orderId: string): void {
-    const allowed = this.allowedTransitions[current];
-    if (!allowed || !allowed.has(target)) {
+    const allowed = this.allowedTransitions[current] as readonly ProcessedOrderState[];
+    if (!allowed || !allowed.includes(target)) {
       throw new InvalidOrderStateException(
         `Invalid status transition for Order '${orderId}': '${current}' -> '${target}'`
       );
+    }
+  }
+
+  private async computeTaxWithFallback(tenantId: string, subtotalGross: number, currency: string): Promise<number> {
+    try {
+      const { TaxEngine } = await import('./TaxEngine');
+      const engine = new TaxEngine({ eventBus: this.eventBus, logger: this.logger });
+      const result = await engine.calculateCartTax(
+        tenantId,
+        [{ priceGross: subtotalGross, quantity: 1, taxRateId: 'default' }],
+        undefined,
+        'PL',
+        undefined,
+        `tax_${Date.now()}`
+      );
+      return result.taxTotal;
+    } catch (err) {
+      this.logger.error({
+        message: `TaxEngine integration unavailable, falling back to flat 23% for tenant ${tenantId}: ${(err as Error).message}`,
+        tenantId,
+      });
+      return Math.round(subtotalGross - subtotalGross / 1.23);
     }
   }
 
@@ -163,11 +259,10 @@ export class OrderProcessingEngine {
       subtotalGross += item.totalGross;
     }
 
-    // Assume flat tax rate 23% for totals calculation
-    const calculatedTax = Math.round(subtotalGross - (subtotalGross / 1.23));
+    const calculatedTax = await this.computeTaxWithFallback(tenantId, subtotalGross, currency);
     const finalSubtotal = totalsOverride?.subtotalGross ?? subtotalGross;
     const finalTax = totalsOverride?.taxTotal ?? calculatedTax;
-    const finalGrandTotal = totalsOverride?.grandTotalGross ?? subtotalGross;
+    const finalGrandTotal = totalsOverride?.grandTotalGross ?? (subtotalGross + calculatedTax);
 
     const order: ProcessedOrder = {
       id: orderId,
