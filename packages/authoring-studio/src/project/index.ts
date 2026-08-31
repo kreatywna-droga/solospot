@@ -13,6 +13,12 @@ export * from './ProjectManager';
 export * from './RecentProjects';
 export * from './ProjectTemplates';
 export * from './ProjectAutosave';
-export * from './ProjectRecovery';
+export {
+  type RecoveryStatus,
+  type RecoveryToken,
+  type SessionRecoveryReport,
+  detectDirtyDocument,
+  createRecoveryToken
+} from './ProjectRecovery';
 export * from './WorkspacePersistence';
 export * from './StartupExperience';

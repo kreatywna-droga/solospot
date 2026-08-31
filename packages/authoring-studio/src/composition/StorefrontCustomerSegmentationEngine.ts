@@ -38,12 +38,12 @@ export class StorefrontCustomerSegmentationEngine {
   private atRiskRecencyDaysThreshold: number;
   private customerScores: Map<string, CustomerRfmScoreDTO> = new Map();
   // O(1) Tier Index Maps (G1-148 REFACTOR)
-  private tierIndexes: Map<CustomerTier, Set<string>> = new Map([
+  private tierIndexes: Map<CustomerSegmentTier, Set<string>> = new Map([
     ['VIP', new Set()],
     ['REGULAR', new Set()],
-    ['NEW', new Set()],
+    ['NEW_VISITOR', new Set()],
     ['AT_RISK', new Set()],
-    ['INACTIVE', new Set()]
+    ['CHURNED', new Set()]
   ]);
 
   constructor(

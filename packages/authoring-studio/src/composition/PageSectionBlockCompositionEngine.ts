@@ -62,6 +62,7 @@ export interface BlockNodeDTO {
   readonly type: BlockType;
   readonly name?: string;
   readonly textContent?: string;
+  readonly imageUrl?: string;
   readonly styleProps?: {
     readonly fontSizePx?: number;
     readonly colorHex?: string;

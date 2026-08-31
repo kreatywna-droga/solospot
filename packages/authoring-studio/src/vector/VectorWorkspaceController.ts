@@ -996,6 +996,7 @@ export function groupSelectedNodes(
     const nextSnapshot: VectorDocumentSnapshot = {
       nodes: remainingNodes,
       selectedIds: [groupNode.id],
+      constraintEdges: state.snapshot.constraintEdges || [],
     };
 
     const nextHistoryStack = state.historyStack.push(nextSnapshot, 'Group Nodes');
@@ -1039,6 +1040,7 @@ export function ungroupSelectedNodes(
     const nextSnapshot: VectorDocumentSnapshot = {
       nodes: nextNodes,
       selectedIds: newChildrenIds,
+      constraintEdges: state.snapshot.constraintEdges || [],
     };
 
     const nextHistoryStack = state.historyStack.push(nextSnapshot, 'Ungroup Nodes');
@@ -1076,6 +1078,7 @@ export function duplicateSelectedNodes(
     const nextSnapshot: VectorDocumentSnapshot = {
       nodes: nextNodes,
       selectedIds: duplicatedIds,
+      constraintEdges: state.snapshot.constraintEdges || [],
     };
 
     const nextHistoryStack = state.historyStack.push(nextSnapshot, 'Duplicate Nodes');
@@ -1154,6 +1157,7 @@ export function cutSelectedNodes(
     const nextSnapshot: VectorDocumentSnapshot = {
       nodes: remainingNodes,
       selectedIds: [],
+      constraintEdges: state.snapshot.constraintEdges || [],
     };
 
     const nextHistoryStack = state.historyStack.push(nextSnapshot, 'Cut Nodes');
@@ -1184,6 +1188,7 @@ export function pasteClipboard(
     const nextSnapshot: VectorDocumentSnapshot = {
       nodes: nextNodes,
       selectedIds: pasteResult.newSelectedIds,
+      constraintEdges: state.snapshot.constraintEdges || [],
     };
 
     const nextHistoryStack = state.historyStack.push(nextSnapshot, 'Paste Nodes');

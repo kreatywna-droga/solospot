@@ -15,7 +15,8 @@ export type ActivityEventType =
   | 'ADD_TO_CART'
   | 'REMOVE_FROM_CART'
   | 'CHECKOUT_STARTED'
-  | 'ORDER_PLACED';
+  | 'ORDER_PLACED'
+  | 'FEEDBACK_SUBMITTED';
 
 export interface CustomerActivityEventDTO {
   readonly eventId: string;

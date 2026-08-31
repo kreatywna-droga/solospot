@@ -281,11 +281,13 @@ export class VectorEditingEngine {
       } as VectorNode;
 
       if (newNode.type === 'group' && newNode.children && newNode.children.length > 0) {
-        newNode.children = VectorConstraintLayoutEngine.applyGroupConstraints(
+        const updatedNode = { ...newNode };
+        (updatedNode as any).children = VectorConstraintLayoutEngine.applyGroupConstraints(
           newNode.children,
           { x, y, width, height },
           { x: nx, y: ny, width: nw, height: nh }
         );
+        return updatedNode;
       }
 
       return newNode;

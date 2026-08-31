@@ -10,7 +10,7 @@
 import { VectorWorkspaceState, VectorDocumentSnapshot } from '../vector/VectorWorkspaceController';
 import { MerchantOrderStatsDTO } from './StorefrontMerchantOrderManagementEngine';
 import { ProductCatalogConfigDTO } from './StorefrontProductCatalogManagementEngine';
-import { SupportTicketConfigDTO } from './StorefrontCustomerSupportTicketBridgeEngine';
+import { SupportConfigDTO } from './StorefrontCustomerSupportTicketBridgeEngine';
 import { ConversionFunnelMetricsDTO } from './StorefrontAnalyticsConversionEngine';
 
 // ---------------------------------------------------------------------------
@@ -51,7 +51,7 @@ export class StorefrontMerchantDashboardRuntimeEngine {
     siteId: string,
     orderStats?: MerchantOrderStatsDTO,
     catalogConfig?: ProductCatalogConfigDTO,
-    supportConfig?: SupportTicketConfigDTO,
+    supportConfig?: SupportConfigDTO,
     funnelMetrics?: ConversionFunnelMetricsDTO
   ): MerchantDashboardAggregateDTO {
     const now = Date.now();

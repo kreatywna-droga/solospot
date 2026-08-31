@@ -678,7 +678,7 @@ describe('WF-HACP-STUDIO-G1-44 — Professional Compound Path, Vector Sub-path T
 
     it('ADV-21: handles SVG export when fillRule is undefined', () => {
       const plainPath = createPathNode('plain_1', 'M 0 0 L 10 10', 0, 0, 10, 10);
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: [plainPath], selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: [plainPath], selectedIds: [], constraintEdges: [] });
       expect(svg).not.toContain('fill-rule=');
     });
 
@@ -763,7 +763,7 @@ describe('WF-HACP-STUDIO-G1-44 — Professional Compound Path, Vector Sub-path T
       const circularPath: any = { id: 'cp', type: 'path', d: 'M 0 0' };
       circularPath.self = circularPath;
 
-      expect(() => VectorDocumentSerializer.serializeVectorDocument({ nodes: [circularPath], selectedIds: [] })).toThrow();
+      expect(() => VectorDocumentSerializer.serializeVectorDocument({ nodes: [circularPath], selectedIds: [], constraintEdges: [] })).toThrow();
     });
 
     it('FI-07: Unclosed Sub-path Hole Clipping Exception Recovery', () => {

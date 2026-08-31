@@ -292,13 +292,13 @@ describe('WF-HACP-STUDIO-G1-37: Vector Viewport & Camera Controller', () => {
         fill: { type: 'solid', color: '#ff0000' },
       };
 
-      const svgBefore = VectorSvgExporter.exportToSvgString({ nodes: [rect], selectedIds: [] });
+      const svgBefore = VectorSvgExporter.exportToSvgString({ nodes: [rect], selectedIds: [], constraintEdges: [] });
 
       // Active viewport state
       const vp = createVectorViewportState({ zoom: 5.0, panX: 1000, panY: 500 });
 
       // Viewport navigation should NOT affect document-space SVG exporter output
-      const svgAfter = VectorSvgExporter.exportToSvgString({ nodes: [rect], selectedIds: [] });
+      const svgAfter = VectorSvgExporter.exportToSvgString({ nodes: [rect], selectedIds: [], constraintEdges: [] });
       expect(svgAfter).toBe(svgBefore);
     });
 

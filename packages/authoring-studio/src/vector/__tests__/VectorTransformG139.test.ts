@@ -315,7 +315,7 @@ describe('WF-HACP-STUDIO-G1-39: Professional Selection & Transform System', () =
 
     it('IT#06: Integration with VectorSvgExporterG135 — export of rotated & scaled shapes reflects transform attributes', () => {
       const r1: RectangleNode = { id: 'r1', type: 'rectangle', visible: true, transform: { x: 50, y: 50, width: 100, height: 100, rotationDeg: 45, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0 } };
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: [r1], selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: [r1], selectedIds: [], constraintEdges: [] });
 
       expect(svg).toContain('transform=');
       expect(svg).toContain('rotate(45');

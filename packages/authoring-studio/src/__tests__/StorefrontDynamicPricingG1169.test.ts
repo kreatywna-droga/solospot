@@ -16,7 +16,7 @@ describe('StorefrontDynamicPricingEngine Recovery (G1-169 — Decision RECOVER)'
   // =========================================================================
   describe('1. Dynamic Price Floor Enforcement (40)', () => {
     it('Feature 01: should enforce minimum price floor when base price drops below floor ratio', () => {
-      const engine = new StorefrontDynamicPricingEngine('tenant_01', 'USD', 'NONE');
+      const engine = new StorefrontDynamicPricingEngine('tenant_01', 'USD', 'NO_ROUNDING');
       engine.updateExchangeRate('USD', 1.0);
 
       const res = engine.calculateDynamicPriceWithFloor({
@@ -30,7 +30,7 @@ describe('StorefrontDynamicPricingEngine Recovery (G1-169 — Decision RECOVER)'
 
     for (let i = 2; i <= 40; i++) {
       it(`Feature ${i}: should verify price floor enforcement scenario ${i}`, () => {
-        const engine = new StorefrontDynamicPricingEngine(`tenant_${i}`, 'USD', 'NONE');
+        const engine = new StorefrontDynamicPricingEngine(`tenant_${i}`, 'USD', 'NO_ROUNDING');
         engine.updateExchangeRate('USD', 1.0);
         const res = engine.calculateDynamicPriceWithFloor({ basePrice: 5, minimumPriceFloor: 15, targetCurrency: 'USD' });
         expect(res.finalUnitPrice).toEqual(15);
@@ -56,7 +56,7 @@ describe('StorefrontDynamicPricingEngine Recovery (G1-169 — Decision RECOVER)'
   describe('3. E2E Tests (30)', () => {
     for (let i = 1; i <= 30; i++) {
       it(`E2E ${i}: should verify E2E price floor workflow ${i}`, () => {
-        const engine = new StorefrontDynamicPricingEngine(`tenant_e2e_${i}`, 'USD', 'NONE');
+        const engine = new StorefrontDynamicPricingEngine(`tenant_e2e_${i}`, 'USD', 'NO_ROUNDING');
         engine.updateExchangeRate('USD', 1.0);
         const res = engine.calculateDynamicPriceWithFloor({ basePrice: 1, minimumPriceFloor: 5, targetCurrency: 'USD' });
         expect(res.finalUnitPrice).toEqual(5);
@@ -69,7 +69,7 @@ describe('StorefrontDynamicPricingEngine Recovery (G1-169 — Decision RECOVER)'
   // =========================================================================
   describe('4. Adversarial Tests (45)', () => {
     it('Adversarial 01: should throw error when minimum price floor is non-positive', () => {
-      const engine = new StorefrontDynamicPricingEngine('tenant_adv', 'USD', 'NONE');
+      const engine = new StorefrontDynamicPricingEngine('tenant_adv', 'USD', 'NO_ROUNDING');
       expect(() => {
         engine.calculateDynamicPriceWithFloor({ basePrice: 10, minimumPriceFloor: 0, targetCurrency: 'USD' });
       }).toThrow('minimumPriceFloor must be greater than zero');

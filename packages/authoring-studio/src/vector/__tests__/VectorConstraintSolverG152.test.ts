@@ -49,7 +49,7 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
       ]
     };
     baseState = createVectorWorkspaceState(nodes, ['node_b']);
-    baseState = { ...baseState, documentSnapshot: baseSnapshot };
+    baseState = { ...baseState, snapshot: baseSnapshot };
   });
 
   // ==========================================
@@ -418,14 +418,14 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
     });
 
     it('Integration 02: should commit exactly 1 HistoryStack entry on successful constraint solve transaction', () => {
-      const initialHistory = baseState.historyStack.past.length;
+      const initialHistory = baseState.historyStack.entries.length;
       const res = VectorWorkflowOrchestrator.executeConstraintSolveTransaction(
         baseState,
         ['node_a'],
         new Map([['node_a', { x: 0, y: 0, width: 600, height: 500 }]])
       );
       expect(res.success).toBe(true);
-      expect(res.nextState?.historyStack.past.length).toBe(initialHistory + 1);
+      expect(res.state?.historyStack.entries.length).toBe(initialHistory + 1);
     });
 
     it('Integration 03: should commit 0 HistoryStack entries on cycle solver failure', () => {
@@ -435,11 +435,11 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
       ];
       const cycleState: VectorWorkspaceState = {
         ...baseState,
-        documentSnapshot: { ...baseSnapshot, constraintEdges: cycleEdges }
+        snapshot: { ...baseSnapshot, constraintEdges: cycleEdges }
       };
-      const initialHistory = cycleState.historyStack.past.length;
+      const initialHistory = cycleState.historyStack.entries.length;
       const res = VectorWorkflowOrchestrator.executeConstraintSolveTransaction(cycleState, ['node_a']);
-      expect(res.nextState?.historyStack.past.length).toBe(initialHistory);
+      expect(res.state?.historyStack.entries.length).toBe(initialHistory);
     });
 
     it('Integration 04: should support Undo after constraint solve transaction', () => {
@@ -448,8 +448,8 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
         ['node_a'],
         new Map([['node_a', { x: 0, y: 0, width: 800, height: 500 }]])
       );
-      const undoState = VectorWorkflowOrchestrator.undoWorkflow(res1.nextState!);
-      expect(undoState.documentSnapshot.nodes[0].transform.width).toBe(500);
+      const undoState = VectorWorkflowOrchestrator.undoWorkflow(res1.state!);
+      expect(undoState.snapshot.nodes[0].transform.width).toBe(500);
     });
 
     it('Integration 05: should support Redo after Undo of constraint solve transaction', () => {
@@ -458,9 +458,9 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
         ['node_a'],
         new Map([['node_a', { x: 0, y: 0, width: 800, height: 500 }]])
       );
-      const undoState = VectorWorkflowOrchestrator.undoWorkflow(res1.nextState!);
+      const undoState = VectorWorkflowOrchestrator.undoWorkflow(res1.state!);
       const redoState = VectorWorkflowOrchestrator.redoWorkflow(undoState);
-      expect(redoState.documentSnapshot.nodes[0].transform.width).toBe(800);
+      expect(redoState.snapshot.nodes[0].transform.width).toBe(800);
     });
 
     it('Integration 06: should preserve resolved geometry through DocumentSerializer roundtrip', () => {
@@ -469,8 +469,8 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
         ['node_a'],
         new Map([['node_a', { x: 0, y: 0, width: 800, height: 500 }]])
       );
-      const json = VectorDocumentSerializer.serializeDocument(res.snapshot!);
-      const snap = VectorDocumentSerializer.deserializeDocument(json);
+      const json = VectorDocumentSerializer.serializeVectorDocument(res.snapshot!);
+      const snap = VectorDocumentSerializer.restoreVectorDocument(json).snapshot!;
       expect(snap.nodes.find(n => n.id === 'node_a')?.transform.width).toBe(800);
     });
 
@@ -480,18 +480,18 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
         ['node_a'],
         new Map([['node_a', { x: 0, y: 0, width: 800, height: 500 }]])
       );
-      const svg = VectorSvgExporter.exportToSvg(res.snapshot!);
+      const svg = VectorSvgExporter.exportToSvgString(res.snapshot!);
       expect(svg).toContain('width="800"');
     });
 
     it('Integration 08: should preserve transient selection state after orchestrator solve transaction', () => {
       const res = VectorWorkflowOrchestrator.executeConstraintSolveTransaction(baseState, ['node_a']);
-      expect(res.nextState?.documentSnapshot.selectedIds).toEqual(['node_b']);
+      expect(res.state?.snapshot.selectedIds).toEqual(['node_b']);
     });
 
     it('Integration 09: should rebuild dependency graph and solve identically after serialization roundtrip', () => {
-      const json = VectorDocumentSerializer.serializeDocument(baseSnapshot);
-      const snap = VectorDocumentSerializer.deserializeDocument(json);
+      const json = VectorDocumentSerializer.serializeVectorDocument(baseSnapshot);
+      const snap = VectorDocumentSerializer.restoreVectorDocument(json).snapshot!;
       const res = VectorConstraintSolverEngine.resolveIncremental(
         snap,
         ['node_a'],
@@ -508,31 +508,31 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
           ['node_a'],
           new Map([['node_a', { x: 0, y: 0, width: 600 + i * 100, height: 500 }]])
         );
-        state = res.nextState!;
+        state = res.state!;
       }
-      expect(state.historyStack.past.length).toBe(baseState.historyStack.past.length + 3);
+      expect(state.historyStack.entries.length).toBe(baseState.historyStack.entries.length + 3);
     });
 
     it('Integration 11: should handle 0 history commits on locked node mutation error in transaction', () => {
       const lockedState: VectorWorkspaceState = {
         ...baseState,
-        documentSnapshot: {
+        snapshot: {
           ...baseSnapshot,
           nodes: [createMockNode('locked_1', 0, 0, 100, 100, true)]
         }
       };
-      const initialHistory = lockedState.historyStack.past.length;
+      const initialHistory = lockedState.historyStack.entries.length;
       const res = VectorWorkflowOrchestrator.executeConstraintSolveTransaction(
         lockedState,
         ['locked_1'],
         new Map([['locked_1', { x: 10, y: 10, width: 100, height: 100 }]])
       );
-      expect(res.nextState?.historyStack.past.length).toBe(initialHistory);
+      expect(res.state?.historyStack.entries.length).toBe(initialHistory);
     });
 
     it('Integration 12: should verify SVG exporter contains zero internal solver runtime attributes', () => {
       const res = VectorConstraintSolverEngine.resolveIncremental(baseSnapshot, ['node_a']);
-      const svg = VectorSvgExporter.exportToSvg(res.snapshot!);
+      const svg = VectorSvgExporter.exportToSvgString(res.snapshot!);
       expect(svg).not.toContain('iterations');
       expect(svg).not.toContain('affectedNodes');
     });
@@ -548,9 +548,9 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
     });
 
     it('Integration 14: should ensure preview mode does not affect workspace state history', () => {
-      const initialHistory = baseState.historyStack.past.length;
-      VectorConstraintSolverEngine.previewConstraintResolution(baseState.documentSnapshot, ['node_a']);
-      expect(baseState.historyStack.past.length).toBe(initialHistory);
+      const initialHistory = baseState.historyStack.entries.length;
+      VectorConstraintSolverEngine.previewConstraintResolution(baseState.snapshot, ['node_a']);
+      expect(baseState.historyStack.entries.length).toBe(initialHistory);
     });
 
     it('Integration 15: should verify SVG exporter renders updated height after vertical STRETCH solve', () => {
@@ -561,7 +561,7 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
         ['node_a'],
         new Map([['node_a', { x: 0, y: 0, width: 500, height: 1200 }]])
       );
-      const svg = VectorSvgExporter.exportToSvg(res.snapshot!);
+      const svg = VectorSvgExporter.exportToSvgString(res.snapshot!);
       expect(svg).toContain('height="1200"');
     });
 
@@ -579,7 +579,7 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
         ['node_a'],
         new Map([['node_a', { x: NaN, y: 0, width: 100, height: 100 }]])
       );
-      expect(res.nextState?.documentSnapshot).toBe(baseState.documentSnapshot);
+      expect(res.state?.snapshot).toBe(baseState.snapshot);
     });
 
     it('Integration 18: should handle full transaction rollback when resolution produces negative width', () => {
@@ -588,7 +588,7 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
         ['node_a'],
         new Map([['node_a', { x: 0, y: 0, width: -100, height: 100 }]])
       );
-      expect(res.nextState?.documentSnapshot).toBe(baseState.documentSnapshot);
+      expect(res.state?.snapshot).toBe(baseState.snapshot);
     });
 
     it('Integration 19: should verify workspace state immutability during orchestrator transaction', () => {
@@ -624,8 +624,8 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
 
     it('Integration 22: should verify DocumentSerializer handles snapshots with 0 constraint edges', () => {
       const snap: VectorDocumentSnapshot = { ...baseSnapshot, constraintEdges: [] };
-      const json = VectorDocumentSerializer.serializeDocument(snap);
-      const restored = VectorDocumentSerializer.deserializeDocument(json);
+      const json = VectorDocumentSerializer.serializeVectorDocument(snap);
+      const restored = VectorDocumentSerializer.restoreVectorDocument(json).snapshot!;
       expect(restored.constraintEdges.length).toBe(0);
     });
 
@@ -652,7 +652,7 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
 
     it('Integration 25: should verify SVG exporter renders all nodes after solver resolution', () => {
       const res = VectorConstraintSolverEngine.resolveIncremental(baseSnapshot, ['node_a']);
-      const svg = VectorSvgExporter.exportToSvg(res.snapshot!);
+      const svg = VectorSvgExporter.exportToSvgString(res.snapshot!);
       expect(svg.match(/<rect/g)?.length).toBe(baseSnapshot.nodes.length);
     });
 
@@ -699,18 +699,18 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
 
     it('Integration 32: should verify HistoryStack canUndo indicator updates correctly after transaction', () => {
       const res = VectorWorkflowOrchestrator.executeConstraintSolveTransaction(baseState, ['node_a']);
-      expect(res.nextState?.historyStack.canUndo).toBe(true);
+      expect(res.state?.historyStack.canUndo).toBe(true);
     });
 
     it('Integration 33: should verify HistoryStack canRedo indicator updates correctly after Undo', () => {
       const res1 = VectorWorkflowOrchestrator.executeConstraintSolveTransaction(baseState, ['node_a']);
-      const res2 = VectorWorkflowOrchestrator.undoWorkflow(res1.nextState!);
+      const res2 = VectorWorkflowOrchestrator.undoWorkflow(res1.state!);
       expect(res2.historyStack.canRedo).toBe(true);
     });
 
     it('Integration 34: should verify SVG exporter handles multi-node resolved snapshot cleanly', () => {
       const res = VectorConstraintSolverEngine.resolveIncremental(baseSnapshot, ['node_a']);
-      const svg = VectorSvgExporter.exportToSvg(res.snapshot!);
+      const svg = VectorSvgExporter.exportToSvgString(res.snapshot!);
       expect(svg).toContain('</svg>');
     });
 
@@ -875,7 +875,7 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
         new Map([['node_a', { x: 0, y: 0, width: 900, height: 500 }]])
       );
       expect(res.success).toBe(true);
-      const svg = VectorSvgExporter.exportToSvg(res.nextState!.documentSnapshot);
+      const svg = VectorSvgExporter.exportToSvgString(res.state!.snapshot);
       expect(svg).toContain('width="900"');
     });
 
@@ -943,14 +943,14 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
     });
 
     it('E2E 15: should verify preview mode returns resolved snapshot without modifying caller reference', () => {
-      const snapBefore = baseState.documentSnapshot;
+      const snapBefore = baseState.snapshot;
       const previewRes = VectorConstraintSolverEngine.previewConstraintResolution(
         snapBefore,
         ['node_a'],
         new Map([['node_a', { x: 0, y: 0, width: 800, height: 500 }]])
       );
       expect(previewRes.success).toBe(true);
-      expect(baseState.documentSnapshot).toBe(snapBefore);
+      expect(baseState.snapshot).toBe(snapBefore);
     });
 
     it('E2E 16: should verify preview snapshot contains updated geometry', () => {
@@ -968,17 +968,17 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
         state,
         ['node_a'],
         new Map([['node_a', { x: 0, y: 0, width: 600, height: 500 }]])
-      ).nextState!;
+      ).state!;
       state = VectorWorkflowOrchestrator.executeConstraintSolveTransaction(
         state,
         ['node_a'],
         new Map([['node_a', { x: 0, y: 0, width: 700, height: 500 }]])
-      ).nextState!;
+      ).state!;
 
       state = VectorWorkflowOrchestrator.undoWorkflow(state);
-      expect(state.documentSnapshot.nodes[0].transform.width).toBe(600);
+      expect(state.snapshot.nodes[0].transform.width).toBe(600);
       state = VectorWorkflowOrchestrator.undoWorkflow(state);
-      expect(state.documentSnapshot.nodes[0].transform.width).toBe(500);
+      expect(state.snapshot.nodes[0].transform.width).toBe(500);
     });
 
     it('E2E 18: should preserve SVG export readability after multiple incremental solver passes', () => {
@@ -991,14 +991,14 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
         );
         snap = res.snapshot!;
       }
-      const svg = VectorSvgExporter.exportToSvg(snap);
+      const svg = VectorSvgExporter.exportToSvgString(snap);
       expect(svg).toContain('width="800"');
     });
 
     it('E2E 19: should verify document serializer roundtrip retains all constraint edges intact', () => {
       const res = VectorConstraintSolverEngine.resolveIncremental(baseSnapshot, ['node_a']);
-      const json = VectorDocumentSerializer.serializeDocument(res.snapshot!);
-      const snap = VectorDocumentSerializer.deserializeDocument(json);
+      const json = VectorDocumentSerializer.serializeVectorDocument(res.snapshot!);
+      const snap = VectorDocumentSerializer.restoreVectorDocument(json).snapshot!;
       expect(snap.constraintEdges.length).toBe(baseSnapshot.constraintEdges.length);
     });
 
@@ -1051,13 +1051,13 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
 
     it('E2E 23: should verify SVG export produces clean valid markup for nested layouts', () => {
       const res = VectorConstraintSolverEngine.resolveIncremental(baseSnapshot, ['node_a']);
-      const svg = VectorSvgExporter.exportToSvg(res.snapshot!);
+      const svg = VectorSvgExporter.exportToSvgString(res.snapshot!);
       expect(svg.startsWith('<svg')).toBe(true);
     });
 
     it('E2E 24: should verify DocumentSerializer serialization format is clean JSON string', () => {
       const res = VectorConstraintSolverEngine.resolveIncremental(baseSnapshot, ['node_a']);
-      const json = VectorDocumentSerializer.serializeDocument(res.snapshot!);
+      const json = VectorDocumentSerializer.serializeVectorDocument(res.snapshot!);
       expect(typeof json).toBe('string');
       expect(json).toContain('nodes');
     });
@@ -1536,11 +1536,11 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
       ];
       const cycleState: VectorWorkspaceState = {
         ...baseState,
-        documentSnapshot: { ...baseSnapshot, constraintEdges: cycleEdges }
+        snapshot: { ...baseSnapshot, constraintEdges: cycleEdges }
       };
       const res = VectorWorkflowOrchestrator.executeConstraintSolveTransaction(cycleState, ['node_a']);
       expect(res.success).toBe(false);
-      expect(res.nextState).toEqual(cycleState);
+      expect(res.state).toEqual(cycleState);
     });
 
     it('FI 03: should maintain zero history commits on cycle resolution error', () => {
@@ -1550,11 +1550,11 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
       ];
       const cycleState: VectorWorkspaceState = {
         ...baseState,
-        documentSnapshot: { ...baseSnapshot, constraintEdges: cycleEdges }
+        snapshot: { ...baseSnapshot, constraintEdges: cycleEdges }
       };
-      const historyBefore = cycleState.historyStack.past.length;
+      const historyBefore = cycleState.historyStack.entries.length;
       VectorWorkflowOrchestrator.executeConstraintSolveTransaction(cycleState, ['node_a']);
-      expect(cycleState.historyStack.past.length).toBe(historyBefore);
+      expect(cycleState.historyStack.entries.length).toBe(historyBefore);
     });
 
     it('FI 04: should recover from invalid bounds mutation during workflow execution', () => {
@@ -1564,10 +1564,10 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
     });
 
     it('FI 05: should preserve original document snapshot byte-for-byte on transaction failure', () => {
-      const originalSnap = baseState.documentSnapshot;
+      const originalSnap = baseState.snapshot;
       const mutations = new Map<string, BoundingBox>([['node_a', { x: NaN, y: 0, width: 100, height: 100 }]]);
       const res = VectorWorkflowOrchestrator.executeConstraintSolveTransaction(baseState, ['node_a'], mutations);
-      expect(res.nextState?.documentSnapshot).toBe(originalSnap);
+      expect(res.state?.snapshot).toBe(originalSnap);
     });
 
     it('FI 06: should handle conflicting edges targeting same node on same axis deterministically', () => {
@@ -1624,14 +1624,14 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
     });
 
     it('FI 13: should preserve recovery checkpoint level when transaction fails', () => {
-      const initialLevel = baseState.historyStack.past.length;
+      const initialLevel = baseState.historyStack.entries.length;
       const cycleEdges: VectorConstraintEdge[] = [
         { id: 'e1', sourceNodeId: 'node_a', targetNodeId: 'node_b' },
         { id: 'e2', sourceNodeId: 'node_b', targetNodeId: 'node_a' }
       ];
-      const badState: VectorWorkspaceState = { ...baseState, documentSnapshot: { ...baseSnapshot, constraintEdges: cycleEdges } };
+      const badState: VectorWorkspaceState = { ...baseState, snapshot: { ...baseSnapshot, constraintEdges: cycleEdges } };
       VectorWorkflowOrchestrator.executeConstraintSolveTransaction(badState, ['node_a']);
-      expect(badState.historyStack.past.length).toBe(initialLevel);
+      expect(badState.historyStack.entries.length).toBe(initialLevel);
     });
 
     it('FI 14: should handle simultaneous cycle detection in multi-threaded-simulated calls', () => {
@@ -1660,16 +1660,16 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
     it('FI 16: should verify zero-transaction commit behavior on resolution pre-flight failure', () => {
       const badState: VectorWorkspaceState = {
         ...baseState,
-        documentSnapshot: {
+        snapshot: {
           ...baseSnapshot,
           nodes: [createMockNode('bad_node', 0, 0, 100, 100, true)]
         }
       };
-      const historyLengthBefore = badState.historyStack.past.length;
+      const historyLengthBefore = badState.historyStack.entries.length;
       const mutations = new Map<string, BoundingBox>([['bad_node', { x: 50, y: 50, width: 100, height: 100 }]]);
       const res = VectorWorkflowOrchestrator.executeConstraintSolveTransaction(badState, ['bad_node'], mutations);
       expect(res.success).toBe(false);
-      expect(res.nextState?.historyStack.past.length).toBe(historyLengthBefore);
+      expect(res.state?.historyStack.entries.length).toBe(historyLengthBefore);
     });
 
     it('FI 17: should recover from corrupted edge array containing null elements', () => {
@@ -1692,14 +1692,14 @@ describe('VectorConstraintSolverEngine (G1-52 Night Shift Level 14)', () => {
     });
 
     it('FI 20: should verify rollback restores full document snapshot immutability on failure', () => {
-      const originalSnap = baseState.documentSnapshot;
+      const originalSnap = baseState.snapshot;
       const cycleEdges: VectorConstraintEdge[] = [
         { id: 'e1', sourceNodeId: 'node_a', targetNodeId: 'node_b' },
         { id: 'e2', sourceNodeId: 'node_b', targetNodeId: 'node_a' }
       ];
-      const badState: VectorWorkspaceState = { ...baseState, documentSnapshot: { ...baseSnapshot, constraintEdges: cycleEdges } };
+      const badState: VectorWorkspaceState = { ...baseState, snapshot: { ...baseSnapshot, constraintEdges: cycleEdges } };
       VectorWorkflowOrchestrator.executeConstraintSolveTransaction(badState, ['node_a']);
-      expect(baseState.documentSnapshot).toBe(originalSnap);
+      expect(baseState.snapshot).toBe(originalSnap);
     });
 
     it('FI 21: should handle large graph topological sort without stack overflow', () => {

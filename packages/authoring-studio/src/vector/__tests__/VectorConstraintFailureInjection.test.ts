@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { VectorWorkflowOrchestrator } from '../VectorWorkflowOrchestrator';
 import { createVectorWorkspaceState, VectorWorkspaceState } from '../VectorWorkspaceController';
 import { VectorConstraintLayoutEngine, BoundingBox } from '../VectorConstraintLayoutEngine';
@@ -107,8 +108,8 @@ describe('VectorConstraintFailureInjection (G1-50)', () => {
     // 11
     it('11. Orchestrator: Target is locked', () => {
       const child = createChild(10, 10, 50, 50, 'MIN', 'MIN');
-      child.locked = true;
-      const state = createVectorWorkspaceState([child], [child.id]);
+      const lockedChild: VectorNode = { ...child, locked: true };
+      const state = createVectorWorkspaceState([lockedChild], [lockedChild.id]);
       const res = VectorWorkflowOrchestrator.executeCrossSubsystemResponsiveTransformTransaction(state, {
         type: 'SCALE_NODES',
         targetIds: [child.id],
@@ -142,8 +143,8 @@ describe('VectorConstraintFailureInjection (G1-50)', () => {
     // 15
     it('15. Orchestrator: SET_CONSTRAINTS on locked node', () => {
       const child = createChild(10, 10, 50, 50, 'MIN', 'MIN');
-      child.locked = true;
-      const state = createVectorWorkspaceState([child], [child.id]);
+      const lockedChild: VectorNode = { ...child, locked: true };
+      const state = createVectorWorkspaceState([lockedChild], [lockedChild.id]);
       const res = VectorWorkflowOrchestrator.dispatchCommand(state, 'set constraints', {
         type: 'SET_CONSTRAINTS',
         targetIds: [child.id],

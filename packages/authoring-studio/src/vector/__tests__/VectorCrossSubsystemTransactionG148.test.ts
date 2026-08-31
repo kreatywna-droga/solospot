@@ -309,7 +309,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
     it('F19: returns error when operation returns invalid non-array nodes snapshot', () => {
       const state = createVectorWorkspaceState([r1]);
-      const badOp: CrossSubsystemOperation = () => ({ nodes: null as any, selectedIds: [] });
+      const badOp: CrossSubsystemOperation = () => ({ nodes: null as any, selectedIds: [], constraintEdges: [] });
 
       const res = executeCrossSubsystemTransaction(state, [badOp], 'Bad Snapshot');
       expect(res.success).toBe(false);
@@ -355,7 +355,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       const state = createVectorWorkspaceState([r1, r2]);
       const op: CrossSubsystemOperation = (snap) => {
         const maskRes = VectorCompoundTopologyMaskEngine.createVectorMask(snap.nodes[0], [snap.nodes[1]]);
-        return { nodes: [maskRes.maskedNode!], selectedIds: [maskRes.maskedNode!.id] };
+        return { nodes: [maskRes.maskedNode!], selectedIds: [maskRes.maskedNode!.id], constraintEdges: [] };
       };
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Mask Transaction');
@@ -369,7 +369,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
       const op: CrossSubsystemOperation = (snap) => {
         const relRes = VectorCompoundTopologyMaskEngine.releaseVectorMask(snap.nodes[0]);
-        return { nodes: [...relRes.releasedNodes!], selectedIds: [] };
+        return { nodes: [...relRes.releasedNodes!], selectedIds: [], constraintEdges: [] };
       };
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Release Mask Transaction');
@@ -381,7 +381,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       const state = createVectorWorkspaceState([p1, p2]);
       const op: CrossSubsystemOperation = (snap) => {
         const topoRes = VectorBooleanTopologyEngine.executeBooleanTopology(snap.nodes as any, 'union');
-        return { nodes: [topoRes.resultNode!], selectedIds: [topoRes.resultNode!.id] };
+        return { nodes: [topoRes.resultNode!], selectedIds: [topoRes.resultNode!.id], constraintEdges: [] };
       };
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Boolean Union Transaction');
@@ -393,7 +393,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       const state = createVectorWorkspaceState([p1, p2]);
       const op: CrossSubsystemOperation = (snap) => {
         const topoRes = VectorBooleanTopologyEngine.executeBooleanTopology(snap.nodes as any, 'difference');
-        return { nodes: [topoRes.resultNode!], selectedIds: [topoRes.resultNode!.id] };
+        return { nodes: [topoRes.resultNode!], selectedIds: [topoRes.resultNode!.id], constraintEdges: [] };
       };
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Boolean Subtract Transaction');
@@ -405,7 +405,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       const state = createVectorWorkspaceState([p1, p2]);
       const op: CrossSubsystemOperation = (snap) => {
         const topoRes = VectorBooleanTopologyEngine.executeBooleanTopology(snap.nodes as any, 'intersection');
-        return { nodes: [topoRes.resultNode!], selectedIds: [topoRes.resultNode!.id] };
+        return { nodes: [topoRes.resultNode!], selectedIds: [topoRes.resultNode!.id], constraintEdges: [] };
       };
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Boolean Intersect Transaction');
@@ -512,7 +512,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
           transform: { x: 0, y: 0, width: 250, height: 110, rotationDeg: 0, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0 },
           children: [...snap.nodes],
         };
-        return { nodes: [group], selectedIds: ['g1'] };
+        return { nodes: [group], selectedIds: ['g1'], constraintEdges: [] };
       };
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Group Nodes');
@@ -657,8 +657,8 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Targeted Op');
-      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes.find(n => n.id === 'rect_2')?.opacity).toBe(1);
-      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes.find(n => n.id === 'rect_3')?.opacity).toBe(1);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes.find((n: any) => n.id === 'rect_2')?.opacity).toBe(1);
+      expect(((res as any).state ?? (res as any).snapshot).snapshot.nodes.find((n: any) => n.id === 'rect_3')?.opacity).toBe(1);
     });
 
     it('I11: integrates cross-subsystem transaction with multiple shape opacity updates', () => {
@@ -908,11 +908,11 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       let state = createVectorWorkspaceState([r1, r2]);
       const createOp: CrossSubsystemOperation = (snap) => {
         const maskRes = VectorCompoundTopologyMaskEngine.createVectorMask(snap.nodes[0], [snap.nodes[1]]);
-        return { nodes: [maskRes.maskedNode!], selectedIds: [maskRes.maskedNode!.id] };
+        return { nodes: [maskRes.maskedNode!], selectedIds: [maskRes.maskedNode!.id], constraintEdges: [] };
       };
       const releaseOp: CrossSubsystemOperation = (snap) => {
         const relRes = VectorCompoundTopologyMaskEngine.releaseVectorMask(snap.nodes[0]);
-        return { nodes: [...relRes.releasedNodes!], selectedIds: [] };
+        return { nodes: [...relRes.releasedNodes!], selectedIds: [], constraintEdges: [] };
       };
 
       const res = executeCrossSubsystemTransaction(state, [createOp, releaseOp], 'Mask Lifecycle');
@@ -1203,7 +1203,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
     it('ADV-07: handles operation returning object without nodes array', () => {
       const state = createVectorWorkspaceState([r1]);
-      const op: CrossSubsystemOperation = () => ({ selectedIds: [] } as any);
+      const op: CrossSubsystemOperation = () => ({ selectedIds: [], constraintEdges: [] } as any);
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Missing Nodes');
       expect(res.success).toBe(false);
@@ -1360,6 +1360,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       const op: CrossSubsystemOperation = (s) => ({
         nodes: s.nodes,
         selectedIds: undefined as any,
+        constraintEdges: [],
       });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Undefined Selection');
@@ -1473,7 +1474,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
     it('ADV-31: handles operation that removes all properties except id and type', () => {
       const state = createVectorWorkspaceState([r1]);
       const minimalNode: any = { id: 'm1', type: 'rectangle', transform: { x: 0, y: 0, width: 10, height: 10, rotationDeg: 0, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0 } };
-      const op: CrossSubsystemOperation = () => ({ nodes: [minimalNode], selectedIds: [] });
+      const op: CrossSubsystemOperation = () => ({ nodes: [minimalNode], selectedIds: [], constraintEdges: [] });
 
       const res = executeCrossSubsystemTransaction(state, [op], 'Minimal Node');
       expect(res.success).toBe(true);
@@ -1546,7 +1547,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
             children: [root],
           };
         }
-        return { nodes: [root], selectedIds: ['g_4'] };
+        return { nodes: [root], selectedIds: ['g_4'], constraintEdges: [] };
       };
 
       const res = executeCrossSubsystemTransaction(state, [op], '5-Level Group');
@@ -1687,7 +1688,7 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
 
     it('FI-05: Failure During Snapshot Validation (Non-Array Nodes)', () => {
       const state = createVectorWorkspaceState([r1]);
-      const badOp: CrossSubsystemOperation = () => ({ nodes: 'invalid' as any, selectedIds: [] });
+      const badOp: CrossSubsystemOperation = () => ({ nodes: 'invalid' as any, selectedIds: [], constraintEdges: [] });
 
       const res = executeCrossSubsystemTransaction(state, [badOp], 'Fail Validation');
       expect(res.success).toBe(false);
@@ -1723,12 +1724,12 @@ describe('WF-HACP-STUDIO-G1-48 — Unified Cross-Subsystem Atomic Editing Transa
       const circularNode: any = { id: 'c1', type: 'rectangle' };
       circularNode.self = circularNode;
 
-      expect(() => VectorDocumentSerializer.serializeVectorDocument({ nodes: [circularNode], selectedIds: [] })).toThrow();
+      expect(() => VectorDocumentSerializer.serializeVectorDocument({ nodes: [circularNode], selectedIds: [], constraintEdges: [] })).toThrow();
     });
 
     it('FI-09: Failure During SVG Export Rendering', () => {
       const brokenSvgNode: any = { id: 'b1', type: 'group', visible: true, children: null };
-      expect(() => VectorSvgExporter.exportToSvgString({ nodes: [brokenSvgNode], selectedIds: [] })).toThrow();
+      expect(() => VectorSvgExporter.exportToSvgString({ nodes: [brokenSvgNode], selectedIds: [], constraintEdges: [] })).toThrow();
     });
 
     it('FI-10: Failure During Recovery Rollback', () => {

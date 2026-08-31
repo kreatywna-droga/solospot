@@ -456,7 +456,7 @@ describe('WF-HACP-STUDIO-G1-46 — Professional Multi-Shape Vector Boolean Topol
     it('I15: maintains sub-child visibility inside mask group during SVG export', () => {
       const invisibleTarget: RectangleNode = { ...r2, visible: false };
       const createRes = VectorCompoundTopologyMaskEngine.createVectorMask(r1, [invisibleTarget]);
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: [createRes.maskedNode!], selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: [createRes.maskedNode!], selectedIds: [], constraintEdges: [] });
 
       expect(svg).not.toContain('Target Shape 1');
     });
@@ -821,7 +821,7 @@ describe('WF-HACP-STUDIO-G1-46 — Professional Multi-Shape Vector Boolean Topol
         children: [r1, r2],
         isMaskGroup: true,
       };
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: [groupNoClip], selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: [groupNoClip], selectedIds: [], constraintEdges: [] });
       expect(svg).toContain('<g');
     });
 
@@ -866,7 +866,7 @@ describe('WF-HACP-STUDIO-G1-46 — Professional Multi-Shape Vector Boolean Topol
 
     it('ADV-27: handles SVG export when node clipPathId is empty string', () => {
       const nodeEmptyClip: RectangleNode = { ...r1, clipPathId: '' };
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: [nodeEmptyClip], selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: [nodeEmptyClip], selectedIds: [], constraintEdges: [] });
       expect(svg).not.toContain('clip-path="url(#)"');
     });
 
@@ -908,7 +908,7 @@ describe('WF-HACP-STUDIO-G1-46 — Professional Multi-Shape Vector Boolean Topol
 
     it('FI-03: Corrupted Clip-Path ID Ingestion', () => {
       const corruptedR: RectangleNode = { ...r1, clipPathId: undefined };
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: [corruptedR], selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: [corruptedR], selectedIds: [], constraintEdges: [] });
       expect(svg).not.toContain('clip-path=');
     });
 
@@ -959,7 +959,7 @@ describe('WF-HACP-STUDIO-G1-46 — Professional Multi-Shape Vector Boolean Topol
       const circularPath: any = { id: 'cp', type: 'path', d: 'M 0 0' };
       circularPath.self = circularPath;
 
-      expect(() => VectorDocumentSerializer.serializeVectorDocument({ nodes: [circularPath], selectedIds: [] })).toThrow();
+      expect(() => VectorDocumentSerializer.serializeVectorDocument({ nodes: [circularPath], selectedIds: [], constraintEdges: [] })).toThrow();
     });
 
     it('FI-09: Locked Mask Target Shape Ingestion Recovery', () => {

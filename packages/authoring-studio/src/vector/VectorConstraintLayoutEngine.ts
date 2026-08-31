@@ -158,11 +158,13 @@ export class VectorConstraintLayoutEngine {
 
       // Recursive application for deeply nested groups
       if (newChild.type === 'group' && newChild.children && newChild.children.length > 0) {
-        newChild.children = this.applyGroupConstraints(
+        const updatedChild = { ...newChild };
+        (updatedChild as any).children = this.applyGroupConstraints(
           newChild.children,
           { x: child.transform.x, y: child.transform.y, width: child.transform.width, height: child.transform.height },
           { x, y, width, height }
         );
+        return updatedChild;
       }
 
       return newChild;

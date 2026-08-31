@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { VectorConstraintLayoutEngine, BoundingBox } from '../VectorConstraintLayoutEngine';
 import { VectorNode } from '../VectorDomainModel';
 
@@ -115,8 +116,10 @@ describe('VectorConstraintLayoutEngine', () => {
         id: 'nested_group',
         type: 'group' as const,
         transform: { x: 50, y: 50, width: 100, height: 100, rotationDeg: 0, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0 },
-        constraints: { horizontal: 'MAX', vertical: 'MAX' },
-        children: [c1]
+        constraints: { horizontal: 'MAX' as const, vertical: 'MAX' as const },
+        children: [c1],
+        visible: true,
+        locked: false,
       };
 
       // When pOld scales to pNew, nestedGroup (MAX, MAX) moves to (250, 250).

@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach } from 'vitest';
 import { VectorWorkflowOrchestrator } from '../VectorWorkflowOrchestrator';
 import { createVectorWorkspaceState, VectorWorkspaceState } from '../VectorWorkspaceController';
 import { ShapeGroupNode, VectorNode } from '../VectorDomainModel';
@@ -89,9 +90,9 @@ describe('VectorResponsiveTransform (G1-50)', () => {
     // Validates that SSOT was not mutated in place
     expect(res.state.snapshot).not.toBe(state.snapshot);
     // Validates history stack pushed exactly 1 transaction
-    expect(res.state.historyStack.canUndo()).toBe(true);
+    expect(res.state.historyStack.canUndo).toBe(true);
     // The previous state is preserved in history
     const prev = res.state.historyStack.undo();
-    expect(prev.snapshot).toEqual(state.snapshot);
+    expect(prev?.state).toEqual(state.snapshot);
   });
 });

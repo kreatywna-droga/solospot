@@ -45,7 +45,7 @@ describe('StorefrontMerchantDashboardRuntimeEngine (G1-89 Night Shift Level 51)'
       const support = {
         siteId: 's1',
         tickets: [
-          { ticketId: 't1', customerId: 'c1', customerEmail: 'a@b.com', subject: 'Urgent Help', message: 'Broken', status: 'OPEN' as const, priority: 'HIGH' as const, createdAt: Date.now() }
+          { ticketId: 't1', customerId: 'c1', customerEmail: 'a@b.com', subject: 'Urgent Help', messages: [{ messageId: 'm1', sender: 'CUSTOMER' as const, senderName: 'User', body: 'Broken', timestamp: Date.now() }], status: 'OPEN' as const, priority: 'HIGH' as const, createdAt: Date.now(), updatedAt: Date.now() }
         ],
         lastUpdated: Date.now()
       };

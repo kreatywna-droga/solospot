@@ -47,7 +47,7 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
       ]
     };
     baseState = createVectorWorkspaceState(nodes, ['node_b']);
-    baseState = { ...baseState, documentSnapshot: baseSnapshot };
+    baseState = { ...baseState, snapshot: baseSnapshot };
   });
 
   // ==========================================
@@ -113,7 +113,7 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
     it('Feature 10: should detect direct self-cycle (A -> A)', () => {
       const selfEdge: VectorConstraintEdge = { id: 'e1', sourceNodeId: 'node_a', targetNodeId: 'node_a', horizontal: 'MIN' };
       const snap: VectorDocumentSnapshot = { nodes: [createMockNode('node_a')], selectedIds: [], constraintEdges: [selfEdge] };
-      const res = VectorConstraintGraphEngine.detectCycle(snap.constraintEdges);
+      const res = VectorConstraintGraphEngine.detectCycle(VectorConstraintGraphEngine.buildDependencyGraph(snap.constraintEdges));
       expect(res.hasCycle).toBe(true);
       expect(res.error?.code).toBe('CYCLE_DETECTED');
     });
@@ -123,7 +123,7 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
         { id: 'e1', sourceNodeId: 'node_b', targetNodeId: 'node_a', horizontal: 'MIN' },
         { id: 'e2', sourceNodeId: 'node_a', targetNodeId: 'node_b', horizontal: 'MIN' }
       ];
-      const res = VectorConstraintGraphEngine.detectCycle(edges);
+      const res = VectorConstraintGraphEngine.detectCycle(VectorConstraintGraphEngine.buildDependencyGraph(edges));
       expect(res.hasCycle).toBe(true);
     });
 
@@ -133,7 +133,7 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
         { id: 'e2', sourceNodeId: 'node_c', targetNodeId: 'node_b', horizontal: 'MIN' },
         { id: 'e3', sourceNodeId: 'node_a', targetNodeId: 'node_c', horizontal: 'MIN' }
       ];
-      const res = VectorConstraintGraphEngine.detectCycle(edges);
+      const res = VectorConstraintGraphEngine.detectCycle(VectorConstraintGraphEngine.buildDependencyGraph(edges));
       expect(res.hasCycle).toBe(true);
     });
 
@@ -358,11 +358,11 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
     });
 
     it('Integration 02: should commit exactly 1 HistoryStack entry on successful resolution', () => {
-      const initialHistoryLength = baseState.historyStack.past.length;
+      const initialHistoryLength = baseState.historyStack.entries.length;
       const mutations = new Map<string, BoundingBox>([['node_a', { x: 0, y: 0, width: 600, height: 500 }]]);
       const result = VectorWorkflowOrchestrator.executeConstraintGraphResolutionTransaction(baseState, mutations);
       expect(result.success).toBe(true);
-      expect(result.nextState?.historyStack.past.length).toBe(initialHistoryLength + 1);
+      expect(result.state?.historyStack.entries.length).toBe(initialHistoryLength + 1);
     });
 
     it('Integration 03: should commit 0 HistoryStack entries on cycle error', () => {
@@ -372,16 +372,16 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
       ];
       const cycleState: VectorWorkspaceState = {
         ...baseState,
-        documentSnapshot: { ...baseSnapshot, constraintEdges: cycleEdges }
+        snapshot: { ...baseSnapshot, constraintEdges: cycleEdges }
       };
-      const initialHistoryLength = cycleState.historyStack.past.length;
+      const initialHistoryLength = cycleState.historyStack.entries.length;
       const result = VectorWorkflowOrchestrator.executeConstraintGraphResolutionTransaction(cycleState);
-      expect(result.nextState?.historyStack.past.length).toBe(initialHistoryLength);
+      expect(result.state?.historyStack.entries.length).toBe(initialHistoryLength);
     });
 
     it('Integration 04: should preserve constraint edges through DocumentSerializer roundtrip', () => {
-      const serialized = VectorDocumentSerializer.serializeDocument(baseSnapshot);
-      const deserialized = VectorDocumentSerializer.deserializeDocument(serialized);
+      const serialized = VectorDocumentSerializer.serializeVectorDocument(baseSnapshot);
+      const deserialized = VectorDocumentSerializer.restoreVectorDocument(serialized).snapshot!;
       expect(deserialized.constraintEdges.length).toBe(baseSnapshot.constraintEdges.length);
       expect(deserialized.constraintEdges[0].id).toBe(baseSnapshot.constraintEdges[0].id);
     });
@@ -391,13 +391,13 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
       const mutations = new Map<string, BoundingBox>([['node_a', { x: 0, y: 0, width: 600, height: 500 }]]);
       const res = VectorConstraintGraphEngine.resolveConstraintGraph(graph, baseSnapshot, mutations);
       const nextSnap: VectorDocumentSnapshot = { ...baseSnapshot, nodes: res.nodes! };
-      const serialized = VectorDocumentSerializer.serializeDocument(nextSnap);
-      const deserialized = VectorDocumentSerializer.deserializeDocument(serialized);
+      const serialized = VectorDocumentSerializer.serializeVectorDocument(nextSnap);
+      const deserialized = VectorDocumentSerializer.restoreVectorDocument(serialized).snapshot!;
       expect(deserialized.nodes.find(n => n.id === 'node_a')?.transform.width).toBe(600);
     });
 
     it('Integration 06: should export valid SVG string without runtime graph pollution', () => {
-      const svg = VectorSvgExporter.exportToSvg(baseSnapshot);
+      const svg = VectorSvgExporter.exportToSvgString(baseSnapshot);
       expect(svg).toContain('<svg');
       expect(svg).not.toContain('adjacencyList');
       expect(svg).not.toContain('reverseAdjacencyList');
@@ -415,6 +415,7 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
     it('Integration 08: should handle multi-stage workflow execution with deterministic engine', () => {
       const result = VectorDeterministicWorkflowEngine.executeWorkflow(baseState, {
         workflowId: 'test_multi',
+        description: 'test_multi_workflow',
         steps: [
           {
             id: 's1',
@@ -432,27 +433,27 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
     it('Integration 09: should maintain undo/redo stack consistency after constraint transaction', () => {
       const mutations = new Map<string, BoundingBox>([['node_a', { x: 0, y: 0, width: 600, height: 500 }]]);
       const result = VectorWorkflowOrchestrator.executeConstraintGraphResolutionTransaction(baseState, mutations);
-      expect(result.nextState?.historyStack.canUndo).toBe(true);
+      expect(result.state?.historyStack.canUndo).toBe(true);
     });
 
     it('Integration 10: should restore exact baseline snapshot on Undo after constraint transaction', () => {
       const mutations = new Map<string, BoundingBox>([['node_a', { x: 0, y: 0, width: 600, height: 500 }]]);
       const result = VectorWorkflowOrchestrator.executeConstraintGraphResolutionTransaction(baseState, mutations);
-      const undoState = VectorWorkflowOrchestrator.undoWorkflow(result.nextState!);
-      expect(undoState.documentSnapshot.nodes[0].transform.width).toBe(500);
+      const undoState = VectorWorkflowOrchestrator.undoWorkflow(result.state!);
+      expect(undoState.snapshot.nodes[0].transform.width).toBe(500);
     });
 
     it('Integration 11: should support Redo after Undo of constraint transaction', () => {
       const mutations = new Map<string, BoundingBox>([['node_a', { x: 0, y: 0, width: 600, height: 500 }]]);
       const res1 = VectorWorkflowOrchestrator.executeConstraintGraphResolutionTransaction(baseState, mutations);
-      const res2 = VectorWorkflowOrchestrator.undoWorkflow(res1.nextState!);
+      const res2 = VectorWorkflowOrchestrator.undoWorkflow(res1.state!);
       const res3 = VectorWorkflowOrchestrator.redoWorkflow(res2);
-      expect(res3.documentSnapshot.nodes[0].transform.width).toBe(600);
+      expect(res3.snapshot.nodes[0].transform.width).toBe(600);
     });
 
     it('Integration 12: should re-build graph correctly after document deserialization', () => {
-      const json = VectorDocumentSerializer.serializeDocument(baseSnapshot);
-      const snap = VectorDocumentSerializer.deserializeDocument(json);
+      const json = VectorDocumentSerializer.serializeVectorDocument(baseSnapshot);
+      const snap = VectorDocumentSerializer.restoreVectorDocument(json).snapshot!;
       const graph = VectorConstraintGraphEngine.buildConstraintGraph(snap);
       expect(graph.nodes.size).toBe(baseSnapshot.nodes.length);
     });
@@ -476,7 +477,7 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
       const mutations = new Map<string, BoundingBox>([['node_a', { x: 0, y: 0, width: 600, height: 500 }]]);
       const res = VectorConstraintGraphEngine.resolveConstraintGraph(graph, baseSnapshot, mutations);
       const snap: VectorDocumentSnapshot = { ...baseSnapshot, nodes: res.nodes! };
-      const svg = VectorSvgExporter.exportToSvg(snap);
+      const svg = VectorSvgExporter.exportToSvgString(snap);
       expect(svg).toContain('rect');
     });
 
@@ -491,7 +492,7 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
     it('Integration 16: should validate that transient editor selection state is preserved after transaction', () => {
       const mutations = new Map<string, BoundingBox>([['node_a', { x: 0, y: 0, width: 600, height: 500 }]]);
       const result = VectorWorkflowOrchestrator.executeConstraintGraphResolutionTransaction(baseState, mutations);
-      expect(result.nextState?.documentSnapshot.selectedIds).toEqual(['node_b']);
+      expect(result.state?.snapshot.selectedIds).toEqual(['node_b']);
     });
 
     it('Integration 17: should handle complex nested parent-child constraint chains', () => {
@@ -509,14 +510,14 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
     it('Integration 18: should prevent partial document commits on layout computation throw', () => {
       const badState: VectorWorkspaceState = {
         ...baseState,
-        documentSnapshot: {
+        snapshot: {
           ...baseSnapshot,
           nodes: [createMockNode('n1', 0, 0, NaN, 100)] // Invalid node
         }
       };
-      const initialHistoryLength = badState.historyStack.past.length;
+      const initialHistoryLength = badState.historyStack.entries.length;
       const res = VectorWorkflowOrchestrator.executeConstraintGraphResolutionTransaction(badState);
-      expect(res.nextState?.historyStack.past.length).toBe(initialHistoryLength);
+      expect(res.state?.historyStack.entries.length).toBe(initialHistoryLength);
     });
 
     it('Integration 19: should support JSON schema validation compatibility for graph edges', () => {
@@ -563,9 +564,9 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
       for (let i = 0; i < 5; i++) {
         const mutations = new Map<string, BoundingBox>([['node_a', { x: 0, y: 0, width: 500 + i * 50, height: 500 }]]);
         const res = VectorWorkflowOrchestrator.executeConstraintGraphResolutionTransaction(state, mutations);
-        state = res.nextState!;
+        state = res.state!;
       }
-      expect(state.historyStack.past.length).toBe(baseState.historyStack.past.length + 5);
+      expect(state.historyStack.entries.length).toBe(baseState.historyStack.entries.length + 5);
     });
 
     it('Integration 25: should preserve non-transform node properties during resolution', () => {
@@ -584,7 +585,7 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
       ];
       const cycleState: VectorWorkspaceState = {
         ...baseState,
-        documentSnapshot: { ...baseSnapshot, constraintEdges: cycleEdges }
+        snapshot: { ...baseSnapshot, constraintEdges: cycleEdges }
       };
       const res = VectorWorkflowOrchestrator.executeConstraintGraphResolutionTransaction(cycleState);
       expect(res.success).toBe(false);
@@ -593,13 +594,13 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
     it('Integration 27: should verify SVG exporter renders updated dimensions after transaction', () => {
       const mutations = new Map<string, BoundingBox>([['node_a', { x: 0, y: 0, width: 1000, height: 500 }]]);
       const res = VectorWorkflowOrchestrator.executeConstraintGraphResolutionTransaction(baseState, mutations);
-      const svg = VectorSvgExporter.exportToSvg(res.nextState!.documentSnapshot);
+      const svg = VectorSvgExporter.exportToSvgString(res.state!.snapshot);
       expect(svg).toContain('1000');
     });
 
     it('Integration 28: should verify DocumentSerializer preserves custom edge properties if any', () => {
-      const json = VectorDocumentSerializer.serializeDocument(baseSnapshot);
-      const snap = VectorDocumentSerializer.deserializeDocument(json);
+      const json = VectorDocumentSerializer.serializeVectorDocument(baseSnapshot);
+      const snap = VectorDocumentSerializer.restoreVectorDocument(json).snapshot!;
       expect(snap.constraintEdges[0].horizontal).toBe('STRETCH');
     });
 
@@ -775,7 +776,7 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
       const mutations = new Map<string, BoundingBox>([['node_a', { x: 0, y: 0, width: 800, height: 600 }]]);
       const res = VectorWorkflowOrchestrator.executeConstraintGraphResolutionTransaction(baseState, mutations);
       expect(res.success).toBe(true);
-      const svg = VectorSvgExporter.exportToSvg(res.nextState!.documentSnapshot);
+      const svg = VectorSvgExporter.exportToSvgString(res.state!.snapshot);
       expect(svg).toContain('width="800"');
     });
 
@@ -844,8 +845,8 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
     });
 
     it('E2E 14: should verify full document serialization persistence of complex multi-node graph', () => {
-      const json = VectorDocumentSerializer.serializeDocument(baseSnapshot);
-      const snap = VectorDocumentSerializer.deserializeDocument(json);
+      const json = VectorDocumentSerializer.serializeVectorDocument(baseSnapshot);
+      const snap = VectorDocumentSerializer.restoreVectorDocument(json).snapshot!;
       const graph = VectorConstraintGraphEngine.buildConstraintGraph(snap);
       expect(graph.edges.length).toBe(1);
     });
@@ -895,16 +896,16 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
       state = VectorWorkflowOrchestrator.executeConstraintGraphResolutionTransaction(
         state,
         new Map([['node_a', { x: 0, y: 0, width: 600, height: 500 }]])
-      ).nextState!;
+      ).state!;
       state = VectorWorkflowOrchestrator.executeConstraintGraphResolutionTransaction(
         state,
         new Map([['node_a', { x: 0, y: 0, width: 700, height: 500 }]])
-      ).nextState!;
+      ).state!;
 
       state = VectorWorkflowOrchestrator.undoWorkflow(state);
-      expect(state.documentSnapshot.nodes[0].transform.width).toBe(600);
+      expect(state.snapshot.nodes[0].transform.width).toBe(600);
       state = VectorWorkflowOrchestrator.undoWorkflow(state);
-      expect(state.documentSnapshot.nodes[0].transform.width).toBe(500);
+      expect(state.snapshot.nodes[0].transform.width).toBe(500);
     });
 
     it('E2E 20: should verify final SVG exporter outputs updated elements for complex layouts', () => {
@@ -914,7 +915,7 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
         baseSnapshot,
         new Map([['node_a', { x: 0, y: 0, width: 999, height: 500 }]])
       );
-      const svg = VectorSvgExporter.exportToSvg({ ...baseSnapshot, nodes: res.nodes! });
+      const svg = VectorSvgExporter.exportToSvgString({ ...baseSnapshot, nodes: res.nodes! });
       expect(svg).toContain('rect');
     });
   });
@@ -969,7 +970,7 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
         { id: 'e2', sourceNodeId: 'node_b', targetNodeId: 'node_a', horizontal: 'MIN' }
       ];
       const snap: VectorDocumentSnapshot = { ...baseSnapshot, constraintEdges: edges };
-      const res = VectorConstraintGraphEngine.detectCycle(snap.constraintEdges);
+      const res = VectorConstraintGraphEngine.detectCycle(VectorConstraintGraphEngine.buildDependencyGraph(snap.constraintEdges));
       expect(res.hasCycle).toBe(true);
     });
 
@@ -980,7 +981,7 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
         { id: 'e3', sourceNodeId: 'd', targetNodeId: 'c', horizontal: 'MIN' },
         { id: 'e4', sourceNodeId: 'a', targetNodeId: 'd', horizontal: 'MIN' }
       ];
-      const res = VectorConstraintGraphEngine.detectCycle(edges);
+      const res = VectorConstraintGraphEngine.detectCycle(VectorConstraintGraphEngine.buildDependencyGraph(edges));
       expect(res.hasCycle).toBe(true);
     });
 
@@ -989,7 +990,7 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
         { id: 'e1', sourceNodeId: 'node_b', targetNodeId: 'node_a', horizontal: 'MIN' },
         { id: 'e2', sourceNodeId: 'node_a', targetNodeId: 'node_b', vertical: 'MIN' }
       ];
-      const res = VectorConstraintGraphEngine.detectCycle(edges);
+      const res = VectorConstraintGraphEngine.detectCycle(VectorConstraintGraphEngine.buildDependencyGraph(edges));
       expect(res.hasCycle).toBe(true);
     });
 
@@ -1069,7 +1070,7 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
     it('Adversarial 20: should handle 100 disconnected nodes in graph without cycle false-positives', () => {
       const nodes = Array.from({ length: 100 }, (_, i) => createMockNode(`n_${i}`));
       const snap: VectorDocumentSnapshot = { nodes, selectedIds: [], constraintEdges: [] };
-      const res = VectorConstraintGraphEngine.detectCycle(snap.constraintEdges);
+      const res = VectorConstraintGraphEngine.detectCycle(VectorConstraintGraphEngine.buildDependencyGraph(snap.constraintEdges));
       expect(res.hasCycle).toBe(false);
     });
 
@@ -1108,7 +1109,7 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
         selectedIds: [],
         constraintEdges: edges
       };
-      const res = VectorConstraintGraphEngine.detectCycle(snap.constraintEdges);
+      const res = VectorConstraintGraphEngine.detectCycle(VectorConstraintGraphEngine.buildDependencyGraph(snap.constraintEdges));
       expect(res.hasCycle).toBe(true);
       expect(res.error?.affectedNodeIds.length).toBeGreaterThan(0);
     });
@@ -1182,7 +1183,7 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
         { id: 'e1', sourceNodeId: 'b', targetNodeId: 'a', horizontal: 'MIN' },
         { id: 'e2', sourceNodeId: 'a', targetNodeId: 'b', horizontal: 'MIN' }
       ];
-      const res = VectorConstraintGraphEngine.detectCycle(edges);
+      const res = VectorConstraintGraphEngine.detectCycle(VectorConstraintGraphEngine.buildDependencyGraph(edges));
       expect(res.cyclePath.length).toBeGreaterThan(0);
     });
 
@@ -1259,11 +1260,11 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
       ];
       const cycleState: VectorWorkspaceState = {
         ...baseState,
-        documentSnapshot: { ...baseSnapshot, constraintEdges: cycleEdges }
+        snapshot: { ...baseSnapshot, constraintEdges: cycleEdges }
       };
       const res = VectorWorkflowOrchestrator.executeConstraintGraphResolutionTransaction(cycleState);
       expect(res.success).toBe(false);
-      expect(res.nextState).toEqual(cycleState); // Retains baseline without corrupting state
+      expect(res.state).toEqual(cycleState); // Retains baseline without corrupting state
     });
 
     it('FI 03: should maintain zero history commits on cycle resolution error', () => {
@@ -1273,11 +1274,11 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
       ];
       const cycleState: VectorWorkspaceState = {
         ...baseState,
-        documentSnapshot: { ...baseSnapshot, constraintEdges: cycleEdges }
+        snapshot: { ...baseSnapshot, constraintEdges: cycleEdges }
       };
-      const historyBefore = cycleState.historyStack.past.length;
+      const historyBefore = cycleState.historyStack.entries.length;
       VectorWorkflowOrchestrator.executeConstraintGraphResolutionTransaction(cycleState);
-      expect(cycleState.historyStack.past.length).toBe(historyBefore);
+      expect(cycleState.historyStack.entries.length).toBe(historyBefore);
     });
 
     it('FI 04: should recover from invalid bounds mutation during workflow execution', () => {
@@ -1287,10 +1288,10 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
     });
 
     it('FI 05: should preserve original document snapshot byte-for-byte on transaction failure', () => {
-      const originalSnap = baseState.documentSnapshot;
+      const originalSnap = baseState.snapshot;
       const mutations = new Map<string, BoundingBox>([['node_a', { x: NaN, y: 0, width: 100, height: 100 }]]);
       const res = VectorWorkflowOrchestrator.executeConstraintGraphResolutionTransaction(baseState, mutations);
-      expect(res.nextState?.documentSnapshot).toBe(originalSnap);
+      expect(res.state?.snapshot).toBe(originalSnap);
     });
 
     it('FI 06: should handle conflicting edges targeting same node on same axis deterministically', () => {
@@ -1321,7 +1322,7 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
     it('FI 09: should handle corrupted edge with identical source and target ID', () => {
       const selfEdge: VectorConstraintEdge = { id: 'e_self', sourceNodeId: 'node_a', targetNodeId: 'node_a' };
       const snap: VectorDocumentSnapshot = { ...baseSnapshot, constraintEdges: [selfEdge] };
-      const res = VectorConstraintGraphEngine.detectCycle(snap.constraintEdges);
+      const res = VectorConstraintGraphEngine.detectCycle(VectorConstraintGraphEngine.buildDependencyGraph(snap.constraintEdges));
       expect(res.hasCycle).toBe(true);
     });
 
@@ -1349,14 +1350,14 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
     });
 
     it('FI 13: should preserve recovery checkpoint level when transaction fails', () => {
-      const initialLevel = baseState.historyStack.past.length;
+      const initialLevel = baseState.historyStack.entries.length;
       const cycleEdges: VectorConstraintEdge[] = [
         { id: 'e1', sourceNodeId: 'node_a', targetNodeId: 'node_b' },
         { id: 'e2', sourceNodeId: 'node_b', targetNodeId: 'node_a' }
       ];
-      const badState: VectorWorkspaceState = { ...baseState, documentSnapshot: { ...baseSnapshot, constraintEdges: cycleEdges } };
+      const badState: VectorWorkspaceState = { ...baseState, snapshot: { ...baseSnapshot, constraintEdges: cycleEdges } };
       VectorWorkflowOrchestrator.executeConstraintGraphResolutionTransaction(badState);
-      expect(badState.historyStack.past.length).toBe(initialLevel);
+      expect(badState.historyStack.entries.length).toBe(initialLevel);
     });
 
     it('FI 14: should handle simultaneous cycle detection in multi-threaded-simulated calls', () => {
@@ -1365,8 +1366,8 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
         { id: 'e2', sourceNodeId: 'node_b', targetNodeId: 'node_a' }
       ];
       const snap: VectorDocumentSnapshot = { ...baseSnapshot, constraintEdges: cycleEdges };
-      const res1 = VectorConstraintGraphEngine.detectCycle(snap.constraintEdges);
-      const res2 = VectorConstraintGraphEngine.detectCycle(snap.constraintEdges);
+      const res1 = VectorConstraintGraphEngine.detectCycle(VectorConstraintGraphEngine.buildDependencyGraph(snap.constraintEdges));
+      const res2 = VectorConstraintGraphEngine.detectCycle(VectorConstraintGraphEngine.buildDependencyGraph(snap.constraintEdges));
       expect(res1.hasCycle).toBe(true);
       expect(res2.hasCycle).toBe(true);
       expect(res1).toEqual(res2);
@@ -1387,16 +1388,16 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
     it('FI 16: should verify zero-transaction commit behavior on resolution pre-flight failure', () => {
       const badState: VectorWorkspaceState = {
         ...baseState,
-        documentSnapshot: {
+        snapshot: {
           ...baseSnapshot,
           nodes: [createMockNode('bad_node', 0, 0, 100, 100, true)] // Locked
         }
       };
-      const historyLengthBefore = badState.historyStack.past.length;
+      const historyLengthBefore = badState.historyStack.entries.length;
       const mutations = new Map<string, BoundingBox>([['bad_node', { x: 50, y: 50, width: 100, height: 100 }]]);
       const res = VectorWorkflowOrchestrator.executeConstraintGraphResolutionTransaction(badState, mutations);
       expect(res.success).toBe(false);
-      expect(res.nextState?.historyStack.past.length).toBe(historyLengthBefore);
+      expect(res.state?.historyStack.entries.length).toBe(historyLengthBefore);
     });
 
     it('FI 17: should recover from corrupted edge array containing null elements', () => {
@@ -1417,20 +1418,20 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
         { id: 'e2', sourceNodeId: 'n2', targetNodeId: 'n1' }
       ];
       for (let i = 0; i < 50; i++) {
-        const res = VectorConstraintGraphEngine.detectCycle(edges);
+        const res = VectorConstraintGraphEngine.detectCycle(VectorConstraintGraphEngine.buildDependencyGraph(edges));
         expect(res.hasCycle).toBe(true);
       }
     });
 
     it('FI 20: should verify rollback restores full document snapshot immutability on failure', () => {
-      const originalSnap = baseState.documentSnapshot;
+      const originalSnap = baseState.snapshot;
       const cycleEdges: VectorConstraintEdge[] = [
         { id: 'e1', sourceNodeId: 'node_a', targetNodeId: 'node_b' },
         { id: 'e2', sourceNodeId: 'node_b', targetNodeId: 'node_a' }
       ];
-      const badState: VectorWorkspaceState = { ...baseState, documentSnapshot: { ...baseSnapshot, constraintEdges: cycleEdges } };
+      const badState: VectorWorkspaceState = { ...baseState, snapshot: { ...baseSnapshot, constraintEdges: cycleEdges } };
       VectorWorkflowOrchestrator.executeConstraintGraphResolutionTransaction(badState);
-      expect(baseState.documentSnapshot).toBe(originalSnap);
+      expect(baseState.snapshot).toBe(originalSnap);
     });
 
     it('FI 21: should handle large graph topological sort without stack overflow', () => {
@@ -1451,7 +1452,7 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
       for (let i = 1; i < 200; i++) {
         edges.push({ id: `e_${i}`, sourceNodeId: `n_${i}`, targetNodeId: `n_${i - 1}` });
       }
-      const res = VectorConstraintGraphEngine.detectCycle(edges);
+      const res = VectorConstraintGraphEngine.detectCycle(VectorConstraintGraphEngine.buildDependencyGraph(edges));
       expect(res.hasCycle).toBe(false);
     });
 
@@ -1463,7 +1464,7 @@ describe('VectorConstraintGraphEngine (G1-51 Night Shift Level 13)', () => {
       }
       edges.push({ id: 'e_close', sourceNodeId: 'n_0', targetNodeId: 'n_199' }); // Creates 200-node loop
 
-      const res = VectorConstraintGraphEngine.detectCycle(edges);
+      const res = VectorConstraintGraphEngine.detectCycle(VectorConstraintGraphEngine.buildDependencyGraph(edges));
       expect(res.hasCycle).toBe(true);
     });
 

@@ -113,7 +113,7 @@ export class VectorEditingCommandSystem {
     command: VectorCommandPayload
   ): CommandExecutionResult {
     if (!snapshot || !Array.isArray(snapshot.nodes)) {
-      return { success: false, snapshot: { nodes: [], selectedIds: [] }, affectedIds: [], errors: ['Invalid snapshot'] };
+      return { success: false, snapshot: { nodes: [], selectedIds: [], constraintEdges: [] }, affectedIds: [], errors: ['Invalid snapshot'] };
     }
 
     if (!VectorEditingCommandSystem.validateCommandPayload(command)) {
@@ -184,6 +184,7 @@ export class VectorEditingCommandSystem {
             snapshot: {
               nodes: nextNodes,
               selectedIds: [groupNode.id],
+              constraintEdges: [],
             },
             affectedIds: [groupNode.id],
             errors: [],
@@ -202,6 +203,7 @@ export class VectorEditingCommandSystem {
             snapshot: {
               nodes: nextNodes,
               selectedIds: childIds,
+              constraintEdges: [],
             },
             affectedIds: childIds,
             errors: [],
@@ -237,6 +239,7 @@ export class VectorEditingCommandSystem {
             snapshot: {
               nodes: nextNodes,
               selectedIds: newSelectedIds,
+              constraintEdges: [],
             },
             affectedIds,
             errors: [],
@@ -252,6 +255,7 @@ export class VectorEditingCommandSystem {
             snapshot: {
               nodes: nextNodes,
               selectedIds: nextSelected,
+              constraintEdges: [],
             },
             affectedIds: [],
             errors: [],
@@ -307,6 +311,7 @@ export class VectorEditingCommandSystem {
             snapshot: {
               nodes: nextNodes,
               selectedIds: [topoRes.resultNode.id],
+              constraintEdges: [],
             },
             affectedIds: [topoRes.resultNode.id],
             errors: [],
@@ -352,6 +357,7 @@ export class VectorEditingCommandSystem {
             snapshot: {
               nodes: nextNodes,
               selectedIds: [compoundRes.compoundNode.id],
+              constraintEdges: [],
             },
             affectedIds: [compoundRes.compoundNode.id],
             errors: [],
@@ -374,6 +380,7 @@ export class VectorEditingCommandSystem {
             snapshot: {
               nodes: nextNodes,
               selectedIds: newSelectedIds,
+              constraintEdges: [],
             },
             affectedIds: newSelectedIds,
             errors: [],
@@ -439,6 +446,7 @@ export class VectorEditingCommandSystem {
             snapshot: {
               nodes: nextNodes,
               selectedIds: newSelected,
+              constraintEdges: [],
             },
             affectedIds: newSelected,
             errors: [],
@@ -462,6 +470,7 @@ export class VectorEditingCommandSystem {
             snapshot: {
               nodes: nextNodes,
               selectedIds: [joinRes.pathNode.id],
+              constraintEdges: [],
             },
             affectedIds: [joinRes.pathNode.id],
             errors: [],
@@ -484,6 +493,7 @@ export class VectorEditingCommandSystem {
             snapshot: {
               nodes: nextNodes,
               selectedIds: [maskRes.maskedNode.id],
+              constraintEdges: [],
             },
             affectedIds: [maskRes.maskedNode.id],
             errors: [],
@@ -504,6 +514,7 @@ export class VectorEditingCommandSystem {
             snapshot: {
               nodes: nextNodes,
               selectedIds: newSelected,
+              constraintEdges: [],
             },
             affectedIds: newSelected,
             errors: [],

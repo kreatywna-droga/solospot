@@ -658,7 +658,7 @@ describe('WF-HACP-STUDIO-G1-43 — Professional Vector Path Operations & Boolean
       const circularPath: any = { id: 'cp', type: 'path', d: 'M 0 0' };
       circularPath.self = circularPath;
 
-      expect(() => VectorDocumentSerializer.serializeVectorDocument({ nodes: [circularPath], selectedIds: [] })).toThrow();
+      expect(() => VectorDocumentSerializer.serializeVectorDocument({ nodes: [circularPath], selectedIds: [], constraintEdges: [] })).toThrow();
     });
   });
 });

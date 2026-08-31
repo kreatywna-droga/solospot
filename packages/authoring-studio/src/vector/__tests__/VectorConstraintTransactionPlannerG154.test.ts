@@ -38,7 +38,7 @@ describe('VectorConstraintTransactionPlannerEngine (G1-54 Night Shift Level 16)'
         id: 'node_a',
         name: 'Header Container',
         type: 'rect',
-        transform: { x: 0, y: 0, width: 800, height: 100, rotation: 0 },
+        transform: { x: 0, y: 0, width: 800, height: 100, rotationDeg: 0, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0 },
         visible: true,
         locked: false
       },
@@ -46,7 +46,7 @@ describe('VectorConstraintTransactionPlannerEngine (G1-54 Night Shift Level 16)'
         id: 'node_b',
         name: 'Logo Image',
         type: 'rect',
-        transform: { x: 20, y: 20, width: 160, height: 60, rotation: 0 },
+        transform: { x: 20, y: 20, width: 160, height: 60, rotationDeg: 0, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0 },
         visible: true,
         locked: false
       },
@@ -54,7 +54,7 @@ describe('VectorConstraintTransactionPlannerEngine (G1-54 Night Shift Level 16)'
         id: 'node_c',
         name: 'Navigation Bar',
         type: 'rect',
-        transform: { x: 200, y: 20, width: 580, height: 60, rotation: 0 },
+        transform: { x: 200, y: 20, width: 580, height: 60, rotationDeg: 0, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0 },
         visible: true,
         locked: false
       }
@@ -796,8 +796,8 @@ describe('VectorConstraintTransactionPlannerEngine (G1-54 Night Shift Level 16)'
     });
 
     it('E2E 02: should verify component tree nesting anchor propagation during layout transaction', () => {
-      const parentNode: VectorNode = { id: 'parent_card', type: 'rect', transform: { x: 50, y: 50, width: 400, height: 300, rotation: 0 } };
-      const childNode: VectorNode = { id: 'child_btn', type: 'rect', transform: { x: 70, y: 70, width: 100, height: 40, rotation: 0 } };
+      const parentNode: VectorNode = { id: 'parent_card', type: 'rect', transform: { x: 50, y: 50, width: 400, height: 300, rotationDeg: 0, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0 } };
+      const childNode: VectorNode = { id: 'child_btn', type: 'rect', transform: { x: 70, y: 70, width: 100, height: 40, rotationDeg: 0, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0 } };
       const anchorEdge: VectorConstraintEdge = { id: 'e_child_parent', sourceNodeId: 'child_btn', targetNodeId: 'parent_card', horizontal: 'MAX' };
 
       const state = createVectorWorkspaceState([parentNode, childNode], ['parent_card'], [anchorEdge]);
@@ -812,8 +812,8 @@ describe('VectorConstraintTransactionPlannerEngine (G1-54 Night Shift Level 16)'
     });
 
     it('E2E 03: should plan centered modal window transaction maintaining viewport symmetry', () => {
-      const modalBg: VectorNode = { id: 'modal_bg', type: 'rect', transform: { x: 100, y: 100, width: 600, height: 400, rotation: 0 } };
-      const modalBtn: VectorNode = { id: 'modal_close', type: 'rect', transform: { x: 650, y: 120, width: 30, height: 30, rotation: 0 } };
+      const modalBg: VectorNode = { id: 'modal_bg', type: 'rect', transform: { x: 100, y: 100, width: 600, height: 400, rotationDeg: 0, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0 } };
+      const modalBtn: VectorNode = { id: 'modal_close', type: 'rect', transform: { x: 650, y: 120, width: 30, height: 30, rotationDeg: 0, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0 } };
       const closeEdge: VectorConstraintEdge = { id: 'e_close_right', sourceNodeId: 'modal_close', targetNodeId: 'modal_bg', horizontal: 'MAX' };
 
       const state = createVectorWorkspaceState([modalBg, modalBtn], ['modal_bg'], [closeEdge]);
@@ -828,8 +828,8 @@ describe('VectorConstraintTransactionPlannerEngine (G1-54 Night Shift Level 16)'
     });
 
     it('E2E 04: should preserve locked sidebar position while expanding main content canvas area', () => {
-      const sidebar: VectorNode = { id: 'sidebar', type: 'rect', transform: { x: 0, y: 0, width: 250, height: 800, rotation: 0 }, locked: true };
-      const mainCanvas: VectorNode = { id: 'main_canvas', type: 'rect', transform: { x: 250, y: 0, width: 950, height: 800, rotation: 0 } };
+      const sidebar: VectorNode = { id: 'sidebar', type: 'rect', transform: { x: 0, y: 0, width: 250, height: 800, rotationDeg: 0, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0 }, locked: true };
+      const mainCanvas: VectorNode = { id: 'main_canvas', type: 'rect', transform: { x: 250, y: 0, width: 950, height: 800, rotationDeg: 0, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0 } };
 
       const state = createVectorWorkspaceState([sidebar, mainCanvas], ['main_canvas'], []);
       const ops: PlannedOperation[] = [
@@ -846,7 +846,7 @@ describe('VectorConstraintTransactionPlannerEngine (G1-54 Night Shift Level 16)'
     });
 
     it('E2E 05: should reject plan execution when attempting mutation on locked sidebar', () => {
-      const sidebar: VectorNode = { id: 'sidebar', type: 'rect', transform: { x: 0, y: 0, width: 250, height: 800, rotation: 0 }, locked: true };
+      const sidebar: VectorNode = { id: 'sidebar', type: 'rect', transform: { x: 0, y: 0, width: 250, height: 800, rotationDeg: 0, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0 }, locked: true };
       const state = createVectorWorkspaceState([sidebar], ['sidebar'], []);
       const ops: PlannedOperation[] = [
         { id: 'op_mutate_sidebar', type: 'MUTATE_NODE_TRANSFORM', targetNodeId: 'sidebar', explicitBounds: { x: 0, y: 0, width: 300, height: 800 } }
@@ -947,8 +947,8 @@ describe('VectorConstraintTransactionPlannerEngine (G1-54 Night Shift Level 16)'
       const nodes: VectorNode[] = Array.from({ length: 10 }, (_, i) => ({
         id: `node_${i}`,
         type: 'rect',
-        transform: { x: i * 50, y: i * 50, width: 100, height: 50, rotation: 0 }
-      }));
+        transform: { x: i * 50, y: i * 50, width: 100, height: 50, rotationDeg: 0, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0 }
+      } as VectorNode));
       const edges: VectorConstraintEdge[] = Array.from({ length: 9 }, (_, i) => ({
         id: `edge_${i}_${i+1}`,
         sourceNodeId: `node_${i+1}`,
@@ -1224,8 +1224,8 @@ describe('VectorConstraintTransactionPlannerEngine (G1-54 Night Shift Level 16)'
       const nodes: VectorNode[] = Array.from({ length: 100 }, (_, i) => ({
         id: `n_${i}`,
         type: 'rect',
-        transform: { x: i * 10, y: i * 10, width: 50, height: 50, rotation: 0 }
-      }));
+        transform: { x: i * 10, y: i * 10, width: 50, height: 50, rotationDeg: 0, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0 }
+      } as VectorNode));
       const snapshot: VectorDocumentSnapshot = { nodes, selectedIds: [], constraintEdges: [] };
       const start = Date.now();
       const plan = VectorConstraintTransactionPlannerEngine.generatePlan(snapshot, []);
@@ -1264,7 +1264,7 @@ describe('VectorConstraintTransactionPlannerEngine (G1-54 Night Shift Level 16)'
     });
 
     it('Adv 15: should handle special unicode characters in node IDs', () => {
-      const unicodeNode: VectorNode = { id: 'node_śōlō_śpōt', type: 'rect', transform: { x: 0, y: 0, width: 100, height: 100, rotation: 0 } };
+      const unicodeNode: VectorNode = { id: 'node_śōlō_śpōt', type: 'rect', transform: { x: 0, y: 0, width: 100, height: 100, rotationDeg: 0, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0 } };
       const snapshot: VectorDocumentSnapshot = { nodes: [unicodeNode], selectedIds: ['node_śōlō_śpōt'], constraintEdges: [] };
       const ops: PlannedOperation[] = [
         { id: 'op_uni', type: 'MUTATE_NODE_TRANSFORM', targetNodeId: 'node_śōlō_śpōt', explicitBounds: { x: 0, y: 0, width: 200, height: 100 } }
@@ -1411,7 +1411,7 @@ describe('VectorConstraintTransactionPlannerEngine (G1-54 Night Shift Level 16)'
       const plan = VectorConstraintTransactionPlannerEngine.generatePlan(baseSnapshot, []);
       const extraNodeSnapshot: VectorDocumentSnapshot = {
         ...baseSnapshot,
-        nodes: [...baseSnapshot.nodes, { id: 'extra_node', type: 'rect', transform: { x: 0, y: 0, width: 50, height: 50, rotation: 0 } }]
+        nodes: [...baseSnapshot.nodes, { id: 'extra_node', type: 'rect', transform: { x: 0, y: 0, width: 50, height: 50, rotationDeg: 0, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0 } } as VectorNode]
       };
       const val = VectorConstraintTransactionPlannerEngine.validatePlan(plan, extraNodeSnapshot);
       expect(val.isStale).toBe(true);
@@ -1536,8 +1536,8 @@ describe('VectorConstraintTransactionPlannerEngine (G1-54 Night Shift Level 16)'
       const nodes: VectorNode[] = Array.from({ length: 1000 }, (_, i) => ({
         id: `n_${i}`,
         type: 'rect',
-        transform: { x: i * 5, y: i * 5, width: 10, height: 10, rotation: 0 }
-      }));
+        transform: { x: i * 5, y: i * 5, width: 10, height: 10, rotationDeg: 0, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0 }
+      } as VectorNode));
       const snapshot: VectorDocumentSnapshot = { nodes, selectedIds: [], constraintEdges: [] };
       const plan = VectorConstraintTransactionPlannerEngine.generatePlan(snapshot, []);
       expect(plan.baseSnapshot.nodes.length).toBe(1000);

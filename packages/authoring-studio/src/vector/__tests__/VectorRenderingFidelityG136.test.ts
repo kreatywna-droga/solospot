@@ -279,7 +279,7 @@ describe('G1-36: VectorRenderingBridge Transform & Stroke Fidelity', () => {
       };
       const line = { ...createLineNode('l1', 0, 0, 100, 100), stroke: { color: '#333', width: 2, dashArray: [6, 3] } };
       const poly = { ...createPolygonNode('p1', 5, 0, 0, 100, 100), transform: { ...createPolygonNode('p1', 5, 0, 0, 100, 100).transform, rotationDeg: 15 } };
-      const snapshot = { nodes: [rect, line, poly], selectedIds: [] };
+      const snapshot = { nodes: [rect, line, poly], selectedIds: [], constraintEdges: [] };
       const svg = VectorSvgExporter.exportToSvgString(snapshot, 800, 600);
       for (const node of snapshot.nodes) {
         const cmds = VectorRenderingBridge.buildRenderCommands(node);

@@ -177,7 +177,7 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
     });
 
     it('F16: creates CHECKPOINT_SESSION_START recovery checkpoint', () => {
-      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [], constraintEdges: [] };
       const cp = re.createCheckpoint('CHECKPOINT_SESSION_START', snap, []);
 
       expect(cp.level).toBe('CHECKPOINT_SESSION_START');
@@ -185,7 +185,7 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
     });
 
     it('F17: creates CHECKPOINT_SELECTION recovery checkpoint', () => {
-      const snap: VectorDocumentSnapshot = { nodes: [r1, r2], selectedIds: ['rect_1'] };
+      const snap: VectorDocumentSnapshot = { nodes: [r1, r2], selectedIds: ['rect_1'], constraintEdges: [] };
       const cp = re.createCheckpoint('CHECKPOINT_SELECTION', snap, ['rect_1']);
 
       expect(cp.level).toBe('CHECKPOINT_SELECTION');
@@ -193,36 +193,36 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
     });
 
     it('F18: creates CHECKPOINT_PREVIEW recovery checkpoint', () => {
-      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [], constraintEdges: [] };
       const cp = re.createCheckpoint('CHECKPOINT_PREVIEW', snap, []);
 
       expect(cp.level).toBe('CHECKPOINT_PREVIEW');
     });
 
     it('F19: creates CHECKPOINT_COMMAND recovery checkpoint', () => {
-      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [], constraintEdges: [] };
       const cp = re.createCheckpoint('CHECKPOINT_COMMAND', snap, []);
 
       expect(cp.level).toBe('CHECKPOINT_COMMAND');
     });
 
     it('F20: creates CHECKPOINT_TRANSACTION recovery checkpoint', () => {
-      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [], constraintEdges: [] };
       const cp = re.createCheckpoint('CHECKPOINT_TRANSACTION', snap, []);
 
       expect(cp.level).toBe('CHECKPOINT_TRANSACTION');
     });
 
     it('F21: creates CHECKPOINT_VALIDATION recovery checkpoint', () => {
-      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [], constraintEdges: [] };
       const cp = re.createCheckpoint('CHECKPOINT_VALIDATION', snap, []);
 
       expect(cp.level).toBe('CHECKPOINT_VALIDATION');
     });
 
     it('F22: rolls back document state to checkpoint by ID', () => {
-      const snap1: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [] };
-      const snap2: VectorDocumentSnapshot = { nodes: [r1, r2], selectedIds: [] };
+      const snap1: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [], constraintEdges: [] };
+      const snap2: VectorDocumentSnapshot = { nodes: [r1, r2], selectedIds: [], constraintEdges: [] };
 
       const cp1 = re.createCheckpoint('CHECKPOINT_SESSION_START', snap1, []);
       re.createCheckpoint('CHECKPOINT_TRANSACTION', snap2, []);
@@ -232,8 +232,8 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
     });
 
     it('F23: rolls back document state to last level checkpoint', () => {
-      const snap1: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [] };
-      const snap2: VectorDocumentSnapshot = { nodes: [r1, r2], selectedIds: [] };
+      const snap1: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [], constraintEdges: [] };
+      const snap2: VectorDocumentSnapshot = { nodes: [r1, r2], selectedIds: [], constraintEdges: [] };
 
       re.createCheckpoint('CHECKPOINT_SESSION_START', snap1, []);
       re.createCheckpoint('CHECKPOINT_TRANSACTION', snap2, []);
@@ -243,8 +243,8 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
     });
 
     it('F24: recovers from error by restoring fallback snapshot', () => {
-      const failedSnap: VectorDocumentSnapshot = { nodes: [], selectedIds: [] };
-      const fallbackSnap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: ['rect_1'] };
+      const failedSnap: VectorDocumentSnapshot = { nodes: [], selectedIds: [], constraintEdges: [] };
+      const fallbackSnap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: ['rect_1'], constraintEdges: [] };
 
       const recovered = re.recoverFromError(failedSnap, fallbackSnap);
       expect(recovered.nodes).toHaveLength(1);
@@ -252,7 +252,7 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
     });
 
     it('F25: clears all recorded checkpoints', () => {
-      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [], constraintEdges: [] };
       re.createCheckpoint('CHECKPOINT_SESSION_START', snap, []);
       re.clearCheckpoints();
 
@@ -260,7 +260,7 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
     });
 
     it('F26: deep clones snapshot nodes during checkpoint creation to prevent mutation leaks', () => {
-      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [], constraintEdges: [] };
       const cp = re.createCheckpoint('CHECKPOINT_SESSION_START', snap, []);
 
       (r1.transform as any).x = 999;
@@ -306,8 +306,8 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
     });
 
     it('I02: integrates recovery engine with workflow transaction rollback', () => {
-      const snap1: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [] };
-      const snap2: VectorDocumentSnapshot = { nodes: [r1, r2], selectedIds: [] };
+      const snap1: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [], constraintEdges: [] };
+      const snap2: VectorDocumentSnapshot = { nodes: [r1, r2], selectedIds: [], constraintEdges: [] };
 
       re.createCheckpoint('CHECKPOINT_TRANSACTION', snap1, []);
       const rollback = re.rollbackToLastLevel('CHECKPOINT_TRANSACTION');
@@ -326,7 +326,7 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
     });
 
     it('I04: integrates recovery engine with JSON document serializer', () => {
-      const snap: VectorDocumentSnapshot = { nodes: [r1, r2], selectedIds: ['rect_1'] };
+      const snap: VectorDocumentSnapshot = { nodes: [r1, r2], selectedIds: ['rect_1'], constraintEdges: [] };
       const cp = re.createCheckpoint('CHECKPOINT_SESSION_START', snap, ['rect_1']);
 
       const json = VectorDocumentSerializer.serializeVectorDocument(cp.snapshot);
@@ -336,7 +336,7 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
     });
 
     it('I05: integrates recovery engine with SVG exporter', () => {
-      const snap: VectorDocumentSnapshot = { nodes: [r1, r2], selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes: [r1, r2], selectedIds: [], constraintEdges: [] };
       const cp = re.createCheckpoint('CHECKPOINT_SESSION_START', snap, []);
 
       const svg = VectorSvgExporter.exportToSvgString(cp.snapshot);
@@ -378,7 +378,7 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
 
     it('I09: integrates recovery engine with vector mask release workflow', () => {
       const maskRes = VectorCompoundTopologyMaskEngine.createVectorMask(r1, [r2]);
-      const snap: VectorDocumentSnapshot = { nodes: [maskRes.maskedNode!], selectedIds: [maskRes.maskedNode!.id] };
+      const snap: VectorDocumentSnapshot = { nodes: [maskRes.maskedNode!], selectedIds: [maskRes.maskedNode!.id], constraintEdges: [] };
       re.createCheckpoint('CHECKPOINT_SESSION_START', snap, [maskRes.maskedNode!.id]);
 
       const releaseRes = VectorCompoundTopologyMaskEngine.releaseVectorMask(maskRes.maskedNode!);
@@ -396,7 +396,7 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
     });
 
     it('I11: integrates recovery engine with 5 sequential checkpoints', () => {
-      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [], constraintEdges: [] };
 
       re.createCheckpoint('CHECKPOINT_SESSION_START', snap, []);
       re.createCheckpoint('CHECKPOINT_SELECTION', snap, []);
@@ -414,7 +414,7 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
         transform: { x: 0, y: 0, width: 100, height: 100, rotationDeg: 0, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0 },
         children: [r1, r2],
       };
-      const snap: VectorDocumentSnapshot = { nodes: [groupNode], selectedIds: ['g1'] };
+      const snap: VectorDocumentSnapshot = { nodes: [groupNode], selectedIds: ['g1'], constraintEdges: [] };
       const cp = re.createCheckpoint('CHECKPOINT_SESSION_START', snap, ['g1']);
 
       const restored = re.rollbackToCheckpoint(cp.id);
@@ -433,8 +433,8 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
     });
 
     it('I14: verifies recoverFromError returns deep clone of fallback snapshot', () => {
-      const fallback: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [] };
-      const recovered = re.recoverFromError({ nodes: [], selectedIds: [] }, fallback);
+      const fallback: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [], constraintEdges: [] };
+      const recovered = re.recoverFromError({ nodes: [], selectedIds: [], constraintEdges: [] }, fallback);
 
       (r1.transform as any).x = 888;
       expect(recovered.nodes[0].transform.x).toBe(0);
@@ -682,7 +682,7 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
     });
 
     it('E2E-14: Full System Reset via State Machine and Recovery Engine', () => {
-      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [], constraintEdges: [] };
       re.createCheckpoint('CHECKPOINT_SESSION_START', snap, []);
 
       sm.transitionTo('SELECTING');
@@ -694,7 +694,7 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
     });
 
     it('E2E-15: 100 Checkpoint Performance Verification without Memory Degradation', () => {
-      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [], constraintEdges: [] };
 
       for (let i = 0; i < 100; i++) {
         re.createCheckpoint('CHECKPOINT_TRANSACTION', snap, []);
@@ -755,12 +755,12 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
     });
 
     it('ADV-11: handles recoverFromError with null fallback snapshot', () => {
-      const recovered = re.recoverFromError({ nodes: [], selectedIds: [] }, null as any);
+      const recovered = re.recoverFromError({ nodes: [], selectedIds: [], constraintEdges: [] }, null as any);
       expect(recovered.nodes).toEqual([]);
     });
 
     it('ADV-12: handles recoverFromError with corrupted fallback snapshot', () => {
-      const recovered = re.recoverFromError({ nodes: [], selectedIds: [] }, {} as any);
+      const recovered = re.recoverFromError({ nodes: [], selectedIds: [], constraintEdges: [] }, {} as any);
       expect(recovered.nodes).toEqual([]);
     });
 
@@ -770,7 +770,7 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
 
     it('ADV-14: handles createCheckpoint with NaN coordinates in nodes', () => {
       const nanR: RectangleNode = { ...r1, transform: { ...r1.transform, x: NaN, y: NaN } };
-      const snap: VectorDocumentSnapshot = { nodes: [nanR], selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes: [nanR], selectedIds: [], constraintEdges: [] };
 
       const cp = re.createCheckpoint('CHECKPOINT_SESSION_START', snap, []);
       expect(cp.snapshot.nodes[0].transform.x).toBeNaN();
@@ -778,7 +778,7 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
 
     it('ADV-15: handles createCheckpoint with Infinity coordinates in nodes', () => {
       const infR: RectangleNode = { ...r1, transform: { ...r1.transform, x: Infinity, y: Infinity } };
-      const snap: VectorDocumentSnapshot = { nodes: [infR], selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes: [infR], selectedIds: [], constraintEdges: [] };
 
       const cp = re.createCheckpoint('CHECKPOINT_SESSION_START', snap, []);
       expect(cp.snapshot.nodes[0].transform.x).toBe(Infinity);
@@ -812,7 +812,7 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
 
     it('ADV-20: handles createCheckpoint with 100 nodes', () => {
       const nodes = Array.from({ length: 100 }, (_, i) => ({ ...r1, id: `r_${i}` }));
-      const snap: VectorDocumentSnapshot = { nodes, selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes, selectedIds: [], constraintEdges: [] };
 
       const cp = re.createCheckpoint('CHECKPOINT_SESSION_START', snap, []);
       expect(cp.snapshot.nodes).toHaveLength(100);
@@ -820,7 +820,7 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
 
     it('ADV-21: handles rollbackToCheckpoint on 100 nodes snapshot', () => {
       const nodes = Array.from({ length: 100 }, (_, i) => ({ ...r1, id: `r_${i}` }));
-      const snap: VectorDocumentSnapshot = { nodes, selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes, selectedIds: [], constraintEdges: [] };
 
       const cp = re.createCheckpoint('CHECKPOINT_SESSION_START', snap, []);
       const restored = re.rollbackToCheckpoint(cp.id);
@@ -836,14 +836,14 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
     });
 
     it('ADV-23: handles createCheckpoint with empty selection IDs array', () => {
-      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [], constraintEdges: [] };
       const cp = re.createCheckpoint('CHECKPOINT_SESSION_START', snap, []);
 
       expect(cp.selectedIds).toEqual([]);
     });
 
     it('ADV-24: handles createCheckpoint with null selection IDs parameter', () => {
-      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [], constraintEdges: [] };
       const cp = re.createCheckpoint('CHECKPOINT_SESSION_START', snap, null as any);
 
       expect(cp.selectedIds).toEqual([]);
@@ -881,8 +881,8 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
     });
 
     it('ADV-31: handles rollbackToLastLevel when multiple checkpoints exist at same level', () => {
-      const snap1: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [] };
-      const snap2: VectorDocumentSnapshot = { nodes: [r1, r2], selectedIds: [] };
+      const snap1: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [], constraintEdges: [] };
+      const snap2: VectorDocumentSnapshot = { nodes: [r1, r2], selectedIds: [], constraintEdges: [] };
 
       re.createCheckpoint('CHECKPOINT_TRANSACTION', snap1, []);
       re.createCheckpoint('CHECKPOINT_TRANSACTION', snap2, []);
@@ -892,8 +892,8 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
     });
 
     it('ADV-32: handles recoverFromError with duplicate node IDs in fallback snapshot', () => {
-      const fallback: VectorDocumentSnapshot = { nodes: [r1, r1], selectedIds: [] };
-      const recovered = re.recoverFromError({ nodes: [], selectedIds: [] }, fallback);
+      const fallback: VectorDocumentSnapshot = { nodes: [r1, r1], selectedIds: [], constraintEdges: [] };
+      const recovered = re.recoverFromError({ nodes: [], selectedIds: [], constraintEdges: [] }, fallback);
 
       expect(recovered.nodes).toHaveLength(2);
     });
@@ -908,14 +908,14 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
 
     it('ADV-34: handles createCheckpoint with extreme negative transform coordinates', () => {
       const negR: RectangleNode = { ...r1, transform: { ...r1.transform, x: -1e9, y: -1e9 } };
-      const snap: VectorDocumentSnapshot = { nodes: [negR], selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes: [negR], selectedIds: [], constraintEdges: [] };
 
       const cp = re.createCheckpoint('CHECKPOINT_SESSION_START', snap, []);
       expect(cp.snapshot.nodes[0].transform.x).toBe(-1e9);
     });
 
     it('ADV-35: handles 100 sequential checkpoint creations and clear operations', () => {
-      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [], constraintEdges: [] };
 
       for (let i = 0; i < 100; i++) {
         re.createCheckpoint('CHECKPOINT_COMMAND', snap, []);
@@ -957,17 +957,17 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
 
     it('FI-04: NaN Geometry Coordinate Recovery', () => {
       const nanR: RectangleNode = { ...r1, transform: { ...r1.transform, x: NaN, y: NaN } };
-      const snap: VectorDocumentSnapshot = { nodes: [nanR], selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes: [nanR], selectedIds: [], constraintEdges: [] };
 
-      const recovered = re.recoverFromError(snap, { nodes: [r1], selectedIds: [] });
+      const recovered = re.recoverFromError(snap, { nodes: [r1], selectedIds: [], constraintEdges: [] });
       expect(recovered.nodes[0].transform.x).toBe(0);
     });
 
     it('FI-05: Infinity Geometry Coordinate Recovery', () => {
       const infR: RectangleNode = { ...r1, transform: { ...r1.transform, x: Infinity, y: Infinity } };
-      const snap: VectorDocumentSnapshot = { nodes: [infR], selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes: [infR], selectedIds: [], constraintEdges: [] };
 
-      const recovered = re.recoverFromError(snap, { nodes: [r1], selectedIds: [] });
+      const recovered = re.recoverFromError(snap, { nodes: [r1], selectedIds: [], constraintEdges: [] });
       expect(recovered.nodes[0].transform.x).toBe(0);
     });
 
@@ -1001,7 +1001,7 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
     });
 
     it('FI-10: Exporter Null Node Tree Ingestion Recovery', () => {
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: [], selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: [], selectedIds: [], constraintEdges: [] });
       expect(svg).toContain('<svg');
     });
 
@@ -1029,7 +1029,7 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
     });
 
     it('FI-13: Empty Document Snapshot Recovery', () => {
-      const snap: VectorDocumentSnapshot = { nodes: [], selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes: [], selectedIds: [], constraintEdges: [] };
       const cp = re.createCheckpoint('CHECKPOINT_SESSION_START', snap, []);
 
       expect(cp.snapshot.nodes).toEqual([]);
@@ -1046,7 +1046,7 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
       const circular: any = { id: 'c1', type: 'path' };
       circular.self = circular;
 
-      expect(() => VectorDocumentSerializer.serializeVectorDocument({ nodes: [circular], selectedIds: [] })).toThrow();
+      expect(() => VectorDocumentSerializer.serializeVectorDocument({ nodes: [circular], selectedIds: [], constraintEdges: [] })).toThrow();
     });
 
     it('FI-16: Null Selection Parameter Recovery', () => {
@@ -1065,14 +1065,14 @@ describe('WF-HACP-STUDIO-G1-47 — Autonomous Vector Editor State & Recovery Arc
 
     it('FI-18: Out-of-bounds Canvas Coordinate Recovery', () => {
       const outR: RectangleNode = { ...r1, transform: { ...r1.transform, x: 1e12, y: 1e12 } };
-      const snap: VectorDocumentSnapshot = { nodes: [outR], selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes: [outR], selectedIds: [], constraintEdges: [] };
 
       const svg = VectorSvgExporter.exportToSvgString(snap);
       expect(svg).toContain('1000000000000');
     });
 
     it('FI-19: Duplicate Checkpoint Registration Recovery', () => {
-      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [] };
+      const snap: VectorDocumentSnapshot = { nodes: [r1], selectedIds: [], constraintEdges: [] };
       const cp1 = re.createCheckpoint('CHECKPOINT_SESSION_START', snap, []);
       const cp2 = re.createCheckpoint('CHECKPOINT_SESSION_START', snap, []);
 

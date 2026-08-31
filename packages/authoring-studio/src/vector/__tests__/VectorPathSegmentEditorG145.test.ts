@@ -358,7 +358,7 @@ describe('WF-HACP-STUDIO-G1-45 — Professional Vector Path Segment Division, No
 
     it('I15: integrates path segment editing with rendering bridge attributes', () => {
       const res = VectorPathSegmentEditorEngine.insertNodeOnSegment(p1, 0, 0.5);
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: [res.pathNode!], selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: [res.pathNode!], selectedIds: [], constraintEdges: [] });
 
       expect(svg).toContain('L 50 50');
     });
@@ -720,7 +720,7 @@ describe('WF-HACP-STUDIO-G1-45 — Professional Vector Path Segment Division, No
       const circularPath: any = { id: 'cp', type: 'path', d: 'M 0 0' };
       circularPath.self = circularPath;
 
-      expect(() => VectorDocumentSerializer.serializeVectorDocument({ nodes: [circularPath], selectedIds: [] })).toThrow();
+      expect(() => VectorDocumentSerializer.serializeVectorDocument({ nodes: [circularPath], selectedIds: [], constraintEdges: [] })).toThrow();
     });
   });
 });

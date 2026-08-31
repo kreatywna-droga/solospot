@@ -1266,7 +1266,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1283,7 +1283,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1300,7 +1300,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1317,7 +1317,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1334,7 +1334,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1351,7 +1351,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1368,7 +1368,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1385,7 +1385,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1402,7 +1402,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1419,7 +1419,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1436,7 +1436,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1453,7 +1453,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1470,7 +1470,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1487,7 +1487,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1504,7 +1504,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1521,7 +1521,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1538,7 +1538,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1555,7 +1555,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1572,7 +1572,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1589,7 +1589,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1606,7 +1606,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1623,7 +1623,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1640,7 +1640,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1657,7 +1657,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1674,7 +1674,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1691,7 +1691,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1708,7 +1708,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1725,7 +1725,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1742,7 +1742,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1759,7 +1759,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1776,7 +1776,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1793,7 +1793,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1810,7 +1810,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1827,7 +1827,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1844,7 +1844,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1861,7 +1861,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1878,7 +1878,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1895,7 +1895,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1912,7 +1912,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -1929,7 +1929,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
         steps: [
           {
             id: 'bad_step',
-            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [] })
+            operation: (snap) => ({ nodes: [{ bad: true } as any], selectedIds: [], constraintEdges: [] as any[] })
           }
         ]
       };
@@ -2012,7 +2012,7 @@ describe('VectorDeterministicWorkflowEngine (G1-49)', () => {
       const wf: VectorWorkflowDefinition = {
         workflowId: 'fail_7',
         description: 'Test',
-        steps: [{ id: 's1', operation: (snap) => ({ nodes: [{ id: '' } as any], selectedIds: [] }) }]
+        steps: [{ id: 's1', operation: (snap) => ({ nodes: [{ id: '' } as any], selectedIds: [], constraintEdges: [] as any[] }) }]
       };
       const result = VectorDeterministicWorkflowEngine.executeWorkflow(baseState, wf);
       expect(result.success).toBe(false);

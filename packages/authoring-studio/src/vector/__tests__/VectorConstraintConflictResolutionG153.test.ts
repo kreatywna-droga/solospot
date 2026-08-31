@@ -53,7 +53,7 @@ describe('VectorConstraintConflictResolutionEngine (G1-53 Night Shift Level 15)'
         { id: 'e1', sourceNodeId: 'node_b', targetNodeId: 'node_a', horizontal: 'STRETCH' }
       ]
     };
-    baseState = createVectorWorkspaceState(nodes, ['node_b'], baseSnapshot.constraintEdges);
+    baseState = createVectorWorkspaceState(nodes, ['node_b'], [...baseSnapshot.constraintEdges]);
     baseSnapshot = baseState.snapshot;
   });
 
@@ -1331,18 +1331,18 @@ describe('VectorConstraintConflictResolutionEngine (G1-53 Night Shift Level 15)'
     });
 
     it('FI 05: should preserve original document snapshot byte-for-byte on transaction failure', () => {
-      const originalSnap = baseState.documentSnapshot;
+      const originalSnap = baseState.snapshot;
       const edges: VectorConstraintEdge[] = [
         { id: 'e1', sourceNodeId: 'node_a', targetNodeId: 'node_b', horizontal: 'MIN' },
         { id: 'e2', sourceNodeId: 'node_b', targetNodeId: 'node_a', horizontal: 'MIN' }
       ];
       const badState: VectorWorkspaceState = {
         ...baseState,
-        documentSnapshot: { ...baseSnapshot, constraintEdges: edges }
+        snapshot: { ...baseSnapshot, constraintEdges: edges }
       };
 
       const res = VectorWorkflowOrchestrator.executeConstraintConflictResolutionTransaction(badState, 'rollback');
-      expect(res.nextState?.documentSnapshot).toBe(originalSnap);
+      expect(res.state?.snapshot).toBe(originalSnap);
     });
 
     it('FI 06: should handle conflicting edges targeting same node on same axis deterministically', () => {
@@ -1487,14 +1487,14 @@ describe('VectorConstraintConflictResolutionEngine (G1-53 Night Shift Level 15)'
     });
 
     it('FI 27: should verify rollback restores full document snapshot immutability on failure', () => {
-      const originalSnap = baseState.documentSnapshot;
+      const originalSnap = baseState.snapshot;
       const edges: VectorConstraintEdge[] = [
         { id: 'e1', sourceNodeId: 'node_a', targetNodeId: 'node_b' },
         { id: 'e2', sourceNodeId: 'node_b', targetNodeId: 'node_a' }
       ];
-      const badState: VectorWorkspaceState = { ...baseState, documentSnapshot: { ...baseSnapshot, constraintEdges: edges } };
+      const badState: VectorWorkspaceState = { ...baseState, snapshot: { ...baseSnapshot, constraintEdges: edges } };
       VectorWorkflowOrchestrator.executeConstraintConflictResolutionTransaction(badState, 'rollback');
-      expect(baseState.documentSnapshot).toBe(originalSnap);
+      expect(baseState.snapshot).toBe(originalSnap);
     });
 
     it('FI 28: should handle large graph conflict detection without stack overflow', () => {
@@ -1593,15 +1593,15 @@ describe('VectorConstraintConflictResolutionEngine (G1-53 Night Shift Level 15)'
     });
 
     it('FI 39: should verify zero side-effects on global workspace state during conflict analysis', () => {
-      const snapBefore = baseState.documentSnapshot;
-      VectorConstraintConflictResolutionEngine.buildConflictReport(baseState.documentSnapshot);
-      expect(baseState.documentSnapshot).toBe(snapBefore);
+      const snapBefore = baseState.snapshot;
+      VectorConstraintConflictResolutionEngine.buildConflictReport(baseState.snapshot);
+      expect(baseState.snapshot).toBe(snapBefore);
     });
 
     it('FI 40: should verify zero side-effects on global workspace state during conflict resolution', () => {
-      const snapBefore = baseState.documentSnapshot;
-      VectorConstraintConflictResolutionEngine.resolveConflicts(baseState.documentSnapshot);
-      expect(baseState.documentSnapshot).toBe(snapBefore);
+      const snapBefore = baseState.snapshot;
+      VectorConstraintConflictResolutionEngine.resolveConflicts(baseState.snapshot);
+      expect(baseState.snapshot).toBe(snapBefore);
     });
 
     it('FI 41: should recover from locked node conflict by preserving locked node immutability', () => {

@@ -6,7 +6,10 @@ export * from './PageSectionBlockCompositionEngine';
 export * from './PageBuilderInteractionEngine';
 export * from './PageBuilderCanvasRuntimeAdapter';
 export * from './MultiPageNavigationRouterEngine';
-export * from './StorefrontCartCheckoutDrawerEngine';
+export {
+  StorefrontCartCheckoutDrawerEngine,
+  type CartItemDTO as CartDrawerItemDTO
+} from './StorefrontCartCheckoutDrawerEngine';
 export * from './SitePublishingDeploymentBridgeEngine';
 export * from './StorefrontFormSubmissionBridgeEngine';
 export * from './StorefrontAnalyticsTelemetryBridgeEngine';
@@ -25,7 +28,12 @@ export * from './StorefrontTaxShippingCalculatorBridgeEngine';
 export * from './StorefrontNotificationBannerBridgeEngine';
 export * from './StorefrontCustomerSupportTicketBridgeEngine';
 export * from './StorefrontProductRecommendationBridgeEngine';
-export * from './StorefrontAbandonedCartRecoveryBridgeEngine';
+export {
+  StorefrontAbandonedCartRecoveryBridgeEngine,
+  type AbandonedCartConfigDTO,
+  type AbandonedCartSessionDTO,
+  type RecoveryStatus as BridgeRecoveryStatus
+} from './StorefrontAbandonedCartRecoveryBridgeEngine';
 export * from './StorefrontCustomDomainDnsBridgeEngine';
 export * from './StorefrontPaymentGatewayBridgeEngine';
 export * from './StorefrontOrderFulfillmentBridgeEngine';
@@ -42,8 +50,13 @@ export * from './StorefrontProductionReadinessOrchestrator';
 export * from './StorefrontPaymentReliabilityEngine';
 export * from './StorefrontWebhookEventProcessingEngine';
 export * from './StorefrontOrderConsistencyEngine';
-export * from './StorefrontInventoryReservationEngine';
-export * from './StorefrontCartPersistenceEngine';
+export {
+  StorefrontInventoryReservationEngine,
+  type InventoryReservationDTO
+} from './StorefrontInventoryReservationEngine';
+export {
+  StorefrontCartPersistenceEngine
+} from './StorefrontCartPersistenceEngine';
 export * from './StorefrontCustomerAddressEngine';
 export * from './StorefrontOrderInvoiceEngine';
 export * from './StorefrontMerchantProductImportExportEngine';
@@ -65,7 +78,11 @@ export * from './StorefrontSubscriptionBillingEngine';
 export * from './StorefrontOrderFulfillmentTrackingEngine';
 export * from './StorefrontTaxComplianceEngine';
 export * from './StorefrontGiftCardVoucherEngine';
-export * from './StorefrontCustomerSegmentationEngine';
+export {
+  StorefrontCustomerSegmentationEngine,
+  type CustomerRfmScoreDTO,
+  type CustomerSegmentationEngineStateDTO
+} from './StorefrontCustomerSegmentationEngine';
 export * from './StorefrontLoyaltyRewardsEngine';
 export * from './StorefrontAffiliateReferralEngine';
 export * from './StorefrontProductSearchSynonymEngine';
@@ -89,63 +106,18 @@ export * from './StorefrontMultiStoreBranchEngine';
 export * from './StorefrontCustomerActivityStreamEngine';
 export * from './StorefrontEndToEndJourneyOrchestratorV3';
 export * from './StorefrontLongHorizonProductEvolutionOrchestratorV3';
-export * from './StorefrontCartAbandonmentRecoveryEngine';
+export {
+  StorefrontCartAbandonmentRecoveryEngine,
+  type CartAbandonmentRecordDTO,
+  type AbandonedCartItemDTO,
+  type CartAbandonmentRecoveryEngineStateDTO
+} from './StorefrontCartAbandonmentRecoveryEngine';
 export * from './StorefrontCustomerConsentPrivacyEngine';
 export * from './StorefrontOrderSlaFulfillmentMonitorEngine';
 export * from './StorefrontAffiliateReferralPayoutEngine';
-export * from './StorefrontCustomLoyaltyRewardProgramEngine';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+export {
+  StorefrontCustomLoyaltyRewardProgramEngine,
+  type CustomLoyaltyRewardProgramEngineStateDTO,
+  type CustomerLoyaltyAccountDTO as CustomLoyaltyAccountDTO,
+  type LoyaltyPointLedgerEntryDTO as CustomLoyaltyPointLedgerEntryDTO
+} from './StorefrontCustomLoyaltyRewardProgramEngine';

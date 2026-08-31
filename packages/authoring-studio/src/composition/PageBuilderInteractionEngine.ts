@@ -168,7 +168,7 @@ export class PageBuilderInteractionEngine {
           success: false,
           workspaceState,
           interactionState,
-          error: (typeof res.error === 'string' ? res.error : res.error?.message) || 'Failed'
+          error: res.error || 'Failed'
         };
       }
 
@@ -218,7 +218,7 @@ export class PageBuilderInteractionEngine {
           success: false,
           workspaceState,
           interactionState,
-          error: (typeof res.error === 'string' ? res.error : res.error?.message) || 'Failed'
+          error: res.error || 'Failed'
         };
       }
 

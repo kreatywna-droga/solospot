@@ -759,7 +759,7 @@ describe('WF-HACP-STUDIO-G1-41 — Professional Transform Interaction Pipeline',
 
     it('FI-04: Missing Node in Document Snapshot', () => {
       const state: VectorWorkspaceState = {
-        snapshot: { nodes: [], selectedIds: ['missing_node'] },
+        snapshot: { nodes: [], selectedIds: ['missing_node'], constraintEdges: [] },
         historyStack: createVectorWorkspaceState([]).historyStack,
       };
       const session = VectorTransformInteractionEngine.startSession(state.snapshot, 'se', { x: 100, y: 100 });

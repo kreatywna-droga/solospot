@@ -298,7 +298,7 @@ describe('G1-34 — Path Pen Tool Bezier Curve Drawing & Node Editing', () => {
 
   it('ADV-11: Serialize malformed / legacy path data', () => {
     const legacyPath = createPathNode('p_legacy', 'M 0 0 L 100 0 Z', 0, 0, 100, 100);
-    const json = VectorDocumentSerializer.serializeVectorDocument({ nodes: [legacyPath], selectedIds: [] });
+    const json = VectorDocumentSerializer.serializeVectorDocument({ nodes: [legacyPath], selectedIds: [], constraintEdges: [] });
     const restored = VectorDocumentSerializer.restoreVectorDocument(json);
 
     expect(restored.success).toBe(true);

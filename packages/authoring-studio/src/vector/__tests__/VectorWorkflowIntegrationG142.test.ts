@@ -998,7 +998,7 @@ describe('WF-HACP-STUDIO-G1-42 — Professional Vector Editing Workflow Integrat
       const circularNode: any = { id: 'c1', type: 'rectangle', transform: { x: 0, y: 0, width: 10, height: 10 } };
       circularNode.self = circularNode;
 
-      expect(() => VectorDocumentSerializer.serializeVectorDocument({ nodes: [circularNode], selectedIds: [] })).toThrow();
+      expect(() => VectorDocumentSerializer.serializeVectorDocument({ nodes: [circularNode], selectedIds: [], constraintEdges: [] })).toThrow();
     });
 
     it('FI-08: Controller State Corruption Emergency Rollback', () => {

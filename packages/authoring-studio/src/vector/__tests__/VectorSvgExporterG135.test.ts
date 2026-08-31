@@ -162,26 +162,26 @@ describe('G1-35: Vector Svg Exporter', () => {
     it('1. Handles empty transform gracefully', () => {
       const rect = createRectangleNode('r1');
       const advRect = { ...rect, transform: { x: 0, y: 0, width: 0, height: 0, rotationDeg: 0, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0 } };
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: [advRect], selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: [advRect], selectedIds: [], constraintEdges: [] });
       expect(svg).toContain('width="0" height="0"');
     });
 
     it('2. Handles missing fill gracefully', () => {
       const rect = createRectangleNode('r1');
       const advRect = { ...rect, fill: undefined };
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: [advRect], selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: [advRect], selectedIds: [], constraintEdges: [] });
       expect(svg).toContain('fill="none"');
     });
 
     it('3. Handles extreme coordinates', () => {
       const rect = createRectangleNode('r1', 99999999, -99999999, Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER);
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: [rect], selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: [rect], selectedIds: [], constraintEdges: [] });
       expect(svg).toContain('translate(99999999, -99999999)');
     });
 
     it('4. Handles negative dimensions (force absolute)', () => {
       const rect = createRectangleNode('r1', 0, 0, -100, -50);
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: [rect], selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: [rect], selectedIds: [], constraintEdges: [] });
       expect(svg).toContain('width="-100"'); // SVG renderer will ignore or error, but exporter shouldn't crash
     });
 
@@ -189,7 +189,7 @@ describe('G1-35: Vector Svg Exporter', () => {
       const g3 = createShapeGroupNode('g3', [createRectangleNode('r1')]);
       const g2 = createShapeGroupNode('g2', [g3]);
       const g1 = createShapeGroupNode('g1', [g2]);
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: [g1], selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: [g1], selectedIds: [], constraintEdges: [] });
       expect(svg).toContain('<g id="g1"');
       expect(svg).toContain('<g id="g2"');
       expect(svg).toContain('<g id="g3"');
@@ -198,45 +198,45 @@ describe('G1-35: Vector Svg Exporter', () => {
 
     it('6. Avoids duplicate gradient defs for same id', () => {
       const r1 = { ...createRectangleNode('r1'), fill: { type: 'linear-gradient' } as any };
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: [r1, r1], selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: [r1, r1], selectedIds: [], constraintEdges: [] });
       expect(svg.match(/<linearGradient/g)?.length).toBe(1);
     });
 
     it('7. Handles gradient stops missing offset/color', () => {
       const r1 = { ...createRectangleNode('r1'), fill: { type: 'radial-gradient', gradientStops: [{}] } as any };
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: [r1], selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: [r1], selectedIds: [], constraintEdges: [] });
       expect(svg).toContain('<radialGradient');
     });
 
     it('8. Handles missing stroke', () => {
       const r1 = { ...createRectangleNode('r1'), stroke: undefined };
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: [r1], selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: [r1], selectedIds: [], constraintEdges: [] });
       expect(svg).not.toContain('stroke=');
     });
 
     it('9. Handles zero stroke width', () => {
       const r1 = { ...createRectangleNode('r1'), stroke: { color: 'red', width: 0 } as any };
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: [r1], selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: [r1], selectedIds: [], constraintEdges: [] });
       expect(svg).not.toContain('stroke-width="0"');
     });
 
     it('10. Handles group with invisible children', () => {
       const r1 = { ...createRectangleNode('r1'), visible: false };
       const g1 = createShapeGroupNode('g1', [r1]);
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: [g1], selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: [g1], selectedIds: [], constraintEdges: [] });
       expect(svg).not.toContain('<rect');
       expect(svg).toContain('<g');
     });
 
     it('11. Handles invalid shape types gracefully (returns empty)', () => {
       const adv = { id: 'x', type: 'unknown', visible: true, transform: {} } as any;
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: [adv], selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: [adv], selectedIds: [], constraintEdges: [] });
       expect(svg).not.toContain('unknown');
     });
 
     it('12. Handles empty path data', () => {
       const p1 = createPathNode('p1', '');
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: [p1], selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: [p1], selectedIds: [], constraintEdges: [] });
       expect(svg).toContain('d=""');
     });
   });
@@ -275,7 +275,7 @@ describe('G1-35: Vector Svg Exporter', () => {
       const r1 = createRectangleNode('r1');
       const r2 = createRectangleNode('r2');
       const g1 = createShapeGroupNode('g1', [r1, r2]);
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: [g1], selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: [g1], selectedIds: [], constraintEdges: [] });
       expect(svg).toContain('<g');
       expect(svg).toContain('id="r1"');
       expect(svg).toContain('id="r2"');
@@ -328,7 +328,7 @@ it('5. Layer reordering correctly affects SVG rendering order', () => {
           gradientStops: [{ offset: 0, color: 'red' }, { offset: 1, color: 'blue' }]
         }
       } as any;
-      const json = VectorDocumentSerializer.serializeVectorDocument({ nodes: [gradRect], selectedIds: [] });
+      const json = VectorDocumentSerializer.serializeVectorDocument({ nodes: [gradRect], selectedIds: [], constraintEdges: [] });
       const restored = VectorDocumentSerializer.restoreVectorDocument(json);
       expect(restored.success).toBe(true);
       const svg = VectorSvgExporter.exportToSvgString(restored.snapshot!);
@@ -340,7 +340,7 @@ it('5. Layer reordering correctly affects SVG rendering order', () => {
     it('8. Group export does not double-apply group transform onto absolute children', () => {
       const child = createRectangleNode('r1', 10, 20, 50, 50);
       const group = createShapeGroupNode('g1', [child], 10, 20, 50, 50);
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: [group], selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: [group], selectedIds: [], constraintEdges: [] });
       expect(svg).toContain('<g id="g1"');
       const rectPos = svg.indexOf('<rect');
       const gPos = svg.indexOf('<g');
@@ -375,7 +375,7 @@ describe('Failure Injection (>= 3)', () => {
       (g1.children as any).push(g2); // Force cycle
 
       expect(() => {
-        VectorSvgExporter.exportToSvgString({ nodes: [g1], selectedIds: [] });
+        VectorSvgExporter.exportToSvgString({ nodes: [g1], selectedIds: [], constraintEdges: [] });
       }).toThrowError(/circular group reference/i);
     });
   });

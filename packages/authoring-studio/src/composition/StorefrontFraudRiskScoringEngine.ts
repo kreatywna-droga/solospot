@@ -203,13 +203,8 @@ export class StorefrontFraudRiskScoringEngine {
     return this.tenantId;
   }
 
-
   public getEvaluation(orderId: string): FraudEvaluationResultDTO | undefined {
     return this.evaluations.get(orderId.trim());
-  }
-
-  public getTenantId(): string {
-    return this.tenantId;
   }
 
   public exportState(): FraudRiskScoringEngineStateDTO {

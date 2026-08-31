@@ -242,7 +242,7 @@ describe('WF-HACP-STUDIO-G1-38: Vector Alignment Engine Expansion', () => {
       const r2: RectangleNode = { id: 'r2', type: 'rectangle', visible: true, transform: { x: 10, y: 10, width: 100, height: 100, rotationDeg: 0, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0 } };
       const grid = VectorEditingEngine.arrangeShapesInGrid([r1, r2], 1, 0, 50, { x: 0, y: 0 });
 
-      const svg = VectorSvgExporter.exportToSvgString({ nodes: grid, selectedIds: [] });
+      const svg = VectorSvgExporter.exportToSvgString({ nodes: grid, selectedIds: [], constraintEdges: [] });
       expect(svg).toContain('translate(0, 150)'); // r2 y: 0 + 100 + 50 = 150
     });
 

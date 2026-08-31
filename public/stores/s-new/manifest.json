@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "buildId": "build_1787724678248_2t8yomi",
+  "buildId": "build_1788167373089_2t216zi",
   "runtimeVersion": "1.0.0",
   "assets": [
     {
@@ -23,6 +23,6 @@
   "integrity": {
     "assets/app.5f0ad3fb.css": "5f0ad3fb6533b3f8cadb43bec1c39433a8306392a335e651c66a5897696ce641"
   },
-  "generatedAt": "2026-08-26T06:11:18.248Z",
+  "generatedAt": "2026-08-31T09:09:33.088Z",
   "metadata": {}
 }
