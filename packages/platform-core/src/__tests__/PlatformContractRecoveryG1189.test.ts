@@ -198,6 +198,23 @@ describe('PlatformContractRecovery', () => {
       expect(status.bySeverity.CRITICAL).toBe(1);
       expect(status.bySeverity.LOW).toBe(1);
     });
+
+    it('tracks auto-resolved count', () => {
+      recovery.detectInconsistencies([registry('c1', [field('a', 'string', { present: false, required: false })])]);
+      const history = recovery.getInconsistencyHistory();
+      recovery.autoResolve(history[0]);
+      const status = recovery.getRecoveryStatus();
+      expect(status.autoResolved).toBe(1);
+      expect(status.pending).toBe(0);
+    });
+
+    it('tracks escalated count', () => {
+      recovery.detectInconsistencies([registry('c1', [field('a', 'string', { present: false, required: false })])]);
+      const history = recovery.getInconsistencyHistory();
+      recovery.escalate(history[0]);
+      const status = recovery.getRecoveryStatus();
+      expect(status.escalated).toBe(1);
+    });
   });
 
   // ── getInconsistencyHistory ──
@@ -217,6 +234,14 @@ describe('PlatformContractRecovery', () => {
       const history = recovery.getInconsistencyHistory();
       history.push(makeInconsistency());
       expect(recovery.getInconsistencyHistory()).toHaveLength(0);
+    });
+
+    it('preserves chronological order', () => {
+      recovery.detectInconsistencies([registry('c1', [field('a', 'string', { present: false, required: false })])]);
+      recovery.detectInconsistencies([registry('c2', [field('b', 'string', { present: false, required: true })])]);
+      const history = recovery.getInconsistencyHistory();
+      expect(history[0].contractName).toBe('c1');
+      expect(history[1].contractName).toBe('c2');
     });
   });
 
