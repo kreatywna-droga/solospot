@@ -89,7 +89,7 @@ export class PaymentOrderConsistencyAuditor {
    */
   auditPaymentToOrderFlow(
     payments: ReadonlyArray<Payment>,
-    orders: ReadonlyArray<Payment>,
+    orders: ReadonlyArray<Order>,
   ): { consistent: boolean; issues: ConsistencyIssue[] } {
     const issues: ConsistencyIssue[] = [];
     const orderMap = new Map<string, Order>();
