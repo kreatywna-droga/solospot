@@ -233,6 +233,24 @@ export class OrderProcessingEngine {
   }
 
   /**
+   * Lists all orders for a tenant (G1-315 merchant dashboard).
+   * Returns orders sorted by createdAt descending.
+   */
+  public listOrders(tenantId: string, options?: { status?: ProcessedOrderState; limit?: number }): ProcessedOrder[] {
+    const result: ProcessedOrder[] = [];
+    for (const order of this.orders.values()) {
+      if (order.tenantId !== tenantId) continue;
+      if (options?.status && order.status !== options.status) continue;
+      result.push(order);
+    }
+    result.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    if (options?.limit && options.limit > 0) {
+      return result.slice(0, options.limit);
+    }
+    return result;
+  }
+
+  /**
    * Safe manual injection for testing or DB seeding.
    */
   public setOrderForTesting(order: ProcessedOrder): void {

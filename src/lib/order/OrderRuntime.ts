@@ -277,9 +277,13 @@ export class OrderRuntime {
    */
   public async getOrderStatus(
     tenantId: string,
-    orderId: string,
+    orderId: string
   ): Promise<ProcessedOrder> {
     return this.orderEngine.getOrder(tenantId, orderId);
+  }
+
+  public listOrders(tenantId: string, options?: { status?: ProcessedOrder['status']; limit?: number }): ProcessedOrder[] {
+    return this.orderEngine.listOrders(tenantId, options);
   }
 
   /**
