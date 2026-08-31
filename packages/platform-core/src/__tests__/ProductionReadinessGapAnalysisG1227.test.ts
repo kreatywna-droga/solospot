@@ -93,8 +93,8 @@ describe('ProductionReadinessGapAnalyzer', () => {
   it('11: prioritizeGaps sorts by impact/effort descending', () => {
     const analyzer = new ProductionReadinessGapAnalyzer();
     const gaps: ReadinessGap[] = [
-      { gapId: 'g1', category: 'A', gapDescription: '', currentScore: 80, targetScore: 90, remediationSteps: ['s1', 's2'] },
-      { gapId: 'g2', category: 'B', gapDescription: '', currentScore: 50, targetScore: 95, remediationSteps: ['s1'] },
+      { gapId: 'g1', category: 'INFRASTRUCTURE', gapDescription: '', currentScore: 80, targetScore: 90, remediationSteps: ['s1', 's2'] },
+      { gapId: 'g2', category: 'SECURITY', gapDescription: '', currentScore: 50, targetScore: 95, remediationSteps: ['s1'] },
     ];
     const prioritized = analyzer.prioritizeGaps(gaps);
     expect(prioritized[0].gapId).toBe('g2');
@@ -103,8 +103,8 @@ describe('ProductionReadinessGapAnalyzer', () => {
   it('12: prioritizeGaps handles equal priorities', () => {
     const analyzer = new ProductionReadinessGapAnalyzer();
     const gaps: ReadinessGap[] = [
-      { gapId: 'g1', category: 'A', gapDescription: '', currentScore: 60, targetScore: 80, remediationSteps: ['s1'] },
-      { gapId: 'g2', category: 'B', gapDescription: '', currentScore: 60, targetScore: 80, remediationSteps: ['s1'] },
+      { gapId: 'g1', category: 'INFRASTRUCTURE', gapDescription: '', currentScore: 60, targetScore: 80, remediationSteps: ['s1'] },
+      { gapId: 'g2', category: 'SECURITY', gapDescription: '', currentScore: 60, targetScore: 80, remediationSteps: ['s1'] },
     ];
     const prioritized = analyzer.prioritizeGaps(gaps);
     expect(prioritized).toHaveLength(2);
@@ -118,7 +118,7 @@ describe('ProductionReadinessGapAnalyzer', () => {
   it('14: calculateReadinessScore returns 100 when all targets met', () => {
     const analyzer = new ProductionReadinessGapAnalyzer();
     const gaps: ReadinessGap[] = [
-      { gapId: 'g1', category: 'A', gapDescription: '', currentScore: 90, targetScore: 90, remediationSteps: [] },
+      { gapId: 'g1', category: 'INFRASTRUCTURE', gapDescription: '', currentScore: 90, targetScore: 90, remediationSteps: [] },
     ];
     expect(analyzer.calculateReadinessScore(gaps)).toBe(100);
   });
@@ -126,7 +126,7 @@ describe('ProductionReadinessGapAnalyzer', () => {
   it('15: calculateReadinessScore returns proportion', () => {
     const analyzer = new ProductionReadinessGapAnalyzer();
     const gaps: ReadinessGap[] = [
-      { gapId: 'g1', category: 'A', gapDescription: '', currentScore: 60, targetScore: 100, remediationSteps: [] },
+      { gapId: 'g1', category: 'INFRASTRUCTURE', gapDescription: '', currentScore: 60, targetScore: 100, remediationSteps: [] },
     ];
     expect(analyzer.calculateReadinessScore(gaps)).toBe(60);
   });
@@ -134,8 +134,8 @@ describe('ProductionReadinessGapAnalyzer', () => {
   it('16: calculateReadinessScore averages across multiple gaps', () => {
     const analyzer = new ProductionReadinessGapAnalyzer();
     const gaps: ReadinessGap[] = [
-      { gapId: 'g1', category: 'A', gapDescription: '', currentScore: 80, targetScore: 100, remediationSteps: [] },
-      { gapId: 'g2', category: 'B', gapDescription: '', currentScore: 60, targetScore: 100, remediationSteps: [] },
+      { gapId: 'g1', category: 'INFRASTRUCTURE', gapDescription: '', currentScore: 80, targetScore: 100, remediationSteps: [] },
+      { gapId: 'g2', category: 'SECURITY', gapDescription: '', currentScore: 60, targetScore: 100, remediationSteps: [] },
     ];
     expect(analyzer.calculateReadinessScore(gaps)).toBe(70);
   });
@@ -221,8 +221,8 @@ describe('ProductionReadinessGapAnalyzer', () => {
   it('27: getCriticalGaps returns all gaps when all are critical', () => {
     const analyzer = new ProductionReadinessGapAnalyzer();
     const gaps: ReadinessGap[] = [
-      { gapId: 'g1', category: 'A', gapDescription: '', currentScore: 10, targetScore: 90, remediationSteps: [] },
-      { gapId: 'g2', category: 'B', gapDescription: '', currentScore: 20, targetScore: 100, remediationSteps: [] },
+      { gapId: 'g1', category: 'INFRASTRUCTURE', gapDescription: '', currentScore: 10, targetScore: 90, remediationSteps: [] },
+      { gapId: 'g2', category: 'SECURITY', gapDescription: '', currentScore: 20, targetScore: 100, remediationSteps: [] },
     ];
     expect(analyzer.getCriticalGaps(gaps)).toHaveLength(2);
   });
@@ -230,7 +230,7 @@ describe('ProductionReadinessGapAnalyzer', () => {
   it('28: calculateReadinessScore with zero targets returns 100', () => {
     const analyzer = new ProductionReadinessGapAnalyzer();
     const gaps: ReadinessGap[] = [
-      { gapId: 'g1', category: 'A', gapDescription: '', currentScore: 0, targetScore: 0, remediationSteps: [] },
+      { gapId: 'g1', category: 'INFRASTRUCTURE', gapDescription: '', currentScore: 0, targetScore: 0, remediationSteps: [] },
     ];
     expect(analyzer.calculateReadinessScore(gaps)).toBe(100);
   });
