@@ -68,6 +68,7 @@ export interface OrderRow {
   customer_id: string | null
   status: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled'
   total: number
+  items: OrderItemRow[]
   metadata: Record<string, unknown>
   created_at: string
   updated_at: string

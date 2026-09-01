@@ -20,9 +20,9 @@ export async function GET() {
     }
 
     const runtime = OrderRuntime.getInstance();
-    const orders = runtime.listOrders(session.tenantId);
+    const orders = await runtime.listOrders(session.tenantId);
 
-    const summary = orders.map((o) => ({
+    const summary = orders.map((o: any) => ({
       id: o.id,
       status: o.status,
       total: o.grandTotalGross,

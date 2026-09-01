@@ -97,11 +97,22 @@ export class OrderRuntime {
   /** Inflight request deduplication map for concurrent requests with identical correlationId. */
   private readonly inflightPromises = new Map<string, Promise<CheckoutResponseDTO>>();
 
-  constructor(options?: { eventBus?: PlatformEventBusImpl; logger?: ConsolePlatformLogger }) {
+  constructor(options?: {
+    eventBus?: PlatformEventBusImpl;
+    logger?: ConsolePlatformLogger;
+    /**
+     * G1-333 HARDEN: optional OrderProcessingEngine (and its persistence adapter)
+     * to inject. Production callers should wire OrderProcessingEngine with a
+     * Supabase-backed OrderRepositoryAdapter; tests can inject an engine that
+     * uses MemoryOrderRepository. When omitted, OrderProcessingEngine runs in
+     * legacy in-memory mode (single-process only — same as before G1-333).
+     */
+    orderEngine?: OrderProcessingEngine;
+  }) {
     this.logger = options?.logger || new ConsolePlatformLogger();
     this.eventBus = options?.eventBus || new PlatformEventBusImpl();
     this.logger.setEventBus(this.eventBus);
-    this.orderEngine = new OrderProcessingEngine({
+    this.orderEngine = options?.orderEngine || new OrderProcessingEngine({
       eventBus: this.eventBus,
       logger: this.logger,
     });
@@ -282,7 +293,7 @@ export class OrderRuntime {
     return this.orderEngine.getOrder(tenantId, orderId);
   }
 
-  public listOrders(tenantId: string, options?: { status?: ProcessedOrder['status']; limit?: number }): ProcessedOrder[] {
+  public async listOrders(tenantId: string, options?: { status?: ProcessedOrder['status']; limit?: number }): Promise<ProcessedOrder[]> {
     return this.orderEngine.listOrders(tenantId, options);
   }
 

@@ -4,6 +4,7 @@
 export * from './interfaces/Repository'
 export * from './repositories/ProductRepository'
 export * from './repositories/OrderRepository'
+export * from './repositories/MemoryOrderRepository'
 export * from './repositories/CartRepository'
 export * from './repositories/InventoryRepository'
 export * from './repositories/CustomerRepository'
