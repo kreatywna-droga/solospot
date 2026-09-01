@@ -10,7 +10,7 @@ export interface SupabaseConfig {
 }
 
 export class SupabaseRepository<T extends { id: string; createdAt: string; updatedAt: string }> implements Repository<T>, TenantAwareRepository<T> {
-  constructor(private config: SupabaseConfig) {}
+  constructor(protected readonly config: SupabaseConfig) {}
 
   async findById(id: string): Promise<T | null> {
     const { createClient } = await import('@supabase/supabase-js')

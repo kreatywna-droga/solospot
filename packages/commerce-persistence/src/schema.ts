@@ -85,9 +85,12 @@ export interface OrderItemRow {
 }
 
 export interface InventoryRow {
+  id: string
+  tenant_id: string
   product_id: string
   quantity: number
   reserved: number
+  low_stock_threshold: number
   created_at: string
   updated_at: string
 }

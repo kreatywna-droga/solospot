@@ -4,6 +4,7 @@ import { ConsolePlatformLogger } from '../../platform-core/src/logger/Logger';
 import { EventRegistry } from '../../platform-core/src/events/EventRegistry';
 import { TenantSecurityException } from './CommerceEngine';
 import { InvalidOrderStateException } from './CheckoutFlow';
+import { InventoryEngine } from './InventoryEngine';
 export { InvalidOrderStateException };
 
 export const ProcessedOrderStateSchema = z.enum([
@@ -56,6 +57,9 @@ export class OrderProcessingEngine {
   private readonly eventBus: PlatformEventBusImpl;
   private readonly logger: ConsolePlatformLogger;
   private readonly orders = new Map<string, ProcessedOrder>(); // In-memory simulated repository
+  private readonly inventoryEngine: InventoryEngine | undefined;
+  /** Map: orderId -> list of stock reservation ids created for that order. */
+  private readonly orderReservations = new Map<string, string[]>();
 
   private readonly allowedTransitions = {
     CREATED: ['PAYMENT_PENDING'],
@@ -71,9 +75,11 @@ export class OrderProcessingEngine {
   constructor(options: {
     eventBus: PlatformEventBusImpl;
     logger: ConsolePlatformLogger;
+    inventoryEngine?: InventoryEngine;
   }) {
     this.eventBus = options.eventBus;
     this.logger = options.logger;
+    this.inventoryEngine = options.inventoryEngine;
 
     // Register all order lifecycle events
     const orderEvents = [
@@ -130,6 +136,7 @@ export class OrderProcessingEngine {
           tenantId,
           metadata: { orderId },
         });
+        await this.releaseInventoryReservations(tenantId, orderId, event.correlationId);
       } catch (err: any) {
         this.logger.error({
           message: `Auto-cancel on Payment.Failed failed for order ${orderId}: ${err.message}`,
@@ -251,6 +258,58 @@ export class OrderProcessingEngine {
   }
 
   /**
+   * Reserves stock for every line item in the order. Returns the reservation
+   * IDs. Stores them in the internal map so {@link confirmPayment} (commit)
+   * and {@link cancelOrder} (release) can reconcile inventory correctly.
+   *
+   * If no inventory engine is wired this method returns an empty array and is
+   * a no-op. If ANY line item reservation fails, all previously-created
+   * reservations for this order are released (rollback) and the original
+   * exception is re-thrown.
+   */
+  public async reserveStockForOrder(
+    tenantId: string,
+    orderId: string,
+    items: ProcessedOrderItem[],
+    ttlSeconds = 900,
+    correlationId?: string
+  ): Promise<string[]> {
+    if (!this.inventoryEngine) return [];
+    const cid = correlationId || `ord_res_${Date.now()}`;
+    const created: string[] = [];
+    try {
+      for (const item of items) {
+        const reservation = await this.inventoryEngine.reserveStock(
+          tenantId,
+          orderId,
+          item.productId,
+          item.quantity,
+          ttlSeconds,
+          cid
+        );
+        created.push(reservation.id);
+      }
+      this.orderReservations.set(orderId, created);
+      return created;
+    } catch (err) {
+      // Rollback: release any reservations we already created.
+      for (const reservationId of created) {
+        try {
+          await this.inventoryEngine.releaseStock(tenantId, reservationId, cid);
+        } catch (releaseErr: any) {
+          this.logger.error({
+            message: `Inventory rollback release failed for reservation ${reservationId}: ${releaseErr.message}`,
+            correlationId: cid,
+            tenantId,
+            error: releaseErr,
+          });
+        }
+      }
+      throw err;
+    }
+  }
+
+  /**
    * Safe manual injection for testing or DB seeding.
    */
   public setOrderForTesting(order: ProcessedOrder): void {
@@ -347,6 +406,9 @@ export class OrderProcessingEngine {
 
   /**
    * Confirms payment for order: PAYMENT_PENDING -> PAID
+   *
+   * When an inventory engine is wired, all reservations created for this order
+   * are committed. Commit is idempotent: re-confirming a PAID order is a no-op.
    */
   public async confirmPayment(
     tenantId: string,
@@ -380,6 +442,26 @@ export class OrderProcessingEngine {
       tenantId,
       payload: { orderId, paymentIntentId },
     });
+
+    // Commit inventory reservations for this order. Failure here does NOT roll
+    // back the order state — the inventory reconciliation engine (recovery)
+    // will retry the commit on the next reconciliation pass. The commit is
+    // idempotent at the persistence layer.
+    if (this.inventoryEngine) {
+      const reservationIds = this.orderReservations.get(orderId) ?? [];
+      for (const reservationId of reservationIds) {
+        try {
+          await this.inventoryEngine.commitStock(tenantId, reservationId, cid);
+        } catch (err: any) {
+          this.logger.error({
+            message: `Inventory commit failed for order ${orderId} reservation ${reservationId}: ${err.message}`,
+            correlationId: cid,
+            tenantId,
+            error: err,
+          });
+        }
+      }
+    }
 
     return updatedOrder;
   }
@@ -472,7 +554,10 @@ export class OrderProcessingEngine {
   }
 
   /**
-   * Moves status to CANCELLED (allowed from PAYMENT_PENDING or PAID)
+   * Moves status to CANCELLED (allowed from PAYMENT_PENDING or PAID).
+   *
+   * On cancellation, any inventory reservations associated with this order are
+   * released back to the available pool.
    */
   public async cancelOrder(
     tenantId: string,
@@ -501,7 +586,36 @@ export class OrderProcessingEngine {
       payload: { orderId },
     });
 
+    await this.releaseInventoryReservations(tenantId, orderId, cid);
+
     return updatedOrder;
+  }
+
+  /**
+   * Helper: releases all inventory reservations associated with an order.
+   * Failures are logged but never thrown — cancellation must always succeed
+   * even if the inventory reconciliation is partially failing.
+   */
+  private async releaseInventoryReservations(
+    tenantId: string,
+    orderId: string,
+    correlationId: string | undefined
+  ): Promise<void> {
+    if (!this.inventoryEngine) return;
+    const reservationIds = this.orderReservations.get(orderId) ?? [];
+    for (const reservationId of reservationIds) {
+      try {
+        await this.inventoryEngine.releaseStock(tenantId, reservationId, correlationId);
+      } catch (err: any) {
+        this.logger.error({
+          message: `Inventory release failed for order ${orderId} reservation ${reservationId}: ${err.message}`,
+          correlationId,
+          tenantId,
+          error: err,
+        });
+      }
+    }
+    this.orderReservations.delete(orderId);
   }
 
   /**
