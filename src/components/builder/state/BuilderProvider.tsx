@@ -94,6 +94,10 @@ export function BuilderProvider({
     })
   )
 
+  // Ref to access latest ctx in keyboard handler
+  const ctxRef = useRef(ctx)
+  ctxRef.current = ctx
+
   // dispatch — the single mutation gateway
   const dispatch = useCallback((command: BuilderCommand) => {
     setCtx(prev => prev.dispatch(command))
@@ -112,6 +116,32 @@ export function BuilderProvider({
       if (ctrlKey && e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
         e.preventDefault()
         dispatch({ type: 'REDO' })
+      }
+      // Delete selected section
+      if ((e.key === 'Delete' || e.key === 'Backspace') && !ctrlKey && !e.shiftKey) {
+        const target = e.target as HTMLElement
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return
+        e.preventDefault()
+        const canvasState = ctxRef.current.canvas
+        if (canvasState.selectedSectionId && canvasState.selectedPageId) {
+          dispatch({
+            type: 'REMOVE_SECTION',
+            pageId: canvasState.selectedPageId,
+            sectionId: canvasState.selectedSectionId,
+          })
+        }
+      }
+      // Duplicate selected section
+      if (ctrlKey && !e.shiftKey && e.key === 'd') {
+        e.preventDefault()
+        const canvasState = ctxRef.current.canvas
+        if (canvasState.selectedSectionId && canvasState.selectedPageId) {
+          dispatch({
+            type: 'DUPLICATE_SECTION',
+            pageId: canvasState.selectedPageId,
+            sectionId: canvasState.selectedSectionId,
+          })
+        }
       }
     }
     window.addEventListener('keydown', handler)
