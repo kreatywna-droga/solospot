@@ -25,14 +25,16 @@ export interface BuilderAppProps {
   /** Initial BuilderDocument loaded from API */
   initialDocument?: BuilderDocument
   onSave?: (doc: BuilderDocument) => Promise<void>
+  onPublish?: (doc: BuilderDocument) => Promise<void>
 }
 
-export function BuilderApp({ storeId, initialDocument, onSave }: BuilderAppProps) {
+export function BuilderApp({ storeId, initialDocument, onSave, onPublish }: BuilderAppProps) {
   return (
     <BuilderShellWithProvider
       storeId={storeId}
       initialDocument={initialDocument}
       onSave={onSave}
+      onPublish={onPublish}
     />
   )
 }

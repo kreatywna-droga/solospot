@@ -3,7 +3,7 @@
 /**
  * BuilderLeftSidebar — C16.2 Left Sidebar
  *
- * Tab switcher: Pages | Layers | Assets | Components
+ * Tab switcher: Pages | Layers | Assets | Components | History | AI
  * Each tab shows its respective panel content.
  */
 
@@ -12,9 +12,9 @@ import {
   PanelLeft, Layers, ImageIcon, Plus,
   ChevronRight, GripVertical,
   Globe, Lock, Eye, EyeOff, FileText,
-  Search, X, Upload,
+  Search, X, Upload, History, Bot,
 } from 'lucide-react'
-import { useBuilder } from '../state/BuilderProvider'
+import { useBuilder, useBuilderHistory } from '../state/BuilderProvider'
 import type { StudioTab } from './BuilderTopBar'
 import { ComponentPanel } from '../sidebar/ComponentPanel'
 
@@ -27,30 +27,30 @@ interface BuilderLeftSidebarProps {
   onTabChange: (tab: StudioTab) => void
 }
 
-type SidebarTab = 'pages' | 'layers' | 'assets' | 'components'
-
 export function BuilderLeftSidebar({ activeTab, onTabChange }: BuilderLeftSidebarProps) {
-  const currentTab: SidebarTab =
-    activeTab === 'pages' || activeTab === 'layers' || activeTab === 'assets' || activeTab === 'components'
+  const currentTab: StudioTab =
+    ['pages', 'layers', 'assets', 'components', 'ai', 'history'].includes(activeTab)
       ? activeTab
       : 'layers'
 
-  const tabs: { id: SidebarTab; label: string; icon: React.ElementType }[] = [
+  const tabs: { id: StudioTab; label: string; icon: React.ElementType }[] = [
     { id: 'pages',      label: 'Pages',      icon: PanelLeft },
     { id: 'layers',     label: 'Layers',     icon: Layers },
     { id: 'assets',     label: 'Assets',     icon: ImageIcon },
     { id: 'components', label: 'Komponenty', icon: Plus },
+    { id: 'history',    label: 'Historia',   icon: History },
+    { id: 'ai',         label: 'AI',         icon: Bot },
   ]
 
   return (
     <aside className="w-80 min-w-[320px] max-w-[380px] border-r border-white/10 bg-[#06060c] flex flex-col overflow-hidden flex-shrink-0">
-      {/* Tab switcher - 4 equal columns with clean responsive labels */}
-      <div className="grid grid-cols-4 border-b border-white/10 bg-[#05050a]">
+      {/* Tab switcher - 6 equal columns */}
+      <div className="grid grid-cols-6 border-b border-white/10 bg-[#05050a]">
         {tabs.map(tab => (
           <button
             key={tab.id}
-            onClick={() => onTabChange(tab.id as StudioTab)}
-            className={`flex flex-col sm:flex-row items-center justify-center gap-1 py-3 px-1 text-[10px] font-bold uppercase tracking-wider transition-all
+            onClick={() => onTabChange(tab.id)}
+            className={`flex flex-col items-center justify-center gap-1 py-3 px-1 text-[9px] font-bold uppercase tracking-wider transition-all
               ${currentTab === tab.id
                 ? 'text-white border-b-2 border-violet-500 bg-violet-500/10'
                 : 'text-slate-500 hover:text-white hover:bg-white/5 border-b-2 border-transparent'
@@ -69,6 +69,8 @@ export function BuilderLeftSidebar({ activeTab, onTabChange }: BuilderLeftSideba
         {currentTab === 'layers' && <LayersPanel />}
         {currentTab === 'assets' && <AssetsPanel />}
         {currentTab === 'components' && <ComponentPanel onClose={() => onTabChange('layers')} />}
+        {currentTab === 'history' && <HistoryPanel />}
+        {currentTab === 'ai' && <AiPanel />}
       </div>
     </aside>
   )
@@ -305,5 +307,139 @@ function AssetsPanel() {
 
 function ComponentsPanel() {
   return <ComponentPanel onClose={() => {}} />
+}
+
+// ---------------------------------------------------------------------------
+// History Panel — C16.6
+// ---------------------------------------------------------------------------
+
+function HistoryPanel() {
+  const { canUndo, canRedo, undo, redo } = useBuilderHistory()
+  const { history } = useBuilder()
+  const entries = history.entries
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+        <h2 className="text-xs font-bold text-white uppercase tracking-wider">Historia</h2>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={undo}
+            disabled={!canUndo}
+            className="px-2 py-1 rounded-lg text-[10px] font-medium text-slate-400 hover:text-white hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            title="Undo"
+          >
+            Undo
+          </button>
+          <button
+            onClick={redo}
+            disabled={!canRedo}
+            className="px-2 py-1 rounded-lg text-[10px] font-medium text-slate-400 hover:text-white hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            title="Redo"
+          >
+            Redo
+          </button>
+        </div>
+      </div>
+      <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
+        {entries.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-slate-600 text-xs text-center gap-2">
+            <History className="w-8 h-8 opacity-30" />
+            <span>No history yet</span>
+            <span className="text-[10px]">Start editing to see changes</span>
+          </div>
+        ) : (
+          [...entries].reverse().map((entry, index) => {
+            const isActive = index === 0
+            return (
+              <div
+                key={entry.id}
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all
+                  ${isActive
+                    ? 'bg-violet-500/20 border border-violet-500/30 text-white'
+                    : 'text-slate-400 border border-transparent hover:bg-white/5 hover:text-white'
+                  }`}
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium truncate">{entry.label}</div>
+                  <div className="text-[10px] text-slate-600 font-mono">
+                    {entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString() : ''}
+                  </div>
+                </div>
+                {isActive && (
+                  <span className="text-[9px] text-violet-400 bg-violet-500/10 px-1.5 py-0.5 rounded font-bold uppercase">
+                    Current
+                  </span>
+                )}
+              </div>
+            )
+          })
+        )}
+      </div>
+      <div className="p-3 border-t border-white/5">
+        <div className="text-[10px] text-slate-600 text-center">
+          {entries.length} change{entries.length !== 1 ? 's' : ''} recorded
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// AI Panel — C16.7
+// ---------------------------------------------------------------------------
+
+function AiPanel() {
+  const [prompt, setPrompt] = useState('')
+  const { dispatch } = useBuilder()
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!prompt.trim()) return
+    // TODO: Wire to AI endpoint
+    console.log('AI prompt:', prompt)
+  }
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+        <h2 className="text-xs font-bold text-white uppercase tracking-wider">AI Assistant</h2>
+        <span className="text-[9px] text-slate-600 bg-slate-800 px-1.5 py-0.5 rounded font-medium">SOON</span>
+      </div>
+
+      {/* AI prompt area */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-3">
+        <div className="flex flex-col items-center justify-center py-12 text-slate-600 text-xs text-center gap-2">
+          <Bot className="w-8 h-8 opacity-30" />
+          <span className="font-medium">AI Assistant</span>
+          <span className="text-[10px] max-w-[200px]">
+            Ask AI to help you build your store — generate sections, suggest layouts, optimize content
+          </span>
+        </div>
+      </div>
+
+      {/* Prompt input */}
+      <form onSubmit={handleSubmit} className="p-3 border-t border-white/5">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={prompt}
+            onChange={e => setPrompt(e.target.value)}
+            placeholder="Describe what you want to build..."
+            className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white
+                       placeholder-slate-600 focus:outline-none focus:border-violet-500/50 transition-all"
+          />
+          <button
+            type="submit"
+            disabled={!prompt.trim()}
+            className="px-3 py-2 rounded-lg text-[10px] font-bold bg-violet-600 text-white
+                       hover:bg-violet-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          >
+            Send
+          </button>
+        </div>
+      </form>
+    </div>
+  )
 }
 

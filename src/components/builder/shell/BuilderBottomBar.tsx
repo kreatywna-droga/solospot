@@ -18,11 +18,12 @@ import type { StudioTab } from './BuilderTopBar'
 
 interface BuilderBottomBarProps {
   onSave?: () => void
+  onPublish?: () => void
   saving?: boolean
   onTabChange?: (tab: StudioTab) => void
 }
 
-export function BuilderBottomBar({ onSave, saving, onTabChange }: BuilderBottomBarProps = {}) {
+export function BuilderBottomBar({ onSave, onPublish, saving, onTabChange }: BuilderBottomBarProps = {}) {
   const { canvas, dispatch } = useBuilder()
   const currentViewport = canvas.viewport.label
   const zoom = canvas.zoom
@@ -151,7 +152,7 @@ export function BuilderBottomBar({ onSave, saving, onTabChange }: BuilderBottomB
         </button>
         <div className="w-px h-4 bg-white/10" />
         <button
-          onClick={onSave}
+          onClick={onPublish}
           disabled={saving}
           className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[11px] font-bold
                      bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white

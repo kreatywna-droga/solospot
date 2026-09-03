@@ -62,10 +62,11 @@ function BuilderBreadcrumbs() {
 interface BuilderShellProps {
   storeId: string
   onSave: () => void
+  onPublish: () => void
   saving: boolean
 }
 
-export function BuilderShell({ storeId, onSave, saving }: BuilderShellProps) {
+export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShellProps) {
   const [activeTab, setActiveTab] = useState<StudioTab>('layers')
   const [leftSidebarVisible, setLeftSidebarVisible] = useState(true)
   const { dispatch, canvas, document: builderDoc } = useBuilder()
@@ -92,6 +93,7 @@ export function BuilderShell({ storeId, onSave, saving }: BuilderShellProps) {
       <BuilderTopBar
         storeId={storeId}
         onSave={onSave}
+        onPublish={onPublish}
         saving={saving}
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -128,6 +130,7 @@ export function BuilderShell({ storeId, onSave, saving }: BuilderShellProps) {
       {/* Bottom Bar */}
       <BuilderBottomBar
         onSave={onSave}
+        onPublish={onPublish}
         saving={saving}
         onTabChange={setActiveTab}
       />
@@ -143,6 +146,7 @@ interface BuilderShellWithProviderProps {
   storeId: string
   initialDocument?: BuilderDocument
   onSave?: (doc: BuilderDocument) => Promise<void>
+  onPublish?: (doc: BuilderDocument) => Promise<void>
 }
 
 function createDefaultDocument(storeId: string): BuilderDocument {
@@ -161,7 +165,7 @@ function createDefaultDocument(storeId: string): BuilderDocument {
 }
 
 export function BuilderShellWithProvider({
-  storeId, initialDocument, onSave,
+  storeId, initialDocument, onSave, onPublish,
 }: BuilderShellWithProviderProps) {
   const [saving, setSaving] = useState(false)
   const [savedDoc, setSavedDoc] = useState<BuilderDocument | null>(null)
@@ -181,26 +185,49 @@ export function BuilderShellWithProvider({
     }
   }, [saving, onSave])
 
+  const handlePublish = useCallback(async (currentDoc: BuilderDocument) => {
+    if (saving) return
+    setSaving(true)
+    try {
+      await onPublish?.(currentDoc)
+      setSavedDoc(currentDoc)
+    } catch (err) {
+      console.error('Builder publish error:', err)
+    } finally {
+      setSaving(false)
+    }
+  }, [saving, onPublish])
+
   return (
     <BuilderProvider document={doc}>
-      <BuilderShellWithSave storeId={storeId} onSave={handleSave} saving={saving} />
+      <BuilderShellWithSave storeId={storeId} onSave={handleSave} onPublish={handlePublish} saving={saving} />
     </BuilderProvider>
   )
 }
 
 // Inner wrapper to access useBuilder() for save
 function BuilderShellWithSave({
-  storeId, onSave, saving,
+  storeId, onSave, onPublish, saving,
 }: {
   storeId: string
   onSave: (doc: BuilderDocument) => Promise<void>
+  onPublish: (doc: BuilderDocument) => Promise<void>
   saving: boolean
 }) {
-  const { document } = useBuilder()
+  const { document, dispatch } = useBuilder()
+  const handleSave = useCallback(async () => {
+    await onSave(document)
+    dispatch({ type: 'MARK_PUBLISHED' })
+  }, [onSave, document, dispatch])
+  const handlePublish = useCallback(async () => {
+    await onPublish(document)
+    dispatch({ type: 'MARK_PUBLISHED' })
+  }, [onPublish, document, dispatch])
   return (
     <BuilderShell
       storeId={storeId}
-      onSave={() => onSave(document)}
+      onSave={handleSave}
+      onPublish={handlePublish}
       saving={saving}
     />
   )

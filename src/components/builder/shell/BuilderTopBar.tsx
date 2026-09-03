@@ -26,6 +26,7 @@ export type PreviewMode = RuntimeMode
 interface BuilderTopBarProps {
   storeId: string
   onSave: () => void
+  onPublish: () => void
   saving: boolean
   activeTab: StudioTab
   onTabChange: (tab: StudioTab) => void
@@ -42,7 +43,7 @@ const TABS: { id: StudioTab; label: string; icon: React.ElementType; shortcut: s
 ]
 
 export function BuilderTopBar({
-  storeId, onSave, saving, activeTab, onTabChange, onToggleLeftSidebar,
+  storeId, onSave, onPublish, saving, activeTab, onTabChange, onToggleLeftSidebar,
 }: BuilderTopBarProps) {
   const { document, canvas, isDirty, dispatch } = useBuilder()
   const { canUndo, canRedo, undo, redo } = useBuilderHistory()
@@ -200,7 +201,7 @@ export function BuilderTopBar({
 
           {/* Publish */}
           <button
-            onClick={onSave}
+            onClick={onPublish}
             disabled={saving}
             className="flex items-center gap-2 px-4 py-1.5 rounded-xl font-bold text-xs
                        bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white

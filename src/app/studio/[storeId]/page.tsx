@@ -224,6 +224,17 @@ export default function StudioPage({ params }: { params: Promise<{ storeId: stri
     if (!data.success) throw new Error(data.error || 'Błąd zapisu')
   }
 
+  const handlePublish = async (doc: BuilderDocument) => {
+    await handleSave(doc)
+    const res = await fetch(`/api/stores/${storeId}/publish`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'publish' }),
+    })
+    const data = await res.json()
+    if (!data.success) throw new Error(data.error || 'Błąd publikacji')
+  }
+
   // Loading state
   if (loading) {
     return (
@@ -260,6 +271,7 @@ export default function StudioPage({ params }: { params: Promise<{ storeId: stri
       storeId={storeId}
       initialDocument={initialDocument}
       onSave={handleSave}
+      onPublish={handlePublish}
     />
   )
 }
