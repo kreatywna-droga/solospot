@@ -14,6 +14,7 @@
 import { use, useEffect, useState, useRef, useCallback } from 'react'
 import { SectionRenderer } from '@/components/runtime/SectionRenderer'
 import { generateThemeCssVars } from '@/lib/tenant/TenantTheme'
+import { CartProvider } from '@/lib/cart/CartStore'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -192,45 +193,47 @@ export default function PreviewFramePage({ params }: Props) {
   }
 
   return (
-    <div
-      ref={containerRef}
-      style={{ fontFamily: theme.font, ...cssVars }}
-      className="min-h-screen bg-white text-slate-900 selection:bg-violet-500 selection:text-white"
-    >
-      {sections.length === 0 && !loaded && (
-        <div className="flex items-center justify-center p-12 text-slate-400 text-sm">
-          Ładowanie podglądu runtime...
-        </div>
-      )}
+    <CartProvider>
+      <div
+        ref={containerRef}
+        style={{ fontFamily: theme.font, ...cssVars }}
+        className="min-h-screen bg-white text-slate-900 selection:bg-violet-500 selection:text-white"
+      >
+        {sections.length === 0 && !loaded && (
+          <div className="flex items-center justify-center p-12 text-slate-400 text-sm">
+            Ładowanie podglądu runtime...
+          </div>
+        )}
 
-      {sections.map((section) => (
-        <div
-          key={section.id}
-          data-section-id={section.id}
-          data-section-type={section.type}
-          onClick={() => handleSectionClick(section.id)}
-          onMouseEnter={() => handleSectionMouseEnter(section.id)}
-          className="relative group cursor-pointer"
-        >
-          <SectionRenderer
-            section={{
-              id: section.id,
-              type: section.type,
-              label: section.label,
-              config: section.props,
-            }}
-            theme={{
-              primaryColor: theme.primaryColor,
-              secondaryColor: theme.secondaryColor,
-              font: theme.font,
-              logo: theme.logo,
-            }}
-            storeName={slug}
-            products={[]}
-            navigation={[]}
-          />
-        </div>
-      ))}
-    </div>
+        {sections.map((section) => (
+          <div
+            key={section.id}
+            data-section-id={section.id}
+            data-section-type={section.type}
+            onClick={() => handleSectionClick(section.id)}
+            onMouseEnter={() => handleSectionMouseEnter(section.id)}
+            className="relative group cursor-pointer"
+          >
+            <SectionRenderer
+              section={{
+                id: section.id,
+                type: section.type,
+                label: section.label,
+                config: section.props,
+              }}
+              theme={{
+                primaryColor: theme.primaryColor,
+                secondaryColor: theme.secondaryColor,
+                font: theme.font,
+                logo: theme.logo,
+              }}
+              storeName={slug}
+              products={[]}
+              navigation={[]}
+            />
+          </div>
+        ))}
+      </div>
+    </CartProvider>
   )
 }

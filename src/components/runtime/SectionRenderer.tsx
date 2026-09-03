@@ -1,4 +1,5 @@
 'use client'
+import React from 'react'
 import type { SectionComponentProps } from '@/lib/runtime/RuntimeTypes'
 import { HeroSection } from './HeroSection'
 import { ProductGridSection } from './ProductGridSection'
@@ -27,6 +28,43 @@ const registry: Record<string, React.FC<SectionComponentProps>> = {
   stats: StatsSection,
 }
 
+// ---------------------------------------------------------------------------
+// Per-section Error Boundary — prevents one crashing section from killing
+// the entire canvas / preview-frame iframe.
+// ---------------------------------------------------------------------------
+
+interface SectionErrorBoundaryState { hasError: boolean; error: string }
+
+class SectionErrorBoundary extends React.Component<
+  { type: string; children: React.ReactNode },
+  SectionErrorBoundaryState
+> {
+  constructor(props: { type: string; children: React.ReactNode }) {
+    super(props)
+    this.state = { hasError: false, error: '' }
+  }
+
+  static getDerivedStateFromError(err: Error): SectionErrorBoundaryState {
+    return { hasError: true, error: err.message }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="py-8 text-center text-red-400 text-xs border border-dashed border-red-500/30 rounded-lg bg-red-500/5">
+          <div className="font-mono font-bold mb-1">{this.props.type}</div>
+          <div className="text-red-300/70">{this.state.error}</div>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
+// ---------------------------------------------------------------------------
+// SectionRenderer
+// ---------------------------------------------------------------------------
+
 export function SectionRenderer(props: SectionComponentProps) {
   const Component = registry[props.section.type]
   if (!Component) {
@@ -36,5 +74,9 @@ export function SectionRenderer(props: SectionComponentProps) {
       </div>
     )
   }
-  return <Component {...props} />
+  return (
+    <SectionErrorBoundary type={props.section.type}>
+      <Component {...props} />
+    </SectionErrorBoundary>
+  )
 }
