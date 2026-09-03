@@ -331,6 +331,27 @@ export const STANDARD_COMPONENT_DESCRIPTORS: ReadonlyArray<ComponentDescriptor> 
     defaultProps: { title: 'Nasze liczby' },
     tags: ['liczby', 'statystyki', 'sukcesy'],
   },
+  {
+    type: 'container',
+    label: 'Contener',
+    category: 'Layout',
+    icon: 'Box',
+    previewable: true,
+    allowChildren: true,
+    schema: [
+      selectProp({ key: 'padding', label: 'Padding', required: false, group: 'layout', defaultValue: 'md', options: [
+        { label: 'Brak', value: 'none' },
+        { label: 'Mały', value: 'sm' },
+        { label: 'Średni', value: 'md' },
+        { label: 'Duży', value: 'lg' },
+        { label: 'Bardzo duży', value: 'xl' },
+      ]}),
+      stringProp({ key: 'maxWidth', label: 'Maks. szerokość', required: false, group: 'layout', defaultValue: '1200px' }),
+      stringProp({ key: 'background', label: 'Kolor tła', required: false, group: 'style', defaultValue: '' }),
+    ],
+    defaultProps: { padding: 'md', maxWidth: '1200px', background: '' },
+    tags: ['contener', 'layout', 'opakowanie'],
+  },
 ];
 
 // ---------------------------------------------------------------------------
