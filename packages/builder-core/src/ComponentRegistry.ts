@@ -339,18 +339,33 @@ export const STANDARD_COMPONENT_DESCRIPTORS: ReadonlyArray<ComponentDescriptor> 
     previewable: true,
     allowChildren: true,
     schema: [
-      selectProp({ key: 'padding', label: 'Padding', required: false, group: 'layout', defaultValue: 'md', options: [
+      selectProp({ key: 'display', label: 'Wyświetlanie', required: false, group: 'layout', defaultValue: 'flex', options: [
+        { label: 'Block', value: 'block' },
+        { label: 'Flex (Column)', value: 'flex-col' },
+        { label: 'Flex (Row)', value: 'flex-row' },
+        { label: 'Grid 2 col', value: 'grid-2' },
+        { label: 'Grid 3 col', value: 'grid-3' },
+        { label: 'Grid 4 col', value: 'grid-4' },
+      ]}),
+      selectProp({ key: 'padding', label: 'Padding', required: false, group: 'spacing', defaultValue: 'md', options: [
         { label: 'Brak', value: 'none' },
-        { label: 'Mały', value: 'sm' },
-        { label: 'Średni', value: 'md' },
-        { label: 'Duży', value: 'lg' },
-        { label: 'Bardzo duży', value: 'xl' },
+        { label: 'Mały (16px)', value: 'sm' },
+        { label: 'Średni (32px)', value: 'md' },
+        { label: 'Duży (48px)', value: 'lg' },
+        { label: 'Bardzo duży (64px)', value: 'xl' },
+      ]}),
+      stringProp({ key: 'gap', label: 'Odstęp między dziećmi', required: false, group: 'spacing', defaultValue: '16' }),
+      selectProp({ key: 'align', label: 'Wyrównanie', required: false, group: 'alignment', defaultValue: 'stretch', options: [
+        { label: 'Rozciągnięty', value: 'stretch' },
+        { label: 'Lewo', value: 'start' },
+        { label: 'Środek', value: 'center' },
+        { label: 'Prawo', value: 'end' },
       ]}),
       stringProp({ key: 'maxWidth', label: 'Maks. szerokość', required: false, group: 'layout', defaultValue: '1200px' }),
       stringProp({ key: 'background', label: 'Kolor tła', required: false, group: 'style', defaultValue: '' }),
     ],
-    defaultProps: { padding: 'md', maxWidth: '1200px', background: '' },
-    tags: ['contener', 'layout', 'opakowanie'],
+    defaultProps: { display: 'flex-col', padding: 'md', gap: '16', align: 'stretch', maxWidth: '1200px', background: '' },
+    tags: ['contener', 'layout', 'opakowanie', 'flex', 'grid'],
   },
 ];
 
