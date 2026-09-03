@@ -12,6 +12,7 @@ import { ContactSection } from './ContactSection'
 import { ContentSection } from './ContentSection'
 import { FeatureGridSection } from './FeatureGridSection'
 import { StatsSection } from './StatsSection'
+import { ContainerSection } from './ContainerSection'
 
 const registry: Record<string, React.FC<SectionComponentProps>> = {
   hero: HeroSection,
@@ -26,6 +27,7 @@ const registry: Record<string, React.FC<SectionComponentProps>> = {
   content: ContentSection,
   'feature-grid': FeatureGridSection,
   stats: StatsSection,
+  container: ContainerSection,
 }
 
 // ---------------------------------------------------------------------------

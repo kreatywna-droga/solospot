@@ -10,10 +10,11 @@ export function NavbarSection({ section, theme, storeName }: SectionComponentPro
   const { state } = useCart()
   const itemCount = state.itemCount
   const isSticky = Boolean(config.sticky)
+  const isTransparent = config.style === 'transparent'
 
   return (
-    <nav className={`z-40 border-b border-white/10 ${isSticky ? 'sticky top-0' : ''}`}
-      style={{ backgroundColor: theme.primaryColor }}>
+    <nav className={`z-40 ${isSticky ? 'sticky top-0' : ''} ${isTransparent ? 'border-b border-white/10' : 'border-b border-white/10'}`}
+      style={{ backgroundColor: isTransparent ? 'transparent' : theme.primaryColor }}>
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <span className="text-xl font-bold text-white" style={{ fontFamily: theme.font }}>{storeName}</span>

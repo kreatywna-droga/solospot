@@ -141,6 +141,7 @@ function PagesPanel() {
 
 function LayersPanel() {
   const { document, canvas, dispatch } = useBuilder()
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
   const activePage = document.pages.find(p =>
     canvas.selectedPageId ? p.id === canvas.selectedPageId : p.isHome
@@ -163,6 +164,29 @@ function LayersPanel() {
   const toggleLock = (sectionId: string) => {
     if (!activePage) return
     dispatch({ type: 'TOGGLE_LOCK', pageId: activePage.id, sectionId })
+  }
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    e.dataTransfer.setData('text/plain', String(index))
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    setDragOverIndex(index)
+  }
+
+  const handleDrop = (e: React.DragEvent, toIndex: number) => {
+    e.preventDefault()
+    const fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10)
+    if (isNaN(fromIndex) || fromIndex === toIndex || !activePage) return
+    dispatch({ type: 'MOVE_SECTION', pageId: activePage.id, fromIndex, toIndex })
+    setDragOverIndex(null)
+  }
+
+  const handleDragEnd = () => {
+    setDragOverIndex(null)
   }
 
   const typeColors: Record<string, string> = {
@@ -196,6 +220,11 @@ function LayersPanel() {
           sections.map((node, index) => (
             <div
               key={node.id}
+              draggable
+              onDragStart={(e) => handleDragStart(e, index)}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDrop={(e) => handleDrop(e, index)}
+              onDragEnd={handleDragEnd}
               onClick={() => selectSection(node.id)}
               className={`group flex items-center gap-2 px-2.5 py-2 rounded-xl cursor-pointer transition-all text-xs select-none
                 ${canvas.selectedSectionId === node.id
@@ -203,6 +232,7 @@ function LayersPanel() {
                   : 'hover:bg-white/5 text-slate-400 hover:text-white border border-transparent'
                 }
                 ${!node.visible ? 'opacity-40' : ''}
+                ${dragOverIndex === index ? 'border-t-2 border-t-violet-500' : ''}
               `}
             >
               {/* Color dot */}

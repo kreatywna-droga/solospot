@@ -2,13 +2,15 @@
 import type { SectionComponentProps } from '@/lib/runtime/RuntimeTypes'
 
 export function FooterSection({ section, theme, storeName }: SectionComponentProps) {
+  const config = ((section?.config || (section as any)?.props) ?? {}) as { text?: string }
+  const copyrightText = config.text || `© 2026 ${storeName}. Wszelkie prawa zastrzeżone.`
   return (
     <footer className="py-12 px-4 text-white/80" style={{ backgroundColor: theme.primaryColor, fontFamily: theme.font }}>
       <div className="max-w-7xl mx-auto">
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           <div>
             <h4 className="font-bold text-white mb-3">{storeName}</h4>
-            <p className="text-sm text-white/60">&copy; 2026 Wszelkie prawa zastrzeżone.</p>
+            <p className="text-sm text-white/60">{copyrightText}</p>
           </div>
           <div>
             <h4 className="font-bold text-white mb-3">Sklep</h4>
