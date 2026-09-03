@@ -24,6 +24,27 @@ vi.mock('@/lib/payments/PaymentFactory', () => ({
   },
 }));
 
+vi.mock('@/lib/product/ProductRepository', () => ({
+  ProductRepository: class {
+    async getProduct(productId: string) {
+      return {
+        id: productId,
+        tenantId: 'test',
+        name: `Product ${productId}`,
+        description: '',
+        price: 5000,
+        currency: 'PLN',
+        status: 'ACTIVE' as const,
+        storeId: 'store-1',
+        images: [],
+        metadata: {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    }
+  },
+}));
+
 function validRequest(): CheckoutRequestDTO {
   return {
     items: [{ productId: 'prod-1', quantity: 2, unitPriceGross: 5000 }],

@@ -61,6 +61,28 @@ export class OrderProcessingEngine {
   private readonly repository: OrderPersistenceAdapter | undefined;
   /** Map: orderId -> list of stock reservation ids created for that order. */
   private readonly orderReservations = new Map<string, string[]>();
+  /** Per-order async lock to serialize concurrent state transitions. */
+  private readonly orderLocks = new Map<string, Promise<void>>();
+
+  private async withOrderLock<T>(orderId: string, fn: () => Promise<T>): Promise<T> {
+    const existingLock = this.orderLocks.get(orderId) ?? Promise.resolve();
+    let resolveLock!: () => void;
+    const nextLock = new Promise<void>((res) => {
+      resolveLock = res;
+    });
+    this.orderLocks.set(orderId, nextLock);
+
+    try {
+      await existingLock;
+      return await fn();
+    } finally {
+      resolveLock();
+      if (this.orderLocks.get(orderId) === nextLock) {
+        this.orderLocks.delete(orderId);
+      }
+    }
+  }
+
 
   private readonly allowedTransitions = {
     CREATED: ['PAYMENT_PENDING'],
@@ -120,8 +142,14 @@ export class OrderProcessingEngine {
       const tenantId = event.tenantId;
       if (!tenantId || !orderId) return;
       try {
-        const order = this.orders.get(orderId);
-        if (!order || order.status !== 'PAYMENT_PENDING') return;
+        let order: ProcessedOrder | undefined;
+        try {
+          order = await this.getOrder(tenantId, orderId);
+        } catch {
+          // Order not found — nothing to cancel.
+          return;
+        }
+        if (order.status !== 'PAYMENT_PENDING') return;
         this.transitionState(order.status, 'CANCELLED', orderId);
         order.status = 'CANCELLED';
         order.updatedAt = new Date().toISOString();
@@ -154,9 +182,23 @@ export class OrderProcessingEngine {
       const tenantId = event.tenantId;
       if (!tenantId || !orderId) return;
       try {
-        const order = this.orders.get(orderId);
-        if (!order) return;
-        if (order.status !== 'PAID' && order.status !== 'FULFILLED' && order.status !== 'PROCESSING') {
+        let order: ProcessedOrder | undefined;
+        try {
+          order = await this.getOrder(tenantId, orderId);
+        } catch {
+          // Order not found — nothing to refund.
+          return;
+        }
+        // Already refunded — idempotent no-op (e.g. duplicate Payment.Refunded event)
+        if (order.status === 'REFUNDED') {
+          this.logger.info({
+            message: `Order ${orderId} is already REFUNDED; ignoring duplicate Payment.Refunded`,
+            tenantId,
+            metadata: { orderId },
+          });
+          return;
+        }
+        if (order.status !== 'PAID' && order.status !== 'FULFILLED' && order.status !== 'PROCESSING' && order.status !== 'READY_FOR_FULFILLMENT') {
           this.logger.warn({
             message: `Payment.Refunded for order ${orderId} in unexpected state ${order.status}; skipping transition`,
             tenantId,
@@ -181,6 +223,9 @@ export class OrderProcessingEngine {
           tenantId,
           metadata: { orderId },
         });
+
+        // Release inventory reservations on refund
+        await this.releaseInventoryReservations(tenantId, orderId, event.correlationId);
       } catch (err: any) {
         this.logger.error({
           message: `Auto-refund on Payment.Refunded failed for order ${orderId}: ${err.message}`,
@@ -332,7 +377,7 @@ export class OrderProcessingEngine {
       id: p.id,
       tenantId: p.tenantId,
       customerId: p.customerId ?? 'unknown',
-      items: p.items.map((it) => ({
+      items: (p.items || []).map((it) => ({
         productId: it.productId,
         quantity: it.quantity,
         unitPriceGross: it.price,
@@ -581,14 +626,57 @@ export class OrderProcessingEngine {
     paymentIntentId: string,
     correlationId?: string
   ): Promise<ProcessedOrder> {
-    const cid = correlationId || `ord_pay_confirm_${Date.now()}`;
-    const order = await this.getOrder(tenantId, orderId);
+    return this.withOrderLock(orderId, async () => {
+      const cid = correlationId || `ord_pay_confirm_${Date.now()}`;
+      const order = await this.getOrder(tenantId, orderId);
 
-    if (order.status === 'PAID') {
-      return order;
-    }
+      if (order.status === 'PAID') {
+        await this.commitInventoryReservations(tenantId, orderId, cid);
+        return order;
+      }
+
 
     this.transitionState(order.status, 'PAID', orderId);
+
+    if (this.repository?.transitionOrderStatus) {
+      const stateToStatus: Record<ProcessedOrderState, 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled'> = {
+        CREATED: 'pending', PAYMENT_PENDING: 'pending', PAID: 'paid', PROCESSING: 'paid',
+        READY_FOR_FULFILLMENT: 'shipped', FULFILLED: 'completed', CANCELLED: 'cancelled', REFUNDED: 'cancelled',
+      };
+      const expectedStatus = stateToStatus[order.status];
+      const success = await this.repository.transitionOrderStatus(
+        tenantId,
+        orderId,
+        expectedStatus,
+        'paid',
+        { paymentIntentId, engineState: 'PAID' }
+      );
+      if (!success) {
+        this.orders.delete(orderId);
+        let currentStatus: ProcessedOrderState | null = null;
+        let freshOrder: ProcessedOrder | null = null;
+        if (this.repository) {
+          const repoOrder = await this.repository.findByTenantAndId(tenantId, orderId);
+          if (repoOrder) {
+            freshOrder = this.fromPersistedOrder(repoOrder);
+            currentStatus = freshOrder.status;
+            this.orders.set(orderId, freshOrder);
+          }
+        }
+        if (!freshOrder) {
+          const current = await this.getOrder(tenantId, orderId);
+          freshOrder = current;
+          currentStatus = current.status;
+        }
+        if (currentStatus === 'PAID') {
+          await this.commitInventoryReservations(tenantId, orderId, cid);
+          return freshOrder!;
+        }
+        throw new InvalidOrderStateException(
+          `Invalid status transition for Order '${orderId}': '${currentStatus}' -> 'PAID' (concurrent state modification)`
+        );
+      }
+    }
 
     const updatedOrder: ProcessedOrder = {
       ...order,
@@ -608,27 +696,10 @@ export class OrderProcessingEngine {
       payload: { orderId, paymentIntentId },
     });
 
-    // Commit inventory reservations for this order. Failure here does NOT roll
-    // back the order state — the inventory reconciliation engine (recovery)
-    // will retry the commit on the next reconciliation pass. The commit is
-    // idempotent at the persistence layer.
-    if (this.inventoryEngine) {
-      const reservationIds = this.orderReservations.get(orderId) ?? [];
-      for (const reservationId of reservationIds) {
-        try {
-          await this.inventoryEngine.commitStock(tenantId, reservationId, cid);
-        } catch (err: any) {
-          this.logger.error({
-            message: `Inventory commit failed for order ${orderId} reservation ${reservationId}: ${err.message}`,
-            correlationId: cid,
-            tenantId,
-            error: err,
-          });
-        }
-      }
-    }
+    await this.commitInventoryReservations(tenantId, orderId, cid);
 
     return updatedOrder;
+    });
   }
 
   /**
@@ -639,29 +710,74 @@ export class OrderProcessingEngine {
     orderId: string,
     correlationId?: string
   ): Promise<ProcessedOrder> {
-    const cid = correlationId || `ord_proc_${Date.now()}`;
-    const order = await this.getOrder(tenantId, orderId);
+    return this.withOrderLock(orderId, async () => {
+      const cid = correlationId || `ord_proc_${Date.now()}`;
+      const order = await this.getOrder(tenantId, orderId);
 
-    this.transitionState(order.status, 'PROCESSING', orderId);
+      if (order.status === 'PROCESSING') {
+        return order;
+      }
 
-    const updatedOrder: ProcessedOrder = {
-      ...order,
-      status: 'PROCESSING',
-      updatedAt: new Date().toISOString(),
-    };
+      this.transitionState(order.status, 'PROCESSING', orderId);
 
-    await this.persistOrder(updatedOrder);
+      if (this.repository?.transitionOrderStatus) {
+        const stateToStatus: Record<ProcessedOrderState, 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled'> = {
+          CREATED: 'pending', PAYMENT_PENDING: 'pending', PAID: 'paid', PROCESSING: 'paid',
+          READY_FOR_FULFILLMENT: 'shipped', FULFILLED: 'completed', CANCELLED: 'cancelled', REFUNDED: 'cancelled',
+        };
+        const expectedStatus = stateToStatus[order.status];
+        const success = await this.repository.transitionOrderStatus(
+          tenantId,
+          orderId,
+          expectedStatus,
+          'paid',
+          { engineState: 'PROCESSING' }
+        );
+        if (!success) {
+          this.orders.delete(orderId);
+          let currentStatus: ProcessedOrderState | null = null;
+          let freshOrder: ProcessedOrder | null = null;
+          if (this.repository) {
+            const repoOrder = await this.repository.findByTenantAndId(tenantId, orderId);
+            if (repoOrder) {
+              freshOrder = this.fromPersistedOrder(repoOrder);
+              currentStatus = freshOrder.status;
+              this.orders.set(orderId, freshOrder);
+            }
+          }
+          if (!freshOrder) {
+            const current = await this.getOrder(tenantId, orderId);
+            freshOrder = current;
+            currentStatus = current.status;
+          }
+          if (currentStatus === 'PROCESSING') {
+            return freshOrder!;
+          }
+          throw new InvalidOrderStateException(
+            `Invalid status transition for Order '${orderId}': '${currentStatus}' -> 'PROCESSING' (concurrent state modification)`
+          );
+        }
+      }
 
-    await this.eventBus.publish({
-      eventId: `evt_ord_proc_${Math.random().toString(36).substr(2, 9)}`,
-      eventType: 'Order.ProcessingStarted',
-      timestamp: new Date().toISOString(),
-      correlationId: cid,
-      tenantId,
-      payload: { orderId },
+      const updatedOrder: ProcessedOrder = {
+        ...order,
+        status: 'PROCESSING',
+        updatedAt: new Date().toISOString(),
+      };
+
+      await this.persistOrder(updatedOrder);
+
+      await this.eventBus.publish({
+        eventId: `evt_ord_proc_${Math.random().toString(36).substr(2, 9)}`,
+        eventType: 'Order.ProcessingStarted',
+        timestamp: new Date().toISOString(),
+        correlationId: cid,
+        tenantId,
+        payload: { orderId },
+      });
+
+      return updatedOrder;
     });
-
-    return updatedOrder;
   }
 
   /**
@@ -672,17 +788,63 @@ export class OrderProcessingEngine {
     orderId: string,
     correlationId?: string
   ): Promise<ProcessedOrder> {
-    const order = await this.getOrder(tenantId, orderId);
-    this.transitionState(order.status, 'READY_FOR_FULFILLMENT', orderId);
+    return this.withOrderLock(orderId, async () => {
+      const order = await this.getOrder(tenantId, orderId);
 
-    const updatedOrder: ProcessedOrder = {
-      ...order,
-      status: 'READY_FOR_FULFILLMENT',
-      updatedAt: new Date().toISOString(),
-    };
+      if (order.status === 'READY_FOR_FULFILLMENT') {
+        return order;
+      }
 
-    await this.persistOrder(updatedOrder);
-    return updatedOrder;
+      this.transitionState(order.status, 'READY_FOR_FULFILLMENT', orderId);
+
+      if (this.repository?.transitionOrderStatus) {
+        const stateToStatus: Record<ProcessedOrderState, 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled'> = {
+          CREATED: 'pending', PAYMENT_PENDING: 'pending', PAID: 'paid', PROCESSING: 'paid',
+          READY_FOR_FULFILLMENT: 'shipped', FULFILLED: 'completed', CANCELLED: 'cancelled', REFUNDED: 'cancelled',
+        };
+        const expectedStatus = stateToStatus[order.status];
+        const success = await this.repository.transitionOrderStatus(
+          tenantId,
+          orderId,
+          expectedStatus,
+          'shipped',
+          { engineState: 'READY_FOR_FULFILLMENT' }
+        );
+        if (!success) {
+          this.orders.delete(orderId);
+          let currentStatus: ProcessedOrderState | null = null;
+          let freshOrder: ProcessedOrder | null = null;
+          if (this.repository) {
+            const repoOrder = await this.repository.findByTenantAndId(tenantId, orderId);
+            if (repoOrder) {
+              freshOrder = this.fromPersistedOrder(repoOrder);
+              currentStatus = freshOrder.status;
+              this.orders.set(orderId, freshOrder);
+            }
+          }
+          if (!freshOrder) {
+            const current = await this.getOrder(tenantId, orderId);
+            freshOrder = current;
+            currentStatus = current.status;
+          }
+          if (currentStatus === 'READY_FOR_FULFILLMENT') {
+            return freshOrder!;
+          }
+          throw new InvalidOrderStateException(
+            `Invalid status transition for Order '${orderId}': '${currentStatus}' -> 'READY_FOR_FULFILLMENT' (concurrent state modification)`
+          );
+        }
+      }
+
+      const updatedOrder: ProcessedOrder = {
+        ...order,
+        status: 'READY_FOR_FULFILLMENT',
+        updatedAt: new Date().toISOString(),
+      };
+
+      await this.persistOrder(updatedOrder);
+      return updatedOrder;
+    });
   }
 
   /**
@@ -693,29 +855,74 @@ export class OrderProcessingEngine {
     orderId: string,
     correlationId?: string
   ): Promise<ProcessedOrder> {
-    const cid = correlationId || `ord_fulfill_${Date.now()}`;
-    const order = await this.getOrder(tenantId, orderId);
+    return this.withOrderLock(orderId, async () => {
+      const cid = correlationId || `ord_fulfill_${Date.now()}`;
+      const order = await this.getOrder(tenantId, orderId);
 
-    this.transitionState(order.status, 'FULFILLED', orderId);
+      if (order.status === 'FULFILLED') {
+        return order;
+      }
 
-    const updatedOrder: ProcessedOrder = {
-      ...order,
-      status: 'FULFILLED',
-      updatedAt: new Date().toISOString(),
-    };
+      this.transitionState(order.status, 'FULFILLED', orderId);
 
-    await this.persistOrder(updatedOrder);
+      if (this.repository?.transitionOrderStatus) {
+        const stateToStatus: Record<ProcessedOrderState, 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled'> = {
+          CREATED: 'pending', PAYMENT_PENDING: 'pending', PAID: 'paid', PROCESSING: 'paid',
+          READY_FOR_FULFILLMENT: 'shipped', FULFILLED: 'completed', CANCELLED: 'cancelled', REFUNDED: 'cancelled',
+        };
+        const expectedStatus = stateToStatus[order.status];
+        const success = await this.repository.transitionOrderStatus(
+          tenantId,
+          orderId,
+          expectedStatus,
+          'completed',
+          { engineState: 'FULFILLED' }
+        );
+        if (!success) {
+          this.orders.delete(orderId);
+          let currentStatus: ProcessedOrderState | null = null;
+          let freshOrder: ProcessedOrder | null = null;
+          if (this.repository) {
+            const repoOrder = await this.repository.findByTenantAndId(tenantId, orderId);
+            if (repoOrder) {
+              freshOrder = this.fromPersistedOrder(repoOrder);
+              currentStatus = freshOrder.status;
+              this.orders.set(orderId, freshOrder);
+            }
+          }
+          if (!freshOrder) {
+            const current = await this.getOrder(tenantId, orderId);
+            freshOrder = current;
+            currentStatus = current.status;
+          }
+          if (currentStatus === 'FULFILLED') {
+            return freshOrder!;
+          }
+          throw new InvalidOrderStateException(
+            `Invalid status transition for Order '${orderId}': '${currentStatus}' -> 'FULFILLED' (concurrent state modification)`
+          );
+        }
+      }
 
-    await this.eventBus.publish({
-      eventId: `evt_ord_fulfilled_${Math.random().toString(36).substr(2, 9)}`,
-      eventType: 'Order.Fulfilled',
-      timestamp: new Date().toISOString(),
-      correlationId: cid,
-      tenantId,
-      payload: { orderId },
+      const updatedOrder: ProcessedOrder = {
+        ...order,
+        status: 'FULFILLED',
+        updatedAt: new Date().toISOString(),
+      };
+
+      await this.persistOrder(updatedOrder);
+
+      await this.eventBus.publish({
+        eventId: `evt_ord_fulfilled_${Math.random().toString(36).substr(2, 9)}`,
+        eventType: 'Order.Fulfilled',
+        timestamp: new Date().toISOString(),
+        correlationId: cid,
+        tenantId,
+        payload: { orderId },
+      });
+
+      return updatedOrder;
     });
-
-    return updatedOrder;
   }
 
   /**
@@ -729,10 +936,57 @@ export class OrderProcessingEngine {
     orderId: string,
     correlationId?: string
   ): Promise<ProcessedOrder> {
-    const cid = correlationId || `ord_cancel_${Date.now()}`;
-    const order = await this.getOrder(tenantId, orderId);
+    return this.withOrderLock(orderId, async () => {
+      const cid = correlationId || `ord_cancel_${Date.now()}`;
+      const order = await this.getOrder(tenantId, orderId);
+
+      if (order.status === 'CANCELLED') {
+        await this.releaseInventoryReservations(tenantId, orderId, cid);
+        return order;
+      }
+
 
     this.transitionState(order.status, 'CANCELLED', orderId);
+
+    if (this.repository?.transitionOrderStatus) {
+      const stateToStatus: Record<ProcessedOrderState, 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled'> = {
+        CREATED: 'pending', PAYMENT_PENDING: 'pending', PAID: 'paid', PROCESSING: 'paid',
+        READY_FOR_FULFILLMENT: 'shipped', FULFILLED: 'completed', CANCELLED: 'cancelled', REFUNDED: 'cancelled',
+      };
+      const expectedStatus = stateToStatus[order.status];
+      const success = await this.repository.transitionOrderStatus(
+        tenantId,
+        orderId,
+        expectedStatus,
+        'cancelled',
+        { engineState: 'CANCELLED' }
+      );
+      if (!success) {
+        this.orders.delete(orderId);
+        let currentStatus: ProcessedOrderState | null = null;
+        let freshOrder: ProcessedOrder | null = null;
+        if (this.repository) {
+          const repoOrder = await this.repository.findByTenantAndId(tenantId, orderId);
+          if (repoOrder) {
+            freshOrder = this.fromPersistedOrder(repoOrder);
+            currentStatus = freshOrder.status;
+            this.orders.set(orderId, freshOrder);
+          }
+        }
+        if (!freshOrder) {
+          const current = await this.getOrder(tenantId, orderId);
+          freshOrder = current;
+          currentStatus = current.status;
+        }
+        if (currentStatus === 'CANCELLED') {
+          await this.releaseInventoryReservations(tenantId, orderId, cid);
+          return freshOrder!;
+        }
+        throw new InvalidOrderStateException(
+          `Invalid status transition for Order '${orderId}': '${currentStatus}' -> 'CANCELLED' (concurrent state modification)`
+        );
+      }
+    }
 
     const updatedOrder: ProcessedOrder = {
       ...order,
@@ -754,6 +1008,58 @@ export class OrderProcessingEngine {
     await this.releaseInventoryReservations(tenantId, orderId, cid);
 
     return updatedOrder;
+    });
+  }
+
+  /**
+   * Helper: commits all inventory reservations associated with an order.
+   * Failures are logged but never thrown — inventory reconciliation engine
+   * will retry the commit on the next pass. The commit is idempotent.
+   */
+  private async commitInventoryReservations(
+    tenantId: string,
+    orderId: string,
+    correlationId: string | undefined
+  ): Promise<void> {
+    if (!this.inventoryEngine) return;
+    let reservationIds = this.orderReservations.get(orderId);
+    if (!reservationIds || reservationIds.length === 0) {
+      if (typeof this.inventoryEngine.getReservationsForOrder === 'function') {
+        try {
+          const resList = await this.inventoryEngine.getReservationsForOrder(tenantId, orderId);
+          reservationIds = resList.map((r: any) => r.id);
+        } catch (err: any) {
+          this.logger.warn({
+            message: `Failed to query persistent reservations for commit of order ${orderId}: ${err.message}`,
+            tenantId,
+          });
+        }
+      } else if (typeof (this.inventoryEngine as any).listReservations === 'function') {
+        try {
+          const resList = await (this.inventoryEngine as any).listReservations(tenantId, orderId);
+          reservationIds = resList.map((r: any) => r.id);
+        } catch (err: any) {
+          this.logger.warn({
+            message: `Failed to list reservations for commit of order ${orderId}: ${err.message}`,
+            tenantId,
+          });
+        }
+      }
+    }
+    reservationIds = reservationIds ?? [];
+
+    for (const reservationId of reservationIds) {
+      try {
+        await this.inventoryEngine.commitStock(tenantId, reservationId, correlationId);
+      } catch (err: any) {
+        this.logger.error({
+          message: `Inventory commit failed for order ${orderId} reservation ${reservationId}: ${err.message}`,
+          correlationId,
+          tenantId,
+          error: err,
+        });
+      }
+    }
   }
 
   /**
@@ -767,7 +1073,32 @@ export class OrderProcessingEngine {
     correlationId: string | undefined
   ): Promise<void> {
     if (!this.inventoryEngine) return;
-    const reservationIds = this.orderReservations.get(orderId) ?? [];
+    let reservationIds = this.orderReservations.get(orderId);
+    if (!reservationIds || reservationIds.length === 0) {
+      if (typeof this.inventoryEngine.getReservationsForOrder === 'function') {
+        try {
+          const resList = await this.inventoryEngine.getReservationsForOrder(tenantId, orderId);
+          reservationIds = resList.map((r: any) => r.id);
+        } catch (err: any) {
+          this.logger.warn({
+            message: `Failed to query persistent reservations for cancellation of order ${orderId}: ${err.message}`,
+            tenantId,
+          });
+        }
+      } else if (typeof (this.inventoryEngine as any).listReservations === 'function') {
+        try {
+          const resList = await (this.inventoryEngine as any).listReservations(tenantId, orderId);
+          reservationIds = resList.map((r: any) => r.id);
+        } catch (err: any) {
+          this.logger.warn({
+            message: `Failed to list reservations for cancellation of order ${orderId}: ${err.message}`,
+            tenantId,
+          });
+        }
+      }
+    }
+    reservationIds = reservationIds ?? [];
+
     for (const reservationId of reservationIds) {
       try {
         await this.inventoryEngine.releaseStock(tenantId, reservationId, correlationId);
@@ -791,29 +1122,80 @@ export class OrderProcessingEngine {
     orderId: string,
     correlationId?: string
   ): Promise<ProcessedOrder> {
-    const cid = correlationId || `ord_refund_${Date.now()}`;
-    const order = await this.getOrder(tenantId, orderId);
+    return this.withOrderLock(orderId, async () => {
+      const cid = correlationId || `ord_refund_${Date.now()}`;
+      const order = await this.getOrder(tenantId, orderId);
 
-    this.transitionState(order.status, 'REFUNDED', orderId);
+      if (order.status === 'REFUNDED') {
+        await this.releaseInventoryReservations(tenantId, orderId, cid);
+        return order;
+      }
 
-    const updatedOrder: ProcessedOrder = {
-      ...order,
-      status: 'REFUNDED',
-      updatedAt: new Date().toISOString(),
-    };
+      this.transitionState(order.status, 'REFUNDED', orderId);
 
-    await this.persistOrder(updatedOrder);
+      if (this.repository?.transitionOrderStatus) {
+        const stateToStatus: Record<ProcessedOrderState, 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled'> = {
+          CREATED: 'pending', PAYMENT_PENDING: 'pending', PAID: 'paid', PROCESSING: 'paid',
+          READY_FOR_FULFILLMENT: 'shipped', FULFILLED: 'completed', CANCELLED: 'cancelled', REFUNDED: 'cancelled',
+        };
+        const expectedStatus = stateToStatus[order.status];
+        const success = await this.repository.transitionOrderStatus(
+          tenantId,
+          orderId,
+          expectedStatus,
+          'cancelled',
+          { engineState: 'REFUNDED' }
+        );
+        if (!success) {
+          this.orders.delete(orderId);
+          let currentStatus: ProcessedOrderState | null = null;
+          let freshOrder: ProcessedOrder | null = null;
+          if (this.repository) {
+            const repoOrder = await this.repository.findByTenantAndId(tenantId, orderId);
+            if (repoOrder) {
+              freshOrder = this.fromPersistedOrder(repoOrder);
+              currentStatus = freshOrder.status;
+              this.orders.set(orderId, freshOrder);
+            }
+          }
+          if (!freshOrder) {
+            const current = await this.getOrder(tenantId, orderId);
+            freshOrder = current;
+            currentStatus = current.status;
+          }
+          if (currentStatus === 'REFUNDED') {
+            await this.releaseInventoryReservations(tenantId, orderId, cid);
+            return freshOrder!;
+          }
+          throw new InvalidOrderStateException(
+            `Invalid status transition for Order '${orderId}': '${currentStatus}' -> 'REFUNDED' (concurrent state modification)`
+          );
+        }
+      }
 
-    await this.eventBus.publish({
-      eventId: `evt_ord_refunded_${Math.random().toString(36).substr(2, 9)}`,
-      eventType: 'Order.Refunded',
-      timestamp: new Date().toISOString(),
-      correlationId: cid,
-      tenantId,
-      payload: { orderId },
+      const updatedOrder: ProcessedOrder = {
+        ...order,
+        status: 'REFUNDED',
+        updatedAt: new Date().toISOString(),
+      };
+
+      await this.persistOrder(updatedOrder);
+
+      await this.eventBus.publish({
+        eventId: `evt_ord_refunded_${Math.random().toString(36).substr(2, 9)}`,
+        eventType: 'Order.Refunded',
+        timestamp: new Date().toISOString(),
+        correlationId: cid,
+        tenantId,
+        payload: { orderId },
+      });
+
+      // Release inventory reservations on refund — inventory should return
+      // to available pool so the items can be sold to other customers.
+      await this.releaseInventoryReservations(tenantId, orderId, cid);
+
+      return updatedOrder;
     });
-
-    return updatedOrder;
   }
 }
 
@@ -864,6 +1246,13 @@ export interface OrderPersistenceAdapter {
     createdAt: string;
     updatedAt: string;
   }>>;
+  transitionOrderStatus?(
+    tenantId: string,
+    id: string,
+    expectedStatus: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled' | Array<'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled'>,
+    newStatus: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled',
+    metadataPatch?: Record<string, unknown>
+  ): Promise<boolean>;
 }
 
 /**
@@ -890,23 +1279,32 @@ export class OrderRepositoryAdapter implements OrderPersistenceAdapter {
     createdAt: string;
     updatedAt: string;
   }): Promise<void> {
-    const existing = await this.repo.findByTenantAndId(order.tenantId, order.id);
-    if (!existing) {
+    try {
       await this.repo.create({
         ...order,
         id: order.id,
         createdAt: order.createdAt,
         updatedAt: order.updatedAt,
       });
-      return;
+    } catch (err: unknown) {
+      const isUniqueViolation =
+        err instanceof Error &&
+        ('code' in err || 'constraint' in err) &&
+        ((err as { code?: string }).code === '23505' ||
+          String(err.message).includes('unique') ||
+          String(err.message).includes('duplicate'));
+      if (isUniqueViolation) {
+        await this.repo.update(order.id, {
+          status: order.status,
+          total: order.total,
+          items: order.items,
+          metadata: order.metadata,
+          updatedAt: order.updatedAt,
+        });
+      } else {
+        throw err;
+      }
     }
-    await this.repo.update(order.id, {
-      status: order.status,
-      total: order.total,
-      items: order.items,
-      metadata: order.metadata,
-      updatedAt: order.updatedAt,
-    });
   }
 
   async findByTenantAndId(tenantId: string, id: string) {
@@ -939,5 +1337,28 @@ export class OrderRepositoryAdapter implements OrderPersistenceAdapter {
       updatedAt: string;
     }>;
     return rows ?? [];
+  }
+
+  async transitionOrderStatus(
+    tenantId: string,
+    id: string,
+    expectedStatus: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled' | Array<'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled'>,
+    newStatus: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled',
+    metadataPatch?: Record<string, unknown>
+  ): Promise<boolean> {
+    const existing = await this.findByTenantAndId(tenantId, id);
+    if (!existing) return true;
+
+    const expectedArray = Array.isArray(expectedStatus) ? expectedStatus : [expectedStatus];
+    if (!expectedArray.includes(existing.status)) {
+      return false;
+    }
+
+    await this.repo.update(id, {
+      status: newStatus,
+      metadata: metadataPatch ? { ...existing.metadata, ...metadataPatch } : existing.metadata,
+      updatedAt: new Date().toISOString(),
+    });
+    return true;
   }
 }

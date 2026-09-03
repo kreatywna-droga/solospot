@@ -8,20 +8,30 @@ import { TimelineRepository } from '@/lib/observability/TimelineRepository';
 import { EventTimeline } from '@/lib/observability/EventTimeline';
 import type { InitiateCheckoutRequest } from '@/lib/onboarding/OnboardingTypes';
 import { isSupabaseConfigured } from '@/lib/supabase';
+import { resolveTenantSession } from '@/lib/tenant/TenantResolver';
 
 export const dynamic = 'force-dynamic';
 
 /**
  * POST /api/onboarding/checkout
  *
- * Inicjalizuje sesję płatności za pakiet platformy.
- * Zwraca URL do przekierowania klienta na stronę 1Koszyk.
+ * Initializes payment session for a platform package.
+ * Returns redirect URL to 1Koszyk payment gateway.
  *
  * Body: { tenantId, packageId }
- * Response: InitiateCheckoutResponse (zawiera paymentUrl + expiresAt)
+ * Response: InitiateCheckoutResponse (contains paymentUrl + expiresAt)
+ *
+ * SECURITY: Requires authentication. The tenantId must match the
+ * authenticated user's tenant.
  */
 export async function POST(req: NextRequest) {
   const correlationId = req.headers.get('x-correlation-id') ?? `chk_${Date.now()}`;
+
+  // Require authentication
+  const session = await resolveTenantSession();
+  if (!session.isAuthenticated || !session.userId) {
+    return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+  }
 
   let body: InitiateCheckoutRequest;
   try {
@@ -38,6 +48,28 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
+
+  // Verify the authenticated user owns this tenant
+  if (session.tenantId) {
+    if (session.tenantId !== tenantId) {
+      return NextResponse.json(
+        { error: 'Forbidden: tenant mismatch' },
+        { status: 403 }
+      );
+    }
+  } else {
+    // Strict tenant ownership validation when session.tenantId is unassigned
+    const tenantRepo = new TenantRepository();
+    const targetTenant = await tenantRepo.getTenant(tenantId);
+    if (targetTenant && targetTenant.ownerEmail.toLowerCase() !== session.email.toLowerCase()) {
+
+      return NextResponse.json(
+        { error: 'Forbidden: tenant mismatch' },
+        { status: 403 }
+      );
+    }
+  }
+
 
   if (!isSupabaseConfigured()) {
     return NextResponse.json(

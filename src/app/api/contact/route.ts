@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { name, email, message, subject } = await req.json();
@@ -8,6 +17,11 @@ export async function POST(req: NextRequest) {
     if (!name || !email || !message) {
       return NextResponse.json({ error: 'Brak wymaganych pól' }, { status: 400 });
     }
+
+    const safeName = escapeHtml(String(name));
+    const safeEmail = escapeHtml(String(email));
+    const safeMessage = escapeHtml(String(message)).replace(/\n/g, '<br>');
+    const safeSubject = subject ? escapeHtml(String(subject)) : '';
 
     const recipientEmail = process.env.CONTACT_RECEIVER_EMAIL || 'kreatywna.droga@gmail.com';
     const gmailUser = process.env.GMAIL_USER || process.env.SMTP_USER;
@@ -33,7 +47,7 @@ export async function POST(req: NextRequest) {
       from: `"SoloSpot - Centrum Pomocy" <${gmailUser}>`,
       to: recipientEmail,
       replyTo: email,
-      subject: subject ? `📩 ${subject} | od ${name}` : `📩 Nowa wiadomość od ${name} | SoloSpot`,
+      subject: safeSubject ? `📩 ${safeSubject} | od ${safeName}` : `📩 Nowa wiadomość od ${safeName} | SoloSpot`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; padding: 30px; border-radius: 10px;">
           <h2 style="color: #7c3aed; border-bottom: 2px solid #7c3aed; padding-bottom: 10px;">
@@ -42,15 +56,15 @@ export async function POST(req: NextRequest) {
           <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
             <tr>
               <td style="padding: 10px; font-weight: bold; color: #555; width: 120px;">Nadawca:</td>
-              <td style="padding: 10px; color: #222;">${name}</td>
+              <td style="padding: 10px; color: #222;">${safeName}</td>
             </tr>
             <tr style="background: #f0ebff;">
               <td style="padding: 10px; font-weight: bold; color: #555;">E-mail:</td>
-              <td style="padding: 10px;"><a href="mailto:${email}" style="color: #7c3aed;">${email}</a></td>
+              <td style="padding: 10px;"><a href="mailto:${safeEmail}" style="color: #7c3aed;">${safeEmail}</a></td>
             </tr>
             <tr>
               <td style="padding: 10px; font-weight: bold; color: #555; vertical-align: top;">Wiadomość:</td>
-              <td style="padding: 10px; color: #222; line-height: 1.6;">${message.replace(/\n/g, '<br>')}</td>
+              <td style="padding: 10px; color: #222; line-height: 1.6;">${safeMessage}</td>
             </tr>
           </table>
           <p style="margin-top: 30px; font-size: 12px; color: #aaa; text-align: center;">

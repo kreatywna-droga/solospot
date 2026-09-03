@@ -62,8 +62,25 @@ export class PaymentEngine {
     }
   }
 
+  private readonly intentsByOrder = new Map<string, PaymentIntent>(); // Key: `${tenantId}:${orderId}`
+
+  /**
+   * Retrieves active payment intent for an order if present.
+   */
+  public async getPaymentIntentForOrder(tenantId: string, orderId: string): Promise<PaymentIntent | null> {
+    const intent = this.intentsByOrder.get(`${tenantId}:${orderId}`);
+    if (intent) {
+      this.enforceTenantIsolation(tenantId, intent.tenantId, 'Get payment intent for order');
+      return intent;
+    }
+    return null;
+  }
+
   /**
    * Initializes a payment intent through a specified adapter.
+   *
+   * Idempotent: returns existing active PaymentIntent for (tenantId, orderId)
+   * if already created, preventing duplicate gateway sessions.
    */
   public async createPaymentIntent(
     tenantId: string,
@@ -74,6 +91,18 @@ export class PaymentEngine {
     correlationId?: string
   ): Promise<PaymentIntent> {
     const cid = correlationId || `pay_create_${Date.now()}`;
+    const orderKey = `${tenantId}:${orderId}`;
+
+    const existing = this.intentsByOrder.get(orderKey);
+    if (existing && existing.status !== 'FAILED') {
+      this.enforceTenantIsolation(tenantId, existing.tenantId, 'Deduplicate PaymentIntent');
+      this.logger.info({
+        message: `Idempotent reuse of active PaymentIntent '${existing.id}' for order '${orderId}'`,
+        correlationId: cid,
+        tenantId,
+      });
+      return existing;
+    }
 
     this.logger.info({
       message: `Creating PaymentIntent for order: ${orderId} using provider: ${adapter.id}`,
@@ -86,6 +115,7 @@ export class PaymentEngine {
       orderId,
       amountGross,
       currency,
+      idempotencyKey: orderKey,
     });
 
     const intent: PaymentIntent = {
@@ -101,6 +131,8 @@ export class PaymentEngine {
       updatedAt: new Date().toISOString(),
     };
 
+    this.intentsByOrder.set(orderKey, intent);
+
     await this.eventBus.publish({
       eventId: `evt_pay_created_${Math.random().toString(36).substr(2, 9)}`,
       eventType: 'Payment.Created',
@@ -112,6 +144,7 @@ export class PaymentEngine {
 
     return intent;
   }
+
 
   /**
    * Transitions payment status: CREATED -> PROCESSING
@@ -130,6 +163,8 @@ export class PaymentEngine {
       status: 'PROCESSING',
       updatedAt: new Date().toISOString(),
     };
+
+    this.intentsByOrder.set(`${tenantId}:${intent.orderId}`, updatedIntent);
 
     await this.eventBus.publish({
       eventId: `evt_pay_proc_${Math.random().toString(36).substr(2, 9)}`,
@@ -161,6 +196,8 @@ export class PaymentEngine {
       updatedAt: new Date().toISOString(),
     };
 
+    this.intentsByOrder.set(`${tenantId}:${intent.orderId}`, updatedIntent);
+
     await this.eventBus.publish({
       eventId: `evt_pay_completed_${Math.random().toString(36).substr(2, 9)}`,
       eventType: 'Payment.Completed',
@@ -191,6 +228,8 @@ export class PaymentEngine {
       updatedAt: new Date().toISOString(),
     };
 
+    this.intentsByOrder.set(`${tenantId}:${intent.orderId}`, updatedIntent);
+
     await this.eventBus.publish({
       eventId: `evt_pay_failed_${Math.random().toString(36).substr(2, 9)}`,
       eventType: 'Payment.Failed',
@@ -216,6 +255,28 @@ export class PaymentEngine {
   ): Promise<{ intent: PaymentIntent; refund: Refund }> {
     const cid = correlationId || `pay_refund_${Date.now()}`;
     this.enforceTenantIsolation(tenantId, intent.tenantId, 'Refund payment');
+
+    // Idempotency guard: if already REFUNDED, return early (no double refund)
+    if (intent.status === 'REFUNDED') {
+      this.logger.info({
+        message: `PaymentIntent '${intent.id}' is already REFUNDED; skipping duplicate refund`,
+        tenantId,
+        correlationId: cid,
+      });
+      return {
+        intent,
+        refund: {
+          id: `ref_dedup_${intent.id}`,
+          tenantId,
+          paymentIntentId: intent.id,
+          amount,
+          reason,
+          status: 'COMPLETED' as const,
+          createdAt: new Date().toISOString(),
+        },
+      };
+    }
+
     this.transitionState(intent.status, 'REFUNDED', intent.id);
 
     if (!intent.externalId) {
@@ -234,20 +295,35 @@ export class PaymentEngine {
       createdAt: new Date().toISOString(),
     };
 
-    const updatedIntent: PaymentIntent = {
-      ...intent,
-      status: 'REFUNDED',
-      updatedAt: new Date().toISOString(),
-    };
+    // Only update intent status to REFUNDED if the gateway refund actually succeeded.
+    // If the refund failed, the intent stays in its current state so it can be retried.
+    const updatedIntent: PaymentIntent = refundResult.success
+      ? {
+          ...intent,
+          status: 'REFUNDED',
+          updatedAt: new Date().toISOString(),
+        }
+      : {
+          ...intent,
+          updatedAt: new Date().toISOString(),
+        };
 
-    await this.eventBus.publish({
-      eventId: `evt_pay_refunded_${Math.random().toString(36).substr(2, 9)}`,
-      eventType: 'Payment.Refunded',
-      timestamp: new Date().toISOString(),
-      correlationId: cid,
-      tenantId,
-      payload: { paymentIntentId: intent.id, refundId: refund.id, success: refundResult.success },
-    });
+    if (refundResult.success) {
+      await this.eventBus.publish({
+        eventId: `evt_pay_refunded_${Math.random().toString(36).substr(2, 9)}`,
+        eventType: 'Payment.Refunded',
+        timestamp: new Date().toISOString(),
+        correlationId: cid,
+        tenantId,
+        payload: { paymentIntentId: intent.id, refundId: refund.id, success: true },
+      });
+    } else {
+      this.logger.error({
+        message: `Gateway refund failed for PaymentIntent '${intent.id}'`,
+        tenantId,
+        correlationId: cid,
+      });
+    }
 
     return { intent: updatedIntent, refund };
   }

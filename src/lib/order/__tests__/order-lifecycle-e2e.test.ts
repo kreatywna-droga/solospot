@@ -27,6 +27,37 @@ vi.mock('@/lib/payments/PaymentFactory', () => ({
   },
 }));
 
+vi.mock('@/lib/product/ProductRepository', () => ({
+  ProductRepository: class {
+    async getProduct(productId: string) {
+      const prices: Record<string, number> = {
+        'mug-1': 4500,
+        'shirt-1': 11000,
+        'jacket-1': 30000,
+        'book-1': 6500,
+        'item-cancel': 8000,
+        'gadget-1': 15000,
+        'item-a': 5000,
+        'item-b': 2500,
+      };
+      return {
+        id: productId,
+        tenantId: 'tenant-canary3',
+        name: `Product ${productId}`,
+        description: '',
+        price: prices[productId] ?? 5000,
+        currency: 'PLN',
+        status: 'ACTIVE' as const,
+        storeId: 'store_1',
+        images: [],
+        metadata: {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    }
+  },
+}));
+
 // Mock StoreRepository for route testing
 vi.mock('@/lib/store/StoreRepository', () => ({
   StoreRepository: class {

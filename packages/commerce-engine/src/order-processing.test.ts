@@ -51,7 +51,11 @@ describe('Order Processing Engine', () => {
     };
 
     // 1. Create order
-    let order = await engine.createOrder(tenantId, customerId, items, shippingAddress);
+    let order = await engine.createOrder(tenantId, customerId, items, shippingAddress, 'PLN', undefined, {
+      subtotalGross: 2000,
+      taxTotal: 0,
+      grandTotalGross: 2000,
+    });
     expect(order.status).toBe('CREATED');
     expect(order.grandTotalGross).toBe(2000);
 

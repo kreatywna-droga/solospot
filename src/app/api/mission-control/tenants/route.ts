@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import { TenantRepository } from '@/lib/tenant/TenantRepository';
 import { TimelineRepository } from '@/lib/observability/TimelineRepository';
-import { resolveTenantSession } from '@/lib/tenant/TenantResolver';
+import { requireAdmin } from '@/lib/auth/requireAdmin';
 import { getServiceSupabase } from '@/lib/supabase';
 
 export async function GET() {
   try {
-    const session = await resolveTenantSession();
-    if (!session.isAuthenticated) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const auth = await requireAdmin();
+    if (!auth.authorized) {
+      return NextResponse.json({ error: auth.error }, { status: 403 });
     }
 
     const tenantRepo = new TenantRepository();

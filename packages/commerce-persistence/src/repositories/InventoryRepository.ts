@@ -1,6 +1,7 @@
 // InventoryRepository.ts
 // C9.1: Commerce Persistence — inventory repository
 // G1-332: Tenant-scoped + atomic reservation support.
+// G1-334: Stock reservation persistence, movement persistence & expiration support.
 
 import { Repository } from '../interfaces/Repository'
 
@@ -13,6 +14,39 @@ export interface Inventory {
   lowStockThreshold: number
   createdAt: string
   updatedAt: string
+}
+
+export type StockReservationStatus = 'PENDING' | 'COMMITTED' | 'RELEASED' | 'EXPIRED';
+
+export interface StockReservationRecord {
+  id: string
+  tenantId: string
+  productId: string
+  orderId: string
+  quantity: number
+  expiresAt: string
+  status: StockReservationStatus
+  createdAt: string
+  updatedAt: string
+}
+
+export type StockMovementType =
+  | 'RECEIPT'
+  | 'SALE'
+  | 'RESERVATION_COMMIT'
+  | 'ADJUSTMENT'
+  | 'RETURN'
+  | 'RESERVATION_RELEASE'
+  | 'EXPIRED';
+
+export interface StockMovementRecord {
+  id: string
+  tenantId: string
+  productId: string
+  quantityDelta: number
+  type: StockMovementType
+  reason?: string
+  createdAt: string
 }
 
 export interface InventoryRepository extends Repository<Inventory> {
@@ -56,6 +90,33 @@ export interface InventoryRepository extends Repository<Inventory> {
    * Tenant-scoped atomic release of a previously-reserved quantity.
    */
   atomicRelease(tenantId: string, productId: string, quantity: number): Promise<Inventory>
+
+  /**
+   * Tenant-scoped atomic commit of a previously-reserved quantity.
+   * Decrements both total physical quantity and reserved quantity in a single atomic operation.
+   */
+  atomicCommit(tenantId: string, productId: string, quantity: number): Promise<Inventory>
+
+
+  // ============================================================================
+  // Stock Reservations Persistence (G1-334)
+  // ============================================================================
+  createReservation(reservation: StockReservationRecord): Promise<StockReservationRecord>
+  updateReservationStatus(
+    tenantId: string,
+    reservationId: string,
+    status: StockReservationStatus,
+    expectedStatus?: StockReservationStatus
+  ): Promise<StockReservationRecord | null>
+  findReservationById(tenantId: string, reservationId: string): Promise<StockReservationRecord | null>
+  findReservationsByOrderId(tenantId: string, orderId: string): Promise<StockReservationRecord[]>
+  findExpiredReservations(tenantId?: string, now?: string): Promise<StockReservationRecord[]>
+
+  // ============================================================================
+  // Stock Movements Persistence (G1-334)
+  // ============================================================================
+  createMovement(movement: StockMovementRecord): Promise<StockMovementRecord>
+  listMovements(tenantId: string, productId?: string): Promise<StockMovementRecord[]>
 }
 
 export class InsufficientInventoryException extends Error {
@@ -63,4 +124,4 @@ export class InsufficientInventoryException extends Error {
     super(message);
     this.name = 'InsufficientInventoryException';
   }
-}
+}

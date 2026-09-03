@@ -1,28 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { MissionControl } from '../../../../../packages/mission-control-core/src/MissionControl';
-import { resolveTenantSession } from '@/lib/tenant/TenantResolver';
+import { requireAdmin } from '@/lib/auth/requireAdmin';
 import { AdminContext } from '../../../../../packages/mission-control-core/src/AdminContext';
 
 async function resolveAdminContext(req: NextRequest): Promise<AdminContext> {
-  const session = await resolveTenantSession();
-  if (!session.isAuthenticated) {
-    throw new Error('Unauthorized');
-  }
-
-  let role: AdminContext['role'] = 'SUPPORT';
-  if (session.email?.includes('owner')) {
-    role = 'OWNER';
-  } else if (session.email?.includes('admin')) {
-    role = 'ADMIN';
-  } else if (session.email?.includes('operator')) {
-    role = 'OPERATOR';
+  const auth = await requireAdmin();
+  if (!auth.authorized) {
+    throw new Error(auth.error || 'Forbidden');
   }
 
   const cid = req.headers.get('x-correlation-id') || `adm_${Date.now()}`;
 
   return {
-    userId: session.userId || 'unknown-user',
-    role,
+    userId: auth.userId || 'unknown-user',
+    role: auth.role,
     permissions: [],
     correlationId: cid
   };

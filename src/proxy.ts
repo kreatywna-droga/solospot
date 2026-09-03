@@ -112,7 +112,9 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/api/') ||
     pathname.startsWith('/admin') ||
     pathname.startsWith('/dashboard') ||
-    pathname.startsWith('/marketplace');
+    pathname.startsWith('/marketplace') ||
+    pathname.startsWith('/studio') ||
+    pathname.startsWith('/preview');
 
   if (!isPlatformPath && isSupabaseConfigured()) {
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);

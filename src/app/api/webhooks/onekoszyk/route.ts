@@ -22,7 +22,11 @@ export async function POST(req: Request) {
   try {
     const payload = JSON.parse(rawBody);
 
-    const providerSecret = process.env.ONEKOSZYK_SIGNATURE_KEY || '';
+    const providerSecret = process.env.ONEKOSZYK_SIGNATURE_KEY;
+    if (!providerSecret) {
+      console.error('ONEKOSZYK_SIGNATURE_KEY not configured — rejecting webhook');
+      return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 });
+    }
 
     const verifier = new WebhookVerifier({
       providerSecret,
@@ -34,8 +38,6 @@ export async function POST(req: Request) {
       signatureHeader: signature,
       payload,
     });
-
-
 
     const supabaseIdempotencyStore = new SupabaseIdempotencyStore();
 
@@ -75,15 +77,17 @@ export async function POST(req: Request) {
 
 
 
-    // Domain order engine wiring
+    // Domain order engine wiring WITH persistence adapter
     const { OrderProcessingEngine } = await import('@/../packages/commerce-engine/src/OrderProcessingEngine');
+    const { SupabaseOrderPersistenceAdapter } = await import('@/lib/order/SupabaseOrderPersistenceAdapter');
+
+    const orderPersistenceAdapter = new SupabaseOrderPersistenceAdapter();
 
     const orderProcessingEngine = new OrderProcessingEngine({
       eventBus: platformEventBus,
       logger: paymentLogger,
+      repository: orderPersistenceAdapter,
     });
-
-
 
     const orderProcessingEngineAdapter = new OrderProcessingEngineAdapter({
       engine: orderProcessingEngine,

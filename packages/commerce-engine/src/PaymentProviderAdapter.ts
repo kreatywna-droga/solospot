@@ -38,6 +38,7 @@ export interface CreateProviderIntentDto {
   orderId: string;
   amountGross: number;
   currency: string;
+  idempotencyKey?: string;
   metadata?: Record<string, any>;
 }
 

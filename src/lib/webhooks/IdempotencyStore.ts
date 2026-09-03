@@ -35,14 +35,28 @@ export class InMemoryIdempotencyStore implements IdempotencyStore {
 
   async upsertReceived(envelope: WebhookEnvelope, payloadHash: string) {
     const k = this.key(envelope.provider, envelope.providerEventId, payloadHash);
-    if (this.map.has(k)) return;
+    const existing = this.map.get(k);
+
+    if (existing) {
+      // Allow re-claiming if status is FAILED, RECEIVED, or stale PROCESSING.
+      const staleThresholdMs = 5 * 60 * 1000;
+      const receivedAt = existing.receivedAt ? new Date(existing.receivedAt).getTime() : 0;
+      const isStaleProcessing = existing.status === 'PROCESSING' &&
+        receivedAt > 0 &&
+        (Date.now() - receivedAt) > staleThresholdMs;
+
+      if (!isStaleProcessing) {
+        // Already COMPLETED, or fresh PROCESSING — do not re-claim
+        return;
+      }
+    }
 
     this.map.set(k, {
       provider: envelope.provider,
       providerEventId: envelope.providerEventId,
       payloadHash,
       correlationId: envelope.correlationId,
-      status: 'RECEIVED',
+      status: 'PROCESSING',
       receivedAt: new Date().toISOString(),
     });
   }

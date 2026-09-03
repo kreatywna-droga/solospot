@@ -2,9 +2,9 @@
 // C9.1: Commerce Persistence — Supabase product repository
 
 import { SupabaseRepository } from './SupabaseRepository'
-import { Product, ProductQueryOptions } from '../repositories/ProductRepository'
+import { Product, ProductRepository, ProductQueryOptions } from '../repositories/ProductRepository'
 
-export class SupabaseProductRepository extends SupabaseRepository<Product> {
+export class SupabaseProductRepository extends SupabaseRepository<Product> implements ProductRepository {
   protected getTableName(): string {
     return 'products'
   }

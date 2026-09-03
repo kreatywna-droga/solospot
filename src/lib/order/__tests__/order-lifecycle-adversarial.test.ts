@@ -24,6 +24,31 @@ vi.mock('@/lib/payments/PaymentFactory', () => ({
   },
 }));
 
+vi.mock('@/lib/product/ProductRepository', () => ({
+  ProductRepository: class {
+    async getProduct(productId: string) {
+      const prices: Record<string, number> = {
+        'p1': 5000,
+        'p-large': 9999,
+      };
+      return {
+        id: productId,
+        tenantId: 'tenant-a',
+        name: `Product ${productId}`,
+        description: '',
+        price: prices[productId] ?? 5000,
+        currency: 'PLN',
+        status: 'ACTIVE' as const,
+        storeId: 'store-a',
+        images: [],
+        metadata: {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    }
+  },
+}));
+
 vi.mock('@/lib/store/StoreRepository', () => ({
   StoreRepository: class {
     async getStoreBySlug(slug: string) {
@@ -114,7 +139,8 @@ describe('B17-REAL-CANARY-3 — 10 Adversarial Chaos Scenarios', () => {
     const p2 = runtime.checkout('tenant-a', 'cust-1', req, 'corr-rapid-1');
     const [r1, r2] = await Promise.all([p1, p2]);
     expect(r1.orderId).toBe(r2.orderId);
-    expect(r1.grandTotalGross).toBe(6000);
+    // Server-side price: p1=5000, qty 3 = 15000
+    expect(r1.grandTotalGross).toBe(15000);
   });
 
   it('ADV-06: Stale State Transition — Attempting invalid direct status transition throws InvalidOrderStateException', async () => {

@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/supabase';
-import { resolveTenantSession } from '@/lib/tenant/TenantResolver';
+import { requireAdmin } from '@/lib/auth/requireAdmin';
 
 export async function POST() {
   try {
-    const session = await resolveTenantSession();
-    if (!session.isAuthenticated || !session.tenantId) {
-      return NextResponse.json({ error: 'Unauthorized or no tenant' }, { status: 401 });
+    const auth = await requireAdmin();
+    if (!auth.authorized) {
+      return NextResponse.json({ error: auth.error }, { status: 403 });
     }
 
     const supabase = getServiceSupabase();
@@ -15,7 +15,7 @@ export async function POST() {
     const fakeIntent = {
       id: `pi_test_${Date.now()}`,
       order_id: `order_test_${Date.now()}`,
-      tenant_id: session.tenantId,
+      tenant_id: 'system',
       provider: 'stripe',
       provider_transaction_id: `ch_test_${Date.now()}`,
       amount: 15000, // 150 PLN (w groszach)

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { TemplateRegistry } from '@/lib/template/TemplateRegistry'
 import { getServiceSupabase } from '@/lib/supabase'
+import { resolveTenantSession } from '@/lib/tenant/TenantResolver'
 
 const stripeKey = process.env.STRIPE_SECRET_KEY
 
@@ -12,10 +13,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 })
   }
 
-  try {
-    const { templateSlug, userId, userEmail } = await request.json()
+  // Require authentication — userId must come from the session, not the client
+  const session = await resolveTenantSession()
+  if (!session.isAuthenticated || !session.userId) {
+    return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+  }
 
-    if (!templateSlug || !userId || !userEmail) {
+  try {
+    const { templateSlug } = await request.json()
+
+    if (!templateSlug) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
@@ -26,7 +33,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Template not found' }, { status: 404 })
     }
 
-    const session = await stripe.checkout.sessions.create({
+    // Use authenticated user's ID and email — never from client
+    const userId = session.userId
+    const userEmail = session.email
+
+    const stripeSession = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card', 'blik', 'p24'],
       line_items: [
@@ -54,7 +65,7 @@ export async function POST(request: NextRequest) {
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/marketplace/${templateSlug}?canceled=true`,
     })
 
-    return NextResponse.json({ url: session.url })
+    return NextResponse.json({ url: stripeSession.url })
   } catch (err: any) {
     console.error('Checkout session error:', err)
     return NextResponse.json({ error: err.message }, { status: 500 })

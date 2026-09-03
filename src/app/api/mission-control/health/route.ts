@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server'
 import { getServiceSupabase } from '@/lib/supabase'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
 
 export async function GET() {
+  const auth = await requireAdmin();
+  if (!auth.authorized) {
+    return NextResponse.json({ error: auth.error }, { status: 403 });
+  }
+
   const supabase = getServiceSupabase();
   const startTime = Date.now();
   

@@ -80,6 +80,8 @@ export class SupabaseIdempotencyStore implements IdempotencyStore {
     const tenantId = assertNonEmpty(envelope.tenantId, 'envelope.tenantId');
 
     const now = new Date().toISOString();
+    // Stale threshold: if a PROCESSING event is older than 5 minutes, allow re-claim.
+    const staleThreshold = new Date(Date.now() - 5 * 60 * 1000).toISOString();
 
     // 1. Try inserting a new row (claims the event if it doesn't exist)
     const { error: insertError } = await supabase
@@ -96,14 +98,15 @@ export class SupabaseIdempotencyStore implements IdempotencyStore {
         error: null,
       });
 
-    // 2. If insert fails with unique constraint (duplicate key), try conditional update (for retries of FAILED status)
+    // 2. If insert fails with unique constraint (duplicate key), try conditional update
     if (insertError) {
       const isUniqueViolation = insertError.code === '23505' || 
         String(insertError.message).includes('duplicate key') || 
         String(insertError.details).includes('already exists');
         
       if (isUniqueViolation) {
-        // Atomic update only if current status is FAILED or RECEIVED (not PROCESSING or COMPLETED)
+        // Allow re-claiming if status is FAILED, RECEIVED, or stale PROCESSING.
+        // A PROCESSING event older than the stale threshold is considered abandoned.
         const { data, error: updateError } = await supabase
           .from(this.table)
           .update({
@@ -115,15 +118,14 @@ export class SupabaseIdempotencyStore implements IdempotencyStore {
           .eq('provider', provider)
           .eq('provider_event_id', providerEventId)
           .eq('payload_hash', payloadHash)
-          .neq('status', 'PROCESSING')
-          .neq('status', 'COMPLETED')
+          .or(`status.eq.FAILED,status.eq.RECEIVED,and(status.eq.PROCESSING,received_at.lt.${staleThreshold})`)
           .select();
 
         if (updateError) {
           throw new Error(`SupabaseIdempotencyStore.upsertReceived update failed: ${updateError.message}`);
         }
 
-        // If no rows were updated, it means another request has already claimed the event (either PROCESSING or COMPLETED)
+        // If no rows were updated, it means another request has already claimed the event
         if (!data || data.length === 0) {
           throw new Error('Duplicate delivery or concurrency lock active');
         }
@@ -174,6 +176,38 @@ export class SupabaseIdempotencyStore implements IdempotencyStore {
     if (error) {
       throw new Error(`SupabaseIdempotencyStore.markFailed failed: ${error.message}`);
     }
+  }
+
+  /**
+   * Recovers stale PROCESSING events that were abandoned mid-flight due to
+   * process crash or timeout. Resets them to FAILED so they can be retried
+   * on the next webhook delivery from the provider.
+   *
+   * @param staleThresholdMs - How long a PROCESSING event must be stale before
+   *   recovery (default: 5 minutes). This accounts for normal processing time
+   *   of complex webhooks.
+   * @returns Number of events recovered.
+   */
+  async sweepStaleProcessing(staleThresholdMs = 5 * 60 * 1000): Promise<number> {
+    const supabase = getServiceSupabase();
+    const cutoff = new Date(Date.now() - staleThresholdMs).toISOString();
+
+    const { data, error } = await supabase
+      .from(this.table)
+      .update({
+        status: 'FAILED' as const,
+        processed_at: new Date().toISOString(),
+        error: 'Recovered from stale PROCESSING state by sweeper',
+      })
+      .eq('status', 'PROCESSING')
+      .lt('received_at', cutoff)
+      .select();
+
+    if (error) {
+      throw new Error(`SupabaseIdempotencyStore.sweepStaleProcessing failed: ${error.message}`);
+    }
+
+    return data?.length ?? 0;
   }
 }
 

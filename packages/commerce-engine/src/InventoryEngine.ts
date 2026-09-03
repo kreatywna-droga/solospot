@@ -25,7 +25,7 @@ export const StockReservationSchema = z.object({
   orderId: z.string().min(1),
   quantity: z.number().int().positive(),
   expiresAt: z.string().datetime(),
-  status: z.enum(['PENDING', 'COMMITTED', 'RELEASED']),
+  status: z.enum(['PENDING', 'COMMITTED', 'RELEASED', 'EXPIRED']),
 });
 export type StockReservation = z.infer<typeof StockReservationSchema>;
 
@@ -34,7 +34,7 @@ export const StockMovementSchema = z.object({
   tenantId: z.string().min(1),
   productId: z.string().min(1),
   quantityDelta: z.number().int(),
-  type: z.enum(['RECEIPT', 'SALE', 'RESERVATION_COMMIT', 'ADJUSTMENT', 'RETURN']),
+  type: z.enum(['RECEIPT', 'SALE', 'RESERVATION_COMMIT', 'ADJUSTMENT', 'RETURN', 'RESERVATION_RELEASE', 'EXPIRED']),
   reason: z.string().optional(),
   createdAt: z.string().datetime(),
 });
@@ -73,6 +73,14 @@ export interface InventoryPersistenceAdapter {
     reserved: number;
     lowStockThreshold: number;
   }>;
+  atomicCommit?(tenantId: string, productId: string, quantity: number): Promise<{
+    tenantId: string;
+    productId: string;
+    quantity: number;
+    reserved: number;
+    lowStockThreshold: number;
+  }>;
+
   upsertStock(input: {
     tenantId: string;
     productId: string;
@@ -86,6 +94,22 @@ export interface InventoryPersistenceAdapter {
     reserved: number;
     lowStockThreshold: number;
   }>;
+
+  // Stock Reservation Persistence (G1-334)
+  createReservation?(reservation: StockReservation): Promise<StockReservation>;
+  updateReservationStatus?(
+    tenantId: string,
+    reservationId: string,
+    status: StockReservation['status'],
+    expectedStatus?: StockReservation['status']
+  ): Promise<StockReservation | null>;
+  findReservationById?(tenantId: string, reservationId: string): Promise<StockReservation | null>;
+  findReservationsByOrderId?(tenantId: string, orderId: string): Promise<StockReservation[]>;
+  findExpiredReservations?(tenantId?: string, now?: string): Promise<StockReservation[]>;
+
+  // Stock Movement Persistence (G1-334)
+  createMovement?(movement: StockMovement): Promise<StockMovement>;
+  listMovements?(tenantId: string, productId?: string): Promise<StockMovement[]>;
 }
 
 export class InventoryEngine {
@@ -113,6 +137,7 @@ export class InventoryEngine {
       'Inventory.Committed',
       'Inventory.Released',
       'Inventory.LowStock',
+      'Inventory.Expired',
     ];
     for (const evt of inventoryEvents) {
       EventRegistry.register(evt);
@@ -222,7 +247,7 @@ export class InventoryEngine {
    *
    * With a repository: hydrated from the persistent store (cache miss → DB read).
    * Without a repository: returns the cached stock, lazily creating a zero-qty
-   * record (legacy semantics — preserved for the 5 existing unit tests).
+   * record (legacy semantics — preserved for existing unit tests).
    */
   public async getStock(tenantId: string, productId: string): Promise<InventoryStock> {
     this.requireTenant(tenantId, 'getStock');
@@ -233,8 +258,7 @@ export class InventoryEngine {
       if (cached) return cached;
       const hydrated = await this.hydrateFromRepository(tenantId, productId);
       if (hydrated) return hydrated;
-      // No persisted row yet — surface a zero-qty stock record (the caller can
-      // decide to initialize via initializeStock).
+      // No persisted row yet — surface a zero-qty stock record.
       const stock: InventoryStock = {
         productId,
         tenantId,
@@ -263,22 +287,89 @@ export class InventoryEngine {
   }
 
   /**
-   * Safely query all movements (for audit/test assertions).
-   *
-   * Only returns the in-memory cache. Movements are not persisted in this
-   * iteration — they remain a derived view of reservation commits, accessible
-   * via `StockMovement` aggregation on the `StockReservation` history if a
-   * future task requires long-term audit.
+   * Look up a stock reservation by ID (durable if repository available).
+   */
+  public async getReservation(tenantId: string, reservationId: string): Promise<StockReservation | null> {
+    this.requireTenant(tenantId, 'getReservation');
+    const cached = this.reservations.get(reservationId);
+    if (cached) {
+      this.enforceTenantIsolation(tenantId, cached.tenantId, 'Get reservation');
+      return cached;
+    }
+    if (this.repository?.findReservationById) {
+      const found = await this.repository.findReservationById(tenantId, reservationId);
+      if (found) {
+        this.reservations.set(found.id, found);
+        return found;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Look up all reservations for an order ID (durable if repository available).
+   */
+  public async getReservationsForOrder(tenantId: string, orderId: string): Promise<StockReservation[]> {
+    this.requireTenant(tenantId, 'getReservationsForOrder');
+    if (this.repository?.findReservationsByOrderId) {
+      const found = await this.repository.findReservationsByOrderId(tenantId, orderId);
+      for (const res of found) {
+        this.reservations.set(res.id, res);
+      }
+      return found;
+    }
+    const result: StockReservation[] = [];
+    for (const res of this.reservations.values()) {
+      if (res.tenantId === tenantId && res.orderId === orderId) {
+        result.push(res);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Query all movements for a tenant (from repository if configured, else in-memory).
+   */
+  public async getMovements(tenantId: string, productId?: string): Promise<StockMovement[]> {
+    this.requireTenant(tenantId, 'getMovements');
+    if (this.repository?.listMovements) {
+      return this.repository.listMovements(tenantId, productId);
+    }
+    return this.movements.filter((m) => m.tenantId === tenantId && (!productId || m.productId === productId));
+  }
+
+  /**
+   * Backward-compatible testing helper.
    */
   public getMovementsForTesting(tenantId: string): StockMovement[] {
     return this.movements.filter((m) => m.tenantId === tenantId);
   }
 
   /**
+   * Helper to persist stock movement.
+   */
+  private async recordMovement(movement: StockMovement): Promise<StockMovement> {
+    StockMovementSchema.parse(movement);
+    this.movements.push(movement);
+    if (this.repository?.createMovement) {
+      try {
+        await this.repository.createMovement(movement);
+      } catch (err) {
+        this.logger.error({
+          message: `Failed to persist stock movement ${movement.id}: ${(err as Error).message}`,
+          tenantId: movement.tenantId,
+          error: err instanceof Error ? err : new Error(String(err)),
+        });
+      }
+    }
+    return movement;
+  }
+
+  /**
    * Reserves stock for Checkout.
    *
-   * With a repository: invokes atomic reserve (server-side conditional update).
-   * Without a repository: legacy in-memory arithmetic.
+   * With a repository: invokes atomic reserve (server-side conditional update)
+   * and persists the reservation record.
    */
   public async reserveStock(
     tenantId: string,
@@ -292,6 +383,9 @@ export class InventoryEngine {
     this.requirePositiveQuantity(productId, quantity, 'reserveStock');
 
     const cid = correlationId || `inv_res_${Date.now()}`;
+    const nowIso = new Date().toISOString();
+    const expiresAt = new Date(Date.now() + ttlSeconds * 1000).toISOString();
+    const reservationId = `res_${Math.random().toString(36).substr(2, 9)}`;
 
     if (this.repository) {
       let persisted;
@@ -299,7 +393,6 @@ export class InventoryEngine {
         persisted = await this.repository.atomicReserve(tenantId, productId, quantity);
       } catch (err) {
         if (err instanceof RepoInsufficientInventoryException) {
-          // Re-throw as the engine's canonical exception type.
           throw new InsufficientInventoryException(err.message);
         }
         this.logger.error({
@@ -320,21 +413,49 @@ export class InventoryEngine {
       this.stocks.set(this.getStockKey(tenantId, productId), stock);
 
       const reservation: StockReservation = {
-        id: `res_${Math.random().toString(36).substr(2, 9)}`,
+        id: reservationId,
         tenantId,
         productId,
         orderId,
         quantity,
-        expiresAt: new Date(Date.now() + ttlSeconds * 1000).toISOString(),
+        expiresAt,
         status: 'PENDING',
       };
       StockReservationSchema.parse(reservation);
       this.reservations.set(reservation.id, reservation);
 
+      if (this.repository.createReservation) {
+        try {
+          await this.repository.createReservation(reservation);
+        } catch (err) {
+          this.logger.error({
+            message: `Failed to persist reservation ${reservation.id}: ${(err as Error).message}`,
+            tenantId,
+            error: err instanceof Error ? err : new Error(String(err)),
+          });
+          // Compensate: release the stock that was atomically reserved in the DB
+          try {
+            await this.repository.atomicRelease(tenantId, productId, quantity);
+            this.logger.info({
+              message: `Compensated: released stock for failed reservation ${reservation.id}`,
+              tenantId,
+              correlationId: cid,
+            });
+          } catch (releaseErr) {
+            this.logger.error({
+              message: `CRITICAL: Failed to compensate stock for failed reservation ${reservation.id}: ${(releaseErr as Error).message}`,
+              tenantId,
+              error: releaseErr instanceof Error ? releaseErr : new Error(String(releaseErr)),
+            });
+          }
+          throw err;
+        }
+      }
+
       await this.eventBus.publish({
         eventId: `evt_inv_res_${Math.random().toString(36).substr(2, 9)}`,
         eventType: 'Inventory.Reserved',
-        timestamp: new Date().toISOString(),
+        timestamp: nowIso,
         correlationId: cid,
         tenantId,
         payload: { reservationId: reservation.id, orderId, productId, quantity },
@@ -353,9 +474,8 @@ export class InventoryEngine {
     stock.quantityReserved += quantity;
     this.stocks.set(this.getStockKey(tenantId, productId), stock);
 
-    const expiresAt = new Date(Date.now() + ttlSeconds * 1000).toISOString();
     const reservation: StockReservation = {
-      id: `res_${Math.random().toString(36).substr(2, 9)}`,
+      id: reservationId,
       tenantId,
       productId,
       orderId,
@@ -370,10 +490,10 @@ export class InventoryEngine {
     await this.eventBus.publish({
       eventId: `evt_inv_res_${Math.random().toString(36).substr(2, 9)}`,
       eventType: 'Inventory.Reserved',
-      timestamp: new Date().toISOString(),
+      timestamp: nowIso,
       correlationId: cid,
       tenantId,
-      payload: { reservationId: reservation.id, orderId },
+      payload: { reservationId: reservation.id, orderId, productId, quantity },
     });
 
     return reservation;
@@ -382,9 +502,7 @@ export class InventoryEngine {
   /**
    * Commits the reserved stock once payment has been confirmed.
    *
-   * With a repository: invokes atomic release (server-side conditional
-   * decrement of `reserved`) and additionally persists the quantity reduction
-   * (commit consumes stock).
+   * Idempotent: re-committing an already COMMITTED reservation returns cleanly.
    */
   public async commitStock(
     tenantId: string,
@@ -393,12 +511,29 @@ export class InventoryEngine {
   ): Promise<StockMovement> {
     this.requireTenant(tenantId, 'commitStock');
     const cid = correlationId || `inv_cmt_${Date.now()}`;
-    const reservation = this.reservations.get(reservationId);
+    let reservation = await this.getReservation(tenantId, reservationId);
     if (!reservation) {
       throw new Error(`Reservation not found: ${reservationId}`);
     }
 
     this.enforceTenantIsolation(tenantId, reservation.tenantId, 'Commit stock reservation');
+
+    // Idempotency: double-commit is a safe no-op.
+    if (reservation.status === 'COMMITTED') {
+      this.logger.info({
+        message: `Stock reservation '${reservationId}' is already COMMITTED; idempotently skipping`,
+        tenantId,
+      });
+      return {
+        id: `mov_dup_${reservationId}`,
+        tenantId: reservation.tenantId,
+        productId: reservation.productId,
+        quantityDelta: -reservation.quantity,
+        type: 'RESERVATION_COMMIT',
+        reason: `Order ${reservation.orderId} already committed (idempotent)`,
+        createdAt: new Date().toISOString(),
+      };
+    }
 
     if (reservation.status !== 'PENDING') {
       throw new Error(`Cannot commit stock for reservation '${reservationId}' in status '${reservation.status}'`);
@@ -407,28 +542,33 @@ export class InventoryEngine {
     reservation.status = 'COMMITTED';
     this.reservations.set(reservationId, reservation);
 
-    if (this.repository) {
-      // Release the reserved counter and decrement total quantity atomically.
-      // atomicRelease handles reserved; for the quantity decrement we do a
-      // follow-up upsert (stock receipt path) — this stays within the engine's
-      // persistence contract.
-      await this.repository.atomicRelease(reservation.tenantId, reservation.productId, reservation.quantity);
-      // Persist the commit: quantity drops by reservation.quantity.
-      const hydrated = await this.repository.findByTenantAndProduct(reservation.tenantId, reservation.productId);
-      if (hydrated) {
-        await this.repository.upsertStock({
-          tenantId: reservation.tenantId,
-          productId: reservation.productId,
-          quantity: Math.max(0, hydrated.quantity - reservation.quantity),
-          reserved: Math.max(0, hydrated.reserved),
-          lowStockThreshold: hydrated.lowStockThreshold,
+    if (this.repository?.updateReservationStatus) {
+      try {
+        await this.repository.updateReservationStatus(tenantId, reservationId, 'COMMITTED');
+      } catch (err) {
+        this.logger.error({
+          message: `Failed to persist reservation status change for ${reservationId}: ${(err as Error).message}`,
+          tenantId,
+          error: err instanceof Error ? err : new Error(String(err)),
         });
+      }
+    }
+
+    if (this.repository) {
+      let committedRow;
+      if (typeof this.repository.atomicCommit === 'function') {
+        committedRow = await this.repository.atomicCommit(reservation.tenantId, reservation.productId, reservation.quantity);
+      } else {
+        await this.repository.atomicRelease(reservation.tenantId, reservation.productId, reservation.quantity);
+        committedRow = await this.repository.findByTenantAndProduct(reservation.tenantId, reservation.productId);
+      }
+      if (committedRow) {
         const stock: InventoryStock = {
           tenantId: reservation.tenantId,
           productId: reservation.productId,
-          quantityAvailable: Math.max(0, hydrated.quantity - reservation.quantity) - Math.max(0, hydrated.reserved),
-          quantityReserved: Math.max(0, hydrated.reserved),
-          lowStockThreshold: hydrated.lowStockThreshold,
+          quantityAvailable: Math.max(0, committedRow.quantity - committedRow.reserved),
+          quantityReserved: Math.max(0, committedRow.reserved),
+          lowStockThreshold: committedRow.lowStockThreshold,
         };
         this.stocks.set(this.getStockKey(reservation.tenantId, reservation.productId), stock);
       }
@@ -449,8 +589,7 @@ export class InventoryEngine {
       createdAt: new Date().toISOString(),
     };
 
-    StockMovementSchema.parse(movement);
-    this.movements.push(movement);
+    await this.recordMovement(movement);
 
     await this.eventBus.publish({
       eventId: `evt_inv_cmt_${Math.random().toString(36).substr(2, 9)}`,
@@ -466,6 +605,8 @@ export class InventoryEngine {
 
   /**
    * Releases stock reservation back to available storage (upon cancellation/expiry).
+   *
+   * Idempotent: re-releasing an already RELEASED reservation returns cleanly.
    */
   public async releaseStock(
     tenantId: string,
@@ -474,12 +615,21 @@ export class InventoryEngine {
   ): Promise<void> {
     this.requireTenant(tenantId, 'releaseStock');
     const cid = correlationId || `inv_rel_${Date.now()}`;
-    const reservation = this.reservations.get(reservationId);
+    let reservation = await this.getReservation(tenantId, reservationId);
     if (!reservation) {
       throw new Error(`Reservation not found: ${reservationId}`);
     }
 
     this.enforceTenantIsolation(tenantId, reservation.tenantId, 'Release stock reservation');
+
+    // Idempotency: double-release is a safe no-op.
+    if (reservation.status === 'RELEASED' || reservation.status === 'EXPIRED') {
+      this.logger.info({
+        message: `Stock reservation '${reservationId}' is already '${reservation.status}'; idempotently skipping release`,
+        tenantId,
+      });
+      return;
+    }
 
     if (reservation.status !== 'PENDING') {
       throw new Error(`Cannot release stock for reservation '${reservationId}' in status '${reservation.status}'`);
@@ -487,6 +637,18 @@ export class InventoryEngine {
 
     reservation.status = 'RELEASED';
     this.reservations.set(reservationId, reservation);
+
+    if (this.repository?.updateReservationStatus) {
+      try {
+        await this.repository.updateReservationStatus(tenantId, reservationId, 'RELEASED');
+      } catch (err) {
+        this.logger.error({
+          message: `Failed to persist reservation release status for ${reservationId}: ${(err as Error).message}`,
+          tenantId,
+          error: err instanceof Error ? err : new Error(String(err)),
+        });
+      }
+    }
 
     if (this.repository) {
       await this.repository.atomicRelease(reservation.tenantId, reservation.productId, reservation.quantity);
@@ -508,6 +670,17 @@ export class InventoryEngine {
       this.stocks.set(this.getStockKey(tenantId, reservation.productId), stock);
     }
 
+    const movement: StockMovement = {
+      id: `mov_${Math.random().toString(36).substr(2, 9)}`,
+      tenantId: reservation.tenantId,
+      productId: reservation.productId,
+      quantityDelta: 0,
+      type: 'RESERVATION_RELEASE',
+      reason: `Reservation ${reservation.id} released`,
+      createdAt: new Date().toISOString(),
+    };
+    await this.recordMovement(movement);
+
     await this.eventBus.publish({
       eventId: `evt_inv_rel_${Math.random().toString(36).substr(2, 9)}`,
       eventType: 'Inventory.Released',
@@ -516,6 +689,112 @@ export class InventoryEngine {
       tenantId,
       payload: { reservationId },
     });
+  }
+
+  /**
+   * Sweeps expired pending reservations and releases reserved stock.
+   *
+   * Idempotent & tenant-isolated. Safe against process restarts and concurrent calls.
+   */
+  public async sweepExpiredReservations(
+    tenantId?: string,
+    now?: string,
+    correlationId?: string
+  ): Promise<{ sweptCount: number; expiredReservationIds: string[] }> {
+    const cid = correlationId || `inv_sweep_${Date.now()}`;
+    const cutoff = now ?? new Date().toISOString();
+
+    this.logger.info({
+      message: `Sweeping expired reservations for ${tenantId || 'all tenants'} (cutoff: ${cutoff})`,
+      correlationId: cid,
+      tenantId: tenantId || 'system',
+    });
+
+    let expiredList: StockReservation[] = [];
+    if (this.repository?.findExpiredReservations) {
+      expiredList = await this.repository.findExpiredReservations(tenantId, cutoff);
+    } else {
+      for (const res of this.reservations.values()) {
+        if (tenantId && res.tenantId !== tenantId) continue;
+        if (res.status === 'PENDING' && res.expiresAt <= cutoff) {
+          expiredList.push(res);
+        }
+      }
+    }
+
+    const expiredReservationIds: string[] = [];
+
+    for (const reservation of expiredList) {
+      try {
+        const current = await this.getReservation(reservation.tenantId, reservation.id);
+        if (!current || current.status !== 'PENDING') continue;
+
+        reservation.status = 'EXPIRED';
+        this.reservations.set(reservation.id, reservation);
+
+        if (this.repository?.updateReservationStatus) {
+          const updated = await this.repository.updateReservationStatus(reservation.tenantId, reservation.id, 'EXPIRED', 'PENDING');
+          if (!updated) {
+            // Another concurrent worker or lifecycle event already updated status
+            continue;
+          }
+        }
+
+        if (this.repository) {
+          await this.repository.atomicRelease(reservation.tenantId, reservation.productId, reservation.quantity);
+          const hydrated = await this.repository.findByTenantAndProduct(reservation.tenantId, reservation.productId);
+          if (hydrated) {
+            const stock: InventoryStock = {
+              tenantId: reservation.tenantId,
+              productId: reservation.productId,
+              quantityAvailable: hydrated.quantity - hydrated.reserved,
+              quantityReserved: hydrated.reserved,
+              lowStockThreshold: hydrated.lowStockThreshold,
+            };
+            this.stocks.set(this.getStockKey(reservation.tenantId, reservation.productId), stock);
+          }
+        } else {
+          const stock = await this.getStock(reservation.tenantId, reservation.productId);
+          stock.quantityAvailable += reservation.quantity;
+          stock.quantityReserved = Math.max(0, stock.quantityReserved - reservation.quantity);
+          this.stocks.set(this.getStockKey(reservation.tenantId, reservation.productId), stock);
+        }
+
+        const movement: StockMovement = {
+          id: `mov_exp_${Math.random().toString(36).substr(2, 9)}`,
+          tenantId: reservation.tenantId,
+          productId: reservation.productId,
+          quantityDelta: 0,
+          type: 'EXPIRED',
+          reason: `Reservation ${reservation.id} expired at ${reservation.expiresAt}`,
+          createdAt: new Date().toISOString(),
+        };
+        await this.recordMovement(movement);
+
+        await this.eventBus.publish({
+          eventId: `evt_inv_exp_${Math.random().toString(36).substr(2, 9)}`,
+          eventType: 'Inventory.Released',
+          timestamp: new Date().toISOString(),
+          correlationId: cid,
+          tenantId: reservation.tenantId,
+          payload: { reservationId: reservation.id, reason: 'expired' },
+        });
+
+        expiredReservationIds.push(reservation.id);
+      } catch (err: any) {
+        this.logger.error({
+          message: `Failed to sweep expired reservation ${reservation.id}: ${err.message}`,
+          correlationId: cid,
+          tenantId: reservation.tenantId,
+          error: err,
+        });
+      }
+    }
+
+    return {
+      sweptCount: expiredReservationIds.length,
+      expiredReservationIds,
+    };
   }
 
   /**
@@ -569,8 +848,7 @@ export class InventoryEngine {
         reason,
         createdAt: new Date().toISOString(),
       };
-      StockMovementSchema.parse(movement);
-      this.movements.push(movement);
+      await this.recordMovement(movement);
 
       if (nextAvailable <= baseThreshold) {
         await this.eventBus.publish({
@@ -599,8 +877,7 @@ export class InventoryEngine {
       createdAt: new Date().toISOString(),
     };
 
-    StockMovementSchema.parse(movement);
-    this.movements.push(movement);
+    await this.recordMovement(movement);
 
     if (stock.quantityAvailable <= stock.lowStockThreshold) {
       await this.eventBus.publish({
@@ -615,15 +892,13 @@ export class InventoryEngine {
 
     return stock;
   }
+
+
 }
 
 /**
  * Bridge adapter: wraps a commerce-persistence `InventoryRepository` and exposes
  * the engine's narrow `InventoryPersistenceAdapter` contract.
- *
- * This is the single place where the engine meets the persistence layer.
- * It implements only upsert + atomic reserve/release — the engine's only
- * authoritative writes when a repository is configured.
  */
 export class InventoryRepositoryAdapter implements InventoryPersistenceAdapter {
   constructor(private readonly repo: InventoryRepository) {}
@@ -653,6 +928,17 @@ export class InventoryRepositoryAdapter implements InventoryPersistenceAdapter {
 
   async atomicRelease(tenantId: string, productId: string, quantity: number) {
     const inv = await this.repo.atomicRelease(tenantId, productId, quantity);
+    return {
+      tenantId: inv.tenantId,
+      productId: inv.productId,
+      quantity: inv.quantity,
+      reserved: inv.reserved,
+      lowStockThreshold: inv.lowStockThreshold ?? 5,
+    };
+  }
+
+  async atomicCommit(tenantId: string, productId: string, quantity: number) {
+    const inv = await this.repo.atomicCommit(tenantId, productId, quantity);
     return {
       tenantId: inv.tenantId,
       productId: inv.productId,
@@ -703,4 +989,120 @@ export class InventoryRepositoryAdapter implements InventoryPersistenceAdapter {
       lowStockThreshold: updated.lowStockThreshold ?? 5,
     };
   }
-}
+
+  async createReservation(reservation: StockReservation): Promise<StockReservation> {
+    const rec = await this.repo.createReservation({
+      id: reservation.id,
+      tenantId: reservation.tenantId,
+      productId: reservation.productId,
+      orderId: reservation.orderId,
+      quantity: reservation.quantity,
+      expiresAt: reservation.expiresAt,
+      status: reservation.status,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    return {
+      id: rec.id,
+      tenantId: rec.tenantId,
+      productId: rec.productId,
+      orderId: rec.orderId,
+      quantity: rec.quantity,
+      expiresAt: rec.expiresAt,
+      status: rec.status,
+    };
+  }
+
+  async updateReservationStatus(
+    tenantId: string,
+    reservationId: string,
+    status: StockReservation['status'],
+    expectedStatus?: StockReservation['status']
+  ): Promise<StockReservation | null> {
+    const rec = await this.repo.updateReservationStatus(tenantId, reservationId, status, expectedStatus);
+    if (!rec) return null;
+    return {
+      id: rec.id,
+      tenantId: rec.tenantId,
+      productId: rec.productId,
+      orderId: rec.orderId,
+      quantity: rec.quantity,
+      expiresAt: rec.expiresAt,
+      status: rec.status,
+    };
+  }
+
+  async findReservationById(tenantId: string, reservationId: string): Promise<StockReservation | null> {
+    const rec = await this.repo.findReservationById(tenantId, reservationId);
+    if (!rec) return null;
+    return {
+      id: rec.id,
+      tenantId: rec.tenantId,
+      productId: rec.productId,
+      orderId: rec.orderId,
+      quantity: rec.quantity,
+      expiresAt: rec.expiresAt,
+      status: rec.status,
+    };
+  }
+
+  async findReservationsByOrderId(tenantId: string, orderId: string): Promise<StockReservation[]> {
+    const records = await this.repo.findReservationsByOrderId(tenantId, orderId);
+    return records.map((rec) => ({
+      id: rec.id,
+      tenantId: rec.tenantId,
+      productId: rec.productId,
+      orderId: rec.orderId,
+      quantity: rec.quantity,
+      expiresAt: rec.expiresAt,
+      status: rec.status,
+    }));
+  }
+
+  async findExpiredReservations(tenantId?: string, now?: string): Promise<StockReservation[]> {
+    const records = await this.repo.findExpiredReservations(tenantId, now);
+    return records.map((rec) => ({
+      id: rec.id,
+      tenantId: rec.tenantId,
+      productId: rec.productId,
+      orderId: rec.orderId,
+      quantity: rec.quantity,
+      expiresAt: rec.expiresAt,
+      status: rec.status,
+    }));
+  }
+
+  async createMovement(movement: StockMovement): Promise<StockMovement> {
+    const rec = await this.repo.createMovement({
+      id: movement.id,
+      tenantId: movement.tenantId,
+      productId: movement.productId,
+      quantityDelta: movement.quantityDelta,
+      type: movement.type,
+      reason: movement.reason,
+      createdAt: movement.createdAt,
+    });
+    return {
+      id: rec.id,
+      tenantId: rec.tenantId,
+      productId: rec.productId,
+      quantityDelta: rec.quantityDelta,
+      type: rec.type,
+      reason: rec.reason,
+      createdAt: rec.createdAt,
+    };
+  }
+
+  async listMovements(tenantId: string, productId?: string): Promise<StockMovement[]> {
+    const records = await this.repo.listMovements(tenantId, productId);
+    return records.map((rec) => ({
+      id: rec.id,
+      tenantId: rec.tenantId,
+      productId: rec.productId,
+      quantityDelta: rec.quantityDelta,
+      type: rec.type,
+      reason: rec.reason,
+      createdAt: rec.createdAt,
+    }));
+  }
+}

@@ -390,6 +390,13 @@ export default function StoreManagementPage({ params }: { params: Promise<{ id: 
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <Link
+              href={`/studio/${store.id}`}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 border border-violet-400/30 rounded-full text-xs font-bold text-white shadow-lg shadow-violet-500/20 transition-all"
+            >
+              <Palette className="w-3.5 h-3.5" />
+              Otwórz Studio
+            </Link>
             <a
               href={`/store/${store.slug}`}
               target="_blank"
@@ -398,7 +405,7 @@ export default function StoreManagementPage({ params }: { params: Promise<{ id: 
             >
               Podgląd sklepu <ExternalLink className="w-3.5 h-3.5" />
             </a>
-            <Button onClick={handleTriggerPublish} disabled={saving} className="bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold rounded-full">
+            <Button onClick={handleTriggerPublish} disabled={saving} className="bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-full">
               {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Zap className="w-4 h-4 mr-1" />}
               Publikuj na Live
             </Button>

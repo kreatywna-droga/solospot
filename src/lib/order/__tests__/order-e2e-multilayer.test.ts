@@ -40,6 +40,35 @@ vi.mock('@/lib/payments/PaymentFactory', () => ({
   },
 }));
 
+vi.mock('@/lib/product/ProductRepository', () => ({
+  ProductRepository: class {
+    async getProduct(productId: string) {
+      const prices: Record<string, number> = {
+        'prod-mug': 4000,
+        'p1': 3000,
+        'p2': 5000,
+        'p3': 3000,
+        'book-1': 5000,
+        'soft-1': 20000,
+      };
+      return {
+        id: productId,
+        tenantId: 'tenant-e2e',
+        name: `Product ${productId}`,
+        description: '',
+        price: prices[productId] ?? 3000,
+        currency: 'PLN',
+        status: 'ACTIVE' as const,
+        storeId: 'store-e2e',
+        images: [],
+        metadata: {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    }
+  },
+}));
+
 function createStoreProduct(id: string, name: string, price: number, taxRate = 23): StoreProduct {
   return {
     id,
@@ -146,9 +175,9 @@ describe('B17-REAL-CANARY-2 — Multi-Layer E2E Workflows', () => {
     };
 
     const res = await runtime.checkout('tenant-e2e', 'cust-102', checkoutReq, 'e2e-corr-02');
-    // Subtotal: 15000 + 5000 = 20000; SAVE10 Discount: 2000; GrandTotal: 18000
-    expect(res.grandTotalGross).toBe(18000);
-    expect(res.redirectUrl).toBe('https://pay.gateway/intent_18000');
+    // Server-side prices: p1=3000, p2=5000. Subtotal: 8000; SAVE10: 800; GrandTotal: 7200
+    expect(res.grandTotalGross).toBe(7200);
+    expect(res.redirectUrl).toBe('https://pay.gateway/intent_7200');
 
     // 3. Simulate payment webhook completion
     const stubAdapter: PaymentProviderAdapter = {
@@ -161,13 +190,13 @@ describe('B17-REAL-CANARY-2 — Multi-Layer E2E Workflows', () => {
     const procOrder = await orderEngine.createOrder(
       'tenant-e2e',
       'cust-102',
-      [{ productId: 'p1', quantity: 1, unitPriceGross: 15000, totalGross: 15000 }],
+      [{ productId: 'p1', quantity: 1, unitPriceGross: 3000, totalGross: 3000 }],
       shippingAddress,
       'PLN',
       'corr-pay-02'
     );
     const pendingOrder = await orderEngine.invoiceOrder('tenant-e2e', procOrder.id, 'corr-pay-02');
-    const intent = await paymentEngine.createPaymentIntent('tenant-e2e', pendingOrder.id, 18000, 'PLN', stubAdapter, 'corr-pay-02');
+    const intent = await paymentEngine.createPaymentIntent('tenant-e2e', pendingOrder.id, 7200, 'PLN', stubAdapter, 'corr-pay-02');
     const procIntent = await paymentEngine.startProcessing('tenant-e2e', intent, 'corr-pay-02');
     await paymentEngine.completePayment('tenant-e2e', procIntent, 'corr-pay-02');
 
@@ -250,7 +279,7 @@ describe('B17-REAL-CANARY-2 — Multi-Layer E2E Workflows', () => {
     expect(state.items.find((i) => i.productId === 'p2')).toBeUndefined();
 
     // Step 4: Checkout with SAVE10 coupon
-    // Remaining items: p1 (qty 3 * 1000 = 3000) + p3 (qty 1 * 3000 = 3000) => Subtotal 6000; SAVE10 Discount: 600; GrandTotal: 5400
+    // Server-side prices: p1=3000, p3=3000. Remaining: p1 (qty 3 * 3000 = 9000) + p3 (qty 1 * 3000 = 3000) => Subtotal 12000; SAVE10 Discount: 1200; GrandTotal: 10800
     const checkoutReq: CheckoutRequestDTO = {
       items: state.items.map((i) => ({ productId: i.productId, quantity: i.quantity, unitPriceGross: i.price })),
       couponCode: 'SAVE10',
@@ -259,10 +288,10 @@ describe('B17-REAL-CANARY-2 — Multi-Layer E2E Workflows', () => {
     };
 
     const res = await runtime.checkout('tenant-e2e', 'guest', checkoutReq, 'e2e-corr-05');
-    expect(res.grandTotalGross).toBe(5400);
+    expect(res.grandTotalGross).toBe(10800);
 
     const order = await runtime.getOrderStatus('tenant-e2e', res.orderId);
     expect(order.status).toBe('PAYMENT_PENDING');
-    expect(order.grandTotalGross).toBe(5400);
+    expect(order.grandTotalGross).toBe(10800);
   });
 });

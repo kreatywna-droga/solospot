@@ -6,7 +6,7 @@ type IdempotencyStoreLike = {
     provider: string,
     providerEventId: string,
     payloadHash: string
-  ) => Promise<{ status: string } | null>;
+  ) => Promise<{ status: string; receivedAt?: string } | null>;
   upsertReceived: (envelope: any, payloadHash: string) => Promise<void>;
   markCompleted: (envelope: any) => Promise<void>;
   markFailed: (envelope: any) => Promise<void>;
@@ -55,27 +55,56 @@ export class WebhookProcessor {
       envelope.payloadHash
     );
 
-    if (existing?.status === 'COMPLETED' || existing?.status === 'PROCESSING') {
+    // If event is already COMPLETED, ignore it (true idempotent).
+    // If event is in PROCESSING state, check if it's stale (>5 min old). If stale, allow re-claim.
+    // Fresh PROCESSING events are from a concurrent request in flight — ignore.
+    if (existing?.status === 'COMPLETED') {
       await this.deps.audit?.record?.({
         type: 'WebhookDuplicateIgnored',
         correlationId: envelope.correlationId,
         tenantId: envelope.tenantId,
-        details: { providerEventId: envelope.providerEventId, inProgress: existing.status === 'PROCESSING' },
+        details: { providerEventId: envelope.providerEventId, reason: 'already_completed' },
       });
       return { ignored: true };
+    }
+
+    if (existing?.status === 'PROCESSING') {
+      const staleThresholdMs = 5 * 60 * 1000;
+      const receivedAt = existing.receivedAt ? new Date(existing.receivedAt).getTime() : 0;
+      const isStale = receivedAt > 0 && (Date.now() - receivedAt) > staleThresholdMs;
+
+      if (!isStale) {
+        await this.deps.audit?.record?.({
+          type: 'WebhookDuplicateIgnored',
+          correlationId: envelope.correlationId,
+          tenantId: envelope.tenantId,
+          details: { providerEventId: envelope.providerEventId, reason: 'concurrent_processing' },
+        });
+        return { ignored: true };
+      }
+      // Stale PROCESSING — fall through to re-claim via upsertReceived
     }
 
 
     try {
       await this.deps.idempotencyStore.upsertReceived(envelope, envelope.payloadHash);
     } catch (err) {
-      await this.deps.audit?.record?.({
-        type: 'WebhookDuplicateIgnored',
-        correlationId: envelope.correlationId,
-        tenantId: envelope.tenantId,
-        details: { providerEventId: envelope.providerEventId, inProgress: true, error: String(err) },
-      });
-      return { ignored: true };
+      const isDuplicateOrConcurrency =
+        err instanceof Error &&
+        (err.message.includes('Duplicate delivery') ||
+          err.message.includes('concurrency lock') ||
+          err.message.includes('already exists'));
+      if (isDuplicateOrConcurrency) {
+        await this.deps.audit?.record?.({
+          type: 'WebhookDuplicateIgnored',
+          correlationId: envelope.correlationId,
+          tenantId: envelope.tenantId,
+          details: { providerEventId: envelope.providerEventId, inProgress: true, error: String(err) },
+        });
+        return { ignored: true };
+      }
+      // Transient DB error — re-throw to trigger retry from the provider
+      throw err;
     }
 
     try {

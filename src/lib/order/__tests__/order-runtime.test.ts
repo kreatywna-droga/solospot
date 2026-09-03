@@ -38,6 +38,31 @@ vi.mock('@/lib/payments/PaymentFactory', () => ({
   },
 }));
 
+vi.mock('@/lib/product/ProductRepository', () => ({
+  ProductRepository: class {
+    async getProduct(productId: string) {
+      const prices: Record<string, number> = {
+        'prod-1': 5000,
+        'prod-2': 5000,
+      };
+      return {
+        id: productId,
+        tenantId: 'test',
+        name: `Product ${productId}`,
+        description: '',
+        price: prices[productId] ?? 5000,
+        currency: 'PLN',
+        status: 'ACTIVE' as const,
+        storeId: 'store-1',
+        images: [],
+        metadata: {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    }
+  },
+}));
+
 function validRequest(): CheckoutRequestDTO {
   return {
     items: [{ productId: 'prod-1', quantity: 2, unitPriceGross: 5000 }],
@@ -93,8 +118,9 @@ describe('OrderRuntime — checkout orchestration (thin layer)', () => {
 
     const result = await runtime.checkout('tenant-1', 'guest', multiReq, 'corr-coupon-1');
     expect(result.success).toBe(true);
-    // Subtotal: 10000 + 10000 = 20000; Discount: 2000; GrandTotal: 18000
-    expect(result.grandTotalGross).toBe(18000);
+    // Server-side price verification: prod-1=5000, prod-2=5000 (from mock)
+    // Subtotal: 5000 + 10000 = 15000; Discount: 1500; GrandTotal: 13500
+    expect(result.grandTotalGross).toBe(13500);
   });
 
   it('IDEMPOTENCJA: drugie wywołanie z tym samym correlationId zwraca to samo zamówienie', async () => {

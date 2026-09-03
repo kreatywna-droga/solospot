@@ -19,17 +19,11 @@ export async function POST(request: Request) {
       );
     }
 
-    // Zostawiamy degraded: true bez zmian lokalnie
     if (!isSupabaseConfigured()) {
-      return NextResponse.json({
-        data: {
-          user: {
-            id: `local-${Date.now()}`,
-            email,
-          },
-        },
-        degraded: true,
-      });
+      return NextResponse.json(
+        { error: 'Authentication service not configured' },
+        { status: 501 },
+      );
     }
 
     // Kluczowe: używamy @supabase/ssr i zapisujemy cookies tak,

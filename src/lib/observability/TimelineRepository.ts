@@ -50,16 +50,22 @@ export class TimelineRepository {
     return (data || []).map(row => this.mapRow(row));
   }
 
-  async getTimelineByCorrelationId(correlationId: string): Promise<TimelineEntry[]> {
+  async getTimelineByCorrelationId(correlationId: string, tenantId?: string): Promise<TimelineEntry[]> {
     if (!isSupabaseConfigured()) return [];
 
     const supabase = getServiceSupabase();
 
-    const { data, error } = await supabase
+    let query = supabase
       .from(this.tableName)
       .select('*')
-      .eq('correlation_id', correlationId)
-      .order('timestamp', { ascending: true });
+      .eq('correlation_id', correlationId);
+
+    // Scope by tenant if provided to prevent cross-tenant data leakage
+    if (tenantId) {
+      query = query.eq('tenant_id', tenantId);
+    }
+
+    const { data, error } = await query.order('timestamp', { ascending: true });
 
     if (error) {
       throw new Error(`TimelineRepository.getTimelineByCorrelationId failed: ${error.message}`);

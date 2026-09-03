@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/supabase';
-import { resolveTenantSession } from '@/lib/tenant/TenantResolver';
+import { requireAdmin } from '@/lib/auth/requireAdmin';
 
 export async function GET() {
   try {
-    const session = await resolveTenantSession();
-    if (!session.isAuthenticated) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const auth = await requireAdmin();
+    if (!auth.authorized) {
+      return NextResponse.json({ error: auth.error }, { status: 403 });
     }
 
     const supabase = getServiceSupabase();

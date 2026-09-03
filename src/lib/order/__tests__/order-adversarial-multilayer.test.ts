@@ -21,6 +21,32 @@ vi.mock('@/lib/payments/PaymentFactory', () => ({
   },
 }));
 
+vi.mock('@/lib/product/ProductRepository', () => ({
+  ProductRepository: class {
+    async getProduct(productId: string) {
+      const prices: Record<string, number> = {
+        'p1': 3000,
+        'p-bulk': 1250,
+        'p-free': 0,
+      };
+      return {
+        id: productId,
+        tenantId: 'tenant-adv',
+        name: `Product ${productId}`,
+        description: '',
+        price: prices[productId] ?? 3000,
+        currency: 'PLN',
+        status: 'ACTIVE' as const,
+        storeId: 'store-adv',
+        images: [],
+        metadata: {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    }
+  },
+}));
+
 const validShipping = {
   fullName: 'Jan Kowalski',
   street: 'ul. Prosta 1',

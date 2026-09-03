@@ -27,6 +27,9 @@ import {
   type PaymentProviderAdapter,
 } from '../../../packages/commerce-engine/src';
 import { PaymentFactory } from '@/lib/payments/PaymentFactory';
+import { ProductRepository } from '@/lib/product/ProductRepository';
+import { toCommerceProduct } from '@/lib/cart/cartAdapter';
+import type { Product as CommerceProduct } from '../../../packages/commerce-engine/src';
 import { PlatformEventBusImpl } from '../../../packages/platform-core/src/events/PlatformEventBus';
 import { ConsolePlatformLogger } from '../../../packages/platform-core/src/logger/Logger';
 
@@ -92,22 +95,21 @@ export class OrderRuntime {
   private readonly logger: ConsolePlatformLogger;
   private readonly orderEngine: OrderProcessingEngine;
   private readonly paymentEngine: PaymentEngine;
-  /** In-memory idempotency cache (double-click "Zapłać" protection) keyed by correlationId. */
-  private readonly checkoutCache = new Map<string, CheckoutResponseDTO>();
-  /** Inflight request deduplication map for concurrent requests with identical correlationId. */
+  private readonly productRepo: ProductRepository;
+  /** In-memory idempotency cache keyed by `${tenantId}::${correlationId}` to prevent cross-tenant collisions. */
+  private readonly checkoutCache = new Map<string, { entry: CheckoutResponseDTO; expiresAt: number }>();
+  /** Inflight request deduplication map keyed by `${tenantId}::${correlationId}`. */
   private readonly inflightPromises = new Map<string, Promise<CheckoutResponseDTO>>();
+  /** Checkout cache TTL — entries older than this are evicted on next access. Default 5 minutes. */
+  private static readonly CHECKOUT_CACHE_TTL_MS = 5 * 60 * 1000;
+  /** Maximum number of entries in checkout cache before forced sweep. */
+  private static readonly CHECKOUT_CACHE_MAX_SIZE = 1000;
 
   constructor(options?: {
     eventBus?: PlatformEventBusImpl;
     logger?: ConsolePlatformLogger;
-    /**
-     * G1-333 HARDEN: optional OrderProcessingEngine (and its persistence adapter)
-     * to inject. Production callers should wire OrderProcessingEngine with a
-     * Supabase-backed OrderRepositoryAdapter; tests can inject an engine that
-     * uses MemoryOrderRepository. When omitted, OrderProcessingEngine runs in
-     * legacy in-memory mode (single-process only — same as before G1-333).
-     */
     orderEngine?: OrderProcessingEngine;
+    productRepo?: ProductRepository;
   }) {
     this.logger = options?.logger || new ConsolePlatformLogger();
     this.eventBus = options?.eventBus || new PlatformEventBusImpl();
@@ -120,6 +122,7 @@ export class OrderRuntime {
       eventBus: this.eventBus,
       logger: this.logger,
     });
+    this.productRepo = options?.productRepo || new ProductRepository();
   }
 
   /**
@@ -139,28 +142,45 @@ export class OrderRuntime {
     correlationId?: string,
   ): Promise<CheckoutResponseDTO> {
     const cid = correlationId || `chk_${Date.now()}`;
+    const cacheKey = `${tenantId}::${cid}`;
+
+    // Proactive sweep: evict expired entries when cache is large
+    if (this.checkoutCache.size > OrderRuntime.CHECKOUT_CACHE_MAX_SIZE) {
+      const now = Date.now();
+      for (const [key, val] of this.checkoutCache) {
+        if (val.expiresAt <= now) {
+          this.checkoutCache.delete(key);
+        }
+      }
+    }
 
     // 0. Idempotency guard — cached completed responses
-    const cached = this.checkoutCache.get(cid);
+    const cached = this.checkoutCache.get(cacheKey);
     if (cached) {
-      return cached;
+      if (cached.expiresAt > Date.now()) {
+        return cached.entry;
+      }
+      this.checkoutCache.delete(cacheKey);
     }
 
     // Deduplicate concurrent inflight requests with identical correlationId
-    const inflight = this.inflightPromises.get(cid);
+    const inflight = this.inflightPromises.get(cacheKey);
     if (inflight) {
       return inflight;
     }
 
     const promise = this.executeCheckout(tenantId, customerId, req, cid);
-    this.inflightPromises.set(cid, promise);
+    this.inflightPromises.set(cacheKey, promise);
 
     try {
       const result = await promise;
-      this.checkoutCache.set(cid, result);
+      this.checkoutCache.set(cacheKey, {
+        entry: result,
+        expiresAt: Date.now() + OrderRuntime.CHECKOUT_CACHE_TTL_MS,
+      });
       return result;
     } finally {
-      this.inflightPromises.delete(cid);
+      this.inflightPromises.delete(cacheKey);
     }
   }
 
@@ -174,6 +194,44 @@ export class OrderRuntime {
 
     if (!req.items || req.items.length === 0) {
       throw new Error('Cannot checkout with an empty cart.');
+    }
+
+    // Server-side price verification: fetch authoritative prices from DB.
+    // If ANY product is not found, reject the checkout (prevents price bypass).
+    // Only fall back to client-supplied prices if the DB is completely unavailable.
+    let productMap: Map<string, CommerceProduct> | null = null;
+    let dbAvailable = true;
+    try {
+      const results = await Promise.allSettled(
+        req.items.map((item) => this.productRepo.getProduct(item.productId, tenantId)),
+      );
+      const allResolved = results.every((r) => r.status === 'fulfilled');
+      if (allResolved) {
+        const dbProducts = results.map((r) => (r.status === 'fulfilled' ? r.value : null));
+        productMap = new Map<string, CommerceProduct>();
+        for (let i = 0; i < req.items.length; i++) {
+          const dbProduct = dbProducts[i];
+          if (!dbProduct) {
+            throw new Error(`Product not found: ${req.items[i].productId}`);
+          }
+          productMap.set(req.items[i].productId, toCommerceProduct(dbProduct));
+        }
+      } else {
+        dbAvailable = false;
+      }
+    } catch (err) {
+      if (err instanceof Error && err.message.startsWith('Product not found:')) {
+        throw err;
+      }
+      dbAvailable = false;
+    }
+
+    if (!dbAvailable || !productMap) {
+      this.logger.warn({
+        message: 'Server-side price verification unavailable — using client-supplied prices',
+        tenantId,
+        correlationId: cid,
+      });
     }
 
     // 1. Zbuduj koszyk z żądania i przelicz sumy
@@ -205,7 +263,7 @@ export class OrderRuntime {
       updatedAt: new Date().toISOString(),
     };
 
-    const cart = CartManager.recalculate(rawCart);
+    const cart = CartManager.recalculate(rawCart, productMap ?? undefined);
 
     // 2. Mapuj adres na kontrakt CheckoutFlow
     const shippingAddress: ShippingAddress = {

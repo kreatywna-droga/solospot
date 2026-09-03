@@ -15,16 +15,10 @@ export async function POST(request: Request) {
     }
 
     if (!isSupabaseConfigured()) {
-      return NextResponse.json({
-        data: {
-          user: {
-            id: `local-${Date.now()}`,
-            email,
-            user_metadata: { name: name || '' },
-          },
-        },
-        degraded: true,
-      });
+      return NextResponse.json(
+        { error: 'Authentication service not configured' },
+        { status: 501 },
+      );
     }
 
     const adminSupabase = getServiceSupabase();

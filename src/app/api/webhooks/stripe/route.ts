@@ -4,6 +4,7 @@ import Stripe from 'stripe'
 import { getServiceSupabase } from '@/lib/supabase'
 import { TemplateRegistry } from '@/lib/template/TemplateRegistry'
 import { sendWelcomeEmail } from '@/lib/email'
+import { SupabaseIdempotencyStore } from '@/lib/webhooks'
 
 const stripeKey = process.env.STRIPE_SECRET_KEY
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
@@ -35,14 +36,42 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 })
   }
 
+  // Idempotency check: skip if already processed
+  const idempotencyStore = new SupabaseIdempotencyStore()
+  const payloadHash = require('crypto').createHash('sha256').update(body).digest('hex')
+  const envelope = {
+    provider: 'stripe',
+    providerEventId: event.id,
+    providerTransactionId: event.id,
+    payloadHash,
+    correlationId: event.id,
+    tenantId: 'system',
+    occurredAt: new Date(event.created * 1000).toISOString(),
+  }
+
+  try {
+    await idempotencyStore.upsertReceived(envelope, payloadHash)
+  } catch {
+    // Duplicate or in-progress — skip
+    return NextResponse.json({ received: true, duplicate: true })
+  }
+
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
 
     if (session.metadata?.type === 'marketplace_purchase' && session.metadata.templateSlug) {
-      await handleMarketplacePurchase(session)
+      try {
+        await handleMarketplacePurchase(session)
+      } catch (err) {
+        // Mark as FAILED so Stripe can retry on next delivery
+        await idempotencyStore.markFailed(envelope)
+        console.error('Marketplace purchase processing failed:', err)
+        return NextResponse.json({ error: 'Processing failed' }, { status: 500 })
+      }
     }
   }
 
+  await idempotencyStore.markCompleted(envelope)
   return NextResponse.json({ received: true })
 }
 
@@ -51,114 +80,106 @@ async function handleMarketplacePurchase(session: Stripe.Checkout.Session) {
   const templateSlug = session.metadata?.templateSlug
 
   if (!userId || !templateSlug) {
-    console.error('Missing metadata in session', { userId, templateSlug })
-    return
+    throw new Error(`Missing metadata in session: userId=${userId}, templateSlug=${templateSlug}`)
   }
 
   const supabase = getServiceSupabase()
 
-  try {
-    const { data: existingTenant } = await supabase
+  const { data: existingTenant } = await supabase
+    .from('tenants')
+    .select('id')
+    .eq('owner_id', userId)
+    .single()
+
+  let tenantId: string
+
+  if (existingTenant) {
+    tenantId = existingTenant.id
+  } else {
+    const { data: tenant, error: tenantError } = await supabase
       .from('tenants')
-      .select('id')
-      .eq('owner_id', userId)
-      .single()
-
-    let tenantId: string
-
-    if (existingTenant) {
-      tenantId = existingTenant.id
-    } else {
-      const { data: tenant, error: tenantError } = await supabase
-        .from('tenants')
-        .insert({
-          owner_id: userId,
-          package_id: 'marketplace',
-          status: 'ACTIVE',
-        })
-        .select('id')
-        .single()
-
-      if (tenantError || !tenant) {
-        console.error('Failed to create tenant:', tenantError)
-        return
-      }
-      tenantId = tenant.id
-    }
-
-    const registry = new TemplateRegistry()
-    const template = registry.getBySlug(templateSlug)
-
-    if (!template) {
-      console.error('Template not found:', templateSlug)
-      return
-    }
-
-    const { data: store, error: storeError } = await supabase
-      .from('stores')
       .insert({
-        tenant_id: tenantId,
-        name: template.name,
-        slug: `${template.slug}-${tenantId.slice(0, 8)}`,
+        owner_id: userId,
+        package_id: 'marketplace',
         status: 'ACTIVE',
-        config: {
-          publicationStatus: 'PUBLISHED',
-          branding: {
-            primaryColor: template.theme.primaryColor,
-            secondaryColor: template.theme.secondaryColor,
-            font: template.theme.font,
-            description: template.theme.description,
-          },
-        },
       })
-      .select('id, slug')
+      .select('id')
       .single()
 
-    if (storeError || !store) {
-      console.error('Failed to create store:', storeError)
-      return
+    if (tenantError || !tenant) {
+      throw new Error(`Failed to create tenant: ${tenantError?.message ?? 'unknown'}`)
     }
-
-    const { error: installError } = await supabase.rpc('install_template_to_store', {
-      p_store_id: store.id,
-      p_template_slug: templateSlug,
-    })
-
-    if (installError) {
-      console.error('Failed to install template:', installError)
-    }
-
-    await supabase.from('timeline_events').insert({
-      tenant_id: tenantId,
-      event_type: 'MARKETPLACE_PURCHASE_COMPLETED',
-      payload: {
-        templateSlug,
-        templateName: template.name,
-        storeId: store.id,
-        storeSlug: store.slug,
-        sessionId: session.id,
-        amount: session.amount_total,
-        currency: session.currency,
-      },
-      correlation_id: session.id,
-    })
-
-    // Get user email for welcome email
-    const { data: user } = await supabase.auth.admin.getUserById(userId)
-    if (user?.user?.email) {
-      const storeUrl = `${process.env.NEXT_PUBLIC_APP_URL}/store/${store.slug}`
-      await sendWelcomeEmail({
-        to: user.user.email,
-        storeName: template.name,
-        storeUrl,
-        dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/stores/${store.id}`,
-        templateName: template.name,
-      })
-    }
-
-    console.log('Marketplace purchase completed:', { tenantId, storeId: store.id, templateSlug })
-
-  } catch (err) {
-    console.error('Error processing marketplace purchase:', err)
+    tenantId = tenant.id
   }
+
+  const registry = new TemplateRegistry()
+  const template = registry.getBySlug(templateSlug)
+
+  if (!template) {
+    throw new Error(`Template not found: ${templateSlug}`)
+  }
+
+  const { data: store, error: storeError } = await supabase
+    .from('stores')
+    .insert({
+      tenant_id: tenantId,
+      name: template.name,
+      slug: `${template.slug}-${tenantId.slice(0, 8)}`,
+      status: 'ACTIVE',
+      config: {
+        publicationStatus: 'PUBLISHED',
+        branding: {
+          primaryColor: template.theme.primaryColor,
+          secondaryColor: template.theme.secondaryColor,
+          font: template.theme.font,
+          description: template.theme.description,
+        },
+      },
+    })
+    .select('id, slug')
+    .single()
+
+  if (storeError || !store) {
+    throw new Error(`Failed to create store: ${storeError?.message ?? 'unknown'}`)
+  }
+
+  // Non-critical: template install failure is logged but does not fail the webhook
+  const { error: installError } = await supabase.rpc('install_template_to_store', {
+    p_store_id: store.id,
+    p_template_slug: templateSlug,
+  })
+
+  if (installError) {
+    console.error('Failed to install template (non-critical):', installError)
+  }
+
+  await supabase.from('timeline_events').insert({
+    tenant_id: tenantId,
+    event_type: 'MARKETPLACE_PURCHASE_COMPLETED',
+    payload: {
+      templateSlug,
+      templateName: template.name,
+      storeId: store.id,
+      storeSlug: store.slug,
+      sessionId: session.id,
+      amount: session.amount_total,
+      currency: session.currency,
+    },
+    correlation_id: session.id,
+  })
+
+  // Best-effort welcome email
+  const { data: user } = await supabase.auth.admin.getUserById(userId)
+  if (user?.user?.email) {
+    const storeUrl = `${process.env.NEXT_PUBLIC_APP_URL}/store/${store.slug}`
+    await sendWelcomeEmail({
+      to: user.user.email,
+      storeName: template.name,
+      storeUrl,
+      dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/stores/${store.id}`,
+      templateName: template.name,
+    }).catch((err) => console.error('Welcome email failed (non-critical):', err))
+  }
+
+  console.log('Marketplace purchase completed:', { tenantId, storeId: store.id, templateSlug })
 }

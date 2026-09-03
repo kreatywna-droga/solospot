@@ -1,6 +1,7 @@
 import { HealthCheckEngine, SystemDiagnosticProbe, SystemDiagnosticReport } from '../../../../packages/observability/src';
 import { PlatformEventBusImpl } from '../../../../packages/platform-core/src/events/PlatformEventBus';
 import { ConsolePlatformLogger } from '../../../../packages/platform-core/src/logger/Logger';
+import { requireAdmin } from '@/lib/auth/requireAdmin';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,6 +42,11 @@ export async function createDiagnosticsReport(): Promise<SystemDiagnosticReport>
 }
 
 export async function GET() {
+  const auth = await requireAdmin();
+  if (!auth.authorized) {
+    return Response.json({ error: auth.error }, { status: 403 });
+  }
+
   const report = await createDiagnosticsReport();
   const isUnhealthy = report.status === 'unhealthy' || report.summary?.status === 'unhealthy';
   const httpStatus = isUnhealthy ? 503 : 200;

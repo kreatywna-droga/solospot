@@ -84,7 +84,7 @@ export class SupabaseRepository<T extends { id: string; createdAt: string; updat
   }
 
   async findByTenant(tenantId: string, options?: QueryOptions): Promise<T[]> {
-    return this.findAll({ ...options, filters: { ...options?.filters, tenantId } })
+    return this.findAll({ ...options, filters: { ...options?.filters, tenant_id: tenantId } })
   }
 
   protected getTableName(): string {

@@ -162,6 +162,22 @@ export class MockQueryBuilder {
     return this;
   }
 
+  or(filterString: string) {
+    if (this.error) return this;
+    if (this.table === 'webhook_events') {
+      this.data = this.data.filter(r => {
+        if (r.status === 'FAILED' || r.status === 'RECEIVED') return true;
+        if (r.status === 'PROCESSING') {
+          const receivedAt = r.received_at ? new Date(r.received_at).getTime() : 0;
+          const staleThresholdMs = 5 * 60 * 1000;
+          return receivedAt > 0 && (Date.now() - receivedAt) > staleThresholdMs;
+        }
+        return false;
+      });
+    }
+    return this;
+  }
+
   order(field: string, options?: { ascending?: boolean }) {
     if (this.error) return this;
     const asc = options?.ascending !== false;
