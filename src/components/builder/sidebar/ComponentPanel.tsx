@@ -105,7 +105,7 @@ interface ComponentPanelProps {
 }
 
 export function ComponentPanel({ onClose }: ComponentPanelProps) {
-  const { dispatch, ctx, canvas } = useBuilder()
+  const { dispatch, ctx, canvas, document: builderDoc } = useBuilder()
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState<string>('all')
 
@@ -122,21 +122,19 @@ export function ComponentPanel({ onClose }: ComponentPanelProps) {
       : (byCategory.get(activeCategory) ?? [])
 
   const handleAdd = useCallback((descriptor: ComponentDescriptor) => {
-    const activePage = canvas.selectedPageId
-      ?? document.querySelectorAll('[data-page-id]')[0]?.getAttribute('data-page-id')
-      ?? null
+    const targetPageId = canvas.selectedPageId || builderDoc.pages[0]?.id
+    if (!targetPageId) return
 
-    // Fall back to first page if no page selected
     dispatch({
       type: 'ADD_SECTION',
-      pageId: activePage ?? '__no_page__',
+      pageId: targetPageId,
       sectionType: descriptor.type,
       defaultProps: { ...descriptor.defaultProps },
       label: descriptor.label,
     })
 
     onClose?.()
-  }, [dispatch, canvas.selectedPageId, onClose])
+  }, [dispatch, canvas.selectedPageId, builderDoc.pages, onClose])
 
   return (
     <div className="flex flex-col h-full">

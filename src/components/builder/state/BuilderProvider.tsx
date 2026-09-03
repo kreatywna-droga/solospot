@@ -178,20 +178,18 @@ export function useBuilderHistory(): {
 
 export function useSelectedSection() {
   const { canvas, document } = useBuilder()
-  if (!canvas.selectedSectionId || !canvas.selectedPageId) return null
+  if (!canvas.selectedSectionId) return null
 
-  const page = document.pages.find(p => p.id === canvas.selectedPageId)
-  if (!page) return null
-
-  const pageSections = page.sections
   const targetId = canvas.selectedSectionId
+  const pages = canvas.selectedPageId
+    ? document.pages.filter(p => p.id === canvas.selectedPageId)
+    : document.pages
 
-  // Search recursively
-  type SectionArray = typeof pageSections
+  type SectionArray = typeof document.pages[0]['sections']
   function find(nodes: SectionArray): SectionArray[0] | null {
     for (const node of nodes) {
       if (node.id === targetId) return node
-      if (node.children.length > 0) {
+      if (node.children && node.children.length > 0) {
         const found = find(node.children)
         if (found) return found
       }
@@ -199,5 +197,10 @@ export function useSelectedSection() {
     return null
   }
 
-  return find(pageSections)
+  for (const page of pages) {
+    const found = find(page.sections)
+    if (found) return found
+  }
+
+  return null
 }

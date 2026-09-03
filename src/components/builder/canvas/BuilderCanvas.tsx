@@ -348,13 +348,11 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
   const isDragging = canvas.dragState?.isDragging ?? false
 
   const handleSelectSection = useCallback((sectionId: string, pageId: string) => {
-    const parentId = findParent(sections, sectionId)
-    const targetId = parentId || sectionId
     dispatch({
       type: 'CANVAS',
-      action: { type: 'SELECT_SECTION', sectionId: targetId, pageId },
+      action: { type: 'SELECT_SECTION', sectionId, pageId },
     })
-  }, [dispatch, sections])
+  }, [dispatch])
 
   const handleParentSelect = useCallback((sectionId: string, pageId: string) => {
     dispatch({
@@ -482,8 +480,8 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
           />
         )}
 
-        {/* Runtime Preview Iframe in PREVIEW/LIVE mode OR Structured Editable Canvas in EDIT mode */}
-        {(canvas.runtimeMode === 'PREVIEW' || canvas.runtimeMode === 'LIVE' || canvas.mode === 'PREVIEW') ? (
+        {/* Runtime Preview Iframe in PREVIEW mode OR Structured Editable Canvas in EDIT mode */}
+        {(canvas.mode === 'PREVIEW' || canvas.runtimeMode === 'PREVIEW') ? (
           <iframe
             ref={iframeRef}
             src={`/preview-frame/${previewSlug || 'vinyl'}`}
@@ -525,18 +523,9 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                   data-section-id={node.id}
                   data-layer-id={node.id}
                   style={{ 
-                    minHeight: sectionHeight(node.type),
                     opacity: isDragSource ? 0.3 : 1,
                   }}
-                  className={`relative group cursor-pointer transition-all duration-150 select-none
-                    ${!node.visible ? 'opacity-30' : ''}
-                    ${canvas.selectedSectionId === node.id
-                      ? 'ring-2 ring-violet-500 ring-inset'
-                      : canvas.hoveredSectionId === node.id && canvas.selectedSectionId !== node.id
-                        ? 'ring-1 ring-violet-500/40 ring-inset'
-                        : ''
-                    }
-                  `}
+                  className="relative w-full"
                 >
                   <SectionBlock
                     node={node}

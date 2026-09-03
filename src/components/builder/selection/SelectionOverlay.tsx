@@ -50,9 +50,12 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
   // Compute toolbar data: find section index in page
   const toolbarData = useMemo(() => {
     if (!overlay.toolbarPosition || !overlay.selectedSection) return null
-    if (!canvas.selectedPageId || !canvas.selectedSectionId) return null
+    if (!canvas.selectedSectionId) return null
 
-    const page = document.pages.find(p => p.id === canvas.selectedPageId)
+    const targetPageId = canvas.selectedPageId || document.pages[0]?.id
+    if (!targetPageId) return null
+
+    const page = document.pages.find(p => p.id === targetPageId)
     if (!page) return null
 
     const index = page.sections.findIndex(s => s.id === canvas.selectedSectionId)
@@ -61,7 +64,7 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     return {
       position: overlay.toolbarPosition,
       sectionId: canvas.selectedSectionId,
-      pageId: canvas.selectedPageId,
+      pageId: targetPageId,
       locked: overlay.selectedSection.locked,
       hidden: !overlay.selectedSection.visible,
       index,

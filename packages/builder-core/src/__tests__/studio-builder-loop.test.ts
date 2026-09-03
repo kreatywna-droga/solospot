@@ -120,20 +120,36 @@ describe('Studio Builder Full Lifecycle Loop', () => {
     expect(ctx.document.pages[0].sections[1].type).toBe('product-grid')
     expect(ctx.document.pages[0].sections[2].type).toBe('hero')
 
-    // 6. TOGGLE PREVIEW MODE
+    // 6. DUPLICATE SECTION
+    ctx = ctx.dispatch({
+      type: 'DUPLICATE_SECTION',
+      pageId: 'page_home',
+      sectionId: 'sec_hero',
+    })
+    expect(ctx.document.pages[0].sections.length).toBe(4)
+
+    // 7. RESPONSIVE VIEWPORT TOGGLE
+    ctx = ctx.dispatch({
+      type: 'CANVAS',
+      action: { type: 'SET_VIEWPORT', viewport: { label: 'mobile', width: 375, height: 667, scale: 1 } },
+    })
+    expect(ctx.canvas.viewport.label).toBe('mobile')
+    expect(ctx.canvas.viewport.width).toBe(375)
+
+    // 8. TOGGLE PREVIEW MODE
     ctx = ctx.dispatch({
       type: 'CANVAS',
       action: { type: 'SET_MODE', mode: 'PREVIEW' },
     })
     expect(ctx.canvas.mode).toBe('PREVIEW')
 
-    // 7. REMOVE SECTION
+    // 9. REMOVE SECTION
     ctx = ctx.dispatch({
       type: 'REMOVE_SECTION',
       pageId: 'page_home',
       sectionId: 'sec_nav',
     })
-    expect(ctx.document.pages[0].sections.length).toBe(2)
+    expect(ctx.document.pages[0].sections.length).toBe(3)
     expect(ctx.document.pages[0].sections.some(s => s.id === 'sec_nav')).toBe(false)
   })
 })

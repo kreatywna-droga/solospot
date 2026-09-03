@@ -68,20 +68,22 @@ interface BuilderShellProps {
 export function BuilderShell({ storeId, onSave, saving }: BuilderShellProps) {
   const [activeTab, setActiveTab] = useState<StudioTab>('layers')
   const [leftSidebarVisible, setLeftSidebarVisible] = useState(true)
-  const { dispatch, canvas } = useBuilder()
+  const { dispatch, canvas, document: builderDoc } = useBuilder()
   // Keyboard handled by KeyboardController in core — BuilderShell is "głupi"
 
   const handleInspectorPropChange = useCallback(
     (key: string, value: unknown) => {
-      if (!canvas.selectedSectionId || !canvas.selectedPageId) return
+      if (!canvas.selectedSectionId) return
+      const targetPageId = canvas.selectedPageId || builderDoc.pages[0]?.id
+      if (!targetPageId) return
       dispatch({
         type: 'UPDATE_PROPS',
-        pageId: canvas.selectedPageId,
+        pageId: targetPageId,
         sectionId: canvas.selectedSectionId,
         props: { [key]: value },
       })
     },
-    [dispatch, canvas.selectedSectionId, canvas.selectedPageId],
+    [dispatch, canvas.selectedSectionId, canvas.selectedPageId, builderDoc.pages],
   )
 
   return (
