@@ -49,6 +49,7 @@ export type BuilderCommandType =
   | 'MOVE_SECTION_TO_PARENT'
   | 'UPDATE_PROPS'
   | 'REPLACE_PROPS'
+  | 'SET_SECTION_RESPONSIVE_PROP'
   | 'TOGGLE_VISIBILITY'
   | 'TOGGLE_LOCK'
   | 'DUPLICATE_SECTION'
@@ -118,6 +119,14 @@ export type BuilderCommand =
       readonly pageId: string;
       readonly sectionId: string;
       readonly props: Record<string, unknown>;
+    }
+  | {
+      readonly type: 'SET_SECTION_RESPONSIVE_PROP';
+      readonly pageId: string;
+      readonly sectionId: string;
+      readonly propName: string;
+      readonly value: unknown;
+      readonly breakpoint: string;
     }
   | {
       readonly type: 'TOGGLE_VISIBILITY';
@@ -194,6 +203,7 @@ export function commandLabel(cmd: BuilderCommand): string {
     case 'MOVE_SECTION_TO_PARENT': return `Move section to new parent`;
     case 'UPDATE_PROPS':      return `Edit section props`;
     case 'REPLACE_PROPS':     return `Replace section props`;
+    case 'SET_SECTION_RESPONSIVE_PROP': return `Set responsive prop`;
     case 'TOGGLE_VISIBILITY': return `Toggle visibility`;
     case 'TOGGLE_LOCK':       return `Toggle lock`;
     case 'DUPLICATE_SECTION': return `Duplicate section`;
@@ -355,6 +365,23 @@ export function applyCommandToDocument(
         return {
           ...page,
           sections: sectionTree.replaceProps(page.sections, command.sectionId, command.props),
+        };
+      });
+      return touchDocument({ ...doc, pages });
+    }
+
+    case 'SET_SECTION_RESPONSIVE_PROP': {
+      const pages = doc.pages.map(page => {
+        if (page.id !== command.pageId) return page;
+        return {
+          ...page,
+          sections: sectionTree.updateResponsiveProps(
+            page.sections,
+            command.sectionId,
+            command.propName,
+            command.value,
+            command.breakpoint
+          ),
         };
       });
       return touchDocument({ ...doc, pages });

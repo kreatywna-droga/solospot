@@ -131,9 +131,9 @@ describe('Studio Builder Full Lifecycle Loop', () => {
     // 7. RESPONSIVE VIEWPORT TOGGLE
     ctx = ctx.dispatch({
       type: 'CANVAS',
-      action: { type: 'SET_VIEWPORT', viewport: { label: 'mobile', width: 375, height: 667, scale: 1 } },
+      action: { type: 'SET_VIEWPORT', viewport: { label: 'MOBILE', width: 375 } },
     })
-    expect(ctx.canvas.viewport.label).toBe('mobile')
+    expect(ctx.canvas.viewport.label).toBe('MOBILE')
     expect(ctx.canvas.viewport.width).toBe(375)
 
     // 8. TOGGLE PREVIEW MODE

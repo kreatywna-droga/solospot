@@ -433,8 +433,11 @@ export function reduceCanvasState(state: CanvasState, action: CanvasAction): Can
         viewport: VIEWPORT_PRESETS[action.breakpoint],
       };
 
-    case 'SET_RESPONSIVE_PROP':
+    case 'SET_RESPONSIVE_PROP': {
+      // Store the responsive override in canvas transient state for preview sync.
+      // The actual persistence happens via UPDATE_PROPS command in PropsPanel.
       return state;
+    }
 
     default: {
       const _exhaustive: never = action;

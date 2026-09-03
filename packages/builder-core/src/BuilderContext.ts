@@ -166,8 +166,20 @@ function buildContext(
             if (pageId) {
               const page = document.pages.find(p => p.id === pageId)
               if (page) {
+                const newBreakpoint = command.action.breakpoint.toLowerCase()
                 for (const section of page.sections) {
-                  sendSectionUpdate(preview, pageId, section.id, section.props)
+                  // Resolve responsive overrides for the new breakpoint
+                  let resolvedProps = section.props
+                  if (section.responsiveProps) {
+                    resolvedProps = { ...resolvedProps }
+                    for (const [propName, breakpointValues] of Object.entries(section.responsiveProps)) {
+                      const value = breakpointValues[newBreakpoint]
+                      if (value !== undefined) {
+                        resolvedProps[propName] = value
+                      }
+                    }
+                  }
+                  sendSectionUpdate(preview, pageId, section.id, resolvedProps)
                 }
               }
             }

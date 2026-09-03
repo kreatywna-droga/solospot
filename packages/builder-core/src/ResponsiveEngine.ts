@@ -6,6 +6,7 @@ import { BuilderCommand } from './BuilderCommands';
 import { CanvasState, ViewportLabel } from './CanvasState';
 
 export type Breakpoint = ViewportLabel;
+export type BreakpointKey = 'desktop' | 'tablet' | 'mobile';
 
 export interface ResponsiveValue<T> {
   readonly desktop?: T;
@@ -44,7 +45,7 @@ export class ResponsiveEngine {
     }
 
     for (const [propName, breakpointValue] of Object.entries(sectionResponsive)) {
-      const value = breakpointValue[this.activeBreakpoint.toLowerCase() as keyof ResponsiveValue<any>];
+      const value = breakpointValue[this.activeBreakpoint.toLowerCase() as BreakpointKey];
       if (value !== undefined) {
         effective[propName] = value;
       }
@@ -57,11 +58,15 @@ export class ResponsiveEngine {
     sectionId: string,
     propName: string,
     value: any,
-    breakpoint: Breakpoint
-  ): Record<string, ResponsiveValue<any>> {
+    breakpoint: Breakpoint,
+    existing?: Record<string, Record<string, unknown>>
+  ): Record<string, Record<string, unknown>> {
+    const sectionExisting = existing ?? {};
+    const propExisting = sectionExisting[propName] ?? {};
     return {
-      [sectionId]: {
-        ...({} as Record<string, ResponsiveValue<any>>),
+      ...sectionExisting,
+      [propName]: {
+        ...propExisting,
         [breakpoint.toLowerCase()]: value,
       },
     };

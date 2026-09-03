@@ -17,14 +17,13 @@
  * No per-component editor files needed. The schema drives everything.
  */
 
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Image } from 'lucide-react'
 import { X, Lock, Eye, EyeOff, Trash2, Copy } from 'lucide-react'
 import { useBuilder, useSelectedSection } from '../state/BuilderProvider'
 import { PropSchema } from '../../../../packages/builder-core/src/ComponentRegistry'
 import { VIEWPORT_PRESETS, ViewportLabel } from '../../../../packages/builder-core/src/CanvasState'
 import { Monitor, Tablet, Smartphone } from 'lucide-react'
-import { ResponsiveEngine, ResponsiveValue } from '../../../../packages/builder-core/src/ResponsiveEngine'
 import { AssetPicker } from '../../media/AssetPicker'
 import { MediaDocument } from '../../../../packages/asset-manager-core/src/AssetTypes'
 
@@ -258,8 +257,6 @@ function PropField({ schema, value, onChange }: FieldProps) {
 export function PropsPanel() {
   const { dispatch, canvas, document, ctx } = useBuilder()
   const selectedNode = useSelectedSection()
-  const responsiveEngine = useMemo(() => new ResponsiveEngine(), [])
-  const [responsiveProps, setResponsiveProps] = useState<Record<string, Record<string, any>>>({})
 
   const handleClose = useCallback(() => {
     dispatch({ type: 'CANVAS', action: { type: 'SELECT_SECTION', sectionId: null } })
@@ -268,22 +265,27 @@ export function PropsPanel() {
   const handlePropChange = useCallback((key: string, value: unknown) => {
     if (!canvas.selectedSectionId || !canvas.selectedPageId) return
     const breakpoint = canvas.selection.activeBreakpoint
-    const sectionResponsive = responsiveProps[canvas.selectedSectionId] ?? {}
-    const updated = {
-      ...sectionResponsive,
-      [breakpoint.toLowerCase()]: value,
+
+    if (breakpoint === 'DESKTOP') {
+      // Desktop = base props (direct mutation)
+      dispatch({
+        type: 'UPDATE_PROPS',
+        pageId: canvas.selectedPageId,
+        sectionId: canvas.selectedSectionId,
+        props: { [key]: value },
+      })
+    } else {
+      // Tablet/Mobile = responsive override (persisted in document)
+      dispatch({
+        type: 'SET_SECTION_RESPONSIVE_PROP',
+        pageId: canvas.selectedPageId,
+        sectionId: canvas.selectedSectionId,
+        propName: key,
+        value,
+        breakpoint: breakpoint.toLowerCase(),
+      })
     }
-    setResponsiveProps(prev => ({
-      ...prev,
-      [canvas.selectedSectionId!]: updated,
-    }))
-    dispatch({
-      type: 'UPDATE_PROPS',
-      pageId: canvas.selectedPageId,
-      sectionId: canvas.selectedSectionId,
-      props: { [key]: value },
-    })
-  }, [dispatch, canvas.selectedSectionId, canvas.selectedPageId, canvas.selection.activeBreakpoint, responsiveProps])
+  }, [dispatch, canvas.selectedSectionId, canvas.selectedPageId, canvas.selection.activeBreakpoint])
 
   const handleDelete = useCallback(() => {
     if (!canvas.selectedSectionId || !canvas.selectedPageId) return
@@ -364,7 +366,20 @@ export function PropsPanel() {
   // Get schema from registry
   const descriptor = ctx.registry.get(selectedNode.type)
   const schema = descriptor?.schema ?? []
-  const props = selectedNode.props
+
+  // Resolve effective props: base props + responsive overrides for current breakpoint
+  const breakpoint = canvas.selection.activeBreakpoint.toLowerCase()
+  const baseProps = selectedNode.props
+  const responsiveProps = selectedNode.responsiveProps
+  const props: Record<string, unknown> = { ...baseProps }
+  if (responsiveProps) {
+    for (const [propName, breakpointValues] of Object.entries(responsiveProps)) {
+      const value = breakpointValues[breakpoint]
+      if (value !== undefined) {
+        props[propName] = value
+      }
+    }
+  }
 
   // Group props by group
   const groups = new Map<string, PropSchema[]>()

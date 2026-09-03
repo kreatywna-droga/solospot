@@ -68,6 +68,7 @@ export interface SectionNode {
   type: string;             // matches ComponentDescriptor.type
   label: string;
   props: Record<string, unknown>;
+  responsiveProps?: Record<string, Record<string, unknown>>; // { propName: { desktop: val, tablet: val, mobile: val } }
   children: SectionNode[]; // empty [] for leaf sections
   visible: boolean;
   locked: boolean;          // prevents prop editing; doesn't prevent deletion
@@ -224,6 +225,7 @@ export function createSectionNode(params: {
   type: string;
   label?: string;
   props?: Record<string, unknown>;
+  responsiveProps?: Record<string, Record<string, unknown>>;
   order?: number;
 }): SectionNode {
   return {
@@ -231,6 +233,7 @@ export function createSectionNode(params: {
     type: params.type,
     label: params.label ?? params.type,
     props: params.props ?? {},
+    responsiveProps: params.responsiveProps,
     children: [],
     visible: true,
     locked: false,
@@ -242,15 +245,34 @@ export function createSectionNode(params: {
 // compile() — the ONLY bridge from Builder to Runtime/Publish
 // ---------------------------------------------------------------------------
 
-function flattenNode(node: SectionNode, parentOrder: number): CompiledSection[] {
+function resolveResponsiveProps(
+  baseProps: Record<string, unknown>,
+  responsiveProps: Record<string, Record<string, unknown>> | undefined,
+  breakpoint: string
+): Record<string, unknown> {
+  if (!responsiveProps) return baseProps;
+  const resolved = { ...baseProps };
+  for (const [propName, breakpointValues] of Object.entries(responsiveProps)) {
+    const value = breakpointValues[breakpoint];
+    if (value !== undefined) {
+      resolved[propName] = value;
+    }
+  }
+  return resolved;
+}
+
+function flattenNode(node: SectionNode, parentOrder: number, breakpoint?: string): CompiledSection[] {
   const children = node.children ?? [];
+  const resolvedProps = breakpoint
+    ? resolveResponsiveProps(node.props, node.responsiveProps, breakpoint)
+    : node.props;
   const compiled: CompiledSection = {
     id: node.id,
     type: node.type,
     label: node.label,
     props: children.length > 0
-      ? { ...node.props, _childIds: children.map(c => c.id) }
-      : node.props,
+      ? { ...resolvedProps, _childIds: children.map(c => c.id) }
+      : resolvedProps,
     order: parentOrder,
     visible: node.visible ?? true,
   };
@@ -258,18 +280,18 @@ function flattenNode(node: SectionNode, parentOrder: number): CompiledSection[] 
   const result: CompiledSection[] = [compiled];
 
   for (let i = 0; i < children.length; i++) {
-    const childFlattened = flattenNode(children[i], i);
+    const childFlattened = flattenNode(children[i], i, breakpoint);
     result.push(...childFlattened);
   }
 
   return result;
 }
 
-export function compile(doc: BuilderDocument): CompiledDocument {
+export function compile(doc: BuilderDocument, breakpoint?: string): CompiledDocument {
   const compiledPages: CompiledPage[] = doc.pages.map(page => {
     const sections: CompiledSection[] = [];
     page.sections.forEach((node, idx) => {
-      sections.push(...flattenNode(node, idx));
+      sections.push(...flattenNode(node, idx, breakpoint));
     });
 
     return {

@@ -130,6 +130,15 @@ export interface SectionTreeOps {
     props: Record<string, unknown>
   ): SectionNode[];
 
+  /** Set a responsive override for a specific breakpoint on a node. */
+  updateResponsiveProps(
+    sections: SectionNode[],
+    id: string,
+    propName: string,
+    value: unknown,
+    breakpoint: string
+  ): SectionNode[];
+
   /** Replace all props on a node. */
   replaceProps(
     sections: SectionNode[],
@@ -265,6 +274,19 @@ export const sectionTree: SectionTreeOps = {
       ...node,
       props: { ...node.props, ...props },
     }));
+  },
+
+  updateResponsiveProps(sections, id, propName, value, breakpoint) {
+    return updateNode(sections, id, node => {
+      const existing = node.responsiveProps?.[propName] ?? {};
+      return {
+        ...node,
+        responsiveProps: {
+          ...node.responsiveProps,
+          [propName]: { ...existing, [breakpoint]: value },
+        },
+      };
+    });
   },
 
   replaceProps(sections, id, props) {

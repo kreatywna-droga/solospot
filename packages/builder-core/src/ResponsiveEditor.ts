@@ -52,12 +52,18 @@ export class ResponsiveEditor {
     sectionId: string,
     propName: string,
     value: any,
-    breakpoint: Breakpoint
-  ): Record<string, ResponsiveValue<any>> {
+    breakpoint: Breakpoint,
+    existing?: Map<string, Record<string, ResponsiveValue<any>>>
+  ): Record<string, Record<string, ResponsiveValue<any>>> {
+    const sectionExisting = existing?.get(sectionId) ?? {};
+    const propExisting = sectionExisting[propName] ?? {};
     return {
       [sectionId]: {
-        ...({} as Record<string, ResponsiveValue<any>>),
-        [breakpoint.toLowerCase()]: value,
+        ...sectionExisting,
+        [propName]: {
+          ...propExisting,
+          [breakpoint.toLowerCase()]: value,
+        },
       },
     };
   }
