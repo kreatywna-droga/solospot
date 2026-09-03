@@ -74,9 +74,21 @@ export function SectionRenderer(props: SectionComponentProps) {
       </div>
     )
   }
+
+  const rawConfig = props.section.config ?? (props.section as any).props ?? {}
+  const normalizedProps: SectionComponentProps = {
+    ...props,
+    section: {
+      ...props.section,
+      config: rawConfig,
+    },
+    products: props.products ?? [],
+    navigation: props.navigation ?? [],
+  }
+
   return (
     <SectionErrorBoundary type={props.section.type}>
-      <Component {...props} />
+      <Component {...normalizedProps} />
     </SectionErrorBoundary>
   )
 }

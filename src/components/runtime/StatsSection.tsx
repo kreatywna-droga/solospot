@@ -17,7 +17,7 @@ const defaultStats = [
 ]
 
 export function StatsSection({ section, theme }: SectionComponentProps) {
-  const config = section.config as { title?: string; stats?: Array<{ icon?: string; value: string; label: string }> }
+  const config = ((section?.config || (section as any)?.props) ?? {}) as { title?: string; stats?: Array<{ icon?: string; value: string; label: string }> }
   const stats = config.stats || defaultStats
 
   return (

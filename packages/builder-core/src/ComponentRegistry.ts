@@ -141,11 +141,209 @@ export interface BuilderComponentRegistry {
 }
 
 // ---------------------------------------------------------------------------
+// Standard Component Descriptors
+// ---------------------------------------------------------------------------
+
+export const STANDARD_COMPONENT_DESCRIPTORS: ReadonlyArray<ComponentDescriptor> = [
+  {
+    type: 'navbar',
+    label: 'Nawigacja',
+    category: 'Navigation',
+    icon: 'Compass',
+    previewable: true,
+    allowChildren: false,
+    schema: [
+      selectProp({
+        key: 'style',
+        label: 'Styl nawigacji',
+        required: false,
+        group: 'layout',
+        defaultValue: 'transparent',
+        options: [
+          { label: 'Przezroczysty', value: 'transparent' },
+          { label: 'Pełny', value: 'solid' },
+        ],
+      }),
+      booleanProp({
+        key: 'sticky',
+        label: 'Przyklejony pasek (sticky)',
+        required: false,
+        group: 'layout',
+        defaultValue: true,
+      }),
+    ],
+    defaultProps: { style: 'transparent', sticky: true },
+    tags: ['nav', 'header', 'menu'],
+  },
+  {
+    type: 'hero',
+    label: 'Hero Banner',
+    category: 'Hero',
+    icon: 'Sparkles',
+    previewable: true,
+    allowChildren: false,
+    schema: [
+      stringProp({ key: 'title', label: 'Tytuł nagłówka', required: false, group: 'content', defaultValue: 'Witaj w naszym sklepie' }),
+      stringProp({ key: 'subtitle', label: 'Podtytuł', required: false, group: 'content', defaultValue: 'Odkryj najnowsze kolekcje i wyjątkowe produkty' }),
+      stringProp({ key: 'cta', label: 'Tekst przycisku CTA', required: false, group: 'content', defaultValue: 'Zobacz ofertę' }),
+      imageProp({ key: 'image', label: 'Obraz tła', required: false, group: 'content' }),
+    ],
+    defaultProps: {
+      title: 'Witaj w naszym sklepie',
+      subtitle: 'Odkryj najnowsze kolekcje i wyjątkowe produkty',
+      cta: 'Zobacz ofertę',
+      image: '',
+    },
+    tags: ['banner', 'hero', 'nagłówek'],
+  },
+  {
+    type: 'category-grid',
+    label: 'Kategorie produktów',
+    category: 'Commerce',
+    icon: 'Grid',
+    previewable: true,
+    allowChildren: false,
+    schema: [
+      stringProp({ key: 'title', label: 'Tytuł sekcji', required: false, group: 'content', defaultValue: 'Kategorie' }),
+    ],
+    defaultProps: { title: 'Kategorie' },
+    tags: ['kategorie', 'siatka', 'commerce'],
+  },
+  {
+    type: 'product-grid',
+    label: 'Siatka produktów',
+    category: 'Commerce',
+    icon: 'ShoppingBag',
+    previewable: true,
+    allowChildren: false,
+    schema: [
+      stringProp({ key: 'title', label: 'Tytuł sekcji', required: false, group: 'content', defaultValue: 'Polecane produkty' }),
+      numberProp({ key: 'count', label: 'Liczba produktów', required: false, group: 'layout', defaultValue: 8, min: 2, max: 24 }),
+    ],
+    defaultProps: { title: 'Polecane produkty', count: 8 },
+    tags: ['produkty', 'sklep', 'commerce', 'siatka'],
+  },
+  {
+    type: 'gallery',
+    label: 'Galeria / Lookbook',
+    category: 'Media',
+    icon: 'Image',
+    previewable: true,
+    allowChildren: false,
+    schema: [
+      stringProp({ key: 'title', label: 'Tytuł galerii', required: false, group: 'content', defaultValue: 'Lookbook' }),
+    ],
+    defaultProps: { title: 'Lookbook', images: [] },
+    tags: ['zdjęcia', 'galeria', 'media'],
+  },
+  {
+    type: 'testimonials',
+    label: 'Opinie klientów',
+    category: 'Social Proof',
+    icon: 'Star',
+    previewable: true,
+    allowChildren: false,
+    schema: [
+      stringProp({ key: 'title', label: 'Tytuł sekcji', required: false, group: 'content', defaultValue: 'Co mówią nasi klienci' }),
+    ],
+    defaultProps: { title: 'Co mówią nasi klienci' },
+    tags: ['opinie', 'recenzje', 'social proof'],
+  },
+  {
+    type: 'newsletter',
+    label: 'Zapis na newsletter',
+    category: 'Marketing',
+    icon: 'Mail',
+    previewable: true,
+    allowChildren: false,
+    schema: [
+      stringProp({ key: 'title', label: 'Tytuł sekcji', required: false, group: 'content', defaultValue: 'Zapisz się do newslettera' }),
+      stringProp({ key: 'cta', label: 'Tekst przycisku', required: false, group: 'content', defaultValue: 'Zapisz się' }),
+    ],
+    defaultProps: { title: 'Zapisz się do newslettera', cta: 'Zapisz się' },
+    tags: ['newsletter', 'email', 'marketing'],
+  },
+  {
+    type: 'footer',
+    label: 'Stopka',
+    category: 'Navigation',
+    icon: 'Layout',
+    previewable: true,
+    allowChildren: false,
+    schema: [
+      stringProp({ key: 'text', label: 'Tekst praw autorskich', required: false, group: 'content', defaultValue: '2026 SoloSpot. Wszelkie prawa zastrzeżone.' }),
+    ],
+    defaultProps: { text: '2026 SoloSpot. Wszelkie prawa zastrzeżone.' },
+    tags: ['stopka', 'footer', 'copyright'],
+  },
+  {
+    type: 'contact',
+    label: 'Formularz / Dane kontaktowe',
+    category: 'Contact',
+    icon: 'Phone',
+    previewable: true,
+    allowChildren: false,
+    schema: [
+      stringProp({ key: 'title', label: 'Tytuł sekcji', required: false, group: 'content', defaultValue: 'Kontakt' }),
+      stringProp({ key: 'phone', label: 'Telefon', required: false, group: 'content', defaultValue: '+48 123 456 789' }),
+      stringProp({ key: 'address', label: 'Adres', required: false, group: 'content', defaultValue: 'ul. Przykładowa 1, Warszawa' }),
+    ],
+    defaultProps: { title: 'Kontakt', phone: '+48 123 456 789', address: 'ul. Przykładowa 1, Warszawa' },
+    tags: ['kontakt', 'telefon', 'adres'],
+  },
+  {
+    type: 'content',
+    label: 'Sekcja tekstowa',
+    category: 'Content',
+    icon: 'FileText',
+    previewable: true,
+    allowChildren: false,
+    schema: [
+      stringProp({ key: 'title', label: 'Nagłówek', required: false, group: 'content', defaultValue: 'O nas' }),
+      textProp({ key: 'body', label: 'Treść', required: false, group: 'content', defaultValue: 'Jesteśmy marką stawiającą na jakość i pasję.' }),
+    ],
+    defaultProps: { title: 'O nas', body: 'Jesteśmy marką stawiającą na jakość i pasję.' },
+    tags: ['tekst', 'artykuł', 'o nas'],
+  },
+  {
+    type: 'feature-grid',
+    label: 'Zalety / Korzyści',
+    category: 'Features',
+    icon: 'Shield',
+    previewable: true,
+    allowChildren: false,
+    schema: [
+      stringProp({ key: 'title', label: 'Tytuł sekcji', required: false, group: 'content', defaultValue: 'Dlaczego my?' }),
+    ],
+    defaultProps: { title: 'Dlaczego my?' },
+    tags: ['cechy', 'korzyści', 'ikony'],
+  },
+  {
+    type: 'stats',
+    label: 'Statystyki i liczby',
+    category: 'Features',
+    icon: 'TrendingUp',
+    previewable: true,
+    allowChildren: false,
+    schema: [
+      stringProp({ key: 'title', label: 'Tytuł sekcji', required: false, group: 'content', defaultValue: 'Nasze liczby' }),
+    ],
+    defaultProps: { title: 'Nasze liczby' },
+    tags: ['liczby', 'statystyki', 'sukcesy'],
+  },
+];
+
+// ---------------------------------------------------------------------------
 // Factory
 // ---------------------------------------------------------------------------
 
 export function createBuilderComponentRegistry(): BuilderComponentRegistry {
   const store = new Map<string, ComponentDescriptor>();
+
+  // Pre-populate with standard components
+  for (const descriptor of STANDARD_COMPONENT_DESCRIPTORS) {
+    store.set(descriptor.type, descriptor);
+  }
 
   return {
     register(descriptor) {

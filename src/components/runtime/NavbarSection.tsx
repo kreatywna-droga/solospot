@@ -6,12 +6,13 @@ import { useCart } from '@/lib/cart/CartStore'
 
 export function NavbarSection({ section, theme, storeName }: SectionComponentProps) {
   const [open, setOpen] = useState(false)
-  const config = section.config as { style?: string; sticky?: boolean }
+  const config = ((section?.config || (section as any)?.props) ?? {}) as { style?: string; sticky?: boolean }
   const { state } = useCart()
   const itemCount = state.itemCount
+  const isSticky = Boolean(config.sticky)
 
   return (
-    <nav className={`z-40 border-b border-white/10 ${config.sticky ? 'sticky top-0' : ''}`}
+    <nav className={`z-40 border-b border-white/10 ${isSticky ? 'sticky top-0' : ''}`}
       style={{ backgroundColor: theme.primaryColor }}>
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-16">

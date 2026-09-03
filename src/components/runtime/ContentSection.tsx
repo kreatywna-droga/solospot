@@ -2,7 +2,7 @@
 import type { SectionComponentProps } from '@/lib/runtime/RuntimeTypes'
 
 export function ContentSection({ section, theme }: SectionComponentProps) {
-  const config = section.config as { title?: string; body?: string }
+  const config = ((section?.config || (section as any)?.props) ?? {}) as { title?: string; body?: string }
   return (
     <section className="py-16 lg:py-24 px-4" style={{ backgroundColor: '#ffffff', fontFamily: theme.font }}>
       <div className="max-w-3xl mx-auto">

@@ -79,9 +79,12 @@ describe('PreviewSync — Inspector → Preview channel', () => {
     expect(next.document.pages[0].sections[0].props.headline).toBe('Zmieniona nagłówek');
 
     // Preview received exactly one DOCUMENT_UPDATE carrying the new value.
-    const updates = messages.filter(m => (m as { type?: string }).type === 'DOCUMENT_UPDATE');
+    const updates = messages.filter(m => {
+      const msg = m as { type?: string; messageType?: string }
+      return (msg.messageType ?? msg.type) === 'DOCUMENT_UPDATE'
+    });
     expect(updates.length).toBe(1);
-    const payload = (updates[0] as { data?: { document?: { pages?: unknown[] } } }).data;
+    const payload = (updates[0] as { document?: unknown; data?: unknown });
     expect(payload).toBeDefined();
   });
 

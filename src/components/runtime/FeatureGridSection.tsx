@@ -17,7 +17,7 @@ const defaultFeatures = [
 ]
 
 export function FeatureGridSection({ section, theme }: SectionComponentProps) {
-  const config = section.config as { title?: string; features?: Array<{ icon?: string; title: string; desc: string }> }
+  const config = ((section?.config || (section as any)?.props) ?? {}) as { title?: string; features?: Array<{ icon?: string; title: string; desc: string }> }
   const features = config.features || defaultFeatures
 
   return (

@@ -115,19 +115,38 @@ function apiStoreToBuilderDoc(store: ApiStore): BuilderDocument {
     })
   })
 
+  let finalPages = pages
+  if (finalPages.length === 0 || (finalPages.length === 1 && finalPages[0].sections.length === 0)) {
+    const starterSections: SectionNode[] = [
+      createSectionNode({ id: 'sec_nav', type: 'navbar', label: 'Nawigacja', props: { style: 'transparent', sticky: true }, order: 0 }),
+      createSectionNode({ id: 'sec_hero', type: 'hero', label: 'Hero Banner', props: { title: store.name || 'Witaj w naszym sklepie', subtitle: 'Odkryj najnowsze kolekcje i wyjątkowe produkty', cta: 'Zobacz ofertę' }, order: 1 }),
+      createSectionNode({ id: 'sec_categories', type: 'category-grid', label: 'Kategorie', props: { title: 'Kategorie produktów' }, order: 2 }),
+      createSectionNode({ id: 'sec_products', type: 'product-grid', label: 'Siatka produktów', props: { title: 'Polecane produkty', count: 8 }, order: 3 }),
+      createSectionNode({ id: 'sec_lookbook', type: 'gallery', label: 'Lookbook', props: { title: 'Lookbook' }, order: 4 }),
+      createSectionNode({ id: 'sec_testimonials', type: 'testimonials', label: 'Opinie', props: { title: 'Co mówią nasi klienci' }, order: 5 }),
+      createSectionNode({ id: 'sec_newsletter', type: 'newsletter', label: 'Newsletter', props: { title: 'Zapisz się do newslettera', cta: 'Zapisz się' }, order: 6 }),
+      createSectionNode({ id: 'sec_footer', type: 'footer', label: 'Stopka', props: { text: `2026 ${store.name || 'SoloSpot'}. Wszelkie prawa zastrzeżone.` }, order: 7 }),
+    ]
+    finalPages = [
+      createBuilderPage({
+        id: `page_home_${store.id}`,
+        slug: '/',
+        name: 'Strona główna',
+        isHome: true,
+        sections: starterSections,
+      }),
+    ]
+  }
+
   const doc = createBuilderDocument({
     id: store.id,
     tenantId: store.id, // will be replaced when tenant API is available
     metadata,
     theme,
+    pages: finalPages,
   })
 
-  // Replace default pages with API pages (if any)
-  if (pages.length > 0) {
-    return { ...doc, pages, isDirty: false }
-  }
-
-  return doc
+  return { ...doc, pages: finalPages, isDirty: false }
 }
 
 // ---------------------------------------------------------------------------

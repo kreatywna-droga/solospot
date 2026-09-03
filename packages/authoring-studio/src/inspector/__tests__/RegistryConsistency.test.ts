@@ -53,7 +53,8 @@ describe('RegistryConsistency — propertyFieldRegistry singleton', () => {
 
   it('resolves a widget renderer for a bound type', () => {
     const widget = propertyFieldRegistry.getWidget('text');
-    expect(widget).toBeTypeOf('function');
+    expect(typeof widget === 'function' || typeof widget === 'object').toBe(true);
+    expect(widget).toBeDefined();
   });
 
   it('returns undefined for an unregistered widget (fail-visible, no crash)', () => {

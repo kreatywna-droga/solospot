@@ -111,7 +111,7 @@ export function BuilderShell({ storeId, onSave, saving }: BuilderShellProps) {
 
         {/* Canvas */}
         <main className="flex-1 flex flex-col overflow-hidden">
-          <BuilderCanvas onAddSection={() => setActiveTab('layers')} />
+          <BuilderCanvas onAddSection={() => setActiveTab('components')} />
         </main>
 
         {/* Inspector (Right Panel) — Inspector 2.0 (PM28 Architecture) */}
@@ -124,7 +124,11 @@ export function BuilderShell({ storeId, onSave, saving }: BuilderShellProps) {
       </div>
 
       {/* Bottom Bar */}
-      <BuilderBottomBar />
+      <BuilderBottomBar
+        onSave={onSave}
+        saving={saving}
+        onTabChange={setActiveTab}
+      />
     </div>
   )
 }

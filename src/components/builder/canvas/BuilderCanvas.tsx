@@ -37,6 +37,8 @@ import { VIEWPORT_PRESETS, DEFAULT_GRID_CONFIG } from '../../../../packages/buil
 import { GridSystem } from '../../../../packages/builder-core/src/GridSystem'
 import { SelectionOverlay } from '../selection/SelectionOverlay'
 import { useRuntimePreview } from './useRuntimePreview'
+import { SectionRenderer } from '@/components/runtime/SectionRenderer'
+import { CartProvider } from '@/lib/cart/CartStore'
 
 // ---------------------------------------------------------------------------
 // Section type → icon mapping (used for wireframe preview)
@@ -159,7 +161,7 @@ const RESIZE_HANDLES = [
 function SectionBlock({
   node, pageId, index, total, isSelected, isHovered, onSelect, onHover,
 }: SectionBlockProps) {
-  const { dispatch } = useBuilder()
+  const { dispatch, document } = useBuilder()
 
   const handleMoveUp = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -183,7 +185,6 @@ function SectionBlock({
     dispatch({ type: 'DUPLICATE_SECTION', pageId, sectionId: node.id })
   }
 
-  const height = sectionHeight(node.type)
   const showOverlay = isSelected || isHovered
 
   return (
@@ -191,48 +192,46 @@ function SectionBlock({
       onClick={onSelect}
       onMouseEnter={() => onHover(node.id)}
       onMouseLeave={() => onHover(null)}
-      style={{ minHeight: height }}
       className={`relative group cursor-pointer transition-all duration-150 select-none
         ${!node.visible ? 'opacity-30' : ''}
         ${isSelected
-          ? 'ring-2 ring-violet-500 ring-inset'
+          ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-[#08080f] shadow-2xl z-20'
           : isHovered
-            ? 'ring-1 ring-violet-500/40 ring-inset'
+            ? 'ring-1 ring-violet-400/60 ring-offset-1 ring-offset-[#08080f] z-10'
             : ''
         }
       `}
     >
-      {/* Wireframe content */}
-      <div className={`w-full h-full flex flex-col items-center justify-center gap-3 px-8 py-6
-        bg-white/[0.02] border-b border-white/5`}
-        style={{ minHeight: height }}
-      >
-        <div className={`p-3 rounded-2xl ${isSelected ? 'bg-violet-500/20' : 'bg-white/5'} transition-colors`}>
-          {sectionIcon(node.type)}
-        </div>
-        <div className="text-center">
-          <div className="font-semibold text-white text-sm">{node.label}</div>
-          <div className="text-[11px] text-slate-600 font-mono mt-0.5">{node.type}</div>
-          {node.locked && (
-            <div className="text-[11px] text-amber-400 mt-1 flex items-center justify-center gap-1">
-              🔒 zablokowana
-            </div>
-          )}
-          {!node.visible && (
-            <div className="text-[11px] text-slate-500 mt-1 flex items-center justify-center gap-1">
-              👁 ukryta
-            </div>
-          )}
-        </div>
-
-        {/* Children indicator for containers */}
-        {node.children.length > 0 && (
-          <div className="text-[11px] text-slate-500 flex items-center gap-1">
-            <Layers className="w-3 h-3" />
-            {node.children.length} komponent{node.children.length > 1 ? 'y' : ''}
-          </div>
-        )}
+      {/* Live rendered section content */}
+      <div className="w-full relative pointer-events-none overflow-hidden bg-white text-slate-900 min-h-[60px]">
+        <CartProvider>
+          <SectionRenderer
+            section={{
+              id: node.id,
+              type: node.type,
+              label: node.label,
+              config: node.props,
+            }}
+            theme={{
+              primaryColor: document.theme?.primaryColor || '#7c3aed',
+              secondaryColor: document.theme?.secondaryColor || '#ec4899',
+              font: document.theme?.font || 'Inter',
+              logo: document.theme?.logo,
+            }}
+            storeName={document.metadata?.storeName || 'Store'}
+            products={[]}
+            navigation={[]}
+          />
+        </CartProvider>
       </div>
+
+      {/* Children indicator for containers */}
+      {node.children.length > 0 && (
+        <div className="text-[11px] text-slate-400 bg-black/60 px-3 py-1 flex items-center gap-1 border-t border-white/10">
+          <Layers className="w-3 h-3" />
+          {node.children.length} komponent{node.children.length > 1 ? 'y' : ''}
+        </div>
+      )}
 
       {/* Hover / selected toolbar */}
       {showOverlay && (
@@ -483,11 +482,11 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
           />
         )}
 
-        {/* Runtime Preview Iframe or Wireframe Fallback */}
-        {previewSlug ? (
+        {/* Runtime Preview Iframe in PREVIEW/LIVE mode OR Structured Editable Canvas in EDIT mode */}
+        {(canvas.runtimeMode === 'PREVIEW' || canvas.runtimeMode === 'LIVE' || canvas.mode === 'PREVIEW') ? (
           <iframe
             ref={iframeRef}
-            src={`/preview-frame/${previewSlug}`}
+            src={`/preview-frame/${previewSlug || 'vinyl'}`}
             title="Runtime Preview"
             className="w-full h-full min-h-[600px] border-0 bg-white"
           />

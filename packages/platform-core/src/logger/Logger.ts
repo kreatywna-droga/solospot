@@ -87,35 +87,24 @@ export class ConsolePlatformLogger implements PlatformLogger {
     this.isPublishing = true;
 
     try {
-      this.eventBus.publish({
-        eventId: `evt_log_${Math.random().toString(36).substr(2, 9)}`,
-        eventType: 'System.LogCreated',
-        timestamp: new Date().toISOString(),
-        correlationId: payload.correlationId,
-        causationId: payload.causationId,
-        tenantId: payload.tenantId,
-        payload: {
-          level,
-          message: payload.message,
-          module: payload.module,
-          metadata: payload.metadata,
-          errorName: error?.name,
-          errorMessage: error?.message,
-        },
-      }).catch((err: any) => {
-        // Safe fallback write to stderr to avoid crashing the logging pipeline
-        console.error(
-          JSON.stringify({
-            timestamp: new Date().toISOString(),
-            level: 'ERROR',
-            message: 'Failed to publish System.LogCreated event',
-            module: 'LOGGER',
-            error: {
-              message: err instanceof Error ? err.message : String(err),
-            },
-          })
-        );
-      });
+      this.eventBus
+        .publish({
+          eventId: `evt_log_${Math.random().toString(36).substr(2, 9)}`,
+          eventType: 'System.LogCreated',
+          timestamp: new Date().toISOString(),
+          correlationId: payload.correlationId || `sys_log_${Math.random().toString(36).substr(2, 9)}`,
+          causationId: payload.causationId,
+          tenantId: payload.tenantId,
+          payload: {
+            level,
+            message: payload.message,
+            module: payload.module,
+            metadata: payload.metadata,
+            errorName: error?.name,
+            errorMessage: error?.message,
+          },
+        })
+        .catch(() => {});
     } catch (err: any) {
       // Catch synchronous errors during publish
       console.error(

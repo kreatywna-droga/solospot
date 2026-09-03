@@ -2,8 +2,8 @@
 import type { SectionComponentProps } from '@/lib/runtime/RuntimeTypes'
 
 export function HeroSection({ section, theme, storeName }: SectionComponentProps) {
-  const config = section.config as { title?: string; subtitle?: string; cta?: string; image?: string }
-  const title = config.title || storeName
+  const config = ((section?.config || (section as any)?.props) ?? {}) as { title?: string; subtitle?: string; cta?: string; image?: string }
+  const title = config.title || storeName || 'Witaj w naszym sklepie'
   return (
     <section className="relative overflow-hidden py-24 lg:py-32 px-4 text-center"
       style={{ background: `linear-gradient(135deg, ${theme.primaryColor}, ${theme.secondaryColor})`, fontFamily: theme.font }}>

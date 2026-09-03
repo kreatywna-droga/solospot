@@ -13,13 +13,13 @@ import {
   ChevronLeft, Monitor, Tablet, Smartphone,
   Undo2, Redo2, Save, Zap, AlertCircle, CheckCircle2,
   PanelLeft, Layers, ImageIcon, Bot, History,
-  Search, Command,
+  Search, Command, Plus,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useBuilder, useBuilderHistory } from '../state/BuilderProvider'
 import { VIEWPORT_PRESETS, ViewportLabel, RuntimeMode } from '../../../../packages/builder-core/src/CanvasState'
 
-export type StudioTab = 'pages' | 'layers' | 'assets' | 'ai' | 'history'
+export type StudioTab = 'pages' | 'layers' | 'assets' | 'components' | 'ai' | 'history'
 
 export type PreviewMode = RuntimeMode
 
@@ -33,11 +33,12 @@ interface BuilderTopBarProps {
 }
 
 const TABS: { id: StudioTab; label: string; icon: React.ElementType; shortcut: string }[] = [
-  { id: 'pages',   label: 'Pages',   icon: PanelLeft,   shortcut: 'Ctrl+1' },
-  { id: 'layers',  label: 'Layers',  icon: Layers,       shortcut: 'Ctrl+2' },
-  { id: 'assets',  label: 'Assets',  icon: ImageIcon,    shortcut: 'Ctrl+3' },
-  { id: 'ai',      label: 'AI',      icon: Bot,           shortcut: 'Ctrl+4' },
-  { id: 'history', label: 'History', icon: History,       shortcut: 'Ctrl+5' },
+  { id: 'pages',      label: 'Pages',      icon: PanelLeft,   shortcut: 'Ctrl+1' },
+  { id: 'layers',     label: 'Layers',     icon: Layers,       shortcut: 'Ctrl+2' },
+  { id: 'components', label: 'Komponenty', icon: Plus,         shortcut: 'Ctrl+3' },
+  { id: 'assets',     label: 'Assets',     icon: ImageIcon,    shortcut: 'Ctrl+4' },
+  { id: 'ai',         label: 'AI',         icon: Bot,          shortcut: 'Ctrl+5' },
+  { id: 'history',    label: 'History',    icon: History,      shortcut: 'Ctrl+6' },
 ]
 
 export function BuilderTopBar({
@@ -199,13 +200,15 @@ export function BuilderTopBar({
 
           {/* Publish */}
           <button
+            onClick={onSave}
+            disabled={saving}
             className="flex items-center gap-2 px-4 py-1.5 rounded-xl font-bold text-xs
                        bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white
                        hover:shadow-lg hover:shadow-violet-500/25 hover:scale-105 active:scale-95
-                       transition-all"
+                       disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             <Zap className="w-3.5 h-3.5" />
-            Publish
+            {saving ? 'Publikowanie...' : 'Publish'}
           </button>
 
           {/* Command Palette */}

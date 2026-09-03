@@ -9,8 +9,9 @@ function formatPrice(price: number, currency: string) {
 }
 
 export function ProductGridSection({ section, theme, products }: SectionComponentProps) {
-  const config = section.config as { title?: string; count?: number }
-  const displayProducts = products?.slice(0, config.count || 8) || []
+  const config = ((section?.config || (section as any)?.props) ?? {}) as { title?: string; count?: number }
+  const displayCount = typeof config.count === 'number' && config.count > 0 ? config.count : 8
+  const displayProducts = products?.slice(0, displayCount) || []
   const { state, dispatch } = useCart()
 
   const handleAddToCart = (product: { id: string; name: string; price: number; currency: string; images: string[] }) => {
@@ -46,7 +47,7 @@ export function ProductGridSection({ section, theme, products }: SectionComponen
             {displayProducts.map((p) => (
               <div key={p.id} className="group cursor-pointer">
                 <div className="aspect-square rounded-2xl bg-slate-100 overflow-hidden mb-3 flex items-center justify-center">
-                  {p.images[0] ? (
+                  {p.images && p.images.length > 0 && p.images[0] ? (
                     <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                   ) : (
                     <Package className="w-10 h-10 text-slate-300" />

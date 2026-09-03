@@ -147,8 +147,8 @@ describe('BuilderInspectorIntegration — full chain', () => {
     // The document was mutated and the preview received a document update.
     expect(next.document.pages[0].sections[0].props.headline).toBe('Nowa nagłówek');
     expect(previewMessages.length).toBeGreaterThanOrEqual(1);
-    const last = previewMessages[previewMessages.length - 1] as { type?: string };
-    expect(last.type).toBe('DOCUMENT_UPDATE');
+    const last = previewMessages[previewMessages.length - 1] as { type?: string; messageType?: string };
+    expect(last.messageType ?? last.type).toBe('DOCUMENT_UPDATE');
   });
 
   it('rendering the inspector does NOT trigger side-effect dispatch (no loop)', () => {

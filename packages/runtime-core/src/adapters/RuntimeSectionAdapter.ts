@@ -34,9 +34,9 @@ export class RuntimeSectionAdapter {
       id: legacy.id,
       type: legacy.type,
       label: legacy.label,
-      props: legacy.config,
-      order: 0,
-      visible: true,
+      props: (legacy as any).props ?? legacy.config ?? {},
+      order: (legacy as any).order ?? 0,
+      visible: (legacy as any).visible ?? true,
     };
   }
 

@@ -9,7 +9,7 @@ const defaultReviews = [
 ]
 
 export function TestimonialsSection({ section, theme }: SectionComponentProps) {
-  const config = section.config as { title?: string }
+  const config = ((section?.config || (section as any)?.props) ?? {}) as { title?: string }
   return (
     <section className="py-16 lg:py-24 px-4" style={{ backgroundColor: '#ffffff', fontFamily: theme.font }}>
       <div className="max-w-4xl mx-auto">

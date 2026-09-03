@@ -30,42 +30,45 @@ interface BuilderLeftSidebarProps {
 type SidebarTab = 'pages' | 'layers' | 'assets' | 'components'
 
 export function BuilderLeftSidebar({ activeTab, onTabChange }: BuilderLeftSidebarProps) {
-  const [sidebarTab, setSidebarTab] = useState<SidebarTab>('layers')
+  const currentTab: SidebarTab =
+    activeTab === 'pages' || activeTab === 'layers' || activeTab === 'assets' || activeTab === 'components'
+      ? activeTab
+      : 'layers'
 
   const tabs: { id: SidebarTab; label: string; icon: React.ElementType }[] = [
     { id: 'pages',      label: 'Pages',      icon: PanelLeft },
     { id: 'layers',     label: 'Layers',     icon: Layers },
     { id: 'assets',     label: 'Assets',     icon: ImageIcon },
-    { id: 'components', label: 'Components', icon: Plus },
+    { id: 'components', label: 'Komponenty', icon: Plus },
   ]
 
   return (
-    <aside className="w-72 min-w-[280px] max-w-[360px] border-r border-white/10 bg-[#06060c] flex flex-col overflow-hidden flex-shrink-0">
-      {/* Tab switcher */}
-      <div className="flex overflow-x-auto border-b border-white/10 no-scrollbar">
+    <aside className="w-80 min-w-[320px] max-w-[380px] border-r border-white/10 bg-[#06060c] flex flex-col overflow-hidden flex-shrink-0">
+      {/* Tab switcher - 4 equal columns with clean responsive labels */}
+      <div className="grid grid-cols-4 border-b border-white/10 bg-[#05050a]">
         {tabs.map(tab => (
           <button
             key={tab.id}
-            onClick={() => setSidebarTab(tab.id)}
-            className={`flex-1 min-w-0 flex items-center justify-center gap-1.5 py-3 px-2 text-[11px] font-semibold uppercase tracking-wide transition-all whitespace-nowrap shrink-0
-              ${sidebarTab === tab.id
-                ? 'text-white border-b-2 border-violet-500 bg-violet-500/5'
-                : 'text-slate-500 hover:text-white hover:bg-white/5'
+            onClick={() => onTabChange(tab.id as StudioTab)}
+            className={`flex flex-col sm:flex-row items-center justify-center gap-1 py-3 px-1 text-[10px] font-bold uppercase tracking-wider transition-all
+              ${currentTab === tab.id
+                ? 'text-white border-b-2 border-violet-500 bg-violet-500/10'
+                : 'text-slate-500 hover:text-white hover:bg-white/5 border-b-2 border-transparent'
               }`}
             title={tab.label}
           >
             <tab.icon className="w-3.5 h-3.5 shrink-0" />
-            <span className="hidden md:inline truncate">{tab.label}</span>
+            <span className="truncate">{tab.label}</span>
           </button>
         ))}
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-hidden">
-        {sidebarTab === 'pages' && <PagesPanel />}
-        {sidebarTab === 'layers' && <LayersPanel />}
-        {sidebarTab === 'assets' && <AssetsPanel />}
-        {sidebarTab === 'components' && <ComponentsPanel />}
+        {currentTab === 'pages' && <PagesPanel />}
+        {currentTab === 'layers' && <LayersPanel />}
+        {currentTab === 'assets' && <AssetsPanel />}
+        {currentTab === 'components' && <ComponentPanel onClose={() => onTabChange('layers')} />}
       </div>
     </aside>
   )
