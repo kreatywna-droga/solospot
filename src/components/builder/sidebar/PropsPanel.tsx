@@ -407,25 +407,7 @@ export function PropsPanel() {
           <p className="text-[11px] text-slate-600 font-mono">{selectedNode.type}</p>
         </div>
         
-        {/* Breakpoint Switcher */}
-        <div className="flex items-center gap-0.5 bg-white/5 rounded-lg p-0.5">
-          {(Object.keys(VIEWPORT_PRESETS) as ViewportLabel[]).map(label => (
-            <button
-              key={label}
-              onClick={() => dispatch({ type: 'CANVAS', action: { type: 'SET_BREAKPOINT', breakpoint: label } })}
-              className={`p-1 rounded transition-all ${
-                canvas.selection.activeBreakpoint === label
-                  ? 'bg-violet-500/20 text-violet-400'
-                  : 'text-slate-500 hover:text-white'
-              }`}
-              title={label}
-            >
-              {label === 'DESKTOP' && <Monitor className="w-3.5 h-3.5" />}
-              {label === 'TABLET' && <Tablet className="w-3.5 h-3.5" />}
-              {label === 'MOBILE' && <Smartphone className="w-3.5 h-3.5" />}
-            </button>
-          ))}
-        </div>
+
 
         <div className="flex items-center gap-1 flex-shrink-0">
           <button
