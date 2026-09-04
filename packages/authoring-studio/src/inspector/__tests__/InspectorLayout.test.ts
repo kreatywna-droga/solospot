@@ -178,7 +178,7 @@ describe('InspectorShell', () => {
     },
   ];
 
-  it('renders section name, type, and breakpoint switcher', () => {
+  it('renders section name and type without a breakpoint switcher (NS24 contract)', () => {
     const html = renderToStaticMarkup(
       React.createElement(InspectorShell, {
         sectionId: 's1',
@@ -190,9 +190,13 @@ describe('InspectorShell', () => {
       })
     );
     expect(html).toContain('Hero');
-    expect(html).toContain('Type: hero');
-    expect(html).toContain('data-testid="breakpoint-switcher"');
-    expect(html).toContain('data-testid="breakpoint-indicator"');
+    expect(html).toContain('hero');
+    // Top toolbar is the ONLY breakpoint switcher (df73b48) — the Inspector
+    // receives the active breakpoint via props instead.
+    expect(html).not.toContain('breakpoint-switcher');
+    expect(html).not.toContain('Desktop');
+    expect(html).not.toContain('Tablet');
+    expect(html).not.toContain('Mobile');
   });
 });
 

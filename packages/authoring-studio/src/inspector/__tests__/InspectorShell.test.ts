@@ -58,7 +58,7 @@ describe('InspectorShell', () => {
     expect(html).toContain('hero');
   });
 
-  it('renders breakpoint switcher and indicator', () => {
+  it('does NOT render a breakpoint switcher (top toolbar is the only breakpoint control)', () => {
     const html = renderToStaticMarkup(
       React.createElement(InspectorShell, {
         sectionId: 'sec-1',
@@ -69,8 +69,28 @@ describe('InspectorShell', () => {
         onPropChange: noop,
       })
     );
-    expect(html).toContain('data-testid="breakpoint-switcher"');
-    expect(html).toContain('data-testid="breakpoint-indicator"');
+    // df73b48/NS24 contract: breakpoint UI lives ONLY in the top toolbar.
+    expect(html).not.toContain('breakpoint-switcher');
+    expect(html).not.toContain('Desktop');
+    expect(html).not.toContain('Tablet');
+    expect(html).not.toContain('Mobile');
+  });
+
+  it('accepts active breakpoint via props (driven by top toolbar viewport)', () => {
+    const html = renderToStaticMarkup(
+      React.createElement(InspectorShell, {
+        sectionId: 'sec-1',
+        sectionName: 'Hero',
+        sectionType: 'hero',
+        categories: [makeCategory('layout', 'Layout')],
+        currentProps: { headline: 'Hello' },
+        onPropChange: noop,
+        breakpoint: 'mobile',
+      })
+    );
+    // Renders successfully with a non-desktop breakpoint and fields present
+    expect(html).toContain('inspector-shell');
+    expect(html).toContain('Headline');
   });
 
   it('renders category accordions and delegates fields to DynamicPropertyPanel', () => {

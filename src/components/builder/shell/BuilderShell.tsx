@@ -162,14 +162,28 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
       const targetPageId = canvas.selectedPageId || builderDoc.pages[0]?.id
       if (!targetPageId) return
 
-      dispatch({
-        type: 'UPDATE_PROPS',
-        pageId: targetPageId,
-        sectionId: canvas.selectedSectionId,
-        props: { [key]: value },
-      })
+      const viewport = canvas.viewport.label
+      if (viewport === 'TABLET' || viewport === 'MOBILE') {
+        // Responsive override — persists into node.responsiveProps[bp]
+        dispatch({
+          type: 'SET_SECTION_RESPONSIVE_PROP',
+          pageId: targetPageId,
+          sectionId: canvas.selectedSectionId,
+          propName: key,
+          value,
+          breakpoint: viewport === 'TABLET' ? 'tablet' : 'mobile',
+        })
+      } else {
+        // Desktop base — direct props mutation
+        dispatch({
+          type: 'UPDATE_PROPS',
+          pageId: targetPageId,
+          sectionId: canvas.selectedSectionId,
+          props: { [key]: value },
+        })
+      }
     },
-    [dispatch, canvas.selectedSectionId, canvas.selectedPageId, builderDoc],
+    [dispatch, canvas.selectedSectionId, canvas.selectedPageId, canvas.viewport.label, builderDoc],
   )
 
   // Phase 3 — direct NodeStyles editing via SET_NODE_STYLES

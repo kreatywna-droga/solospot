@@ -33,6 +33,7 @@ import {
 } from 'lucide-react'
 import { useBuilder } from '../state/BuilderProvider'
 import { SectionNode } from '../../../../packages/builder-core/src/BuilderDocument'
+import { findNode } from '../../../../packages/builder-core/src'
 import { VIEWPORT_PRESETS, DEFAULT_GRID_CONFIG, ViewportLabel } from '../../../../packages/builder-core/src/CanvasState'
 import { GridSystem } from '../../../../packages/builder-core/src/GridSystem'
 import { SelectionOverlay } from '../selection/SelectionOverlay'
@@ -101,6 +102,10 @@ function findParent(sections: SectionNode[], childId: string): string | null {
   return null
 }
 
+// Module-scoped dragged node id — dataTransfer.getData() is protected
+// during dragover, so this is the only reliable cross-node channel.
+let currentlyDraggedNodeId: string | null = null
+
 function GridOverlay({ width }: { width: number }) {
   const config = gridSystem.getConfig()
   if (!config.showGuides) return null
@@ -146,17 +151,6 @@ interface SectionBlockProps {
   onSelect: () => void
   onHover: (id: string | null) => void
 }
-
-const RESIZE_HANDLES = [
-  { id: 'nw', cursor: 'nwse-resize', className: '-top-1.5 -left-1.5' },
-  { id: 'n',  cursor: 'ns-resize',   className: '-top-1.5 left-1/2 -translate-x-1/2' },
-  { id: 'ne', cursor: 'nesw-resize', className: '-top-1.5 -right-1.5' },
-  { id: 'e',  cursor: 'ew-resize',   className: '-right-1.5 top-1/2 -translate-y-1/2' },
-  { id: 'se', cursor: 'nwse-resize', className: '-bottom-1.5 -right-1.5' },
-  { id: 's',  cursor: 'ns-resize',   className: '-bottom-1.5 left-1/2 -translate-x-1/2' },
-  { id: 'sw', cursor: 'nesw-resize', className: '-bottom-1.5 -left-1.5' },
-  { id: 'w',  cursor: 'ew-resize',   className: '-left-1.5 top-1/2 -translate-y-1/2' },
-]
 
 // ---------------------------------------------------------------------------
 // Responsive style & prop resolvers
@@ -355,8 +349,13 @@ function CanvasNode({
       return
     }
     e.stopPropagation()
+    currentlyDraggedNodeId = node.id
     e.dataTransfer.setData('application/solospot-node-id', node.id)
     e.dataTransfer.effectAllowed = 'move'
+  }
+
+  const handleDragEnd = () => {
+    currentlyDraggedNodeId = null
   }
 
   if (node.type === 'heading') {
@@ -377,6 +376,7 @@ function CanvasNode({
         data-parent-id={node.parentId}
         draggable={!node.locked}
         onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         onMouseEnter={handleMouseEnter}
@@ -432,6 +432,7 @@ function CanvasNode({
         data-parent-id={node.parentId}
         draggable={!node.locked}
         onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         onMouseEnter={handleMouseEnter}
@@ -487,6 +488,7 @@ function CanvasNode({
         data-parent-id={node.parentId}
         draggable={!node.locked}
         onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         onMouseEnter={handleMouseEnter}
@@ -581,6 +583,7 @@ function CanvasNode({
         data-parent-id={node.parentId}
         draggable={!node.locked}
         onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         onMouseEnter={handleMouseEnter}
@@ -775,6 +778,9 @@ function SectionBlock({
 }: SectionBlockProps) {
   const { dispatch, document, canvas, ctx } = useBuilder()
   const [isSectionDropTarget, setIsSectionDropTarget] = useState(false)
+  // Resolved styles (base + responsive overrides for active viewport) —
+  // applied to the section wrapper so Design Inspector changes are visible.
+  const resolvedStyles = resolveEffectiveStyles(node, canvas.viewport.label)
 
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -824,6 +830,83 @@ function SectionBlock({
     dispatch({ type: 'DUPLICATE_SECTION', pageId, sectionId: node.id })
   }
 
+  // -------------------------------------------------------------------------
+  // Root-level drag reorder (HTML5 DnD → MOVE_SECTION / MOVE_NODE)
+  // NOTE: dataTransfer.getData() is protected during dragover/dragstart,
+  // so the dragged node id is tracked in module-scoped state.
+  // -------------------------------------------------------------------------
+  const [dropEdge, setDropEdge] = useState<'before' | 'after' | null>(null)
+
+  const handleRootDragStart = (e: React.DragEvent) => {
+    if (node.locked) {
+      e.preventDefault()
+      return
+    }
+    currentlyDraggedNodeId = node.id
+    e.dataTransfer.setData('application/solospot-node-id', node.id)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  const handleRootDragEnd = () => {
+    currentlyDraggedNodeId = null
+    setDropEdge(null)
+  }
+
+  const handleRootDragOver = (e: React.DragEvent) => {
+    if (!currentlyDraggedNodeId || currentlyDraggedNodeId === node.id) return
+
+    e.preventDefault()
+    e.stopPropagation()
+    e.dataTransfer.dropEffect = 'move'
+    const rect = e.currentTarget.getBoundingClientRect()
+    setDropEdge(e.clientY < rect.top + rect.height / 2 ? 'before' : 'after')
+  }
+
+  const handleRootDragLeave = (e: React.DragEvent) => {
+    e.stopPropagation()
+    setDropEdge(null)
+  }
+
+  const handleRootDrop = (e: React.DragEvent) => {
+    const draggedId = currentlyDraggedNodeId
+    const edge = dropEdge
+    setDropEdge(null)
+    currentlyDraggedNodeId = null
+    if (!draggedId || draggedId === node.id || !edge) return
+
+    e.preventDefault()
+    e.stopPropagation()
+
+    const found = findNode(document, draggedId)
+    if (!found) return
+
+    const draggedIsRootSibling = !found.parent && found.page.id === pageId
+    let target: number
+    if (draggedIsRootSibling) {
+      const draggedIdx = found.page.sections.findIndex(s => s.id === draggedId)
+      if (draggedIdx < 0) return
+      // Index on the list WITHOUT the dragged item (MOVE_SECTION removes first)
+      if (edge === 'before') {
+        target = draggedIdx < index ? index - 1 : index
+      } else {
+        target = draggedIdx < index ? index : index + 1
+      }
+      if (target === draggedIdx) return
+      dispatch({ type: 'MOVE_SECTION', pageId, fromIndex: draggedIdx, toIndex: target })
+    } else {
+      // Nested node dragged onto a root section edge → hoist to root level
+      // (moveNode removes first, then inserts at targetIndex)
+      target = edge === 'before' ? index : index + 1
+      dispatch({
+        type: 'MOVE_NODE',
+        pageId,
+        nodeId: draggedId,
+        targetParentId: null,
+        targetIndex: target,
+      })
+    }
+  }
+
   const showOverlay = isSelected || isHovered
 
   return (
@@ -832,8 +915,15 @@ function SectionBlock({
       onDoubleClick={handleDoubleClick}
       onMouseEnter={() => onHover(node.id)}
       onMouseLeave={() => onHover(null)}
+      draggable={!node.locked}
+      onDragStart={handleRootDragStart}
+      onDragEnd={handleRootDragEnd}
+      onDragOver={handleRootDragOver}
+      onDragLeave={handleRootDragLeave}
+      onDrop={handleRootDrop}
       className={`relative group cursor-pointer transition-all duration-150 select-none
         ${!node.visible ? 'opacity-30' : ''}
+        ${dropEdge ? 'ring-1 ring-violet-400/50' : ''}
         ${isSelected
           ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-[#08080f] shadow-2xl z-20'
           : isHovered
@@ -842,6 +932,15 @@ function SectionBlock({
         }
       `}
     >
+      {/* Root reorder drop indicator */}
+      {dropEdge && (
+        <div
+          className={`absolute left-0 right-0 h-0.5 bg-violet-500 z-30 pointer-events-none shadow-[0_0_8px_rgba(139,92,246,0.9)] ${
+            dropEdge === 'before' ? '-top-0.5' : '-bottom-0.5'
+          }`}
+        />
+      )}
+
       {/* Live rendered section content */}
       {node.type === 'container' ? (
         <div
@@ -900,9 +999,18 @@ function SectionBlock({
               })
             }
           }}
-          className={`w-full p-4 bg-[#08080f] text-white min-h-[80px] transition-all ${
+          className={`w-full text-white min-h-[80px] transition-all ${
             isSectionDropTarget ? 'ring-2 ring-violet-400 bg-violet-950/20' : ''
           }`}
+          style={{
+            backgroundColor: resolvedStyles.backgroundColor || '#08080f',
+            padding: typeof resolvedStyles.padding === 'object' && resolvedStyles.padding
+              ? `${(resolvedStyles.padding as any).top ?? '0px'} ${(resolvedStyles.padding as any).right ?? '0px'} ${(resolvedStyles.padding as any).bottom ?? '0px'} ${(resolvedStyles.padding as any).left ?? '0px'}`
+              : (resolvedStyles.padding as string | undefined) ?? '16px',
+            borderRadius: resolvedStyles.borderRadius,
+            opacity: resolvedStyles.opacity,
+            boxShadow: resolvedStyles.boxShadow,
+          }}
         >
           <div className="max-w-[1200px] mx-auto space-y-3">
             {node.children && node.children.length > 0 ? (
@@ -929,7 +1037,23 @@ function SectionBlock({
         </div>
       ) : (
         <>
-          <div className="w-full relative pointer-events-none overflow-hidden bg-white text-slate-900 min-h-[60px]">
+          <div
+            className="w-full relative pointer-events-none overflow-hidden text-slate-900 min-h-[60px]"
+            style={{
+              backgroundColor: resolvedStyles.backgroundColor || '#ffffff',
+              opacity: resolvedStyles.opacity,
+              padding: typeof resolvedStyles.padding === 'object' && resolvedStyles.padding
+                ? `${(resolvedStyles.padding as any).top ?? 0} ${(resolvedStyles.padding as any).right ?? 0} ${(resolvedStyles.padding as any).bottom ?? 0} ${(resolvedStyles.padding as any).left ?? 0}`
+                : (resolvedStyles.padding as string | undefined),
+              borderRadius: resolvedStyles.borderRadius,
+              border: resolvedStyles.borderWidth
+                ? `${resolvedStyles.borderWidth} ${resolvedStyles.borderStyle || 'solid'} ${resolvedStyles.borderColor || 'rgba(0,0,0,0.1)'}`
+                : undefined,
+              boxShadow: resolvedStyles.boxShadow,
+              width: resolvedStyles.width,
+              minHeight: resolvedStyles.minHeight,
+            }}
+          >
             <CartProvider>
               <SectionRenderer
                 section={{
@@ -1032,24 +1156,8 @@ function SectionBlock({
           <span>{node.children.length} dzieci</span>
         </div>
       )}
-      
-      {/* Resize Handles */}
-      {isSelected && (
-        <div className="absolute inset-0 pointer-events-none">
-          {RESIZE_HANDLES.map(handle => (
-            <div
-              key={handle.id}
-              className={`absolute w-3 h-3 bg-violet-500 border-2 border-white rounded-full pointer-events-auto cursor-${handle.cursor}`}
-              style={{
-                top: handle.className.includes('-top') ? '-6px' : handle.className.includes('-bottom') ? 'auto' : '50%',
-                bottom: handle.className.includes('-bottom') ? '-6px' : handle.className.includes('-top') ? 'auto' : '50%',
-                left: handle.className.includes('-left') ? '-6px' : handle.className.includes('-right') ? 'auto' : '50%',
-                right: handle.className.includes('-right') ? '-6px' : handle.className.includes('-left') ? 'auto' : '50%',
-              }}
-            />
-          ))}
-        </div>
-      )}
+      {/* NOTE: Resize interaction is owned exclusively by SelectionOverlay
+          (ResizeHandles → SET_NODE_STYLES). No duplicate handles here. */}
     </div>
   )
 }
@@ -1066,7 +1174,6 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
   const { document, canvas, dispatch, ctx } = useBuilder()
   const canvasFrameRef = useRef<HTMLDivElement | null>(null)
   const iframeRef = useRef<HTMLIFrameElement | null>(null)
-  const [marquee, setMarquee] = useState<{ startX: number; startY: number; currentX: number; currentY: number } | null>(null)
 
   const previewSlug = document.metadata?.storeSlug || null
   const runtimePreviewState = useRuntimePreview(previewSlug, iframeRef)
@@ -1114,35 +1221,108 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
     }
   }, [dispatch, canvas.selectedSectionId])
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.button !== 0) return
-    const rect = e.currentTarget.getBoundingClientRect()
-    setMarquee({
-      startX: e.clientX - rect.left,
-      startY: e.clientY - rect.top,
-      currentX: e.clientX - rect.left,
-      currentY: e.clientY - rect.top,
-    })
-  }, [])
-
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!marquee) return
-    const rect = e.currentTarget.getBoundingClientRect()
-    setMarquee({
-      ...marquee,
-      currentX: e.clientX - rect.left,
-      currentY: e.clientY - rect.top,
-    })
-  }, [marquee])
-
-  const handleMouseUp = useCallback(() => {
-    if (marquee) {
-      setMarquee(null)
-    }
-  }, [marquee])
-
   const containerRef = useRef<HTMLDivElement>(null)
   const zoom = canvas.zoom ?? 1.0
+
+  // ---------------------------------------------------------------------------
+  // Marquee box-select (real): starts only on empty canvas background,
+  // dispatches BOX_SELECT with section positions on pointer up.
+  // ---------------------------------------------------------------------------
+  const [marquee, setMarquee] = useState<{
+    startX: number
+    startY: number
+    currentX: number
+    currentY: number
+  } | null>(null)
+
+  const marqueeRef = useRef<typeof marquee>(null)
+  marqueeRef.current = marquee
+
+  const collectSectionPositions = useCallback((): Map<string, { x: number; y: number; width: number; height: number }> => {
+    const frame = canvasFrameRef.current
+    const positions = new Map<string, { x: number; y: number; width: number; height: number }>()
+    if (!frame) return positions
+    const frameRect = frame.getBoundingClientRect()
+    // Query both root sections and nested nodes
+    frame.querySelectorAll<HTMLElement>('[data-section-id], [data-node-id]').forEach(el => {
+      const id = el.getAttribute('data-section-id') || el.getAttribute('data-node-id')
+      if (!id) return
+      const r = el.getBoundingClientRect()
+      // Convert to canvas-frame coordinates, compensating for zoom
+      positions.set(id, {
+        x: (r.left - frameRect.left) / zoom,
+        y: (r.top - frameRect.top) / zoom,
+        width: r.width / zoom,
+        height: r.height / zoom,
+      })
+    })
+    return positions
+  }, [zoom])
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0) return
+    // Marquee starts ONLY on the canvas frame background itself —
+    // never on sections, nodes, or toolbar elements (they stop propagation
+    // or are children with their own handlers).
+    if (e.target !== e.currentTarget) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    setMarquee({
+      startX: (e.clientX - rect.left) / zoom,
+      startY: (e.clientY - rect.top) / zoom,
+      currentX: (e.clientX - rect.left) / zoom,
+      currentY: (e.clientY - rect.top) / zoom,
+    })
+  }, [zoom])
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    const m = marqueeRef.current
+    if (!m) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    setMarquee({
+      ...m,
+      currentX: (e.clientX - rect.left) / zoom,
+      currentY: (e.clientY - rect.top) / zoom,
+    })
+  }, [zoom])
+
+  const handleMouseUp = useCallback(() => {
+    const m = marqueeRef.current
+    setMarquee(null)
+    if (!m || !activePage) return
+
+    const x = Math.min(m.startX, m.currentX)
+    const y = Math.min(m.startY, m.currentY)
+    const width = Math.abs(m.currentX - m.startX)
+    const height = Math.abs(m.currentY - m.startY)
+
+    // Ignore click-like drags (< 4px) — they should deselect via canvas click instead
+    if (width < 4 || height < 4) return
+
+    const sectionPositions = collectSectionPositions()
+    dispatch({
+      type: 'CANVAS',
+      action: {
+        type: 'BOX_SELECT',
+        pageId: activePage.id,
+        rect: { x, y, width, height },
+        sectionPositions,
+      },
+    })
+  }, [activePage, collectSectionPositions, dispatch])
+
+  const cancelMarquee = useCallback(() => setMarquee(null), [])
+
+  useEffect(() => {
+    if (!marquee) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        cancelMarquee()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [marquee, cancelMarquee])
 
   useEffect(() => {
     const container = containerRef.current
@@ -1216,10 +1396,17 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
           transition={{ duration: 0.2 }}
           style={{ width: '100%' }}
           className="relative bg-[#08080f] rounded-2xl shadow-2xl border border-white/10 overflow-hidden min-h-[600px] w-full transition-colors"
-          onClick={e => e.stopPropagation()}
+          onClick={e => {
+            e.stopPropagation()
+            // Click on empty canvas background (not a section/node) clears selection
+            if (e.target === e.currentTarget && canvas.selectedSectionId) {
+              dispatch({ type: 'CANVAS', action: { type: 'SELECT_SECTION', sectionId: null } })
+            }
+          }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
           onDragOver={(e) => {
             e.preventDefault()
             e.dataTransfer.dropEffect = 'copy'

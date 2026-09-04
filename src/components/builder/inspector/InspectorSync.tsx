@@ -84,10 +84,28 @@ export function InspectorSync({ children }: InspectorSyncProps) {
         return
       }
 
+      // Resolve effective props for the ACTIVE breakpoint:
+      // desktop → base; tablet → base + tablet overrides; mobile → base + tablet + mobile.
+      const bp = canvas.viewport.label === 'TABLET' ? 'tablet'
+        : canvas.viewport.label === 'MOBILE' ? 'mobile'
+        : 'desktop'
+      let resolved: Record<string, unknown> = { ...selectedNode.props }
+      if (selectedNode.responsiveProps && bp !== 'desktop') {
+        for (const [propName, breakpointValues] of Object.entries(selectedNode.responsiveProps)) {
+          const tabletVal = (breakpointValues as Record<string, unknown>).tablet
+          const mobileVal = (breakpointValues as Record<string, unknown>).mobile
+          if (bp === 'tablet' && tabletVal !== undefined) resolved[propName] = tabletVal
+          if (bp === 'mobile') {
+            if (tabletVal !== undefined) resolved[propName] = tabletVal
+            if (mobileVal !== undefined) resolved[propName] = mobileVal
+          }
+        }
+      }
+
       setData({
         sectionId: canvas.selectedSectionId,
         descriptor,
-        props: { ...descriptor.defaultProps, ...selectedNode.props },
+        props: { ...descriptor.defaultProps, ...resolved },
         loading: false,
         error: null,
       })
@@ -98,7 +116,7 @@ export function InspectorSync({ children }: InspectorSyncProps) {
         error: err instanceof Error ? err.message : 'Unknown error loading inspector data',
       }))
     }
-  }, [selectedNode, canvas.selectedSectionId, ctx.registry])
+  }, [selectedNode, canvas.selectedSectionId, canvas.viewport.label, ctx.registry])
 
   return <>{children(data)}</>
 }

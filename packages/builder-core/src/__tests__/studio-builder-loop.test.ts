@@ -264,4 +264,174 @@ describe('Studio Builder Full Lifecycle Loop', () => {
     // Mobile override stored separately
     expect(node.responsiveProps?.sticky?.mobile).toBe(true)
   })
+
+  it('NS24: root-level drag reorder — dragging C above A yields C,A,B with undo/redo', () => {
+    const registry = createBuilderComponentRegistry()
+    const channel = createMemoryChannel()
+
+    const mk = (id: string, order: number) =>
+      createSectionNode({ id, type: 'content', label: id, props: { title: id }, order })
+
+    const page = createBuilderPage({
+      id: 'page_home',
+      slug: '/',
+      name: 'Home',
+      isHome: true,
+      sections: [mk('sec_a', 0), mk('sec_b', 1), mk('sec_c', 2)],
+    })
+    const doc = createBuilderDocument({
+      id: 'store_test',
+      metadata: { storeName: 'Test Store', storeSlug: 'test', locale: 'pl', currency: 'PLN' },
+      pages: [page],
+    })
+
+    let ctx = createBuilderContext({
+      document: doc,
+      registry,
+      preview: channel.builderChannel,
+    })
+
+    // Drag C (index 2) above A (index 0):
+    // MOVE_SECTION removes C first → [A,B], then inserts at 0 → [C,A,B]
+    ctx = ctx.dispatch({
+      type: 'MOVE_SECTION',
+      pageId: 'page_home',
+      fromIndex: 2,
+      toIndex: 0,
+    })
+
+    const order1 = ctx.document.pages[0].sections.map(s => s.id)
+    expect(order1).toEqual(['sec_c', 'sec_a', 'sec_b'])
+
+    // UNDO restores original order
+    ctx = ctx.dispatch({ type: 'UNDO' })
+    expect(ctx.document.pages[0].sections.map(s => s.id)).toEqual(['sec_a', 'sec_b', 'sec_c'])
+
+    // REDO restores reordered state
+    ctx = ctx.dispatch({ type: 'REDO' })
+    expect(ctx.document.pages[0].sections.map(s => s.id)).toEqual(['sec_c', 'sec_a', 'sec_b'])
+
+    // Orders re-normalized 0..n
+    expect(ctx.document.pages[0].sections.map(s => s.order)).toEqual([0, 1, 2])
+  })
+
+  it('NS24: SET_NODE_STYLES participates in history (resize/style undo-redo)', () => {
+    const registry = createBuilderComponentRegistry()
+    const channel = createMemoryChannel()
+
+    const heading = createSectionNode({
+      id: 'elem_h',
+      type: 'heading',
+      label: 'Nagłówek',
+      props: { text: 'Tytuł', level: 'h2' },
+      order: 0,
+    })
+    const page = createBuilderPage({
+      id: 'page_home',
+      slug: '/',
+      name: 'Home',
+      isHome: true,
+      sections: [heading],
+    })
+    const doc = createBuilderDocument({
+      id: 'store_test',
+      metadata: { storeName: 'Test Store', storeSlug: 'test', locale: 'pl', currency: 'PLN' },
+      pages: [page],
+    })
+
+    let ctx = createBuilderContext({
+      document: doc,
+      registry,
+      preview: channel.builderChannel,
+    })
+
+    // Resize commit (same command SelectionOverlay dispatches on pointer up)
+    ctx = ctx.dispatch({
+      type: 'SET_NODE_STYLES',
+      nodeId: 'elem_h',
+      styles: { width: '320px', height: '80px' },
+    })
+
+    let node: any = ctx.document.pages[0].sections[0]
+    expect(node.styles.width).toBe('320px')
+    expect(node.styles.height).toBe('80px')
+
+    ctx = ctx.dispatch({ type: 'UNDO' })
+    node = ctx.document.pages[0].sections[0]
+    expect(node.styles?.width).toBeUndefined()
+
+    ctx = ctx.dispatch({ type: 'REDO' })
+    node = ctx.document.pages[0].sections[0]
+    expect(node.styles.width).toBe('320px')
+  })
+
+  it('NS24: persistence round-trip contract — node styles, responsive, children preserved through save shape', () => {
+    const registry = createBuilderComponentRegistry()
+    const channel = createMemoryChannel()
+
+    const child = createSectionNode({
+      id: 'elem_img',
+      type: 'image',
+      label: 'Zdjęcie',
+      props: { src: 'https://example.com/img.jpg', alt: 'Opis' },
+      order: 0,
+    })
+    const container = {
+      ...createSectionNode({
+        id: 'cont_main',
+        type: 'container',
+        label: 'Kontener',
+        props: { display: 'flex-col' },
+        order: 0,
+      }),
+      children: [child],
+    }
+    const page = createBuilderPage({
+      id: 'page_home',
+      slug: '/',
+      name: 'Home',
+      isHome: true,
+      sections: [container],
+    })
+    const doc = createBuilderDocument({
+      id: 'store_test',
+      metadata: { storeName: 'Test Store', storeSlug: 'test', locale: 'pl', currency: 'PLN' },
+      pages: [page],
+    })
+
+    let ctx = createBuilderContext({
+      document: doc,
+      registry,
+      preview: channel.builderChannel,
+    })
+
+    // Mutations: style, responsive style, text
+    ctx = ctx.dispatch({ type: 'SET_NODE_STYLES', nodeId: 'cont_main', styles: { backgroundColor: '#101020', padding: '24px' } })
+    ctx = ctx.dispatch({ type: 'UPDATE_PROPS', pageId: 'page_home', sectionId: 'elem_img', props: { src: 'https://example.com/changed.jpg' } })
+    // Mobile style override (same command BuilderShell dispatches in TABLET/MOBILE)
+    ctx = ctx.dispatch({ type: 'UPDATE_NODE', nodeId: 'cont_main', updates: { responsive: { mobile: { padding: '8px' } } } })
+
+    // Simulate the API persistence shape (nodeToApiSection from studio page):
+    // styles + responsive + children must survive the serialize/deserialize cycle
+    const serialized = ctx.document.pages[0].sections.map((s) => ({
+      id: s.id,
+      type: s.type,
+      label: s.label,
+      config: s.props,
+      styles: s.styles,
+      responsive: s.responsive,
+      responsiveProps: s.responsiveProps,
+      visible: s.visible,
+      locked: s.locked,
+      order: s.order,
+      children: (s.children ?? []).map((c) => ({
+        id: c.id, type: c.type, label: c.label, config: c.props, styles: c.styles,
+        responsive: c.responsive, visible: c.visible, locked: c.locked, order: c.order,
+      })),
+    }))
+
+    expect(serialized[0]?.styles?.backgroundColor).toBe('#101020')
+    expect(serialized[0]?.responsive?.mobile?.padding).toBe('8px')
+    expect(serialized[0]?.children?.[0]?.config?.src).toBe('https://example.com/changed.jpg')
+  })
 })

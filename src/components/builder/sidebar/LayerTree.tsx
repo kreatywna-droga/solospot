@@ -291,23 +291,12 @@ export function LayerTree() {
     canvas.selectedPageId ? p.id === canvas.selectedPageId : p.isHome
   ) ?? document.pages[0]
 
-  const findParent = (sections: SectionNode[], childId: string): string | null => {
-    for (const section of sections) {
-      if (section.children.some(child => child.id === childId)) {
-        return section.id
-      }
-      const found = findParent(section.children, childId)
-      if (found) return found
-    }
-    return null
-  }
-
   const handleSelect = useCallback((sectionId: string) => {
-    const parentId = findParent(activePage.sections, sectionId)
-    const targetId = parentId || sectionId
+    // Select exactly the clicked node — canvas and layers must reference
+    // the SAME node id (canvas selection highlights [data-node-id]).
     dispatch({
       type: 'CANVAS',
-      action: { type: 'SELECT_SECTION', sectionId: targetId, pageId: activePage?.id ?? null },
+      action: { type: 'SELECT_SECTION', sectionId, pageId: activePage?.id ?? null },
     })
   }, [dispatch, activePage])
 

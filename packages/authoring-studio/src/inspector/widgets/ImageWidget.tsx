@@ -31,6 +31,10 @@ const defaultImage: ImageShape = {
 };
 
 function parseImage(value: unknown): ImageShape {
+  // Flat string value (e.g. props.src = "https://...") — treat as the source URL
+  if (typeof value === 'string') {
+    return { ...defaultImage, src: value }
+  }
   if (value && typeof value === 'object') {
     const v = value as Record<string, unknown>;
     return {
@@ -52,10 +56,16 @@ const FIT_OPTIONS = [
   { label: 'Scale-down', value: 'scale-down' },
 ];
 
-const ImageWidget: React.FC<WidgetProps<ImageShape>> = ({ value, onChange }) => {
-  const img = parseImage(value);
+const ImageWidget: React.FC<WidgetProps<ImageShape | string>> = ({ value, onChange }) => {
+  const isFlatString = typeof value === 'string'
+  const img = parseImage(value)
 
-  const update = (partial: Partial<ImageShape>) => onChange({ ...img, ...partial });
+  // When the document value is a flat string (props.src), write back a flat
+  // string so the canvas renderer contract (props.src: string) stays intact.
+  const update = (partial: Partial<ImageShape>) => {
+    const next: ImageShape = { ...img, ...partial }
+    onChange((isFlatString ? next.src : next) as ImageShape)
+  }
 
   return (
     <div className="space-y-3">

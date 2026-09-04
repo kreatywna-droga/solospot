@@ -632,3 +632,77 @@ describe('computeSelectionBox', () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// NS24: BOX_SELECT reducer — real marquee selection
+// ---------------------------------------------------------------------------
+
+describe('NS24 reduceSelection BOX_SELECT', () => {
+  const doc = createTestDocument();
+
+  it('selects all elements intersecting the marquee rect', () => {
+    const sectionPositions = new Map([
+      ['hero', { x: 0, y: 0, width: 200, height: 100 }],
+      ['container_features', { x: 0, y: 100, width: 200, height: 200 }],
+      ['footer', { x: 0, y: 300, width: 200, height: 100 }],
+    ]);
+
+    const next = reduceSelection(
+      createInitialSelection(),
+      doc,
+      {
+        type: 'BOX_SELECT',
+        pageId: 'page_home',
+        rect: { x: 0, y: 50, width: 200, height: 100 },
+        sectionPositions: sectionPositions as Map<string, import('../CanvasState').Rect>,
+      }
+    );
+
+    // hero (y 0-100 intersects 50-150) and container_features (100-300 intersects) selected; footer not
+    expect(next.selectedIds).toContain('hero');
+    expect(next.selectedIds).toContain('container_features');
+    expect(next.selectedIds).not.toContain('footer');
+  });
+
+  it('does not select locked elements', () => {
+    const sectionPositions = new Map([
+      ['hero', { x: 0, y: 0, width: 100, height: 100 }],
+    ]);
+    const lockedState: SelectionState = {
+      ...createInitialSelection(),
+      lockedIds: ['hero'],
+    };
+
+    const next = reduceSelection(
+      lockedState,
+      doc,
+      {
+        type: 'BOX_SELECT',
+        pageId: 'page_home',
+        rect: { x: 0, y: 0, width: 200, height: 200 },
+        sectionPositions: sectionPositions as Map<string, import('../CanvasState').Rect>,
+      }
+    );
+
+    expect(next.selectedIds).not.toContain('hero');
+  });
+
+  it('returns empty selection for a rect that intersects nothing', () => {
+    const sectionPositions = new Map([
+      ['hero', { x: 0, y: 0, width: 10, height: 10 }],
+    ]);
+
+    const next = reduceSelection(
+      createInitialSelection(),
+      doc,
+      {
+        type: 'BOX_SELECT',
+        pageId: 'page_home',
+        rect: { x: 500, y: 500, width: 10, height: 10 },
+        sectionPositions: sectionPositions as Map<string, import('../CanvasState').Rect>,
+      }
+    );
+
+    expect(next.selectedIds).toHaveLength(0);
+  });
+});
+
