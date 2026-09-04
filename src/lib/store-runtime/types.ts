@@ -16,6 +16,8 @@ export interface RuntimeTheme {
   primaryColor: string
   secondaryColor: string
   font: string
+  logo?: string
+  favicon?: string
   description?: string
 }
 

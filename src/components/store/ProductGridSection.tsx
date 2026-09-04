@@ -9,7 +9,7 @@ function formatPrice(price: number, currency: string) {
 }
 
 export function ProductGridSection({ section, theme, products }: SectionComponentProps) {
-  const config = section.config as { title?: string; count?: number }
+  const config = ((section?.config || (section as any)?.props) ?? {}) as { title?: string; count?: number }
   const displayProducts = products?.slice(0, config.count || 8) || []
 
   return (

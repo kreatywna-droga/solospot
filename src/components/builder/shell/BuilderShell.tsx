@@ -30,6 +30,7 @@ import { BuilderTopBar, StudioTab } from './BuilderTopBar'
 import { BuilderLeftSidebar } from './BuilderLeftSidebar'
 import { BuilderBottomBar } from './BuilderBottomBar'
 import { BuilderDocument, BuilderMetadata, BuilderTheme, createBuilderDocument } from '../../../../packages/builder-core/src/BuilderDocument'
+import { findNode } from '../../../../packages/builder-core/src'
 
 // ---------------------------------------------------------------------------
 // Breadcrumbs
@@ -160,14 +161,74 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
       if (!canvas.selectedSectionId) return
       const targetPageId = canvas.selectedPageId || builderDoc.pages[0]?.id
       if (!targetPageId) return
+
+      // Update props (Single Source of Truth)
       dispatch({
         type: 'UPDATE_PROPS',
         pageId: targetPageId,
         sectionId: canvas.selectedSectionId,
         props: { [key]: value },
       })
+
+      // Style property mapping
+      const STYLE_PROP_MAP: Record<string, string> = {
+        background: 'backgroundColor',
+        backgroundColor: 'backgroundColor',
+        color: 'color',
+        textColor: 'color',
+        fontSize: 'fontSize',
+        fontWeight: 'fontWeight',
+        fontFamily: 'fontFamily',
+        lineHeight: 'lineHeight',
+        letterSpacing: 'letterSpacing',
+        textAlign: 'textAlign',
+        borderRadius: 'borderRadius',
+        borderWidth: 'borderWidth',
+        borderColor: 'borderColor',
+        width: 'width',
+        height: 'height',
+        gap: 'gap',
+        padding: 'padding',
+        margin: 'margin',
+        display: 'display',
+        alignItems: 'alignItems',
+        justifyContent: 'justifyContent',
+      }
+
+      const styleKey = STYLE_PROP_MAP[key]
+      if (styleKey) {
+        const viewport = canvas.viewport.label
+        if (viewport === 'TABLET' || viewport === 'MOBILE') {
+          // Responsive override
+          const bp = viewport === 'TABLET' ? 'tablet' : 'mobile'
+          const found = findNode(builderDoc, canvas.selectedSectionId)
+          if (found) {
+            const currentResp = found.node.responsive || {}
+            const currentBpStyles = (currentResp[bp] || {}) as Record<string, unknown>
+            dispatch({
+              type: 'UPDATE_NODE',
+              nodeId: canvas.selectedSectionId,
+              updates: {
+                responsive: {
+                  ...currentResp,
+                  [bp]: { ...currentBpStyles, [styleKey]: value },
+                },
+              },
+              pageId: targetPageId,
+            })
+          }
+        } else {
+          // Desktop base style
+          dispatch({
+            type: 'SET_NODE_STYLES',
+            nodeId: canvas.selectedSectionId,
+            styles: { [styleKey]: value as any },
+            pageId: targetPageId,
+          })
+        }
+      }
     },
-    [dispatch, canvas.selectedSectionId, canvas.selectedPageId, builderDoc.pages],
+    [dispatch, canvas.selectedSectionId, canvas.selectedPageId, canvas.viewport.label, builderDoc],
   )
 
   return (

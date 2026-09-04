@@ -44,6 +44,12 @@ interface ApiSection {
   label: string
   config?: Record<string, unknown>
   order?: number
+  parentId?: string | null
+  styles?: Record<string, unknown>
+  responsive?: Record<string, unknown>
+  visible?: boolean
+  locked?: boolean
+  children?: ApiSection[]
 }
 
 interface ApiPage {
@@ -73,8 +79,40 @@ interface ApiStore {
 }
 
 // ---------------------------------------------------------------------------
-// Converter: ApiStore → BuilderDocument
+// Converters: ApiStore ↔ BuilderDocument
 // ---------------------------------------------------------------------------
+
+function nodeToApiSection(n: SectionNode, order: number): ApiSection {
+  return {
+    id: n.id,
+    type: n.type,
+    label: n.label,
+    config: n.props,
+    styles: n.styles as Record<string, unknown>,
+    responsive: n.responsive as Record<string, unknown>,
+    visible: n.visible,
+    locked: n.locked,
+    parentId: n.parentId,
+    order: n.order ?? order,
+    children: (n.children ?? []).map((child, ci) => nodeToApiSection(child, ci)),
+  }
+}
+
+function apiSectionToNode(s: ApiSection, i: number, parentId?: string | null): SectionNode {
+  return {
+    id: s.id,
+    type: s.type,
+    label: s.label || s.type,
+    parentId: s.parentId ?? parentId ?? null,
+    props: s.config ?? {},
+    styles: (s.styles as any) ?? {},
+    responsive: (s.responsive as any) ?? {},
+    visible: s.visible !== false,
+    locked: s.locked === true,
+    order: s.order ?? i,
+    children: (s.children ?? []).map((child, ci) => apiSectionToNode(child, ci, s.id)),
+  }
+}
 
 function apiStoreToBuilderDoc(store: ApiStore): BuilderDocument {
   const branding = store.config?.branding ?? {}
@@ -98,13 +136,7 @@ function apiStoreToBuilderDoc(store: ApiStore): BuilderDocument {
   const pages = apiPages.map((apiPage, pageIdx) => {
     const sections: SectionNode[] = (apiPage.sections ?? [])
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-      .map((s, i) => createSectionNode({
-        id: s.id,
-        type: s.type,
-        label: s.label || s.type,
-        props: s.config ?? {},
-        order: i,
-      }))
+      .map((s, i) => apiSectionToNode(s, i, null))
 
     return createBuilderPage({
       id: apiPage.id,
@@ -221,17 +253,11 @@ function builderDocToApiPatch(doc: BuilderDocument): Record<string, unknown> {
         logo: compiled.branding.logo,
         favicon: compiled.branding.favicon,
       },
-      pages: compiled.pages.map(page => ({
+      pages: doc.pages.map(page => ({
         id: page.id,
         name: page.name,
         slug: page.slug,
-        sections: page.sections.map(s => ({
-          id: s.id,
-          type: s.type,
-          label: s.label,
-          config: s.props,
-          order: s.order,
-        })),
+        sections: page.sections.map((s, idx) => nodeToApiSection(s, idx)),
         seo: page.seo,
       })),
     },

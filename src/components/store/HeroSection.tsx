@@ -3,7 +3,7 @@
 import type { SectionComponentProps } from '@/lib/store-runtime/types'
 
 export function HeroSection({ section, theme, storeName }: SectionComponentProps) {
-  const config = section.config as { title?: string; subtitle?: string; cta?: string; image?: string }
+  const config = ((section?.config || (section as any)?.props) ?? {}) as { title?: string; subtitle?: string; cta?: string; image?: string }
   const title = config.title || storeName
 
   return (

@@ -5,7 +5,7 @@ import type { SectionComponentProps } from '@/lib/store-runtime/types'
 
 export function NewsletterSection({ section, theme }: SectionComponentProps) {
   const [email, setEmail] = useState('')
-  const config = section.config as { title?: string; cta?: string }
+  const config = ((section?.config || (section as any)?.props) ?? {}) as { title?: string; cta?: string }
 
   return (
     <section className="py-16 lg:py-24 px-4" style={{ background: `linear-gradient(135deg, ${theme.primaryColor}15, ${theme.secondaryColor}15)`, fontFamily: theme.font }}>

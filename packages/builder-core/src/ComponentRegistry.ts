@@ -119,6 +119,7 @@ export interface ComponentDescriptor {
   readonly icon: string;             // icon name (lucide) or inline SVG string
   readonly schema: ReadonlyArray<PropSchema>;
   readonly defaultProps: Record<string, unknown>;
+  readonly defaultStyles?: Record<string, unknown>;
   readonly thumbnail?: string;       // base64 or URL for palette card preview
   readonly previewable: boolean;     // can render live preview in builder
   readonly allowChildren: boolean;   // if true, SectionNode.children[] is active (container)
@@ -560,7 +561,7 @@ export const STANDARD_COMPONENT_DESCRIPTORS: ReadonlyArray<ComponentDescriptor> 
     tags: ['contener', 'layout', 'flex', 'grid', 'kolumny'],
   },
 
-  // 11. ATOMIC ELEMENTS & SECTIONS (Phase 1)
+  // 11. ATOMIC ELEMENTS & SECTIONS (Phase 1 & 2)
   {
     type: 'section',
     label: 'Sekcja bazowa',
@@ -570,15 +571,68 @@ export const STANDARD_COMPONENT_DESCRIPTORS: ReadonlyArray<ComponentDescriptor> 
     allowChildren: true,
     schema: [
       colorProp({ key: 'background', label: 'Kolor tła', required: false, group: 'style' }),
-      selectProp({ key: 'padding', label: 'Padding sekcji', required: false, group: 'spacing', defaultValue: 'md', options: [
+      selectProp({ key: 'padding', label: 'Wypełnienie (Padding)', required: false, group: 'spacing', defaultValue: 'md', options: [
         { label: 'Brak (0px)', value: 'none' },
         { label: 'Mały (24px)', value: 'sm' },
         { label: 'Średni (48px)', value: 'md' },
         { label: 'Duży (80px)', value: 'lg' },
+        { label: 'Bardzo duży (120px)', value: 'xl' },
+      ]}),
+      stringProp({ key: 'minHeight', label: 'Minimalna wysokość (np. 400px)', required: false, group: 'layout', defaultValue: 'auto' }),
+      selectProp({ key: 'maxWidth', label: 'Maksymalna szerokość', required: false, group: 'layout', defaultValue: '1280px', options: [
+        { label: 'Pełna szerokość (100%)', value: '100%' },
+        { label: 'Standard (1280px)', value: '1280px' },
+        { label: 'Wąska (1024px)', value: '1024px' },
+        { label: 'Tekstowa (800px)', value: '800px' },
       ]}),
     ],
-    defaultProps: { padding: 'md', background: '#0a0a14' },
+    defaultProps: { padding: 'md', background: '#0a0a14', minHeight: 'auto', maxWidth: '1280px' },
     tags: ['sekcja', 'układ', 'layout', 'wiersz'],
+  },
+  {
+    type: 'container',
+    label: 'Kontener / Ramka',
+    category: 'Layout',
+    icon: 'Box',
+    previewable: true,
+    allowChildren: true,
+    schema: [
+      selectProp({ key: 'display', label: 'Układ wewnętrzny', required: false, group: 'layout', defaultValue: 'flex-col', options: [
+        { label: 'Kolumna (flex-col)', value: 'flex-col' },
+        { label: 'Wiersz (flex-row)', value: 'flex-row' },
+        { label: 'Siatka 2 kolumny', value: 'grid-2' },
+        { label: 'Siatka 3 kolumny', value: 'grid-3' },
+        { label: 'Siatka 4 kolumny', value: 'grid-4' },
+      ]}),
+      selectProp({ key: 'alignItems', label: 'Wyrównanie elementów (Align)', required: false, group: 'layout', defaultValue: 'stretch', options: [
+        { label: 'Rozciągnij (stretch)', value: 'stretch' },
+        { label: 'Do początku (flex-start)', value: 'flex-start' },
+        { label: 'Środek (center)', value: 'center' },
+        { label: 'Do końca (flex-end)', value: 'flex-end' },
+      ]}),
+      selectProp({ key: 'justifyContent', label: 'Rozkład w osi głównej (Justify)', required: false, group: 'layout', defaultValue: 'flex-start', options: [
+        { label: 'Do początku (flex-start)', value: 'flex-start' },
+        { label: 'Środek (center)', value: 'center' },
+        { label: 'Równomiernie (space-between)', value: 'space-between' },
+        { label: 'Wokół (space-around)', value: 'space-around' },
+      ]}),
+      selectProp({ key: 'padding', label: 'Wewnętrzny odstęp (Padding)', required: false, group: 'spacing', defaultValue: 'md', options: [
+        { label: 'Brak (0px)', value: 'none' },
+        { label: 'Mały (16px)', value: 'sm' },
+        { label: 'Średni (32px)', value: 'md' },
+        { label: 'Duży (48px)', value: 'lg' },
+        { label: 'Bardzo duży (64px)', value: 'xl' },
+      ]}),
+      stringProp({ key: 'gap', label: 'Odstęp między elementami (gap px)', required: false, group: 'spacing', defaultValue: '16' }),
+      stringProp({ key: 'width', label: 'Szerokość (np. 100%, 400px)', required: false, group: 'layout', defaultValue: 'auto' }),
+      stringProp({ key: 'height', label: 'Wysokość (np. auto, 250px)', required: false, group: 'layout', defaultValue: 'auto' }),
+      colorProp({ key: 'background', label: 'Kolor tła', required: false, group: 'style' }),
+      stringProp({ key: 'borderRadius', label: 'Zaokrąglenie rogów (np. 12px)', required: false, group: 'style', defaultValue: '12px' }),
+      stringProp({ key: 'borderColor', label: 'Kolor obramowania', required: false, group: 'style' }),
+      stringProp({ key: 'borderWidth', label: 'Grubość obramowania (np. 1px)', required: false, group: 'style', defaultValue: '0px' }),
+    ],
+    defaultProps: { display: 'flex-col', padding: 'md', gap: '16', width: 'auto', height: 'auto', background: '', borderRadius: '12px', borderWidth: '0px' },
+    tags: ['contener', 'layout', 'flex', 'grid', 'kolumny'],
   },
   {
     type: 'heading',
@@ -589,20 +643,37 @@ export const STANDARD_COMPONENT_DESCRIPTORS: ReadonlyArray<ComponentDescriptor> 
     allowChildren: false,
     schema: [
       stringProp({ key: 'text', label: 'Tekst nagłówka', required: true, group: 'content', defaultValue: 'Nowoczesny nagłówek sekcji' }),
-      selectProp({ key: 'level', label: 'Rozmiar (H1-H4)', required: false, group: 'typography', defaultValue: 'h2', options: [
-        { label: 'H1 — Bardzo duży', value: 'h1' },
-        { label: 'H2 — Duży nagłówek', value: 'h2' },
-        { label: 'H3 — Średni podtytuł', value: 'h3' },
-        { label: 'H4 — Mały nagłówek', value: 'h4' },
+      selectProp({ key: 'level', label: 'Rozmiar semantyczny (H1-H4)', required: false, group: 'typography', defaultValue: 'h2', options: [
+        { label: 'H1 — Tytuł strony (Bardzo duży)', value: 'h1' },
+        { label: 'H2 — Tytuł sekcji (Duży)', value: 'h2' },
+        { label: 'H3 — Podtytuł (Średni)', value: 'h3' },
+        { label: 'H4 — Etykieta grupy (Mały)', value: 'h4' },
+      ]}),
+      selectProp({ key: 'fontFamily', label: 'Krój pisma (Font)', required: false, group: 'typography', defaultValue: 'Inter', options: [
+        { label: 'Inter (Nowoczesny)', value: 'Inter' },
+        { label: 'Outfit (Geometryczny)', value: 'Outfit' },
+        { label: 'Playfair Display (Elegancki)', value: 'Playfair Display' },
+        { label: 'Space Grotesk (Techniczny)', value: 'Space Grotesk' },
+        { label: 'Roboto (Uniwersalny)', value: 'Roboto' },
+      ]}),
+      stringProp({ key: 'fontSize', label: 'Wielkość czcionki (np. 32px, 2.5rem)', required: false, group: 'typography' }),
+      selectProp({ key: 'fontWeight', label: 'Grubość tekstu (Weight)', required: false, group: 'typography', defaultValue: 'bold', options: [
+        { label: 'Normalny (400)', value: 'normal' },
+        { label: 'Średni (500)', value: 'medium' },
+        { label: 'Półgruby (600)', value: 'semibold' },
+        { label: 'Pogrubiony (700)', value: 'bold' },
+        { label: 'Bardzo gruby (800)', value: 'extrabold' },
       ]}),
       selectProp({ key: 'textAlign', label: 'Wyrównanie', required: false, group: 'typography', defaultValue: 'left', options: [
         { label: 'Do lewej', value: 'left' },
         { label: 'Środek', value: 'center' },
         { label: 'Do prawej', value: 'right' },
       ]}),
+      stringProp({ key: 'lineHeight', label: 'Wysokość linii (np. 1.2, 1.4)', required: false, group: 'typography', defaultValue: '1.2' }),
+      stringProp({ key: 'letterSpacing', label: 'Odstęp liter (np. -0.02em, 0.05em)', required: false, group: 'typography' }),
       colorProp({ key: 'color', label: 'Kolor tekstu', required: false, group: 'style' }),
     ],
-    defaultProps: { text: 'Nowoczesny nagłówek sekcji', level: 'h2', textAlign: 'left', color: '#ffffff' },
+    defaultProps: { text: 'Nowoczesny nagłówek sekcji', level: 'h2', fontFamily: 'Inter', textAlign: 'left', fontWeight: 'bold', lineHeight: '1.2', color: '#ffffff' },
     tags: ['nagłówek', 'tekst', 'tytuł', 'heading', 'h1', 'h2'],
   },
   {
@@ -614,14 +685,29 @@ export const STANDARD_COMPONENT_DESCRIPTORS: ReadonlyArray<ComponentDescriptor> 
     allowChildren: false,
     schema: [
       textProp({ key: 'text', label: 'Treść akapitu', required: true, group: 'content', defaultValue: 'Wprowadź tekst opisu lub akapitu...' }),
+      selectProp({ key: 'fontFamily', label: 'Krój pisma (Font)', required: false, group: 'typography', defaultValue: 'Inter', options: [
+        { label: 'Inter (Nowoczesny)', value: 'Inter' },
+        { label: 'Outfit (Geometryczny)', value: 'Outfit' },
+        { label: 'Playfair Display (Elegancki)', value: 'Playfair Display' },
+        { label: 'Space Grotesk (Techniczny)', value: 'Space Grotesk' },
+        { label: 'Roboto (Uniwersalny)', value: 'Roboto' },
+      ]}),
+      stringProp({ key: 'fontSize', label: 'Wielkość czcionki (np. 16px)', required: false, group: 'typography', defaultValue: '16px' }),
+      selectProp({ key: 'fontWeight', label: 'Grubość tekstu', required: false, group: 'typography', defaultValue: 'normal', options: [
+        { label: 'Normalny (400)', value: 'normal' },
+        { label: 'Średni (500)', value: 'medium' },
+        { label: 'Półgruby (600)', value: 'semibold' },
+        { label: 'Pogrubiony (700)', value: 'bold' },
+      ]}),
       selectProp({ key: 'textAlign', label: 'Wyrównanie', required: false, group: 'typography', defaultValue: 'left', options: [
         { label: 'Do lewej', value: 'left' },
         { label: 'Środek', value: 'center' },
         { label: 'Do prawej', value: 'right' },
       ]}),
+      stringProp({ key: 'lineHeight', label: 'Wysokość linii (np. 1.6)', required: false, group: 'typography', defaultValue: '1.6' }),
       colorProp({ key: 'color', label: 'Kolor tekstu', required: false, group: 'style' }),
     ],
-    defaultProps: { text: 'Wprowadź tekst opisu lub akapitu...', textAlign: 'left', color: '#94a3b8' },
+    defaultProps: { text: 'Wprowadź tekst opisu lub akapitu...', fontFamily: 'Inter', fontSize: '16px', textAlign: 'left', fontWeight: 'normal', lineHeight: '1.6', color: '#94a3b8' },
     tags: ['tekst', 'opis', 'akapit', 'paragraph'],
   },
   {
@@ -633,16 +719,18 @@ export const STANDARD_COMPONENT_DESCRIPTORS: ReadonlyArray<ComponentDescriptor> 
     allowChildren: false,
     schema: [
       stringProp({ key: 'text', label: 'Etykieta przycisku', required: true, group: 'content', defaultValue: 'Kliknij tutaj' }),
-      stringProp({ key: 'url', label: 'Adres URL (Link)', required: false, group: 'link', defaultValue: '#' }),
+      stringProp({ key: 'url', label: 'Adres URL (Link docelowy)', required: false, group: 'link', defaultValue: '#' }),
       selectProp({ key: 'variant', label: 'Styl przycisku', required: false, group: 'style', defaultValue: 'primary', options: [
-        { label: 'Główny (Primary)', value: 'primary' },
-        { label: 'Drugorzędny (Secondary)', value: 'secondary' },
+        { label: 'Główny (Wypełniony)', value: 'primary' },
+        { label: 'Drugorzędny (Ciemny)', value: 'secondary' },
         { label: 'Kontur (Outline)', value: 'outline' },
       ]}),
       colorProp({ key: 'background', label: 'Kolor tła przycisku', required: false, group: 'style' }),
       colorProp({ key: 'textColor', label: 'Kolor tekstu', required: false, group: 'style' }),
+      stringProp({ key: 'borderRadius', label: 'Zaokrąglenie (np. 12px, 9999px)', required: false, group: 'style', defaultValue: '12px' }),
+      stringProp({ key: 'padding', label: 'Padding (np. 12px 24px)', required: false, group: 'style', defaultValue: '10px 20px' }),
     ],
-    defaultProps: { text: 'Kliknij tutaj', url: '#', variant: 'primary', background: '#7c3aed', textColor: '#ffffff' },
+    defaultProps: { text: 'Kliknij tutaj', url: '#', variant: 'primary', background: '#7c3aed', textColor: '#ffffff', borderRadius: '12px', padding: '10px 20px' },
     tags: ['przycisk', 'button', 'cta', 'akcja'],
   },
   {
@@ -655,9 +743,16 @@ export const STANDARD_COMPONENT_DESCRIPTORS: ReadonlyArray<ComponentDescriptor> 
     schema: [
       imageProp({ key: 'src', label: 'Adres URL zdjęcia', required: true, group: 'content', defaultValue: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80' }),
       stringProp({ key: 'alt', label: 'Tekst alternatywny (Alt)', required: false, group: 'seo', defaultValue: 'Zdjęcie produktu' }),
+      stringProp({ key: 'width', label: 'Szerokość (np. 100%, 400px)', required: false, group: 'layout', defaultValue: '100%' }),
+      stringProp({ key: 'height', label: 'Wysokość (np. auto, 300px)', required: false, group: 'layout', defaultValue: 'auto' }),
+      selectProp({ key: 'objectFit', label: 'Dopasowanie (Object Fit)', required: false, group: 'layout', defaultValue: 'cover', options: [
+        { label: 'Cover (Wypełnij)', value: 'cover' },
+        { label: 'Contain (Zmieść)', value: 'contain' },
+        { label: 'Fill (Rozciągnij)', value: 'fill' },
+      ]}),
       stringProp({ key: 'borderRadius', label: 'Zaokrąglenie (np. 12px)', required: false, group: 'style', defaultValue: '12px' }),
     ],
-    defaultProps: { src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80', alt: 'Zdjęcie produktu', borderRadius: '12px' },
+    defaultProps: { src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80', alt: 'Zdjęcie produktu', width: '100%', height: 'auto', objectFit: 'cover', borderRadius: '12px' },
     tags: ['zdjęcie', 'obraz', 'image', 'grafika', 'foto'],
   },
 ];

@@ -70,42 +70,91 @@ interface LayerRowProps {
 function LayerRow({ node, depth, pageId, selectedId, onSelect }: LayerRowProps) {
   const { dispatch } = useBuilder()
   const [expanded, setExpanded] = useState(true)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editValue, setEditValue] = useState(node.label || node.type)
+  const [isDragOver, setIsDragOver] = useState(false)
+
   const hasChildren = Boolean(node.children && node.children.length > 0)
   const isSelected = selectedId === node.id
 
   const handleToggleVisibility = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
-    dispatch({ type: 'TOGGLE_VISIBILITY', pageId, sectionId: node.id } as any)
-  }, [dispatch, pageId, node.id])
+    dispatch({ type: 'SET_NODE_HIDDEN', pageId, nodeId: node.id, hidden: node.visible })
+  }, [dispatch, pageId, node.id, node.visible])
 
   const handleDelete = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
-    dispatch({ type: 'REMOVE_SECTION', pageId, sectionId: node.id } as any)
+    dispatch({ type: 'REMOVE_NODE', pageId, nodeId: node.id })
     if (isSelected) {
-      dispatch({ type: 'CANVAS', action: { type: 'SELECT_SECTION', sectionId: null } } as any)
+      dispatch({ type: 'CANVAS', action: { type: 'SELECT_SECTION', sectionId: null } })
     }
   }, [dispatch, pageId, node.id, isSelected])
 
   const handleDuplicate = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
-    dispatch({ type: 'DUPLICATE_SECTION', pageId, sectionId: node.id } as any)
+    dispatch({ type: 'DUPLICATE_NODE', pageId, nodeId: node.id })
   }, [dispatch, pageId, node.id])
 
   const handleToggleLock = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
-    dispatch({ type: 'TOGGLE_LOCK', pageId, sectionId: node.id } as any)
-  }, [dispatch, pageId, node.id])
+    dispatch({ type: 'SET_NODE_LOCKED', pageId, nodeId: node.id, locked: !node.locked })
+  }, [dispatch, pageId, node.id, node.locked])
+
+  const handleCommitRename = useCallback(() => {
+    const trimmed = editValue.trim()
+    if (trimmed && trimmed !== node.label) {
+      dispatch({
+        type: 'UPDATE_NODE',
+        pageId,
+        nodeId: node.id,
+        updates: { label: trimmed },
+      })
+    }
+    setIsEditing(false)
+  }, [dispatch, pageId, node.id, node.label, editValue])
 
   return (
-    <div>
+    <div
+      onDragOver={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setIsDragOver(true)
+      }}
+      onDragLeave={(e) => {
+        e.stopPropagation()
+        setIsDragOver(false)
+      }}
+      onDrop={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setIsDragOver(false)
+        const draggedId = e.dataTransfer.getData('application/solospot-layer-id') || e.dataTransfer.getData('application/solospot-node-id')
+        if (draggedId && draggedId !== node.id) {
+          dispatch({
+            type: 'MOVE_NODE',
+            pageId,
+            nodeId: draggedId,
+            targetParentId: hasChildren ? node.id : (node.parentId ?? null),
+            targetIndex: node.order,
+          })
+        }
+      }}
+    >
       <div
+        draggable={!node.locked && !isEditing}
+        onDragStart={(e) => {
+          e.dataTransfer.setData('application/solospot-layer-id', node.id)
+          e.dataTransfer.setData('application/solospot-node-id', node.id)
+          e.dataTransfer.effectAllowed = 'move'
+        }}
         onClick={() => onSelect(node.id)}
-        className={`group flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer transition-all text-sm select-none
+        className={`group flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer transition-all text-sm select-none relative
           ${isSelected
             ? 'bg-violet-500/20 border border-violet-500/40 text-white shadow-sm shadow-violet-500/10'
             : 'hover:bg-white/5 text-slate-300 hover:text-white border border-transparent'
           }
           ${!node.visible ? 'opacity-40' : ''}
+          ${isDragOver ? 'ring-2 ring-violet-400 bg-violet-500/30' : ''}
         `}
         style={{ paddingLeft: `${8 + depth * 16}px` }}
       >
@@ -130,12 +179,41 @@ function LayerRow({ node, depth, pageId, selectedId, onSelect }: LayerRowProps) 
         </span>
 
         {/* Drag handle */}
-        <GripVertical className="w-3 h-3 text-slate-600 group-hover:text-slate-400 transition-colors flex-shrink-0" />
+        <GripVertical className="w-3 h-3 text-slate-600 group-hover:text-slate-400 transition-colors flex-shrink-0 cursor-grab active:cursor-grabbing" />
 
-        {/* Label */}
-        <span className={`flex-1 text-xs font-medium truncate ${node.locked ? 'text-amber-400/80' : ''}`}>
-          {node.label || node.type}
-        </span>
+        {/* Label or Inline Rename Input */}
+        {isEditing ? (
+          <input
+            type="text"
+            value={editValue}
+            autoFocus
+            onChange={e => setEditValue(e.target.value)}
+            onBlur={handleCommitRename}
+            onKeyDown={e => {
+              if (e.key === 'Enter') handleCommitRename()
+              if (e.key === 'Escape') {
+                setEditValue(node.label || node.type)
+                setIsEditing(false)
+              }
+            }}
+            onClick={e => e.stopPropagation()}
+            className="flex-1 text-xs bg-[#0b0b14] border border-violet-500 rounded px-1.5 py-0.5 text-white outline-none"
+          />
+        ) : (
+          <span
+            onDoubleClick={e => {
+              e.stopPropagation()
+              if (!node.locked) {
+                setEditValue(node.label || node.type)
+                setIsEditing(true)
+              }
+            }}
+            title="Kliknij dwukrotnie, aby zmienić nazwę"
+            className={`flex-1 text-xs font-medium truncate ${node.locked ? 'text-amber-400/80' : ''}`}
+          >
+            {node.label || node.type}
+          </span>
+        )}
 
         {/* Type badge */}
         <span className="text-[9px] text-slate-500 font-mono hidden group-hover:block flex-shrink-0 bg-white/5 px-1 py-0.5 rounded">
@@ -150,7 +228,7 @@ function LayerRow({ node, depth, pageId, selectedId, onSelect }: LayerRowProps) 
             title={node.locked ? 'Odblokuj' : 'Zablokuj'}
           >
             {node.locked
-              ? <Lock className="w-3 h-3" />
+              ? <Lock className="w-3 h-3 text-amber-400" />
               : <Unlock className="w-3 h-3" />
             }
           </button>

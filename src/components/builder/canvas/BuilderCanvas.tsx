@@ -33,7 +33,7 @@ import {
 } from 'lucide-react'
 import { useBuilder } from '../state/BuilderProvider'
 import { SectionNode } from '../../../../packages/builder-core/src/BuilderDocument'
-import { VIEWPORT_PRESETS, DEFAULT_GRID_CONFIG } from '../../../../packages/builder-core/src/CanvasState'
+import { VIEWPORT_PRESETS, DEFAULT_GRID_CONFIG, ViewportLabel } from '../../../../packages/builder-core/src/CanvasState'
 import { GridSystem } from '../../../../packages/builder-core/src/GridSystem'
 import { SelectionOverlay } from '../selection/SelectionOverlay'
 import { useRuntimePreview } from './useRuntimePreview'
@@ -159,6 +159,40 @@ const RESIZE_HANDLES = [
 ]
 
 // ---------------------------------------------------------------------------
+// Responsive style & prop resolvers
+// ---------------------------------------------------------------------------
+
+function resolveEffectiveStyles(node: SectionNode, viewport: ViewportLabel): Record<string, any> {
+  const base = (node.styles || {}) as Record<string, any>
+  if (viewport === 'DESKTOP') return base
+  const tablet = (node.responsive?.tablet || {}) as Record<string, any>
+  if (viewport === 'TABLET') return { ...base, ...tablet }
+  const mobile = (node.responsive?.mobile || {}) as Record<string, any>
+  return { ...base, ...tablet, ...mobile }
+}
+
+function resolveEffectiveProps(node: SectionNode, viewport: ViewportLabel): Record<string, any> {
+  const base = (node.props || {}) as Record<string, any>
+  if (!node.responsiveProps) return base
+  const resolved = { ...base }
+  for (const [propName, breakpointValues] of Object.entries(node.responsiveProps)) {
+    if (viewport === 'TABLET') {
+      if (breakpointValues.tablet !== undefined || breakpointValues.TABLET !== undefined) {
+        resolved[propName] = breakpointValues.tablet ?? breakpointValues.TABLET
+      }
+    } else if (viewport === 'MOBILE') {
+      if (breakpointValues.tablet !== undefined || breakpointValues.TABLET !== undefined) {
+        resolved[propName] = breakpointValues.tablet ?? breakpointValues.TABLET
+      }
+      if (breakpointValues.mobile !== undefined || breakpointValues.MOBILE !== undefined) {
+        resolved[propName] = breakpointValues.mobile ?? breakpointValues.MOBILE
+      }
+    }
+  }
+  return resolved
+}
+
+// ---------------------------------------------------------------------------
 // CanvasNode: Hierarchical recursive renderer for universal nodes
 // ---------------------------------------------------------------------------
 
@@ -168,6 +202,7 @@ interface CanvasNodeProps {
   depth?: number
   selectedId: string | null
   hoveredId: string | null
+  viewport: ViewportLabel
   onSelectNode: (id: string, e: React.MouseEvent) => void
   onHoverNode: (id: string | null) => void
   onDoubleClickNode: (node: SectionNode, e: React.MouseEvent) => void
@@ -179,12 +214,18 @@ function CanvasNode({
   depth = 0,
   selectedId,
   hoveredId,
+  viewport,
   onSelectNode,
   onHoverNode,
   onDoubleClickNode,
 }: CanvasNodeProps) {
+  const { dispatch, ctx } = useBuilder()
+  const [isDropTarget, setIsDropTarget] = useState(false)
   const isSelected = selectedId === node.id
   const isHovered = hoveredId === node.id && !isSelected
+
+  const styles = resolveEffectiveStyles(node, viewport)
+  const props = resolveEffectiveProps(node, viewport)
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -206,22 +247,47 @@ function CanvasNode({
     onHoverNode(null)
   }
 
+  const handleDragStart = (e: React.DragEvent) => {
+    if (node.locked) {
+      e.preventDefault()
+      return
+    }
+    e.stopPropagation()
+    e.dataTransfer.setData('application/solospot-node-id', node.id)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
   if (node.type === 'heading') {
-    const text = (node.props?.text as string) || (node.props?.title as string) || node.label || 'Nagłówek'
-    const level = (node.props?.level as string) || 'h2'
-    const color = (node.styles?.color as string) || (node.props?.color as string) || '#ffffff'
-    const textAlign = (node.styles?.textAlign as any) || (node.props?.textAlign as any) || 'left'
+    const text = (props.text as string) || (props.title as string) || node.label || 'Nagłówek'
+    const level = (props.level as string) || 'h2'
+    const color = (styles.color as string) || (props.color as string) || '#ffffff'
+    const textAlign = (styles.textAlign as any) || (props.textAlign as any) || 'left'
+    const fontSize = styles.fontSize || (level === 'h1' ? '2rem' : level === 'h3' ? '1.25rem' : level === 'h4' ? '1.125rem' : '1.5rem')
+    const fontWeight = styles.fontWeight || (level === 'h1' ? '800' : level === 'h3' ? '600' : '700')
+    const lineHeight = styles.lineHeight
+    const letterSpacing = styles.letterSpacing
+    const fontFamily = styles.fontFamily
 
     return (
       <div
         data-node-id={node.id}
         data-node-type={node.type}
         data-parent-id={node.parentId}
+        draggable={!node.locked}
+        onDragStart={handleDragStart}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        className={`relative cursor-pointer transition-all duration-150 p-2 rounded-lg ${
+        style={{
+          width: styles.width,
+          height: styles.height,
+          margin: styles.margin,
+          padding: styles.padding ?? '8px',
+          backgroundColor: styles.backgroundColor,
+          borderRadius: styles.borderRadius,
+        }}
+        className={`relative cursor-pointer transition-all duration-150 rounded-lg ${
           !node.visible ? 'opacity-30' : ''
         } ${
           isSelected ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-[#08080f] z-20' :
@@ -229,13 +295,16 @@ function CanvasNode({
         }`}
       >
         <div
-          style={{ color, textAlign }}
-          className={
-            level === 'h1' ? 'text-3xl font-extrabold tracking-tight' :
-            level === 'h3' ? 'text-xl font-semibold' :
-            level === 'h4' ? 'text-lg font-medium' :
-            'text-2xl font-bold'
-          }
+          style={{
+            color,
+            textAlign,
+            fontSize,
+            fontWeight,
+            lineHeight,
+            letterSpacing,
+            fontFamily,
+          }}
+          className="tracking-tight select-none"
         >
           {text}
         </div>
@@ -244,27 +313,53 @@ function CanvasNode({
   }
 
   if (node.type === 'text') {
-    const text = (node.props?.text as string) || (node.props?.content as string) || 'Przykładowy tekst opisu lub akapitu...'
-    const color = (node.styles?.color as string) || (node.props?.color as string) || '#94a3b8'
-    const textAlign = (node.styles?.textAlign as any) || (node.props?.textAlign as any) || 'left'
+    const text = (props.text as string) || (props.content as string) || 'Przykładowy tekst opisu lub akapitu...'
+    const color = (styles.color as string) || (props.color as string) || '#94a3b8'
+    const textAlign = (styles.textAlign as any) || (props.textAlign as any) || 'left'
+    const fontSize = styles.fontSize || '0.875rem'
+    const fontWeight = styles.fontWeight || '400'
+    const lineHeight = styles.lineHeight || '1.6'
+    const letterSpacing = styles.letterSpacing
+    const fontFamily = styles.fontFamily
 
     return (
       <div
         data-node-id={node.id}
         data-node-type={node.type}
         data-parent-id={node.parentId}
+        draggable={!node.locked}
+        onDragStart={handleDragStart}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        className={`relative cursor-pointer transition-all duration-150 p-2 rounded-lg ${
+        style={{
+          width: styles.width,
+          height: styles.height,
+          margin: styles.margin,
+          padding: styles.padding ?? '8px',
+          backgroundColor: styles.backgroundColor,
+          borderRadius: styles.borderRadius,
+        }}
+        className={`relative cursor-pointer transition-all duration-150 rounded-lg ${
           !node.visible ? 'opacity-30' : ''
         } ${
           isSelected ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-[#08080f] z-20' :
           isHovered ? 'ring-1 ring-violet-400/60 z-10' : ''
         }`}
       >
-        <p style={{ color, textAlign }} className="text-sm leading-relaxed">
+        <p
+          style={{
+            color,
+            textAlign,
+            fontSize,
+            fontWeight,
+            lineHeight,
+            letterSpacing,
+            fontFamily,
+          }}
+          className="leading-relaxed select-none"
+        >
           {text}
         </p>
       </div>
@@ -272,20 +367,29 @@ function CanvasNode({
   }
 
   if (node.type === 'button') {
-    const text = (node.props?.text as string) || (node.props?.label as string) || 'Kliknij tutaj'
-    const bg = (node.styles?.backgroundColor as string) || (node.props?.background as string) || '#7c3aed'
-    const textColor = (node.styles?.color as string) || (node.props?.textColor as string) || '#ffffff'
-    const variant = (node.props?.variant as string) || 'primary'
+    const text = (props.text as string) || (props.label as string) || 'Kliknij tutaj'
+    const bg = (styles.backgroundColor as string) || (props.background as string) || '#7c3aed'
+    const textColor = (styles.color as string) || (props.textColor as string) || '#ffffff'
+    const variant = (props.variant as string) || 'primary'
+    const borderRadius = (styles.borderRadius as string) || (props.borderRadius as string) || '12px'
+    const borderWidth = styles.borderWidth || (variant === 'outline' ? '2px' : '1px')
+    const borderColor = styles.borderColor || (variant === 'outline' ? bg : 'transparent')
 
     return (
       <div
         data-node-id={node.id}
         data-node-type={node.type}
         data-parent-id={node.parentId}
+        draggable={!node.locked}
+        onDragStart={handleDragStart}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        style={{
+          width: styles.width,
+          margin: styles.margin,
+        }}
         className={`relative inline-block cursor-pointer transition-all duration-150 p-1 rounded-xl ${
           !node.visible ? 'opacity-30' : ''
         } ${
@@ -298,11 +402,17 @@ function CanvasNode({
           style={{
             backgroundColor: variant === 'outline' ? 'transparent' : bg,
             color: textColor,
-            borderColor: variant === 'outline' ? bg : 'transparent',
+            borderRadius,
+            borderWidth,
+            borderColor,
+            fontSize: styles.fontSize || '0.875rem',
+            fontWeight: styles.fontWeight || '500',
+            fontFamily: styles.fontFamily,
+            padding: styles.padding || '10px 20px',
+            width: styles.width ? '100%' : undefined,
+            height: styles.height,
           }}
-          className={`px-5 py-2.5 rounded-xl font-medium text-sm shadow-md pointer-events-none transition-transform ${
-            variant === 'outline' ? 'border-2' : ''
-          }`}
+          className="font-medium shadow-md pointer-events-none transition-transform select-none"
         >
           {text}
         </button>
@@ -311,19 +421,26 @@ function CanvasNode({
   }
 
   if (node.type === 'image') {
-    const src = (node.props?.src as string) || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80'
-    const alt = (node.props?.alt as string) || node.label || 'Obraz'
-    const borderRadius = (node.styles?.borderRadius as string) || (node.props?.borderRadius as string) || '12px'
+    const src = (props.src as string) || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80'
+    const alt = (props.alt as string) || node.label || 'Obraz'
+    const borderRadius = (styles.borderRadius as string) || (props.borderRadius as string) || '12px'
 
     return (
       <div
         data-node-id={node.id}
         data-node-type={node.type}
         data-parent-id={node.parentId}
+        draggable={!node.locked}
+        onDragStart={handleDragStart}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        style={{
+          width: styles.width,
+          height: styles.height,
+          margin: styles.margin,
+        }}
         className={`relative cursor-pointer transition-all duration-150 p-1 rounded-xl ${
           !node.visible ? 'opacity-30' : ''
         } ${
@@ -334,35 +451,121 @@ function CanvasNode({
         <img
           src={src}
           alt={alt}
-          style={{ borderRadius }}
-          className="max-w-full h-auto max-h-[300px] object-cover pointer-events-none"
+          style={{
+            borderRadius,
+            borderWidth: styles.borderWidth,
+            borderColor: styles.borderColor,
+            width: styles.width || '100%',
+            height: styles.height || 'auto',
+            maxHeight: styles.height ? undefined : '350px',
+            objectFit: (styles.objectFit as any) || 'cover',
+          }}
+          className="max-w-full pointer-events-none select-none"
         />
       </div>
     )
   }
 
   // Default: container or other composite node
-  const display = (node.props?.display as string) || 'flex-col'
-  const gap = (node.props?.gap as string) || '16'
-  const bg = (node.styles?.backgroundColor as string) || (node.props?.background as string) || 'transparent'
-  const padding = (node.props?.padding as string) || 'md'
+  const display = (props.display as string) || 'flex-col'
+  const gap = styles.gap !== undefined ? (typeof styles.gap === 'number' ? `${styles.gap}px` : styles.gap) : `${props.gap || '16'}px`
+  const bg = (styles.backgroundColor as string) || (props.background as string) || 'transparent'
+  const padding = styles.padding || (props.padding === 'none' ? 0 : props.padding === 'sm' ? '12px' : props.padding === 'lg' ? '32px' : '20px')
+
+  const handleContainerDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    e.dataTransfer.dropEffect = 'copy'
+    setIsDropTarget(true)
+  }
+
+  const handleContainerDragLeave = (e: React.DragEvent) => {
+    e.stopPropagation()
+    setIsDropTarget(false)
+  }
+
+  const handleContainerDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDropTarget(false)
+
+    const draggedNodeId = e.dataTransfer.getData('application/solospot-node-id')
+    const compType = e.dataTransfer.getData('application/solospot-component-type') || e.dataTransfer.getData('text/plain')
+
+    if (draggedNodeId && draggedNodeId !== node.id) {
+      dispatch({
+        type: 'MOVE_NODE',
+        pageId,
+        nodeId: draggedNodeId,
+        targetParentId: node.id,
+        targetIndex: node.children?.length ?? 0,
+      })
+      dispatch({
+        type: 'CANVAS',
+        action: { type: 'SELECT_SECTION', sectionId: draggedNodeId, pageId },
+      })
+    } else if (compType) {
+      const descriptor = ctx.registry.get(compType)
+      const newNodeId = `node_${compType}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+      const newNode: SectionNode = {
+        id: newNodeId,
+        type: compType,
+        label: descriptor?.label || compType,
+        parentId: node.id,
+        order: node.children?.length ?? 0,
+        visible: true,
+        locked: false,
+        props: descriptor?.defaultProps ? { ...descriptor.defaultProps } : {},
+        styles: (descriptor?.defaultStyles as any) || {},
+        children: [],
+      }
+      dispatch({
+        type: 'INSERT_NODE',
+        pageId,
+        parentId: node.id,
+        node: newNode,
+      })
+      dispatch({
+        type: 'CANVAS',
+        action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId },
+      })
+    }
+  }
 
   return (
     <div
       data-node-id={node.id}
       data-node-type={node.type}
       data-parent-id={node.parentId}
+      draggable={!node.locked}
+      onDragStart={handleDragStart}
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onDragOver={handleContainerDragOver}
+      onDragLeave={handleContainerDragLeave}
+      onDrop={handleContainerDrop}
       style={{
         backgroundColor: bg,
-        padding: padding === 'none' ? 0 : padding === 'sm' ? '12px' : padding === 'lg' ? '32px' : '20px',
-        gap: `${gap}px`,
+        padding,
+        margin: styles.margin,
+        gap,
+        width: styles.width,
+        height: styles.height,
+        minHeight: styles.minHeight || '50px',
+        maxWidth: styles.maxWidth,
+        alignItems: styles.alignItems || props.alignItems,
+        justifyContent: styles.justifyContent || props.justifyContent,
+        borderRadius: styles.borderRadius || '12px',
+        border: styles.borderWidth
+          ? `${styles.borderWidth} solid ${styles.borderColor || 'rgba(255,255,255,0.1)'}`
+          : '1px solid rgba(255,255,255,0.05)',
       }}
-      className={`relative cursor-pointer transition-all duration-150 rounded-xl border border-white/5 min-h-[50px] ${
+      className={`relative cursor-pointer transition-all duration-150 ${
         !node.visible ? 'opacity-30' : ''
+      } ${
+        isDropTarget ? 'ring-2 ring-violet-400 bg-violet-500/10' : ''
       } ${
         display === 'flex-row' ? 'flex flex-row flex-wrap items-center' :
         display === 'grid-2' ? 'grid grid-cols-2' :
@@ -383,14 +586,15 @@ function CanvasNode({
             depth={depth + 1}
             selectedId={selectedId}
             hoveredId={hoveredId}
+            viewport={viewport}
             onSelectNode={onSelectNode}
             onHoverNode={onHoverNode}
             onDoubleClickNode={onDoubleClickNode}
           />
         ))
       ) : (
-        <div className="p-4 border border-dashed border-white/10 rounded-lg text-center text-xs text-slate-500 w-full">
-          Pusty kontener
+        <div className="p-4 border border-dashed border-white/10 rounded-lg text-center text-xs text-slate-500 w-full select-none">
+          Pusty kontener — upuść tutaj komponent
         </div>
       )}
     </div>
@@ -400,7 +604,8 @@ function CanvasNode({
 function SectionBlock({
   node, pageId, index, total, isSelected, isHovered, onSelect, onHover,
 }: SectionBlockProps) {
-  const { dispatch, document, canvas } = useBuilder()
+  const { dispatch, document, canvas, ctx } = useBuilder()
+  const [isSectionDropTarget, setIsSectionDropTarget] = useState(false)
 
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -470,7 +675,66 @@ function SectionBlock({
     >
       {/* Live rendered section content */}
       {node.type === 'container' ? (
-        <div className="w-full p-4 bg-[#08080f] text-white min-h-[80px]">
+        <div
+          onDragOver={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            e.dataTransfer.dropEffect = 'copy'
+            setIsSectionDropTarget(true)
+          }}
+          onDragLeave={(e) => {
+            e.stopPropagation()
+            setIsSectionDropTarget(false)
+          }}
+          onDrop={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            setIsSectionDropTarget(false)
+            const draggedNodeId = e.dataTransfer.getData('application/solospot-node-id')
+            const compType = e.dataTransfer.getData('application/solospot-component-type') || e.dataTransfer.getData('text/plain')
+            if (draggedNodeId && draggedNodeId !== node.id) {
+              dispatch({
+                type: 'MOVE_NODE',
+                pageId,
+                nodeId: draggedNodeId,
+                targetParentId: node.id,
+                targetIndex: node.children?.length ?? 0,
+              })
+              dispatch({
+                type: 'CANVAS',
+                action: { type: 'SELECT_SECTION', sectionId: draggedNodeId, pageId },
+              })
+            } else if (compType) {
+              const descriptor = ctx.registry.get(compType)
+              const newNodeId = `node_${compType}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+              const newNode: SectionNode = {
+                id: newNodeId,
+                type: compType,
+                label: descriptor?.label || compType,
+                parentId: node.id,
+                order: node.children?.length ?? 0,
+                visible: true,
+                locked: false,
+                props: descriptor?.defaultProps ? { ...descriptor.defaultProps } : {},
+                styles: (descriptor?.defaultStyles as any) || {},
+                children: [],
+              }
+              dispatch({
+                type: 'INSERT_NODE',
+                pageId,
+                parentId: node.id,
+                node: newNode,
+              })
+              dispatch({
+                type: 'CANVAS',
+                action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId },
+              })
+            }
+          }}
+          className={`w-full p-4 bg-[#08080f] text-white min-h-[80px] transition-all ${
+            isSectionDropTarget ? 'ring-2 ring-violet-400 bg-violet-950/20' : ''
+          }`}
+        >
           <div className="max-w-[1200px] mx-auto space-y-3">
             {node.children && node.children.length > 0 ? (
               node.children.map(child => (
@@ -481,6 +745,7 @@ function SectionBlock({
                   depth={1}
                   selectedId={canvas.selectedSectionId}
                   hoveredId={canvas.hoveredSectionId}
+                  viewport={canvas.viewport.label}
                   onSelectNode={handleSelectChildNode}
                   onHoverNode={onHover}
                   onDoubleClickNode={handleDoubleClickChildNode}
@@ -528,6 +793,7 @@ function SectionBlock({
                   depth={1}
                   selectedId={canvas.selectedSectionId}
                   hoveredId={canvas.hoveredSectionId}
+                  viewport={canvas.viewport.label}
                   onSelectNode={handleSelectChildNode}
                   onHoverNode={onHover}
                   onDoubleClickNode={handleDoubleClickChildNode}

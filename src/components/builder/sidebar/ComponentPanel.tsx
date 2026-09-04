@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import { useBuilder } from '../state/BuilderProvider'
 import { ComponentDescriptor } from '../../../../packages/builder-core/src/ComponentRegistry'
+import { BuilderNode, createBuilderNode, generateNodeId, findNode } from '../../../../packages/builder-core/src'
 
 // ---------------------------------------------------------------------------
 // Category tabs
@@ -183,16 +184,92 @@ export function ComponentPanel({ onClose }: ComponentPanelProps) {
     const targetPageId = canvas.selectedPageId || builderDoc.pages[0]?.id
     if (!targetPageId) return
 
-    dispatch({
-      type: 'ADD_SECTION',
-      pageId: targetPageId,
-      sectionType: descriptor.type,
-      defaultProps: { ...descriptor.defaultProps },
+    const newNodeId = generateNodeId(descriptor.type)
+    const newNode: BuilderNode = createBuilderNode({
+      id: newNodeId,
+      type: descriptor.type,
       label: descriptor.label,
+      props: { ...descriptor.defaultProps },
+      styles: descriptor.type === 'container' ? { display: 'flex-col', padding: '16px', gap: '16px' } : undefined,
+      children: [],
+    })
+
+    const selectedId = canvas.selectedSectionId
+    const found = selectedId ? findNode(builderDoc, selectedId) : null
+
+    if (found) {
+      if (found.node.type === 'container' || found.node.type === 'section') {
+        // Insert inside the container / section
+        dispatch({
+          type: 'INSERT_NODE',
+          parentId: found.node.id,
+          node: { ...newNode, parentId: found.node.id },
+          index: found.node.children.length,
+          pageId: targetPageId,
+        })
+      } else {
+        // Insert as sibling after the selected node
+        const siblings = found.parent ? found.parent.children : found.page.sections
+        const siblingIdx = siblings.findIndex(s => s.id === found.node.id)
+        const parentId = found.parent ? found.parent.id : null
+        dispatch({
+          type: 'INSERT_NODE',
+          parentId,
+          node: { ...newNode, parentId },
+          index: siblingIdx >= 0 ? siblingIdx + 1 : undefined,
+          pageId: targetPageId,
+        })
+      }
+    } else {
+      // Nothing selected
+      if (descriptor.type === 'section') {
+        dispatch({
+          type: 'INSERT_NODE',
+          parentId: null,
+          node: newNode,
+          pageId: targetPageId,
+        })
+      } else {
+        // Atomic element or container without selection:
+        // Append to last section's children or create a default section wrapper
+        const activePage = builderDoc.pages.find(p => p.id === targetPageId)
+        if (activePage && activePage.sections.length > 0) {
+          const lastSection = activePage.sections[activePage.sections.length - 1]
+          dispatch({
+            type: 'INSERT_NODE',
+            parentId: lastSection.id,
+            node: { ...newNode, parentId: lastSection.id },
+            index: lastSection.children.length,
+            pageId: targetPageId,
+          })
+        } else {
+          const wrapperSection = createBuilderNode({
+            id: generateNodeId('section'),
+            type: 'section',
+            label: 'Sekcja',
+            props: { padding: 'md', background: '#0a0a14' },
+            children: [],
+          })
+          newNode.parentId = wrapperSection.id
+          wrapperSection.children = [newNode]
+          dispatch({
+            type: 'INSERT_NODE',
+            parentId: null,
+            node: wrapperSection,
+            pageId: targetPageId,
+          })
+        }
+      }
+    }
+
+    // Immediately select the newly created node
+    dispatch({
+      type: 'CANVAS',
+      action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId: targetPageId },
     })
 
     onClose?.()
-  }, [dispatch, canvas.selectedPageId, builderDoc.pages, onClose])
+  }, [dispatch, canvas.selectedSectionId, canvas.selectedPageId, builderDoc, onClose])
 
   return (
     <div className="flex flex-col h-full">

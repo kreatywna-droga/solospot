@@ -4,7 +4,7 @@ import { Phone, MapPin, Clock } from 'lucide-react'
 import type { SectionComponentProps } from '@/lib/store-runtime/types'
 
 export function ContactSection({ section, theme }: SectionComponentProps) {
-  const config = section.config as { title?: string; phone?: string; address?: string }
+  const config = ((section?.config || (section as any)?.props) ?? {}) as { title?: string; phone?: string; address?: string }
 
   return (
     <section className="py-16 lg:py-24 px-4" style={{ backgroundColor: '#f8fafc', fontFamily: theme.font }}>

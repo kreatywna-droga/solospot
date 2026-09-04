@@ -6,7 +6,7 @@ import type { SectionComponentProps } from '@/lib/store-runtime/types'
 
 export function NavbarSection({ section, theme, storeName }: SectionComponentProps) {
   const [open, setOpen] = useState(false)
-  const config = section.config as { style?: string; sticky?: boolean }
+  const config = ((section?.config || (section as any)?.props) ?? {}) as { style?: string; sticky?: boolean }
   const isTransparent = config.style === 'transparent'
   const bg = isTransparent ? 'bg-transparent' : `bg-[${theme.primaryColor}]`
 
