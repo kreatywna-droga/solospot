@@ -18,12 +18,13 @@
  *   - Common: Duplicate, Delete, Lock, Reorder
  */
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowUp, ArrowDown, Copy, Trash2, Lock, Eye,
   Type, AlignLeft, AlignCenter, AlignRight, Image as ImageIcon,
   Palette, ExternalLink, Plus, Check, ChevronDown, Sparkles,
+  Video, Upload, MousePointer,
 } from 'lucide-react'
 import { findNode, type ToolbarPositionResult, type ToolbarActionType } from '../../../../packages/builder-core/src'
 import { useBuilder } from '../state/BuilderProvider'
@@ -55,7 +56,9 @@ export function QuickToolbar({
   const [showFontSizePopover, setShowFontSizePopover] = useState(false)
   const [showMediaPicker, setShowMediaPicker] = useState(false)
   const [showLinkInput, setShowLinkInput] = useState(false)
+  const [showAddMenu, setShowAddMenu] = useState(false)
   const [linkVal, setLinkVal] = useState('')
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const found = useMemo(() => findNode(document, sectionId), [document, sectionId])
   const node = found?.node
@@ -106,6 +109,112 @@ export function QuickToolbar({
       props: patch,
     } as any)
   }, [dispatch, pageId, sectionId])
+
+  const handleInsertChildNode = useCallback((childType: string, customProps?: Record<string, any>, customStyles?: Record<string, any>) => {
+    const newNodeId = `node_${childType}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+    let nodeProps: Record<string, any> = {}
+    let nodeStyles: Record<string, any> = {}
+    let label = 'Element'
+
+    switch (childType) {
+      case 'text':
+        label = 'Tekst'
+        nodeProps = { content: 'Wpisz swój tekst tutaj...', text: 'Wpisz swój tekst tutaj...' }
+        nodeStyles = { fontSize: '16px', color: '#ffffff', lineHeight: '1.5' }
+        break
+      case 'heading':
+        label = 'Nagłówek'
+        nodeProps = { content: 'Nowy nagłówek', text: 'Nowy nagłówek', level: 'h2' }
+        nodeStyles = { fontSize: '32px', fontWeight: 'bold', color: '#ffffff', lineHeight: '1.2' }
+        break
+      case 'image':
+        label = 'Obraz'
+        nodeProps = { src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80', alt: 'Obraz' }
+        nodeStyles = { width: '400px', height: '260px', objectFit: 'cover', borderRadius: '12px' }
+        break
+      case 'video':
+        label = 'Wideo'
+        nodeProps = {
+          src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+          controls: true,
+          autoPlay: false,
+          loop: false,
+          muted: true,
+        }
+        nodeStyles = { width: '480px', height: '270px', borderRadius: '12px' }
+        break
+      case 'svg':
+        label = 'SVG / Ikona'
+        nodeProps = {
+          svgContent: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+        }
+        nodeStyles = { width: '48px', height: '48px', color: '#8b5cf6' }
+        break
+      case 'button':
+        label = 'Przycisk'
+        nodeProps = { text: 'Kliknij tutaj', href: '#' }
+        nodeStyles = {
+          backgroundColor: '#7c3aed',
+          color: '#ffffff',
+          padding: '12px 24px',
+          borderRadius: '8px',
+          fontSize: '14px',
+          fontWeight: '600',
+        }
+        break
+      default:
+        break
+    }
+
+    const newNode = {
+      id: newNodeId,
+      type: childType,
+      label,
+      parentId: sectionId,
+      order: node?.children?.length ?? 0,
+      visible: true,
+      locked: false,
+      props: { ...nodeProps, ...(customProps || {}) },
+      styles: { ...nodeStyles, ...(customStyles || {}) },
+      children: [],
+    }
+
+    dispatch({
+      type: 'INSERT_NODE',
+      pageId,
+      parentId: sectionId,
+      node: newNode,
+    } as any)
+
+    dispatch({
+      type: 'CANVAS',
+      action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId },
+    } as any)
+
+    setShowAddMenu(false)
+  }, [dispatch, pageId, sectionId, node])
+
+  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0]
+      const isImg = file.type.startsWith('image/')
+      const isVid = file.type.startsWith('video/')
+      const isSvg = file.type === 'image/svg+xml' || file.name.endsWith('.svg')
+
+      const reader = new FileReader()
+      reader.onload = (uploadEvt) => {
+        const dataUrl = uploadEvt.target?.result as string
+        if (dataUrl) {
+          const childType = isVid ? 'video' : isSvg ? 'svg' : 'image'
+          handleInsertChildNode(childType, { src: dataUrl, url: dataUrl, name: file.name }, {
+            width: isSvg ? '64px' : '400px',
+            height: isVid ? '270px' : isSvg ? '64px' : 'auto',
+          })
+        }
+      }
+      reader.readAsDataURL(file)
+    }
+  }, [handleInsertChildNode])
 
   const handleAction = useCallback((type: ToolbarActionType) => {
     switch (type) {
@@ -450,17 +559,169 @@ export function QuickToolbar({
           )}
 
           {/* ------------------------------------------------------------- */}
-          {/* CONTEXTUAL CONTROLS FOR SECTION / CONTAINER                   */}
+          {/* CONTEXTUAL CONTROLS FOR VIDEO                                  */}
           {/* ------------------------------------------------------------- */}
-          {nodeType === 'section' && (
+          {nodeType === 'video' && (
             <>
+              <div className="relative">
+                <button
+                  onClick={() => {
+                    setLinkVal(String(props.src || ''))
+                    setShowLinkInput(!showLinkInput)
+                  }}
+                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-[11px] text-slate-300 font-medium"
+                  title="Zmień adres URL wideo"
+                >
+                  <Video className="w-3 h-3 text-red-400" />
+                  <span>URL wideo</span>
+                </button>
+
+                {showLinkInput && (
+                  <div className="absolute top-full left-0 mt-2 p-2 bg-[#0c0c14] border border-white/15 rounded-xl shadow-2xl flex items-center gap-1.5 z-[300] min-w-[240px]">
+                    <input
+                      type="text"
+                      value={linkVal}
+                      onChange={(e) => setLinkVal(e.target.value)}
+                      placeholder="https://... (mp4/webm)"
+                      className="flex-1 px-2 py-1 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none focus:border-violet-500"
+                    />
+                    <button
+                      onClick={() => {
+                        handleUpdateProps({ src: linkVal, url: linkVal })
+                        setShowLinkInput(false)
+                      }}
+                      className="px-2 py-1 rounded-lg bg-violet-600 text-white text-xs font-bold"
+                    >
+                      OK
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <button
+                onClick={() => handleUpdateProps({ loop: !props.loop })}
+                className={`px-2 py-1 rounded-lg text-[10px] font-semibold transition-colors ${
+                  props.loop ? 'bg-violet-600 text-white' : 'bg-white/5 text-slate-400 hover:text-white'
+                }`}
+                title="Pętla odtwarzania wideo"
+              >
+                Pętla
+              </button>
+
+              <button
+                onClick={() => handleUpdateProps({ autoPlay: !props.autoPlay })}
+                className={`px-2 py-1 rounded-lg text-[10px] font-semibold transition-colors ${
+                  props.autoPlay ? 'bg-violet-600 text-white' : 'bg-white/5 text-slate-400 hover:text-white'
+                }`}
+                title="Autoodtwarzanie"
+              >
+                Autoodtwarzanie
+              </button>
+
+              <div className="w-px h-4 bg-white/10 mx-0.5" />
+            </>
+          )}
+
+          {/* ------------------------------------------------------------- */}
+          {/* CONTEXTUAL CONTROLS FOR SVG / ICON                             */}
+          {/* ------------------------------------------------------------- */}
+          {(nodeType === 'svg' || nodeType === 'icon') && (
+            <>
+              <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-2 py-0.5">
+                <span className="text-[10px] text-slate-400">Kolor:</span>
+                <input
+                  type="color"
+                  value={styles.color || '#8b5cf6'}
+                  onChange={(e) => handleUpdateStyles({ color: e.target.value })}
+                  className="w-4 h-4 rounded border-0 cursor-pointer bg-transparent"
+                  title="Kolor ikony / SVG"
+                />
+              </div>
+
+              <div className="w-px h-4 bg-white/10 mx-0.5" />
+            </>
+          )}
+
+          {/* ------------------------------------------------------------- */}
+          {/* CONTEXTUAL CONTROLS FOR SECTION / CONTAINER / COLUMN           */}
+          {/* ------------------------------------------------------------- */}
+          {(nodeType === 'section' || nodeType === 'container' || nodeType === 'column' || nodeType === 'grid') && (
+            <>
+              {/* Contextual + Dodaj Element dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowAddMenu(!showAddMenu)}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-semibold transition-all shadow-sm"
+                  title="Dodaj element bezpośrednio do tego kontenera"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Dodaj element</span>
+                  <ChevronDown className={`w-3 h-3 transition-transform ${showAddMenu ? 'rotate-180' : ''}`} />
+                </button>
+
+                {showAddMenu && (
+                  <div className="absolute top-full left-0 mt-2 p-1.5 bg-[#0e0d1c] border border-white/15 rounded-xl shadow-2xl z-[300] min-w-[190px] space-y-1 select-none">
+                    <button
+                      onClick={() => handleInsertChildNode('text')}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left text-xs text-slate-200 hover:text-white hover:bg-white/10 transition-colors"
+                    >
+                      <Type className="w-3.5 h-3.5 text-violet-400" />
+                      <span>Tekst</span>
+                    </button>
+                    <button
+                      onClick={() => handleInsertChildNode('heading')}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left text-xs text-slate-200 hover:text-white hover:bg-white/10 transition-colors"
+                    >
+                      <Type className="w-3.5 h-3.5 text-indigo-400 font-bold" />
+                      <span>Nagłówek</span>
+                    </button>
+                    <button
+                      onClick={() => handleInsertChildNode('image')}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left text-xs text-slate-200 hover:text-white hover:bg-white/10 transition-colors"
+                    >
+                      <ImageIcon className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Obraz</span>
+                    </button>
+                    <button
+                      onClick={() => handleInsertChildNode('video')}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left text-xs text-slate-200 hover:text-white hover:bg-white/10 transition-colors"
+                    >
+                      <Video className="w-3.5 h-3.5 text-red-400" />
+                      <span>Wideo</span>
+                    </button>
+                    <button
+                      onClick={() => handleInsertChildNode('svg')}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left text-xs text-slate-200 hover:text-white hover:bg-white/10 transition-colors"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      <span>SVG / Ikona</span>
+                    </button>
+                    <button
+                      onClick={() => handleInsertChildNode('button')}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left text-xs text-slate-200 hover:text-white hover:bg-white/10 transition-colors"
+                    >
+                      <MousePointer className="w-3.5 h-3.5 text-blue-400" />
+                      <span>Przycisk</span>
+                    </button>
+                    <div className="h-px bg-white/10 my-1" />
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left text-xs text-violet-300 hover:text-white hover:bg-violet-600/30 transition-colors"
+                    >
+                      <Upload className="w-3.5 h-3.5 text-violet-400" />
+                      <span>Wgraj z dysku...</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <div className="flex items-center gap-1">
                 <input
                   type="color"
-                  value={styles.backgroundColor || '#06060c'}
+                  value={styles.backgroundColor || (nodeType === 'section' ? '#06060c' : 'transparent')}
                   onChange={(e) => handleUpdateStyles({ backgroundColor: e.target.value })}
                   className="w-5 h-5 rounded-md border border-white/20 cursor-pointer bg-transparent"
-                  title="Kolor tła sekcji"
+                  title="Kolor tła"
                 />
               </div>
 
@@ -527,6 +788,14 @@ export function QuickToolbar({
           }}
         />
       )}
+      {/* Hidden file input for uploading images/videos/SVGs directly into container */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*,video/*,.svg"
+        onChange={handleFileUpload}
+        className="hidden"
+      />
     </>
   )
 }

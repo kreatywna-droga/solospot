@@ -26,7 +26,7 @@ import { useState } from 'react';
 import {
   Type, Image as ImageIcon, Sparkles, Sliders, ChevronDown, ChevronUp,
   FileText, AlignLeft, AlignCenter, AlignRight, ExternalLink,
-  Layers, Palette, Video, Upload, Check,
+  Layers, Palette, Video, Upload, Check, Move,
 } from 'lucide-react';
 import { useBuilder, useSelectedSection } from '../state/BuilderProvider';
 import { DesignInspector } from '../../../../packages/authoring-studio/src/inspector/DesignInspector';
@@ -296,6 +296,65 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                 ))}
               </div>
             </div>
+
+            {/* Image Width & Height exact inputs + continuous sliders */}
+            <div className="space-y-2 pt-1 border-t border-white/5">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-semibold text-slate-300">Szerokość obrazu</label>
+                <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-0.5">
+                  <input
+                    type="number"
+                    min={20}
+                    max={1400}
+                    value={parseInt(String(currentStyles.width || '400px').replace('px', '')) || 400}
+                    onChange={(e) => {
+                      const v = Math.min(1400, Math.max(20, Number(e.target.value) || 20))
+                      onStyleChange({ width: `${v}px` })
+                    }}
+                    className="w-12 bg-transparent text-right font-mono text-white text-xs focus:outline-none"
+                  />
+                  <span className="text-[10px] text-slate-400">px</span>
+                </div>
+              </div>
+              <input
+                type="range"
+                min={20}
+                max={1400}
+                step={1}
+                value={parseInt(String(currentStyles.width || '400px').replace('px', '')) || 400}
+                onChange={(e) => onStyleChange({ width: `${e.target.value}px` })}
+                className="w-full accent-violet-500 h-1 cursor-pointer"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-semibold text-slate-300">Wysokość obrazu</label>
+                <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-0.5">
+                  <input
+                    type="number"
+                    min={20}
+                    max={1200}
+                    value={parseInt(String(currentStyles.height || '260px').replace('px', '')) || 260}
+                    onChange={(e) => {
+                      const v = Math.min(1200, Math.max(20, Number(e.target.value) || 20))
+                      onStyleChange({ height: `${v}px` })
+                    }}
+                    className="w-12 bg-transparent text-right font-mono text-white text-xs focus:outline-none"
+                  />
+                  <span className="text-[10px] text-slate-400">px</span>
+                </div>
+              </div>
+              <input
+                type="range"
+                min={20}
+                max={1200}
+                step={1}
+                value={parseInt(String(currentStyles.height || '260px').replace('px', '')) || 260}
+                onChange={(e) => onStyleChange({ height: `${e.target.value}px` })}
+                className="w-full accent-violet-500 h-1 cursor-pointer"
+              />
+            </div>
           </div>
         )}
 
@@ -367,6 +426,65 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Button Width & Height */}
+            <div className="space-y-2 pt-1 border-t border-white/5">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-semibold text-slate-300">Szerokość przycisku</label>
+                <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-0.5">
+                  <input
+                    type="number"
+                    min={60}
+                    max={800}
+                    value={parseInt(String(currentStyles.width || '180px').replace('px', '')) || 180}
+                    onChange={(e) => {
+                      const v = Math.min(800, Math.max(60, Number(e.target.value) || 60))
+                      onStyleChange({ width: `${v}px` })
+                    }}
+                    className="w-12 bg-transparent text-right font-mono text-white text-xs focus:outline-none"
+                  />
+                  <span className="text-[10px] text-slate-400">px</span>
+                </div>
+              </div>
+              <input
+                type="range"
+                min={60}
+                max={800}
+                step={1}
+                value={parseInt(String(currentStyles.width || '180px').replace('px', '')) || 180}
+                onChange={(e) => onStyleChange({ width: `${e.target.value}px` })}
+                className="w-full accent-violet-500 h-1 cursor-pointer"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-semibold text-slate-300">Wysokość przycisku</label>
+                <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-0.5">
+                  <input
+                    type="number"
+                    min={24}
+                    max={120}
+                    value={parseInt(String(currentStyles.height || '44px').replace('px', '')) || 44}
+                    onChange={(e) => {
+                      const v = Math.min(120, Math.max(24, Number(e.target.value) || 24))
+                      onStyleChange({ height: `${v}px` })
+                    }}
+                    className="w-12 bg-transparent text-right font-mono text-white text-xs focus:outline-none"
+                  />
+                  <span className="text-[10px] text-slate-400">px</span>
+                </div>
+              </div>
+              <input
+                type="range"
+                min={24}
+                max={120}
+                step={1}
+                value={parseInt(String(currentStyles.height || '44px').replace('px', '')) || 44}
+                onChange={(e) => onStyleChange({ height: `${e.target.value}px` })}
+                className="w-full accent-violet-500 h-1 cursor-pointer"
+              />
             </div>
           </div>
         )}
@@ -487,6 +605,215 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             </div>
           </div>
         )}
+
+        {/* ============================================================= */}
+        {/* SIMPLE CONTROLS: VIDEO                                         */}
+        {/* ============================================================= */}
+        {nodeType === 'video' && (
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold text-slate-300">Adres URL wideo</label>
+              <input
+                type="text"
+                value={String(props.src ?? '')}
+                onChange={(e) => {
+                  onPropChange('src', e.target.value)
+                  onPropChange('url', e.target.value)
+                }}
+                placeholder="https://... (mp4, webm)"
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-violet-500"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-semibold text-slate-300">Szerokość wideo</label>
+                <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-0.5">
+                  <input
+                    type="number"
+                    min={100}
+                    max={1400}
+                    value={parseInt(String(currentStyles.width || '480px').replace('px', '')) || 480}
+                    onChange={(e) => {
+                      const v = Math.min(1400, Math.max(100, Number(e.target.value) || 100))
+                      onStyleChange({ width: `${v}px` })
+                    }}
+                    className="w-12 bg-transparent text-right font-mono text-white text-xs focus:outline-none"
+                  />
+                  <span className="text-[10px] text-slate-400">px</span>
+                </div>
+              </div>
+              <input
+                type="range"
+                min={100}
+                max={1400}
+                step={1}
+                value={parseInt(String(currentStyles.width || '480px').replace('px', '')) || 480}
+                onChange={(e) => onStyleChange({ width: `${e.target.value}px` })}
+                className="w-full accent-violet-500 h-1 cursor-pointer"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-semibold text-slate-300">Wysokość wideo</label>
+                <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-0.5">
+                  <input
+                    type="number"
+                    min={80}
+                    max={900}
+                    value={parseInt(String(currentStyles.height || '270px').replace('px', '')) || 270}
+                    onChange={(e) => {
+                      const v = Math.min(900, Math.max(80, Number(e.target.value) || 80))
+                      onStyleChange({ height: `${v}px` })
+                    }}
+                    className="w-12 bg-transparent text-right font-mono text-white text-xs focus:outline-none"
+                  />
+                  <span className="text-[10px] text-slate-400">px</span>
+                </div>
+              </div>
+              <input
+                type="range"
+                min={80}
+                max={900}
+                step={1}
+                value={parseInt(String(currentStyles.height || '270px').replace('px', '')) || 270}
+                onChange={(e) => onStyleChange({ height: `${e.target.value}px` })}
+                className="w-full accent-violet-500 h-1 cursor-pointer"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 pt-1 border-t border-white/5">
+              <button
+                onClick={() => onPropChange('loop', !props.loop)}
+                className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
+                  props.loop ? 'bg-violet-600 text-white border-violet-500' : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                }`}
+              >
+                Pętla (Loop)
+              </button>
+              <button
+                onClick={() => onPropChange('autoPlay', !props.autoPlay)}
+                className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
+                  props.autoPlay ? 'bg-violet-600 text-white border-violet-500' : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                }`}
+              >
+                Autoodtwarzanie
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================= */}
+        {/* SIMPLE CONTROLS: SVG / ICON                                    */}
+        {/* ============================================================= */}
+        {(nodeType === 'svg' || nodeType === 'icon') && (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-semibold text-slate-300">Rozmiar ikony</label>
+                <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-0.5">
+                  <input
+                    type="number"
+                    min={12}
+                    max={256}
+                    value={parseInt(String(currentStyles.width || '48px').replace('px', '')) || 48}
+                    onChange={(e) => {
+                      const v = Math.min(256, Math.max(12, Number(e.target.value) || 12))
+                      onStyleChange({ width: `${v}px`, height: `${v}px` })
+                    }}
+                    className="w-10 bg-transparent text-right font-mono text-white text-xs focus:outline-none"
+                  />
+                  <span className="text-[10px] text-slate-400">px</span>
+                </div>
+              </div>
+              <input
+                type="range"
+                min={12}
+                max={256}
+                step={1}
+                value={parseInt(String(currentStyles.width || '48px').replace('px', '')) || 48}
+                onChange={(e) => onStyleChange({ width: `${e.target.value}px`, height: `${e.target.value}px` })}
+                className="w-full accent-violet-500 h-1 cursor-pointer"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold text-slate-300">Kolor ikony</label>
+              <div className="flex items-center gap-2 p-1.5 bg-white/5 border border-white/10 rounded-xl">
+                <input
+                  type="color"
+                  value={currentStyles.color || '#8b5cf6'}
+                  onChange={(e) => onStyleChange({ color: e.target.value })}
+                  className="w-7 h-7 rounded-lg border-0 cursor-pointer bg-transparent flex-shrink-0"
+                />
+                <input
+                  type="text"
+                  value={currentStyles.color || '#8b5cf6'}
+                  onChange={(e) => onStyleChange({ color: e.target.value })}
+                  placeholder="#8b5cf6"
+                  className="w-full bg-transparent text-[11px] font-mono text-slate-300 focus:outline-none focus:text-white"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================= */}
+        {/* UNIVERSAL CANVAS POSITION (X / Y)                             */}
+        {/* ============================================================= */}
+        <div className="pt-3 border-t border-white/10 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-300">
+              <Move className="w-3.5 h-3.5 text-violet-400" />
+              <span>Pozycja na Canvasie</span>
+            </div>
+            {(currentStyles.translateX || currentStyles.translateY) && (
+              <button
+                onClick={() => onStyleChange({ translateX: '0px', translateY: '0px' })}
+                className="text-[10px] text-violet-400 hover:text-violet-300 font-medium transition-colors"
+              >
+                Resetuj (0, 0)
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            {/* Position X */}
+            <div className="space-y-1 bg-white/5 p-2 rounded-xl border border-white/5">
+              <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                <span>Oś X</span>
+                <span className="font-mono text-white">{currentStyles.translateX || '0px'}</span>
+              </div>
+              <input
+                type="range"
+                min={-500}
+                max={500}
+                step={1}
+                value={parseInt(String(currentStyles.translateX || '0px').replace('px', '')) || 0}
+                onChange={(e) => onStyleChange({ translateX: `${e.target.value}px` })}
+                className="w-full accent-violet-500 h-1 cursor-pointer"
+              />
+            </div>
+
+            {/* Position Y */}
+            <div className="space-y-1 bg-white/5 p-2 rounded-xl border border-white/5">
+              <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                <span>Oś Y</span>
+                <span className="font-mono text-white">{currentStyles.translateY || '0px'}</span>
+              </div>
+              <input
+                type="range"
+                min={-500}
+                max={500}
+                step={1}
+                value={parseInt(String(currentStyles.translateY || '0px').replace('px', '')) || 0}
+                onChange={(e) => onStyleChange({ translateY: `${e.target.value}px` })}
+                className="w-full accent-violet-500 h-1 cursor-pointer"
+              />
+            </div>
+          </div>
+        </div>
 
         {/* ============================================================= */}
         {/* ADVANCED COLLAPSIBLE ACCORDION                                */}

@@ -37,6 +37,8 @@ interface BoundingBoxProps {
   animationDuration?: number
   /** Z-index */
   zIndex?: number
+  /** Callback to initiate dragging/moving */
+  onMoveStart?: (e: React.MouseEvent) => void
 }
 
 export function BoundingBox({
@@ -46,6 +48,7 @@ export function BoundingBox({
   borderStyle = 'solid',
   animationDuration = 150,
   zIndex,
+  onMoveStart,
 }: BoundingBoxProps) {
   if (!rect.visible) return null
 
@@ -76,7 +79,37 @@ export function BoundingBox({
         transform,
         boxShadow: `0 0 0 1px ${color}33, 0 0 12px ${color}22`,
       }}
-    />
+    >
+      {/* Interactive border drag zones allowing user to grab any border to move element */}
+      {onMoveStart && (
+        <>
+          {/* Top border drag zone */}
+          <div
+            onMouseDown={onMoveStart}
+            className="absolute -top-1.5 left-0 right-0 h-3 pointer-events-auto cursor-move"
+            title="Przeciągnij krawędź, aby przesunąć element"
+          />
+          {/* Bottom border drag zone */}
+          <div
+            onMouseDown={onMoveStart}
+            className="absolute -bottom-1.5 left-0 right-0 h-3 pointer-events-auto cursor-move"
+            title="Przeciągnij krawędź, aby przesunąć element"
+          />
+          {/* Left border drag zone */}
+          <div
+            onMouseDown={onMoveStart}
+            className="absolute -left-1.5 top-0 bottom-0 w-3 pointer-events-auto cursor-move"
+            title="Przeciągnij krawędź, aby przesunąć element"
+          />
+          {/* Right border drag zone */}
+          <div
+            onMouseDown={onMoveStart}
+            className="absolute -right-1.5 top-0 bottom-0 w-3 pointer-events-auto cursor-move"
+            title="Przeciągnij krawędź, aby przesunąć element"
+          />
+        </>
+      )}
+    </motion.div>
   )
 }
 

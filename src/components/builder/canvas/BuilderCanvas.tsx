@@ -30,6 +30,7 @@ import { motion } from 'framer-motion'
 import {
   ArrowUp, ArrowDown, Trash2, Copy, Plus,
   Layers, Package, Star, FileText, LayoutDashboard, Grid, Sparkles,
+  Video, Upload, Image as ImageIcon, Type,
 } from 'lucide-react'
 import { useBuilder } from '../state/BuilderProvider'
 import { SectionNode } from '../../../../packages/builder-core/src/BuilderDocument'
@@ -597,6 +598,7 @@ function CanvasNode({
         onMouseLeave={handleMouseLeave}
         style={{
           width,
+          height: height || undefined,
           margin,
           display: 'inline-block',
           transform: formatTransform(styles),
@@ -773,6 +775,132 @@ function CanvasNode({
     )
   }
 
+  // First-class Video component
+  if (node.type === 'video') {
+    const src = (props.src as string) || (props.url as string) || (styles as any).videoSrc || 'https://assets.mixkit.co/videos/preview/mixkit-set-of-plateaus-seen-from-the-sky-in-a-sunset-26070-large.mp4'
+    const poster = (props.poster as string) || (styles as any).videoPoster
+    const autoPlay = props.autoPlay !== undefined ? Boolean(props.autoPlay) : Boolean((styles as any).videoAutoplay ?? false)
+    const loop = props.loop !== undefined ? Boolean(props.loop) : Boolean((styles as any).videoLoop ?? true)
+    const muted = props.muted !== undefined ? Boolean(props.muted) : Boolean((styles as any).videoMuted ?? true)
+    const controls = props.controls !== undefined ? Boolean(props.controls) : true
+    const width = styles.width || (props.width as string) || '100%'
+    const height = styles.height || (props.height as string) || '320px'
+    const borderRadius = (styles.borderRadius as string) || (props.borderRadius as string) || '12px'
+    const borderWidth = styles.borderWidth || (props.borderWidth as string)
+    const borderColor = styles.borderColor || (props.borderColor as string) || 'rgba(255,255,255,0.2)'
+    const borderStyle = styles.borderStyle || (borderWidth ? 'solid' : undefined)
+    const margin = formatFourSide(styles.margin)
+    const padding = formatFourSide(styles.padding)
+
+    return (
+      <div
+        data-node-id={node.id}
+        data-node-type={node.type}
+        data-parent-id={node.parentId}
+        draggable={!node.locked}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onClick={handleClick}
+        onDoubleClick={handleDoubleClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        style={{
+          width,
+          height,
+          margin,
+          padding,
+          display: 'inline-block',
+          transform: formatTransform(styles),
+        }}
+        className={`relative cursor-pointer transition-all duration-150 p-1 rounded-xl overflow-hidden ${
+          !node.visible ? 'opacity-30' : ''
+        } ${
+          isSelected ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-[#08080f] z-20' :
+          isHovered ? 'ring-1 ring-violet-400/60 z-10' : ''
+        }`}
+      >
+        <video
+          src={src}
+          poster={poster}
+          autoPlay={autoPlay}
+          loop={loop}
+          muted={muted}
+          controls={controls}
+          style={{
+            width: '100%',
+            height: '100%',
+            borderRadius,
+            borderWidth: borderWidth || undefined,
+            borderColor: borderWidth ? borderColor : undefined,
+            borderStyle: borderWidth ? borderStyle : undefined,
+            objectFit: (styles.objectFit as any) || 'cover',
+          }}
+          className="max-w-full pointer-events-none select-none"
+        />
+      </div>
+    )
+  }
+
+  // First-class SVG / Icon component
+  if (node.type === 'svg' || node.type === 'icon') {
+    const svgContent = (props.svgContent as string) || (props.content as string)
+    const src = (props.src as string) || (props.url as string)
+    const width = styles.width || (props.width as string) || '64px'
+    const height = styles.height || (props.height as string) || '64px'
+    const color = (styles.color as string) || (props.color as string) || '#ffffff'
+    const margin = formatFourSide(styles.margin)
+    const padding = formatFourSide(styles.padding)
+
+    return (
+      <div
+        data-node-id={node.id}
+        data-node-type={node.type}
+        data-parent-id={node.parentId}
+        draggable={!node.locked}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onClick={handleClick}
+        onDoubleClick={handleDoubleClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        style={{
+          width,
+          height,
+          color,
+          margin,
+          padding,
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transform: formatTransform(styles),
+        }}
+        className={`relative cursor-pointer transition-all duration-150 p-1 rounded-lg ${
+          !node.visible ? 'opacity-30' : ''
+        } ${
+          isSelected ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-[#08080f] z-20' :
+          isHovered ? 'ring-1 ring-violet-400/60 z-10' : ''
+        }`}
+      >
+        {svgContent ? (
+          <div
+            dangerouslySetInnerHTML={{ __html: svgContent }}
+            style={{ width: '100%', height: '100%', fill: 'currentColor' }}
+            className="pointer-events-none select-none flex items-center justify-center [&>svg]:w-full [&>svg]:h-full"
+          />
+        ) : src ? (
+          <img
+            src={src}
+            alt={node.label || 'SVG'}
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            className="pointer-events-none select-none"
+          />
+        ) : (
+          <Sparkles className="w-full h-full text-violet-400 pointer-events-none select-none" />
+        )}
+      </div>
+    )
+  }
+
   // Default: container or other composite node
   const display = (props.display as string) || 'flex-col'
   const gap = styles.gap !== undefined ? (typeof styles.gap === 'number' ? `${styles.gap}px` : styles.gap) : `${props.gap || '16'}px`
@@ -801,6 +929,50 @@ function CanvasNode({
     e.preventDefault()
     e.stopPropagation()
     setIsDropTarget(false)
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0]
+      const isImg = file.type.startsWith('image/')
+      const isVid = file.type.startsWith('video/')
+      const isSvg = file.type === 'image/svg+xml' || file.name.endsWith('.svg')
+
+      const reader = new FileReader()
+      reader.onload = (uploadEvt) => {
+        const dataUrl = uploadEvt.target?.result as string
+        if (dataUrl) {
+          const nodeType = isVid ? 'video' : isSvg ? 'svg' : 'image'
+          const newNodeId = `node_${nodeType}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+          const newNode: SectionNode = {
+            id: newNodeId,
+            type: nodeType,
+            label: file.name,
+            parentId: node.id,
+            order: node.children?.length ?? 0,
+            visible: true,
+            locked: false,
+            props: { src: dataUrl, url: dataUrl },
+            styles: {
+              width: '100%',
+              height: isVid ? '320px' : isSvg ? '64px' : 'auto',
+              borderRadius: '12px',
+            },
+            children: [],
+          }
+          dispatch({
+            type: 'INSERT_NODE',
+            pageId,
+            parentId: node.id,
+            node: newNode,
+          })
+          dispatch({
+            type: 'CANVAS',
+            action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId },
+          })
+        }
+      }
+      reader.readAsDataURL(file)
+      return
+    }
 
     const draggedNodeId = e.dataTransfer.getData('application/solospot-node-id')
     const typoData = e.dataTransfer.getData('application/solospot-typography-preset')
@@ -957,8 +1129,125 @@ function CanvasNode({
           />
         ))
       ) : (
-        <div className="p-4 border border-dashed border-white/10 rounded-lg text-center text-xs text-slate-500 w-full select-none">
-          Pusty kontener — upuść tutaj komponent
+        <div className="p-6 border-2 border-dashed border-violet-500/20 hover:border-violet-500/40 rounded-xl text-center text-xs text-slate-400 w-full select-none flex flex-col items-center justify-center gap-3 transition-colors bg-violet-950/5">
+          <div className="flex items-center gap-2 text-violet-300 font-semibold text-xs">
+            <Upload className="w-4 h-4 text-violet-400" />
+            <span>Pusty kontener — upuść plik lub dodaj element</span>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap justify-center">
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                const newNodeId = `node_text_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+                dispatch({
+                  type: 'INSERT_NODE',
+                  pageId,
+                  parentId: node.id,
+                  node: {
+                    id: newNodeId,
+                    type: 'text',
+                    label: 'Tekst',
+                    parentId: node.id,
+                    order: node.children?.length ?? 0,
+                    visible: true,
+                    locked: false,
+                    props: { content: 'Nowy tekst...', text: 'Nowy tekst...' },
+                    styles: { fontSize: '16px', color: '#ffffff' },
+                    children: [],
+                  },
+                })
+                dispatch({ type: 'CANVAS', action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId } })
+              }}
+              className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-violet-600/30 border border-white/10 hover:border-violet-500/40 text-[11px] text-slate-300 hover:text-white transition-all"
+            >
+              + Tekst
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                const newNodeId = `node_image_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+                dispatch({
+                  type: 'INSERT_NODE',
+                  pageId,
+                  parentId: node.id,
+                  node: {
+                    id: newNodeId,
+                    type: 'image',
+                    label: 'Obraz',
+                    parentId: node.id,
+                    order: node.children?.length ?? 0,
+                    visible: true,
+                    locked: false,
+                    props: { src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80', alt: 'Obraz' },
+                    styles: { width: '400px', height: '260px', objectFit: 'cover', borderRadius: '12px' },
+                    children: [],
+                  },
+                })
+                dispatch({ type: 'CANVAS', action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId } })
+              }}
+              className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-violet-600/30 border border-white/10 hover:border-violet-500/40 text-[11px] text-slate-300 hover:text-white transition-all"
+            >
+              + Obraz
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                const newNodeId = `node_video_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+                dispatch({
+                  type: 'INSERT_NODE',
+                  pageId,
+                  parentId: node.id,
+                  node: {
+                    id: newNodeId,
+                    type: 'video',
+                    label: 'Wideo',
+                    parentId: node.id,
+                    order: node.children?.length ?? 0,
+                    visible: true,
+                    locked: false,
+                    props: {
+                      src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+                      controls: true,
+                      muted: true,
+                    },
+                    styles: { width: '480px', height: '270px', borderRadius: '12px' },
+                    children: [],
+                  },
+                })
+                dispatch({ type: 'CANVAS', action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId } })
+              }}
+              className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-violet-600/30 border border-white/10 hover:border-violet-500/40 text-[11px] text-slate-300 hover:text-white transition-all"
+            >
+              + Wideo
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                const newNodeId = `node_button_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+                dispatch({
+                  type: 'INSERT_NODE',
+                  pageId,
+                  parentId: node.id,
+                  node: {
+                    id: newNodeId,
+                    type: 'button',
+                    label: 'Przycisk',
+                    parentId: node.id,
+                    order: node.children?.length ?? 0,
+                    visible: true,
+                    locked: false,
+                    props: { text: 'Kliknij tutaj', href: '#' },
+                    styles: { backgroundColor: '#7c3aed', color: '#ffffff', padding: '10px 20px', borderRadius: '8px' },
+                    children: [],
+                  },
+                })
+                dispatch({ type: 'CANVAS', action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId } })
+              }}
+              className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-violet-600/30 border border-white/10 hover:border-violet-500/40 text-[11px] text-slate-300 hover:text-white transition-all"
+            >
+              + Przycisk
+            </button>
+          </div>
         </div>
       )}
     </div>

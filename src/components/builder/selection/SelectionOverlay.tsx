@@ -25,6 +25,7 @@
 
 import { useMemo, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Move } from 'lucide-react'
 import { useBuilder } from '../state/BuilderProvider'
 import { ExternalSectionRect, useOverlay } from './useOverlay'
 import { BoundingBox } from './BoundingBox'
@@ -61,6 +62,15 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     currentFontSize?: number
   } | null>(null)
 
+  const [moving, setMoving] = useState<{
+    startX: number
+    startY: number
+    startTx: number
+    startTy: number
+    deltaX: number
+    deltaY: number
+  } | null>(null)
+
   // Compute toolbar data: find node in page or parent container
   const toolbarData = useMemo(() => {
     if (!overlay.toolbarPosition || !overlay.selectedSection) return null
@@ -88,6 +98,110 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     document,
   ])
 
+  // ---------------------------------------------------------------------------
+  // Universal Canvas Move: Dragging element via Move Grip or BoundingBox edges
+  // ---------------------------------------------------------------------------
+  const handleMoveStart = useCallback((e: React.MouseEvent) => {
+    if (!overlay.boundingRect || !canvas.selectedSectionId) return
+    e.preventDefault()
+    e.stopPropagation()
+
+    const targetNodeId = canvas.selectedSectionId
+    const found = findNode(document, targetNodeId)
+    if (!found) return
+
+    const isTablet = canvas.viewport.label === 'TABLET'
+    const isMobile = canvas.viewport.label === 'MOBILE'
+    const activeBp = isTablet ? 'tablet' : isMobile ? 'mobile' : 'desktop'
+
+    const activeStyles = activeBp === 'desktop'
+      ? (found.node.styles || {})
+      : { ...(found.node.styles || {}), ...((found.node.responsive as Record<string, any>)?.[activeBp] || {}) }
+
+    const startTx = parseInt(String(activeStyles.translateX || '0px').replace('px', '')) || 0
+    const startTy = parseInt(String(activeStyles.translateY || '0px').replace('px', '')) || 0
+
+    const zoom = canvas.zoom ?? 1.0
+    const startX = e.clientX
+    const startY = e.clientY
+
+    const domEl = containerRef.current?.querySelector(`[data-section-id="${targetNodeId}"], [data-node-id="${targetNodeId}"]`) as HTMLElement | null
+    const baseRotate = activeStyles.rotate || '0deg'
+    const baseScale = activeStyles.scale || 1
+
+    setMoving({
+      startX,
+      startY,
+      startTx,
+      startTy,
+      deltaX: 0,
+      deltaY: 0,
+    })
+
+    const onPointerMove = (moveEvt: PointerEvent) => {
+      const deltaX = (moveEvt.clientX - startX) / zoom
+      const deltaY = (moveEvt.clientY - startY) / zoom
+
+      setMoving(prev => prev ? { ...prev, deltaX, deltaY } : null)
+
+      // Direct 60fps DOM transform during pointermove (zero re-renders/history pollution during drag)
+      if (domEl) {
+        const curTx = startTx + Math.round(deltaX)
+        const curTy = startTy + Math.round(deltaY)
+        domEl.style.transform = `translate(${curTx}px, ${curTy}px) rotate(${baseRotate}) scale(${baseScale})`
+      }
+    }
+
+    const onPointerUp = (upEvt: PointerEvent) => {
+      window.removeEventListener('pointermove', onPointerMove)
+      window.removeEventListener('pointerup', onPointerUp)
+      window.removeEventListener('pointercancel', onPointerUp)
+
+      const deltaX = (upEvt.clientX - startX) / zoom
+      const deltaY = (upEvt.clientY - startY) / zoom
+
+      if (Math.abs(deltaX) > 1 || Math.abs(deltaY) > 1) {
+        const finalTx = startTx + Math.round(deltaX)
+        const finalTy = startTy + Math.round(deltaY)
+
+        if (activeBp === 'tablet' || activeBp === 'mobile') {
+          const currentResp = (found.node.responsive as Record<string, any>) || {}
+          const currentBpStyles = currentResp[activeBp] || {}
+          dispatch({
+            type: 'UPDATE_NODE',
+            nodeId: targetNodeId,
+            updates: {
+              responsive: {
+                ...currentResp,
+                [activeBp]: { ...currentBpStyles, translateX: `${finalTx}px`, translateY: `${finalTy}px` },
+              },
+            },
+            pageId: found.page.id,
+          } as any)
+        } else {
+          dispatch({
+            type: 'SET_NODE_STYLES',
+            nodeId: targetNodeId,
+            styles: { translateX: `${finalTx}px`, translateY: `${finalTy}px` },
+          })
+        }
+      } else {
+        if (domEl) {
+          domEl.style.transform = `translate(${startTx}px, ${startTy}px) rotate(${baseRotate}) scale(${baseScale})`
+        }
+      }
+
+      setMoving(null)
+    }
+
+    window.addEventListener('pointermove', onPointerMove)
+    window.addEventListener('pointerup', onPointerUp)
+    window.addEventListener('pointercancel', onPointerUp)
+  }, [overlay.boundingRect, canvas.selectedSectionId, canvas.viewport.label, canvas.zoom, containerRef, dispatch, document])
+
+  // ---------------------------------------------------------------------------
+  // Universal Canvas Resize: Dragging corner or edge handles
+  // ---------------------------------------------------------------------------
   const handleResizeStart = useCallback((handle: HandleType, e: React.MouseEvent) => {
     if (!overlay.boundingRect || !canvas.selectedSectionId) return
     e.preventDefault()
@@ -112,6 +226,8 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     const startY = e.clientY
     const startWidth = overlay.boundingRect.width
     const startHeight = overlay.boundingRect.height
+
+    const domEl = containerRef.current?.querySelector(`[data-section-id="${targetNodeId}"], [data-node-id="${targetNodeId}"]`) as HTMLElement | null
 
     setResizing({
       handle,
@@ -157,6 +273,16 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
         currentHeight: Math.round(h),
         currentFontSize,
       } : null)
+
+      // Direct 60fps DOM preview during resize
+      if (domEl) {
+        if (isTextNode) {
+          domEl.style.fontSize = `${currentFontSize}px`
+        } else {
+          if (handle.includes('E') || handle.includes('W')) domEl.style.width = `${Math.round(w)}px`
+          if (handle.includes('S') || handle.includes('N')) domEl.style.height = `${Math.round(h)}px`
+        }
+      }
     }
 
     const onPointerUp = (upEvt: PointerEvent) => {
@@ -249,17 +375,27 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     window.addEventListener('pointermove', onPointerMove)
     window.addEventListener('pointerup', onPointerUp)
     window.addEventListener('pointercancel', onPointerUp)
-  }, [overlay.boundingRect, canvas.selectedSectionId, canvas.viewport.label, canvas.zoom, dispatch, document])
+  }, [overlay.boundingRect, canvas.selectedSectionId, canvas.viewport.label, canvas.zoom, containerRef, dispatch, document])
 
   const displayRect = useMemo(() => {
     if (!overlay.boundingRect) return null
-    if (!resizing) return overlay.boundingRect
-    return {
-      ...overlay.boundingRect,
-      width: resizing.currentWidth,
-      height: resizing.currentHeight,
+    let rect = overlay.boundingRect
+    if (resizing) {
+      rect = {
+        ...rect,
+        width: resizing.currentWidth,
+        height: resizing.currentHeight,
+      }
     }
-  }, [overlay.boundingRect, resizing])
+    if (moving) {
+      rect = {
+        ...rect,
+        x: rect.x + moving.deltaX,
+        y: rect.y + moving.deltaY,
+      }
+    }
+    return rect
+  }, [overlay.boundingRect, resizing, moving])
 
   return (
     <AnimatePresence>
@@ -279,7 +415,27 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
           {/* Selection bounding box */}
           {displayRect && (
             <>
-              <BoundingBox rect={displayRect} />
+              <BoundingBox rect={displayRect} onMoveStart={handleMoveStart} />
+
+              {/* Move Grip Handle — allows intuitive dragging of any element */}
+              <div
+                style={{
+                  left: displayRect.x + displayRect.width / 2,
+                  top: displayRect.y - 8,
+                  transform: 'translate(-50%, -100%)',
+                }}
+                onMouseDown={handleMoveStart}
+                className="absolute z-[125] pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 bg-[#121124] hover:bg-violet-600 text-violet-200 hover:text-white text-[11px] font-medium rounded-lg shadow-xl border border-violet-500/40 cursor-grab active:cursor-grabbing transition-all select-none group"
+                title="Przeciągnij myszą, aby swobodnie przesunąć element po Canvasie"
+              >
+                <Move className="w-3.5 h-3.5 text-violet-400 group-hover:text-white transition-colors" />
+                <span className="font-semibold">Przesuń</span>
+                {moving && (
+                  <span className="ml-1 text-[10px] font-mono text-violet-200 bg-black/40 px-1.5 py-0.5 rounded border border-white/10">
+                    X: {moving.startTx + Math.round(moving.deltaX)}px, Y: {moving.startTy + Math.round(moving.deltaY)}px
+                  </span>
+                )}
+              </div>
 
               {/* Resize handles */}
               <div className="pointer-events-auto">
@@ -314,7 +470,7 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
           )}
 
           {/* Quick toolbar */}
-          {toolbarData && !resizing && (
+          {toolbarData && !resizing && !moving && (
             <div className="pointer-events-auto">
               <QuickToolbar
                 position={toolbarData.position}
