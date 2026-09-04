@@ -30,6 +30,40 @@ export interface BuilderMetadata {
 // Theme — editor-side branding model
 // ---------------------------------------------------------------------------
 
+export interface BuilderDesignTokens {
+  colors?: {
+    primary?: string;
+    secondary?: string;
+    background?: string;
+    surface?: string;
+    text?: string;
+    muted?: string;
+    accent?: string;
+    border?: string;
+  };
+  typography?: {
+    headingFont?: string;
+    bodyFont?: string;
+    h1Size?: string;
+    h2Size?: string;
+    h3Size?: string;
+    bodySize?: string;
+  };
+  spacing?: {
+    xs?: string;
+    sm?: string;
+    md?: string;
+    lg?: string;
+    xl?: string;
+  };
+  radius?: {
+    sm?: string;
+    md?: string;
+    lg?: string;
+    full?: string;
+  };
+}
+
 export interface BuilderTheme {
   primaryColor: string;
   secondaryColor: string;
@@ -38,6 +72,7 @@ export interface BuilderTheme {
   favicon?: string;
   backgroundColor?: string;
   borderRadius?: string;
+  tokens?: BuilderDesignTokens;
 }
 
 // ---------------------------------------------------------------------------
@@ -86,6 +121,9 @@ export interface BuilderPage {
   sections: SectionNode[];  // root-level tree of this page
   seo: BuilderSEO;
   isHome: boolean;
+  folder?: string;
+  hidden?: boolean;
+  status?: 'published' | 'draft';
 }
 
 // ---------------------------------------------------------------------------

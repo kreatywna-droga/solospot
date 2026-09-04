@@ -60,8 +60,12 @@ export type BuilderCommandType =
   | 'REMOVE_PAGE'
   | 'UPDATE_PAGE_META'
   | 'UPDATE_PAGE_SEO'
-  // Branding / theme
+  | 'DUPLICATE_PAGE'
+  | 'REORDER_PAGES'
+  | 'SET_HOME_PAGE'
+  // Branding / theme / tokens
   | 'UPDATE_THEME'
+  | 'UPDATE_DESIGN_TOKENS'
   // Document-level
   | 'MARK_PUBLISHED'
   // Canvas (non-mutating document, just canvas state)
@@ -165,11 +169,26 @@ export type BuilderCommand =
       readonly pageId: string;
     }
   | {
+      readonly type: 'DUPLICATE_PAGE';
+      readonly pageId: string;
+    }
+  | {
+      readonly type: 'REORDER_PAGES';
+      readonly orderedPageIds: readonly string[];
+    }
+  | {
+      readonly type: 'SET_HOME_PAGE';
+      readonly pageId: string;
+    }
+  | {
       readonly type: 'UPDATE_PAGE_META';
       readonly pageId: string;
       readonly slug?: string;
       readonly name?: string;
       readonly isHome?: boolean;
+      readonly folder?: string;
+      readonly hidden?: boolean;
+      readonly status?: 'published' | 'draft';
     }
   | {
       readonly type: 'UPDATE_PAGE_SEO';
@@ -179,6 +198,10 @@ export type BuilderCommand =
   | {
       readonly type: 'UPDATE_THEME';
       readonly theme: Partial<BuilderTheme>;
+    }
+  | {
+      readonly type: 'UPDATE_DESIGN_TOKENS';
+      readonly tokens: NonNullable<BuilderTheme['tokens']>;
     }
   | {
       readonly type: 'MARK_PUBLISHED';
@@ -211,9 +234,13 @@ export function commandLabel(cmd: BuilderCommand): string {
     case 'REORDER_SECTIONS':  return `Reorder sections`;
     case 'ADD_PAGE':          return `Add page "${cmd.page.name}"`;
     case 'REMOVE_PAGE':       return `Delete page`;
+    case 'DUPLICATE_PAGE':    return `Duplicate page`;
+    case 'REORDER_PAGES':     return `Reorder pages`;
+    case 'SET_HOME_PAGE':     return `Set home page`;
     case 'UPDATE_PAGE_META':  return `Update page settings`;
     case 'UPDATE_PAGE_SEO':   return `Update page SEO`;
     case 'UPDATE_THEME':      return `Update theme`;
+    case 'UPDATE_DESIGN_TOKENS': return `Update design tokens`;
     case 'MARK_PUBLISHED':    return `Mark as published`;
     case 'CANVAS':            return `Canvas: ${cmd.action.type}`;
     case 'UNDO':              return `Undo`;
@@ -454,6 +481,55 @@ export function applyCommandToDocument(
       return touchDocument({ ...doc, pages });
     }
 
+    case 'DUPLICATE_PAGE': {
+      const targetPage = doc.pages.find(p => p.id === command.pageId);
+      if (!targetPage) return doc;
+      const newId = `page_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      // Deep clone sections with new IDs
+      const cloneSections = (nodes: SectionNode[]): SectionNode[] =>
+        nodes.map(n => ({
+          ...n,
+          id: `sec_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          props: JSON.parse(JSON.stringify(n.props)),
+          children: cloneSections(n.children ?? []),
+        }));
+
+      const duplicatedPage: BuilderPage = {
+        ...targetPage,
+        id: newId,
+        name: `${targetPage.name} (Kopia)`,
+        slug: `${targetPage.slug}-copy`,
+        isHome: false,
+        sections: cloneSections(targetPage.sections),
+      };
+      return touchDocument({ ...doc, pages: [...doc.pages, duplicatedPage] });
+    }
+
+    case 'REORDER_PAGES': {
+      const pageMap = new Map(doc.pages.map(p => [p.id, p]));
+      const newPages: BuilderPage[] = [];
+      for (const id of command.orderedPageIds) {
+        const page = pageMap.get(id);
+        if (page) {
+          newPages.push(page);
+          pageMap.delete(id);
+        }
+      }
+      // Add any remaining pages
+      for (const remaining of pageMap.values()) {
+        newPages.push(remaining);
+      }
+      return touchDocument({ ...doc, pages: newPages });
+    }
+
+    case 'SET_HOME_PAGE': {
+      const pages = doc.pages.map(page => ({
+        ...page,
+        isHome: page.id === command.pageId,
+      }));
+      return touchDocument({ ...doc, pages });
+    }
+
     case 'UPDATE_PAGE_META': {
       const pages = doc.pages.map(page => {
         if (page.id !== command.pageId) return page;
@@ -462,6 +538,9 @@ export function applyCommandToDocument(
           ...(command.slug !== undefined    ? { slug: command.slug }       : {}),
           ...(command.name !== undefined    ? { name: command.name }       : {}),
           ...(command.isHome !== undefined  ? { isHome: command.isHome }   : {}),
+          ...(command.folder !== undefined  ? { folder: command.folder }   : {}),
+          ...(command.hidden !== undefined  ? { hidden: command.hidden }   : {}),
+          ...(command.status !== undefined  ? { status: command.status }   : {}),
         };
       });
       return touchDocument({ ...doc, pages });
@@ -477,6 +556,14 @@ export function applyCommandToDocument(
 
     case 'UPDATE_THEME': {
       return touchDocument({ ...doc, theme: { ...doc.theme, ...command.theme } });
+    }
+
+    case 'UPDATE_DESIGN_TOKENS': {
+      const updatedTokens = {
+        ...(doc.theme.tokens ?? {}),
+        ...command.tokens,
+      };
+      return touchDocument({ ...doc, theme: { ...doc.theme, tokens: updatedTokens } });
     }
 
     case 'MARK_PUBLISHED': {

@@ -13,13 +13,13 @@ import {
   ChevronLeft, Monitor, Tablet, Smartphone,
   Undo2, Redo2, Save, Zap, AlertCircle, CheckCircle2,
   PanelLeft, Layers, ImageIcon, Bot, History,
-  Search, Command, Plus,
+  Search, Command, Plus, Palette,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useBuilder, useBuilderHistory } from '../state/BuilderProvider'
 import { VIEWPORT_PRESETS, ViewportLabel, RuntimeMode } from '../../../../packages/builder-core/src/CanvasState'
 
-export type StudioTab = 'pages' | 'layers' | 'assets' | 'components' | 'ai' | 'history'
+export type StudioTab = 'pages' | 'layers' | 'components' | 'assets' | 'style' | 'ai' | 'history'
 
 export type PreviewMode = RuntimeMode
 
@@ -34,12 +34,13 @@ interface BuilderTopBarProps {
 }
 
 const TABS: { id: StudioTab; label: string; icon: React.ElementType; shortcut: string }[] = [
-  { id: 'pages',      label: 'Pages',      icon: PanelLeft,   shortcut: 'Ctrl+1' },
-  { id: 'layers',     label: 'Layers',     icon: Layers,       shortcut: 'Ctrl+2' },
-  { id: 'components', label: 'Komponenty', icon: Plus,         shortcut: 'Ctrl+3' },
-  { id: 'assets',     label: 'Assets',     icon: ImageIcon,    shortcut: 'Ctrl+4' },
-  { id: 'ai',         label: 'AI',         icon: Bot,          shortcut: 'Ctrl+5' },
-  { id: 'history',    label: 'History',    icon: History,      shortcut: 'Ctrl+6' },
+  { id: 'pages',      label: 'Strony',     icon: PanelLeft,   shortcut: 'Ctrl+1' },
+  { id: 'layers',     label: 'Warstwy',    icon: Layers,      shortcut: 'Ctrl+2' },
+  { id: 'components', label: 'Komponenty', icon: Plus,        shortcut: 'Ctrl+3' },
+  { id: 'assets',     label: 'Media',      icon: ImageIcon,   shortcut: 'Ctrl+4' },
+  { id: 'style',      label: 'Styl',       icon: Palette,     shortcut: 'Ctrl+5' },
+  { id: 'ai',         label: 'AI',         icon: Bot,         shortcut: 'Ctrl+6' },
+  { id: 'history',    label: 'Historia',   icon: History,     shortcut: 'Ctrl+7' },
 ]
 
 export function BuilderTopBar({

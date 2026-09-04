@@ -114,12 +114,25 @@ interface ComponentCardProps {
 
 function ComponentCard({ descriptor, onAdd }: ComponentCardProps) {
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData('application/solospot-component-type', descriptor.type)
+        e.dataTransfer.setData('text/plain', descriptor.type)
+        e.dataTransfer.effectAllowed = 'copy'
+      }}
       onClick={() => onAdd(descriptor)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onAdd(descriptor)
+        }
+      }}
       className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/5
                  hover:border-violet-500/30 hover:bg-violet-500/10 active:scale-[0.98]
-                 transition-all text-left group overflow-hidden"
+                 transition-all text-left group overflow-hidden cursor-grab active:cursor-grabbing select-none focus:outline-none focus:border-violet-500/50"
     >
       {/* Icon / thumbnail */}
       <div className="w-9 h-9 min-w-[36px] max-w-[36px] min-h-[36px] max-h-[36px] rounded-lg bg-violet-500/15 flex items-center justify-center
@@ -137,7 +150,7 @@ function ComponentCard({ descriptor, onAdd }: ComponentCardProps) {
       <div className="flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center bg-white/0 group-hover:bg-violet-500/20 transition-colors">
         <Plus className="w-3.5 h-3.5 text-slate-500 group-hover:text-violet-300 transition-colors shrink-0" />
       </div>
-    </button>
+    </div>
   )
 }
 
