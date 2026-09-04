@@ -536,3 +536,6 @@ export type {
 // Real Rendering Engine (Sprint S10)
 export * from './rendering';
 
+// 100+ Google Fonts Catalog
+export * from './fonts/FontCatalog';
+

@@ -129,6 +129,7 @@ export interface NodeStyles {
   borderWidth?: string;
   borderColor?: string;
   borderStyle?: string;
+  borderLeft?: string;
   boxShadow?: string;
   opacity?: number;
   display?: string;
@@ -142,6 +143,16 @@ export interface NodeStyles {
   position?: 'static' | 'relative' | 'absolute' | 'sticky' | 'fixed';
   objectFit?: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down';
   objectPosition?: string;
+  translateX?: string | number;
+  translateY?: string | number;
+  scale?: number;
+  rotate?: number;
+  videoSrc?: string;
+  videoAutoplay?: boolean;
+  videoLoop?: boolean;
+  videoMuted?: boolean;
+  overlayColor?: string;
+  overlayOpacity?: number;
   customCss?: string;
 }
 

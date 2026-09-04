@@ -40,6 +40,7 @@ import { SelectionOverlay } from '../selection/SelectionOverlay'
 import { useRuntimePreview } from './useRuntimePreview'
 import { SectionRenderer } from '@/components/runtime/SectionRenderer'
 import { CartProvider } from '@/lib/cart/CartStore'
+import { loadGoogleFont } from '../../../../packages/builder-core/src/fonts/FontCatalog'
 
 // ---------------------------------------------------------------------------
 // Section type → icon mapping (used for wireframe preview)
@@ -83,6 +84,24 @@ const SECTION_HEIGHTS: Record<string, number> = {
 
 function sectionHeight(type: string): number {
   return SECTION_HEIGHTS[type] ?? 160
+}
+
+function formatTransform(styles: Record<string, any>): string | undefined {
+  if (!styles) return undefined
+  const parts: string[] = []
+  if (styles.translateX || styles.translateY) {
+    parts.push(`translate(${styles.translateX || '0px'}, ${styles.translateY || '0px'})`)
+  }
+  if (styles.rotate !== undefined && styles.rotate !== 0) {
+    parts.push(`rotate(${styles.rotate}deg)`)
+  }
+  if (styles.scale !== undefined && styles.scale !== 1) {
+    parts.push(`scale(${styles.scale})`)
+  }
+  if (styles.transform) {
+    parts.push(styles.transform)
+  }
+  return parts.length > 0 ? parts.join(' ') : undefined
 }
 
 // ---------------------------------------------------------------------------
@@ -394,6 +413,9 @@ function CanvasNode({
     const lineHeight = styles.lineHeight || (props.lineHeight as string) || '1.2'
     const letterSpacing = styles.letterSpacing || (props.letterSpacing as string)
     const fontFamily = styles.fontFamily || (props.fontFamily as string)
+    if (fontFamily) {
+      loadGoogleFont(fontFamily)
+    }
     const bg = (styles.backgroundColor as string) || (props.background as string) || 'transparent'
     const borderRadius = (styles.borderRadius as string) || (props.borderRadius as string)
     const borderWidth = styles.borderWidth || (props.borderWidth as string)
@@ -430,6 +452,7 @@ function CanvasNode({
           borderStyle: borderWidth ? borderStyle : undefined,
           boxShadow,
           opacity,
+          transform: formatTransform(styles),
         }}
         className={`relative cursor-pointer transition-all duration-150 rounded-lg ${
           !node.visible ? 'opacity-30' : ''
@@ -467,6 +490,9 @@ function CanvasNode({
     const lineHeight = styles.lineHeight || (props.lineHeight as string) || '1.6'
     const letterSpacing = styles.letterSpacing || (props.letterSpacing as string)
     const fontFamily = styles.fontFamily || (props.fontFamily as string)
+    if (fontFamily) {
+      loadGoogleFont(fontFamily)
+    }
     const bg = (styles.backgroundColor as string) || (props.background as string) || 'transparent'
     const borderRadius = (styles.borderRadius as string) || (props.borderRadius as string)
     const borderWidth = styles.borderWidth || (props.borderWidth as string)
@@ -503,6 +529,7 @@ function CanvasNode({
           borderStyle: borderWidth ? borderStyle : undefined,
           boxShadow,
           opacity,
+          transform: formatTransform(styles),
         }}
         className={`relative cursor-pointer transition-all duration-150 rounded-lg ${
           !node.visible ? 'opacity-30' : ''
@@ -543,6 +570,9 @@ function CanvasNode({
     const fontSize = styles.fontSize || (props.fontSize as string) || '0.875rem'
     const fontWeight = styles.fontWeight || (props.fontWeight as string) || '500'
     const fontFamily = styles.fontFamily || (props.fontFamily as string)
+    if (fontFamily) {
+      loadGoogleFont(fontFamily)
+    }
     const textAlign = (styles.textAlign as any) || (props.textAlign as any) || 'center'
     const boxShadow = styles.boxShadow
     const opacity = styles.opacity !== undefined ? styles.opacity : undefined
@@ -567,6 +597,7 @@ function CanvasNode({
           width,
           margin,
           display: 'inline-block',
+          transform: formatTransform(styles),
         }}
         className={`relative inline-block cursor-pointer transition-all duration-150 p-1 rounded-xl ${
           !node.visible ? 'opacity-30' : ''
@@ -709,6 +740,7 @@ function CanvasNode({
           margin,
           padding,
           display: 'inline-block',
+          transform: formatTransform(styles),
         }}
         className={`relative cursor-pointer transition-all duration-150 p-1 rounded-xl ${
           !node.visible ? 'opacity-30' : ''
@@ -769,7 +801,38 @@ function CanvasNode({
     setIsDropTarget(false)
 
     const draggedNodeId = e.dataTransfer.getData('application/solospot-node-id')
+    const typoData = e.dataTransfer.getData('application/solospot-typography-preset')
     const compType = e.dataTransfer.getData('application/solospot-component-type') || e.dataTransfer.getData('text/plain')
+
+    if (typoData) {
+      try {
+        const preset = JSON.parse(typoData)
+        const newNodeId = `node_${preset.type}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+        const newNode: SectionNode = {
+          id: newNodeId,
+          type: preset.type,
+          label: preset.name,
+          parentId: node.id,
+          order: node.children?.length ?? 0,
+          visible: true,
+          locked: false,
+          props: { content: preset.defaultText, text: preset.defaultText },
+          styles: { ...preset.styles },
+          children: [],
+        }
+        dispatch({
+          type: 'INSERT_NODE',
+          pageId,
+          parentId: node.id,
+          node: newNode,
+        })
+        dispatch({
+          type: 'CANVAS',
+          action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId },
+        })
+        return
+      } catch (err) {}
+    }
 
     if (draggedNodeId && draggedNodeId !== node.id) {
       dispatch({
@@ -856,6 +919,7 @@ function CanvasNode({
           display === 'grid-2' || display === 'grid-3' || display === 'grid-4' ? 'grid' :
           'flex'
         ),
+        transform: formatTransform(styles),
       }}
       className={`relative cursor-pointer transition-all duration-150 ${
         !node.visible ? 'opacity-30' : ''
@@ -1107,7 +1171,39 @@ function SectionBlock({
             }
 
             const draggedNodeId = e.dataTransfer.getData('application/solospot-node-id')
+            const typoData = e.dataTransfer.getData('application/solospot-typography-preset')
             const compType = e.dataTransfer.getData('application/solospot-component-type') || e.dataTransfer.getData('text/plain')
+
+            if (typoData) {
+              try {
+                const preset = JSON.parse(typoData)
+                const newNodeId = `node_${preset.type}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+                const newNode: SectionNode = {
+                  id: newNodeId,
+                  type: preset.type,
+                  label: preset.name,
+                  parentId: node.id,
+                  order: node.children?.length ?? 0,
+                  visible: true,
+                  locked: false,
+                  props: { content: preset.defaultText, text: preset.defaultText },
+                  styles: { ...preset.styles },
+                  children: [],
+                }
+                dispatch({
+                  type: 'INSERT_NODE',
+                  pageId,
+                  parentId: node.id,
+                  node: newNode,
+                })
+                dispatch({
+                  type: 'CANVAS',
+                  action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId },
+                })
+                return
+              } catch (err) {}
+            }
+
             if (draggedNodeId && draggedNodeId !== node.id) {
               dispatch({
                 type: 'MOVE_NODE',
@@ -1147,7 +1243,7 @@ function SectionBlock({
               })
             }
           }}
-          className={`w-full text-white min-h-[80px] transition-all relative ${
+          className={`w-full text-white min-h-[80px] transition-all relative overflow-hidden ${
             isSectionDropTarget ? 'ring-2 ring-violet-400 bg-violet-950/20' : ''
           }`}
           style={{
@@ -1171,10 +1267,34 @@ function SectionBlock({
             maxHeight: resolvedStyles.maxHeight,
             position: resolvedStyles.position as any,
             zIndex: resolvedStyles.zIndex,
+            transform: formatTransform(resolvedStyles),
           }}
         >
+          {/* Ambient Section Video Background */}
+          {resolvedStyles.videoSrc && (
+            <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+              <video
+                src={resolvedStyles.videoSrc}
+                autoPlay={resolvedStyles.videoAutoplay ?? true}
+                loop={resolvedStyles.videoLoop ?? true}
+                muted={resolvedStyles.videoMuted ?? true}
+                playsInline
+                className="w-full h-full object-cover"
+              />
+              {resolvedStyles.overlayColor && (
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    backgroundColor: resolvedStyles.overlayColor,
+                    opacity: resolvedStyles.overlayOpacity ?? 0.5,
+                  }}
+                />
+              )}
+            </div>
+          )}
+
           <div
-            className="w-full mx-auto"
+            className="w-full mx-auto relative z-10"
             style={{
               maxWidth: node.type === 'section' ? (resolvedStyles.maxWidth || '1280px') : undefined,
               display: resolvedStyles.display || 'flex',
@@ -1604,16 +1724,123 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
           }}
           onDrop={(e) => {
             e.preventDefault()
+            const typoData = e.dataTransfer.getData('application/solospot-typography-preset')
+            if (typoData && activePage) {
+              try {
+                const preset = JSON.parse(typoData)
+                const lastSection = activePage.sections[activePage.sections.length - 1]
+                const targetParent = (lastSection && lastSection.children && lastSection.children.length > 0 && lastSection.children[lastSection.children.length - 1].type === 'container')
+                  ? lastSection.children[lastSection.children.length - 1]
+                  : lastSection
+                const newNodeId = `node_${preset.type}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+                const newNode: SectionNode = {
+                  id: newNodeId,
+                  type: preset.type,
+                  label: preset.name,
+                  parentId: targetParent ? targetParent.id : null,
+                  order: targetParent ? (targetParent.children?.length ?? 0) : 0,
+                  visible: true,
+                  locked: false,
+                  props: { content: preset.defaultText, text: preset.defaultText },
+                  styles: { ...preset.styles },
+                  children: [],
+                }
+                if (targetParent) {
+                  dispatch({
+                    type: 'INSERT_NODE',
+                    pageId: activePage.id,
+                    parentId: targetParent.id,
+                    node: newNode,
+                  })
+                } else {
+                  const wrapperSection: SectionNode = {
+                    id: `node_section_${Date.now()}`,
+                    type: 'section',
+                    label: 'Sekcja',
+                    parentId: null,
+                    order: 0,
+                    visible: true,
+                    locked: false,
+                    props: { background: '#0a0a14' },
+                    styles: {},
+                    children: [{ ...newNode, parentId: null }],
+                  }
+                  dispatch({
+                    type: 'INSERT_NODE',
+                    pageId: activePage.id,
+                    parentId: null,
+                    node: wrapperSection,
+                  })
+                }
+                dispatch({
+                  type: 'CANVAS',
+                  action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId: activePage.id },
+                })
+                return
+              } catch (err) {}
+            }
+
             const componentType = e.dataTransfer.getData('application/solospot-component-type') || e.dataTransfer.getData('text/plain')
             if (componentType && activePage) {
               const descriptor = ctx.registry.get(componentType)
-              dispatch({
-                type: 'ADD_SECTION',
-                pageId: activePage.id,
-                sectionType: componentType,
-                defaultProps: descriptor?.defaultProps ? { ...descriptor.defaultProps } : {},
-                label: descriptor?.label || componentType,
-              })
+              if (componentType === 'section') {
+                dispatch({
+                  type: 'ADD_SECTION',
+                  pageId: activePage.id,
+                  sectionType: componentType,
+                  defaultProps: descriptor?.defaultProps ? { ...descriptor.defaultProps } : {},
+                  label: descriptor?.label || componentType,
+                })
+              } else {
+                const lastSection = activePage.sections[activePage.sections.length - 1]
+                const targetParent = (lastSection && lastSection.children && lastSection.children.length > 0 && lastSection.children[lastSection.children.length - 1].type === 'container')
+                  ? lastSection.children[lastSection.children.length - 1]
+                  : lastSection
+                const newNodeId = `node_${componentType}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+                const newNode: SectionNode = {
+                  id: newNodeId,
+                  type: componentType,
+                  label: descriptor?.label || componentType,
+                  parentId: targetParent ? targetParent.id : null,
+                  order: targetParent ? (targetParent.children?.length ?? 0) : 0,
+                  visible: true,
+                  locked: false,
+                  props: descriptor?.defaultProps ? { ...descriptor.defaultProps } : {},
+                  styles: (descriptor?.defaultStyles as any) || {},
+                  children: [],
+                }
+                if (targetParent) {
+                  dispatch({
+                    type: 'INSERT_NODE',
+                    pageId: activePage.id,
+                    parentId: targetParent.id,
+                    node: newNode,
+                  })
+                } else {
+                  const wrapperSection: SectionNode = {
+                    id: `node_section_${Date.now()}`,
+                    type: 'section',
+                    label: 'Sekcja',
+                    parentId: null,
+                    order: 0,
+                    visible: true,
+                    locked: false,
+                    props: { background: '#0a0a14' },
+                    styles: {},
+                    children: [{ ...newNode, parentId: null }],
+                  }
+                  dispatch({
+                    type: 'INSERT_NODE',
+                    pageId: activePage.id,
+                    parentId: null,
+                    node: wrapperSection,
+                  })
+                }
+                dispatch({
+                  type: 'CANVAS',
+                  action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId: activePage.id },
+                })
+              }
             }
           }}
         >

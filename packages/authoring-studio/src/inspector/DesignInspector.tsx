@@ -27,6 +27,7 @@ import {
   StretchHorizontal, Grid3X3,
 } from 'lucide-react';
 import type { NodeStyles } from '../../../builder-core/src/BuilderDocument';
+import { FontPicker } from './widgets/FontPicker';
 
 // ---------------------------------------------------------------------------
 // Shared mini-components
@@ -338,7 +339,7 @@ function FourSideEditor({
         </button>
       </div>
 
-      {linked && (
+      {linked ? (
         <div className="flex items-center gap-2 bg-[#0a0a14] p-2 rounded-lg border border-white/5">
           <input
             type="range"
@@ -367,24 +368,36 @@ function FourSideEditor({
             <span className="text-[10px] text-slate-500 ml-1">px</span>
           </div>
         </div>
+      ) : (
+        <div className="space-y-1.5 bg-[#0a0a14] p-2 rounded-lg border border-white/5">
+          {sides.map(({ key, short }) => {
+            const sideVal = parseInt(parsed[key] || '0', 10) || 0;
+            return (
+              <div key={key} className="flex items-center gap-2">
+                <span className="w-8 text-[10px] font-bold text-slate-400 uppercase">{short}:</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={120}
+                  step={1}
+                  value={sideVal}
+                  onChange={(e) => handleSide(key, `${e.target.value}px`)}
+                  className="flex-1 accent-violet-500 h-1 cursor-pointer"
+                />
+                <input
+                  type="number"
+                  min={0}
+                  max={999}
+                  value={sideVal}
+                  onChange={(e) => handleSide(key, `${e.target.value || '0'}px`)}
+                  className="w-12 bg-[#0e0e1a] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-violet-500/60 font-mono"
+                />
+                <span className="text-[10px] text-slate-500">px</span>
+              </div>
+            );
+          })}
+        </div>
       )}
-
-      <div className="grid grid-cols-4 gap-1.5">
-        {sides.map(({ key, short }) => (
-          <div key={key} className="relative">
-            <input
-              type="text"
-              value={parsed[key] || ''}
-              placeholder="0"
-              onChange={(e) => handleSide(key, e.target.value)}
-              className="w-full bg-[#0e0e1a] border border-white/10 rounded px-1 py-1.5 text-[11px] text-white text-center focus:outline-none focus:border-violet-500/60 font-mono"
-            />
-            <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-[8px] font-bold text-slate-500 uppercase bg-[#06060c] px-1 rounded">
-              {short}
-            </span>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
@@ -473,6 +486,85 @@ function DesignTab({
                 { value: 'left', label: 'Lewo (Left)' },
                 { value: 'right', label: 'Prawo (Right)' },
               ]}
+            />
+          </Row>
+        </Section>
+      )}
+
+      {/* Contextual: Section Media & Background */}
+      {nodeType === 'section' && (
+        <Section title="Media i tło sekcji">
+          <Row label="Typ tła">
+            <SelectInput
+              value={styles.videoSrc ? 'video' : styles.backgroundImage ? 'image' : 'color'}
+              onChange={(v) => {
+                if (v === 'color') onChange({ backgroundImage: '', videoSrc: '' });
+                else if (v === 'image' && !styles.backgroundImage) onChange({ backgroundImage: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809', videoSrc: '' });
+                else if (v === 'video' && !styles.videoSrc) onChange({ videoSrc: 'https://assets.mixkit.co/videos/preview/mixkit-set-of-plateaus-seen-from-the-sky-in-a-sunset-26070-large.mp4' });
+              }}
+              options={[
+                { value: 'color', label: 'Kolor / Czysty' },
+                { value: 'image', label: 'Zdjęcie (Image)' },
+                { value: 'video', label: 'Wideo tła (Video MP4)' },
+              ]}
+            />
+          </Row>
+          {styles.videoSrc ? (
+            <>
+              <Row label="Wideo URL">
+                <input
+                  type="text"
+                  value={styles.videoSrc || ''}
+                  placeholder="https://... direct .mp4/.webm URL"
+                  onChange={(e) => onChange({ videoSrc: e.target.value })}
+                  className={inputCls}
+                />
+              </Row>
+              <Row label="Wyciszone">
+                <input
+                  type="checkbox"
+                  checked={styles.videoMuted ?? true}
+                  onChange={(e) => onChange({ videoMuted: e.target.checked })}
+                  className="accent-violet-500 rounded cursor-pointer"
+                />
+              </Row>
+              <Row label="Autoodtwarzanie">
+                <input
+                  type="checkbox"
+                  checked={styles.videoAutoplay ?? true}
+                  onChange={(e) => onChange({ videoAutoplay: e.target.checked })}
+                  className="accent-violet-500 rounded cursor-pointer"
+                />
+              </Row>
+            </>
+          ) : (
+            <Row label="Zdjęcie URL">
+              <input
+                type="text"
+                value={styles.backgroundImage || ''}
+                placeholder="https://... URL zdjęcia tła"
+                onChange={(e) => onChange({ backgroundImage: e.target.value })}
+                className={inputCls}
+              />
+            </Row>
+          )}
+          <Row label="Kolor nakładki">
+            <ColorInput
+              value={styles.overlayColor || '#000000'}
+              onChange={(v) => onChange({ overlayColor: v })}
+            />
+          </Row>
+          <Row label="Krycie nakładki">
+            <UnitInput
+              value={`${Math.round((styles.overlayOpacity ?? 0.5) * 100)}%`}
+              onChange={(v) => {
+                const num = parseFloat(v) || 0;
+                onChange({ overlayOpacity: Math.min(1, Math.max(0, num / 100)) });
+              }}
+              slider
+              min={0}
+              max={100}
+              step={5}
             />
           </Row>
         </Section>
@@ -645,6 +737,85 @@ function DesignTab({
             onChange={(e) => onChange({ boxShadow: e.target.value })}
             className={inputCls}
           />
+        </Row>
+      </Section>
+
+      <Section title="Transformacje (Transform)">
+        <Row label="Pozycja X">
+          <UnitInput
+            value={styles.translateX !== undefined ? String(styles.translateX) : '0px'}
+            onChange={(v) => onChange({ translateX: v })}
+            slider
+            min={-200}
+            max={200}
+            step={1}
+            placeholder="0px"
+          />
+        </Row>
+        <Row label="Pozycja Y">
+          <UnitInput
+            value={styles.translateY !== undefined ? String(styles.translateY) : '0px'}
+            onChange={(v) => onChange({ translateY: v })}
+            slider
+            min={-200}
+            max={200}
+            step={1}
+            placeholder="0px"
+          />
+        </Row>
+        <Row label="Skala">
+          <div className="flex items-center gap-2">
+            <input
+              type="range"
+              min={20}
+              max={300}
+              step={5}
+              value={Math.round((styles.scale ?? 1) * 100)}
+              onChange={(e) => onChange({ scale: parseFloat(e.target.value) / 100 })}
+              className="flex-1 accent-violet-500 h-1 cursor-pointer"
+            />
+            <div className="flex items-center">
+              <input
+                type="number"
+                min={20}
+                max={500}
+                value={Math.round((styles.scale ?? 1) * 100)}
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value);
+                  if (!Number.isNaN(val)) onChange({ scale: Math.max(0.1, val / 100) });
+                }}
+                className="w-12 bg-[#0e0e1a] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-violet-500/60 font-mono"
+              />
+              <span className="text-[10px] text-slate-500 ml-1">%</span>
+            </div>
+          </div>
+        </Row>
+        <Row label="Obrót (Rot)">
+          <div className="flex items-center gap-2">
+            <input
+              type="range"
+              min={-180}
+              max={180}
+              step={1}
+              value={styles.rotate ?? 0}
+              onChange={(e) => onChange({ rotate: parseInt(e.target.value, 10) })}
+              className="flex-1 accent-violet-500 h-1 cursor-pointer"
+            />
+            <div className="flex items-center">
+              <input
+                type="number"
+                min={-360}
+                max={360}
+                value={styles.rotate ?? 0}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  if (!Number.isNaN(val)) onChange({ rotate: val });
+                }}
+                className="w-12 bg-[#0e0e1a] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-violet-500/60 font-mono"
+              />
+              <span className="text-[10px] text-slate-500 ml-1">°</span>
+            </div>
+          </div>
         </Row>
       </Section>
     </>
@@ -879,17 +1050,9 @@ function TypographyTab({
     <>
       <Section title="Font">
         <Row label="Family">
-          <SelectInput
-            value={styles.fontFamily}
+          <FontPicker
+            value={styles.fontFamily || 'Inter'}
             onChange={(v) => onChange({ fontFamily: v })}
-            options={[
-              { value: 'Inter', label: 'Inter' },
-              { value: 'Outfit', label: 'Outfit' },
-              { value: 'Playfair Display', label: 'Playfair Display' },
-              { value: 'Space Grotesk', label: 'Space Grotesk' },
-              { value: 'Roboto', label: 'Roboto' },
-              { value: 'Poppins', label: 'Poppins' },
-            ]}
           />
         </Row>
         <Row label="Size">

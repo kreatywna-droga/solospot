@@ -23,6 +23,7 @@ import {
 import { useBuilder } from '../state/BuilderProvider'
 import { ComponentDescriptor } from '../../../../packages/builder-core/src/ComponentRegistry'
 import { BuilderNode, createBuilderNode, generateNodeId, findNode } from '../../../../packages/builder-core/src'
+import { TypographyPresetsPanel, TypographyPreset } from './TypographyPresetsPanel'
 
 // ---------------------------------------------------------------------------
 // Category tabs
@@ -294,11 +295,93 @@ export function ComponentPanel({ onClose }: ComponentPanelProps) {
     onClose?.()
   }, [dispatch, canvas.selectedSectionId, canvas.selectedPageId, builderDoc, onClose])
 
+  const handleAddTypographyPreset = useCallback((preset: TypographyPreset) => {
+    const targetPageId = canvas.selectedPageId || builderDoc.pages[0]?.id
+    if (!targetPageId) return
+
+    const newNodeId = generateNodeId(preset.type)
+    const newNode: BuilderNode = createBuilderNode({
+      id: newNodeId,
+      type: preset.type,
+      label: preset.name,
+      props: { content: preset.defaultText, text: preset.defaultText },
+      styles: { ...preset.styles },
+      children: [],
+    })
+
+    const selectedId = canvas.selectedSectionId
+    const found = selectedId ? findNode(builderDoc, selectedId) : null
+    const activePage = builderDoc.pages.find(p => p.id === targetPageId)
+
+    if (found) {
+      if (found.node.type === 'container' || found.node.type === 'section') {
+        dispatch({
+          type: 'INSERT_NODE',
+          parentId: found.node.id,
+          node: { ...newNode, parentId: found.node.id },
+          index: found.node.children.length,
+          pageId: targetPageId,
+        })
+      } else {
+        const parentId = found.parent ? found.parent.id : null
+        const siblings = found.parent ? found.parent.children : (found.page?.sections ?? [])
+        const siblingIdx = siblings.findIndex(s => s.id === found.node.id)
+        dispatch({
+          type: 'INSERT_NODE',
+          parentId,
+          node: { ...newNode, parentId },
+          index: siblingIdx >= 0 ? siblingIdx + 1 : undefined,
+          pageId: targetPageId,
+        })
+      }
+    } else {
+      if (activePage && activePage.sections.length > 0) {
+        const lastSection = activePage.sections[activePage.sections.length - 1]
+        const targetParent = (lastSection.children && lastSection.children.length > 0 && lastSection.children[lastSection.children.length - 1].type === 'container')
+          ? lastSection.children[lastSection.children.length - 1]
+          : lastSection
+
+        dispatch({
+          type: 'INSERT_NODE',
+          parentId: targetParent.id,
+          node: { ...newNode, parentId: targetParent.id },
+          index: targetParent.children.length,
+          pageId: targetPageId,
+        })
+      } else {
+        const wrapperSection = createBuilderNode({
+          id: generateNodeId('section'),
+          type: 'section',
+          label: 'Sekcja',
+          props: { padding: 'md', background: '#0a0a14' },
+          children: [{ ...newNode, parentId: null }],
+        })
+        newNode.parentId = wrapperSection.id
+        wrapperSection.children = [newNode]
+        dispatch({
+          type: 'INSERT_NODE',
+          parentId: null,
+          node: wrapperSection,
+          pageId: targetPageId,
+        })
+      }
+    }
+
+    dispatch({
+      type: 'CANVAS',
+      action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId: targetPageId },
+    })
+
+    onClose?.()
+  }, [dispatch, canvas.selectedSectionId, canvas.selectedPageId, builderDoc, onClose])
+
+  const [subTab, setSubTab] = useState<'components' | 'typography'>('components')
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-white/10">
-        <h2 className="text-xs font-bold text-white uppercase tracking-wider">Komponenty</h2>
+        <h2 className="text-xs font-bold text-white uppercase tracking-wider">Biblioteka Tworzenia</h2>
         {onClose && (
           <button onClick={onClose} className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors">
             <X className="w-4 h-4" />
@@ -306,51 +389,85 @@ export function ComponentPanel({ onClose }: ComponentPanelProps) {
         )}
       </div>
 
-      {/* Search */}
-      <div className="px-3 pt-3 pb-2">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
-          <input
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Szukaj sekcji..."
-            className="w-full bg-white/5 border border-white/10 rounded-lg pl-8 pr-3 py-2 text-sm text-white
-                       placeholder-slate-600 focus:outline-none focus:border-violet-500/50 transition-all"
-          />
+      {/* Sub-tab switcher */}
+      <div className="flex border-b border-white/10 px-3 pt-2 gap-1">
+        <button
+          type="button"
+          onClick={() => setSubTab('components')}
+          className={`flex-1 py-1.5 text-xs font-semibold rounded-t-lg transition-all border-b-2 ${
+            subTab === 'components'
+              ? 'text-white border-violet-500 bg-white/5'
+              : 'text-slate-500 border-transparent hover:text-slate-300'
+          }`}
+        >
+          Komponenty
+        </button>
+        <button
+          type="button"
+          onClick={() => setSubTab('typography')}
+          className={`flex-1 py-1.5 text-xs font-semibold rounded-t-lg transition-all border-b-2 ${
+            subTab === 'typography'
+              ? 'text-white border-violet-500 bg-white/5'
+              : 'text-slate-500 border-transparent hover:text-slate-300'
+          }`}
+        >
+          Typografia
+        </button>
+      </div>
+
+      {subTab === 'typography' ? (
+        <div className="flex-1 overflow-y-auto">
+          <TypographyPresetsPanel onSelect={handleAddTypographyPreset} />
         </div>
-      </div>
-
-      {/* Category tabs */}
-      {!search && (
-        <CategoryTabs
-          categories={categories}
-          active={activeCategory}
-          onChange={setActiveCategory}
-        />
-      )}
-
-      {/* Component list */}
-      <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-1.5">
-        {filtered.length === 0 ? (
-          <div className="text-xs text-slate-600 text-center py-8">
-            Brak komponentów
-            {search && (
-              <> dla zapytania: <span className="text-slate-400">&ldquo;{search}&rdquo;</span></>
-            )}
-            <br />
-            Zarejestruj komponenty w BuilderComponentRegistry.
+      ) : (
+        <>
+          {/* Search */}
+          <div className="px-3 pt-3 pb-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Szukaj sekcji lub elementu..."
+                className="w-full bg-white/5 border border-white/10 rounded-lg pl-8 pr-3 py-2 text-sm text-white
+                           placeholder-slate-600 focus:outline-none focus:border-violet-500/50 transition-all"
+              />
+            </div>
           </div>
-        ) : (
-          filtered.map(descriptor => (
-            <ComponentCard
-              key={descriptor.type}
-              descriptor={descriptor}
-              onAdd={handleAdd}
+
+          {/* Category tabs */}
+          {!search && (
+            <CategoryTabs
+              categories={categories}
+              active={activeCategory}
+              onChange={setActiveCategory}
             />
-          ))
-        )}
-      </div>
+          )}
+
+          {/* Component list */}
+          <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-1.5">
+            {filtered.length === 0 ? (
+              <div className="text-xs text-slate-600 text-center py-8">
+                Brak komponentów
+                {search && (
+                  <> dla zapytania: <span className="text-slate-400">&ldquo;{search}&rdquo;</span></>
+                )}
+                <br />
+                Zarejestruj komponenty w BuilderComponentRegistry.
+              </div>
+            ) : (
+              filtered.map(descriptor => (
+                <ComponentCard
+                  key={descriptor.type}
+                  descriptor={descriptor}
+                  onAdd={handleAdd}
+                />
+              ))
+            )}
+          </div>
+        </>
+      )}
     </div>
   )
 }
