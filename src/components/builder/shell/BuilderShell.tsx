@@ -70,7 +70,84 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
   const [activeTab, setActiveTab] = useState<StudioTab>('layers')
   const [leftSidebarVisible, setLeftSidebarVisible] = useState(true)
   const { dispatch, canvas, document: builderDoc } = useBuilder()
-  // Keyboard handled by KeyboardController in core — BuilderShell is "głupi"
+
+  // Resizable sidebar widths with localStorage persistence
+  const [leftWidth, setLeftWidth] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('solospot_builder_left_width')
+      if (saved) {
+        const parsed = parseInt(saved, 10)
+        if (!isNaN(parsed) && parsed >= 220 && parsed <= 620) return parsed
+      }
+    }
+    return 320
+  })
+
+  const [rightWidth, setRightWidth] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('solospot_builder_right_width')
+      if (saved) {
+        const parsed = parseInt(saved, 10)
+        if (!isNaN(parsed) && parsed >= 220 && parsed <= 620) return parsed
+      }
+    }
+    return 288
+  })
+
+  const [isResizingLeft, setIsResizingLeft] = useState(false)
+  const [isResizingRight, setIsResizingRight] = useState(false)
+
+  // Drag handler for Left Sidebar
+  const handleLeftResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsResizingLeft(true)
+    const startX = e.clientX
+    const startW = leftWidth
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const delta = moveEvent.clientX - startX
+      const newWidth = Math.min(Math.max(startW + delta, 220), 620)
+      setLeftWidth(newWidth)
+      try {
+        localStorage.setItem('solospot_builder_left_width', newWidth.toString())
+      } catch {}
+    }
+
+    const handleMouseUp = () => {
+      setIsResizingLeft(false)
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+  }, [leftWidth])
+
+  // Drag handler for Right Sidebar (Inspector)
+  const handleRightResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsResizingRight(true)
+    const startX = e.clientX
+    const startW = rightWidth
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const delta = startX - moveEvent.clientX
+      const newWidth = Math.min(Math.max(startW + delta, 220), 620)
+      setRightWidth(newWidth)
+      try {
+        localStorage.setItem('solospot_builder_right_width', newWidth.toString())
+      } catch {}
+    }
+
+    const handleMouseUp = () => {
+      setIsResizingRight(false)
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+  }, [rightWidth])
 
   const handleInspectorPropChange = useCallback(
     (key: string, value: unknown) => {
@@ -89,6 +166,11 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
 
   return (
     <div className="h-screen bg-[#050508] text-white flex flex-col overflow-hidden select-none">
+      {/* Overlay to capture pointer events smoothly when dragging across iframes */}
+      {(isResizingLeft || isResizingRight) && (
+        <div className="fixed inset-0 z-[9999] cursor-col-resize select-none" />
+      )}
+
       {/* Top Bar */}
       <BuilderTopBar
         storeId={storeId}
@@ -104,22 +186,61 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
       <BuilderBreadcrumbs />
 
       {/* Main Content */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
         {/* Left Sidebar */}
         {leftSidebarVisible && (
-          <BuilderLeftSidebar
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          />
+          <>
+            <BuilderLeftSidebar
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              width={leftWidth}
+            />
+            {/* Left Resizer Handle */}
+            <div
+              onMouseDown={handleLeftResizeStart}
+              onDoubleClick={() => {
+                setLeftWidth(320)
+                try { localStorage.setItem('solospot_builder_left_width', '320') } catch {}
+              }}
+              title="Przeciągnij, aby zmienić szerokość lewego panelu (kliknij 2x, aby zresetować)"
+              className={`w-1.5 hover:w-2 -mr-1.5 z-30 cursor-col-resize transition-all flex items-center justify-center group flex-shrink-0 relative ${
+                isResizingLeft ? 'bg-violet-500 shadow-lg shadow-violet-500/50' : 'bg-transparent hover:bg-violet-500/40'
+              }`}
+            >
+              <div className={`w-[2px] h-8 rounded-full transition-colors ${
+                isResizingLeft ? 'bg-white' : 'bg-white/10 group-hover:bg-violet-400'
+              }`} />
+            </div>
+          </>
         )}
 
         {/* Canvas */}
-        <main className="flex-1 flex flex-col overflow-hidden">
+        <main className="flex-1 flex flex-col overflow-hidden min-w-0">
           <BuilderCanvas onAddSection={() => setActiveTab('components')} />
         </main>
 
+        {/* Right Resizer Handle */}
+        <div
+          onMouseDown={handleRightResizeStart}
+          onDoubleClick={() => {
+            setRightWidth(288)
+            try { localStorage.setItem('solospot_builder_right_width', '288') } catch {}
+          }}
+          title="Przeciągnij, aby zmienić szerokość inspektora (kliknij 2x, aby zresetować)"
+          className={`w-1.5 hover:w-2 -ml-1.5 z-30 cursor-col-resize transition-all flex items-center justify-center group flex-shrink-0 relative ${
+            isResizingRight ? 'bg-violet-500 shadow-lg shadow-violet-500/50' : 'bg-transparent hover:bg-violet-500/40'
+          }`}
+        >
+          <div className={`w-[2px] h-8 rounded-full transition-colors ${
+            isResizingRight ? 'bg-white' : 'bg-white/10 group-hover:bg-violet-400'
+          }`} />
+        </div>
+
         {/* Inspector (Right Panel) — Inspector 2.0 (PM28 Architecture) */}
-        <aside className="w-72 border-l border-white/10 bg-[#06060c] flex flex-col overflow-hidden flex-shrink-0">
+        <aside
+          style={{ width: `${rightWidth}px` }}
+          className="border-l border-white/10 bg-[#06060c] flex flex-col overflow-hidden flex-shrink-0 h-full select-none"
+        >
           <InspectorShellAdapter
             sectionId={canvas.selectedSectionId}
             onPropChange={handleInspectorPropChange}

@@ -32,16 +32,20 @@ import { StylePanel } from '../sidebar/StylePanel'
 interface BuilderLeftSidebarProps {
   activeTab: StudioTab
   onTabChange: (tab: StudioTab) => void
+  width?: number
 }
 
-export function BuilderLeftSidebar({ activeTab, onTabChange }: BuilderLeftSidebarProps) {
+export function BuilderLeftSidebar({ activeTab, onTabChange, width = 320 }: BuilderLeftSidebarProps) {
   const currentTab: StudioTab =
     ['pages', 'layers', 'components', 'assets', 'style', 'ai', 'history'].includes(activeTab)
       ? activeTab
       : 'layers'
 
   return (
-    <aside className="w-80 min-w-[320px] max-w-[380px] border-r border-white/10 bg-[#06060c] flex flex-col overflow-hidden flex-shrink-0">
+    <aside
+      style={{ width: `${width}px` }}
+      className="border-r border-white/10 bg-[#06060c] flex flex-col overflow-hidden flex-shrink-0 h-full select-none"
+    >
       <div className="flex-1 overflow-hidden">
         {currentTab === 'pages' && <PagesPanel />}
         {currentTab === 'layers' && <LayerTree />}
