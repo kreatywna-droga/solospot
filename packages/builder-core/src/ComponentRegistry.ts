@@ -559,6 +559,107 @@ export const STANDARD_COMPONENT_DESCRIPTORS: ReadonlyArray<ComponentDescriptor> 
     defaultProps: { display: 'flex-col', padding: 'md', gap: '16', maxWidth: '1200px', background: '' },
     tags: ['contener', 'layout', 'flex', 'grid', 'kolumny'],
   },
+
+  // 11. ATOMIC ELEMENTS & SECTIONS (Phase 1)
+  {
+    type: 'section',
+    label: 'Sekcja bazowa',
+    category: 'Layout',
+    icon: 'Layers',
+    previewable: true,
+    allowChildren: true,
+    schema: [
+      colorProp({ key: 'background', label: 'Kolor tła', required: false, group: 'style' }),
+      selectProp({ key: 'padding', label: 'Padding sekcji', required: false, group: 'spacing', defaultValue: 'md', options: [
+        { label: 'Brak (0px)', value: 'none' },
+        { label: 'Mały (24px)', value: 'sm' },
+        { label: 'Średni (48px)', value: 'md' },
+        { label: 'Duży (80px)', value: 'lg' },
+      ]}),
+    ],
+    defaultProps: { padding: 'md', background: '#0a0a14' },
+    tags: ['sekcja', 'układ', 'layout', 'wiersz'],
+  },
+  {
+    type: 'heading',
+    label: 'Nagłówek',
+    category: 'Typography',
+    icon: 'Heading',
+    previewable: true,
+    allowChildren: false,
+    schema: [
+      stringProp({ key: 'text', label: 'Tekst nagłówka', required: true, group: 'content', defaultValue: 'Nowoczesny nagłówek sekcji' }),
+      selectProp({ key: 'level', label: 'Rozmiar (H1-H4)', required: false, group: 'typography', defaultValue: 'h2', options: [
+        { label: 'H1 — Bardzo duży', value: 'h1' },
+        { label: 'H2 — Duży nagłówek', value: 'h2' },
+        { label: 'H3 — Średni podtytuł', value: 'h3' },
+        { label: 'H4 — Mały nagłówek', value: 'h4' },
+      ]}),
+      selectProp({ key: 'textAlign', label: 'Wyrównanie', required: false, group: 'typography', defaultValue: 'left', options: [
+        { label: 'Do lewej', value: 'left' },
+        { label: 'Środek', value: 'center' },
+        { label: 'Do prawej', value: 'right' },
+      ]}),
+      colorProp({ key: 'color', label: 'Kolor tekstu', required: false, group: 'style' }),
+    ],
+    defaultProps: { text: 'Nowoczesny nagłówek sekcji', level: 'h2', textAlign: 'left', color: '#ffffff' },
+    tags: ['nagłówek', 'tekst', 'tytuł', 'heading', 'h1', 'h2'],
+  },
+  {
+    type: 'text',
+    label: 'Akapit tekstu',
+    category: 'Typography',
+    icon: 'Type',
+    previewable: true,
+    allowChildren: false,
+    schema: [
+      textProp({ key: 'text', label: 'Treść akapitu', required: true, group: 'content', defaultValue: 'Wprowadź tekst opisu lub akapitu...' }),
+      selectProp({ key: 'textAlign', label: 'Wyrównanie', required: false, group: 'typography', defaultValue: 'left', options: [
+        { label: 'Do lewej', value: 'left' },
+        { label: 'Środek', value: 'center' },
+        { label: 'Do prawej', value: 'right' },
+      ]}),
+      colorProp({ key: 'color', label: 'Kolor tekstu', required: false, group: 'style' }),
+    ],
+    defaultProps: { text: 'Wprowadź tekst opisu lub akapitu...', textAlign: 'left', color: '#94a3b8' },
+    tags: ['tekst', 'opis', 'akapit', 'paragraph'],
+  },
+  {
+    type: 'button',
+    label: 'Przycisk akcji',
+    category: 'Elements',
+    icon: 'Square',
+    previewable: true,
+    allowChildren: false,
+    schema: [
+      stringProp({ key: 'text', label: 'Etykieta przycisku', required: true, group: 'content', defaultValue: 'Kliknij tutaj' }),
+      stringProp({ key: 'url', label: 'Adres URL (Link)', required: false, group: 'link', defaultValue: '#' }),
+      selectProp({ key: 'variant', label: 'Styl przycisku', required: false, group: 'style', defaultValue: 'primary', options: [
+        { label: 'Główny (Primary)', value: 'primary' },
+        { label: 'Drugorzędny (Secondary)', value: 'secondary' },
+        { label: 'Kontur (Outline)', value: 'outline' },
+      ]}),
+      colorProp({ key: 'background', label: 'Kolor tła przycisku', required: false, group: 'style' }),
+      colorProp({ key: 'textColor', label: 'Kolor tekstu', required: false, group: 'style' }),
+    ],
+    defaultProps: { text: 'Kliknij tutaj', url: '#', variant: 'primary', background: '#7c3aed', textColor: '#ffffff' },
+    tags: ['przycisk', 'button', 'cta', 'akcja'],
+  },
+  {
+    type: 'image',
+    label: 'Zdjęcie / Obraz',
+    category: 'Media',
+    icon: 'Image',
+    previewable: true,
+    allowChildren: false,
+    schema: [
+      imageProp({ key: 'src', label: 'Adres URL zdjęcia', required: true, group: 'content', defaultValue: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80' }),
+      stringProp({ key: 'alt', label: 'Tekst alternatywny (Alt)', required: false, group: 'seo', defaultValue: 'Zdjęcie produktu' }),
+      stringProp({ key: 'borderRadius', label: 'Zaokrąglenie (np. 12px)', required: false, group: 'style', defaultValue: '12px' }),
+    ],
+    defaultProps: { src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80', alt: 'Zdjęcie produktu', borderRadius: '12px' },
+    tags: ['zdjęcie', 'obraz', 'image', 'grafika', 'foto'],
+  },
 ];
 
 // ---------------------------------------------------------------------------

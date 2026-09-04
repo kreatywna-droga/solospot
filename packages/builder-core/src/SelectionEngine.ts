@@ -204,18 +204,27 @@ export function reduceSelection(
       const selectedId = state.selectedIds[0];
 
       for (const page of document.pages) {
-        // Check if selected is at root level → already at top
-        const rootNode = page.sections.find(s => s.id === selectedId);
-        if (rootNode) return state; // already at root level
-
-        // Find parent
+        // Find parent if node is a nested child
         const parentInfo = getParentId(page.sections, selectedId);
         if (parentInfo) {
           return {
             ...state,
             selectedIds: [parentInfo.parentId],
+            primarySelectionId: parentInfo.parentId,
             lastClickedId: parentInfo.parentId,
             breadcrumbs: buildBreadcrumbs(document, parentInfo.parentId),
+          };
+        }
+
+        // Check if selected is at root level → clear selection to page/root
+        const rootNode = page.sections.find(s => s.id === selectedId);
+        if (rootNode) {
+          return {
+            ...state,
+            selectedIds: [],
+            primarySelectionId: null,
+            lastClickedId: null,
+            breadcrumbs: [],
           };
         }
       }

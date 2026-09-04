@@ -297,7 +297,7 @@ describe('SelectionEngine — reduceSelection', () => {
       expect(next.selectedIds).toContain('container_features');
     });
 
-    it('should stay at root level if already at root', () => {
+    it('should transition to page/root level (clear section selection) if already at root', () => {
       const doc = freshDoc();
       const state = {
         ...createInitialSelection(),
@@ -306,7 +306,7 @@ describe('SelectionEngine — reduceSelection', () => {
       };
       const next = reduceSelection(state, doc, { type: 'SELECT_PARENT' });
 
-      expect(next.selectedIds).toEqual(['hero']); // unchanged
+      expect(next.selectedIds).toEqual([]); // clear selection to page/root
     });
 
     it('should do nothing if nothing is selected', () => {

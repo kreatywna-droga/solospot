@@ -31,9 +31,12 @@ import {
   BuilderSEO,
   BuilderTheme,
   SectionNode,
+  BuilderNode,
+  NodeStyles,
   touchDocument,
 } from './BuilderDocument';
 import { sectionTree } from './SectionTree';
+import * as nodeTree from './NodeTree';
 import { CanvasAction, Alignment } from './CanvasState';
 
 // ---------------------------------------------------------------------------
@@ -55,6 +58,16 @@ export type BuilderCommandType =
   | 'DUPLICATE_SECTION'
   | 'REORDER_SECTIONS'
   | 'ALIGN_SECTIONS'
+  // C17.1 Phase 1 — Hierarchical Node Commands
+  | 'INSERT_NODE'
+  | 'REMOVE_NODE'
+  | 'MOVE_NODE'
+  | 'DUPLICATE_NODE'
+  | 'UPDATE_NODE'
+  | 'SET_NODE_PROPS'
+  | 'SET_NODE_STYLES'
+  | 'SET_NODE_LOCKED'
+  | 'SET_NODE_HIDDEN'
   // Page mutations
   | 'ADD_PAGE'
   | 'REMOVE_PAGE'
@@ -159,6 +172,62 @@ export type BuilderCommand =
       readonly alignment: Alignment;
     }
 
+  // C17.1 Phase 1 — Hierarchical Node commands
+  | {
+      readonly type: 'INSERT_NODE';
+      readonly parentId: string | null;
+      readonly node: BuilderNode;
+      readonly index?: number;
+      readonly pageId?: string;
+    }
+  | {
+      readonly type: 'REMOVE_NODE';
+      readonly nodeId: string;
+      readonly pageId?: string;
+    }
+  | {
+      readonly type: 'MOVE_NODE';
+      readonly nodeId: string;
+      readonly targetParentId: string | null;
+      readonly targetIndex?: number;
+      readonly pageId?: string;
+    }
+  | {
+      readonly type: 'DUPLICATE_NODE';
+      readonly nodeId: string;
+      readonly pageId?: string;
+    }
+  | {
+      readonly type: 'UPDATE_NODE';
+      readonly nodeId: string;
+      readonly updates: Partial<BuilderNode>;
+      readonly pageId?: string;
+    }
+  | {
+      readonly type: 'SET_NODE_PROPS';
+      readonly nodeId: string;
+      readonly props: Record<string, unknown>;
+      readonly pageId?: string;
+    }
+  | {
+      readonly type: 'SET_NODE_STYLES';
+      readonly nodeId: string;
+      readonly styles: Partial<NodeStyles>;
+      readonly pageId?: string;
+    }
+  | {
+      readonly type: 'SET_NODE_LOCKED';
+      readonly nodeId: string;
+      readonly locked: boolean;
+      readonly pageId?: string;
+    }
+  | {
+      readonly type: 'SET_NODE_HIDDEN';
+      readonly nodeId: string;
+      readonly hidden: boolean;
+      readonly pageId?: string;
+    }
+
 // Page mutations
   | {
       readonly type: 'ADD_PAGE';
@@ -232,6 +301,15 @@ export function commandLabel(cmd: BuilderCommand): string {
     case 'DUPLICATE_SECTION': return `Duplicate section`;
     case 'ALIGN_SECTIONS':     return `Align sections`;
     case 'REORDER_SECTIONS':  return `Reorder sections`;
+    case 'INSERT_NODE':       return `Insert ${cmd.node.type}`;
+    case 'REMOVE_NODE':       return `Delete ${cmd.nodeId}`;
+    case 'MOVE_NODE':         return `Move node`;
+    case 'DUPLICATE_NODE':    return `Duplicate node`;
+    case 'UPDATE_NODE':       return `Update node`;
+    case 'SET_NODE_PROPS':    return `Set node properties`;
+    case 'SET_NODE_STYLES':   return `Set node styles`;
+    case 'SET_NODE_LOCKED':   return cmd.locked ? `Lock node` : `Unlock node`;
+    case 'SET_NODE_HIDDEN':   return cmd.hidden ? `Hide node` : `Show node`;
     case 'ADD_PAGE':          return `Add page "${cmd.page.name}"`;
     case 'REMOVE_PAGE':       return `Delete page`;
     case 'DUPLICATE_PAGE':    return `Duplicate page`;
@@ -465,6 +543,69 @@ export function applyCommandToDocument(
         };
       });
       return touchDocument({ ...doc, pages });
+    }
+
+    // C17.1 Phase 1 — Hierarchical NodeTree command executions
+    case 'INSERT_NODE': {
+      return touchDocument(
+        nodeTree.insertNode(
+          doc,
+          command.parentId,
+          command.node,
+          command.index,
+          command.pageId
+        )
+      );
+    }
+
+    case 'REMOVE_NODE': {
+      return touchDocument(nodeTree.removeNode(doc, command.nodeId));
+    }
+
+    case 'MOVE_NODE': {
+      return touchDocument(
+        nodeTree.moveNode(
+          doc,
+          command.nodeId,
+          command.targetParentId,
+          command.targetIndex
+        )
+      );
+    }
+
+    case 'DUPLICATE_NODE': {
+      const result = nodeTree.duplicateNode(doc, command.nodeId);
+      return touchDocument(result.doc);
+    }
+
+    case 'UPDATE_NODE': {
+      return touchDocument(
+        nodeTree.updateNode(doc, command.nodeId, command.updates)
+      );
+    }
+
+    case 'SET_NODE_PROPS': {
+      return touchDocument(
+        nodeTree.setNodeProps(doc, command.nodeId, command.props)
+      );
+    }
+
+    case 'SET_NODE_STYLES': {
+      return touchDocument(
+        nodeTree.setNodeStyles(doc, command.nodeId, command.styles)
+      );
+    }
+
+    case 'SET_NODE_LOCKED': {
+      return touchDocument(
+        nodeTree.setNodeLocked(doc, command.nodeId, command.locked)
+      );
+    }
+
+    case 'SET_NODE_HIDDEN': {
+      return touchDocument(
+        nodeTree.setNodeHidden(doc, command.nodeId, command.hidden)
+      );
     }
 
     case 'ADD_PAGE': {

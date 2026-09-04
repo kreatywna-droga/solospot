@@ -19,6 +19,10 @@ export type {
   BuilderSEO,
   BuilderMetadata,
   SectionNode,
+  BuilderNode,
+  NodeType,
+  NodeStyles,
+  NodeResponsive,
   CompiledDocument,
   CompiledPage,
   CompiledSection,
@@ -28,10 +32,35 @@ export type {
 export {
   createBuilderDocument,
   createBuilderPage,
+  createBuilderNode,
   createSectionNode,
   compile,
   touchDocument,
 } from './BuilderDocument';
+
+// C17.1 Phase 1 — Hierarchical NodeTree API
+export {
+  findNode,
+  findNodeInDocument,
+  findNodeInTree,
+  getNode,
+  getParent,
+  getChildren,
+  insertNode,
+  removeNode,
+  moveNode,
+  duplicateNode,
+  updateNode,
+  setNodeProps,
+  setNodeStyles,
+  setNodeLocked,
+  setNodeHidden,
+  generateNodeId,
+  isDescendant,
+  hasNodeId,
+  cloneNodeWithNewIds,
+  nodeTree,
+} from './NodeTree';
 
 export type {
   CanvasState,
@@ -46,6 +75,7 @@ export {
   createCanvasState,
   reduceCanvasState,
   VIEWPORT_PRESETS,
+  DEFAULT_SELECTION,
 } from './CanvasState';
 
 export type {
@@ -75,7 +105,7 @@ export {
 
 // C6.1-A/B — Section tree operations
 export type { SectionTreeOps } from './SectionTree';
-export { sectionTree, findNode } from './SectionTree';
+export { sectionTree, findNode as findNodeInSectionTree } from './SectionTree';
 
 // C6.1-B — Commands & mutations
 export type { BuilderCommand, BuilderCommandType } from './BuilderCommands';

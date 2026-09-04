@@ -88,27 +88,91 @@ export interface BuilderSEO {
 }
 
 // ---------------------------------------------------------------------------
-// Section tree — recursive (supports containers, grids, nested blocks)
+// Node tree — hierarchical & universal (supports sections, containers, elements)
 // ---------------------------------------------------------------------------
 
-/**
- * SectionNode is the core structural unit of the Builder document tree.
- * Using a recursive children[] instead of a flat sections[] allows:
- *   - Layout containers (2-column, grid)
- *   - Nested sections (accordion, tabs)
- *   - Future: slot-based composition
- */
-export interface SectionNode {
-  readonly id: string;
-  type: string;             // matches ComponentDescriptor.type
-  label: string;
-  props: Record<string, unknown>;
-  responsiveProps?: Record<string, Record<string, unknown>>; // { propName: { desktop: val, tablet: val, mobile: val } }
-  children: SectionNode[]; // empty [] for leaf sections
-  visible: boolean;
-  locked: boolean;          // prevents prop editing; doesn't prevent deletion
-  order: number;            // sibling-level ordering (0-based, contiguous)
+export type NodeType =
+  | 'section'
+  | 'container'
+  | 'heading'
+  | 'text'
+  | 'button'
+  | 'image'
+  | 'video'
+  | 'icon'
+  | 'divider'
+  | 'spacer'
+  | 'grid'
+  | 'flex'
+  | 'box'
+  | string;
+
+export interface NodeStyles {
+  width?: string;
+  height?: string;
+  minWidth?: string;
+  maxWidth?: string;
+  minHeight?: string;
+  maxHeight?: string;
+  padding?: { top?: string; right?: string; bottom?: string; left?: string } | string;
+  margin?: { top?: string; right?: string; bottom?: string; left?: string } | string;
+  backgroundColor?: string;
+  color?: string;
+  fontSize?: string;
+  fontWeight?: string;
+  lineHeight?: string;
+  letterSpacing?: string;
+  textAlign?: 'left' | 'center' | 'right' | 'justify';
+  borderRadius?: string;
+  borderWidth?: string;
+  borderColor?: string;
+  borderStyle?: string;
+  boxShadow?: string;
+  opacity?: number;
+  display?: string;
+  flexDirection?: 'row' | 'column' | 'row-reverse' | 'column-reverse';
+  alignItems?: string;
+  justifyContent?: string;
+  gap?: string;
+  gridTemplateColumns?: string;
+  gridTemplateRows?: string;
+  zIndex?: number;
+  position?: 'static' | 'relative' | 'absolute' | 'sticky' | 'fixed';
+  customCss?: string;
 }
+
+export interface NodeResponsive {
+  desktop?: Partial<NodeStyles>;
+  tablet?: Partial<NodeStyles>;
+  mobile?: Partial<NodeStyles>;
+  hiddenOn?: Array<'desktop' | 'tablet' | 'mobile'>;
+}
+
+/**
+ * BuilderNode is the universal hierarchical structural unit of the Builder document tree.
+ * Supports: Page -> Section -> Container -> Elements (Heading, Text, Button, Image, etc.)
+ */
+export interface BuilderNode {
+  readonly id: string;
+  type: NodeType;
+  label: string;
+  parentId?: string | null;
+  props: Record<string, unknown>;
+  styles?: NodeStyles;
+  responsive?: NodeResponsive;
+  responsiveProps?: Record<string, Record<string, unknown>>;
+  metadata?: Record<string, unknown>;
+  children: BuilderNode[];
+  visible: boolean;
+  hidden?: boolean; // alias for !visible
+  locked: boolean;
+  order: number;
+}
+
+/**
+ * SectionNode alias for backward compatibility across existing builder codebase.
+ */
+export type SectionNode = BuilderNode;
 
 // ---------------------------------------------------------------------------
 // Pages
@@ -258,6 +322,41 @@ export function createBuilderPage(params: {
   };
 }
 
+export function createBuilderNode(params: {
+  id: string;
+  type: NodeType;
+  label?: string;
+  parentId?: string | null;
+  props?: Record<string, unknown>;
+  styles?: NodeStyles;
+  responsive?: NodeResponsive;
+  responsiveProps?: Record<string, Record<string, unknown>>;
+  metadata?: Record<string, unknown>;
+  children?: BuilderNode[];
+  visible?: boolean;
+  hidden?: boolean;
+  locked?: boolean;
+  order?: number;
+}): BuilderNode {
+  const isHidden = params.hidden ?? (params.visible !== undefined ? !params.visible : false);
+  return {
+    id: params.id,
+    type: params.type,
+    label: params.label ?? params.type,
+    parentId: params.parentId ?? null,
+    props: params.props ?? {},
+    styles: params.styles,
+    responsive: params.responsive,
+    responsiveProps: params.responsiveProps,
+    metadata: params.metadata,
+    children: params.children ?? [],
+    visible: !isHidden,
+    hidden: isHidden,
+    locked: params.locked ?? false,
+    order: params.order ?? 0,
+  };
+}
+
 export function createSectionNode(params: {
   id: string;
   type: string;
@@ -266,17 +365,14 @@ export function createSectionNode(params: {
   responsiveProps?: Record<string, Record<string, unknown>>;
   order?: number;
 }): SectionNode {
-  return {
+  return createBuilderNode({
     id: params.id,
     type: params.type,
-    label: params.label ?? params.type,
-    props: params.props ?? {},
+    label: params.label,
+    props: params.props,
     responsiveProps: params.responsiveProps,
-    children: [],
-    visible: true,
-    locked: false,
-    order: params.order ?? 0,
-  };
+    order: params.order,
+  });
 }
 
 // ---------------------------------------------------------------------------

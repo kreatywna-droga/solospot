@@ -79,8 +79,8 @@ export function useOverlay(
       const container = canvasContainerRef.current
       if (!container) return null
 
-      // Try to find the element by data attribute
-      const selector = options.sectionSelector ?? `[data-section-id="${sectionId}"]`
+      // Try to find the element by data attribute (node or section)
+      const selector = options.sectionSelector ?? `[data-node-id="${sectionId}"], [data-section-id="${sectionId}"]`
       const el = container.querySelector(selector) as HTMLElement | null
       if (!el) return null
 

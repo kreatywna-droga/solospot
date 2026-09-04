@@ -32,6 +32,8 @@ import { ResizeHandles } from './ResizeHandles'
 import { HoverHighlight } from './HoverHighlight'
 import { QuickToolbar } from './QuickToolbar'
 
+import { findNode } from '../../../../packages/builder-core/src'
+
 // ---------------------------------------------------------------------------
 // SelectionOverlay
 // ---------------------------------------------------------------------------
@@ -47,35 +49,31 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
   const overlay = useOverlay(containerRef, { externalRects })
   const { document, canvas } = useBuilder()
 
-  // Compute toolbar data: find section index in page
+  // Compute toolbar data: find node in page or parent container
   const toolbarData = useMemo(() => {
     if (!overlay.toolbarPosition || !overlay.selectedSection) return null
     if (!canvas.selectedSectionId) return null
 
-    const targetPageId = canvas.selectedPageId || document.pages[0]?.id
-    if (!targetPageId) return null
+    const found = findNode(document, canvas.selectedSectionId)
+    if (!found) return null
 
-    const page = document.pages.find(p => p.id === targetPageId)
-    if (!page) return null
-
-    const index = page.sections.findIndex(s => s.id === canvas.selectedSectionId)
-    if (index < 0) return null
+    const siblings = found.parent ? found.parent.children : found.page.sections
+    const index = siblings.findIndex(s => s.id === canvas.selectedSectionId)
 
     return {
       position: overlay.toolbarPosition,
       sectionId: canvas.selectedSectionId,
-      pageId: targetPageId,
+      pageId: found.page.id,
       locked: overlay.selectedSection.locked,
       hidden: !overlay.selectedSection.visible,
-      index,
-      total: page.sections.length,
+      index: Math.max(0, index),
+      total: Math.max(1, siblings.length),
     }
   }, [
     overlay.toolbarPosition,
     overlay.selectedSection,
-    canvas.selectedPageId,
     canvas.selectedSectionId,
-    document.pages,
+    document,
   ])
 
   return (

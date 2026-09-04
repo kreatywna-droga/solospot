@@ -25,6 +25,7 @@ import { PreviewChannel } from './PreviewContract';
 import { BuilderCommand, applyCommandToDocument, commandLabel } from './BuilderCommands';
 import { createDocumentUpdate, createSectionUpdate } from './PreviewMessage';
 import { reduceSelection } from './SelectionEngine';
+import { nodeTree } from './NodeTree';
 
 // ---------------------------------------------------------------------------
 // Context type
@@ -136,7 +137,7 @@ function buildContext(
             // Sync selectedSectionId from selection state (backward compat)
             if (nextSelection.selectedIds.length > 0) {
               nextCanvas = { ...nextCanvas, selectedSectionId: nextSelection.selectedIds[0] };
-            } else if (selAction.type === 'SELECT_SECTION' && !selAction.sectionId) {
+            } else {
               nextCanvas = { ...nextCanvas, selectedSectionId: null };
             }
           }
@@ -206,9 +207,38 @@ function buildContext(
         });
       }
 
+      if (command.type === 'DUPLICATE_NODE' && nextDoc !== document) {
+        const found = nodeTree.findNode(nextDoc, command.nodeId);
+        if (found) {
+          const siblings = found.parent ? found.parent.children : found.page.sections;
+          const originalIdx = siblings.findIndex(s => s.id === command.nodeId);
+          if (originalIdx >= 0 && originalIdx + 1 < siblings.length) {
+            const duplicatedSibling = siblings[originalIdx + 1];
+            nextCanvas = reduceCanvasState(canvas, {
+              type: 'SELECT_SECTION',
+              sectionId: duplicatedSibling.id,
+            });
+          }
+        }
+      }
+
+      if (command.type === 'INSERT_NODE' && command.node) {
+        nextCanvas = reduceCanvasState(canvas, {
+          type: 'SELECT_SECTION',
+          sectionId: command.node.id,
+        });
+      }
+
       if (command.type === 'REMOVE_SECTION') {
         // Deselect if the removed section was selected
-        if (canvas.selectedSectionId === command.sectionId) {
+        if (canvas.selectedSectionId === command.sectionId || canvas.selection.selectedIds.includes(command.sectionId)) {
+          nextCanvas = reduceCanvasState(canvas, { type: 'SELECT_SECTION', sectionId: null });
+        }
+      }
+
+      if (command.type === 'REMOVE_NODE') {
+        // Deselect if the removed node was selected
+        if (canvas.selectedSectionId === command.nodeId || canvas.selection.selectedIds.includes(command.nodeId)) {
           nextCanvas = reduceCanvasState(canvas, { type: 'SELECT_SECTION', sectionId: null });
         }
       }
@@ -234,7 +264,7 @@ function buildContext(
 // ---------------------------------------------------------------------------
 
 function sendPreviewUpdate(preview: PreviewChannel, doc: BuilderDocument): void {
-  if (!preview.isReady) return;
+  if (!preview || !preview.isReady) return;
   try {
     preview.send(createDocumentUpdate(doc));
   } catch {
@@ -243,7 +273,7 @@ function sendPreviewUpdate(preview: PreviewChannel, doc: BuilderDocument): void 
 }
 
 function sendSectionUpdate(preview: PreviewChannel, pageId: string, sectionId: string, props: Record<string, unknown>): void {
-  if (!preview.isReady) return;
+  if (!preview || !preview.isReady) return;
   try {
     preview.send(createSectionUpdate(pageId, sectionId, props));
   } catch {

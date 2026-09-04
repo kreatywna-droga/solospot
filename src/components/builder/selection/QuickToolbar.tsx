@@ -18,7 +18,7 @@ import { motion } from 'framer-motion'
 import {
   ArrowUp, ArrowDown, Copy, Trash2, Lock, Eye,
 } from 'lucide-react'
-import type { ToolbarPositionResult, ToolbarActionType } from '../../../../packages/builder-core/src'
+import { findNode, type ToolbarPositionResult, type ToolbarActionType } from '../../../../packages/builder-core/src'
 import { useBuilder } from '../state/BuilderProvider'
 import { useCallback } from 'react'
 
@@ -110,48 +110,96 @@ export function QuickToolbar({
   index,
   total,
 }: QuickToolbarProps) {
-  const { dispatch } = useBuilder()
+  const { dispatch, document } = useBuilder()
 
   const handleAction = useCallback((type: ToolbarActionType) => {
     const action = { type, sectionId, pageId }
 
     // Map toolbar action to builder command
     switch (type) {
-      case 'MOVE_UP':
-      case 'MOVE_DOWN':
-      case 'DUPLICATE':
-      case 'DELETE':
+      case 'MOVE_UP': {
+        const found = findNode(document, sectionId)
+        if (found?.parent) {
+          dispatch({
+            type: 'MOVE_NODE',
+            nodeId: sectionId,
+            targetParentId: found.parent.id,
+            targetIndex: Math.max(0, index - 1),
+            pageId,
+          } as any)
+        } else {
+          dispatch({
+            type: 'MOVE_SECTION',
+            pageId,
+            fromIndex: index,
+            toIndex: Math.max(0, index - 1),
+          } as any)
+        }
+        break
+      }
+      case 'MOVE_DOWN': {
+        const found = findNode(document, sectionId)
+        if (found?.parent) {
+          dispatch({
+            type: 'MOVE_NODE',
+            nodeId: sectionId,
+            targetParentId: found.parent.id,
+            targetIndex: Math.min(total - 1, index + 1),
+            pageId,
+          } as any)
+        } else {
+          dispatch({
+            type: 'MOVE_SECTION',
+            pageId,
+            fromIndex: index,
+            toIndex: Math.min(total - 1, index + 1),
+          } as any)
+        }
+        break
+      }
+      case 'DUPLICATE': {
+        const found = findNode(document, sectionId)
+        if (found?.parent) {
+          dispatch({ type: 'DUPLICATE_NODE', nodeId: sectionId } as any)
+        } else {
+          dispatch({ type: 'DUPLICATE_SECTION', pageId, sectionId } as any)
+        }
+        break
+      }
+      case 'DELETE': {
+        const found = findNode(document, sectionId)
+        if (found?.parent) {
+          dispatch({ type: 'REMOVE_NODE', nodeId: sectionId } as any)
+        } else {
+          dispatch({ type: 'REMOVE_SECTION', pageId, sectionId } as any)
+        }
+        dispatch({ type: 'CANVAS', action: { type: 'SELECT_SECTION', sectionId: null } } as any)
+        break
+      }
       case 'LOCK':
-      case 'UNLOCK':
+      case 'UNLOCK': {
+        const found = findNode(document, sectionId)
+        if (found?.parent) {
+          dispatch({ type: 'SET_NODE_LOCKED', nodeId: sectionId, locked: !locked } as any)
+        } else {
+          dispatch({ type: 'TOGGLE_LOCK', pageId, sectionId } as any)
+        }
+        break
+      }
       case 'HIDE':
       case 'SHOW': {
-        // Direct command mapping
-        const cmdMap: Record<string, { type: string; extra?: Record<string, unknown> }> = {
-          MOVE_UP: { type: 'MOVE_SECTION', extra: { fromIndex: index, toIndex: Math.max(0, index - 1) } },
-          MOVE_DOWN: { type: 'MOVE_SECTION', extra: { fromIndex: index, toIndex: Math.min(total - 1, index + 1) } },
-          DUPLICATE: { type: 'DUPLICATE_SECTION' },
-          DELETE: { type: 'REMOVE_SECTION' },
-          LOCK: { type: 'TOGGLE_LOCK' },
-          UNLOCK: { type: 'TOGGLE_LOCK' },
-          HIDE: { type: 'TOGGLE_VISIBILITY' },
-          SHOW: { type: 'TOGGLE_VISIBILITY' },
-        }
-
-        const cmd = cmdMap[type]
-        if (cmd) {
-          dispatch({
-            type: cmd.type as any,
-            pageId,
-            sectionId,
-            ...(cmd.extra ?? {}),
-          } as any)
+        const found = findNode(document, sectionId)
+        if (found?.parent) {
+          dispatch({ type: 'SET_NODE_HIDDEN', nodeId: sectionId, hidden: !hidden } as any)
+        } else {
+          dispatch({ type: 'TOGGLE_VISIBILITY', pageId, sectionId } as any)
         }
         break
       }
       default:
         break
     }
-  }, [dispatch, sectionId, pageId, index, total])
+  }, [dispatch, document, sectionId, pageId, index, total, locked, hidden])
 
   const direction = position.position
   const isTop = direction === 'top'

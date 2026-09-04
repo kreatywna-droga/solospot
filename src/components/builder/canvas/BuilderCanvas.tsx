@@ -158,10 +158,275 @@ const RESIZE_HANDLES = [
   { id: 'w',  cursor: 'ew-resize',   className: '-left-1.5 top-1/2 -translate-y-1/2' },
 ]
 
+// ---------------------------------------------------------------------------
+// CanvasNode: Hierarchical recursive renderer for universal nodes
+// ---------------------------------------------------------------------------
+
+interface CanvasNodeProps {
+  node: SectionNode
+  pageId: string
+  depth?: number
+  selectedId: string | null
+  hoveredId: string | null
+  onSelectNode: (id: string, e: React.MouseEvent) => void
+  onHoverNode: (id: string | null) => void
+  onDoubleClickNode: (node: SectionNode, e: React.MouseEvent) => void
+}
+
+function CanvasNode({
+  node,
+  pageId,
+  depth = 0,
+  selectedId,
+  hoveredId,
+  onSelectNode,
+  onHoverNode,
+  onDoubleClickNode,
+}: CanvasNodeProps) {
+  const isSelected = selectedId === node.id
+  const isHovered = hoveredId === node.id && !isSelected
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    onSelectNode(node.id, e)
+  }
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    onDoubleClickNode(node, e)
+  }
+
+  const handleMouseEnter = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    onHoverNode(node.id)
+  }
+
+  const handleMouseLeave = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    onHoverNode(null)
+  }
+
+  if (node.type === 'heading') {
+    const text = (node.props?.text as string) || (node.props?.title as string) || node.label || 'Nagłówek'
+    const level = (node.props?.level as string) || 'h2'
+    const color = (node.styles?.color as string) || (node.props?.color as string) || '#ffffff'
+    const textAlign = (node.styles?.textAlign as any) || (node.props?.textAlign as any) || 'left'
+
+    return (
+      <div
+        data-node-id={node.id}
+        data-node-type={node.type}
+        data-parent-id={node.parentId}
+        onClick={handleClick}
+        onDoubleClick={handleDoubleClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className={`relative cursor-pointer transition-all duration-150 p-2 rounded-lg ${
+          !node.visible ? 'opacity-30' : ''
+        } ${
+          isSelected ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-[#08080f] z-20' :
+          isHovered ? 'ring-1 ring-violet-400/60 z-10' : ''
+        }`}
+      >
+        <div
+          style={{ color, textAlign }}
+          className={
+            level === 'h1' ? 'text-3xl font-extrabold tracking-tight' :
+            level === 'h3' ? 'text-xl font-semibold' :
+            level === 'h4' ? 'text-lg font-medium' :
+            'text-2xl font-bold'
+          }
+        >
+          {text}
+        </div>
+      </div>
+    )
+  }
+
+  if (node.type === 'text') {
+    const text = (node.props?.text as string) || (node.props?.content as string) || 'Przykładowy tekst opisu lub akapitu...'
+    const color = (node.styles?.color as string) || (node.props?.color as string) || '#94a3b8'
+    const textAlign = (node.styles?.textAlign as any) || (node.props?.textAlign as any) || 'left'
+
+    return (
+      <div
+        data-node-id={node.id}
+        data-node-type={node.type}
+        data-parent-id={node.parentId}
+        onClick={handleClick}
+        onDoubleClick={handleDoubleClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className={`relative cursor-pointer transition-all duration-150 p-2 rounded-lg ${
+          !node.visible ? 'opacity-30' : ''
+        } ${
+          isSelected ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-[#08080f] z-20' :
+          isHovered ? 'ring-1 ring-violet-400/60 z-10' : ''
+        }`}
+      >
+        <p style={{ color, textAlign }} className="text-sm leading-relaxed">
+          {text}
+        </p>
+      </div>
+    )
+  }
+
+  if (node.type === 'button') {
+    const text = (node.props?.text as string) || (node.props?.label as string) || 'Kliknij tutaj'
+    const bg = (node.styles?.backgroundColor as string) || (node.props?.background as string) || '#7c3aed'
+    const textColor = (node.styles?.color as string) || (node.props?.textColor as string) || '#ffffff'
+    const variant = (node.props?.variant as string) || 'primary'
+
+    return (
+      <div
+        data-node-id={node.id}
+        data-node-type={node.type}
+        data-parent-id={node.parentId}
+        onClick={handleClick}
+        onDoubleClick={handleDoubleClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className={`relative inline-block cursor-pointer transition-all duration-150 p-1 rounded-xl ${
+          !node.visible ? 'opacity-30' : ''
+        } ${
+          isSelected ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-[#08080f] z-20' :
+          isHovered ? 'ring-1 ring-violet-400/60 z-10' : ''
+        }`}
+      >
+        <button
+          type="button"
+          style={{
+            backgroundColor: variant === 'outline' ? 'transparent' : bg,
+            color: textColor,
+            borderColor: variant === 'outline' ? bg : 'transparent',
+          }}
+          className={`px-5 py-2.5 rounded-xl font-medium text-sm shadow-md pointer-events-none transition-transform ${
+            variant === 'outline' ? 'border-2' : ''
+          }`}
+        >
+          {text}
+        </button>
+      </div>
+    )
+  }
+
+  if (node.type === 'image') {
+    const src = (node.props?.src as string) || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80'
+    const alt = (node.props?.alt as string) || node.label || 'Obraz'
+    const borderRadius = (node.styles?.borderRadius as string) || (node.props?.borderRadius as string) || '12px'
+
+    return (
+      <div
+        data-node-id={node.id}
+        data-node-type={node.type}
+        data-parent-id={node.parentId}
+        onClick={handleClick}
+        onDoubleClick={handleDoubleClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className={`relative cursor-pointer transition-all duration-150 p-1 rounded-xl ${
+          !node.visible ? 'opacity-30' : ''
+        } ${
+          isSelected ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-[#08080f] z-20' :
+          isHovered ? 'ring-1 ring-violet-400/60 z-10' : ''
+        }`}
+      >
+        <img
+          src={src}
+          alt={alt}
+          style={{ borderRadius }}
+          className="max-w-full h-auto max-h-[300px] object-cover pointer-events-none"
+        />
+      </div>
+    )
+  }
+
+  // Default: container or other composite node
+  const display = (node.props?.display as string) || 'flex-col'
+  const gap = (node.props?.gap as string) || '16'
+  const bg = (node.styles?.backgroundColor as string) || (node.props?.background as string) || 'transparent'
+  const padding = (node.props?.padding as string) || 'md'
+
+  return (
+    <div
+      data-node-id={node.id}
+      data-node-type={node.type}
+      data-parent-id={node.parentId}
+      onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        backgroundColor: bg,
+        padding: padding === 'none' ? 0 : padding === 'sm' ? '12px' : padding === 'lg' ? '32px' : '20px',
+        gap: `${gap}px`,
+      }}
+      className={`relative cursor-pointer transition-all duration-150 rounded-xl border border-white/5 min-h-[50px] ${
+        !node.visible ? 'opacity-30' : ''
+      } ${
+        display === 'flex-row' ? 'flex flex-row flex-wrap items-center' :
+        display === 'grid-2' ? 'grid grid-cols-2' :
+        display === 'grid-3' ? 'grid grid-cols-3' :
+        display === 'grid-4' ? 'grid grid-cols-4' :
+        'flex flex-col'
+      } ${
+        isSelected ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-[#08080f] z-20' :
+        isHovered ? 'ring-1 ring-violet-400/60 z-10' : ''
+      }`}
+    >
+      {node.children && node.children.length > 0 ? (
+        node.children.map(child => (
+          <CanvasNode
+            key={child.id}
+            node={child}
+            pageId={pageId}
+            depth={depth + 1}
+            selectedId={selectedId}
+            hoveredId={hoveredId}
+            onSelectNode={onSelectNode}
+            onHoverNode={onHoverNode}
+            onDoubleClickNode={onDoubleClickNode}
+          />
+        ))
+      ) : (
+        <div className="p-4 border border-dashed border-white/10 rounded-lg text-center text-xs text-slate-500 w-full">
+          Pusty kontener
+        </div>
+      )}
+    </div>
+  )
+}
+
 function SectionBlock({
   node, pageId, index, total, isSelected, isHovered, onSelect, onHover,
 }: SectionBlockProps) {
-  const { dispatch, document } = useBuilder()
+  const { dispatch, document, canvas } = useBuilder()
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (node.children && node.children.length > 0) {
+      dispatch({
+        type: 'CANVAS',
+        action: { type: 'SELECT_SECTION', sectionId: node.children[0].id, pageId },
+      })
+    }
+  }
+
+  const handleSelectChildNode = (id: string, e: React.MouseEvent) => {
+    dispatch({
+      type: 'CANVAS',
+      action: { type: 'SELECT_SECTION', sectionId: id, pageId },
+    })
+  }
+
+  const handleDoubleClickChildNode = (childNode: SectionNode, e: React.MouseEvent) => {
+    if (childNode.children && childNode.children.length > 0) {
+      dispatch({
+        type: 'CANVAS',
+        action: { type: 'SELECT_SECTION', sectionId: childNode.children[0].id, pageId },
+      })
+    }
+  }
 
   const handleMoveUp = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -190,6 +455,7 @@ function SectionBlock({
   return (
     <div
       onClick={onSelect}
+      onDoubleClick={handleDoubleClick}
       onMouseEnter={() => onHover(node.id)}
       onMouseLeave={() => onHover(null)}
       className={`relative group cursor-pointer transition-all duration-150 select-none
@@ -203,34 +469,73 @@ function SectionBlock({
       `}
     >
       {/* Live rendered section content */}
-      <div className="w-full relative pointer-events-none overflow-hidden bg-white text-slate-900 min-h-[60px]">
-        <CartProvider>
-          <SectionRenderer
-            section={{
-              id: node.id,
-              type: node.type,
-              label: node.label,
-              config: node.props,
-            }}
-            theme={{
-              primaryColor: document.theme?.primaryColor || '#7c3aed',
-              secondaryColor: document.theme?.secondaryColor || '#ec4899',
-              font: document.theme?.font || 'Inter',
-              logo: document.theme?.logo,
-            }}
-            storeName={document.metadata?.storeName || 'Store'}
-            products={[]}
-            navigation={[]}
-          />
-        </CartProvider>
-      </div>
-
-      {/* Children indicator for containers */}
-      {node.children.length > 0 && (
-        <div className="text-[11px] text-slate-400 bg-black/60 px-3 py-1 flex items-center gap-1 border-t border-white/10">
-          <Layers className="w-3 h-3" />
-          {node.children.length} komponent{node.children.length > 1 ? 'y' : ''}
+      {node.type === 'container' ? (
+        <div className="w-full p-4 bg-[#08080f] text-white min-h-[80px]">
+          <div className="max-w-[1200px] mx-auto space-y-3">
+            {node.children && node.children.length > 0 ? (
+              node.children.map(child => (
+                <CanvasNode
+                  key={child.id}
+                  node={child}
+                  pageId={pageId}
+                  depth={1}
+                  selectedId={canvas.selectedSectionId}
+                  hoveredId={canvas.hoveredSectionId}
+                  onSelectNode={handleSelectChildNode}
+                  onHoverNode={onHover}
+                  onDoubleClickNode={handleDoubleClickChildNode}
+                />
+              ))
+            ) : (
+              <div className="p-6 border border-dashed border-white/15 rounded-xl text-center text-xs text-slate-400">
+                Pusty kontener — dodaj elementy lub przeciągnij komponent
+              </div>
+            )}
+          </div>
         </div>
+      ) : (
+        <>
+          <div className="w-full relative pointer-events-none overflow-hidden bg-white text-slate-900 min-h-[60px]">
+            <CartProvider>
+              <SectionRenderer
+                section={{
+                  id: node.id,
+                  type: node.type,
+                  label: node.label,
+                  config: node.props,
+                }}
+                theme={{
+                  primaryColor: document.theme?.primaryColor || '#7c3aed',
+                  secondaryColor: document.theme?.secondaryColor || '#ec4899',
+                  font: document.theme?.font || 'Inter',
+                  logo: document.theme?.logo,
+                }}
+                storeName={document.metadata?.storeName || 'Store'}
+                products={[]}
+                navigation={[]}
+              />
+            </CartProvider>
+          </div>
+
+          {/* Render children if section has nested nodes */}
+          {node.children && node.children.length > 0 && (
+            <div className="p-4 bg-[#08080f]/90 border-t border-white/10 space-y-3">
+              {node.children.map(child => (
+                <CanvasNode
+                  key={child.id}
+                  node={child}
+                  pageId={pageId}
+                  depth={1}
+                  selectedId={canvas.selectedSectionId}
+                  hoveredId={canvas.hoveredSectionId}
+                  onSelectNode={handleSelectChildNode}
+                  onHoverNode={onHover}
+                  onDoubleClickNode={handleDoubleClickChildNode}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       {/* Hover / selected toolbar */}
@@ -423,6 +728,29 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
       container.removeEventListener('wheel', onWheel)
     }
   }, [canvas.zoom, dispatch])
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      // Don't intercept Escape if user is editing inside an input/textarea
+      if (
+        window.document.activeElement &&
+        (window.document.activeElement.tagName === 'INPUT' ||
+         window.document.activeElement.tagName === 'TEXTAREA' ||
+         (window.document.activeElement as HTMLElement).isContentEditable)
+      ) {
+        return
+      }
+
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        dispatch({ type: 'CANVAS', action: { type: 'SELECT_PARENT' } })
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [dispatch])
 
   const viewportWidth = VIEWPORT_PRESETS[canvas.viewport.label].width
 

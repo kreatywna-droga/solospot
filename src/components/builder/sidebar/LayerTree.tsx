@@ -20,48 +20,81 @@ import { useState, useCallback } from 'react'
 import {
   Eye, EyeOff, Trash2, Copy, ChevronRight, ChevronDown,
   GripVertical, Lock, Unlock, Filter,
+  LayoutDashboard, Box, Heading as HeadingIcon, Type, Square, Image as ImageIcon, Grid,
 } from 'lucide-react'
 import { useBuilder } from '../state/BuilderProvider'
-import { SectionNode } from '../../../../packages/builder-core/src/BuilderDocument'
+import { BuilderNode, SectionNode } from '../../../../packages/builder-core/src/BuilderDocument'
+
+// ---------------------------------------------------------------------------
+// Helper: get icon for node type
+// ---------------------------------------------------------------------------
+
+function getNodeIcon(type: string, hasChildren: boolean) {
+  switch (type.toLowerCase()) {
+    case 'heading':
+      return <HeadingIcon className="w-3.5 h-3.5 text-amber-400" />
+    case 'text':
+    case 'paragraph':
+      return <Type className="w-3.5 h-3.5 text-emerald-400" />
+    case 'button':
+      return <Square className="w-3.5 h-3.5 text-pink-400" />
+    case 'image':
+      return <ImageIcon className="w-3.5 h-3.5 text-cyan-400" />
+    case 'container':
+    case 'box':
+      return <Box className="w-3.5 h-3.5 text-blue-400" />
+    case 'grid':
+    case 'flex':
+      return <Grid className="w-3.5 h-3.5 text-purple-400" />
+    default:
+      return hasChildren ? (
+        <Box className="w-3.5 h-3.5 text-violet-400" />
+      ) : (
+        <LayoutDashboard className="w-3.5 h-3.5 text-slate-400" />
+      )
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Layer row
 // ---------------------------------------------------------------------------
 
 interface LayerRowProps {
-  node: SectionNode
+  node: BuilderNode
   depth: number
   pageId: string
-  isSelected: boolean
+  selectedId: string | null
   onSelect: (id: string) => void
 }
 
-function LayerRow({ node, depth, pageId, isSelected, onSelect }: LayerRowProps) {
+function LayerRow({ node, depth, pageId, selectedId, onSelect }: LayerRowProps) {
   const { dispatch } = useBuilder()
   const [expanded, setExpanded] = useState(true)
-  const hasChildren = node.children.length > 0
+  const hasChildren = Boolean(node.children && node.children.length > 0)
+  const isSelected = selectedId === node.id
 
   const handleToggleVisibility = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
-    dispatch({ type: 'TOGGLE_VISIBILITY', pageId, sectionId: node.id })
+    dispatch({ type: 'TOGGLE_VISIBILITY', pageId, sectionId: node.id } as any)
   }, [dispatch, pageId, node.id])
 
   const handleDelete = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
-    dispatch({ type: 'REMOVE_SECTION', pageId, sectionId: node.id })
-  }, [dispatch, pageId, node.id])
+    dispatch({ type: 'REMOVE_SECTION', pageId, sectionId: node.id } as any)
+    if (isSelected) {
+      dispatch({ type: 'CANVAS', action: { type: 'SELECT_SECTION', sectionId: null } } as any)
+    }
+  }, [dispatch, pageId, node.id, isSelected])
 
   const handleDuplicate = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
-    dispatch({ type: 'DUPLICATE_SECTION', pageId, sectionId: node.id })
+    dispatch({ type: 'DUPLICATE_SECTION', pageId, sectionId: node.id } as any)
   }, [dispatch, pageId, node.id])
 
   const handleToggleLock = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
-    dispatch({ type: 'TOGGLE_LOCK', pageId, sectionId: node.id })
+    dispatch({ type: 'TOGGLE_LOCK', pageId, sectionId: node.id } as any)
   }, [dispatch, pageId, node.id])
-
-  const typeIcon = hasChildren ? '⬡' : '▣'
 
   return (
     <div>
@@ -69,7 +102,7 @@ function LayerRow({ node, depth, pageId, isSelected, onSelect }: LayerRowProps) 
         onClick={() => onSelect(node.id)}
         className={`group flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer transition-all text-sm select-none
           ${isSelected
-            ? 'bg-violet-500/20 border border-violet-500/30 text-white'
+            ? 'bg-violet-500/20 border border-violet-500/40 text-white shadow-sm shadow-violet-500/10'
             : 'hover:bg-white/5 text-slate-300 hover:text-white border border-transparent'
           }
           ${!node.visible ? 'opacity-40' : ''}
@@ -88,21 +121,24 @@ function LayerRow({ node, depth, pageId, isSelected, onSelect }: LayerRowProps) 
             }
           </button>
         ) : (
-          <span className="w-3.5 h-3.5 flex-shrink-0 text-slate-600 text-xs flex items-center justify-center">
-            {typeIcon}
-          </span>
+          <span className="w-3.5 h-3.5 flex-shrink-0" />
         )}
 
+        {/* Node type icon */}
+        <span className="flex-shrink-0 flex items-center justify-center">
+          {getNodeIcon(node.type, hasChildren)}
+        </span>
+
         {/* Drag handle */}
-        <GripVertical className="w-3.5 h-3.5 text-slate-600 group-hover:text-slate-400 transition-colors flex-shrink-0" />
+        <GripVertical className="w-3 h-3 text-slate-600 group-hover:text-slate-400 transition-colors flex-shrink-0" />
 
         {/* Label */}
-        <span className={`flex-1 text-xs font-medium truncate ${node.locked ? 'text-amber-400/70' : ''}`}>
-          {node.label}
+        <span className={`flex-1 text-xs font-medium truncate ${node.locked ? 'text-amber-400/80' : ''}`}>
+          {node.label || node.type}
         </span>
 
         {/* Type badge */}
-        <span className="text-[10px] text-slate-600 font-mono hidden group-hover:block flex-shrink-0">
+        <span className="text-[9px] text-slate-500 font-mono hidden group-hover:block flex-shrink-0 bg-white/5 px-1 py-0.5 rounded">
           {node.type}
         </span>
 
@@ -125,7 +161,7 @@ function LayerRow({ node, depth, pageId, isSelected, onSelect }: LayerRowProps) 
           >
             {node.visible
               ? <Eye className="w-3 h-3" />
-              : <EyeOff className="w-3 h-3" />
+              : <EyeOff className="w-3 h-3 text-amber-400/80" />
             }
           </button>
           <button
@@ -154,7 +190,7 @@ function LayerRow({ node, depth, pageId, isSelected, onSelect }: LayerRowProps) 
               node={child}
               depth={depth + 1}
               pageId={pageId}
-              isSelected={isSelected && false /* children have own selection */}
+              selectedId={selectedId}
               onSelect={onSelect}
             />
           ))}
@@ -248,7 +284,7 @@ export function LayerTree() {
             node={node}
             depth={0}
             pageId={activePage.id}
-            isSelected={canvas.selectedSectionId === node.id}
+            selectedId={canvas.selectedSectionId}
             onSelect={handleSelect}
           />
         ))
