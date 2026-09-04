@@ -117,6 +117,7 @@ export interface NodeStyles {
   padding?: { top?: string; right?: string; bottom?: string; left?: string } | string;
   margin?: { top?: string; right?: string; bottom?: string; left?: string } | string;
   backgroundColor?: string;
+  backgroundImage?: string;
   color?: string;
   fontSize?: string;
   fontWeight?: string;
@@ -363,6 +364,8 @@ export function createSectionNode(params: {
   type: string;
   label?: string;
   props?: Record<string, unknown>;
+  styles?: NodeStyles;
+  responsive?: NodeResponsive;
   responsiveProps?: Record<string, Record<string, unknown>>;
   order?: number;
 }): SectionNode {
@@ -371,6 +374,8 @@ export function createSectionNode(params: {
     type: params.type,
     label: params.label,
     props: params.props,
+    styles: params.styles,
+    responsive: params.responsive,
     responsiveProps: params.responsiveProps,
     order: params.order,
   });

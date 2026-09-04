@@ -5,7 +5,7 @@ export function ContentSection({ section, theme }: SectionComponentProps) {
   const config = ((section?.config || (section as any)?.props) ?? {}) as {
     title?: string; body?: string
     titleSize?: string; titleWeight?: string; titleColor?: string
-    bodySize?: string; bodyColor?: string
+    bodySize?: string; bodyColor?: string; background?: string
   }
 
   const sizeMap: Record<string, string> = { sm: 'text-xl', md: 'text-2xl', lg: 'text-3xl' }
@@ -19,7 +19,7 @@ export function ContentSection({ section, theme }: SectionComponentProps) {
   const bodyColor = config.bodyColor || '#64748b'
 
   return (
-    <section className="py-16 lg:py-24 px-4" style={{ backgroundColor: '#ffffff', fontFamily: theme.font }}>
+    <section className="py-16 lg:py-24 px-4" style={{ backgroundColor: config.background || 'transparent', fontFamily: theme.font }}>
       <div className="max-w-3xl mx-auto">
         {config.title && <h2 className={`${titleSize} ${titleWeight} mb-6`} style={{ color: titleColor }}>{config.title}</h2>}
         {config.body && <div className={`${bodySize} leading-relaxed`} style={{ color: bodyColor }}>{config.body}</div>}

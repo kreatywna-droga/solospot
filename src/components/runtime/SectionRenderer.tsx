@@ -14,7 +14,39 @@ import { FeatureGridSection } from './FeatureGridSection'
 import { StatsSection } from './StatsSection'
 import { ContainerSection } from './ContainerSection'
 
+export function BaseSection({ section, children }: SectionComponentProps & { children?: React.ReactNode }) {
+  const config = ((section?.config || (section as any)?.props) ?? {}) as {
+    background?: string
+    padding?: string
+    minHeight?: string
+    maxWidth?: string
+  }
+  const paddingMap: Record<string, string> = {
+    none: '0',
+    sm: '24px 16px',
+    md: '48px 24px',
+    lg: '80px 32px',
+    xl: '120px 32px',
+  }
+  const padding = paddingMap[config.padding ?? 'md'] ?? (config.padding || '48px 24px')
+  return (
+    <section
+      className="w-full relative transition-all"
+      style={{
+        backgroundColor: config.background || 'transparent',
+        minHeight: config.minHeight && config.minHeight !== 'auto' ? config.minHeight : '80px',
+        padding,
+      }}
+    >
+      <div style={{ maxWidth: config.maxWidth || '1280px', margin: '0 auto', width: '100%' }}>
+        {children}
+      </div>
+    </section>
+  )
+}
+
 const registry: Record<string, React.FC<SectionComponentProps>> = {
+  section: BaseSection as React.FC<SectionComponentProps>,
   hero: HeroSection,
   'product-grid': ProductGridSection,
   gallery: GallerySection,

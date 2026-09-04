@@ -17,11 +17,11 @@ const defaultFeatures = [
 ]
 
 export function FeatureGridSection({ section, theme }: SectionComponentProps) {
-  const config = ((section?.config || (section as any)?.props) ?? {}) as { title?: string; features?: Array<{ icon?: string; title: string; desc: string }> }
+  const config = ((section?.config || (section as any)?.props) ?? {}) as { title?: string; features?: Array<{ icon?: string; title: string; desc: string }>; background?: string }
   const features = config.features || defaultFeatures
 
   return (
-    <section className="py-16 lg:py-24 px-4" style={{ backgroundColor: '#f8fafc', fontFamily: theme.font }}>
+    <section className="py-16 lg:py-24 px-4" style={{ backgroundColor: config.background || 'transparent', fontFamily: theme.font }}>
       <div className="max-w-7xl mx-auto">
         {config.title && <h2 className="text-3xl font-bold text-center mb-12" style={{ color: theme.primaryColor }}>{config.title}</h2>}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">

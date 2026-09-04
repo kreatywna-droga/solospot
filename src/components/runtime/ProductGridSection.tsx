@@ -10,7 +10,7 @@ function formatPrice(price: number, currency: string) {
 }
 
 export function ProductGridSection({ section, theme, products }: SectionComponentProps) {
-  const config = ((section?.config || (section as any)?.props) ?? {}) as { title?: string; count?: number }
+  const config = ((section?.config || (section as any)?.props) ?? {}) as { title?: string; count?: number; background?: string }
   const displayCount = typeof config.count === 'number' && config.count > 0 ? config.count : 8
   const displayProducts = products?.slice(0, displayCount) || []
   const { state, dispatch } = useCart()
@@ -35,7 +35,7 @@ export function ProductGridSection({ section, theme, products }: SectionComponen
   }
 
   return (
-    <section className="py-16 lg:py-24 px-4" style={{ backgroundColor: '#ffffff', fontFamily: theme.font }}>
+    <section className="py-16 lg:py-24 px-4" style={{ backgroundColor: config.background || 'transparent', fontFamily: theme.font }}>
       <div className="max-w-7xl mx-auto">
         {config.title && <h2 className="text-3xl font-bold text-center mb-12" style={{ color: theme.primaryColor }}>{config.title}</h2>}
         {displayProducts.length === 0 ? (

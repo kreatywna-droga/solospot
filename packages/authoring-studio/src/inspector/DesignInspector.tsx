@@ -87,9 +87,18 @@ function UnitInput({
   /** When provided, renders a slider + numeric input pair sharing the same value */
   slider?: boolean;
 }) {
-  const [unit, setUnit] = React.useState('px');
-  const numVal = value ? parseFloat(value.replace(/[^0-9.-]/g, '')) : NaN
-  const hasNum = !Number.isNaN(numVal)
+  const match = value ? String(value).match(/^([+-]?(?:\d*\.)?\d+)([a-zA-Z%]*)$/) : null;
+  const numVal = match ? parseFloat(match[1]) : (value ? parseFloat(String(value).replace(/[^0-9.-]/g, '')) : NaN);
+  const detectedUnit = match && match[2] ? match[2] : 'px';
+  const hasNum = !Number.isNaN(numVal);
+
+  const [unit, setUnit] = React.useState(detectedUnit);
+
+  React.useEffect(() => {
+    if (match && match[2] && match[2] !== unit) {
+      setUnit(match[2]);
+    }
+  }, [value]);
 
   const commit = (num: string, u: string) => onChange(num ? `${num}${u}` : '');
 
@@ -150,6 +159,15 @@ function ColorInput({
   value?: string;
   onChange: (v: string) => void;
 }) {
+  const hexVal = React.useMemo(() => {
+    if (!value) return '#ffffff';
+    if (/^#[0-9a-fA-F]{6}$/.test(value)) return value;
+    if (/^#[0-9a-fA-F]{3}$/.test(value)) {
+      return `#${value[1]}${value[1]}${value[2]}${value[2]}${value[3]}${value[3]}`;
+    }
+    return '#ffffff';
+  }, [value]);
+
   return (
     <div className="flex items-center gap-1.5">
       <div
@@ -158,7 +176,7 @@ function ColorInput({
       >
         <input
           type="color"
-          value={value?.startsWith('#') ? value : '#ffffff'}
+          value={hexVal}
           onChange={(e) => onChange(e.target.value)}
           className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
         />
@@ -401,6 +419,15 @@ function DesignTab({
           <ColorInput
             value={styles.backgroundColor}
             onChange={(v) => onChange({ backgroundColor: v })}
+          />
+        </Row>
+        <Row label="Image URL">
+          <input
+            type="text"
+            value={styles.backgroundImage || ''}
+            placeholder="https://... or url('...')"
+            onChange={(e) => onChange({ backgroundImage: e.target.value })}
+            className={inputCls}
           />
         </Row>
         <Row label="Color">

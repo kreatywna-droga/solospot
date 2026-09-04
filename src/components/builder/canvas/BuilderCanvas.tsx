@@ -187,6 +187,32 @@ function resolveEffectiveProps(node: SectionNode, viewport: ViewportLabel): Reco
 }
 
 // ---------------------------------------------------------------------------
+// 4-side spacing formatter (ensures objects { top, right, bottom, left } serialize cleanly to CSS)
+// ---------------------------------------------------------------------------
+
+function formatFourSide(val: any, fallback?: string): string | undefined {
+  if (!val) return fallback
+  if (typeof val === 'string') return val
+  if (typeof val === 'object') {
+    const top = val.top ?? '0px'
+    const right = val.right ?? '0px'
+    const bottom = val.bottom ?? '0px'
+    const left = val.left ?? '0px'
+    if (!val.top && !val.right && !val.bottom && !val.left) return fallback
+    return `${top || '0px'} ${right || '0px'} ${bottom || '0px'} ${left || '0px'}`
+  }
+  return fallback
+}
+
+const PADDING_PRESET_MAP: Record<string, string> = {
+  none: '0px',
+  sm: '16px',
+  md: '32px',
+  lg: '48px',
+  xl: '64px',
+}
+
+// ---------------------------------------------------------------------------
 // CanvasNode: Hierarchical recursive renderer for universal nodes
 // ---------------------------------------------------------------------------
 
@@ -363,11 +389,22 @@ function CanvasNode({
     const level = (props.level as string) || 'h2'
     const color = (styles.color as string) || (props.color as string) || '#ffffff'
     const textAlign = (styles.textAlign as any) || (props.textAlign as any) || 'left'
-    const fontSize = styles.fontSize || (level === 'h1' ? '2rem' : level === 'h3' ? '1.25rem' : level === 'h4' ? '1.125rem' : '1.5rem')
-    const fontWeight = styles.fontWeight || (level === 'h1' ? '800' : level === 'h3' ? '600' : '700')
-    const lineHeight = styles.lineHeight
-    const letterSpacing = styles.letterSpacing
+    const fontSize = styles.fontSize || (props.fontSize as string) || (level === 'h1' ? '2.25rem' : level === 'h3' ? '1.25rem' : level === 'h4' ? '1.125rem' : '1.75rem')
+    const fontWeight = styles.fontWeight || (props.fontWeight as string) || (level === 'h1' ? '800' : level === 'h3' ? '600' : '700')
+    const lineHeight = styles.lineHeight || (props.lineHeight as string) || '1.2'
+    const letterSpacing = styles.letterSpacing || (props.letterSpacing as string)
     const fontFamily = styles.fontFamily || (props.fontFamily as string)
+    const bg = (styles.backgroundColor as string) || (props.background as string) || 'transparent'
+    const borderRadius = (styles.borderRadius as string) || (props.borderRadius as string)
+    const borderWidth = styles.borderWidth || (props.borderWidth as string)
+    const borderColor = styles.borderColor || (props.borderColor as string) || 'rgba(255,255,255,0.2)'
+    const borderStyle = styles.borderStyle || (borderWidth ? 'solid' : undefined)
+    const boxShadow = styles.boxShadow
+    const opacity = styles.opacity !== undefined ? styles.opacity : undefined
+    const width = styles.width || (props.width as string)
+    const height = styles.height || (props.height as string)
+    const padding = formatFourSide(styles.padding, '8px')
+    const margin = formatFourSide(styles.margin)
 
     return (
       <div
@@ -382,12 +419,17 @@ function CanvasNode({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         style={{
-          width: styles.width,
-          height: styles.height,
-          margin: styles.margin,
-          padding: styles.padding ?? '8px',
-          backgroundColor: styles.backgroundColor,
-          borderRadius: styles.borderRadius,
+          width,
+          height,
+          margin,
+          padding,
+          backgroundColor: bg,
+          borderRadius,
+          borderWidth: borderWidth || undefined,
+          borderColor: borderWidth ? borderColor : undefined,
+          borderStyle: borderWidth ? borderStyle : undefined,
+          boxShadow,
+          opacity,
         }}
         className={`relative cursor-pointer transition-all duration-150 rounded-lg ${
           !node.visible ? 'opacity-30' : ''
@@ -401,6 +443,7 @@ function CanvasNode({
           pageId={pageId}
           propName="text"
           value={text}
+          as={level as any}
           style={{
             color,
             textAlign: textAlign as any,
@@ -419,11 +462,22 @@ function CanvasNode({
     const text = (props.text as string) || (props.content as string) || 'Przykładowy tekst opisu lub akapitu...'
     const color = (styles.color as string) || (props.color as string) || '#94a3b8'
     const textAlign = (styles.textAlign as any) || (props.textAlign as any) || 'left'
-    const fontSize = styles.fontSize || '0.875rem'
-    const fontWeight = styles.fontWeight || '400'
-    const lineHeight = styles.lineHeight || '1.6'
-    const letterSpacing = styles.letterSpacing
+    const fontSize = styles.fontSize || (props.fontSize as string) || '1rem'
+    const fontWeight = styles.fontWeight || (props.fontWeight as string) || '400'
+    const lineHeight = styles.lineHeight || (props.lineHeight as string) || '1.6'
+    const letterSpacing = styles.letterSpacing || (props.letterSpacing as string)
     const fontFamily = styles.fontFamily || (props.fontFamily as string)
+    const bg = (styles.backgroundColor as string) || (props.background as string) || 'transparent'
+    const borderRadius = (styles.borderRadius as string) || (props.borderRadius as string)
+    const borderWidth = styles.borderWidth || (props.borderWidth as string)
+    const borderColor = styles.borderColor || (props.borderColor as string) || 'rgba(255,255,255,0.2)'
+    const borderStyle = styles.borderStyle || (borderWidth ? 'solid' : undefined)
+    const boxShadow = styles.boxShadow
+    const opacity = styles.opacity !== undefined ? styles.opacity : undefined
+    const width = styles.width || (props.width as string)
+    const height = styles.height || (props.height as string)
+    const padding = formatFourSide(styles.padding, '8px')
+    const margin = formatFourSide(styles.margin)
 
     return (
       <div
@@ -438,12 +492,17 @@ function CanvasNode({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         style={{
-          width: styles.width,
-          height: styles.height,
-          margin: styles.margin,
-          padding: styles.padding ?? '8px',
-          backgroundColor: styles.backgroundColor,
-          borderRadius: styles.borderRadius,
+          width,
+          height,
+          margin,
+          padding,
+          backgroundColor: bg,
+          borderRadius,
+          borderWidth: borderWidth || undefined,
+          borderColor: borderWidth ? borderColor : undefined,
+          borderStyle: borderWidth ? borderStyle : undefined,
+          boxShadow,
+          opacity,
         }}
         className={`relative cursor-pointer transition-all duration-150 rounded-lg ${
           !node.visible ? 'opacity-30' : ''
@@ -474,12 +533,23 @@ function CanvasNode({
 
   if (node.type === 'button') {
     const text = (props.text as string) || (props.label as string) || 'Kliknij tutaj'
-    const bg = (styles.backgroundColor as string) || (props.background as string) || '#7c3aed'
-    const textColor = (styles.color as string) || (props.textColor as string) || '#ffffff'
     const variant = (props.variant as string) || 'primary'
+    const bg = (styles.backgroundColor as string) || (props.background as string) || (props.backgroundColor as string) || (variant === 'secondary' ? '#1e1e2e' : '#7c3aed')
+    const textColor = (styles.color as string) || (props.textColor as string) || (props.color as string) || '#ffffff'
     const borderRadius = (styles.borderRadius as string) || (props.borderRadius as string) || '12px'
-    const borderWidth = styles.borderWidth || (variant === 'outline' ? '2px' : '1px')
-    const borderColor = styles.borderColor || (variant === 'outline' ? bg : 'transparent')
+    const borderWidth = styles.borderWidth || (props.borderWidth as string) || (variant === 'outline' ? '2px' : '1px')
+    const borderColor = styles.borderColor || (props.borderColor as string) || (variant === 'outline' ? bg : 'transparent')
+    const borderStyle = styles.borderStyle || 'solid'
+    const fontSize = styles.fontSize || (props.fontSize as string) || '0.875rem'
+    const fontWeight = styles.fontWeight || (props.fontWeight as string) || '500'
+    const fontFamily = styles.fontFamily || (props.fontFamily as string)
+    const textAlign = (styles.textAlign as any) || (props.textAlign as any) || 'center'
+    const boxShadow = styles.boxShadow
+    const opacity = styles.opacity !== undefined ? styles.opacity : undefined
+    const width = styles.width || (props.width as string)
+    const height = styles.height || (props.height as string)
+    const padding = formatFourSide(styles.padding, (props.padding as string) || '10px 20px')
+    const margin = formatFourSide(styles.margin)
 
     return (
       <div
@@ -494,8 +564,9 @@ function CanvasNode({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         style={{
-          width: styles.width,
-          margin: styles.margin,
+          width,
+          margin,
+          display: 'inline-block',
         }}
         className={`relative inline-block cursor-pointer transition-all duration-150 p-1 rounded-xl ${
           !node.visible ? 'opacity-30' : ''
@@ -512,14 +583,18 @@ function CanvasNode({
             borderRadius,
             borderWidth,
             borderColor,
-            fontSize: styles.fontSize || '0.875rem',
-            fontWeight: styles.fontWeight || '500',
-            fontFamily: styles.fontFamily || (props.fontFamily as string),
-            padding: styles.padding || '10px 20px',
-            width: styles.width ? '100%' : undefined,
-            height: styles.height,
+            borderStyle,
+            boxShadow,
+            opacity,
+            fontSize,
+            fontWeight,
+            fontFamily,
+            textAlign,
+            padding,
+            width: width ? '100%' : undefined,
+            height: height || undefined,
           }}
-          className="font-medium shadow-md pointer-events-none transition-transform"
+          className="font-medium pointer-events-none transition-transform"
         >
           <span
             onDoubleClick={(e: React.MouseEvent) => {
@@ -572,9 +647,20 @@ function CanvasNode({
   }
 
   if (node.type === 'image') {
-    const src = (props.src as string) || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80'
+    const src = (props.src as string) || (props.url as string) || (props.image as string) || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80'
     const alt = (props.alt as string) || node.label || 'Obraz'
     const borderRadius = (styles.borderRadius as string) || (props.borderRadius as string) || '12px'
+    const borderWidth = styles.borderWidth || (props.borderWidth as string)
+    const borderColor = styles.borderColor || (props.borderColor as string) || 'rgba(255,255,255,0.2)'
+    const borderStyle = styles.borderStyle || (borderWidth ? 'solid' : undefined)
+    const width = styles.width || (props.width as string) || '100%'
+    const height = styles.height || (props.height as string) || 'auto'
+    const objectFit = (styles.objectFit as any) || (props.objectFit as any) || 'cover'
+    const objectPosition = (styles.objectPosition as any) || (props.objectPosition as any) || 'center'
+    const boxShadow = styles.boxShadow
+    const opacity = styles.opacity !== undefined ? styles.opacity : undefined
+    const padding = formatFourSide(styles.padding)
+    const margin = formatFourSide(styles.margin)
 
     return (
       <div
@@ -589,9 +675,11 @@ function CanvasNode({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         style={{
-          width: styles.width,
-          height: styles.height,
-          margin: styles.margin,
+          width,
+          height: height === 'auto' ? undefined : height,
+          margin,
+          padding,
+          display: 'inline-block',
         }}
         className={`relative cursor-pointer transition-all duration-150 p-1 rounded-xl ${
           !node.visible ? 'opacity-30' : ''
@@ -605,12 +693,16 @@ function CanvasNode({
           alt={alt}
           style={{
             borderRadius,
-            borderWidth: styles.borderWidth,
-            borderColor: styles.borderColor,
-            width: styles.width || '100%',
-            height: styles.height || 'auto',
-            maxHeight: styles.height ? undefined : '350px',
-            objectFit: (styles.objectFit as any) || 'cover',
+            borderWidth: borderWidth || undefined,
+            borderColor: borderWidth ? borderColor : undefined,
+            borderStyle: borderWidth ? borderStyle : undefined,
+            width: '100%',
+            height: height === 'auto' ? 'auto' : '100%',
+            maxHeight: height === 'auto' ? (styles.maxHeight || '350px') : undefined,
+            objectFit,
+            objectPosition,
+            boxShadow,
+            opacity,
           }}
           className="max-w-full pointer-events-none select-none"
         />
@@ -622,7 +714,13 @@ function CanvasNode({
   const display = (props.display as string) || 'flex-col'
   const gap = styles.gap !== undefined ? (typeof styles.gap === 'number' ? `${styles.gap}px` : styles.gap) : `${props.gap || '16'}px`
   const bg = (styles.backgroundColor as string) || (props.background as string) || 'transparent'
-  const padding = styles.padding || (props.padding === 'none' ? 0 : props.padding === 'sm' ? '12px' : props.padding === 'lg' ? '32px' : '20px')
+  const paddingFallback = typeof props.padding === 'string' ? (PADDING_PRESET_MAP[props.padding] || props.padding) : '20px'
+  const padding = formatFourSide(styles.padding, paddingFallback)
+  const margin = formatFourSide(styles.margin)
+  const borderWidth = styles.borderWidth || (props.borderWidth as string) || (styles.borderColor ? '1px' : undefined)
+  const borderColor = styles.borderColor || (props.borderColor as string) || 'rgba(255,255,255,0.1)'
+  const borderStyle = styles.borderStyle || (borderWidth ? 'solid' : undefined)
+  const border = borderWidth ? `${borderWidth} ${borderStyle || 'solid'} ${borderColor}` : '1px solid rgba(255,255,255,0.05)'
 
   const handleContainerDragOver = (e: React.DragEvent) => {
     e.preventDefault()
@@ -700,27 +798,26 @@ function CanvasNode({
       onDrop={handleContainerDrop}
       style={{
         backgroundColor: bg,
-        padding: typeof styles.padding === 'object'
-          ? `${(styles.padding as any).top || 0} ${(styles.padding as any).right || 0} ${(styles.padding as any).bottom || 0} ${(styles.padding as any).left || 0}`
-          : (styles.padding as string) || padding,
-        margin: typeof styles.margin === 'object'
-          ? `${(styles.margin as any).top || 0} ${(styles.margin as any).right || 0} ${(styles.margin as any).bottom || 0} ${(styles.margin as any).left || 0}`
-          : (styles.margin as string),
+        backgroundImage: styles.backgroundImage ? (styles.backgroundImage.startsWith('url(') ? styles.backgroundImage : `url("${styles.backgroundImage}")`) : undefined,
+        backgroundSize: styles.backgroundImage ? 'cover' : undefined,
+        backgroundPosition: styles.backgroundImage ? 'center' : undefined,
+        padding,
+        margin,
         gap,
-        width: styles.width,
-        height: styles.height,
-        minHeight: styles.minHeight || '50px',
-        maxWidth: styles.maxWidth,
+        width: styles.width || (props.width as string),
+        height: styles.height || (props.height as string),
+        minWidth: styles.minWidth,
+        maxWidth: styles.maxWidth || (props.maxWidth as string),
+        minHeight: styles.minHeight || (props.minHeight as string) || '50px',
+        maxHeight: styles.maxHeight,
         alignItems: styles.alignItems || (props.alignItems as string),
         justifyContent: styles.justifyContent || (props.justifyContent as string),
-        flexDirection: styles.flexDirection,
-        flexWrap: (styles as any).flexWrap,
-        gridTemplateColumns: styles.gridTemplateColumns,
+        flexDirection: styles.flexDirection || (display === 'flex-row' ? 'row' : display === 'flex-col' ? 'column' : undefined),
+        flexWrap: (styles as any).flexWrap || (display === 'flex-row' ? 'wrap' : undefined),
+        gridTemplateColumns: styles.gridTemplateColumns || (display === 'grid-2' ? 'repeat(2, 1fr)' : display === 'grid-3' ? 'repeat(3, 1fr)' : display === 'grid-4' ? 'repeat(4, 1fr)' : undefined),
         gridTemplateRows: styles.gridTemplateRows,
-        borderRadius: styles.borderRadius || '12px',
-        border: styles.borderWidth
-          ? `${styles.borderWidth} ${styles.borderStyle || 'solid'} ${styles.borderColor || 'rgba(255,255,255,0.1)'}`
-          : '1px solid rgba(255,255,255,0.05)',
+        borderRadius: styles.borderRadius || (props.borderRadius as string) || '12px',
+        border,
         boxShadow: styles.boxShadow,
         opacity: styles.opacity,
         position: styles.position as any,
@@ -1003,13 +1100,33 @@ function SectionBlock({
             isSectionDropTarget ? 'ring-2 ring-violet-400 bg-violet-950/20' : ''
           }`}
           style={{
-            backgroundColor: resolvedStyles.backgroundColor || '#08080f',
-            padding: typeof resolvedStyles.padding === 'object' && resolvedStyles.padding
-              ? `${(resolvedStyles.padding as any).top ?? '0px'} ${(resolvedStyles.padding as any).right ?? '0px'} ${(resolvedStyles.padding as any).bottom ?? '0px'} ${(resolvedStyles.padding as any).left ?? '0px'}`
-              : (resolvedStyles.padding as string | undefined) ?? '16px',
-            borderRadius: resolvedStyles.borderRadius,
+            backgroundColor: resolvedStyles.backgroundColor || (node.props as any)?.background || '#08080f',
+            backgroundImage: resolvedStyles.backgroundImage ? (resolvedStyles.backgroundImage.startsWith('url(') ? resolvedStyles.backgroundImage : `url("${resolvedStyles.backgroundImage}")`) : undefined,
+            backgroundSize: resolvedStyles.backgroundImage ? 'cover' : undefined,
+            backgroundPosition: resolvedStyles.backgroundImage ? 'center' : undefined,
+            padding: formatFourSide(resolvedStyles.padding, typeof (node.props as any)?.padding === 'string' ? (PADDING_PRESET_MAP[(node.props as any).padding] || (node.props as any).padding) : '16px'),
+            margin: formatFourSide(resolvedStyles.margin),
+            borderRadius: resolvedStyles.borderRadius || (node.props as any)?.borderRadius,
+            borderWidth: resolvedStyles.borderWidth || (node.props as any)?.borderWidth,
+            borderColor: resolvedStyles.borderColor || (node.props as any)?.borderColor,
+            borderStyle: resolvedStyles.borderStyle || ((resolvedStyles.borderWidth || (node.props as any)?.borderWidth) ? 'solid' : undefined),
             opacity: resolvedStyles.opacity,
             boxShadow: resolvedStyles.boxShadow,
+            width: resolvedStyles.width || (node.props as any)?.width || '100%',
+            height: resolvedStyles.height || (node.props as any)?.height,
+            minWidth: resolvedStyles.minWidth,
+            maxWidth: resolvedStyles.maxWidth || (node.props as any)?.maxWidth,
+            minHeight: resolvedStyles.minHeight || (node.props as any)?.minHeight || '80px',
+            maxHeight: resolvedStyles.maxHeight,
+            display: resolvedStyles.display,
+            flexDirection: resolvedStyles.flexDirection,
+            alignItems: resolvedStyles.alignItems || (node.props as any)?.alignItems,
+            justifyContent: resolvedStyles.justifyContent || (node.props as any)?.justifyContent,
+            gap: resolvedStyles.gap || ((node.props as any)?.gap ? `${(node.props as any).gap}px` : undefined),
+            gridTemplateColumns: resolvedStyles.gridTemplateColumns,
+            gridTemplateRows: resolvedStyles.gridTemplateRows,
+            position: resolvedStyles.position as any,
+            zIndex: resolvedStyles.zIndex,
           }}
         >
           <div className="max-w-[1200px] mx-auto space-y-3">
@@ -1040,18 +1157,33 @@ function SectionBlock({
           <div
             className="w-full relative pointer-events-none overflow-hidden text-slate-900 min-h-[60px]"
             style={{
-              backgroundColor: resolvedStyles.backgroundColor || '#ffffff',
+              backgroundColor: resolvedStyles.backgroundColor || (node.props as any)?.background || (node.type === 'section' ? '#0a0a14' : '#ffffff'),
+              backgroundImage: resolvedStyles.backgroundImage ? (resolvedStyles.backgroundImage.startsWith('url(') ? resolvedStyles.backgroundImage : `url("${resolvedStyles.backgroundImage}")`) : undefined,
+              backgroundSize: resolvedStyles.backgroundImage ? 'cover' : undefined,
+              backgroundPosition: resolvedStyles.backgroundImage ? 'center' : undefined,
               opacity: resolvedStyles.opacity,
-              padding: typeof resolvedStyles.padding === 'object' && resolvedStyles.padding
-                ? `${(resolvedStyles.padding as any).top ?? 0} ${(resolvedStyles.padding as any).right ?? 0} ${(resolvedStyles.padding as any).bottom ?? 0} ${(resolvedStyles.padding as any).left ?? 0}`
-                : (resolvedStyles.padding as string | undefined),
-              borderRadius: resolvedStyles.borderRadius,
-              border: resolvedStyles.borderWidth
-                ? `${resolvedStyles.borderWidth} ${resolvedStyles.borderStyle || 'solid'} ${resolvedStyles.borderColor || 'rgba(0,0,0,0.1)'}`
-                : undefined,
+              padding: formatFourSide(resolvedStyles.padding, typeof (node.props as any)?.padding === 'string' ? (PADDING_PRESET_MAP[(node.props as any).padding] || (node.props as any).padding) : undefined),
+              margin: formatFourSide(resolvedStyles.margin),
+              borderRadius: resolvedStyles.borderRadius || (node.props as any)?.borderRadius,
+              borderWidth: resolvedStyles.borderWidth || (node.props as any)?.borderWidth,
+              borderColor: resolvedStyles.borderColor || (node.props as any)?.borderColor,
+              borderStyle: resolvedStyles.borderStyle || ((resolvedStyles.borderWidth || (node.props as any)?.borderWidth) ? 'solid' : undefined),
               boxShadow: resolvedStyles.boxShadow,
-              width: resolvedStyles.width,
-              minHeight: resolvedStyles.minHeight,
+              width: resolvedStyles.width || (node.props as any)?.width || '100%',
+              height: resolvedStyles.height || (node.props as any)?.height,
+              minWidth: resolvedStyles.minWidth,
+              maxWidth: resolvedStyles.maxWidth || (node.props as any)?.maxWidth,
+              minHeight: resolvedStyles.minHeight || (node.props as any)?.minHeight || '60px',
+              maxHeight: resolvedStyles.maxHeight,
+              display: resolvedStyles.display,
+              flexDirection: resolvedStyles.flexDirection,
+              alignItems: resolvedStyles.alignItems || (node.props as any)?.alignItems,
+              justifyContent: resolvedStyles.justifyContent || (node.props as any)?.justifyContent,
+              gap: resolvedStyles.gap,
+              gridTemplateColumns: resolvedStyles.gridTemplateColumns,
+              gridTemplateRows: resolvedStyles.gridTemplateRows,
+              position: resolvedStyles.position as any,
+              zIndex: resolvedStyles.zIndex,
             }}
           >
             <CartProvider>
@@ -1060,7 +1192,10 @@ function SectionBlock({
                   id: node.id,
                   type: node.type,
                   label: node.label,
-                  config: node.props,
+                  config: {
+                    ...node.props,
+                    background: resolvedStyles.backgroundColor || (node.props as any)?.background,
+                  },
                 }}
                 theme={{
                   primaryColor: document.theme?.primaryColor || '#7c3aed',
