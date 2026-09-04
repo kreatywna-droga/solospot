@@ -61,16 +61,13 @@ async function main() {
   };
 
   try {
-    // ---------- 1. REGISTER ----------
+    // ---------- 1. REGISTER (from Node — no page context needed) ----------
     console.log('\n=== REGISTER ===');
-    const regRes = await page.evaluate(async (url, email, password) => {
-      const r = await fetch(`${url}/api/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name: 'NS24 Acceptance Bot' }),
-      });
-      return { status: r.status, body: await r.json() };
-    }, BASE, EMAIL, PASSWORD);
+    const regRes = await fetch(`${BASE}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: EMAIL, password: PASSWORD, name: 'NS24 Acceptance Bot' }),
+    }).then((r) => r.json().then((b) => ({ status: r.status, body: b })));
     const regOk = regRes.status === 200 || (regRes.body && !regRes.body.error);
     step('register test account', regOk, JSON.stringify(regRes.body).slice(0, 120));
     if (!regOk) throw new Error('Register failed: ' + JSON.stringify(regRes.body));
@@ -96,26 +93,41 @@ async function main() {
 
     // ---------- 3. OPEN STUDIO / pick store ----------
     console.log('\n=== STUDIO ===');
-    await page.goto(`${BASE}/studio`, { waitUntil: 'networkidle2', timeout: 60000 });
-    await sleep(2500);
-    await shot(page, '03-studio-list');
+    // Ensure the account has a tenant + store (created WITH the authenticated session cookies)
+    // Starter package is free (price 0) so no checkout is required for a CREATED tenant.
+    const onboarding = await page.evaluate(async (url, email) => {
+      const r = await fetch(`${url}/api/onboarding/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ownerEmail: email,
+          packageId: 'starter',
+          storeName: 'NS24 Acceptance Store',
+        }),
+      });
+      return { status: r.status, body: await r.json() };
+    }, BASE, EMAIL);
+    const tenantOk = onboarding.status === 201 || (onboarding.body && onboarding.body.success);
+    step('onboard tenant (starter)', Boolean(tenantOk), JSON.stringify(onboarding.body).slice(0, 120));
 
-    // Find a studio link (store card)
-    const studioHref = await page.evaluate(() => {
-      const links = Array.from(document.querySelectorAll('a[href*="/studio/"]'));
-      const el = links.find((l) => !l.getAttribute('href').endsWith('/studio')) || links[0];
-      return el ? el.getAttribute('href') : null;
-    });
-    if (!studioHref) {
-      // maybe redirect already into a store or dashboard — check URL
-      const inStudio = page.url().includes('/studio/');
-      step('open studio store', inStudio, `url=${page.url()}`);
-      if (!inStudio) throw new Error('No studio store link found and not inside studio');
-    } else {
-      await page.goto(`${BASE}${studioHref}`, { waitUntil: 'networkidle2', timeout: 60000 });
-      step('open studio store', true, studioHref);
-    }
-    await sleep(4000);
+    const createStore = await page.evaluate(async (url) => {
+      const r = await fetch(`${url}/api/stores`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'NS24 Acceptance Store',
+          slug: `ns24-${Date.now()}`,
+        }),
+      });
+      return { status: r.status, body: await r.json() };
+    }, BASE);
+    const storeId = createStore.body && createStore.body.store && createStore.body.store.id;
+    step('create test store', Boolean(storeId), `status=${createStore.status} ${storeId || JSON.stringify(createStore.body).slice(0, 100)}`);
+    if (!storeId) throw new Error('Store creation failed: ' + JSON.stringify(createStore.body).slice(0, 200));
+
+    await page.goto(`${BASE}/studio/${storeId}`, { waitUntil: 'networkidle2', timeout: 90000 });
+    step('open studio store', page.url().includes(`/studio/${storeId}`), `url=${page.url()}`);
+    await sleep(5000);
     await shot(page, '04-studio-builder');
 
     // Builder must render canvas + left tabs + inspector
@@ -149,18 +161,35 @@ async function main() {
 
     const addComponentByLabel = async (label) => {
       const ok = await page.evaluate((lbl) => {
-        const cards = Array.from(document.querySelectorAll('[role="button"], button, div'));
-        const card = cards.find((c) => c.textContent && c.textContent.trim().startsWith(lbl));
-        if (card) { card.click(); return true; }
+        // Cards render label + category; match the exact label text node
+        const candidates = Array.from(document.querySelectorAll('div, [role="button"]'));
+        const card = candidates.find((c) => {
+          const labelEl = c.querySelector('div.font-semibold');
+          return labelEl && labelEl.textContent.trim() === lbl;
+        });
+        if (card) {
+          card.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+          return true;
+        }
         return false;
       }, label);
-      await sleep(1400);
+      await sleep(1600);
       return ok;
     };
 
     // Select nothing first (clear selection) so atomic elements wrap into a section
-    await page.mouse.click(800, 500); // click somewhere neutral
-    await sleep(600);
+    const cleared = await page.evaluate(() => {
+      // Click on empty canvas frame background (target === currentTarget check in app)
+      const frame = document.querySelector('main .relative.bg-\\[\\#08080f\\], [data-section-id]')?.parentElement;
+      const els = Array.from(document.querySelectorAll('[data-section-id]'));
+      if (els.length && els[0].parentElement) {
+        // Click the wrapper (plain div) between sections — deselects via canvas click
+        els[0].parentElement.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+      }
+      return true;
+    });
+    await sleep(800);
+    void cleared;
 
     const addedSection = await addComponentByLabel('Sekcja bazowa');
     step('add Section (base)', addedSection);
@@ -254,21 +283,27 @@ async function main() {
     // ---------- 16-19. HEADING TEXT + FONT SIZE ----------
     console.log('\n=== HEADING EDIT ===');
     await selectNodeByType('heading', []);
-    // Inline edit: double-click the heading text
+    // Inline edit: double-click the heading's inline-editable text element
     const inlineEdited = await page.evaluate(() => {
-      const h = document.querySelector('[data-node-type="heading"] [data-inline-edit], [data-node-type="heading"]');
+      const h = document.querySelector('[data-node-type="heading"] [data-inline-edit="text"]');
       if (!h) return false;
-      h.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+      h.dispatchEvent(new MouseEvent('dblclick', { bubbles: true, cancelable: true }));
       return true;
     });
-    await sleep(500);
-    if (inlineEdited) {
+    await sleep(600);
+    // Verify contentEditable actually activated
+    const editActive = await page.evaluate(() => {
+      const el = document.querySelector('[data-node-type="heading"] [contenteditable="true"]');
+      return !!el;
+    });
+    if (inlineEdited && editActive) {
       await page.keyboard.type('NS24 LIVE EDIT', { delay: 30 });
       await page.keyboard.press('Enter');
-      await sleep(800);
+      await sleep(900);
     }
     const inlineCommitted = await page.evaluate(() => document.body.innerText.includes('NS24 LIVE EDIT'));
-    step('inline edit Heading text (dblclick → type → Enter)', inlineEdited && inlineCommitted);
+    step('inline edit Heading text (dblclick → type → Enter)', inlineEdited && editActive && inlineCommitted,
+      `edited=${inlineEdited} active=${editActive} committed=${inlineCommitted}`);
     await shot(page, '10-inline-edit');
 
     // ---------- 21-22. BUTTON TEXT + BACKGROUND (via inspector) ----------
@@ -314,9 +349,17 @@ async function main() {
     step('switch to Tablet (top toolbar only)', tabletOk);
     await shot(page, '13-tablet');
 
-    // change something in tablet — e.g. heading font size via Design inspector
+    // change something in tablet — heading font size via Design → Type tab → Size
     await selectNodeByType('heading', []);
     const tabletEdit = await page.evaluate(() => {
+      // Open the Type (typography) sub-tab of the Design inspector
+      const tabs = Array.from(document.querySelectorAll('button'));
+      const typeTab = tabs.find((b) => b.textContent && (b.textContent.trim() === 'Type' || b.textContent.trim() === 'Typography'));
+      if (typeTab) typeTab.click();
+      return !!typeTab;
+    });
+    await sleep(700);
+    const tabletSizeChanged = await page.evaluate(() => {
       const labels = Array.from(document.querySelectorAll('span, label'));
       const sizeLabel = labels.find((l) => l.textContent && l.textContent.trim() === 'Size');
       if (!sizeLabel) return false;
@@ -328,8 +371,8 @@ async function main() {
       input.dispatchEvent(new Event('input', { bubbles: true }));
       return true;
     });
-    await sleep(800);
-    step('change property in Tablet context', tabletEdit);
+    await sleep(900);
+    step('change property in Tablet context', tabletEdit && tabletSizeChanged, `tab=${tabletEdit} size=${tabletSizeChanged}`);
 
     const mobileOk = await setViewport('MOBILE');
     step('switch to Mobile', mobileOk);
@@ -350,10 +393,30 @@ async function main() {
     step('save document', saveOk);
     await shot(page, '15-saved');
 
-    await page.reload({ waitUntil: 'networkidle2', timeout: 60000 });
-    await sleep(5000);
-    const persisted = await page.evaluate(() => document.body.innerText.includes('NS24 LIVE EDIT'));
-    step('reload → text edit persisted', persisted);
+    await page.reload({ waitUntil: 'networkidle2', timeout: 90000 });
+    await sleep(6000);
+    const persistedUi = await page.evaluate(() => document.body.innerText.includes('NS24 LIVE EDIT'));
+    // Deep persistence check via the real API path (server-side document state)
+    const persistedApi = await page.evaluate(async (url, sid) => {
+      const r = await fetch(`${url}/api/stores/${sid}`);
+      const data = await r.json();
+      if (!data.success || !data.store) return { ok: false, reason: 'no store' };
+      const pages = data.store.config && data.store.config.pages;
+      if (!Array.isArray(pages) || !pages.length) return { ok: false, reason: 'no pages in config' };
+      const allSections = [];
+      const walk = (secs) => {
+        for (const s of secs) {
+          allSections.push(s);
+          if (Array.isArray(s.children)) walk(s.children);
+        }
+      };
+      for (const p of pages) walk(p.sections || []);
+      const hasEditText = allSections.some((s) => s.config && String(s.config.text || '').includes('NS24 LIVE EDIT'));
+      const hasBackground = allSections.some((s) => s.styles && s.styles.backgroundColor === '#123456');
+      return { ok: hasEditText, hasBackground, sections: allSections.length };
+    }, BASE, storeId);
+    step('reload → text edit persisted (UI)', persistedUi);
+    step('reload → persisted in STORE CONFIG via API', persistedApi.ok, JSON.stringify(persistedApi));
     await shot(page, '16-after-reload');
 
     // ---------- 37-39. PREVIEW ----------

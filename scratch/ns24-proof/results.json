@@ -1,0 +1,119 @@
+{
+  "base": "https://www.solospot.pl",
+  "email": "ns24.bot+1788549665782@solospot-test.pl",
+  "results": [
+    {
+      "name": "register test account",
+      "ok": true
+    },
+    {
+      "name": "login via UI",
+      "ok": true
+    },
+    {
+      "name": "onboard tenant (starter)",
+      "ok": true
+    },
+    {
+      "name": "create test store",
+      "ok": true
+    },
+    {
+      "name": "open studio store",
+      "ok": true
+    },
+    {
+      "name": "builder shell renders (tabs/canvas/inspector)",
+      "ok": true
+    },
+    {
+      "name": "add Section (base)",
+      "ok": true
+    },
+    {
+      "name": "add Container",
+      "ok": false
+    },
+    {
+      "name": "add Heading",
+      "ok": true
+    },
+    {
+      "name": "add Text",
+      "ok": true
+    },
+    {
+      "name": "add Image",
+      "ok": true
+    },
+    {
+      "name": "add Button",
+      "ok": true
+    },
+    {
+      "name": "click Heading → contextual inspector",
+      "ok": true
+    },
+    {
+      "name": "click Text → contextual inspector",
+      "ok": true
+    },
+    {
+      "name": "click Image → contextual inspector",
+      "ok": true
+    },
+    {
+      "name": "click Button → contextual inspector",
+      "ok": true
+    },
+    {
+      "name": "click Section",
+      "ok": true
+    },
+    {
+      "name": "change Section background color",
+      "ok": true
+    },
+    {
+      "name": "inline edit Heading text (dblclick → type → Enter)",
+      "ok": false
+    },
+    {
+      "name": "undo (Ctrl+Z path via toolbar)",
+      "ok": true
+    },
+    {
+      "name": "redo restores edit",
+      "ok": false
+    },
+    {
+      "name": "switch to Tablet (top toolbar only)",
+      "ok": true
+    },
+    {
+      "name": "change property in Tablet context",
+      "ok": false
+    },
+    {
+      "name": "switch to Mobile",
+      "ok": true
+    },
+    {
+      "name": "switch back to Desktop",
+      "ok": true
+    },
+    {
+      "name": "save document",
+      "ok": true
+    },
+    {
+      "name": "reload → text edit persisted",
+      "ok": false
+    },
+    {
+      "name": "preview toggle (view → edit)",
+      "ok": true
+    }
+  ],
+  "consoleErrors": []
+}

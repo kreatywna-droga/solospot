@@ -531,35 +531,8 @@ export const STANDARD_COMPONENT_DESCRIPTORS: ReadonlyArray<ComponentDescriptor> 
   },
 
   // 10. LAYOUT
-  {
-    type: 'container',
-    label: 'Kontener uniwersalny (Flex / Grid)',
-    category: 'Layout',
-    icon: 'Box',
-    previewable: true,
-    allowChildren: true,
-    schema: [
-      selectProp({ key: 'display', label: 'Wyświetlanie', required: false, group: 'layout', defaultValue: 'flex-col', options: [
-        { label: 'Flex Column (Pionowo)', value: 'flex-col' },
-        { label: 'Flex Row (Poziomo)', value: 'flex-row' },
-        { label: 'Grid 2 kolumny', value: 'grid-2' },
-        { label: 'Grid 3 kolumny', value: 'grid-3' },
-        { label: 'Grid 4 kolumny', value: 'grid-4' },
-      ]}),
-      selectProp({ key: 'padding', label: 'Padding wewnętrzny', required: false, group: 'spacing', defaultValue: 'md', options: [
-        { label: 'Brak (0px)', value: 'none' },
-        { label: 'Mały (16px)', value: 'sm' },
-        { label: 'Średni (32px)', value: 'md' },
-        { label: 'Duży (48px)', value: 'lg' },
-        { label: 'Bardzo duży (64px)', value: 'xl' },
-      ]}),
-      stringProp({ key: 'gap', label: 'Odstęp (gap px)', required: false, group: 'spacing', defaultValue: '16' }),
-      stringProp({ key: 'maxWidth', label: 'Maksymalna szerokość', required: false, group: 'layout', defaultValue: '1200px' }),
-      colorProp({ key: 'background', label: 'Kolor tła', required: false, group: 'style' }),
-    ],
-    defaultProps: { display: 'flex-col', padding: 'md', gap: '16', maxWidth: '1200px', background: '' },
-    tags: ['contener', 'layout', 'flex', 'grid', 'kolumny'],
-  },
+  // NOTE: Exactly ONE descriptor per type — a duplicate `container` entry
+  // used to silently overwrite this one in the registry Map (data-contract bug, NS24).
 
   // 11. ATOMIC ELEMENTS & SECTIONS (Phase 1 & 2)
   {
@@ -626,12 +599,13 @@ export const STANDARD_COMPONENT_DESCRIPTORS: ReadonlyArray<ComponentDescriptor> 
       stringProp({ key: 'gap', label: 'Odstęp między elementami (gap px)', required: false, group: 'spacing', defaultValue: '16' }),
       stringProp({ key: 'width', label: 'Szerokość (np. 100%, 400px)', required: false, group: 'layout', defaultValue: 'auto' }),
       stringProp({ key: 'height', label: 'Wysokość (np. auto, 250px)', required: false, group: 'layout', defaultValue: 'auto' }),
+      stringProp({ key: 'maxWidth', label: 'Maksymalna szerokość', required: false, group: 'layout', defaultValue: '1200px' }),
       colorProp({ key: 'background', label: 'Kolor tła', required: false, group: 'style' }),
       stringProp({ key: 'borderRadius', label: 'Zaokrąglenie rogów (np. 12px)', required: false, group: 'style', defaultValue: '12px' }),
       stringProp({ key: 'borderColor', label: 'Kolor obramowania', required: false, group: 'style' }),
       stringProp({ key: 'borderWidth', label: 'Grubość obramowania (np. 1px)', required: false, group: 'style', defaultValue: '0px' }),
     ],
-    defaultProps: { display: 'flex-col', padding: 'md', gap: '16', width: 'auto', height: 'auto', background: '', borderRadius: '12px', borderWidth: '0px' },
+    defaultProps: { display: 'flex-col', padding: 'md', gap: '16', width: 'auto', height: 'auto', maxWidth: '1200px', background: '', borderRadius: '12px', borderWidth: '0px' },
     tags: ['contener', 'layout', 'flex', 'grid', 'kolumny'],
   },
   {

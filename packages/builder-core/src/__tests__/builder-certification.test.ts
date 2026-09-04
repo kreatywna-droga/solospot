@@ -3,6 +3,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { createBuilderDocument, createBuilderPage, createSectionNode } from '../BuilderDocument';
+import { STANDARD_COMPONENT_DESCRIPTORS } from '../ComponentRegistry';
 import { createCanvasState, reduceCanvasState, CanvasAction } from '../CanvasState';
 import { createDragCommand, computeDropTarget, snapDragToGrid } from '../DragEngine';
 import { createResizeCommand, constrainResize, applyAspectRatio, snapResizeToGrid } from '../ResizeEngine';
@@ -90,6 +91,16 @@ describe('C7.1 Interaction Engine', () => {
     });
     expect(mobile.selection.activeBreakpoint).toBe('MOBILE');
     expect(mobile.viewport.label).toBe('MOBILE');
+  });
+
+  it('NS24: STANDARD_COMPONENT_DESCRIPTORS contains exactly one descriptor per type (no silent registry overwrite)', () => {
+    const seen = new Set<string>();
+    const duplicates: string[] = [];
+    for (const d of STANDARD_COMPONENT_DESCRIPTORS) {
+      if (seen.has(d.type)) duplicates.push(d.type);
+      seen.add(d.type);
+    }
+    expect(duplicates).toEqual([]);
   });
 
   it('should handle SET_GRID action', () => {
