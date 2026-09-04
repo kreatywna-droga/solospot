@@ -141,14 +141,41 @@ export class OverlayController {
     let hoveredSection: SectionNode | null = null;
 
     if (selection.hoveredId && selection.hoveredId !== selectedId) {
-      const rect = getElementRect(selection.hoveredId);
-      if (rect) {
-        hoverRect = createOverlayRect({
-          ...rect,
-          viewport,
-          zIndex: mergedConfig.zIndex - 1,
-        });
-        hoveredSection = this.findSectionById(document, selection.hoveredId);
+      // Suppress hover rect if the hovered element is an ancestor of the selected element.
+      // Prevents the double-frame problem: parent container frame + child selection frame.
+      let isAncestorOfSelected = false;
+      if (selectedId) {
+        const getAncestorIds = (doc: BuilderDocument, nodeId: string): string[] => {
+          const ancestors: string[] = [];
+          const find = (nodes: SectionNode[]): boolean => {
+            for (const node of nodes) {
+              if (node.id === nodeId) return true;
+              if (node.children && find(node.children)) {
+                ancestors.push(node.id);
+                return true;
+              }
+            }
+            return false;
+          };
+          for (const page of doc.pages) {
+            find(page.sections);
+          }
+          return ancestors;
+        };
+        const ancestorIds = getAncestorIds(document, selectedId);
+        isAncestorOfSelected = ancestorIds.includes(selection.hoveredId);
+      }
+
+      if (!isAncestorOfSelected) {
+        const rect = getElementRect(selection.hoveredId);
+        if (rect) {
+          hoverRect = createOverlayRect({
+            ...rect,
+            viewport,
+            zIndex: mergedConfig.zIndex - 1,
+          });
+          hoveredSection = this.findSectionById(document, selection.hoveredId);
+        }
       }
     }
 

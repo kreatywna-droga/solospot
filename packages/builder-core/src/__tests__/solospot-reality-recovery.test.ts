@@ -312,4 +312,62 @@ describe('SoloSpot Builder — Reality Recovery Test Suite', () => {
     expect(node.responsive?.mobile?.fontSize).toBe('20px');
     expect(node.responsive?.mobile?.padding).toBe('16px');
   });
+
+  it('7. Section background contract: image (url + fit + overlay) and video persist and are undoable', () => {
+    const section = createSectionNode({
+      id: 'sec_bg',
+      type: 'section',
+      label: 'Hero z tłem',
+      props: {},
+      children: [],
+    });
+
+    const doc = createBuilderDocument({
+      id: 'doc_bg',
+      pages: [createBuilderPage({ id: 'p1', name: 'Home', slug: '/', sections: [section] })],
+    });
+
+    const registry = createBuilderComponentRegistry();
+    let ctx = createBuilderContext({ document: doc, registry, preview: createMemoryChannel().builderChannel });
+
+    // Inspector "Zdjęcie" tab → SET_NODE_STYLES with background image + fit + overlay
+    ctx = ctx.dispatch({
+      type: 'SET_NODE_STYLES',
+      nodeId: 'sec_bg',
+      styles: {
+        backgroundImage: 'url("https://example.com/hero.jpg")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        overlayOpacity: 0.4,
+      },
+    });
+
+    let node = findNode(ctx.document, 'sec_bg')!.node;
+    expect(node.styles?.backgroundImage).toBe('url("https://example.com/hero.jpg")');
+    expect(node.styles?.backgroundSize).toBe('cover');
+    expect(node.styles?.overlayOpacity).toBe(0.4);
+
+    // Switch to "Wideo" tab → clear image, set props.backgroundVideo
+    ctx = ctx.dispatch({ type: 'SET_NODE_STYLES', nodeId: 'sec_bg', styles: { backgroundImage: 'none' } });
+    ctx = ctx.dispatch({ type: 'UPDATE_PROPS', pageId: 'p1', sectionId: 'sec_bg', props: { backgroundVideo: 'https://example.com/bg.mp4' } });
+
+    node = findNode(ctx.document, 'sec_bg')!.node;
+    expect(node.styles?.backgroundImage).toBe('none');
+    expect(node.props.backgroundVideo).toBe('https://example.com/bg.mp4');
+
+    // Both mutations are undoable (history integrity)
+    ctx = ctx.dispatch({ type: 'UNDO' });
+    node = findNode(ctx.document, 'sec_bg')!.node;
+    expect(node.props.backgroundVideo).toBeUndefined();
+
+    ctx = ctx.dispatch({ type: 'UNDO' });
+    node = findNode(ctx.document, 'sec_bg')!.node;
+    expect(node.styles?.backgroundImage).toBe('url("https://example.com/hero.jpg")');
+
+    ctx = ctx.dispatch({ type: 'REDO' });
+    ctx = ctx.dispatch({ type: 'REDO' });
+    node = findNode(ctx.document, 'sec_bg')!.node;
+    expect(node.props.backgroundVideo).toBe('https://example.com/bg.mp4');
+  });
 });

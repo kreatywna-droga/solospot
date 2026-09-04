@@ -118,6 +118,9 @@ export interface NodeStyles {
   margin?: { top?: string; right?: string; bottom?: string; left?: string } | string;
   backgroundColor?: string;
   backgroundImage?: string;
+  backgroundSize?: string;
+  backgroundPosition?: string;
+  backgroundRepeat?: string;
   color?: string;
   fontSize?: string;
   fontWeight?: string;

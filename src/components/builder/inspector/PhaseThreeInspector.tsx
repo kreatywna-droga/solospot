@@ -59,6 +59,8 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
 }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showMediaPicker, setShowMediaPicker] = useState(false);
+  /** Which property the media picker writes to */
+  const [mediaPickerTarget, setMediaPickerTarget] = useState<'image' | 'section-bg' | 'video-bg'>('image');
   const selectedNode = useSelectedSection();
   const { canvas, document: builderDoc } = useBuilder();
 
@@ -243,7 +245,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             <div className="space-y-2">
               <label className="text-[11px] font-semibold text-slate-300">Zdjęcie</label>
               <button
-                onClick={() => setShowMediaPicker(true)}
+                onClick={() => { setMediaPickerTarget('image'); setShowMediaPicker(true); }}
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 font-semibold text-xs text-white transition-all shadow-md shadow-violet-600/20"
               >
                 <ImageIcon className="w-4 h-4" />
@@ -487,63 +489,222 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
         {/* ============================================================= */}
         {/* SIMPLE CONTROLS: SECTION                                       */}
         {/* ============================================================= */}
-        {nodeType === 'section' && (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-[11px] font-semibold text-slate-300">Tło sekcji</label>
-              <div className="flex items-center gap-3 p-2 bg-white/5 border border-white/10 rounded-xl">
-                <input
-                  type="color"
-                  value={currentStyles.backgroundColor || '#06060c'}
-                  onChange={(e) => onStyleChange({ backgroundColor: e.target.value })}
-                  className="w-8 h-8 rounded-lg border-0 cursor-pointer bg-transparent flex-shrink-0"
-                />
-                <div className="min-w-0 flex-1">
-                  <div className="text-xs font-semibold text-white mb-0.5">Kolor tła</div>
+        {nodeType === 'section' && (() => {
+          const bgType: 'color' | 'image' | 'video' =
+            props.backgroundVideo ? 'video'
+            : currentStyles.backgroundImage && currentStyles.backgroundImage !== 'none' ? 'image'
+            : 'color';
+
+          return (
+            <div className="space-y-4">
+              {/* ---- Background type tabs: Kolor | Zdjęcie | Wideo ---- */}
+              <div className="space-y-2">
+                <label className="text-[11px] font-semibold text-slate-300">Tło sekcji</label>
+                <div className="flex items-center p-1 bg-white/5 border border-white/10 rounded-xl gap-1">
+                  {(['color', 'image', 'video'] as const).map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => {
+                        if (tab === 'color') {
+                          onStyleChange({ backgroundImage: 'none' });
+                          onPropChange('backgroundVideo', '');
+                        } else if (tab === 'image') {
+                          onPropChange('backgroundVideo', '');
+                        } else {
+                          onStyleChange({ backgroundImage: 'none' });
+                        }
+                      }}
+                      className={`flex-1 py-1.5 text-[11px] font-semibold rounded-lg transition-all ${
+                        bgType === tab
+                          ? 'bg-violet-600 text-white'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {tab === 'color' ? '🎨 Kolor' : tab === 'image' ? '🖼 Zdjęcie' : '🎬 Wideo'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* ---- Solid colour ---- */}
+              {bgType === 'color' && (
+                <div className="flex items-center gap-3 p-2 bg-white/5 border border-white/10 rounded-xl">
                   <input
-                    type="text"
+                    type="color"
                     value={currentStyles.backgroundColor || '#06060c'}
                     onChange={(e) => onStyleChange({ backgroundColor: e.target.value })}
-                    placeholder="#06060c"
-                    className="w-full bg-transparent text-[11px] font-mono text-slate-300 focus:outline-none focus:text-white"
+                    className="w-8 h-8 rounded-lg border-0 cursor-pointer bg-transparent flex-shrink-0"
                   />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs font-semibold text-white mb-0.5">Kolor tła</div>
+                    <input
+                      type="text"
+                      value={currentStyles.backgroundColor || '#06060c'}
+                      onChange={(e) => onStyleChange({ backgroundColor: e.target.value })}
+                      placeholder="#06060c"
+                      className="w-full bg-transparent text-[11px] font-mono text-slate-300 focus:outline-none focus:text-white"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* ---- Background image (upload / library / URL) ---- */}
+              {bgType === 'image' && (
+                <div className="space-y-3">
+                  <button
+                    onClick={() => { setMediaPickerTarget('section-bg'); setShowMediaPicker(true); }}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 font-semibold text-xs text-white transition-all shadow-md shadow-violet-600/20"
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span>Wybierz lub wgraj zdjęcie tła</span>
+                  </button>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold text-slate-300">URL zdjęcia</label>
+                    <input
+                      type="text"
+                      value={(() => {
+                        const bg = currentStyles.backgroundImage || '';
+                        const m = bg.match(/url\(["']?(.+?)["']?\)/);
+                        return m ? m[1] : '';
+                      })()}
+                      onChange={(e) => {
+                        const url = e.target.value.trim();
+                        onStyleChange({
+                          backgroundImage: url ? `url("${url}")` : 'none',
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          backgroundRepeat: 'no-repeat',
+                        });
+                      }}
+                      placeholder="https://..."
+                      className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-violet-500"
+                    />
+                  </div>
+
+                  {/* Fit */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold text-slate-300">Dopasowanie</label>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {[
+                        { label: 'Wypełnij', size: 'cover' },
+                        { label: 'Dopasuj', size: 'contain' },
+                        { label: 'Oryginał', size: 'auto' },
+                      ].map((opt) => (
+                        <button
+                          key={opt.size}
+                          onClick={() => onStyleChange({ backgroundSize: opt.size })}
+                          className={`py-1 text-[11px] font-semibold rounded-lg border transition-all ${
+                            currentStyles.backgroundSize === opt.size || (!currentStyles.backgroundSize && opt.size === 'cover')
+                              ? 'bg-violet-600 text-white border-violet-500'
+                              : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Darkening overlay */}
+                  <div className="space-y-1.5 pt-1 border-t border-white/5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-semibold text-slate-300">Przyciemnienie (overlay)</label>
+                      <span className="text-[11px] font-mono text-white">
+                        {Math.round((currentStyles.overlayOpacity ?? 0.4) * 100)}%
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={5}
+                      value={Math.round((currentStyles.overlayOpacity ?? 0.4) * 100)}
+                      onChange={(e) => onStyleChange({ overlayOpacity: Number(e.target.value) / 100 })}
+                      className="w-full accent-violet-500 h-1 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* ---- Background video ---- */}
+              {bgType === 'video' && (
+                <div className="space-y-3">
+                  <button
+                    onClick={() => { setMediaPickerTarget('video-bg'); setShowMediaPicker(true); }}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 font-semibold text-xs text-white transition-all shadow-md shadow-violet-600/20"
+                  >
+                    <Video className="w-4 h-4" />
+                    <span>Wybierz lub wgraj wideo tła</span>
+                  </button>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold text-slate-300">URL wideo tła (mp4 / webm)</label>
+                    <input
+                      type="text"
+                      value={String(props.backgroundVideo ?? '')}
+                      onChange={(e) => onPropChange('backgroundVideo', e.target.value)}
+                      placeholder="https://... (mp4, webm)"
+                      className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-violet-500"
+                    />
+                    <p className="text-[10px] text-slate-500">Wideo odtwarzane automatycznie w tle (bez dźwięku, w pętli)</p>
+                  </div>
+
+                  {/* Darkening overlay */}
+                  <div className="space-y-1.5 pt-1 border-t border-white/5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-semibold text-slate-300">Przyciemnienie (overlay)</label>
+                      <span className="text-[11px] font-mono text-white">
+                        {Math.round((currentStyles.overlayOpacity ?? 0.4) * 100)}%
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={5}
+                      value={Math.round((currentStyles.overlayOpacity ?? 0.4) * 100)}
+                      onChange={(e) => onStyleChange({ overlayOpacity: Number(e.target.value) / 100 })}
+                      className="w-full accent-violet-500 h-1 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-1.5 pt-2 border-t border-white/5">
+                <label className="text-[11px] font-semibold text-slate-300">Odstępy pionowe (Padding)</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { label: 'Kompaktowe', top: '40px', bottom: '40px' },
+                    { label: 'Normalne', top: '70px', bottom: '70px' },
+                    { label: 'Duże', top: '100px', bottom: '100px' },
+                  ].map((p) => {
+                    const isSelected =
+                      (typeof currentStyles.padding === 'object' && currentStyles.padding?.top === p.top) ||
+                      currentStyles.padding === `${p.top} 24px`;
+                    return (
+                      <button
+                        key={p.label}
+                        onClick={() =>
+                          onStyleChange({
+                            padding: { top: p.top, right: '24px', bottom: p.bottom, left: '24px' },
+                          })
+                        }
+                        className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
+                          isSelected
+                            ? 'bg-violet-600 text-white border-violet-500'
+                            : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                        }`}
+                      >
+                        {p.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-slate-300">Odstępy pionowe (Padding)</label>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { label: 'Kompaktowe', top: '40px', bottom: '40px' },
-                  { label: 'Normalne', top: '70px', bottom: '70px' },
-                  { label: 'Duże', top: '100px', bottom: '100px' },
-                ].map((p) => {
-                  const isSelected =
-                    (typeof currentStyles.padding === 'object' && currentStyles.padding?.top === p.top) ||
-                    currentStyles.padding === `${p.top} 24px`;
-                  return (
-                    <button
-                      key={p.label}
-                      onClick={() =>
-                        onStyleChange({
-                          padding: { top: p.top, right: '24px', bottom: p.bottom, left: '24px' },
-                        })
-                      }
-                      className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
-                        isSelected
-                          ? 'bg-violet-600 text-white border-violet-500'
-                          : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
-                      }`}
-                    >
-                      {p.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* ============================================================= */}
         {/* SIMPLE CONTROLS: CONTAINER                                     */}
@@ -843,13 +1004,29 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
         </div>
       </div>
 
-      {/* Media Picker Modal */}
+      {/* Media Picker Modal — target-aware write-back */}
       {showMediaPicker && (
         <MediaPickerModal
           isOpen={showMediaPicker}
+          title={
+            mediaPickerTarget === 'section-bg' ? 'Zdjęcie tła sekcji'
+            : mediaPickerTarget === 'video-bg' ? 'Wideo tła sekcji'
+            : 'Zdjęcie'
+          }
           onClose={() => setShowMediaPicker(false)}
           onSelect={(url) => {
-            onPropChange('src', url);
+            if (mediaPickerTarget === 'section-bg') {
+              onStyleChange({
+                backgroundImage: url ? `url("${url}")` : 'none',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+              });
+            } else if (mediaPickerTarget === 'video-bg') {
+              onPropChange('backgroundVideo', url);
+            } else {
+              onPropChange('src', url);
+            }
             setShowMediaPicker(false);
           }}
         />

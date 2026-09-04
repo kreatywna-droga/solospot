@@ -460,8 +460,8 @@ function CanvasNode({
         className={`relative cursor-pointer transition-all duration-150 rounded-lg ${
           !node.visible ? 'opacity-30' : ''
         } ${
-          isSelected ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-[#08080f] z-20' :
-          isHovered ? 'ring-1 ring-violet-400/60 z-10' : ''
+          isSelected ? 'z-20' :
+          isHovered ? 'z-10' : ''
         }`}
       >
         <InlineEditableText
@@ -537,8 +537,8 @@ function CanvasNode({
         className={`relative cursor-pointer transition-all duration-150 rounded-lg ${
           !node.visible ? 'opacity-30' : ''
         } ${
-          isSelected ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-[#08080f] z-20' :
-          isHovered ? 'ring-1 ring-violet-400/60 z-10' : ''
+          isSelected ? 'z-20' :
+          isHovered ? 'z-10' : ''
         }`}
       >
         <InlineEditableText
@@ -606,8 +606,8 @@ function CanvasNode({
         className={`relative inline-block cursor-pointer transition-all duration-150 p-1 rounded-xl ${
           !node.visible ? 'opacity-30' : ''
         } ${
-          isSelected ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-[#08080f] z-20' :
-          isHovered ? 'ring-1 ring-violet-400/60 z-10' : ''
+          isSelected ? 'z-20' :
+          isHovered ? 'z-10' : ''
         }`}
       >
         <button
@@ -749,8 +749,8 @@ function CanvasNode({
         className={`relative cursor-pointer transition-all duration-150 p-1 rounded-xl ${
           !node.visible ? 'opacity-30' : ''
         } ${
-          isSelected ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-[#08080f] z-20' :
-          isHovered ? 'ring-1 ring-violet-400/60 z-10' : ''
+          isSelected ? 'z-20' :
+          isHovered ? 'z-10' : ''
         }`}
       >
         <img
@@ -815,8 +815,8 @@ function CanvasNode({
         className={`relative cursor-pointer transition-all duration-150 p-1 rounded-xl overflow-hidden ${
           !node.visible ? 'opacity-30' : ''
         } ${
-          isSelected ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-[#08080f] z-20' :
-          isHovered ? 'ring-1 ring-violet-400/60 z-10' : ''
+          isSelected ? 'z-20' :
+          isHovered ? 'z-10' : ''
         }`}
       >
         <video
@@ -877,8 +877,8 @@ function CanvasNode({
         className={`relative cursor-pointer transition-all duration-150 p-1 rounded-lg ${
           !node.visible ? 'opacity-30' : ''
         } ${
-          isSelected ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-[#08080f] z-20' :
-          isHovered ? 'ring-1 ring-violet-400/60 z-10' : ''
+          isSelected ? 'z-20' :
+          isHovered ? 'z-10' : ''
         }`}
       >
         {svgContent ? (
@@ -1064,9 +1064,12 @@ function CanvasNode({
       onDrop={handleContainerDrop}
       style={{
         backgroundColor: bg,
-        backgroundImage: styles.backgroundImage ? (styles.backgroundImage.startsWith('url(') ? styles.backgroundImage : `url("${styles.backgroundImage}")`) : undefined,
-        backgroundSize: styles.backgroundImage ? 'cover' : undefined,
-        backgroundPosition: styles.backgroundImage ? 'center' : undefined,
+        backgroundImage: styles.backgroundImage && styles.backgroundImage !== 'none'
+          ? (styles.backgroundImage.startsWith('url(') ? styles.backgroundImage : `url("${styles.backgroundImage}")`)
+          : undefined,
+        backgroundSize: styles.backgroundImage && styles.backgroundImage !== 'none' ? (styles.backgroundSize || 'cover') : undefined,
+        backgroundPosition: styles.backgroundImage && styles.backgroundImage !== 'none' ? (styles.backgroundPosition || 'center') : undefined,
+        backgroundRepeat: styles.backgroundImage && styles.backgroundImage !== 'none' ? (styles.backgroundRepeat || 'no-repeat') : undefined,
         padding,
         margin,
         gap,
@@ -1109,12 +1112,40 @@ function CanvasNode({
           'flex-col'
         ) : ''
       } ${
-        isSelected ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-[#08080f] z-20' :
-        isHovered ? 'ring-1 ring-violet-400/60 z-10' : ''
+        // Selection/hover frames are rendered EXCLUSIVELY by SelectionOverlay
+        // (BoundingBox + HoverHighlight). No rings here — one frame only.
+        isSelected ? 'z-20' :
+        isHovered ? 'z-10' : ''
       }`}
     >
+      {/* Background video (props.backgroundVideo) + darkening overlay */}
+      {(props.backgroundVideo as string) && (
+        <>
+          <video
+            src={String(props.backgroundVideo)}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0 rounded-[inherit]"
+          />
+          {styles.overlayOpacity && parseFloat(styles.overlayOpacity) > 0 && (
+            <div
+              className="absolute inset-0 pointer-events-none bg-black z-0 rounded-[inherit]"
+              style={{ opacity: parseFloat(styles.overlayOpacity) }}
+            />
+          )}
+        </>
+      )}
+      {!props.backgroundVideo && styles.backgroundImage && styles.backgroundImage !== 'none' && styles.overlayOpacity && parseFloat(styles.overlayOpacity) > 0 && (
+        <div
+          className="absolute inset-0 pointer-events-none bg-black z-0 rounded-[inherit]"
+          style={{ opacity: parseFloat(styles.overlayOpacity) }}
+        />
+      )}
       {node.children && node.children.length > 0 ? (
-        node.children.map(child => (
+        <div className="relative z-10">
+        {node.children.map(child => (
           <CanvasNode
             key={child.id}
             node={child}
@@ -1127,7 +1158,8 @@ function CanvasNode({
             onHoverNode={onHoverNode}
             onDoubleClickNode={onDoubleClickNode}
           />
-        ))
+        ))}
+        </div>
       ) : (
         <div className="p-6 border-2 border-dashed border-violet-500/20 hover:border-violet-500/40 rounded-xl text-center text-xs text-slate-400 w-full select-none flex flex-col items-center justify-center gap-3 transition-colors bg-violet-950/5">
           <div className="flex items-center gap-2 text-violet-300 font-semibold text-xs">
@@ -1406,9 +1438,9 @@ function SectionBlock({
         ${!node.visible ? 'opacity-30' : ''}
         ${dropEdge ? 'ring-1 ring-violet-400/50' : ''}
         ${isSelected
-          ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-[#08080f] shadow-2xl z-20'
+          ? 'z-20'
           : isHovered
-            ? 'ring-1 ring-violet-400/60 ring-offset-1 ring-offset-[#08080f] z-10'
+            ? 'z-10'
             : ''
         }
       `}
@@ -1539,9 +1571,12 @@ function SectionBlock({
           }`}
           style={{
             backgroundColor: resolvedStyles.backgroundColor || (node.props as any)?.background || (node.type === 'section' ? '#0a0a14' : '#08080f'),
-            backgroundImage: resolvedStyles.backgroundImage ? (resolvedStyles.backgroundImage.startsWith('url(') ? resolvedStyles.backgroundImage : `url("${resolvedStyles.backgroundImage}")`) : undefined,
-            backgroundSize: resolvedStyles.backgroundImage ? 'cover' : undefined,
-            backgroundPosition: resolvedStyles.backgroundImage ? 'center' : undefined,
+            backgroundImage: resolvedStyles.backgroundImage && resolvedStyles.backgroundImage !== 'none'
+              ? (resolvedStyles.backgroundImage.startsWith('url(') ? resolvedStyles.backgroundImage : `url("${resolvedStyles.backgroundImage}")`)
+              : undefined,
+            backgroundSize: resolvedStyles.backgroundImage && resolvedStyles.backgroundImage !== 'none' ? (resolvedStyles.backgroundSize || 'cover') : undefined,
+            backgroundPosition: resolvedStyles.backgroundImage && resolvedStyles.backgroundImage !== 'none' ? (resolvedStyles.backgroundPosition || 'center') : undefined,
+            backgroundRepeat: resolvedStyles.backgroundImage && resolvedStyles.backgroundImage !== 'none' ? (resolvedStyles.backgroundRepeat || 'no-repeat') : undefined,
             padding: formatFourSide(resolvedStyles.padding, typeof (node.props as any)?.padding === 'string' ? (PADDING_PRESET_MAP[(node.props as any).padding] || (node.props as any).padding) : (node.type === 'section' ? '32px 20px' : '16px')),
             margin: formatFourSide(resolvedStyles.margin),
             borderRadius: resolvedStyles.borderRadius || (node.props as any)?.borderRadius,
@@ -1561,27 +1596,39 @@ function SectionBlock({
             transform: formatTransform(resolvedStyles),
           }}
         >
-          {/* Ambient Section Video Background */}
-          {resolvedStyles.videoSrc && (
+          {/* Ambient Section Video Background (legacy videoSrc or new props.backgroundVideo) */}
+          {(resolvedStyles.videoSrc || (node.props as any)?.backgroundVideo) && (
             <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
               <video
-                src={resolvedStyles.videoSrc}
+                src={String(resolvedStyles.videoSrc || (node.props as any).backgroundVideo)}
                 autoPlay={resolvedStyles.videoAutoplay ?? true}
                 loop={resolvedStyles.videoLoop ?? true}
                 muted={resolvedStyles.videoMuted ?? true}
                 playsInline
                 className="w-full h-full object-cover"
               />
-              {resolvedStyles.overlayColor && (
+              {(resolvedStyles.overlayColor || parseFloat(String(resolvedStyles.overlayOpacity ?? '0')) > 0) && (
                 <div
                   className="absolute inset-0"
                   style={{
-                    backgroundColor: resolvedStyles.overlayColor,
-                    opacity: resolvedStyles.overlayOpacity ?? 0.5,
+                    backgroundColor: resolvedStyles.overlayColor || '#000000',
+                    opacity: resolvedStyles.overlayColor
+                      ? (resolvedStyles.overlayOpacity ?? 0.5)
+                      : parseFloat(String(resolvedStyles.overlayOpacity ?? '0.4')),
                   }}
                 />
               )}
             </div>
+          )}
+
+          {/* Darkening overlay for background image (readability) */}
+          {!(resolvedStyles.videoSrc || (node.props as any)?.backgroundVideo)
+            && resolvedStyles.backgroundImage && resolvedStyles.backgroundImage !== 'none'
+            && parseFloat(String(resolvedStyles.overlayOpacity ?? '0')) > 0 && (
+            <div
+              className="absolute inset-0 pointer-events-none z-0 bg-black"
+              style={{ opacity: parseFloat(String(resolvedStyles.overlayOpacity)) }}
+            />
           )}
 
           <div
@@ -1625,9 +1672,12 @@ function SectionBlock({
             className="w-full relative pointer-events-none overflow-hidden text-slate-900 min-h-[60px]"
             style={{
               backgroundColor: resolvedStyles.backgroundColor || (node.props as any)?.background || (node.type === 'section' ? '#0a0a14' : '#ffffff'),
-              backgroundImage: resolvedStyles.backgroundImage ? (resolvedStyles.backgroundImage.startsWith('url(') ? resolvedStyles.backgroundImage : `url("${resolvedStyles.backgroundImage}")`) : undefined,
-              backgroundSize: resolvedStyles.backgroundImage ? 'cover' : undefined,
-              backgroundPosition: resolvedStyles.backgroundImage ? 'center' : undefined,
+              backgroundImage: resolvedStyles.backgroundImage && resolvedStyles.backgroundImage !== 'none'
+                ? (resolvedStyles.backgroundImage.startsWith('url(') ? resolvedStyles.backgroundImage : `url("${resolvedStyles.backgroundImage}")`)
+                : undefined,
+              backgroundSize: resolvedStyles.backgroundImage && resolvedStyles.backgroundImage !== 'none' ? (resolvedStyles.backgroundSize || 'cover') : undefined,
+              backgroundPosition: resolvedStyles.backgroundImage && resolvedStyles.backgroundImage !== 'none' ? (resolvedStyles.backgroundPosition || 'center') : undefined,
+              backgroundRepeat: resolvedStyles.backgroundImage && resolvedStyles.backgroundImage !== 'none' ? (resolvedStyles.backgroundRepeat || 'no-repeat') : undefined,
               opacity: resolvedStyles.opacity,
               padding: formatFourSide(resolvedStyles.padding, typeof (node.props as any)?.padding === 'string' ? (PADDING_PRESET_MAP[(node.props as any).padding] || (node.props as any).padding) : undefined),
               margin: formatFourSide(resolvedStyles.margin),
@@ -1653,6 +1703,33 @@ function SectionBlock({
               zIndex: resolvedStyles.zIndex,
             }}
           >
+            {/* Background video (autoplay, muted, loop) + darkening overlay */}
+            {(node.props as any)?.backgroundVideo && (
+              <>
+                <video
+                  src={String((node.props as any).backgroundVideo)}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                />
+                {resolvedStyles.overlayOpacity && parseFloat(resolvedStyles.overlayOpacity) > 0 && (
+                  <div
+                    className="absolute inset-0 pointer-events-none bg-black"
+                    style={{ opacity: parseFloat(resolvedStyles.overlayOpacity) }}
+                  />
+                )}
+              </>
+            )}
+            {/* Darkening overlay for background image */}
+            {!((node.props as any)?.backgroundVideo) && resolvedStyles.backgroundImage && resolvedStyles.backgroundImage !== 'none' && resolvedStyles.overlayOpacity && parseFloat(resolvedStyles.overlayOpacity) > 0 && (
+              <div
+                className="absolute inset-0 pointer-events-none bg-black"
+                style={{ opacity: parseFloat(resolvedStyles.overlayOpacity) }}
+              />
+            )}
+            <div className={resolvedStyles.backgroundImage && resolvedStyles.backgroundImage !== 'none' || (node.props as any)?.backgroundVideo ? 'relative' : undefined}>
             <CartProvider>
               <SectionRenderer
                 section={{
@@ -1675,6 +1752,7 @@ function SectionBlock({
                 navigation={[]}
               />
             </CartProvider>
+            </div>
           </div>
 
           {/* Render children if custom section has nested nodes */}
