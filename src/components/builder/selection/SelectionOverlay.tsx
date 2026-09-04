@@ -71,6 +71,10 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     deltaY: number
   } | null>(null)
 
+  // Refs for hot-path drag tracking (zero re-renders during pointermove)
+  const dragRef = useMemo(() => ({ deltaX: 0, deltaY: 0 }), [])
+  const resizeRef = useMemo(() => ({ w: 0, h: 0, fontSize: 0 }), [])
+
   // Compute toolbar data: find node in page or parent container
   const toolbarData = useMemo(() => {
     if (!overlay.toolbarPosition || !overlay.selectedSection) return null
@@ -126,25 +130,22 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     const startY = e.clientY
 
     const domEl = containerRef.current?.querySelector(`[data-section-id="${targetNodeId}"], [data-node-id="${targetNodeId}"]`) as HTMLElement | null
-    const baseRotate = activeStyles.rotate || '0deg'
-    const baseScale = activeStyles.scale || 1
+    const baseRotate = (activeStyles as any).rotate || '0deg'
+    const baseScale = (activeStyles as any).scale || 1
 
-    setMoving({
-      startX,
-      startY,
-      startTx,
-      startTy,
-      deltaX: 0,
-      deltaY: 0,
-    })
+    dragRef.deltaX = 0
+    dragRef.deltaY = 0
+
+    // Show badge once at start (no per-frame re-render)
+    setMoving({ startX, startY, startTx, startTy, deltaX: 0, deltaY: 0 })
 
     const onPointerMove = (moveEvt: PointerEvent) => {
       const deltaX = (moveEvt.clientX - startX) / zoom
       const deltaY = (moveEvt.clientY - startY) / zoom
+      dragRef.deltaX = deltaX
+      dragRef.deltaY = deltaY
 
-      setMoving(prev => prev ? { ...prev, deltaX, deltaY } : null)
-
-      // Direct 60fps DOM transform during pointermove (zero re-renders/history pollution during drag)
+      // Direct 60fps DOM transform — zero React re-renders during drag
       if (domEl) {
         const curTx = startTx + Math.round(deltaX)
         const curTy = startTy + Math.round(deltaY)
@@ -194,10 +195,10 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
       setMoving(null)
     }
 
-    window.addEventListener('pointermove', onPointerMove)
+    window.addEventListener('pointermove', onPointerMove, { passive: true })
     window.addEventListener('pointerup', onPointerUp)
     window.addEventListener('pointercancel', onPointerUp)
-  }, [overlay.boundingRect, canvas.selectedSectionId, canvas.viewport.label, canvas.zoom, containerRef, dispatch, document])
+  }, [overlay.boundingRect, canvas.selectedSectionId, canvas.viewport.label, canvas.zoom, containerRef, dispatch, document, dragRef])
 
   // ---------------------------------------------------------------------------
   // Universal Canvas Resize: Dragging corner or edge handles
@@ -219,7 +220,7 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
           ? (found.node.styles || {})
           : { ...(found.node.styles || {}), ...((found.node.responsive as Record<string, any>)?.[activeBp] || {}) })
       : {}
-    const startFontSize = parseInt(String(activeStyles.fontSize || '16px').replace('px', '')) || 16
+    const startFontSize = parseInt(String((activeStyles as any).fontSize || '16px').replace('px', '')) || 16
 
     const zoom = canvas.zoom ?? 1.0
     const startX = e.clientX
@@ -229,6 +230,11 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
 
     const domEl = containerRef.current?.querySelector(`[data-section-id="${targetNodeId}"], [data-node-id="${targetNodeId}"]`) as HTMLElement | null
 
+    resizeRef.w = startWidth
+    resizeRef.h = startHeight
+    resizeRef.fontSize = startFontSize
+
+    // Show badge once at start
     setResizing({
       handle,
       startX,
@@ -267,14 +273,11 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
         currentFontSize = Math.min(150, Math.max(8, Math.round(startFontSize * ratio)))
       }
 
-      setResizing(prev => prev ? {
-        ...prev,
-        currentWidth: Math.round(w),
-        currentHeight: Math.round(h),
-        currentFontSize,
-      } : null)
+      resizeRef.w = Math.round(w)
+      resizeRef.h = Math.round(h)
+      resizeRef.fontSize = currentFontSize
 
-      // Direct 60fps DOM preview during resize
+      // Direct 60fps DOM preview — zero re-renders
       if (domEl) {
         if (isTextNode) {
           domEl.style.fontSize = `${currentFontSize}px`
@@ -372,10 +375,10 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
       setResizing(null)
     }
 
-    window.addEventListener('pointermove', onPointerMove)
+    window.addEventListener('pointermove', onPointerMove, { passive: true })
     window.addEventListener('pointerup', onPointerUp)
     window.addEventListener('pointercancel', onPointerUp)
-  }, [overlay.boundingRect, canvas.selectedSectionId, canvas.viewport.label, canvas.zoom, containerRef, dispatch, document])
+  }, [overlay.boundingRect, canvas.selectedSectionId, canvas.viewport.label, canvas.zoom, containerRef, dispatch, document, resizeRef])
 
   const displayRect = useMemo(() => {
     if (!overlay.boundingRect) return null
@@ -417,15 +420,19 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
             <>
               <BoundingBox rect={displayRect} onMoveStart={handleMoveStart} />
 
-              {/* Move Grip Handle — allows intuitive dragging of any element */}
+              {/* Move Grip Handle — pointer capture for smooth drag even at high velocity */}
               <div
                 style={{
                   left: displayRect.x + displayRect.width / 2,
                   top: displayRect.y - 8,
                   transform: 'translate(-50%, -100%)',
                 }}
+                onPointerDown={(e) => {
+                  // Capture pointer so drag continues even if mouse leaves the element
+                  e.currentTarget.setPointerCapture(e.pointerId)
+                }}
                 onMouseDown={handleMoveStart}
-                className="absolute z-[125] pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 bg-[#121124] hover:bg-violet-600 text-violet-200 hover:text-white text-[11px] font-medium rounded-lg shadow-xl border border-violet-500/40 cursor-grab active:cursor-grabbing transition-all select-none group"
+                className="absolute z-[125] pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 bg-[#121124] hover:bg-violet-600 text-violet-200 hover:text-white text-[11px] font-medium rounded-lg shadow-xl border border-violet-500/40 cursor-grab active:cursor-grabbing transition-all select-none group touch-none"
                 title="Przeciągnij myszą, aby swobodnie przesunąć element po Canvasie"
               >
                 <Move className="w-3.5 h-3.5 text-violet-400 group-hover:text-white transition-colors" />

@@ -22,7 +22,7 @@
  */
 
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import {
   Type, Image as ImageIcon, Sparkles, Sliders, ChevronDown, ChevronUp,
   FileText, AlignLeft, AlignCenter, AlignRight, ExternalLink,
@@ -36,6 +36,7 @@ import { EmptyInspectorState } from '../../../../packages/authoring-studio/src/i
 import { InspectorRuntime } from '../../../../packages/builder-core/src/InspectorRuntime';
 import { FontPicker } from '../../../../packages/authoring-studio/src/inspector/widgets/FontPicker';
 import { MediaPickerModal } from '../sidebar/MediaPickerModal';
+import { SmoothSlider } from './SmoothSlider';
 import type { InspectorCategory } from '../../../../packages/builder-core/src/InspectorRuntime';
 import type { NodeStyles, NodeResponsive } from '../../../../packages/builder-core/src/BuilderDocument';
 
@@ -60,6 +61,27 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
   const [showMediaPicker, setShowMediaPicker] = useState(false);
   const selectedNode = useSelectedSection();
   const { canvas, document: builderDoc } = useBuilder();
+
+  // Label refs — updated in-place during slider drag (no re-render)
+  const fontSizeLabelRef = useRef<HTMLSpanElement>(null);
+  const imgWidthLabelRef = useRef<HTMLSpanElement>(null);
+  const imgHeightLabelRef = useRef<HTMLSpanElement>(null);
+  const vidWidthLabelRef = useRef<HTMLSpanElement>(null);
+  const vidHeightLabelRef = useRef<HTMLSpanElement>(null);
+  const btnWidthLabelRef = useRef<HTMLSpanElement>(null);
+  const btnHeightLabelRef = useRef<HTMLSpanElement>(null);
+  const svgSizeLabelRef = useRef<HTMLSpanElement>(null);
+  const txLabelRef = useRef<HTMLSpanElement>(null);
+  const tyLabelRef = useRef<HTMLSpanElement>(null);
+
+  // Helper: get canvas DOM element for the selected node for live preview
+  const getCanvasEl = useCallback((): HTMLElement | null => {
+    if (!sectionId) return null;
+    return (
+      document.querySelector(`[data-section-id="${sectionId}"]`) ??
+      document.querySelector(`[data-node-id="${sectionId}"]`)
+    ) as HTMLElement | null;
+  }, [sectionId]);
 
   if (!sectionId || !selectedNode) {
     return <EmptyInspectorState />;
@@ -118,37 +140,30 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
               />
             </div>
 
-            {/* Font Size — Exact Input + Sensitive Continuous Slider */}
+            {/* Font Size — Exact Input + SmoothSlider (zero re-render during drag) */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-[11px]">
                 <span className="font-semibold text-slate-300">Rozmiar tekstu</span>
                 <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-lg px-2 py-0.5">
-                  <input
-                    type="number"
-                    min={8}
-                    max={150}
-                    value={parseInt(String(currentStyles.fontSize || '16px').replace('px', '')) || 16}
-                    onChange={(e) => {
-                      const v = Math.min(150, Math.max(8, Number(e.target.value) || 8));
-                      onStyleChange({ fontSize: `${v}px` });
-                    }}
-                    className="w-10 bg-transparent text-right font-mono text-white text-xs focus:outline-none"
-                  />
+                  <span ref={fontSizeLabelRef} className="w-10 text-right font-mono text-white text-xs">
+                    {parseInt(String(currentStyles.fontSize || '16px').replace('px', '')) || 16}
+                  </span>
                   <span className="text-slate-400 text-[10px]">px</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="range"
-                  min={8}
-                  max={150}
-                  step={1}
-                  value={parseInt(String(currentStyles.fontSize || '16px').replace('px', '')) || 16}
-                  onChange={(e) => onStyleChange({ fontSize: `${e.target.value}px` })}
-                  className="flex-1 accent-violet-500 h-1 cursor-pointer"
-                />
-              </div>
-              {/* Optional Quick Jumps */}
+              <SmoothSlider
+                min={8}
+                max={150}
+                value={parseInt(String(currentStyles.fontSize || '16px').replace('px', '')) || 16}
+                labelRef={fontSizeLabelRef}
+                unit=""
+                onLivePreview={(v) => {
+                  const el = getCanvasEl();
+                  if (el) el.style.fontSize = `${v}px`;
+                }}
+                onChange={(v) => onStyleChange({ fontSize: `${v}px` })}
+              />
+              {/* Quick Jumps */}
               <div className="flex items-center gap-1">
                 {[16, 24, 36, 48, 64].map((sz) => (
                   <button
@@ -297,33 +312,28 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
               </div>
             </div>
 
-            {/* Image Width & Height exact inputs + continuous sliders */}
+            {/* Image Width & Height — SmoothSlider */}
             <div className="space-y-2 pt-1 border-t border-white/5">
               <div className="flex items-center justify-between">
                 <label className="text-[11px] font-semibold text-slate-300">Szerokość obrazu</label>
                 <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-0.5">
-                  <input
-                    type="number"
-                    min={20}
-                    max={1400}
-                    value={parseInt(String(currentStyles.width || '400px').replace('px', '')) || 400}
-                    onChange={(e) => {
-                      const v = Math.min(1400, Math.max(20, Number(e.target.value) || 20))
-                      onStyleChange({ width: `${v}px` })
-                    }}
-                    className="w-12 bg-transparent text-right font-mono text-white text-xs focus:outline-none"
-                  />
+                  <span ref={imgWidthLabelRef} className="w-12 text-right font-mono text-white text-xs">
+                    {parseInt(String(currentStyles.width || '400px').replace('px', '')) || 400}
+                  </span>
                   <span className="text-[10px] text-slate-400">px</span>
                 </div>
               </div>
-              <input
-                type="range"
+              <SmoothSlider
                 min={20}
                 max={1400}
-                step={1}
                 value={parseInt(String(currentStyles.width || '400px').replace('px', '')) || 400}
-                onChange={(e) => onStyleChange({ width: `${e.target.value}px` })}
-                className="w-full accent-violet-500 h-1 cursor-pointer"
+                labelRef={imgWidthLabelRef}
+                unit=""
+                onLivePreview={(v) => {
+                  const el = getCanvasEl();
+                  if (el) el.style.width = `${v}px`;
+                }}
+                onChange={(v) => onStyleChange({ width: `${v}px` })}
               />
             </div>
 
@@ -331,28 +341,23 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
               <div className="flex items-center justify-between">
                 <label className="text-[11px] font-semibold text-slate-300">Wysokość obrazu</label>
                 <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-0.5">
-                  <input
-                    type="number"
-                    min={20}
-                    max={1200}
-                    value={parseInt(String(currentStyles.height || '260px').replace('px', '')) || 260}
-                    onChange={(e) => {
-                      const v = Math.min(1200, Math.max(20, Number(e.target.value) || 20))
-                      onStyleChange({ height: `${v}px` })
-                    }}
-                    className="w-12 bg-transparent text-right font-mono text-white text-xs focus:outline-none"
-                  />
+                  <span ref={imgHeightLabelRef} className="w-12 text-right font-mono text-white text-xs">
+                    {parseInt(String(currentStyles.height || '260px').replace('px', '')) || 260}
+                  </span>
                   <span className="text-[10px] text-slate-400">px</span>
                 </div>
               </div>
-              <input
-                type="range"
+              <SmoothSlider
                 min={20}
                 max={1200}
-                step={1}
                 value={parseInt(String(currentStyles.height || '260px').replace('px', '')) || 260}
-                onChange={(e) => onStyleChange({ height: `${e.target.value}px` })}
-                className="w-full accent-violet-500 h-1 cursor-pointer"
+                labelRef={imgHeightLabelRef}
+                unit=""
+                onLivePreview={(v) => {
+                  const el = getCanvasEl();
+                  if (el) el.style.height = `${v}px`;
+                }}
+                onChange={(v) => onStyleChange({ height: `${v}px` })}
               />
             </div>
           </div>
@@ -428,33 +433,28 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
               </div>
             </div>
 
-            {/* Button Width & Height */}
+            {/* Button Width & Height — SmoothSlider */}
             <div className="space-y-2 pt-1 border-t border-white/5">
               <div className="flex items-center justify-between">
                 <label className="text-[11px] font-semibold text-slate-300">Szerokość przycisku</label>
                 <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-0.5">
-                  <input
-                    type="number"
-                    min={60}
-                    max={800}
-                    value={parseInt(String(currentStyles.width || '180px').replace('px', '')) || 180}
-                    onChange={(e) => {
-                      const v = Math.min(800, Math.max(60, Number(e.target.value) || 60))
-                      onStyleChange({ width: `${v}px` })
-                    }}
-                    className="w-12 bg-transparent text-right font-mono text-white text-xs focus:outline-none"
-                  />
+                  <span ref={btnWidthLabelRef} className="w-12 text-right font-mono text-white text-xs">
+                    {parseInt(String(currentStyles.width || '180px').replace('px', '')) || 180}
+                  </span>
                   <span className="text-[10px] text-slate-400">px</span>
                 </div>
               </div>
-              <input
-                type="range"
+              <SmoothSlider
                 min={60}
                 max={800}
-                step={1}
                 value={parseInt(String(currentStyles.width || '180px').replace('px', '')) || 180}
-                onChange={(e) => onStyleChange({ width: `${e.target.value}px` })}
-                className="w-full accent-violet-500 h-1 cursor-pointer"
+                labelRef={btnWidthLabelRef}
+                unit=""
+                onLivePreview={(v) => {
+                  const el = getCanvasEl();
+                  if (el) el.style.width = `${v}px`;
+                }}
+                onChange={(v) => onStyleChange({ width: `${v}px` })}
               />
             </div>
 
@@ -462,28 +462,23 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
               <div className="flex items-center justify-between">
                 <label className="text-[11px] font-semibold text-slate-300">Wysokość przycisku</label>
                 <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-0.5">
-                  <input
-                    type="number"
-                    min={24}
-                    max={120}
-                    value={parseInt(String(currentStyles.height || '44px').replace('px', '')) || 44}
-                    onChange={(e) => {
-                      const v = Math.min(120, Math.max(24, Number(e.target.value) || 24))
-                      onStyleChange({ height: `${v}px` })
-                    }}
-                    className="w-12 bg-transparent text-right font-mono text-white text-xs focus:outline-none"
-                  />
+                  <span ref={btnHeightLabelRef} className="w-12 text-right font-mono text-white text-xs">
+                    {parseInt(String(currentStyles.height || '44px').replace('px', '')) || 44}
+                  </span>
                   <span className="text-[10px] text-slate-400">px</span>
                 </div>
               </div>
-              <input
-                type="range"
+              <SmoothSlider
                 min={24}
                 max={120}
-                step={1}
                 value={parseInt(String(currentStyles.height || '44px').replace('px', '')) || 44}
-                onChange={(e) => onStyleChange({ height: `${e.target.value}px` })}
-                className="w-full accent-violet-500 h-1 cursor-pointer"
+                labelRef={btnHeightLabelRef}
+                unit=""
+                onLivePreview={(v) => {
+                  const el = getCanvasEl();
+                  if (el) el.style.height = `${v}px`;
+                }}
+                onChange={(v) => onStyleChange({ height: `${v}px` })}
               />
             </div>
           </div>
@@ -629,28 +624,23 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
               <div className="flex items-center justify-between">
                 <label className="text-[11px] font-semibold text-slate-300">Szerokość wideo</label>
                 <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-0.5">
-                  <input
-                    type="number"
-                    min={100}
-                    max={1400}
-                    value={parseInt(String(currentStyles.width || '480px').replace('px', '')) || 480}
-                    onChange={(e) => {
-                      const v = Math.min(1400, Math.max(100, Number(e.target.value) || 100))
-                      onStyleChange({ width: `${v}px` })
-                    }}
-                    className="w-12 bg-transparent text-right font-mono text-white text-xs focus:outline-none"
-                  />
+                  <span ref={vidWidthLabelRef} className="w-12 text-right font-mono text-white text-xs">
+                    {parseInt(String(currentStyles.width || '480px').replace('px', '')) || 480}
+                  </span>
                   <span className="text-[10px] text-slate-400">px</span>
                 </div>
               </div>
-              <input
-                type="range"
+              <SmoothSlider
                 min={100}
                 max={1400}
-                step={1}
                 value={parseInt(String(currentStyles.width || '480px').replace('px', '')) || 480}
-                onChange={(e) => onStyleChange({ width: `${e.target.value}px` })}
-                className="w-full accent-violet-500 h-1 cursor-pointer"
+                labelRef={vidWidthLabelRef}
+                unit=""
+                onLivePreview={(v) => {
+                  const el = getCanvasEl();
+                  if (el) el.style.width = `${v}px`;
+                }}
+                onChange={(v) => onStyleChange({ width: `${v}px` })}
               />
             </div>
 
@@ -658,28 +648,23 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
               <div className="flex items-center justify-between">
                 <label className="text-[11px] font-semibold text-slate-300">Wysokość wideo</label>
                 <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-0.5">
-                  <input
-                    type="number"
-                    min={80}
-                    max={900}
-                    value={parseInt(String(currentStyles.height || '270px').replace('px', '')) || 270}
-                    onChange={(e) => {
-                      const v = Math.min(900, Math.max(80, Number(e.target.value) || 80))
-                      onStyleChange({ height: `${v}px` })
-                    }}
-                    className="w-12 bg-transparent text-right font-mono text-white text-xs focus:outline-none"
-                  />
+                  <span ref={vidHeightLabelRef} className="w-12 text-right font-mono text-white text-xs">
+                    {parseInt(String(currentStyles.height || '270px').replace('px', '')) || 270}
+                  </span>
                   <span className="text-[10px] text-slate-400">px</span>
                 </div>
               </div>
-              <input
-                type="range"
+              <SmoothSlider
                 min={80}
                 max={900}
-                step={1}
                 value={parseInt(String(currentStyles.height || '270px').replace('px', '')) || 270}
-                onChange={(e) => onStyleChange({ height: `${e.target.value}px` })}
-                className="w-full accent-violet-500 h-1 cursor-pointer"
+                labelRef={vidHeightLabelRef}
+                unit=""
+                onLivePreview={(v) => {
+                  const el = getCanvasEl();
+                  if (el) el.style.height = `${v}px`;
+                }}
+                onChange={(v) => onStyleChange({ height: `${v}px` })}
               />
             </div>
 
@@ -713,28 +698,23 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
               <div className="flex items-center justify-between">
                 <label className="text-[11px] font-semibold text-slate-300">Rozmiar ikony</label>
                 <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-0.5">
-                  <input
-                    type="number"
-                    min={12}
-                    max={256}
-                    value={parseInt(String(currentStyles.width || '48px').replace('px', '')) || 48}
-                    onChange={(e) => {
-                      const v = Math.min(256, Math.max(12, Number(e.target.value) || 12))
-                      onStyleChange({ width: `${v}px`, height: `${v}px` })
-                    }}
-                    className="w-10 bg-transparent text-right font-mono text-white text-xs focus:outline-none"
-                  />
+                  <span ref={svgSizeLabelRef} className="w-10 text-right font-mono text-white text-xs">
+                    {parseInt(String(currentStyles.width || '48px').replace('px', '')) || 48}
+                  </span>
                   <span className="text-[10px] text-slate-400">px</span>
                 </div>
               </div>
-              <input
-                type="range"
+              <SmoothSlider
                 min={12}
                 max={256}
-                step={1}
                 value={parseInt(String(currentStyles.width || '48px').replace('px', '')) || 48}
-                onChange={(e) => onStyleChange({ width: `${e.target.value}px`, height: `${e.target.value}px` })}
-                className="w-full accent-violet-500 h-1 cursor-pointer"
+                labelRef={svgSizeLabelRef}
+                unit=""
+                onLivePreview={(v) => {
+                  const el = getCanvasEl();
+                  if (el) { el.style.width = `${v}px`; el.style.height = `${v}px`; }
+                }}
+                onChange={(v) => onStyleChange({ width: `${v}px`, height: `${v}px` })}
               />
             </div>
 
@@ -779,37 +759,53 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            {/* Position X */}
+            {/* Position X — SmoothSlider */}
             <div className="space-y-1 bg-white/5 p-2 rounded-xl border border-white/5">
               <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
                 <span>Oś X</span>
-                <span className="font-mono text-white">{currentStyles.translateX || '0px'}</span>
+                <span ref={txLabelRef} className="font-mono text-white">
+                  {currentStyles.translateX || '0px'}
+                </span>
               </div>
-              <input
-                type="range"
+              <SmoothSlider
                 min={-500}
                 max={500}
-                step={1}
                 value={parseInt(String(currentStyles.translateX || '0px').replace('px', '')) || 0}
-                onChange={(e) => onStyleChange({ translateX: `${e.target.value}px` })}
-                className="w-full accent-violet-500 h-1 cursor-pointer"
+                labelRef={txLabelRef}
+                unit="px"
+                onLivePreview={(v) => {
+                  const el = getCanvasEl();
+                  if (el) {
+                    const curTy = parseInt(el.style.transform.match(/translate\([^,]+,\s*(-?\d+)/)?.[1] ?? '0') || 0;
+                    el.style.transform = `translate(${v}px, ${curTy}px)`;
+                  }
+                }}
+                onChange={(v) => onStyleChange({ translateX: `${v}px` })}
               />
             </div>
 
-            {/* Position Y */}
+            {/* Position Y — SmoothSlider */}
             <div className="space-y-1 bg-white/5 p-2 rounded-xl border border-white/5">
               <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
                 <span>Oś Y</span>
-                <span className="font-mono text-white">{currentStyles.translateY || '0px'}</span>
+                <span ref={tyLabelRef} className="font-mono text-white">
+                  {currentStyles.translateY || '0px'}
+                </span>
               </div>
-              <input
-                type="range"
+              <SmoothSlider
                 min={-500}
                 max={500}
-                step={1}
                 value={parseInt(String(currentStyles.translateY || '0px').replace('px', '')) || 0}
-                onChange={(e) => onStyleChange({ translateY: `${e.target.value}px` })}
-                className="w-full accent-violet-500 h-1 cursor-pointer"
+                labelRef={tyLabelRef}
+                unit="px"
+                onLivePreview={(v) => {
+                  const el = getCanvasEl();
+                  if (el) {
+                    const curTx = parseInt(el.style.transform.match(/translate\((-?\d+)/)?.[1] ?? '0') || 0;
+                    el.style.transform = `translate(${curTx}px, ${v}px)`;
+                  }
+                }}
+                onChange={(v) => onStyleChange({ translateY: `${v}px` })}
               />
             </div>
           </div>
