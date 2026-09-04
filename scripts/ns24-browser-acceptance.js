@@ -196,7 +196,7 @@ async function main() {
 
     // Select the section node then add Container inside
     await openComponents();
-    const addedContainer = await addComponentByLabel('Kontener uniwersalny');
+    const addedContainer = (await addComponentByLabel('Kontener / Ramka')) || (await addComponentByLabel('Kontener uniwersalny (Flex / Grid)'));
     step('add Container', addedContainer);
 
     await openComponents();

@@ -1,6 +1,6 @@
 {
   "base": "https://www.solospot.pl",
-  "email": "ns24.bot+1788549665782@solospot-test.pl",
+  "email": "ns24.bot+1788550737322@solospot-test.pl",
   "results": [
     {
       "name": "register test account",
@@ -32,7 +32,7 @@
     },
     {
       "name": "add Container",
-      "ok": false
+      "ok": true
     },
     {
       "name": "add Heading",
@@ -76,7 +76,7 @@
     },
     {
       "name": "inline edit Heading text (dblclick → type → Enter)",
-      "ok": false
+      "ok": true
     },
     {
       "name": "undo (Ctrl+Z path via toolbar)",
@@ -84,7 +84,7 @@
     },
     {
       "name": "redo restores edit",
-      "ok": false
+      "ok": true
     },
     {
       "name": "switch to Tablet (top toolbar only)",
@@ -92,7 +92,7 @@
     },
     {
       "name": "change property in Tablet context",
-      "ok": false
+      "ok": true
     },
     {
       "name": "switch to Mobile",
@@ -107,8 +107,12 @@
       "ok": true
     },
     {
-      "name": "reload → text edit persisted",
-      "ok": false
+      "name": "reload → text edit persisted (UI)",
+      "ok": true
+    },
+    {
+      "name": "reload → persisted in STORE CONFIG via API",
+      "ok": true
     },
     {
       "name": "preview toggle (view → edit)",
