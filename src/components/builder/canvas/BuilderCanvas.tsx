@@ -548,30 +548,50 @@ function CanvasNode({
       onDrop={handleContainerDrop}
       style={{
         backgroundColor: bg,
-        padding,
-        margin: styles.margin,
+        padding: typeof styles.padding === 'object'
+          ? `${(styles.padding as any).top || 0} ${(styles.padding as any).right || 0} ${(styles.padding as any).bottom || 0} ${(styles.padding as any).left || 0}`
+          : (styles.padding as string) || padding,
+        margin: typeof styles.margin === 'object'
+          ? `${(styles.margin as any).top || 0} ${(styles.margin as any).right || 0} ${(styles.margin as any).bottom || 0} ${(styles.margin as any).left || 0}`
+          : (styles.margin as string),
         gap,
         width: styles.width,
         height: styles.height,
         minHeight: styles.minHeight || '50px',
         maxWidth: styles.maxWidth,
-        alignItems: styles.alignItems || props.alignItems,
-        justifyContent: styles.justifyContent || props.justifyContent,
+        alignItems: styles.alignItems || (props.alignItems as string),
+        justifyContent: styles.justifyContent || (props.justifyContent as string),
+        flexDirection: styles.flexDirection,
+        flexWrap: (styles as any).flexWrap,
+        gridTemplateColumns: styles.gridTemplateColumns,
+        gridTemplateRows: styles.gridTemplateRows,
         borderRadius: styles.borderRadius || '12px',
         border: styles.borderWidth
-          ? `${styles.borderWidth} solid ${styles.borderColor || 'rgba(255,255,255,0.1)'}`
+          ? `${styles.borderWidth} ${styles.borderStyle || 'solid'} ${styles.borderColor || 'rgba(255,255,255,0.1)'}`
           : '1px solid rgba(255,255,255,0.05)',
+        boxShadow: styles.boxShadow,
+        opacity: styles.opacity,
+        position: styles.position as any,
+        zIndex: styles.zIndex,
+        display: styles.display || (
+          display === 'flex-row' ? 'flex' :
+          display === 'grid-2' || display === 'grid-3' || display === 'grid-4' ? 'grid' :
+          'flex'
+        ),
       }}
       className={`relative cursor-pointer transition-all duration-150 ${
         !node.visible ? 'opacity-30' : ''
       } ${
         isDropTarget ? 'ring-2 ring-violet-400 bg-violet-500/10' : ''
       } ${
-        display === 'flex-row' ? 'flex flex-row flex-wrap items-center' :
-        display === 'grid-2' ? 'grid grid-cols-2' :
-        display === 'grid-3' ? 'grid grid-cols-3' :
-        display === 'grid-4' ? 'grid grid-cols-4' :
-        'flex flex-col'
+        // Legacy layout class fallback when no styles.display
+        !styles.display ? (
+          display === 'flex-row' ? 'flex-row flex-wrap items-center' :
+          display === 'grid-2' ? 'grid-cols-2' :
+          display === 'grid-3' ? 'grid-cols-3' :
+          display === 'grid-4' ? 'grid-cols-4' :
+          'flex-col'
+        ) : ''
       } ${
         isSelected ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-[#08080f] z-20' :
         isHovered ? 'ring-1 ring-violet-400/60 z-10' : ''

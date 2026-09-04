@@ -25,7 +25,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { BuilderProvider, useBuilder, useBuilderHistory } from '../state/BuilderProvider'
 import { BuilderCanvas } from '../canvas/BuilderCanvas'
-import { InspectorShellAdapter } from '../../../../packages/authoring-studio/src/inspector/InspectorShellAdapter'
+import { PhaseThreeInspector } from '../inspector/PhaseThreeInspector'
 import { BuilderTopBar, StudioTab } from './BuilderTopBar'
 import { BuilderLeftSidebar } from './BuilderLeftSidebar'
 import { BuilderBottomBar } from './BuilderBottomBar'
@@ -162,70 +162,51 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
       const targetPageId = canvas.selectedPageId || builderDoc.pages[0]?.id
       if (!targetPageId) return
 
-      // Update props (Single Source of Truth)
       dispatch({
         type: 'UPDATE_PROPS',
         pageId: targetPageId,
         sectionId: canvas.selectedSectionId,
         props: { [key]: value },
       })
+    },
+    [dispatch, canvas.selectedSectionId, canvas.selectedPageId, builderDoc],
+  )
 
-      // Style property mapping
-      const STYLE_PROP_MAP: Record<string, string> = {
-        background: 'backgroundColor',
-        backgroundColor: 'backgroundColor',
-        color: 'color',
-        textColor: 'color',
-        fontSize: 'fontSize',
-        fontWeight: 'fontWeight',
-        fontFamily: 'fontFamily',
-        lineHeight: 'lineHeight',
-        letterSpacing: 'letterSpacing',
-        textAlign: 'textAlign',
-        borderRadius: 'borderRadius',
-        borderWidth: 'borderWidth',
-        borderColor: 'borderColor',
-        width: 'width',
-        height: 'height',
-        gap: 'gap',
-        padding: 'padding',
-        margin: 'margin',
-        display: 'display',
-        alignItems: 'alignItems',
-        justifyContent: 'justifyContent',
-      }
+  // Phase 3 — direct NodeStyles editing via SET_NODE_STYLES
+  const handleInspectorStyleChange = useCallback(
+    (patch: import('../../../../packages/builder-core/src/BuilderDocument').NodeStyles) => {
+      if (!canvas.selectedSectionId) return
+      const targetPageId = canvas.selectedPageId || builderDoc.pages[0]?.id
+      if (!targetPageId) return
 
-      const styleKey = STYLE_PROP_MAP[key]
-      if (styleKey) {
-        const viewport = canvas.viewport.label
-        if (viewport === 'TABLET' || viewport === 'MOBILE') {
-          // Responsive override
-          const bp = viewport === 'TABLET' ? 'tablet' : 'mobile'
-          const found = findNode(builderDoc, canvas.selectedSectionId)
-          if (found) {
-            const currentResp = found.node.responsive || {}
-            const currentBpStyles = (currentResp[bp] || {}) as Record<string, unknown>
-            dispatch({
-              type: 'UPDATE_NODE',
-              nodeId: canvas.selectedSectionId,
-              updates: {
-                responsive: {
-                  ...currentResp,
-                  [bp]: { ...currentBpStyles, [styleKey]: value },
-                },
-              },
-              pageId: targetPageId,
-            })
-          }
-        } else {
-          // Desktop base style
+      const viewport = canvas.viewport.label
+      if (viewport === 'TABLET' || viewport === 'MOBILE') {
+        // Responsive override — write into node.responsive[bp]
+        const bp = viewport === 'TABLET' ? 'tablet' : 'mobile'
+        const found = findNode(builderDoc, canvas.selectedSectionId)
+        if (found) {
+          const currentResp = found.node.responsive || {}
+          const currentBpStyles = (currentResp as Record<string, Record<string, unknown>>)[bp] || {}
           dispatch({
-            type: 'SET_NODE_STYLES',
+            type: 'UPDATE_NODE',
             nodeId: canvas.selectedSectionId,
-            styles: { [styleKey]: value as any },
+            updates: {
+              responsive: {
+                ...currentResp,
+                [bp]: { ...currentBpStyles, ...patch },
+              },
+            },
             pageId: targetPageId,
           })
         }
+      } else {
+        // Desktop base — use SET_NODE_STYLES
+        dispatch({
+          type: 'SET_NODE_STYLES',
+          nodeId: canvas.selectedSectionId,
+          styles: patch,
+          pageId: targetPageId,
+        })
       }
     },
     [dispatch, canvas.selectedSectionId, canvas.selectedPageId, canvas.viewport.label, builderDoc],
@@ -303,14 +284,15 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
           }`} />
         </div>
 
-        {/* Inspector (Right Panel) — Inspector 2.0 (PM28 Architecture) */}
+        {/* Inspector (Right Panel) — Phase 3 Inspector (Design + Content tabs) */}
         <aside
           style={{ width: `${rightWidth}px` }}
           className="border-l border-white/10 bg-[#06060c] flex flex-col overflow-hidden flex-shrink-0 h-full select-none"
         >
-          <InspectorShellAdapter
+          <PhaseThreeInspector
             sectionId={canvas.selectedSectionId}
             onPropChange={handleInspectorPropChange}
+            onStyleChange={handleInspectorStyleChange}
           />
         </aside>
       </div>
