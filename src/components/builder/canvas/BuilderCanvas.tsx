@@ -25,7 +25,7 @@
  *   - Clicking a section → dispatch(CANVAS SELECT_SECTION)
  */
 
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   ArrowUp, ArrowDown, Trash2, Copy, Plus,
@@ -401,27 +401,63 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
     }
   }, [marquee])
 
+  const containerRef = useRef<HTMLDivElement>(null)
+  const zoom = canvas.zoom ?? 1.0
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const onWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault()
+        const delta = e.deltaY < 0 ? 0.05 : -0.05
+        const currentZoom = canvas.zoom ?? 1.0
+        const newZoom = Math.min(2.0, Math.max(0.25, Math.round((currentZoom + delta) * 100) / 100))
+        dispatch({ type: 'CANVAS', action: { type: 'SET_ZOOM', zoom: newZoom } })
+      }
+    }
+
+    container.addEventListener('wheel', onWheel, { passive: false })
+    return () => {
+      container.removeEventListener('wheel', onWheel)
+    }
+  }, [canvas.zoom, dispatch])
+
   const viewportWidth = VIEWPORT_PRESETS[canvas.viewport.label].width
 
   return (
     <div
+      ref={containerRef}
       className="flex-1 flex flex-col items-center justify-start overflow-auto bg-[#030305] p-8"
       onClick={handleCanvasClick}
     >
-      {/* Canvas frame */}
-      <motion.div
-        key={canvas.viewport.label}
-        ref={canvasFrameRef}
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.2 }}
-        style={{ width: viewportWidth, maxWidth: '100%' }}
-        className="relative bg-[#08080f] rounded-2xl shadow-2xl border border-white/10 overflow-hidden min-h-[600px]"
-        onClick={e => e.stopPropagation()}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
+      {/* Scalable Canvas Frame Container */}
+      <div
+        style={{
+          transform: `scale(${zoom})`,
+          transformOrigin: 'top center',
+          transition: 'transform 0.15s cubic-bezier(0.2, 0, 0, 1)',
+          width: viewportWidth,
+          maxWidth: zoom <= 1 ? '100%' : undefined,
+          marginBottom: zoom > 1 ? `${(zoom - 1) * 800}px` : undefined,
+        }}
+        className="flex justify-center flex-shrink-0"
       >
+        {/* Canvas frame */}
+        <motion.div
+          key={canvas.viewport.label}
+          ref={canvasFrameRef}
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.2 }}
+          style={{ width: '100%' }}
+          className="relative bg-[#08080f] rounded-2xl shadow-2xl border border-white/10 overflow-hidden min-h-[600px] w-full"
+          onClick={e => e.stopPropagation()}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+        >
         {/* Grid Overlay */}
         <GridOverlay width={viewportWidth} />
 
@@ -561,6 +597,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
           </button>
         )}
       </motion.div>
+      </div>
     </div>
   )
 }

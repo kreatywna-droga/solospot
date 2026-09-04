@@ -143,6 +143,25 @@ export function BuilderProvider({
           })
         }
       }
+      // Zoom in (Ctrl + Plus / Equal)
+      if (ctrlKey && (e.key === '=' || e.key === '+')) {
+        e.preventDefault()
+        const currentZoom = ctxRef.current.canvas.zoom ?? 1.0
+        const newZoom = Math.min(2.0, Math.round((currentZoom + 0.25) * 100) / 100)
+        dispatch({ type: 'CANVAS', action: { type: 'SET_ZOOM', zoom: newZoom } })
+      }
+      // Zoom out (Ctrl + Minus / Underscore)
+      if (ctrlKey && (e.key === '-' || e.key === '_')) {
+        e.preventDefault()
+        const currentZoom = ctxRef.current.canvas.zoom ?? 1.0
+        const newZoom = Math.max(0.25, Math.round((currentZoom - 0.25) * 100) / 100)
+        dispatch({ type: 'CANVAS', action: { type: 'SET_ZOOM', zoom: newZoom } })
+      }
+      // Reset zoom (Ctrl + 0)
+      if (ctrlKey && e.key === '0') {
+        e.preventDefault()
+        dispatch({ type: 'CANVAS', action: { type: 'SET_ZOOM', zoom: 1.0 } })
+      }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)

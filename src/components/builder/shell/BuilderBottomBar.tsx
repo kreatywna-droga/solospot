@@ -48,7 +48,7 @@ export function BuilderBottomBar({ onSave, onPublish, saving, onTabChange }: Bui
       {/* Left: Zoom */}
       <div className="flex items-center gap-1">
         <button
-          onClick={() => setZoom(Math.max(0.25, zoom - 0.25))}
+          onClick={() => setZoom(Math.max(0.25, Math.round((zoom - 0.25) * 100) / 100))}
           className="p-1 rounded-md text-slate-500 hover:text-white hover:bg-white/5 transition-all"
           title="Zoom out"
         >
@@ -77,7 +77,7 @@ export function BuilderBottomBar({ onSave, onPublish, saving, onTabChange }: Bui
           </div>
         </div>
         <button
-          onClick={() => setZoom(Math.min(2.0, zoom + 0.25))}
+          onClick={() => setZoom(Math.min(2.0, Math.round((zoom + 0.25) * 100) / 100))}
           className="p-1 rounded-md text-slate-500 hover:text-white hover:bg-white/5 transition-all"
           title="Zoom in"
         >
