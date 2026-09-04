@@ -25,11 +25,11 @@
  *   - Clicking a section → dispatch(CANVAS SELECT_SECTION)
  */
 
-import { useCallback, useMemo, useRef, useState, useEffect } from 'react'
+import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   ArrowUp, ArrowDown, Trash2, Copy, Plus,
-  Layers, Package, Star, FileText, LayoutDashboard, Grid,
+  Layers, Package, Star, FileText, LayoutDashboard, Grid, Sparkles,
 } from 'lucide-react'
 import { useBuilder } from '../state/BuilderProvider'
 import { SectionNode } from '../../../../packages/builder-core/src/BuilderDocument'
@@ -41,6 +41,8 @@ import { useRuntimePreview } from './useRuntimePreview'
 import { SectionRenderer } from '@/components/runtime/SectionRenderer'
 import { CartProvider } from '@/lib/cart/CartStore'
 import { loadGoogleFont } from '../../../../packages/builder-core/src/fonts/FontCatalog'
+import { SectionLibraryModal } from '../library/SectionLibraryModal'
+import { WebsiteTemplatePickerModal } from '../templates/WebsiteTemplatePickerModal'
 
 // ---------------------------------------------------------------------------
 // Section type → icon mapping (used for wireframe preview)
@@ -1505,6 +1507,10 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
   const sections = activePage?.sections ?? []
   const isDragging = canvas.dragState?.isDragging ?? false
 
+  const [isSectionLibraryOpen, setIsSectionLibraryOpen] = useState(false)
+  const [insertSectionIndex, setInsertSectionIndex] = useState<number | undefined>(undefined)
+  const [isTemplatePickerOpen, setIsTemplatePickerOpen] = useState(false)
+
   const handleSelectSection = useCallback((sectionId: string, pageId: string) => {
     dispatch({
       type: 'CANVAS',
@@ -1913,55 +1919,98 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
         ) : (
           <>
             {sections.length === 0 && (
-              <div className="flex flex-col items-center justify-center h-full min-h-[500px] text-center p-12">
-                <div className="w-20 h-20 rounded-3xl bg-violet-500/10 border border-violet-500/20
-                                flex items-center justify-center mb-6">
-                  <Layers className="w-10 h-10 text-violet-400" />
+              <div className="flex flex-col items-center justify-center h-full min-h-[550px] text-center p-12">
+                <div className="w-20 h-20 rounded-3xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-6">
+                  <Sparkles className="w-10 h-10 text-violet-400" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">Pusta strona</h3>
-                <p className="text-slate-500 text-sm mb-8 max-w-xs">
-                  Przeciągnij komponent z lewego panelu lub wybierz gotowy układ poniżej
+                <h3 className="text-xl font-bold text-white mb-2">Rozpocznij tworzenie strony</h3>
+                <p className="text-slate-400 text-sm mb-8 max-w-md">
+                  Wybierz gotowy, profesjonalnie skomponowany szablon strony lub dodaj pojedyncze sekcje z biblioteki.
                 </p>
-                {onAddSection && (
+                <div className="flex flex-wrap items-center justify-center gap-4">
                   <button
-                    onClick={onAddSection}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl
-                               bg-gradient-to-r from-violet-600 to-fuchsia-600
-                               text-white font-bold text-sm hover:shadow-lg hover:shadow-violet-500/30
-                               transition-all hover:scale-105 active:scale-95"
+                    onClick={() => setIsTemplatePickerOpen(true)}
+                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold text-sm hover:shadow-xl hover:shadow-violet-500/30 transition-all hover:scale-105 active:scale-95"
                   >
-                    <Plus className="w-4 h-4" />
-                    Dodaj sekcję
+                    <Sparkles className="w-4 h-4" />
+                    <span>Wybierz gotowy szablon strony</span>
                   </button>
-                )}
+                  <button
+                    onClick={() => {
+                      setInsertSectionIndex(0)
+                      setIsSectionLibraryOpen(true)
+                    }}
+                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-200 hover:text-white font-bold text-sm border border-white/10 transition-all"
+                  >
+                    <Plus className="w-4 h-4 text-violet-400" />
+                    <span>Przeglądaj bibliotekę sekcji</span>
+                  </button>
+                </div>
               </div>
             )}
 
             {sections.map((node, index) => {
               const isDragSource = isDragging && canvas.dragState?.sectionId === node.id
               return (
-                <div
-                  key={node.id}
-                  data-section-id={node.id}
-                  data-layer-id={node.id}
-                  style={{ 
-                    opacity: isDragSource ? 0.3 : 1,
-                  }}
-                  className="relative w-full"
-                >
-                  <SectionBlock
-                    node={node}
-                    pageId={activePage!.id}
-                    index={index}
-                    total={sections.length}
-                    isSelected={canvas.selectedSectionId === node.id}
-                    isHovered={canvas.hoveredSectionId === node.id && canvas.selectedSectionId !== node.id}
-                    onSelect={() => handleSelectSection(node.id, activePage!.id)}
-                    onHover={handleHoverSection}
-                  />
-                </div>
+                <React.Fragment key={node.id}>
+                  {/* In-between section insertion divider */}
+                  <div className="relative group/divider py-1.5 flex items-center justify-center z-20">
+                    <div className="absolute inset-x-8 h-px bg-transparent group-hover/divider:bg-violet-500/40 transition-all" />
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setInsertSectionIndex(index)
+                        setIsSectionLibraryOpen(true)
+                      }}
+                      className="opacity-0 group-hover/divider:opacity-100 transition-all flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-bold shadow-lg shadow-violet-600/40 z-10 scale-95 hover:scale-105"
+                      title="Wstaw sekcję w tym miejscu"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Dodaj sekcję tutaj</span>
+                    </button>
+                  </div>
+
+                  <div
+                    data-section-id={node.id}
+                    data-layer-id={node.id}
+                    style={{ 
+                      opacity: isDragSource ? 0.3 : 1,
+                    }}
+                    className="relative w-full"
+                  >
+                    <SectionBlock
+                      node={node}
+                      pageId={activePage!.id}
+                      index={index}
+                      total={sections.length}
+                      isSelected={canvas.selectedSectionId === node.id}
+                      isHovered={canvas.hoveredSectionId === node.id && canvas.selectedSectionId !== node.id}
+                      onSelect={() => handleSelectSection(node.id, activePage!.id)}
+                      onHover={handleHoverSection}
+                    />
+                  </div>
+                </React.Fragment>
               )
             })}
+
+            {/* In-between divider after the last section */}
+            {sections.length > 0 && (
+              <div className="relative group/divider py-2 flex items-center justify-center z-20">
+                <div className="absolute inset-x-8 h-px bg-transparent group-hover/divider:bg-violet-500/40 transition-all" />
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setInsertSectionIndex(sections.length)
+                    setIsSectionLibraryOpen(true)
+                  }}
+                  className="opacity-0 group-hover/divider:opacity-100 transition-all flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-bold shadow-lg shadow-violet-600/40 z-10 scale-95 hover:scale-105"
+                  title="Wstaw sekcję na końcu strony"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Dodaj sekcję tutaj</span>
+                </button>
+              </div>
+            )}
           </>
         )}
 
@@ -1973,9 +2022,34 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
 
         {/* Add section & Layout Presets at bottom */}
         {sections.length > 0 && (
-          <div className="border-t border-white/10 bg-[#06060c] p-4 flex flex-col items-center gap-3">
-            <div className="flex flex-wrap items-center justify-center gap-2 text-xs">
-              <span className="text-[11px] font-semibold text-slate-400">Dodaj układ:</span>
+          <div className="border-t border-white/10 bg-[#06060c] p-5 flex flex-col items-center gap-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setInsertSectionIndex(sections.length)
+                  setIsSectionLibraryOpen(true)
+                }}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold transition-all shadow-md shadow-violet-600/25 hover:scale-105 active:scale-95"
+              >
+                <Plus className="w-4 h-4" />
+                <span>+ Dodaj Sekcję z Biblioteki</span>
+              </button>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setIsTemplatePickerOpen(true)
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-semibold transition-all border border-white/10"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+                <span>Zmień Szablon Strony</span>
+              </button>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-2 text-xs pt-1 border-t border-white/5 w-full">
+              <span className="text-[11px] font-semibold text-slate-500">Szybkie kolumny:</span>
               {[
                 { label: '1 Kolumna', display: 'flex-col' },
                 { label: '2 Kolumny (50/50)', display: 'grid-2' },
@@ -1996,24 +2070,27 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                       label: `Układ: ${preset.label}`,
                     })
                   }}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-violet-600 hover:text-white text-slate-300 border border-white/10 transition-all font-medium"
+                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-violet-600 hover:text-white text-slate-400 hover:border-violet-500 border border-white/5 transition-all font-medium text-[11px]"
                 >
                   + {preset.label}
                 </button>
               ))}
             </div>
-
-            {onAddSection && (
-              <button
-                onClick={e => { e.stopPropagation(); onAddSection?.() }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-semibold transition-all border border-white/10"
-              >
-                <Plus className="w-3.5 h-3.5 text-violet-400" />
-                <span>Otwórz bibliotekę komponentów</span>
-              </button>
-            )}
           </div>
         )}
+
+        {/* Section Library Modal */}
+        <SectionLibraryModal
+          isOpen={isSectionLibraryOpen}
+          onClose={() => setIsSectionLibraryOpen(false)}
+          insertIndex={insertSectionIndex}
+        />
+
+        {/* Website Template Picker Modal */}
+        <WebsiteTemplatePickerModal
+          isOpen={isTemplatePickerOpen}
+          onClose={() => setIsTemplatePickerOpen(false)}
+        />
       </motion.div>
       </div>
     </div>

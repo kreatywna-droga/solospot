@@ -13,11 +13,12 @@ import {
   ChevronLeft, Monitor, Tablet, Smartphone,
   Undo2, Redo2, Save, Zap, AlertCircle, CheckCircle2,
   PanelLeft, Layers, ImageIcon, Bot, History,
-  Search, Command, Plus, Palette,
+  Search, Command, Plus, Palette, Eye, Sparkles,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useBuilder, useBuilderHistory } from '../state/BuilderProvider'
 import { VIEWPORT_PRESETS, ViewportLabel, RuntimeMode } from '../../../../packages/builder-core/src/CanvasState'
+import { WebsiteTemplatePickerModal } from '../templates/WebsiteTemplatePickerModal'
 
 export type StudioTab = 'pages' | 'layers' | 'components' | 'assets' | 'style' | 'ai' | 'history'
 
@@ -49,6 +50,7 @@ export function BuilderTopBar({
   const { document, canvas, isDirty, dispatch } = useBuilder()
   const { canUndo, canRedo, undo, redo } = useBuilderHistory()
   const [showCommandPalette, setShowCommandPalette] = useState(false)
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false)
 
   const setViewport = useCallback((label: ViewportLabel) => {
     dispatch({
@@ -120,24 +122,34 @@ export function BuilderTopBar({
           ))}
         </div>
 
-        {/* Right: viewport + runtime mode + undo/redo + save/publish */}
+        {/* Right: viewport + templates / preview + undo/redo + save/publish */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Runtime Mode (LIVE / PREVIEW / EXPORT) */}
-          <div className="flex items-center gap-0.5 bg-white/5 rounded-xl p-0.5 border border-white/5">
-            {(['PREVIEW', 'LIVE', 'EXPORT'] as RuntimeMode[]).map(m => (
-              <button
-                key={m}
-                onClick={() => setRuntimeMode(m)}
-                className={`px-2 py-1 rounded-lg text-[10px] font-bold tracking-wider transition-all
-                  ${canvas.runtimeMode === m
-                    ? 'bg-violet-500/25 text-violet-300 border border-violet-500/40'
-                    : 'text-slate-500 hover:text-slate-300 border border-transparent'
-                  }`}
-                title={`Tryb podglądu: ${m}`}
-              >
-                {m}
-              </button>
-            ))}
+          {/* Templates & Preview Mode Buttons */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setShowTemplatePicker(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-600/15 hover:bg-violet-600/25 text-violet-300 border border-violet-500/30 text-xs font-semibold transition-all shadow-sm"
+              title="Wybierz gotowy szablon strony"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+              <span className="hidden sm:inline">Szablony</span>
+            </button>
+
+            <button
+              onClick={() => {
+                const nextMode = canvas.runtimeMode === 'PREVIEW' ? 'LIVE' : 'PREVIEW'
+                setRuntimeMode(nextMode)
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                canvas.runtimeMode === 'PREVIEW'
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm'
+                  : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 hover:text-white'
+              }`}
+              title="Przełącz tryb podglądu"
+            >
+              <Eye className="w-3.5 h-3.5" />
+              <span>{canvas.runtimeMode === 'PREVIEW' ? 'Edytuj' : 'Podgląd'}</span>
+            </button>
           </div>
 
           <div className="w-px h-6 bg-white/10 mx-1" />
@@ -230,6 +242,12 @@ export function BuilderTopBar({
       {showCommandPalette && (
         <CommandPaletteModal onClose={() => setShowCommandPalette(false)} />
       )}
+
+      {/* Website Template Picker Modal */}
+      <WebsiteTemplatePickerModal
+        isOpen={showTemplatePicker}
+        onClose={() => setShowTemplatePicker(false)}
+      />
     </>
   )
 }

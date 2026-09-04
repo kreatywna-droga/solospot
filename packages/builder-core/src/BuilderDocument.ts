@@ -122,6 +122,7 @@ export interface NodeStyles {
   fontSize?: string;
   fontWeight?: string;
   fontFamily?: string;
+  fontStyle?: string;
   lineHeight?: string;
   letterSpacing?: string;
   textAlign?: 'left' | 'center' | 'right' | 'justify';

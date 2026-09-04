@@ -1,44 +1,49 @@
 'use client';
 
 /**
- * PhaseThreeInspector — Phase 3 Master Inspector
+ * PhaseThreeInspector — Simple-First Progressive Inspector
  *
- * Multi-tab inspector that combines:
- *   - Design / Layout / Spacing / Typography / Advanced → NodeStyles via SET_NODE_STYLES
- *   - Content → ComponentRegistry schema-driven props via InspectorShell
+ * Product Philosophy:
+ *   SIMPLE FIRST. POWER SECOND.
+ *
+ * Default View (Simple Mode):
+ *   Only 3-5 essential, intuitive visual controls tailored to the selected element.
+ *   No CSS jargon or overwhelming wall of sliders.
+ *
+ * Advanced View:
+ *   Collapsible accordion "Zaawansowane ustawienia (Advanced) ▼" revealing the
+ *   complete professional DesignInspector (exact numeric transforms, scale,
+ *   rotation, 4-side padding/margin, borders, shadows, z-index, custom CSS).
  *
  * Architecture (DECISION-043, DECISION-044, DECISION-045):
- *   - Reads selected node styles from BuilderDocument (SSOT) via useSelectedSection()
- *   - Dispatches SET_NODE_STYLES for style changes (passed in as onStyleChange)
- *   - Dispatches UPDATE_PROPS for content/prop changes (passed in as onPropChange)
+ *   - Reads selected node from BuilderDocument (SSOT) via useSelectedSection()
+ *   - Dispatches SET_NODE_STYLES / UPDATE_PROPS
  *   - Inspector NEVER invokes PlaybackController
- *   - Inspector edits configuration ONLY
- *
- * @phase Phase 3 — Inspector + Layout Engine
  */
 
 import * as React from 'react';
-import { FileText } from 'lucide-react';
+import { useState } from 'react';
+import {
+  Type, Image as ImageIcon, Sparkles, Sliders, ChevronDown, ChevronUp,
+  FileText, AlignLeft, AlignCenter, AlignRight, ExternalLink,
+  Layers, Palette, Video, Upload, Check,
+} from 'lucide-react';
 import { useBuilder, useSelectedSection } from '../state/BuilderProvider';
 import { DesignInspector } from '../../../../packages/authoring-studio/src/inspector/DesignInspector';
 import { InspectorSync } from './InspectorSync';
 import { InspectorShell } from '../../../../packages/authoring-studio/src/inspector/InspectorShell';
 import { EmptyInspectorState } from '../../../../packages/authoring-studio/src/inspector/EmptyInspectorState';
 import { InspectorRuntime } from '../../../../packages/builder-core/src/InspectorRuntime';
+import { FontPicker } from '../../../../packages/authoring-studio/src/inspector/widgets/FontPicker';
+import { MediaPickerModal } from '../sidebar/MediaPickerModal';
 import type { InspectorCategory } from '../../../../packages/builder-core/src/InspectorRuntime';
 import type { NodeStyles, NodeResponsive } from '../../../../packages/builder-core/src/BuilderDocument';
-
-// ---------------------------------------------------------------------------
-// PhaseThreeInspector
-// ---------------------------------------------------------------------------
 
 export interface PhaseThreeInspectorProps {
   sectionId: string | null;
   onPropChange: (key: string, value: unknown) => void;
   onStyleChange: (patch: Partial<NodeStyles>) => void;
 }
-
-type MasterTab = 'design' | 'content';
 
 function viewportToBreakpoint(label: string): 'desktop' | 'tablet' | 'mobile' {
   if (label === 'TABLET') return 'tablet';
@@ -51,9 +56,10 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
   onPropChange,
   onStyleChange,
 }) => {
-  const [masterTab, setMasterTab] = React.useState<MasterTab>('design');
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showMediaPicker, setShowMediaPicker] = useState(false);
   const selectedNode = useSelectedSection();
-  const { canvas } = useBuilder();
+  const { canvas, document: builderDoc } = useBuilder();
 
   if (!sectionId || !selectedNode) {
     return <EmptyInspectorState />;
@@ -64,85 +70,423 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
     activeBreakpoint === 'desktop'
       ? (selectedNode.styles ?? {})
       : { ...(selectedNode.styles ?? {}), ...((selectedNode.responsive as NodeResponsive | undefined)?.[activeBreakpoint] ?? {}) };
+
   const nodeLabel = selectedNode.label ?? selectedNode.type;
   const nodeType = selectedNode.type;
+  const props = selectedNode.props ?? {};
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      {/* Master Tab Bar: Design | Content */}
-      <div className="flex border-b border-white/10 flex-shrink-0 bg-[#07070f]">
-        <button
-          onClick={() => setMasterTab('design')}
-          className={`flex-1 py-2.5 text-[11px] font-semibold tracking-wide border-b-2 transition-colors ${
-            masterTab === 'design'
-              ? 'text-white border-violet-500'
-              : 'text-slate-500 border-transparent hover:text-slate-300'
-          }`}
-        >
-          Design
-        </button>
-        <button
-          onClick={() => setMasterTab('content')}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] font-semibold tracking-wide border-b-2 transition-colors ${
-            masterTab === 'content'
-              ? 'text-white border-violet-500'
-              : 'text-slate-500 border-transparent hover:text-slate-300'
-          }`}
-        >
-          <FileText className="w-3.5 h-3.5" />
-          Content
-        </button>
-        <div className="flex items-center px-2 text-[9px] font-mono uppercase text-violet-300/80 bg-violet-500/10 border-l border-white/5">
-          {activeBreakpoint}
+    <div className="flex flex-col h-full overflow-hidden bg-[#07070f] text-white select-none">
+      {/* Element Header */}
+      <div className="px-4 py-3 border-b border-white/10 bg-[#090914] flex items-center justify-between">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-white truncate">{nodeLabel}</span>
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-violet-500/20 text-violet-300 uppercase">
+              {nodeType}
+            </span>
+          </div>
+          <p className="text-[11px] text-slate-500 mt-0.5">Szybka edycja wizualna</p>
         </div>
       </div>
 
-      {/* Design tab — DesignInspector with 5 sub-tabs */}
-      {masterTab === 'design' && (
-        <div className="flex-1 overflow-hidden">
-          <DesignInspector
-            styles={currentStyles}
-            onStyleChange={onStyleChange}
-            nodeLabel={nodeLabel}
-            nodeType={nodeType}
-          />
-        </div>
-      )}
+      {/* Main Scrollable Inspector Body */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-5">
+        {/* ============================================================= */}
+        {/* SIMPLE CONTROLS: TEXT / HEADING                                */}
+        {/* ============================================================= */}
+        {(nodeType === 'text' || nodeType === 'heading') && (
+          <div className="space-y-4">
+            {/* Direct Text Input */}
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold text-slate-300">Treść tekstu</label>
+              <textarea
+                value={String(props.text ?? '')}
+                onChange={(e) => onPropChange('text', e.target.value)}
+                placeholder="Wpisz treść tekstu..."
+                rows={3}
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 resize-none"
+              />
+            </div>
 
-      {/* Content tab — schema-driven props via InspectorSync */}
-      {masterTab === 'content' && (
-        <div className="flex-1 overflow-hidden flex flex-col">
-          <InspectorSync>
-            {(data) => {
-              if (!data.descriptor || !data.sectionId) {
-                return (
-                  <div className="flex-1 flex items-center justify-center p-4">
-                    <p className="text-[11px] text-slate-600 text-center">
-                      No content schema for this element.
-                    </p>
-                  </div>
-                );
-              }
+            {/* Font Family */}
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold text-slate-300">Czcionka (Google Fonts)</label>
+              <FontPicker
+                value={currentStyles.fontFamily || 'Inter'}
+                onChange={(font) => onStyleChange({ fontFamily: font })}
+              />
+            </div>
 
-              const schema = data.descriptor.schema ?? [];
-              const props = InspectorRuntime.applyDefaults(schema, data.props);
-              const readonlyCategories = InspectorRuntime.organizeByCategory(schema);
-              const categories: InspectorCategory[] = [...readonlyCategories];
+            {/* Font Size */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="font-semibold text-slate-300">Rozmiar tekstu</span>
+                <span className="font-mono text-slate-400">{currentStyles.fontSize || '16px'}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                {[
+                  { label: 'S (14px)', val: '14px' },
+                  { label: 'M (18px)', val: '18px' },
+                  { label: 'L (24px)', val: '24px' },
+                  { label: 'XL (36px)', val: '36px' },
+                  { label: '2XL (48px)', val: '48px' },
+                ].map((s) => (
+                  <button
+                    key={s.val}
+                    onClick={() => onStyleChange({ fontSize: s.val })}
+                    className={`flex-1 py-1 text-[10px] font-bold rounded-lg border transition-all ${
+                      currentStyles.fontSize === s.val
+                        ? 'bg-violet-600 text-white border-violet-500 shadow-sm'
+                        : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                    }`}
+                  >
+                    {s.label.split(' ')[0]}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-              return (
-                <InspectorShell
-                  sectionId={data.sectionId}
-                  sectionName={data.descriptor.label ?? data.sectionId}
-                  sectionType={data.descriptor.type}
-                  categories={categories}
-                  currentProps={props}
-                  onPropChange={onPropChange}
-                  breakpoint={activeBreakpoint}
+            {/* Color & Alignment */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-semibold text-slate-300">Kolor tekstu</label>
+                <div className="flex items-center gap-2 p-1.5 bg-white/5 border border-white/10 rounded-xl">
+                  <input
+                    type="color"
+                    value={currentStyles.color || '#ffffff'}
+                    onChange={(e) => onStyleChange({ color: e.target.value })}
+                    className="w-7 h-7 rounded-lg border-0 cursor-pointer bg-transparent"
+                  />
+                  <span className="text-[11px] font-mono text-slate-300">{currentStyles.color || '#ffffff'}</span>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-semibold text-slate-300">Wyrównanie</label>
+                <div className="flex items-center p-1 bg-white/5 border border-white/10 rounded-xl gap-1">
+                  <button
+                    onClick={() => onStyleChange({ textAlign: 'left' })}
+                    className={`flex-1 py-1.5 rounded-lg flex items-center justify-center transition-colors ${
+                      currentStyles.textAlign === 'left' || !currentStyles.textAlign ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <AlignLeft className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => onStyleChange({ textAlign: 'center' })}
+                    className={`flex-1 py-1.5 rounded-lg flex items-center justify-center transition-colors ${
+                      currentStyles.textAlign === 'center' ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <AlignCenter className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => onStyleChange({ textAlign: 'right' })}
+                    className={`flex-1 py-1.5 rounded-lg flex items-center justify-center transition-colors ${
+                      currentStyles.textAlign === 'right' ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <AlignRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================= */}
+        {/* SIMPLE CONTROLS: IMAGE                                         */}
+        {/* ============================================================= */}
+        {nodeType === 'image' && (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-[11px] font-semibold text-slate-300">Zdjęcie</label>
+              <button
+                onClick={() => setShowMediaPicker(true)}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 font-semibold text-xs text-white transition-all shadow-md shadow-violet-600/20"
+              >
+                <ImageIcon className="w-4 h-4" />
+                <span>Wybierz lub wgraj nowe zdjęcie</span>
+              </button>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold text-slate-300">Adres URL grafiki</label>
+              <input
+                type="text"
+                value={String(props.src ?? '')}
+                onChange={(e) => onPropChange('src', e.target.value)}
+                placeholder="https://..."
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-violet-500"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold text-slate-300">Dopasowanie (Object Fit)</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => onStyleChange({ objectFit: 'cover' })}
+                  className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
+                    currentStyles.objectFit === 'cover' || !currentStyles.objectFit
+                      ? 'bg-violet-600 text-white border-violet-500'
+                      : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                  }`}
+                >
+                  Wypełnij (Cover)
+                </button>
+                <button
+                  onClick={() => onStyleChange({ objectFit: 'contain' })}
+                  className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
+                    currentStyles.objectFit === 'contain'
+                      ? 'bg-violet-600 text-white border-violet-500'
+                      : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                  }`}
+                >
+                  Dopasuj (Contain)
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold text-slate-300">Zaokrąglenie narożników</label>
+              <div className="grid grid-cols-4 gap-1.5">
+                {[
+                  { label: 'Proste', val: '0px' },
+                  { label: '8px', val: '8px' },
+                  { label: '16px', val: '16px' },
+                  { label: 'Pełne', val: '9999px' },
+                ].map((r) => (
+                  <button
+                    key={r.val}
+                    onClick={() => onStyleChange({ borderRadius: r.val })}
+                    className={`py-1 text-[11px] font-semibold rounded-lg border transition-all ${
+                      currentStyles.borderRadius === r.val
+                        ? 'bg-violet-600 text-white border-violet-500'
+                        : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                    }`}
+                  >
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================= */}
+        {/* SIMPLE CONTROLS: BUTTON                                        */}
+        {/* ============================================================= */}
+        {nodeType === 'button' && (
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold text-slate-300">Tekst na przycisku</label>
+              <input
+                type="text"
+                value={String(props.text ?? '')}
+                onChange={(e) => onPropChange('text', e.target.value)}
+                placeholder="np. Kup Teraz, Zarejestruj się"
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-violet-500"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold text-slate-300">Link docelowy (URL)</label>
+              <div className="relative">
+                <ExternalLink className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <input
+                  type="text"
+                  value={String(props.href ?? '')}
+                  onChange={(e) => onPropChange('href', e.target.value)}
+                  placeholder="https://... lub #kontakt"
+                  className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-violet-500"
                 />
-              );
-            }}
-          </InspectorSync>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-semibold text-slate-300">Kolor tła</label>
+                <div className="flex items-center gap-2 p-1.5 bg-white/5 border border-white/10 rounded-xl">
+                  <input
+                    type="color"
+                    value={currentStyles.backgroundColor || '#7c3aed'}
+                    onChange={(e) => onStyleChange({ backgroundColor: e.target.value })}
+                    className="w-7 h-7 rounded-lg border-0 cursor-pointer bg-transparent"
+                  />
+                  <span className="text-[11px] font-mono text-slate-300">{currentStyles.backgroundColor || '#7c3aed'}</span>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-semibold text-slate-300">Kolor tekstu</label>
+                <div className="flex items-center gap-2 p-1.5 bg-white/5 border border-white/10 rounded-xl">
+                  <input
+                    type="color"
+                    value={currentStyles.color || '#ffffff'}
+                    onChange={(e) => onStyleChange({ color: e.target.value })}
+                    className="w-7 h-7 rounded-lg border-0 cursor-pointer bg-transparent"
+                  />
+                  <span className="text-[11px] font-mono text-slate-300">{currentStyles.color || '#ffffff'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================= */}
+        {/* SIMPLE CONTROLS: SECTION                                       */}
+        {/* ============================================================= */}
+        {nodeType === 'section' && (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-[11px] font-semibold text-slate-300">Tło sekcji</label>
+              <div className="flex items-center gap-2 p-2 bg-white/5 border border-white/10 rounded-xl">
+                <input
+                  type="color"
+                  value={currentStyles.backgroundColor || '#06060c'}
+                  onChange={(e) => onStyleChange({ backgroundColor: e.target.value })}
+                  className="w-8 h-8 rounded-lg border-0 cursor-pointer bg-transparent"
+                />
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold text-white">Kolor tła</div>
+                  <div className="text-[11px] font-mono text-slate-400">{currentStyles.backgroundColor || '#06060c'}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold text-slate-300">Odstępy pionowe (Padding)</label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { label: 'Kompaktowe', top: '40px', bottom: '40px' },
+                  { label: 'Normalne', top: '70px', bottom: '70px' },
+                  { label: 'Duże', top: '100px', bottom: '100px' },
+                ].map((p) => {
+                  const isSelected =
+                    (typeof currentStyles.padding === 'object' && currentStyles.padding?.top === p.top) ||
+                    currentStyles.padding === `${p.top} 24px`;
+                  return (
+                    <button
+                      key={p.label}
+                      onClick={() =>
+                        onStyleChange({
+                          padding: { top: p.top, right: '24px', bottom: p.bottom, left: '24px' },
+                        })
+                      }
+                      className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
+                        isSelected
+                          ? 'bg-violet-600 text-white border-violet-500'
+                          : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================= */}
+        {/* SIMPLE CONTROLS: CONTAINER                                     */}
+        {/* ============================================================= */}
+        {nodeType === 'container' && (
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold text-slate-300">Układ elementów</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => onStyleChange({ display: 'flex', flexDirection: 'column' })}
+                  className={`py-2 text-xs font-semibold rounded-xl border transition-all ${
+                    currentStyles.flexDirection === 'column' || !currentStyles.flexDirection
+                      ? 'bg-violet-600 text-white border-violet-500'
+                      : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                  }`}
+                >
+                  W pionie (Kolumna)
+                </button>
+                <button
+                  onClick={() => onStyleChange({ display: 'flex', flexDirection: 'row' })}
+                  className={`py-2 text-xs font-semibold rounded-xl border transition-all ${
+                    currentStyles.flexDirection === 'row'
+                      ? 'bg-violet-600 text-white border-violet-500'
+                      : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                  }`}
+                >
+                  W poziomie (Wiersz)
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold text-slate-300">Odstęp między elementami (Gap)</label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { label: 'Mały (8px)', val: '8px' },
+                  { label: 'Średni (16px)', val: '16px' },
+                  { label: 'Duży (32px)', val: '32px' },
+                ].map((g) => (
+                  <button
+                    key={g.val}
+                    onClick={() => onStyleChange({ gap: g.val })}
+                    className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
+                      currentStyles.gap === g.val
+                        ? 'bg-violet-600 text-white border-violet-500'
+                        : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                    }`}
+                  >
+                    {g.label.split(' ')[0]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================= */}
+        {/* ADVANCED COLLAPSIBLE ACCORDION                                */}
+        {/* ============================================================= */}
+        <div className="pt-3 border-t border-white/10">
+          <button
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-slate-300 hover:text-white transition-all border border-white/5"
+          >
+            <div className="flex items-center gap-2">
+              <Sliders className="w-3.5 h-3.5 text-violet-400" />
+              <span>Zaawansowane ustawienia (Advanced)</span>
+            </div>
+            {showAdvanced ? (
+              <ChevronUp className="w-4 h-4 text-slate-400" />
+            ) : (
+              <ChevronDown className="w-4 h-4 text-slate-400" />
+            )}
+          </button>
+
+          {showAdvanced && (
+            <div className="mt-3 pt-3 border-t border-white/5">
+              <DesignInspector
+                styles={currentStyles}
+                onStyleChange={onStyleChange}
+                nodeLabel={nodeLabel}
+                nodeType={nodeType}
+              />
+            </div>
+          )}
         </div>
+      </div>
+
+      {/* Media Picker Modal */}
+      {showMediaPicker && (
+        <MediaPickerModal
+          isOpen={showMediaPicker}
+          onClose={() => setShowMediaPicker(false)}
+          onSelect={(url) => {
+            onPropChange('src', url);
+            setShowMediaPicker(false);
+          }}
+        />
       )}
     </div>
   );

@@ -40,6 +40,7 @@ const CURATED_LIBRARY: Array<{ id: string; name: string; url: string; category: 
 ]
 
 interface MediaPickerModalProps {
+  isOpen?: boolean
   title?: string
   currentValue?: string
   onSelect: (url: string) => void

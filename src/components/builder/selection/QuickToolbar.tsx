@@ -1,103 +1,42 @@
 'use client'
 
 /**
- * QuickToolbar — C16.4 Quick Action Toolbar
+ * QuickToolbar — C16.4 Smart Contextual Action Toolbar
  *
  * Floating toolbar above/below the selected element.
  *
  * Architecture:
- *   Receives ToolbarPositionResult + selected section data → renders buttons
- *   Emits dispatch(OverlayController.actionToCommand(action))
+ *   Receives ToolbarPositionResult + selected section data → renders contextual controls
+ *   Emits dispatch() to BuilderDocument (SSOT).
  *   NEVER modifies document directly.
  *
- * Actions:
- *   ↑ MOVE_UP | ↓ MOVE_DOWN | ⬡ DUPLICATE | 🗑 DELETE | 🔒 LOCK | 👁 HIDE
+ * Contextual Controls:
+ *   - Text/Heading: Direct edit, Font Family, Quick Size (S, M, L, XL), Color, Align (L, C, R)
+ *   - Image: Replace Image, Fit (Cover/Contain), Radius
+ *   - Button: Label, Link URL, Style
+ *   - Section: Background Media, + Add Section Below
+ *   - Common: Duplicate, Delete, Lock, Reorder
  */
 
-import { motion } from 'framer-motion'
+import { useState, useCallback, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowUp, ArrowDown, Copy, Trash2, Lock, Eye,
+  Type, AlignLeft, AlignCenter, AlignRight, Image as ImageIcon,
+  Palette, ExternalLink, Plus, Check, ChevronDown, Sparkles,
 } from 'lucide-react'
 import { findNode, type ToolbarPositionResult, type ToolbarActionType } from '../../../../packages/builder-core/src'
 import { useBuilder } from '../state/BuilderProvider'
-import { useCallback } from 'react'
-
-// ---------------------------------------------------------------------------
-// Action button config
-// ---------------------------------------------------------------------------
-
-interface ActionButton {
-  readonly type: ToolbarActionType
-  readonly icon: React.ElementType
-  readonly label: string
-  readonly shortcut?: string
-  /** Condition to show this action (based on section state) */
-  readonly showIf: (params: { locked: boolean; hidden: boolean; index: number; total: number }) => boolean
-}
-
-const ACTIONS: ActionButton[] = [
-  {
-    type: 'MOVE_UP',
-    icon: ArrowUp,
-    label: 'Przesuń w górę',
-    shortcut: 'Ctrl+↑',
-    showIf: ({ index }) => index > 0,
-  },
-  {
-    type: 'MOVE_DOWN',
-    icon: ArrowDown,
-    label: 'Przesuń w dół',
-    shortcut: 'Ctrl+↓',
-    showIf: ({ index, total }) => index < total - 1,
-  },
-  {
-    type: 'DUPLICATE',
-    icon: Copy,
-    label: 'Duplikuj',
-    shortcut: 'Ctrl+D',
-    showIf: () => true,
-  },
-  {
-    type: 'DELETE',
-    icon: Trash2,
-    label: 'Usuń',
-    shortcut: 'Del',
-    showIf: () => true,
-  },
-  {
-    type: 'LOCK',
-    icon: Lock,
-    label: 'Zablokuj',
-    shortcut: 'Ctrl+L',
-    showIf: ({ locked }) => !locked,
-  },
-  {
-    type: 'HIDE',
-    icon: Eye,
-    label: 'Ukryj',
-    shortcut: 'Ctrl+H',
-    showIf: ({ hidden }) => !hidden,
-  },
-]
-
-// ---------------------------------------------------------------------------
-// QuickToolbar
-// ---------------------------------------------------------------------------
+import { MediaPickerModal } from '../sidebar/MediaPickerModal'
+import { FontPicker } from '../../../../packages/authoring-studio/src/inspector/widgets/FontPicker'
 
 interface QuickToolbarProps {
-  /** Toolbar position from OverlayController */
   position: ToolbarPositionResult
-  /** Section ID for actions */
   sectionId: string
-  /** Page ID for actions */
   pageId: string
-  /** Whether the section is locked */
   locked?: boolean
-  /** Whether the section is hidden */
   hidden?: boolean
-  /** Section index in page */
   index: number
-  /** Total sections on page */
   total: number
 }
 
@@ -111,14 +50,38 @@ export function QuickToolbar({
   total,
 }: QuickToolbarProps) {
   const { dispatch, document } = useBuilder()
+  const [showColorPicker, setShowColorPicker] = useState(false)
+  const [showFontPicker, setShowFontPicker] = useState(false)
+  const [showMediaPicker, setShowMediaPicker] = useState(false)
+  const [showLinkInput, setShowLinkInput] = useState(false)
+  const [linkVal, setLinkVal] = useState('')
+
+  const found = useMemo(() => findNode(document, sectionId), [document, sectionId])
+  const node = found?.node
+  const nodeType = node?.type || 'section'
+  const styles = node?.styles || {}
+  const props = node?.props || {}
+
+  const handleUpdateStyles = useCallback((patch: Record<string, any>) => {
+    dispatch({
+      type: 'SET_NODE_STYLES',
+      nodeId: sectionId,
+      styles: patch,
+    } as any)
+  }, [dispatch, sectionId])
+
+  const handleUpdateProps = useCallback((patch: Record<string, any>) => {
+    dispatch({
+      type: 'UPDATE_PROPS',
+      pageId,
+      sectionId,
+      props: patch,
+    } as any)
+  }, [dispatch, pageId, sectionId])
 
   const handleAction = useCallback((type: ToolbarActionType) => {
-    const action = { type, sectionId, pageId }
-
-    // Map toolbar action to builder command
     switch (type) {
       case 'MOVE_UP': {
-        const found = findNode(document, sectionId)
         if (found?.parent) {
           dispatch({
             type: 'MOVE_NODE',
@@ -138,7 +101,6 @@ export function QuickToolbar({
         break
       }
       case 'MOVE_DOWN': {
-        const found = findNode(document, sectionId)
         if (found?.parent) {
           dispatch({
             type: 'MOVE_NODE',
@@ -158,7 +120,6 @@ export function QuickToolbar({
         break
       }
       case 'DUPLICATE': {
-        const found = findNode(document, sectionId)
         if (found?.parent) {
           dispatch({ type: 'DUPLICATE_NODE', nodeId: sectionId } as any)
         } else {
@@ -167,7 +128,6 @@ export function QuickToolbar({
         break
       }
       case 'DELETE': {
-        const found = findNode(document, sectionId)
         if (found?.parent) {
           dispatch({ type: 'REMOVE_NODE', nodeId: sectionId } as any)
         } else {
@@ -178,7 +138,6 @@ export function QuickToolbar({
       }
       case 'LOCK':
       case 'UNLOCK': {
-        const found = findNode(document, sectionId)
         if (found?.parent) {
           dispatch({ type: 'SET_NODE_LOCKED', nodeId: sectionId, locked: !locked } as any)
         } else {
@@ -186,80 +145,317 @@ export function QuickToolbar({
         }
         break
       }
-      case 'HIDE':
-      case 'SHOW': {
-        const found = findNode(document, sectionId)
-        if (found?.parent) {
-          dispatch({ type: 'SET_NODE_HIDDEN', nodeId: sectionId, hidden: !hidden } as any)
-        } else {
-          dispatch({ type: 'TOGGLE_VISIBILITY', pageId, sectionId } as any)
-        }
-        break
-      }
       default:
         break
     }
-  }, [dispatch, document, sectionId, pageId, index, total, locked, hidden])
+  }, [dispatch, found, sectionId, pageId, index, total, locked])
 
   const direction = position.position
   const isTop = direction === 'top'
 
   return (
-    <motion.div
-      className="absolute z-[200] flex items-center gap-0.5"
-      initial={false}
-      animate={{
-        left: position.x,
-        top: position.y,
-        opacity: 1,
-        x: '-50%',
-      }}
-      transition={{
-        duration: 0.15,
-        ease: 'easeOut',
-      }}
-    >
-      {/* Toolbar body */}
-      <div
-        className={`flex items-center gap-0.5 px-1 py-1
-                    bg-[#0c0c14]/95 backdrop-blur-md
-                    border border-white/10 rounded-xl
-                    shadow-2xl shadow-black/40`}
+    <>
+      <motion.div
+        className="absolute z-[200] flex flex-col items-center gap-1"
+        initial={false}
+        animate={{
+          left: position.x,
+          top: position.y,
+          opacity: 1,
+          x: '-50%',
+        }}
+        transition={{ duration: 0.15, ease: 'easeOut' }}
       >
-        {ACTIONS.map(action => {
-          if (!action.showIf({ locked, hidden, index, total })) return null
+        {/* Main Toolbar Container */}
+        <div
+          className="flex items-center gap-1 px-2 py-1.5 bg-[#0c0c16]/95 backdrop-blur-md border border-white/15 rounded-xl shadow-2xl shadow-black/60 text-white text-xs select-none"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Element Type Badge */}
+          <span className="px-2 py-0.5 rounded-md bg-white/10 text-[10px] font-mono text-violet-300 font-bold uppercase tracking-wider mr-0.5">
+            {node?.label || nodeType}
+          </span>
 
-          const Icon = action.icon
-          const isDanger = action.type === 'DELETE'
+          <div className="w-px h-4 bg-white/10 mx-0.5" />
 
-          return (
+          {/* ------------------------------------------------------------- */}
+          {/* CONTEXTUAL CONTROLS FOR TEXT / HEADING                         */}
+          {/* ------------------------------------------------------------- */}
+          {(nodeType === 'text' || nodeType === 'heading') && (
+            <>
+              {/* Font Family Button */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowFontPicker(!showFontPicker)}
+                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-[11px] font-medium text-slate-200 transition-colors"
+                  title="Zmień czcionkę"
+                >
+                  <Type className="w-3 h-3 text-violet-400" />
+                  <span className="max-w-[70px] truncate">{styles.fontFamily || 'Inter'}</span>
+                  <ChevronDown className="w-2.5 h-2.5 opacity-60" />
+                </button>
+
+                {showFontPicker && (
+                  <div className="absolute top-full left-0 mt-2 z-[300]">
+                    <FontPicker
+                      value={styles.fontFamily || 'Inter'}
+                      onChange={(font) => {
+                        handleUpdateStyles({ fontFamily: font })
+                        setShowFontPicker(false)
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Quick Font Size Buttons (S / M / L / XL) */}
+              <div className="flex items-center bg-white/5 rounded-lg p-0.5">
+                {[
+                  { label: 'S', size: '16px' },
+                  { label: 'M', size: '24px' },
+                  { label: 'L', size: '36px' },
+                  { label: 'XL', size: '48px' },
+                ].map((item) => (
+                  <button
+                    key={item.label}
+                    onClick={() => handleUpdateStyles({ fontSize: item.size })}
+                    className={`px-1.5 py-0.5 rounded text-[10px] font-bold transition-all ${
+                      styles.fontSize === item.size
+                        ? 'bg-violet-600 text-white shadow-sm'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Alignment Buttons */}
+              <div className="flex items-center bg-white/5 rounded-lg p-0.5">
+                <button
+                  onClick={() => handleUpdateStyles({ textAlign: 'left' })}
+                  className={`p-1 rounded transition-colors ${
+                    styles.textAlign === 'left' || !styles.textAlign ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'
+                  }`}
+                  title="Do lewej"
+                >
+                  <AlignLeft className="w-3 h-3" />
+                </button>
+                <button
+                  onClick={() => handleUpdateStyles({ textAlign: 'center' })}
+                  className={`p-1 rounded transition-colors ${
+                    styles.textAlign === 'center' ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'
+                  }`}
+                  title="Wyśrodkuj"
+                >
+                  <AlignCenter className="w-3 h-3" />
+                </button>
+                <button
+                  onClick={() => handleUpdateStyles({ textAlign: 'right' })}
+                  className={`p-1 rounded transition-colors ${
+                    styles.textAlign === 'right' ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'
+                  }`}
+                  title="Do prawej"
+                >
+                  <AlignRight className="w-3 h-3" />
+                </button>
+              </div>
+
+              {/* Color Swatch */}
+              <div className="relative flex items-center">
+                <input
+                  type="color"
+                  value={styles.color || '#ffffff'}
+                  onChange={(e) => handleUpdateStyles({ color: e.target.value })}
+                  className="w-5 h-5 rounded-md border border-white/20 cursor-pointer bg-transparent"
+                  title="Kolor tekstu"
+                />
+              </div>
+
+              <div className="w-px h-4 bg-white/10 mx-0.5" />
+            </>
+          )}
+
+          {/* ------------------------------------------------------------- */}
+          {/* CONTEXTUAL CONTROLS FOR IMAGE                                  */}
+          {/* ------------------------------------------------------------- */}
+          {nodeType === 'image' && (
+            <>
+              <button
+                onClick={() => setShowMediaPicker(true)}
+                className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-violet-600/80 hover:bg-violet-600 text-white text-[11px] font-semibold transition-all shadow-sm"
+              >
+                <ImageIcon className="w-3 h-3" />
+                <span>Zmień obraz</span>
+              </button>
+
+              {/* Fit Toggle */}
+              <button
+                onClick={() => handleUpdateStyles({ objectFit: styles.objectFit === 'contain' ? 'cover' : 'contain' })}
+                className="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-[11px] font-medium text-slate-300 transition-colors"
+                title="Dopasowanie obrazu"
+              >
+                {styles.objectFit === 'contain' ? 'Contain' : 'Cover'}
+              </button>
+
+              {/* Radius Pills */}
+              <div className="flex items-center bg-white/5 rounded-lg p-0.5">
+                {[
+                  { label: '0', val: '0px' },
+                  { label: '8', val: '8px' },
+                  { label: '16', val: '16px' },
+                  { label: '●', val: '9999px' },
+                ].map((item) => (
+                  <button
+                    key={item.label}
+                    onClick={() => handleUpdateStyles({ borderRadius: item.val })}
+                    className={`px-1.5 py-0.5 rounded text-[10px] font-bold transition-all ${
+                      styles.borderRadius === item.val
+                        ? 'bg-violet-600 text-white'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                    title={`Zaokrąglenie ${item.val}`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="w-px h-4 bg-white/10 mx-0.5" />
+            </>
+          )}
+
+          {/* ------------------------------------------------------------- */}
+          {/* CONTEXTUAL CONTROLS FOR BUTTON                                 */}
+          {/* ------------------------------------------------------------- */}
+          {nodeType === 'button' && (
+            <>
+              <div className="relative">
+                <button
+                  onClick={() => {
+                    setLinkVal(String(props.href || ''))
+                    setShowLinkInput(!showLinkInput)
+                  }}
+                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-[11px] text-slate-300 font-medium"
+                  title="Edytuj link URL"
+                >
+                  <ExternalLink className="w-3 h-3 text-violet-400" />
+                  <span>Link</span>
+                </button>
+
+                {showLinkInput && (
+                  <div className="absolute top-full left-0 mt-2 p-2 bg-[#0c0c14] border border-white/15 rounded-xl shadow-2xl flex items-center gap-1.5 z-[300] min-w-[220px]">
+                    <input
+                      type="text"
+                      value={linkVal}
+                      onChange={(e) => setLinkVal(e.target.value)}
+                      placeholder="https://..."
+                      className="flex-1 px-2 py-1 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none focus:border-violet-500"
+                    />
+                    <button
+                      onClick={() => {
+                        handleUpdateProps({ href: linkVal })
+                        setShowLinkInput(false)
+                      }}
+                      className="px-2 py-1 rounded-lg bg-violet-600 text-white text-xs font-bold"
+                    >
+                      OK
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Color Swatch for Button Background */}
+              <input
+                type="color"
+                value={styles.backgroundColor || '#7c3aed'}
+                onChange={(e) => handleUpdateStyles({ backgroundColor: e.target.value })}
+                className="w-5 h-5 rounded-md border border-white/20 cursor-pointer bg-transparent"
+                title="Kolor tła przycisku"
+              />
+
+              <div className="w-px h-4 bg-white/10 mx-0.5" />
+            </>
+          )}
+
+          {/* ------------------------------------------------------------- */}
+          {/* CONTEXTUAL CONTROLS FOR SECTION / CONTAINER                   */}
+          {/* ------------------------------------------------------------- */}
+          {nodeType === 'section' && (
+            <>
+              <div className="flex items-center gap-1">
+                <input
+                  type="color"
+                  value={styles.backgroundColor || '#06060c'}
+                  onChange={(e) => handleUpdateStyles({ backgroundColor: e.target.value })}
+                  className="w-5 h-5 rounded-md border border-white/20 cursor-pointer bg-transparent"
+                  title="Kolor tła sekcji"
+                />
+              </div>
+
+              <div className="w-px h-4 bg-white/10 mx-0.5" />
+            </>
+          )}
+
+          {/* ------------------------------------------------------------- */}
+          {/* COMMON STRUCTURAL ACTIONS                                      */}
+          {/* ------------------------------------------------------------- */}
+          {index > 0 && (
             <button
-              key={action.type}
-              onClick={(e) => {
-                e.stopPropagation()
-                handleAction(action.type)
-              }}
-              className={`p-1.5 rounded-lg transition-all
-                ${isDanger
-                  ? 'text-slate-500 hover:text-red-400 hover:bg-red-500/10'
-                  : 'text-slate-400 hover:text-white hover:bg-white/10'
-                }
-                active:scale-90`}
-              title={`${action.label}${action.shortcut ? ` (${action.shortcut})` : ''}`}
+              onClick={() => handleAction('MOVE_UP')}
+              className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+              title="Przesuń w górę (Ctrl+↑)"
             >
-              <Icon className="w-3.5 h-3.5" />
+              <ArrowUp className="w-3.5 h-3.5" />
             </button>
-          )
-        })}
-      </div>
+          )}
 
-      {/* Arrow pointing to element */}
-      <div
-        className={`absolute left-1/2 -translate-x-1/2 w-2 h-2
-                    bg-[#0c0c14] border border-white/10 rotate-45
-                    ${isTop ? 'bottom-[-5px] border-t-0 border-l-0' : 'top-[-5px] border-b-0 border-r-0'}`}
-      />
-    </motion.div>
+          {index < total - 1 && (
+            <button
+              onClick={() => handleAction('MOVE_DOWN')}
+              className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+              title="Przesuń w dół (Ctrl+↓)"
+            >
+              <ArrowDown className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          <button
+            onClick={() => handleAction('DUPLICATE')}
+            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+            title="Duplikuj (Ctrl+D)"
+          >
+            <Copy className="w-3.5 h-3.5" />
+          </button>
+
+          <button
+            onClick={() => handleAction('DELETE')}
+            className="p-1 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+            title="Usuń (Del)"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Small pointer arrow pointing to the selected element */}
+        <div
+          className={`w-2 h-2 bg-[#0c0c16] border border-white/15 rotate-45 ${
+            isTop ? 'border-t-0 border-l-0' : 'border-b-0 border-r-0'
+          }`}
+        />
+      </motion.div>
+
+      {/* Media Picker Modal for Image elements */}
+      {showMediaPicker && (
+        <MediaPickerModal
+          isOpen={showMediaPicker}
+          onClose={() => setShowMediaPicker(false)}
+          onSelect={(url) => {
+            handleUpdateProps({ src: url })
+            setShowMediaPicker(false)
+          }}
+        />
+      )}
+    </>
   )
 }
-
