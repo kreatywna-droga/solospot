@@ -564,7 +564,7 @@ function DesignTab({
               slider
               min={0}
               max={100}
-              step={5}
+              step={1}
             />
           </Row>
         </Section>
@@ -578,7 +578,7 @@ function DesignTab({
             slider
             min={20}
             max={1600}
-            step={10}
+            step={1}
           />
         </Row>
         <Row label="Height">
@@ -588,7 +588,7 @@ function DesignTab({
             slider
             min={20}
             max={1200}
-            step={10}
+            step={1}
           />
         </Row>
         <Row label="Min W">
@@ -598,7 +598,7 @@ function DesignTab({
             slider
             min={0}
             max={1600}
-            step={10}
+            step={1}
           />
         </Row>
         <Row label="Max W">
@@ -608,7 +608,7 @@ function DesignTab({
             slider
             min={200}
             max={1920}
-            step={10}
+            step={1}
           />
         </Row>
         <Row label="Min H">
@@ -618,7 +618,7 @@ function DesignTab({
             slider
             min={0}
             max={1200}
-            step={10}
+            step={1}
           />
         </Row>
         <Row label="Max H">
@@ -628,7 +628,7 @@ function DesignTab({
             slider
             min={100}
             max={1600}
-            step={10}
+            step={1}
           />
         </Row>
       </Section>
@@ -767,9 +767,9 @@ function DesignTab({
           <div className="flex items-center gap-2">
             <input
               type="range"
-              min={20}
+              min={10}
               max={300}
-              step={5}
+              step={1}
               value={Math.round((styles.scale ?? 1) * 100)}
               onChange={(e) => onChange({ scale: parseFloat(e.target.value) / 100 })}
               className="flex-1 accent-violet-500 h-1 cursor-pointer"
@@ -899,8 +899,8 @@ function LayoutTab({
               placeholder="16px"
               slider
               min={0}
-              max={120}
-              step={2}
+              max={200}
+              step={1}
             />
           </Row>
         </Section>
@@ -1062,7 +1062,7 @@ function TypographyTab({
             placeholder="16px"
             slider
             min={8}
-            max={96}
+            max={150}
             step={1}
           />
         </Row>

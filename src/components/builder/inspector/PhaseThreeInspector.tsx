@@ -118,30 +118,49 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
               />
             </div>
 
-            {/* Font Size */}
-            <div className="space-y-1.5">
+            {/* Font Size — Exact Input + Sensitive Continuous Slider */}
+            <div className="space-y-2">
               <div className="flex items-center justify-between text-[11px]">
                 <span className="font-semibold text-slate-300">Rozmiar tekstu</span>
-                <span className="font-mono text-slate-400">{currentStyles.fontSize || '16px'}</span>
+                <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-lg px-2 py-0.5">
+                  <input
+                    type="number"
+                    min={8}
+                    max={150}
+                    value={parseInt(String(currentStyles.fontSize || '16px').replace('px', '')) || 16}
+                    onChange={(e) => {
+                      const v = Math.min(150, Math.max(8, Number(e.target.value) || 8));
+                      onStyleChange({ fontSize: `${v}px` });
+                    }}
+                    className="w-10 bg-transparent text-right font-mono text-white text-xs focus:outline-none"
+                  />
+                  <span className="text-slate-400 text-[10px]">px</span>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                {[
-                  { label: 'S (14px)', val: '14px' },
-                  { label: 'M (18px)', val: '18px' },
-                  { label: 'L (24px)', val: '24px' },
-                  { label: 'XL (36px)', val: '36px' },
-                  { label: '2XL (48px)', val: '48px' },
-                ].map((s) => (
+              <div className="flex items-center gap-2">
+                <input
+                  type="range"
+                  min={8}
+                  max={150}
+                  step={1}
+                  value={parseInt(String(currentStyles.fontSize || '16px').replace('px', '')) || 16}
+                  onChange={(e) => onStyleChange({ fontSize: `${e.target.value}px` })}
+                  className="flex-1 accent-violet-500 h-1 cursor-pointer"
+                />
+              </div>
+              {/* Optional Quick Jumps */}
+              <div className="flex items-center gap-1">
+                {[16, 24, 36, 48, 64].map((sz) => (
                   <button
-                    key={s.val}
-                    onClick={() => onStyleChange({ fontSize: s.val })}
-                    className={`flex-1 py-1 text-[10px] font-bold rounded-lg border transition-all ${
-                      currentStyles.fontSize === s.val
-                        ? 'bg-violet-600 text-white border-violet-500 shadow-sm'
-                        : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                    key={sz}
+                    onClick={() => onStyleChange({ fontSize: `${sz}px` })}
+                    className={`flex-1 py-0.5 text-[9px] font-mono rounded border transition-all ${
+                      (parseInt(String(currentStyles.fontSize || '16px').replace('px', '')) || 16) === sz
+                        ? 'bg-violet-600/30 text-violet-300 border-violet-500/50'
+                        : 'bg-white/5 text-slate-500 border-white/5 hover:text-slate-300'
                     }`}
                   >
-                    {s.label.split(' ')[0]}
+                    {sz}px
                   </button>
                 ))}
               </div>
@@ -156,9 +175,15 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                     type="color"
                     value={currentStyles.color || '#ffffff'}
                     onChange={(e) => onStyleChange({ color: e.target.value })}
-                    className="w-7 h-7 rounded-lg border-0 cursor-pointer bg-transparent"
+                    className="w-7 h-7 rounded-lg border-0 cursor-pointer bg-transparent flex-shrink-0"
                   />
-                  <span className="text-[11px] font-mono text-slate-300">{currentStyles.color || '#ffffff'}</span>
+                  <input
+                    type="text"
+                    value={currentStyles.color || '#ffffff'}
+                    onChange={(e) => onStyleChange({ color: e.target.value })}
+                    placeholder="#ffffff"
+                    className="w-full bg-transparent text-[11px] font-mono text-slate-300 focus:outline-none focus:text-white"
+                  />
                 </div>
               </div>
 
@@ -312,9 +337,15 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                     type="color"
                     value={currentStyles.backgroundColor || '#7c3aed'}
                     onChange={(e) => onStyleChange({ backgroundColor: e.target.value })}
-                    className="w-7 h-7 rounded-lg border-0 cursor-pointer bg-transparent"
+                    className="w-7 h-7 rounded-lg border-0 cursor-pointer bg-transparent flex-shrink-0"
                   />
-                  <span className="text-[11px] font-mono text-slate-300">{currentStyles.backgroundColor || '#7c3aed'}</span>
+                  <input
+                    type="text"
+                    value={currentStyles.backgroundColor || '#7c3aed'}
+                    onChange={(e) => onStyleChange({ backgroundColor: e.target.value })}
+                    placeholder="#7c3aed"
+                    className="w-full bg-transparent text-[11px] font-mono text-slate-300 focus:outline-none focus:text-white"
+                  />
                 </div>
               </div>
 
@@ -325,9 +356,15 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                     type="color"
                     value={currentStyles.color || '#ffffff'}
                     onChange={(e) => onStyleChange({ color: e.target.value })}
-                    className="w-7 h-7 rounded-lg border-0 cursor-pointer bg-transparent"
+                    className="w-7 h-7 rounded-lg border-0 cursor-pointer bg-transparent flex-shrink-0"
                   />
-                  <span className="text-[11px] font-mono text-slate-300">{currentStyles.color || '#ffffff'}</span>
+                  <input
+                    type="text"
+                    value={currentStyles.color || '#ffffff'}
+                    onChange={(e) => onStyleChange({ color: e.target.value })}
+                    placeholder="#ffffff"
+                    className="w-full bg-transparent text-[11px] font-mono text-slate-300 focus:outline-none focus:text-white"
+                  />
                 </div>
               </div>
             </div>
@@ -341,16 +378,22 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="text-[11px] font-semibold text-slate-300">Tło sekcji</label>
-              <div className="flex items-center gap-2 p-2 bg-white/5 border border-white/10 rounded-xl">
+              <div className="flex items-center gap-3 p-2 bg-white/5 border border-white/10 rounded-xl">
                 <input
                   type="color"
                   value={currentStyles.backgroundColor || '#06060c'}
                   onChange={(e) => onStyleChange({ backgroundColor: e.target.value })}
-                  className="w-8 h-8 rounded-lg border-0 cursor-pointer bg-transparent"
+                  className="w-8 h-8 rounded-lg border-0 cursor-pointer bg-transparent flex-shrink-0"
                 />
-                <div className="min-w-0">
-                  <div className="text-xs font-semibold text-white">Kolor tła</div>
-                  <div className="text-[11px] font-mono text-slate-400">{currentStyles.backgroundColor || '#06060c'}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-semibold text-white mb-0.5">Kolor tła</div>
+                  <input
+                    type="text"
+                    value={currentStyles.backgroundColor || '#06060c'}
+                    onChange={(e) => onStyleChange({ backgroundColor: e.target.value })}
+                    placeholder="#06060c"
+                    className="w-full bg-transparent text-[11px] font-mono text-slate-300 focus:outline-none focus:text-white"
+                  />
                 </div>
               </div>
             </div>

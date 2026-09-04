@@ -49,9 +49,10 @@ export function QuickToolbar({
   index,
   total,
 }: QuickToolbarProps) {
-  const { dispatch, document } = useBuilder()
+  const { dispatch, document, canvas } = useBuilder()
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [showFontPicker, setShowFontPicker] = useState(false)
+  const [showFontSizePopover, setShowFontSizePopover] = useState(false)
   const [showMediaPicker, setShowMediaPicker] = useState(false)
   const [showLinkInput, setShowLinkInput] = useState(false)
   const [linkVal, setLinkVal] = useState('')
@@ -59,16 +60,43 @@ export function QuickToolbar({
   const found = useMemo(() => findNode(document, sectionId), [document, sectionId])
   const node = found?.node
   const nodeType = node?.type || 'section'
-  const styles = node?.styles || {}
+  const isTablet = canvas.viewport.label === 'TABLET'
+  const isMobile = canvas.viewport.label === 'MOBILE'
+  const activeBp = isTablet ? 'tablet' : isMobile ? 'mobile' : 'desktop'
+
+  const styles = useMemo(() => {
+    if (!node) return {}
+    if (activeBp === 'desktop') return node.styles || {}
+    const resp = (node.responsive as Record<string, any>)?.[activeBp] || {}
+    return { ...(node.styles || {}), ...resp }
+  }, [node, activeBp])
   const props = node?.props || {}
 
   const handleUpdateStyles = useCallback((patch: Record<string, any>) => {
-    dispatch({
-      type: 'SET_NODE_STYLES',
-      nodeId: sectionId,
-      styles: patch,
-    } as any)
-  }, [dispatch, sectionId])
+    if (activeBp === 'tablet' || activeBp === 'mobile') {
+      if (found) {
+        const currentResp = (found.node.responsive as Record<string, any>) || {}
+        const currentBpStyles = currentResp[activeBp] || {}
+        dispatch({
+          type: 'UPDATE_NODE',
+          nodeId: sectionId,
+          updates: {
+            responsive: {
+              ...currentResp,
+              [activeBp]: { ...currentBpStyles, ...patch },
+            },
+          },
+          pageId,
+        } as any)
+      }
+    } else {
+      dispatch({
+        type: 'SET_NODE_STYLES',
+        nodeId: sectionId,
+        styles: patch,
+      } as any)
+    }
+  }, [dispatch, sectionId, activeBp, found, pageId])
 
   const handleUpdateProps = useCallback((patch: Record<string, any>) => {
     dispatch({
@@ -208,26 +236,62 @@ export function QuickToolbar({
                 )}
               </div>
 
-              {/* Quick Font Size Buttons (S / M / L / XL) */}
-              <div className="flex items-center bg-white/5 rounded-lg p-0.5">
-                {[
-                  { label: 'S', size: '16px' },
-                  { label: 'M', size: '24px' },
-                  { label: 'L', size: '36px' },
-                  { label: 'XL', size: '48px' },
-                ].map((item) => (
-                  <button
-                    key={item.label}
-                    onClick={() => handleUpdateStyles({ fontSize: item.size })}
-                    className={`px-1.5 py-0.5 rounded text-[10px] font-bold transition-all ${
-                      styles.fontSize === item.size
-                        ? 'bg-violet-600 text-white shadow-sm'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
+              {/* Font Size — Exact Value Popover + Sensitive Continuous Slider */}
+              <div className="relative flex items-center">
+                <button
+                  onClick={() => setShowFontSizePopover(!showFontSizePopover)}
+                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-[11px] font-mono font-semibold text-white border border-white/10 transition-colors"
+                  title="Rozmiar czcionki (dokładna wartość + suwak)"
+                >
+                  <span>{parseInt(String(styles.fontSize || '16px').replace('px', '')) || 16}px</span>
+                  <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${showFontSizePopover ? 'rotate-180' : ''}`} />
+                </button>
+
+                {showFontSizePopover && (
+                  <div className="absolute top-full left-0 mt-2 p-3 bg-[#0d0d18] border border-white/15 rounded-xl shadow-2xl z-[300] min-w-[200px] space-y-2">
+                    <div className="flex items-center justify-between text-[11px] font-medium text-slate-300">
+                      <span>Rozmiar tekstu</span>
+                      <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-1.5 py-0.5">
+                        <input
+                          type="number"
+                          min={8}
+                          max={150}
+                          value={parseInt(String(styles.fontSize || '16px').replace('px', '')) || 16}
+                          onChange={(e) => {
+                            const v = Math.min(150, Math.max(8, Number(e.target.value) || 8))
+                            handleUpdateStyles({ fontSize: `${v}px` })
+                          }}
+                          className="w-10 bg-transparent text-right font-mono text-white text-xs focus:outline-none"
+                        />
+                        <span className="text-[10px] text-slate-400">px</span>
+                      </div>
+                    </div>
+                    <input
+                      type="range"
+                      min={8}
+                      max={150}
+                      step={1}
+                      value={parseInt(String(styles.fontSize || '16px').replace('px', '')) || 16}
+                      onChange={(e) => handleUpdateStyles({ fontSize: `${e.target.value}px` })}
+                      className="w-full accent-violet-500 h-1 cursor-pointer"
+                    />
+                    <div className="flex items-center gap-1 pt-1 border-t border-white/5">
+                      {[16, 24, 32, 48, 64].map((sz) => (
+                        <button
+                          key={sz}
+                          onClick={() => handleUpdateStyles({ fontSize: `${sz}px` })}
+                          className={`flex-1 py-0.5 text-[9px] font-mono rounded border transition-all ${
+                            (parseInt(String(styles.fontSize || '16px').replace('px', '')) || 16) === sz
+                              ? 'bg-violet-600/40 text-violet-300 border-violet-500/50'
+                              : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                          }`}
+                        >
+                          {sz}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Alignment Buttons */}
@@ -261,14 +325,21 @@ export function QuickToolbar({
                 </button>
               </div>
 
-              {/* Color Swatch */}
-              <div className="relative flex items-center">
+              {/* Color Swatch + Exact HEX input */}
+              <div className="relative flex items-center gap-1 bg-white/5 border border-white/10 rounded-lg px-1.5 py-0.5">
                 <input
                   type="color"
                   value={styles.color || '#ffffff'}
                   onChange={(e) => handleUpdateStyles({ color: e.target.value })}
-                  className="w-5 h-5 rounded-md border border-white/20 cursor-pointer bg-transparent"
+                  className="w-4 h-4 rounded border-0 cursor-pointer bg-transparent"
                   title="Kolor tekstu"
+                />
+                <input
+                  type="text"
+                  value={styles.color || '#ffffff'}
+                  onChange={(e) => handleUpdateStyles({ color: e.target.value })}
+                  className="w-14 bg-transparent text-[10px] font-mono text-slate-300 focus:outline-none focus:text-white"
+                  placeholder="#ffffff"
                 />
               </div>
 

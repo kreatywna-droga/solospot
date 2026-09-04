@@ -56,6 +56,9 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     startHeight: number
     currentWidth: number
     currentHeight: number
+    isTextNode?: boolean
+    startFontSize?: number
+    currentFontSize?: number
   } | null>(null)
 
   // Compute toolbar data: find node in page or parent container
@@ -90,6 +93,20 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     e.preventDefault()
     e.stopPropagation()
 
+    const targetNodeId = canvas.selectedSectionId
+    const found = findNode(document, targetNodeId)
+    const isTextNode = found?.node.type === 'text' || found?.node.type === 'heading'
+    const isTablet = canvas.viewport.label === 'TABLET'
+    const isMobile = canvas.viewport.label === 'MOBILE'
+    const activeBp = isTablet ? 'tablet' : isMobile ? 'mobile' : 'desktop'
+
+    const activeStyles = isTextNode && found
+      ? (activeBp === 'desktop'
+          ? (found.node.styles || {})
+          : { ...(found.node.styles || {}), ...((found.node.responsive as Record<string, any>)?.[activeBp] || {}) })
+      : {}
+    const startFontSize = parseInt(String(activeStyles.fontSize || '16px').replace('px', '')) || 16
+
     const zoom = canvas.zoom ?? 1.0
     const startX = e.clientX
     const startY = e.clientY
@@ -104,6 +121,9 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
       startHeight,
       currentWidth: startWidth,
       currentHeight: startHeight,
+      isTextNode,
+      startFontSize,
+      currentFontSize: startFontSize,
     })
 
     const onPointerMove = (moveEvt: PointerEvent) => {
@@ -118,7 +138,25 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
       if (handle.includes('S')) h = Math.max(20, startHeight + deltaY)
       if (handle.includes('N')) h = Math.max(20, startHeight - deltaY)
 
-      setResizing(prev => prev ? { ...prev, currentWidth: Math.round(w), currentHeight: Math.round(h) } : null)
+      let currentFontSize = startFontSize
+      if (isTextNode) {
+        let ratio = 1
+        if (handle.includes('E') || handle.includes('W')) {
+          ratio = w / Math.max(1, startWidth)
+        } else if (handle.includes('S') || handle.includes('N')) {
+          ratio = h / Math.max(1, startHeight)
+        } else {
+          ratio = Math.max(w / Math.max(1, startWidth), h / Math.max(1, startHeight))
+        }
+        currentFontSize = Math.min(150, Math.max(8, Math.round(startFontSize * ratio)))
+      }
+
+      setResizing(prev => prev ? {
+        ...prev,
+        currentWidth: Math.round(w),
+        currentHeight: Math.round(h),
+        currentFontSize,
+      } : null)
     }
 
     const onPointerUp = (upEvt: PointerEvent) => {
@@ -137,25 +175,71 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
       if (handle.includes('S')) finalH = Math.max(20, startHeight + deltaY)
       if (handle.includes('N')) finalH = Math.max(20, startHeight - deltaY)
 
-      const roundedW = `${Math.round(finalW)}px`
-      const roundedH = `${Math.round(finalH)}px`
+      if (found) {
+        if (isTextNode) {
+          let ratio = 1
+          if (handle.includes('E') || handle.includes('W')) {
+            ratio = finalW / Math.max(1, startWidth)
+          } else if (handle.includes('S') || handle.includes('N')) {
+            ratio = finalH / Math.max(1, startHeight)
+          } else {
+            ratio = Math.max(finalW / Math.max(1, startWidth), finalH / Math.max(1, startHeight))
+          }
+          const finalFontSize = `${Math.min(150, Math.max(8, Math.round(startFontSize * ratio)))}px`
 
-      const targetNodeId = canvas.selectedSectionId
-      if (targetNodeId) {
-        dispatch({
-          type: 'SET_NODE_STYLES',
-          nodeId: targetNodeId,
-          styles: { width: roundedW, height: roundedH },
-        })
+          if (activeBp === 'tablet' || activeBp === 'mobile') {
+            const currentResp = (found.node.responsive as Record<string, any>) || {}
+            const currentBpStyles = currentResp[activeBp] || {}
+            dispatch({
+              type: 'UPDATE_NODE',
+              nodeId: targetNodeId,
+              updates: {
+                responsive: {
+                  ...currentResp,
+                  [activeBp]: { ...currentBpStyles, fontSize: finalFontSize },
+                },
+              },
+              pageId: found.page.id,
+            } as any)
+          } else {
+            dispatch({
+              type: 'SET_NODE_STYLES',
+              nodeId: targetNodeId,
+              styles: { fontSize: finalFontSize },
+            })
+          }
+        } else {
+          const roundedW = `${Math.round(finalW)}px`
+          const roundedH = `${Math.round(finalH)}px`
 
-        const found = findNode(document, targetNodeId)
-        if (found) {
-          dispatch({
-            type: 'UPDATE_PROPS',
-            pageId: found.page.id,
-            sectionId: targetNodeId,
-            props: { width: roundedW, height: roundedH },
-          })
+          if (activeBp === 'tablet' || activeBp === 'mobile') {
+            const currentResp = (found.node.responsive as Record<string, any>) || {}
+            const currentBpStyles = currentResp[activeBp] || {}
+            dispatch({
+              type: 'UPDATE_NODE',
+              nodeId: targetNodeId,
+              updates: {
+                responsive: {
+                  ...currentResp,
+                  [activeBp]: { ...currentBpStyles, width: roundedW, height: roundedH },
+                },
+              },
+              pageId: found.page.id,
+            } as any)
+          } else {
+            dispatch({
+              type: 'SET_NODE_STYLES',
+              nodeId: targetNodeId,
+              styles: { width: roundedW, height: roundedH },
+            })
+
+            dispatch({
+              type: 'UPDATE_PROPS',
+              pageId: found.page.id,
+              sectionId: targetNodeId,
+              props: { width: roundedW, height: roundedH },
+            })
+          }
         }
       }
 
@@ -165,7 +249,7 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     window.addEventListener('pointermove', onPointerMove)
     window.addEventListener('pointerup', onPointerUp)
     window.addEventListener('pointercancel', onPointerUp)
-  }, [overlay.boundingRect, canvas.selectedSectionId, canvas.zoom, dispatch, document])
+  }, [overlay.boundingRect, canvas.selectedSectionId, canvas.viewport.label, canvas.zoom, dispatch, document])
 
   const displayRect = useMemo(() => {
     if (!overlay.boundingRect) return null
@@ -214,9 +298,16 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
                     top: displayRect.y + displayRect.height + 10,
                     transform: 'translateX(-50%)',
                   }}
-                  className="absolute z-[120] bg-violet-600 text-white text-[11px] font-mono font-bold px-2 py-1 rounded-md shadow-xl border border-white/20 pointer-events-none whitespace-nowrap"
+                  className="absolute z-[120] bg-violet-600 text-white text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg shadow-xl border border-white/20 pointer-events-none whitespace-nowrap flex items-center gap-1.5"
                 >
-                  {resizing.currentWidth}px × {resizing.currentHeight}px
+                  {resizing.isTextNode ? (
+                    <>
+                      <span className="text-violet-200 text-[10px] uppercase">Czcionka:</span>
+                      <span>{resizing.currentFontSize}px</span>
+                    </>
+                  ) : (
+                    <span>{resizing.currentWidth}px × {resizing.currentHeight}px</span>
+                  )}
                 </div>
               )}
             </>
