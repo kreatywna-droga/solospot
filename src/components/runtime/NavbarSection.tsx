@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Menu, X, ShoppingBag } from 'lucide-react'
 import type { SectionComponentProps } from '@/lib/runtime/RuntimeTypes'
 import { useCart } from '@/lib/cart/CartStore'
+import { resolveImageUrl } from '@/lib/assets/resolveImageUrl'
 
 export function NavbarSection({ section, theme, storeName }: SectionComponentProps) {
   const [open, setOpen] = useState(false)
@@ -11,13 +12,18 @@ export function NavbarSection({ section, theme, storeName }: SectionComponentPro
   const itemCount = state.itemCount
   const isSticky = Boolean(config.sticky)
   const isTransparent = config.style === 'transparent'
+  const logoUrl = resolveImageUrl(theme?.logo)
 
   return (
     <nav className={`z-40 ${isSticky ? 'sticky top-0' : ''} ${isTransparent ? 'border-b border-white/10' : 'border-b border-white/10'}`}
       style={{ backgroundColor: isTransparent ? 'transparent' : theme.primaryColor }}>
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <span className="text-xl font-bold text-white" style={{ fontFamily: theme.font }}>{storeName}</span>
+          {logoUrl ? (
+            <img src={logoUrl} alt={storeName} className="h-8 max-w-[160px] object-contain" />
+          ) : (
+            <span className="text-xl font-bold text-white" style={{ fontFamily: theme.font }}>{storeName}</span>
+          )}
           <div className="hidden md:flex items-center gap-6">
             <a href="#" className="text-sm text-white/80 hover:text-white transition-colors">Strona główna</a>
             <a href="#" className="text-sm text-white/80 hover:text-white transition-colors">Produkty</a>

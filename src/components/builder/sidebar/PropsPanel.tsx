@@ -26,6 +26,7 @@ import { VIEWPORT_PRESETS, ViewportLabel } from '../../../../packages/builder-co
 import { Monitor, Tablet, Smartphone } from 'lucide-react'
 import { AssetPicker } from '../../media/AssetPicker'
 import { MediaDocument } from '../../../../packages/asset-manager-core/src/AssetTypes'
+import { resolveImageUrl } from '@/lib/assets/resolveImageUrl'
 
 // ---------------------------------------------------------------------------
 // Individual field renderers
@@ -143,26 +144,26 @@ function ColorField({ schema, value, onChange }: FieldProps) {
 
 function ImageField({ schema, value, onChange }: FieldProps) {
   const [showPicker, setShowPicker] = useState(false)
-  const assetRef = typeof value === 'object' && value !== null && 'id' in value ? value as { id: string; type: string } : null
-  const displayUrl = assetRef ? `asset://${assetRef.id}` : (typeof value === 'string' ? value : '')
+  const { document } = useBuilder()
+  const storeId = document.id || document.tenantId
+  const displayUrl = resolveImageUrl(value)
   
   return (
     <div>
       <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
         {schema.label}
       </label>
-      {assetRef && (
-        <div className="mb-2 relative rounded-lg overflow-hidden bg-white/5 border border-white/10 aspect-video flex items-center justify-center">
-          <div className="text-4xl opacity-60">🖼️</div>
-          <div className="absolute bottom-2 left-2 right-2">
-            <p className="text-[10px] text-slate-400 font-mono truncate">asset://{assetRef.id}</p>
-          </div>
-        </div>
-      )}
-      {!assetRef && displayUrl && (
-        <div className="mb-2 relative rounded-lg overflow-hidden bg-white/5 border border-white/10 aspect-video">
+      {displayUrl && (
+        <div className="mb-2 relative rounded-lg overflow-hidden bg-white/5 border border-white/10 aspect-video flex items-center justify-center group">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={displayUrl} alt={schema.label} className="w-full h-full object-cover" />
+          <button
+            onClick={() => onChange(schema.key, '')}
+            className="absolute top-1.5 right-1.5 p-1 rounded-md bg-black/70 hover:bg-red-600 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+            title="Usuń obraz"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
       <div className="flex items-center gap-2">
@@ -175,7 +176,7 @@ function ImageField({ schema, value, onChange }: FieldProps) {
         />
         <button
           onClick={() => setShowPicker(true)}
-          className="p-2 rounded-lg bg-violet-600 text-white hover:bg-violet-500 transition-colors"
+          className="p-2 rounded-lg bg-violet-600 text-white hover:bg-violet-500 transition-colors flex-shrink-0"
           title="Wybierz z biblioteki"
         >
           <Image className="w-4 h-4" />
@@ -183,10 +184,11 @@ function ImageField({ schema, value, onChange }: FieldProps) {
       </div>
       <AssetPicker
         isOpen={showPicker}
+        storeId={storeId}
         onClose={() => setShowPicker(false)}
         onSelect={(asset) => {
-          const ref = { id: asset.id, type: asset.type }
-          onChange(schema.key, ref)
+          const url = asset.publicUrl || (asset.metadata as any)?.publicUrl || asset.id
+          onChange(schema.key, url)
           setShowPicker(false)
         }}
         document={{} as MediaDocument}

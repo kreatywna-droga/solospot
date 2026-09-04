@@ -1,4 +1,4 @@
-import { getServiceSupabase } from '@/lib/supabase';
+import { getServiceSupabase } from '../supabase';
 import type { Store, StoreRow, CreateStoreRequest, UpdateStoreRequest, StoreConfig, StoreBranding, PublicationStatus } from './StoreTypes';
 
 export class StoreRepository {

@@ -2,6 +2,7 @@
 import { Package, ShoppingCart } from 'lucide-react'
 import type { SectionComponentProps } from '@/lib/runtime/RuntimeTypes'
 import { useCart } from '@/lib/cart/CartStore'
+import { resolveImageUrl } from '@/lib/assets/resolveImageUrl'
 
 function formatPrice(price: number, currency: string) {
   const symbols: Record<string, string> = { PLN: 'zł', EUR: '€', USD: '$' }
@@ -47,8 +48,8 @@ export function ProductGridSection({ section, theme, products }: SectionComponen
             {displayProducts.map((p) => (
               <div key={p.id} className="group cursor-pointer">
                 <div className="aspect-square rounded-2xl bg-slate-100 overflow-hidden mb-3 flex items-center justify-center">
-                  {p.images && p.images.length > 0 && p.images[0] ? (
-                    <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  {p.images && p.images.length > 0 && resolveImageUrl(p.images[0]) ? (
+                    <img src={resolveImageUrl(p.images[0])} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                   ) : (
                     <Package className="w-10 h-10 text-slate-300" />
                   )}

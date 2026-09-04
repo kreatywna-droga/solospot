@@ -1,13 +1,15 @@
 'use client'
 import type { SectionComponentProps } from '@/lib/runtime/RuntimeTypes'
+import { resolveImageUrl } from '@/lib/assets/resolveImageUrl'
 
 export function HeroSection({ section, theme, storeName }: SectionComponentProps) {
   const config = ((section?.config || (section as any)?.props) ?? {}) as {
-    title?: string; subtitle?: string; cta?: string; image?: string
+    title?: string; subtitle?: string; cta?: string; image?: unknown
     titleSize?: string; titleWeight?: string; titleAlign?: string; titleColor?: string
   }
   const title = config.title || storeName || 'Witaj w naszym sklepie'
-  const hasImage = Boolean(config.image)
+  const imageUrl = resolveImageUrl(config.image)
+  const hasImage = Boolean(imageUrl)
 
   const sizeMap: Record<string, string> = { sm: 'text-2xl', md: 'text-3xl', lg: 'text-4xl', xl: 'text-5xl', '2xl': 'text-6xl' }
   const weightMap: Record<string, string> = { light: 'font-light', normal: 'font-normal', medium: 'font-medium', semibold: 'font-semibold', bold: 'font-bold' }
@@ -23,7 +25,7 @@ export function HeroSection({ section, theme, storeName }: SectionComponentProps
       className="relative overflow-hidden py-24 lg:py-32 px-4 text-center"
       style={{
         background: hasImage
-          ? `linear-gradient(135deg, rgba(0,0,0,0.5), rgba(0,0,0,0.3)), url(${config.image}) center/cover no-repeat`
+          ? `linear-gradient(135deg, rgba(0,0,0,0.5), rgba(0,0,0,0.3)), url("${imageUrl}") center/cover no-repeat`
           : `linear-gradient(135deg, ${theme.primaryColor}, ${theme.secondaryColor})`,
         fontFamily: theme.font,
       }}
