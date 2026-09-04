@@ -120,6 +120,7 @@ export interface NodeStyles {
   color?: string;
   fontSize?: string;
   fontWeight?: string;
+  fontFamily?: string;
   lineHeight?: string;
   letterSpacing?: string;
   textAlign?: 'left' | 'center' | 'right' | 'justify';

@@ -75,6 +75,23 @@ describe('C7.1 Interaction Engine', () => {
     expect(next.viewport.width).toBe(375);
   });
 
+  it('SET_VIEWPORT keeps selection.activeBreakpoint in sync (single source of truth)', () => {
+    const state = createCanvasState();
+    const tablet = reduceCanvasState(state, {
+      type: 'SET_VIEWPORT',
+      viewport: { width: 768, label: 'TABLET' },
+    });
+    expect(tablet.selection.activeBreakpoint).toBe('TABLET');
+    expect(tablet.viewport.label).toBe('TABLET');
+
+    const mobile = reduceCanvasState(tablet, {
+      type: 'SET_VIEWPORT',
+      viewport: { width: 375, label: 'MOBILE' },
+    });
+    expect(mobile.selection.activeBreakpoint).toBe('MOBILE');
+    expect(mobile.viewport.label).toBe('MOBILE');
+  });
+
   it('should handle SET_GRID action', () => {
     const state = createCanvasState();
     const next = reduceCanvasState(state, {

@@ -26,7 +26,7 @@ import { InspectorShell } from '../../../../packages/authoring-studio/src/inspec
 import { EmptyInspectorState } from '../../../../packages/authoring-studio/src/inspector/EmptyInspectorState';
 import { InspectorRuntime } from '../../../../packages/builder-core/src/InspectorRuntime';
 import type { InspectorCategory } from '../../../../packages/builder-core/src/InspectorRuntime';
-import type { NodeStyles } from '../../../../packages/builder-core/src/BuilderDocument';
+import type { NodeStyles, NodeResponsive } from '../../../../packages/builder-core/src/BuilderDocument';
 
 // ---------------------------------------------------------------------------
 // PhaseThreeInspector
@@ -40,6 +40,12 @@ export interface PhaseThreeInspectorProps {
 
 type MasterTab = 'design' | 'content';
 
+function viewportToBreakpoint(label: string): 'desktop' | 'tablet' | 'mobile' {
+  if (label === 'TABLET') return 'tablet';
+  if (label === 'MOBILE') return 'mobile';
+  return 'desktop';
+}
+
 export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
   sectionId,
   onPropChange,
@@ -47,12 +53,17 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
 }) => {
   const [masterTab, setMasterTab] = React.useState<MasterTab>('design');
   const selectedNode = useSelectedSection();
+  const { canvas } = useBuilder();
 
   if (!sectionId || !selectedNode) {
     return <EmptyInspectorState />;
   }
 
-  const currentStyles: NodeStyles = selectedNode.styles ?? {};
+  const activeBreakpoint = viewportToBreakpoint(canvas.viewport.label);
+  const currentStyles: NodeStyles =
+    activeBreakpoint === 'desktop'
+      ? (selectedNode.styles ?? {})
+      : { ...(selectedNode.styles ?? {}), ...((selectedNode.responsive as NodeResponsive | undefined)?.[activeBreakpoint] ?? {}) };
   const nodeLabel = selectedNode.label ?? selectedNode.type;
   const nodeType = selectedNode.type;
 
@@ -81,6 +92,9 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
           <FileText className="w-3.5 h-3.5" />
           Content
         </button>
+        <div className="flex items-center px-2 text-[9px] font-mono uppercase text-violet-300/80 bg-violet-500/10 border-l border-white/5">
+          {activeBreakpoint}
+        </div>
       </div>
 
       {/* Design tab — DesignInspector with 5 sub-tabs */}
@@ -123,6 +137,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   categories={categories}
                   currentProps={props}
                   onPropChange={onPropChange}
+                  breakpoint={activeBreakpoint}
                 />
               );
             }}

@@ -10,13 +10,19 @@ export interface InspectorShellProps {
   categories: InspectorCategory[];
   currentProps: Record<string, unknown>;
   onPropChange: (key: string, value: unknown) => void;
+  /**
+   * Active breakpoint for responsive value resolution.
+   * Driven by the top toolbar viewport (single source of truth).
+   */
+  breakpoint?: 'desktop' | 'tablet' | 'mobile';
 }
 
 /**
  * InspectorShell — Sprint 7.1 UI
  *
- * Breakpoint switching removed — viewport is controlled from the top toolbar only.
- * Uses 'desktop' as the fixed breakpoint for this panel.
+ * Breakpoint switching UI removed — viewport is controlled from the top
+ * toolbar only. The active breakpoint is passed in via props so responsive
+ * values resolve against the SAME breakpoint the canvas is editing.
  */
 export const InspectorShell: React.FC<InspectorShellProps> = ({
   sectionId,
@@ -24,7 +30,8 @@ export const InspectorShell: React.FC<InspectorShellProps> = ({
   sectionType,
   categories,
   currentProps,
-  onPropChange
+  onPropChange,
+  breakpoint = 'desktop'
 }) => {
   return (
     <div className="inspector-shell flex flex-col h-full">
@@ -44,7 +51,7 @@ export const InspectorShell: React.FC<InspectorShellProps> = ({
                 group={group}
                 currentProps={currentProps}
                 onPropChange={onPropChange}
-                breakpoint="desktop"
+                breakpoint={breakpoint}
               />
             ))}
           </InspectorAccordion>

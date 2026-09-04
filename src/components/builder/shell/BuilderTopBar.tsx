@@ -240,15 +240,64 @@ export function BuilderTopBar({
 
 function CommandPaletteModal({ onClose }: { onClose: () => void }): React.ReactElement {
   const [query, setQuery] = useState('')
-  const { dispatch } = useBuilder()
+  const { dispatch, document, canvas } = useBuilder()
 
-  const commands = [
-    { label: 'Add Hero section', action: () => {} },
-    { label: 'Add Features section', action: () => {} },
-    { label: 'Add Pricing section', action: () => {} },
-    { label: 'Publish page', action: () => {} },
-    { label: 'Toggle responsive view', action: () => {} },
-    { label: 'Open AI Assistant', action: () => {} },
+  const activePageId = canvas.selectedPageId || document.pages[0]?.id
+
+  const addSection = (sectionType: string, defaultProps: Record<string, unknown>, label: string) => {
+    if (!activePageId) return
+    dispatch({
+      type: 'ADD_SECTION',
+      pageId: activePageId,
+      sectionType,
+      defaultProps,
+      label,
+    })
+  }
+
+  const commands: { label: string; action: () => void }[] = [
+    {
+      label: 'Add Hero section',
+      action: () =>
+        addSection('hero', { title: 'Nowy Hero', subtitle: 'Podtytuł hero', cta: 'Rozpocznij zakupy' }, 'Hero'),
+    },
+    {
+      label: 'Add Features section',
+      action: () =>
+        addSection('feature-grid', { title: 'Nasze korzyści' }, 'Korzyści'),
+    },
+    {
+      label: 'Add Pricing section',
+      action: () =>
+        addSection('pricing', { title: 'Cennik' }, 'Cennik'),
+    },
+    {
+      label: 'Switch to Mobile viewport',
+      action: () =>
+        dispatch({
+          type: 'CANVAS',
+          action: { type: 'SET_VIEWPORT', viewport: VIEWPORT_PRESETS.MOBILE },
+        }),
+    },
+    {
+      label: 'Switch to Tablet viewport',
+      action: () =>
+        dispatch({
+          type: 'CANVAS',
+          action: { type: 'SET_VIEWPORT', viewport: VIEWPORT_PRESETS.TABLET },
+        }),
+    },
+    {
+      label: 'Switch to Desktop viewport',
+      action: () =>
+        dispatch({
+          type: 'CANVAS',
+          action: { type: 'SET_VIEWPORT', viewport: VIEWPORT_PRESETS.DESKTOP },
+        }),
+    },
+    { label: 'Undo (Ctrl+Z)', action: () => dispatch({ type: 'UNDO' }) },
+    { label: 'Redo (Ctrl+Shift+Z)', action: () => dispatch({ type: 'REDO' }) },
+    { label: 'Zoom 100%', action: () => dispatch({ type: 'CANVAS', action: { type: 'SET_ZOOM', zoom: 1.0 } }) },
   ]
 
   const filtered = query.trim()

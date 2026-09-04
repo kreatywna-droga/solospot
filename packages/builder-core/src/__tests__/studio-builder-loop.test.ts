@@ -152,4 +152,116 @@ describe('Studio Builder Full Lifecycle Loop', () => {
     expect(ctx.document.pages[0].sections.length).toBe(3)
     expect(ctx.document.pages[0].sections.some(s => s.id === 'sec_nav')).toBe(false)
   })
+
+  it('NS23: inline text edit path — UPDATE_PROPS commits to document and participates in history', () => {
+    const registry = createBuilderComponentRegistry()
+    const channel = createMemoryChannel()
+
+    const heading = createSectionNode({
+      id: 'elem_heading',
+      type: 'heading',
+      label: 'Nagłówek',
+      props: { text: 'Oryginalny tekst', level: 'h2' },
+      order: 0,
+    })
+    const page = createBuilderPage({
+      id: 'page_home',
+      slug: '/',
+      name: 'Home',
+      isHome: true,
+      sections: [heading],
+    })
+    const doc = createBuilderDocument({
+      id: 'store_test',
+      metadata: { storeName: 'Test Store', storeSlug: 'test', locale: 'pl', currency: 'PLN' },
+      pages: [page],
+    })
+
+    let ctx = createBuilderContext({
+      document: doc,
+      registry,
+      preview: channel.builderChannel,
+    })
+
+    // Simulate the inline-edit commit (same command InlineEditableText dispatches on blur)
+    ctx = ctx.dispatch({
+      type: 'UPDATE_PROPS',
+      pageId: 'page_home',
+      sectionId: 'elem_heading',
+      props: { text: 'Nowy tekst nagłówka' },
+    })
+
+    const node = ctx.document.pages[0].sections[0]
+    expect(node.props.text).toBe('Nowy tekst nagłówka')
+
+    // UNDO restores original text (inline edits are part of history)
+    ctx = ctx.dispatch({ type: 'UNDO' })
+    expect(ctx.document.pages[0].sections[0].props.text).toBe('Oryginalny tekst')
+
+    // REDO restores the edit
+    ctx = ctx.dispatch({ type: 'REDO' })
+    expect(ctx.document.pages[0].sections[0].props.text).toBe('Nowy tekst nagłówka')
+  })
+
+  it('NS23: responsive prop isolation — tablet/mobile overrides never overwrite desktop base', () => {
+    const registry = createBuilderComponentRegistry()
+    const channel = createMemoryChannel()
+
+    const nav = createSectionNode({
+      id: 'sec_nav',
+      type: 'navbar',
+      label: 'Nawigacja',
+      props: { style: 'transparent', sticky: true },
+      order: 0,
+    })
+    const page = createBuilderPage({
+      id: 'page_home',
+      slug: '/',
+      name: 'Home',
+      isHome: true,
+      sections: [nav],
+    })
+    const doc = createBuilderDocument({
+      id: 'store_test',
+      metadata: { storeName: 'Test Store', storeSlug: 'test', locale: 'pl', currency: 'PLN' },
+      pages: [page],
+    })
+
+    let ctx = createBuilderContext({
+      document: doc,
+      registry,
+      preview: channel.builderChannel,
+    })
+
+    // Desktop base value
+    expect(ctx.document.pages[0].sections[0].props.sticky).toBe(true)
+
+    // TABLET override — different value
+    ctx = ctx.dispatch({
+      type: 'SET_SECTION_RESPONSIVE_PROP',
+      pageId: 'page_home',
+      sectionId: 'sec_nav',
+      propName: 'sticky',
+      value: false,
+      breakpoint: 'tablet',
+    })
+
+    // MOBILE override — yet another value
+    ctx = ctx.dispatch({
+      type: 'SET_SECTION_RESPONSIVE_PROP',
+      pageId: 'page_home',
+      sectionId: 'sec_nav',
+      propName: 'sticky',
+      value: true,
+      breakpoint: 'mobile',
+    })
+
+    const node = ctx.document.pages[0].sections[0]
+    // Desktop base intact
+    expect(node.props.sticky).toBe(true)
+    // Tablet override stored separately
+    expect(node.responsiveProps?.sticky?.tablet).toBe(false)
+    // Mobile override stored separately
+    expect(node.responsiveProps?.sticky?.mobile).toBe(true)
+  })
 })

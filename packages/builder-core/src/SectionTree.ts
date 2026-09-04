@@ -307,8 +307,30 @@ export const sectionTree: SectionTreeOps = {
 
     const clone = deepCloneWithNewIds(found.node);
 
-    // Insert clone immediately after original at root level (simplified)
-    // For nested duplications, the caller should use insertChild directly
+    // Nested node → insert the clone right after the original inside the
+    // SAME parent (preserves hierarchy). Root node → insert at root level.
+    if (found.path.length > 1) {
+      const insertAtParent = (nodes: SectionNode[]): SectionNode[] =>
+        nodes.map(node => {
+          const childIdx = node.children.findIndex(c => c.id === id);
+          if (childIdx >= 0) {
+            const newChildren = [
+              ...node.children.slice(0, childIdx + 1),
+              clone,
+              ...node.children.slice(childIdx + 1),
+            ];
+            return { ...node, children: reorder(newChildren) };
+          }
+          if (node.children.length > 0) {
+            return { ...node, children: insertAtParent(node.children) };
+          }
+          return node;
+        });
+
+      return { sections: insertAtParent(sections), newId: clone.id };
+    }
+
+    // Root-level: insert clone immediately after original.
     const insertIdx = found.path[0] + 1;
     const next = [
       ...sections.slice(0, insertIdx),

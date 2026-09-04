@@ -244,6 +244,28 @@ describe('sectionTree.duplicateNode', () => {
     expect(sections).toHaveLength(1);
     expect(newId).toBe('');
   });
+
+  it('duplicates a nested child inside the SAME parent, right after the original', () => {
+    const childA = makeLeaf('child-a', 'heading', 0);
+    const childB = makeLeaf('child-b', 'text', 1);
+    const container = makeContainer('cont', [childA, childB], 0);
+    const root = [container, makeLeaf('footer', 'footer', 1)];
+
+    const { sections, newId } = sectionTree.duplicateNode(root, 'child-a');
+
+    // Root level unchanged (no accidental hoisting)
+    expect(sections).toHaveLength(2);
+    expect(sections[0].id).toBe('cont');
+    expect(sections[1].id).toBe('footer');
+
+    // Clone inserted inside the container, right after the original
+    const cont = sections[0];
+    expect(cont.children).toHaveLength(3);
+    expect(cont.children[0].id).toBe('child-a');
+    expect(cont.children[1].id).toBe(newId);
+    expect(cont.children[1].type).toBe('heading');
+    expect(cont.children[2].id).toBe('child-b');
+  });
 });
 
 // ---------------------------------------------------------------------------

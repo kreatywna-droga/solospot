@@ -349,7 +349,14 @@ export function reduceCanvasState(state: CanvasState, action: CanvasAction): Can
       return { ...state, runtimeMode: action.mode };
 
     case 'SET_VIEWPORT':
-      return { ...state, viewport: action.viewport };
+      // Single source of truth: viewport change IS the breakpoint change.
+      // Keeps selection.activeBreakpoint in sync so the Inspector and
+      // responsive prop writes never diverge from the toolbar viewport.
+      return {
+        ...state,
+        viewport: action.viewport,
+        selection: { ...state.selection, activeBreakpoint: action.viewport.label },
+      };
 
     case 'SET_ZOOM': {
       const clamped = Math.min(2.0, Math.max(0.25, action.zoom));

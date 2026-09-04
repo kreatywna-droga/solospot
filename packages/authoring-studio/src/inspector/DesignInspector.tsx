@@ -73,42 +73,72 @@ function UnitInput({
   value,
   onChange,
   placeholder = '0',
+  min,
+  max,
+  step,
+  slider,
 }: {
   value?: string;
   onChange: (v: string) => void;
   placeholder?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  /** When provided, renders a slider + numeric input pair sharing the same value */
+  slider?: boolean;
 }) {
   const [unit, setUnit] = React.useState('px');
-  const numVal = value ? value.replace(/[^0-9.-]/g, '') : '';
+  const numVal = value ? parseFloat(value.replace(/[^0-9.-]/g, '')) : NaN
+  const hasNum = !Number.isNaN(numVal)
 
   const commit = (num: string, u: string) => onChange(num ? `${num}${u}` : '');
 
+  const commitNumber = (n: number, u: string) =>
+    onChange(`${Math.round(n * 100) / 100}${u}`);
+
   return (
-    <div className="flex">
-      <input
-        type="number"
-        value={numVal}
-        placeholder={placeholder}
-        onChange={(e) => commit(e.target.value, unit)}
-        className={unitInputCls}
-      />
-      <select
-        value={unit}
-        onChange={(e) => {
-          setUnit(e.target.value);
-          commit(numVal, e.target.value);
-        }}
-        className="bg-[#0e0e1a] border border-l-0 border-white/10 rounded-r text-[11px] text-slate-400 px-1 focus:outline-none"
-      >
-        <option>px</option>
-        <option>%</option>
-        <option>rem</option>
-        <option>em</option>
-        <option>vw</option>
-        <option>vh</option>
-        <option>fr</option>
-        <option>auto</option>
-      </select>
+    <div className="flex flex-col gap-1">
+      <div className="flex">
+        <input
+          type="number"
+          value={hasNum ? numVal : ''}
+          placeholder={placeholder}
+          min={min}
+          max={max}
+          step={step}
+          onChange={(e) => commit(e.target.value, unit)}
+          className={unitInputCls}
+        />
+        <select
+          value={unit}
+          onChange={(e) => {
+            const nextUnit = e.target.value;
+            setUnit(nextUnit);
+            commit(hasNum ? String(numVal) : '', nextUnit);
+          }}
+          className="bg-[#0e0e1a] border border-l-0 border-white/10 rounded-r text-[11px] text-slate-400 px-1 focus:outline-none"
+        >
+          <option>px</option>
+          <option>%</option>
+          <option>rem</option>
+          <option>em</option>
+          <option>vw</option>
+          <option>vh</option>
+          <option>fr</option>
+          <option>auto</option>
+        </select>
+      </div>
+      {slider && min !== undefined && max !== undefined && (
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={step ?? 1}
+          value={hasNum ? Math.min(max, Math.max(min, numVal)) : min}
+          onChange={(e) => commitNumber(parseFloat(e.target.value), unit)}
+          className="w-full accent-violet-500 h-1"
+        />
+      )}
     </div>
   );
 }
@@ -324,12 +354,20 @@ function DesignTab({
           <UnitInput
             value={styles.width}
             onChange={(v) => onChange({ width: v })}
+            slider
+            min={20}
+            max={1600}
+            step={5}
           />
         </Row>
         <Row label="Height">
           <UnitInput
             value={styles.height}
             onChange={(v) => onChange({ height: v })}
+            slider
+            min={20}
+            max={1200}
+            step={5}
           />
         </Row>
         <Row label="Min W">
@@ -348,6 +386,12 @@ function DesignTab({
           <UnitInput
             value={styles.minHeight}
             onChange={(v) => onChange({ minHeight: v })}
+          />
+        </Row>
+        <Row label="Max H">
+          <UnitInput
+            value={styles.maxHeight}
+            onChange={(v) => onChange({ maxHeight: v })}
           />
         </Row>
       </Section>
@@ -650,11 +694,29 @@ function TypographyTab({
   return (
     <>
       <Section title="Font">
+        <Row label="Family">
+          <SelectInput
+            value={styles.fontFamily}
+            onChange={(v) => onChange({ fontFamily: v })}
+            options={[
+              { value: 'Inter', label: 'Inter' },
+              { value: 'Outfit', label: 'Outfit' },
+              { value: 'Playfair Display', label: 'Playfair Display' },
+              { value: 'Space Grotesk', label: 'Space Grotesk' },
+              { value: 'Roboto', label: 'Roboto' },
+              { value: 'Poppins', label: 'Poppins' },
+            ]}
+          />
+        </Row>
         <Row label="Size">
           <UnitInput
             value={styles.fontSize}
             onChange={(v) => onChange({ fontSize: v })}
             placeholder="16px"
+            slider
+            min={8}
+            max={96}
+            step={1}
           />
         </Row>
         <Row label="Weight">

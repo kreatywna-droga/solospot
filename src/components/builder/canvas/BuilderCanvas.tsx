@@ -208,6 +208,108 @@ interface CanvasNodeProps {
   onDoubleClickNode: (node: SectionNode, e: React.MouseEvent) => void
 }
 
+// ---------------------------------------------------------------------------
+// Inline text editing (contentEditable) — commits to BuilderDocument on blur.
+// The document remains the single source of truth; no fake overlay state.
+// ---------------------------------------------------------------------------
+
+function useInlineTextCommit(
+  nodeId: string,
+  pageId: string,
+  propName: string,
+) {
+  const { dispatch } = useBuilder()
+  const commit = useCallback((element: HTMLElement, currentValue: unknown) => {
+    const next = element.innerText.replace(/\u00A0/g, ' ').trim()
+    if (next !== String(currentValue ?? '')) {
+      dispatch({
+        type: 'UPDATE_PROPS',
+        pageId,
+        sectionId: nodeId,
+        props: { [propName]: next },
+      })
+    }
+  }, [dispatch, pageId, nodeId, propName])
+  return commit
+}
+
+function InlineEditableText({
+  nodeId,
+  pageId,
+  propName,
+  value,
+  className,
+  style,
+  as = 'div',
+}: {
+  nodeId: string
+  pageId: string
+  propName: string
+  value: string
+  className?: string
+  style?: React.CSSProperties
+  as?: 'div' | 'p' | 'span'
+}) {
+  const commit = useInlineTextCommit(nodeId, pageId, propName)
+  const ref = useRef<HTMLElement | null>(null)
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const el = ref.current
+    if (!el) return
+    el.contentEditable = 'true'
+    el.focus()
+    // Select all text for quick replace
+    const selection = window.getSelection()
+    if (selection) {
+      const range = document.createRange()
+      range.selectNodeContents(el)
+      selection.removeAllRanges()
+      selection.addRange(range)
+    }
+  }
+
+  const handleBlur = () => {
+    const el = ref.current
+    if (!el) return
+    el.contentEditable = 'false'
+    commit(el as HTMLElement, value)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    e.stopPropagation()
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      ;(e.target as HTMLElement).blur()
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      // Revert to document value
+      if (ref.current) ref.current.innerText = value
+      ;(e.target as HTMLElement).blur()
+    }
+  }
+
+  const Tag = as as any
+  return (
+    <Tag
+      ref={ref as any}
+      onDoubleClick={handleDoubleClick}
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
+      onMouseEnter={(e: React.MouseEvent) => e.stopPropagation()}
+      onMouseLeave={(e: React.MouseEvent) => e.stopPropagation()}
+      onClick={(e: React.MouseEvent) => e.stopPropagation()}
+      suppressContentEditableWarning
+      data-inline-edit="text"
+      className={`${className ?? ''} [&_:focus]:outline-none [&_:focus]:ring-1 [&_:focus]:ring-violet-500/60 rounded-sm cursor-text`}
+      style={style}
+    >
+      {value}
+    </Tag>
+  )
+}
+
 function CanvasNode({
   node,
   pageId,
@@ -266,7 +368,7 @@ function CanvasNode({
     const fontWeight = styles.fontWeight || (level === 'h1' ? '800' : level === 'h3' ? '600' : '700')
     const lineHeight = styles.lineHeight
     const letterSpacing = styles.letterSpacing
-    const fontFamily = styles.fontFamily
+    const fontFamily = styles.fontFamily || (props.fontFamily as string)
 
     return (
       <div
@@ -294,20 +396,21 @@ function CanvasNode({
           isHovered ? 'ring-1 ring-violet-400/60 z-10' : ''
         }`}
       >
-        <div
+        <InlineEditableText
+          nodeId={node.id}
+          pageId={pageId}
+          propName="text"
+          value={text}
           style={{
             color,
-            textAlign,
+            textAlign: textAlign as any,
             fontSize,
             fontWeight,
             lineHeight,
             letterSpacing,
             fontFamily,
           }}
-          className="tracking-tight select-none"
-        >
-          {text}
-        </div>
+        />
       </div>
     )
   }
@@ -320,7 +423,7 @@ function CanvasNode({
     const fontWeight = styles.fontWeight || '400'
     const lineHeight = styles.lineHeight || '1.6'
     const letterSpacing = styles.letterSpacing
-    const fontFamily = styles.fontFamily
+    const fontFamily = styles.fontFamily || (props.fontFamily as string)
 
     return (
       <div
@@ -348,20 +451,22 @@ function CanvasNode({
           isHovered ? 'ring-1 ring-violet-400/60 z-10' : ''
         }`}
       >
-        <p
+        <InlineEditableText
+          nodeId={node.id}
+          pageId={pageId}
+          propName="text"
+          value={text}
+          as="p"
           style={{
             color,
-            textAlign,
+            textAlign: textAlign as any,
             fontSize,
             fontWeight,
             lineHeight,
             letterSpacing,
             fontFamily,
           }}
-          className="leading-relaxed select-none"
-        >
-          {text}
-        </p>
+        />
       </div>
     )
   }
@@ -407,14 +512,58 @@ function CanvasNode({
             borderColor,
             fontSize: styles.fontSize || '0.875rem',
             fontWeight: styles.fontWeight || '500',
-            fontFamily: styles.fontFamily,
+            fontFamily: styles.fontFamily || (props.fontFamily as string),
             padding: styles.padding || '10px 20px',
             width: styles.width ? '100%' : undefined,
             height: styles.height,
           }}
-          className="font-medium shadow-md pointer-events-none transition-transform select-none"
+          className="font-medium shadow-md pointer-events-none transition-transform"
         >
-          {text}
+          <span
+            onDoubleClick={(e: React.MouseEvent) => {
+              e.stopPropagation()
+              const el = e.currentTarget as HTMLElement
+              el.contentEditable = 'true'
+              el.focus()
+              const selection = window.getSelection()
+              if (selection) {
+                const range = document.createRange()
+                range.selectNodeContents(el)
+                selection.removeAllRanges()
+                selection.addRange(range)
+              }
+            }}
+            onBlur={(e: React.FocusEvent<HTMLElement>) => {
+              const el = e.currentTarget as HTMLElement
+              el.contentEditable = 'false'
+              const next = el.innerText.replace(/\u00A0/g, ' ').trim()
+              if (next && next !== text) {
+                dispatch({
+                  type: 'UPDATE_PROPS',
+                  pageId,
+                  sectionId: node.id,
+                  props: { text: next },
+                })
+              }
+            }}
+            onKeyDown={(e: React.KeyboardEvent) => {
+              e.stopPropagation()
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                ;(e.target as HTMLElement).blur()
+              }
+              if (e.key === 'Escape') {
+                e.preventDefault()
+                ;(e.target as HTMLElement).innerText = text
+                ;(e.target as HTMLElement).blur()
+              }
+            }}
+            suppressContentEditableWarning
+            data-inline-edit="text"
+            style={{ pointerEvents: 'auto', cursor: 'text', outline: 'none' }}
+          >
+            {text}
+          </span>
         </button>
       </div>
     )
