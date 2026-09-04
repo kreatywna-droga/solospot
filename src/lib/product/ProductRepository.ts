@@ -16,7 +16,7 @@ export class ProductRepository {
       throw new Error(`ProductRepository.getProductsByTenant failed: ${error.message}`)
     }
 
-    return (data || []).map((row) => this.mapProduct(row))
+    return (data || []).map((row: any) => this.mapProduct(row))
   }
 
   async getProductsByStore(tenantId: string, storeId: string): Promise<Product[]> {
@@ -32,7 +32,7 @@ export class ProductRepository {
       throw new Error(`ProductRepository.getProductsByStore failed: ${error.message}`)
     }
 
-    return (data || []).map((row) => this.mapProduct(row))
+    return (data || []).map((row: any) => this.mapProduct(row))
   }
 
   async getProduct(id: string, tenantId: string): Promise<Product | null> {

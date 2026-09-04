@@ -21,7 +21,7 @@ export async function GET() {
       throw new Error(`Failed to fetch orders: ${error.message}`);
     }
 
-    const orders = (data || []).map((intent) => ({
+    const orders = (data || []).map((intent: any) => ({
       orderId: intent.order_id,
       paymentIntentId: intent.id,
       tenantId: intent.tenant_id,

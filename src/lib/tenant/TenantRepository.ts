@@ -56,7 +56,7 @@ export class TenantRepository {
       throw new Error(`TenantRepository.getAllTenants failed: ${error.message}`);
     }
 
-    return (data || []).map(row => this.mapTenant(row));
+    return (data || []).map((row: any) => this.mapTenant(row));
   }
 
   async updateTenantStatus(id: string, status: TenantStatus): Promise<Tenant> {

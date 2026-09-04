@@ -52,7 +52,7 @@ export class DefaultStoreDashboardService implements StoreDashboardService {
 
       if (orders) {
         ordersCount = orders.length;
-        revenue = orders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
+        revenue = orders.reduce((sum: number, o: any) => sum + (o.total_amount || 0), 0);
       }
     } catch {
       // Fallback if orders table doesn't exist/empty

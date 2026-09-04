@@ -16,7 +16,7 @@ export class StoreRepository {
       throw new Error(`StoreRepository.getStoresByTenant failed: ${error.message}`);
     }
 
-    return (data || []).map((row) => this.mapStore(row));
+    return (data || []).map((row: any) => this.mapStore(row));
   }
 
   async getStoreBySlug(slug: string): Promise<Store | null> {

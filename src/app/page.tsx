@@ -56,16 +56,17 @@ function Nav() {
     if (!mounted) return
 
     // Check initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
+    supabase.auth.getSession().then((res: any) => {
+      setUser(res?.data?.session?.user ?? null)
     })
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const authSub = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null)
     })
+    const subscription = authSub?.data?.subscription;
 
-    return () => subscription.unsubscribe()
+    return () => subscription?.unsubscribe()
   }, [mounted])
 
   const handleLogout = async () => {

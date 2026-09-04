@@ -22,7 +22,8 @@ export default function RegisterPage() {
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then((res: any) => {
+      const session = res?.data?.session;
       if (session?.user) {
         window.location.href = '/dashboard';
       }

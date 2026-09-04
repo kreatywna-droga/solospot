@@ -25,9 +25,9 @@ export async function GET() {
         const timeline = await timelineRepo.getTimelineByTenant(tenant.id);
         const lastEvent = timeline[0] || null;
 
-        const tenantIntents = paymentIntents.filter(i => i.tenant_id === tenant.id);
-        const paidIntents = tenantIntents.filter(i => i.status === 'CAPTURED' || i.status === 'PAID');
-        const revenue = paidIntents.reduce((sum, intent) => sum + (intent.amount || 0), 0);
+        const tenantIntents = paymentIntents.filter((i: any) => i.tenant_id === tenant.id);
+        const paidIntents = tenantIntents.filter((i: any) => i.status === 'CAPTURED' || i.status === 'PAID');
+        const revenue = paidIntents.reduce((sum: number, intent: any) => sum + (intent.amount || 0), 0);
         const ordersCount = tenantIntents.length;
 
         let health = 100;

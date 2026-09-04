@@ -46,11 +46,11 @@ export async function GET() {
       .order('created_at', { ascending: false });
 
     // Map stores
-    const mappedStores = (dbStores || []).map((store) => {
+    const mappedStores = (dbStores || []).map((store: any) => {
       const branding = (store.config as { branding?: Record<string, string> })?.branding || {};
-      const storeOrders = (dbOrders || []).filter((o) => o.store_id === store.id);
-      const paidOrders = storeOrders.filter((o) => o.status === 'CAPTURED');
-      const storeRevenue = paidOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
+      const storeOrders = (dbOrders || []).filter((o: any) => o.store_id === store.id);
+      const paidOrders = storeOrders.filter((o: any) => o.status === 'CAPTURED');
+      const storeRevenue = paidOrders.reduce((sum: number, o: any) => sum + (o.amount || 0), 0);
 
       return {
         id: store.id,
@@ -70,12 +70,12 @@ export async function GET() {
     });
 
     // Totals calculations
-    const activeStores = (dbStores || []).filter((s) => s.status === 'ACTIVE').length;
+    const activeStores = (dbStores || []).filter((s: any) => s.status === 'ACTIVE').length;
     const totalOrders = dbOrders?.length ?? 0;
-    const paidOrders = dbOrders?.filter((o) => o.status === 'CAPTURED').length ?? 0;
+    const paidOrders = dbOrders?.filter((o: any) => o.status === 'CAPTURED').length ?? 0;
     const totalRevenue = (dbOrders || [])
-      .filter((o) => o.status === 'CAPTURED')
-      .reduce((sum, o) => sum + (o.amount || 0), 0);
+      .filter((o: any) => o.status === 'CAPTURED')
+      .reduce((sum: number, o: any) => sum + (o.amount || 0), 0);
 
     // Query recent timeline activity
     const timelineRepo = new TimelineRepository();

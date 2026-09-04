@@ -47,7 +47,7 @@ export class TimelineRepository {
       throw new Error(`TimelineRepository.getTimelineByTenant failed: ${error.message}`);
     }
 
-    return (data || []).map(row => this.mapRow(row));
+    return (data || []).map((row: any) => this.mapRow(row));
   }
 
   async getTimelineByCorrelationId(correlationId: string, tenantId?: string): Promise<TimelineEntry[]> {
@@ -71,7 +71,7 @@ export class TimelineRepository {
       throw new Error(`TimelineRepository.getTimelineByCorrelationId failed: ${error.message}`);
     }
 
-    return (data || []).map(row => this.mapRow(row));
+    return (data || []).map((row: any) => this.mapRow(row));
   }
 
   async getAllEntries(limit = 100): Promise<TimelineEntry[]> {
@@ -89,7 +89,7 @@ export class TimelineRepository {
       throw new Error(`TimelineRepository.getAllEntries failed: ${error.message}`);
     }
 
-    return (data || []).map(row => this.mapRow(row));
+    return (data || []).map((row: any) => this.mapRow(row));
   }
 
   private mapRow(row: any): TimelineEntry {
