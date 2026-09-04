@@ -14,7 +14,12 @@
  */
 
 import { useState, useCallback } from 'react'
-import { Search, Plus, X } from 'lucide-react'
+import {
+  Search, Plus, X,
+  Compass, Sparkles, Grid, ShoppingBag, Image as ImageIcon,
+  Star, Mail, Layout, Phone, FileText, Shield,
+  TrendingUp, Box, Layers, Package, Store, LayoutGrid, Globe, Palette,
+} from 'lucide-react'
 import { useBuilder } from '../state/BuilderProvider'
 import { ComponentDescriptor } from '../../../../packages/builder-core/src/ComponentRegistry'
 
@@ -59,6 +64,46 @@ function CategoryTabs({ categories, active, onChange }: CategoryTabsProps) {
 }
 
 // ---------------------------------------------------------------------------
+// Component icon resolver
+// ---------------------------------------------------------------------------
+
+const ICON_MAP: Record<string, React.ElementType> = {
+  Compass,
+  Sparkles,
+  Grid,
+  ShoppingBag,
+  Image: ImageIcon,
+  ImageIcon,
+  Star,
+  Mail,
+  Layout,
+  Phone,
+  FileText,
+  Shield,
+  TrendingUp,
+  Box,
+  Layers,
+  Package,
+  Store,
+  LayoutGrid,
+  Globe,
+  Palette,
+}
+
+function renderComponentIcon(iconName: string): React.ReactNode {
+  const IconComponent = ICON_MAP[iconName]
+  if (IconComponent) {
+    return <IconComponent className="w-4 h-4 shrink-0" />
+  }
+
+  if (iconName && iconName.length <= 2) {
+    return <span className="text-sm leading-none select-none shrink-0">{iconName}</span>
+  }
+
+  return <Box className="w-4 h-4 shrink-0" />
+}
+
+// ---------------------------------------------------------------------------
 // Component card
 // ---------------------------------------------------------------------------
 
@@ -70,28 +115,28 @@ interface ComponentCardProps {
 function ComponentCard({ descriptor, onAdd }: ComponentCardProps) {
   return (
     <button
+      type="button"
       onClick={() => onAdd(descriptor)}
-      className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5
-                 hover:border-violet-500/30 hover:bg-violet-500/5 active:scale-[0.98]
-                 transition-all text-left group"
+      className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/5
+                 hover:border-violet-500/30 hover:bg-violet-500/10 active:scale-[0.98]
+                 transition-all text-left group overflow-hidden"
     >
       {/* Icon / thumbnail */}
-      <div className="w-10 h-10 rounded-xl bg-violet-500/15 flex items-center justify-center
-                      text-violet-400 flex-shrink-0 text-lg group-hover:bg-violet-500/25 transition-colors">
-        {descriptor.icon.length === 1 || descriptor.icon.startsWith('<')
-          ? <span className="text-base">{descriptor.icon}</span>
-          : descriptor.icon
-        }
+      <div className="w-9 h-9 min-w-[36px] max-w-[36px] min-h-[36px] max-h-[36px] rounded-lg bg-violet-500/15 flex items-center justify-center
+                      text-violet-400 flex-shrink-0 group-hover:bg-violet-500/25 group-hover:text-violet-300 transition-colors overflow-hidden">
+        {renderComponentIcon(descriptor.icon)}
       </div>
 
       {/* Info */}
-      <div className="flex-1 min-w-0">
-        <div className="font-semibold text-white text-sm truncate">{descriptor.label}</div>
-        <div className="text-[11px] text-slate-500 capitalize">{descriptor.category}</div>
+      <div className="flex-1 min-w-0 overflow-hidden flex flex-col justify-center">
+        <div className="font-semibold text-white text-xs sm:text-sm truncate leading-snug">{descriptor.label}</div>
+        <div className="text-[10px] sm:text-[11px] text-slate-400 truncate leading-snug">{descriptor.category}</div>
       </div>
 
       {/* Add hint */}
-      <Plus className="w-4 h-4 text-slate-600 group-hover:text-violet-400 transition-colors flex-shrink-0" />
+      <div className="flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center bg-white/0 group-hover:bg-violet-500/20 transition-colors">
+        <Plus className="w-3.5 h-3.5 text-slate-500 group-hover:text-violet-300 transition-colors shrink-0" />
+      </div>
     </button>
   )
 }
