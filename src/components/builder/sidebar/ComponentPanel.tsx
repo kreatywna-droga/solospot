@@ -190,16 +190,45 @@ export function ComponentPanel({ onClose }: ComponentPanelProps) {
       type: descriptor.type,
       label: descriptor.label,
       props: { ...descriptor.defaultProps },
-      styles: descriptor.type === 'container' ? { display: 'flex-col', padding: '16px', gap: '16px' } : undefined,
+      styles: descriptor.type === 'container' ? { display: 'flex', flexDirection: 'column', padding: '16px', gap: '16px' } : undefined,
       children: [],
     })
 
     const selectedId = canvas.selectedSectionId
     const found = selectedId ? findNode(builderDoc, selectedId) : null
+    const activePage = builderDoc.pages.find(p => p.id === targetPageId)
 
-    if (found) {
+    // Rule 1: A Section is always a top-level page block
+    if (descriptor.type === 'section') {
+      let insertIdx = activePage ? activePage.sections.length : undefined
+      if (found) {
+        // If an element or section is selected, insert the new section right after the root section
+        const rootSectionId = found.parent ? (function getRootId(n: typeof found): string {
+          let curr = n
+          while (curr && curr.parent) {
+            const next = findNode(builderDoc, curr.parent.id)
+            if (!next || !next.parent) return curr.parent.id
+            curr = next
+          }
+          return curr.node.id
+        })(found) : found.node.id
+
+        if (activePage) {
+          const rootIdx = activePage.sections.findIndex(s => s.id === rootSectionId)
+          if (rootIdx >= 0) insertIdx = rootIdx + 1
+        }
+      }
+
+      dispatch({
+        type: 'INSERT_NODE',
+        parentId: null,
+        node: newNode,
+        index: insertIdx,
+        pageId: targetPageId,
+      })
+    } else if (found) {
+      // Rule 2: If a Container or Section is selected, insert inside it
       if (found.node.type === 'container' || found.node.type === 'section') {
-        // Insert inside the container / section
         dispatch({
           type: 'INSERT_NODE',
           parentId: found.node.id,
@@ -208,10 +237,10 @@ export function ComponentPanel({ onClose }: ComponentPanelProps) {
           pageId: targetPageId,
         })
       } else {
-        // Insert as sibling after the selected node
-        const siblings = found.parent ? found.parent.children : found.page.sections
-        const siblingIdx = siblings.findIndex(s => s.id === found.node.id)
+        // Rule 3: If an atomic component is selected, insert as sibling immediately after it
         const parentId = found.parent ? found.parent.id : null
+        const siblings = found.parent ? found.parent.children : (found.page?.sections ?? [])
+        const siblingIdx = siblings.findIndex(s => s.id === found.node.id)
         dispatch({
           type: 'INSERT_NODE',
           parentId,
@@ -221,44 +250,38 @@ export function ComponentPanel({ onClose }: ComponentPanelProps) {
         })
       }
     } else {
-      // Nothing selected
-      if (descriptor.type === 'section') {
+      // Rule 4: Nothing selected — insert into last section or wrap in new section
+      if (activePage && activePage.sections.length > 0) {
+        const lastSection = activePage.sections[activePage.sections.length - 1]
+        // If last section has a container child, append inside container, else inside section
+        const targetParent = (lastSection.children && lastSection.children.length > 0 && lastSection.children[lastSection.children.length - 1].type === 'container')
+          ? lastSection.children[lastSection.children.length - 1]
+          : lastSection
+
         dispatch({
           type: 'INSERT_NODE',
-          parentId: null,
-          node: newNode,
+          parentId: targetParent.id,
+          node: { ...newNode, parentId: targetParent.id },
+          index: targetParent.children.length,
           pageId: targetPageId,
         })
       } else {
-        // Atomic element or container without selection:
-        // Append to last section's children or create a default section wrapper
-        const activePage = builderDoc.pages.find(p => p.id === targetPageId)
-        if (activePage && activePage.sections.length > 0) {
-          const lastSection = activePage.sections[activePage.sections.length - 1]
-          dispatch({
-            type: 'INSERT_NODE',
-            parentId: lastSection.id,
-            node: { ...newNode, parentId: lastSection.id },
-            index: lastSection.children.length,
-            pageId: targetPageId,
-          })
-        } else {
-          const wrapperSection = createBuilderNode({
-            id: generateNodeId('section'),
-            type: 'section',
-            label: 'Sekcja',
-            props: { padding: 'md', background: '#0a0a14' },
-            children: [],
-          })
-          newNode.parentId = wrapperSection.id
-          wrapperSection.children = [newNode]
-          dispatch({
-            type: 'INSERT_NODE',
-            parentId: null,
-            node: wrapperSection,
-            pageId: targetPageId,
-          })
-        }
+        // Empty page: create standard Section wrapper with the new node as child
+        const wrapperSection = createBuilderNode({
+          id: generateNodeId('section'),
+          type: 'section',
+          label: 'Sekcja',
+          props: { padding: 'md', background: '#0a0a14' },
+          children: [{ ...newNode, parentId: null }],
+        })
+        newNode.parentId = wrapperSection.id
+        wrapperSection.children = [newNode]
+        dispatch({
+          type: 'INSERT_NODE',
+          parentId: null,
+          node: wrapperSection,
+          pageId: targetPageId,
+        })
       }
     }
 

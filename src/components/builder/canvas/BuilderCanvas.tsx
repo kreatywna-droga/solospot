@@ -674,6 +674,35 @@ function CanvasNode({
         onDoubleClick={handleDoubleClick}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onDragOver={(e) => {
+          if (e.dataTransfer.types.includes('Files')) {
+            e.preventDefault()
+            e.stopPropagation()
+            e.dataTransfer.dropEffect = 'copy'
+          }
+        }}
+        onDrop={(e) => {
+          if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            const file = e.dataTransfer.files[0]
+            if (file.type.startsWith('image/')) {
+              e.preventDefault()
+              e.stopPropagation()
+              const reader = new FileReader()
+              reader.onload = (uploadEvt) => {
+                const dataUrl = uploadEvt.target?.result as string
+                if (dataUrl) {
+                  dispatch({
+                    type: 'UPDATE_PROPS',
+                    pageId,
+                    sectionId: node.id,
+                    props: { src: dataUrl, image: dataUrl },
+                  })
+                }
+              }
+              reader.readAsDataURL(file)
+            }
+          }
+        }}
         style={{
           width,
           height: height === 'auto' ? undefined : height,
@@ -1039,7 +1068,7 @@ function SectionBlock({
       )}
 
       {/* Live rendered section content */}
-      {node.type === 'container' ? (
+      {node.type === 'container' || node.type === 'section' ? (
         <div
           onDragOver={(e) => {
             e.preventDefault()
@@ -1055,6 +1084,28 @@ function SectionBlock({
             e.preventDefault()
             e.stopPropagation()
             setIsSectionDropTarget(false)
+
+            // Direct file drop support (e.g. image file from local OS)
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+              const file = e.dataTransfer.files[0]
+              if (file.type.startsWith('image/')) {
+                const reader = new FileReader()
+                reader.onload = (uploadEvt) => {
+                  const dataUrl = uploadEvt.target?.result as string
+                  if (dataUrl) {
+                    dispatch({
+                      type: 'SET_NODE_STYLES',
+                      nodeId: node.id,
+                      styles: { backgroundImage: `url("${dataUrl}")` },
+                      pageId,
+                    })
+                  }
+                }
+                reader.readAsDataURL(file)
+                return
+              }
+            }
+
             const draggedNodeId = e.dataTransfer.getData('application/solospot-node-id')
             const compType = e.dataTransfer.getData('application/solospot-component-type') || e.dataTransfer.getData('text/plain')
             if (draggedNodeId && draggedNodeId !== node.id) {
@@ -1081,7 +1132,7 @@ function SectionBlock({
                 visible: true,
                 locked: false,
                 props: descriptor?.defaultProps ? { ...descriptor.defaultProps } : {},
-                styles: (descriptor?.defaultStyles as any) || {},
+                styles: (descriptor?.defaultStyles as any) || (compType === 'container' ? { display: 'flex', flexDirection: 'column', padding: '16px', gap: '16px' } : {}),
                 children: [],
               }
               dispatch({
@@ -1096,15 +1147,15 @@ function SectionBlock({
               })
             }
           }}
-          className={`w-full text-white min-h-[80px] transition-all ${
+          className={`w-full text-white min-h-[80px] transition-all relative ${
             isSectionDropTarget ? 'ring-2 ring-violet-400 bg-violet-950/20' : ''
           }`}
           style={{
-            backgroundColor: resolvedStyles.backgroundColor || (node.props as any)?.background || '#08080f',
+            backgroundColor: resolvedStyles.backgroundColor || (node.props as any)?.background || (node.type === 'section' ? '#0a0a14' : '#08080f'),
             backgroundImage: resolvedStyles.backgroundImage ? (resolvedStyles.backgroundImage.startsWith('url(') ? resolvedStyles.backgroundImage : `url("${resolvedStyles.backgroundImage}")`) : undefined,
             backgroundSize: resolvedStyles.backgroundImage ? 'cover' : undefined,
             backgroundPosition: resolvedStyles.backgroundImage ? 'center' : undefined,
-            padding: formatFourSide(resolvedStyles.padding, typeof (node.props as any)?.padding === 'string' ? (PADDING_PRESET_MAP[(node.props as any).padding] || (node.props as any).padding) : '16px'),
+            padding: formatFourSide(resolvedStyles.padding, typeof (node.props as any)?.padding === 'string' ? (PADDING_PRESET_MAP[(node.props as any).padding] || (node.props as any).padding) : (node.type === 'section' ? '32px 20px' : '16px')),
             margin: formatFourSide(resolvedStyles.margin),
             borderRadius: resolvedStyles.borderRadius || (node.props as any)?.borderRadius,
             borderWidth: resolvedStyles.borderWidth || (node.props as any)?.borderWidth,
@@ -1116,20 +1167,25 @@ function SectionBlock({
             height: resolvedStyles.height || (node.props as any)?.height,
             minWidth: resolvedStyles.minWidth,
             maxWidth: resolvedStyles.maxWidth || (node.props as any)?.maxWidth,
-            minHeight: resolvedStyles.minHeight || (node.props as any)?.minHeight || '80px',
+            minHeight: resolvedStyles.minHeight || (node.props as any)?.minHeight || (node.type === 'section' ? '120px' : '80px'),
             maxHeight: resolvedStyles.maxHeight,
-            display: resolvedStyles.display,
-            flexDirection: resolvedStyles.flexDirection,
-            alignItems: resolvedStyles.alignItems || (node.props as any)?.alignItems,
-            justifyContent: resolvedStyles.justifyContent || (node.props as any)?.justifyContent,
-            gap: resolvedStyles.gap || ((node.props as any)?.gap ? `${(node.props as any).gap}px` : undefined),
-            gridTemplateColumns: resolvedStyles.gridTemplateColumns,
-            gridTemplateRows: resolvedStyles.gridTemplateRows,
             position: resolvedStyles.position as any,
             zIndex: resolvedStyles.zIndex,
           }}
         >
-          <div className="max-w-[1200px] mx-auto space-y-3">
+          <div
+            className="w-full mx-auto"
+            style={{
+              maxWidth: node.type === 'section' ? (resolvedStyles.maxWidth || '1280px') : undefined,
+              display: resolvedStyles.display || 'flex',
+              flexDirection: resolvedStyles.flexDirection || (resolvedStyles.display === 'grid' ? undefined : 'column'),
+              alignItems: resolvedStyles.alignItems || (node.props as any)?.alignItems,
+              justifyContent: resolvedStyles.justifyContent || (node.props as any)?.justifyContent,
+              gap: resolvedStyles.gap || ((node.props as any)?.gap ? `${(node.props as any).gap}px` : '16px'),
+              gridTemplateColumns: resolvedStyles.gridTemplateColumns,
+              gridTemplateRows: resolvedStyles.gridTemplateRows,
+            }}
+          >
             {node.children && node.children.length > 0 ? (
               node.children.map(child => (
                 <CanvasNode
@@ -1146,8 +1202,8 @@ function SectionBlock({
                 />
               ))
             ) : (
-              <div className="p-6 border border-dashed border-white/15 rounded-xl text-center text-xs text-slate-400">
-                Pusty kontener — dodaj elementy lub przeciągnij komponent
+              <div className="p-8 border border-dashed border-white/20 rounded-xl text-center text-xs text-slate-400 w-full select-none">
+                {node.type === 'section' ? 'Pusta sekcja — przeciągnij komponenty tutaj lub dodaj z panelu' : 'Pusty kontener — dodaj elementy lub przeciągnij komponent'}
               </div>
             )}
           </div>
@@ -1210,9 +1266,9 @@ function SectionBlock({
             </CartProvider>
           </div>
 
-          {/* Render children if section has nested nodes */}
+          {/* Render children if custom section has nested nodes */}
           {node.children && node.children.length > 0 && (
-            <div className="p-4 bg-[#08080f]/90 border-t border-white/10 space-y-3">
+            <div className="max-w-[1280px] mx-auto p-4 space-y-3">
               {node.children.map(child => (
                 <CanvasNode
                   key={child.id}

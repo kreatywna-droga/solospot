@@ -140,6 +140,8 @@ export interface NodeStyles {
   gridTemplateRows?: string;
   zIndex?: number;
   position?: 'static' | 'relative' | 'absolute' | 'sticky' | 'fixed';
+  objectFit?: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down';
+  objectPosition?: string;
   customCss?: string;
 }
 
@@ -273,15 +275,16 @@ export interface CompiledDocument {
 // ---------------------------------------------------------------------------
 
 export function createBuilderDocument(params: {
-  id: string;
+  id?: string;
   tenantId?: string;
   metadata?: BuilderMetadata;
   theme?: Partial<BuilderTheme>;
   pages?: BuilderPage[];
 }): BuilderDocument {
   const now = Date.now();
+  const docId = params.id ?? `doc_${now}`;
   return {
-    id: params.id,
+    id: docId,
     tenantId: params.tenantId ?? 'tenant_default',
     version: 1,
     metadata: params.metadata ?? {
@@ -292,7 +295,7 @@ export function createBuilderDocument(params: {
     },
     pages: params.pages && params.pages.length > 0
       ? params.pages
-      : [createBuilderPage({ id: `page_home_${params.id}`, slug: '/', name: 'Home', isHome: true })],
+      : [createBuilderPage({ id: `page_home_${docId}`, slug: '/', name: 'Home', isHome: true })],
     theme: {
       primaryColor: '#6366f1',
       secondaryColor: '#f1f5f9',
@@ -368,6 +371,7 @@ export function createSectionNode(params: {
   responsive?: NodeResponsive;
   responsiveProps?: Record<string, Record<string, unknown>>;
   order?: number;
+  children?: BuilderNode[];
 }): SectionNode {
   return createBuilderNode({
     id: params.id,
@@ -378,6 +382,7 @@ export function createSectionNode(params: {
     responsive: params.responsive,
     responsiveProps: params.responsiveProps,
     order: params.order,
+    children: params.children,
   });
 }
 

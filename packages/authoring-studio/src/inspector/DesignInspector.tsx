@@ -152,6 +152,19 @@ function UnitInput({
   );
 }
 
+const COLOR_PRESETS = [
+  { label: 'Przezroczysty', value: 'transparent' },
+  { label: 'Biały', value: '#ffffff' },
+  { label: 'Czarny', value: '#000000' },
+  { label: 'Ciemny', value: '#0a0a14' },
+  { label: 'Fiolet', value: '#7c3aed' },
+  { label: 'Róż', value: '#ec4899' },
+  { label: 'Niebieski', value: '#3b82f6' },
+  { label: 'Szmaragd', value: '#10b981' },
+  { label: 'Bursztyn', value: '#f59e0b' },
+  { label: 'Szary', value: '#64748b' },
+];
+
 function ColorInput({
   value,
   onChange,
@@ -160,7 +173,7 @@ function ColorInput({
   onChange: (v: string) => void;
 }) {
   const hexVal = React.useMemo(() => {
-    if (!value) return '#ffffff';
+    if (!value || value === 'transparent') return '#ffffff';
     if (/^#[0-9a-fA-F]{6}$/.test(value)) return value;
     if (/^#[0-9a-fA-F]{3}$/.test(value)) {
       return `#${value[1]}${value[1]}${value[2]}${value[2]}${value[3]}${value[3]}`;
@@ -169,25 +182,44 @@ function ColorInput({
   }, [value]);
 
   return (
-    <div className="flex items-center gap-1.5">
-      <div
-        className="w-6 h-6 rounded border border-white/20 flex-shrink-0 cursor-pointer relative overflow-hidden"
-        style={{ background: value || 'transparent' }}
-      >
+    <div className="flex flex-col gap-1.5 w-full">
+      <div className="flex items-center gap-1.5">
+        <div
+          className="w-7 h-7 rounded-lg border border-white/20 flex-shrink-0 cursor-pointer relative overflow-hidden shadow-inner"
+          style={{ background: value || 'transparent' }}
+          title="Kliknij, aby otworzyć próbnik kolorów"
+        >
+          <input
+            type="color"
+            value={hexVal}
+            onChange={(e) => onChange(e.target.value)}
+            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+          />
+        </div>
         <input
-          type="color"
-          value={hexVal}
+          type="text"
+          value={value || ''}
+          placeholder="#ffffff, transparent, rgba(…)"
           onChange={(e) => onChange(e.target.value)}
-          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+          className={`${inputCls} font-mono text-xs`}
         />
       </div>
-      <input
-        type="text"
-        value={value || ''}
-        placeholder="#ffffff or rgba(…)"
-        onChange={(e) => onChange(e.target.value)}
-        className={inputCls}
-      />
+      <div className="flex flex-wrap gap-1">
+        {COLOR_PRESETS.map((preset) => (
+          <button
+            key={preset.value}
+            type="button"
+            title={preset.label}
+            onClick={() => onChange(preset.value)}
+            className={`w-3.5 h-3.5 rounded-sm border transition-transform hover:scale-125 ${
+              value === preset.value ? 'ring-1 ring-violet-400 border-white' : 'border-white/20'
+            }`}
+            style={{
+              backgroundColor: preset.value === 'transparent' ? '#1a1a24' : preset.value,
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -285,23 +317,59 @@ function FourSideEditor({
     { key: 'left', short: 'L' },
   ];
 
+  const masterVal = parseInt(parsed.top || '0', 10) || 0;
+
   return (
-    <div>
+    <div className="space-y-2">
       <div className="flex items-center justify-between mb-1">
-        <span className="text-[11px] text-slate-500">{label}</span>
+        <span className="text-[11px] text-slate-400 font-medium">{label}</span>
         <button
+          type="button"
           onClick={() => setLinked((v) => !v)}
-          className={`p-0.5 rounded text-[10px] transition-colors ${
+          className={`px-1.5 py-0.5 rounded text-[10px] flex items-center gap-1 transition-colors ${
             linked
-              ? 'text-violet-400 bg-violet-500/10'
-              : 'text-slate-600 hover:text-white'
+              ? 'text-violet-400 bg-violet-500/20 border border-violet-500/30'
+              : 'text-slate-500 hover:text-white bg-white/5'
           }`}
-          title={linked ? 'Unlink sides' : 'Link all sides'}
+          title={linked ? 'Rozłącz boki (edytuj każdy osobno)' : 'Połącz wszystkie boki'}
         >
           <Lock className="w-3 h-3" />
+          <span className="text-[9px]">{linked ? 'Połączone' : 'Osobno'}</span>
         </button>
       </div>
-      <div className="grid grid-cols-4 gap-1">
+
+      {linked && (
+        <div className="flex items-center gap-2 bg-[#0a0a14] p-2 rounded-lg border border-white/5">
+          <input
+            type="range"
+            min={0}
+            max={120}
+            step={1}
+            value={masterVal}
+            onChange={(e) => {
+              const v = `${e.target.value}px`;
+              onChange({ top: v, right: v, bottom: v, left: v });
+            }}
+            className="flex-1 accent-violet-500 h-1 cursor-pointer"
+          />
+          <div className="flex items-center">
+            <input
+              type="number"
+              min={0}
+              max={999}
+              value={masterVal}
+              onChange={(e) => {
+                const v = `${e.target.value || '0'}px`;
+                onChange({ top: v, right: v, bottom: v, left: v });
+              }}
+              className="w-12 bg-[#0e0e1a] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-violet-500/60 font-mono"
+            />
+            <span className="text-[10px] text-slate-500 ml-1">px</span>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-4 gap-1.5">
         {sides.map(({ key, short }) => (
           <div key={key} className="relative">
             <input
@@ -309,9 +377,9 @@ function FourSideEditor({
               value={parsed[key] || ''}
               placeholder="0"
               onChange={(e) => handleSide(key, e.target.value)}
-              className="w-full bg-[#0e0e1a] border border-white/10 rounded px-1 py-1 text-[11px] text-white text-center focus:outline-none focus:border-violet-500/60"
+              className="w-full bg-[#0e0e1a] border border-white/10 rounded px-1 py-1.5 text-[11px] text-white text-center focus:outline-none focus:border-violet-500/60 font-mono"
             />
-            <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-[8px] font-bold text-slate-600 uppercase">
+            <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-[8px] font-bold text-slate-500 uppercase bg-[#06060c] px-1 rounded">
               {short}
             </span>
           </div>
@@ -361,12 +429,55 @@ function IconToggleGroup<T extends string>({
 function DesignTab({
   styles,
   onChange,
+  nodeType,
 }: {
   styles: NodeStyles;
   onChange: (patch: Partial<NodeStyles>) => void;
+  nodeType?: string;
 }) {
   return (
     <>
+      {/* Contextual: Image Source section when an Image element is selected */}
+      {nodeType === 'image' && (
+        <Section title="Zdjęcie / Źródło obrazu">
+          <Row label="Adres URL">
+            <input
+              type="text"
+              value={styles.backgroundImage || ''}
+              placeholder="https://... URL zdjęcia"
+              onChange={(e) => onChange({ backgroundImage: e.target.value })}
+              className={inputCls}
+            />
+          </Row>
+          <Row label="Dopasowanie">
+            <SelectInput
+              value={styles.objectFit}
+              onChange={(v) => onChange({ objectFit: v as NodeStyles['objectFit'] })}
+              options={[
+                { value: 'cover', label: 'Cover (Wypełnij)' },
+                { value: 'contain', label: 'Contain (Zmieść w całości)' },
+                { value: 'fill', label: 'Fill (Rozciągnij)' },
+                { value: 'none', label: 'None (Oryginalny rozmiar)' },
+                { value: 'scale-down', label: 'Scale Down' },
+              ]}
+            />
+          </Row>
+          <Row label="Pozycja">
+            <SelectInput
+              value={styles.objectPosition}
+              onChange={(v) => onChange({ objectPosition: v })}
+              options={[
+                { value: 'center', label: 'Środek (Center)' },
+                { value: 'top', label: 'Góra (Top)' },
+                { value: 'bottom', label: 'Dół (Bottom)' },
+                { value: 'left', label: 'Lewo (Left)' },
+                { value: 'right', label: 'Prawo (Right)' },
+              ]}
+            />
+          </Row>
+        </Section>
+      )}
+
       <Section title="Size">
         <Row label="Width">
           <UnitInput
@@ -375,7 +486,7 @@ function DesignTab({
             slider
             min={20}
             max={1600}
-            step={5}
+            step={10}
           />
         </Row>
         <Row label="Height">
@@ -385,31 +496,47 @@ function DesignTab({
             slider
             min={20}
             max={1200}
-            step={5}
+            step={10}
           />
         </Row>
         <Row label="Min W">
           <UnitInput
             value={styles.minWidth}
             onChange={(v) => onChange({ minWidth: v })}
+            slider
+            min={0}
+            max={1600}
+            step={10}
           />
         </Row>
         <Row label="Max W">
           <UnitInput
             value={styles.maxWidth}
             onChange={(v) => onChange({ maxWidth: v })}
+            slider
+            min={200}
+            max={1920}
+            step={10}
           />
         </Row>
         <Row label="Min H">
           <UnitInput
             value={styles.minHeight}
             onChange={(v) => onChange({ minHeight: v })}
+            slider
+            min={0}
+            max={1200}
+            step={10}
           />
         </Row>
         <Row label="Max H">
           <UnitInput
             value={styles.maxHeight}
             onChange={(v) => onChange({ maxHeight: v })}
+            slider
+            min={100}
+            max={1600}
+            step={10}
           />
         </Row>
       </Section>
@@ -445,11 +572,25 @@ function DesignTab({
               step={0.01}
               value={styles.opacity ?? 1}
               onChange={(e) => onChange({ opacity: parseFloat(e.target.value) })}
-              className="flex-1 accent-violet-500"
+              className="flex-1 accent-violet-500 h-1 cursor-pointer"
             />
-            <span className="text-[11px] text-slate-400 w-10 text-right">
-              {Math.round((styles.opacity ?? 1) * 100)}%
-            </span>
+            <div className="flex items-center">
+              <input
+                type="number"
+                min={0}
+                max={100}
+                step={1}
+                value={Math.round((styles.opacity ?? 1) * 100)}
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value);
+                  if (!Number.isNaN(val)) {
+                    onChange({ opacity: Math.min(1, Math.max(0, val / 100)) });
+                  }
+                }}
+                className="w-12 bg-[#0e0e1a] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-violet-500/60 font-mono"
+              />
+              <span className="text-[10px] text-slate-500 ml-1">%</span>
+            </div>
           </div>
         </Row>
       </Section>
@@ -465,6 +606,10 @@ function DesignTab({
           <UnitInput
             value={styles.borderWidth}
             onChange={(v) => onChange({ borderWidth: v })}
+            slider
+            min={0}
+            max={30}
+            step={1}
           />
         </Row>
         <Row label="Style">
@@ -483,6 +628,10 @@ function DesignTab({
           <UnitInput
             value={styles.borderRadius}
             onChange={(v) => onChange({ borderRadius: v })}
+            slider
+            min={0}
+            max={100}
+            step={1}
           />
         </Row>
       </Section>
@@ -577,6 +726,10 @@ function LayoutTab({
               value={styles.gap}
               onChange={(v) => onChange({ gap: v })}
               placeholder="16px"
+              slider
+              min={0}
+              max={120}
+              step={2}
             />
           </Row>
         </Section>
@@ -607,6 +760,10 @@ function LayoutTab({
               value={styles.gap}
               onChange={(v) => onChange({ gap: v })}
               placeholder="16px"
+              slider
+              min={0}
+              max={120}
+              step={2}
             />
           </Row>
           <Row label="Align">
@@ -768,13 +925,21 @@ function TypographyTab({
             value={styles.lineHeight}
             onChange={(v) => onChange({ lineHeight: v })}
             placeholder="1.5"
+            slider
+            min={0.8}
+            max={3.0}
+            step={0.05}
           />
         </Row>
         <Row label="Tracking">
           <UnitInput
             value={styles.letterSpacing}
             onChange={(v) => onChange({ letterSpacing: v })}
-            placeholder="0em"
+            placeholder="0px"
+            slider
+            min={-2}
+            max={12}
+            step={0.5}
           />
         </Row>
       </Section>
@@ -855,7 +1020,19 @@ export const DesignInspector: React.FC<DesignInspectorProps> = ({
   nodeLabel,
   nodeType,
 }) => {
-  const [activeTab, setActiveTab] = React.useState<DesignTab>('design');
+  const getInitialTab = (type?: string): DesignTab => {
+    if (type === 'heading' || type === 'text') return 'typography';
+    if (type === 'container') return 'layout';
+    return 'design';
+  };
+
+  const [activeTab, setActiveTab] = React.useState<DesignTab>(() => getInitialTab(nodeType));
+
+  React.useEffect(() => {
+    if (nodeType) {
+      setActiveTab(getInitialTab(nodeType));
+    }
+  }, [nodeType]);
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -894,7 +1071,7 @@ export const DesignInspector: React.FC<DesignInspectorProps> = ({
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto">
         {activeTab === 'design' && (
-          <DesignTab styles={styles} onChange={onStyleChange} />
+          <DesignTab styles={styles} onChange={onStyleChange} nodeType={nodeType} />
         )}
         {activeTab === 'layout' && (
           <LayoutTab styles={styles} onChange={onStyleChange} />
