@@ -9,7 +9,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import {
-  PanelLeft, Layers, ImageIcon, Plus,
+  Layers, ImageIcon, Plus,
   ChevronRight, GripVertical,
   Globe, Lock, Eye, EyeOff, FileText,
   Search, X, Upload, History, Bot,
@@ -34,36 +34,8 @@ export function BuilderLeftSidebar({ activeTab, onTabChange }: BuilderLeftSideba
       ? activeTab
       : 'layers'
 
-  const tabs: { id: StudioTab; label: string; icon: React.ElementType }[] = [
-    { id: 'pages',      label: 'Pages',      icon: PanelLeft },
-    { id: 'layers',     label: 'Layers',     icon: Layers },
-    { id: 'assets',     label: 'Assets',     icon: ImageIcon },
-    { id: 'components', label: 'Komponenty', icon: Plus },
-    { id: 'history',    label: 'Historia',   icon: History },
-    { id: 'ai',         label: 'AI',         icon: Bot },
-  ]
-
   return (
     <aside className="w-80 min-w-[320px] max-w-[380px] border-r border-white/10 bg-[#06060c] flex flex-col overflow-hidden flex-shrink-0">
-      {/* Tab switcher - 6 equal columns */}
-      <div className="grid grid-cols-6 border-b border-white/10 bg-[#05050a]">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => onTabChange(tab.id)}
-            className={`flex flex-col items-center justify-center gap-1 py-3 px-1 text-[9px] font-bold uppercase tracking-wider transition-all
-              ${currentTab === tab.id
-                ? 'text-white border-b-2 border-violet-500 bg-violet-500/10'
-                : 'text-slate-500 hover:text-white hover:bg-white/5 border-b-2 border-transparent'
-              }`}
-            title={tab.label}
-          >
-            <tab.icon className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">{tab.label}</span>
-          </button>
-        ))}
-      </div>
-
       {/* Content */}
       <div className="flex-1 overflow-hidden">
         {currentTab === 'pages' && <PagesPanel />}
