@@ -98,55 +98,61 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
   const [isResizingRight, setIsResizingRight] = useState(false)
 
   // Drag handler for Left Sidebar
-  const handleLeftResizeStart = useCallback((e: React.MouseEvent) => {
+  const handleLeftPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     e.preventDefault()
+    e.stopPropagation()
     setIsResizingLeft(true)
     const startX = e.clientX
     const startW = leftWidth
 
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      const delta = moveEvent.clientX - startX
-      const newWidth = Math.min(Math.max(startW + delta, 220), 620)
+    const onPointerMove = (moveEvt: PointerEvent) => {
+      const delta = moveEvt.clientX - startX
+      const newWidth = Math.min(Math.max(startW + delta, 220), 650)
       setLeftWidth(newWidth)
       try {
         localStorage.setItem('solospot_builder_left_width', newWidth.toString())
       } catch {}
     }
 
-    const handleMouseUp = () => {
+    const onPointerUp = () => {
       setIsResizingLeft(false)
-      window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('mouseup', handleMouseUp)
+      window.removeEventListener('pointermove', onPointerMove)
+      window.removeEventListener('pointerup', onPointerUp)
+      window.removeEventListener('pointercancel', onPointerUp)
     }
 
-    window.addEventListener('mousemove', handleMouseMove)
-    window.addEventListener('mouseup', handleMouseUp)
+    window.addEventListener('pointermove', onPointerMove)
+    window.addEventListener('pointerup', onPointerUp)
+    window.addEventListener('pointercancel', onPointerUp)
   }, [leftWidth])
 
   // Drag handler for Right Sidebar (Inspector)
-  const handleRightResizeStart = useCallback((e: React.MouseEvent) => {
+  const handleRightPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     e.preventDefault()
+    e.stopPropagation()
     setIsResizingRight(true)
     const startX = e.clientX
     const startW = rightWidth
 
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      const delta = startX - moveEvent.clientX
-      const newWidth = Math.min(Math.max(startW + delta, 220), 620)
+    const onPointerMove = (moveEvt: PointerEvent) => {
+      const delta = startX - moveEvt.clientX
+      const newWidth = Math.min(Math.max(startW + delta, 220), 650)
       setRightWidth(newWidth)
       try {
         localStorage.setItem('solospot_builder_right_width', newWidth.toString())
       } catch {}
     }
 
-    const handleMouseUp = () => {
+    const onPointerUp = () => {
       setIsResizingRight(false)
-      window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('mouseup', handleMouseUp)
+      window.removeEventListener('pointermove', onPointerMove)
+      window.removeEventListener('pointerup', onPointerUp)
+      window.removeEventListener('pointercancel', onPointerUp)
     }
 
-    window.addEventListener('mousemove', handleMouseMove)
-    window.addEventListener('mouseup', handleMouseUp)
+    window.addEventListener('pointermove', onPointerMove)
+    window.addEventListener('pointerup', onPointerUp)
+    window.addEventListener('pointercancel', onPointerUp)
   }, [rightWidth])
 
   const handleInspectorPropChange = useCallback(
@@ -168,7 +174,7 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
     <div className="h-screen bg-[#050508] text-white flex flex-col overflow-hidden select-none">
       {/* Overlay to capture pointer events smoothly when dragging across iframes */}
       {(isResizingLeft || isResizingRight) && (
-        <div className="fixed inset-0 z-[9999] cursor-col-resize select-none" />
+        <div className="fixed inset-0 z-[9999] cursor-ew-resize select-none" />
       )}
 
       {/* Top Bar */}
@@ -197,18 +203,18 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
             />
             {/* Left Resizer Handle */}
             <div
-              onMouseDown={handleLeftResizeStart}
+              onPointerDown={handleLeftPointerDown}
               onDoubleClick={() => {
                 setLeftWidth(320)
                 try { localStorage.setItem('solospot_builder_left_width', '320') } catch {}
               }}
-              title="Przeciągnij, aby zmienić szerokość lewego panelu (kliknij 2x, aby zresetować)"
-              className={`w-1.5 hover:w-2 -mr-1.5 z-30 cursor-col-resize transition-all flex items-center justify-center group flex-shrink-0 relative ${
+              title="Przeciągnij, aby zmienić szerokość lewego panelu (kliknij 2x, aby zresetować do 320px)"
+              className={`w-2 hover:w-2.5 -mr-1 z-30 cursor-ew-resize transition-all flex items-center justify-center group flex-shrink-0 relative ${
                 isResizingLeft ? 'bg-violet-500 shadow-lg shadow-violet-500/50' : 'bg-transparent hover:bg-violet-500/40'
               }`}
             >
-              <div className={`w-[2px] h-8 rounded-full transition-colors ${
-                isResizingLeft ? 'bg-white' : 'bg-white/10 group-hover:bg-violet-400'
+              <div className={`w-[2px] h-10 rounded-full transition-colors ${
+                isResizingLeft ? 'bg-white' : 'bg-white/10 group-hover:bg-violet-300'
               }`} />
             </div>
           </>
@@ -221,18 +227,18 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
 
         {/* Right Resizer Handle */}
         <div
-          onMouseDown={handleRightResizeStart}
+          onPointerDown={handleRightPointerDown}
           onDoubleClick={() => {
             setRightWidth(288)
             try { localStorage.setItem('solospot_builder_right_width', '288') } catch {}
           }}
-          title="Przeciągnij, aby zmienić szerokość inspektora (kliknij 2x, aby zresetować)"
-          className={`w-1.5 hover:w-2 -ml-1.5 z-30 cursor-col-resize transition-all flex items-center justify-center group flex-shrink-0 relative ${
+          title="Przeciągnij, aby zmienić szerokość inspektora (kliknij 2x, aby zresetować do 288px)"
+          className={`w-2 hover:w-2.5 -ml-1 z-30 cursor-ew-resize transition-all flex items-center justify-center group flex-shrink-0 relative ${
             isResizingRight ? 'bg-violet-500 shadow-lg shadow-violet-500/50' : 'bg-transparent hover:bg-violet-500/40'
           }`}
         >
-          <div className={`w-[2px] h-8 rounded-full transition-colors ${
-            isResizingRight ? 'bg-white' : 'bg-white/10 group-hover:bg-violet-400'
+          <div className={`w-[2px] h-10 rounded-full transition-colors ${
+            isResizingRight ? 'bg-white' : 'bg-white/10 group-hover:bg-violet-300'
           }`} />
         </div>
 
