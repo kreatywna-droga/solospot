@@ -130,11 +130,18 @@ async function main() {
     });
     await sleep(2000);
     const bgRendered = await page.evaluate(() => {
-      const el = document.querySelector('[data-section-id="sec_hero"] > div, [data-section-id="sec_hero"]');
-      const target = el && el.tagName === 'DIV' && el.firstElementChild && el.firstElementChild.tagName === 'DIV'
-        ? el.firstElementChild : el;
-      if (!target) return false;
-      return (getComputedStyle(target).backgroundImage || '').includes('url(');
+      // Walk the hero subtree — the background may be on the section wrapper
+      // or on the runtime-rendered <section> (config.image path).
+      const hero = document.querySelector('[data-section-id="sec_hero"]') || document.querySelector('[data-section-id]');
+      if (!hero) return false;
+      let found = false;
+      const check = (el) => {
+        const s = getComputedStyle(el);
+        if (s.backgroundImage && s.backgroundImage !== 'none' && s.backgroundImage.includes('unsplash')) found = true;
+        Array.from(el.children).forEach((c) => check(c));
+      };
+      check(hero);
+      return found;
     });
     step('set bg image URL → canvas renders it', imgTabClicked && bgSet && bgRendered, `tab=${imgTabClicked} set=${bgSet} rendered=${bgRendered}`);
     await shot(page, '03-bg-image');

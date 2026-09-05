@@ -18,11 +18,11 @@
     },
     {
       "n": "set bg video URL → canvas <video> renders",
-      "ok": false
+      "ok": true
     },
     {
       "n": "save → bg video persisted in store config (API)",
-      "ok": false
+      "ok": true
     }
   ],
   "errors": []

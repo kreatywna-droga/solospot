@@ -1738,6 +1738,13 @@ function SectionBlock({
                   config: {
                     ...node.props,
                     background: resolvedStyles.backgroundColor || (node.props as any)?.background,
+                    // Pass the background image URL to the runtime renderer so
+                    // hero-style sections render it natively (gradient overlay)
+                    // instead of covering the section background with a solid gradient.
+                    image: (node.props as any)?.image
+                      || (resolvedStyles.backgroundImage && resolvedStyles.backgroundImage !== 'none'
+                        ? (resolvedStyles.backgroundImage.match(/url\(["']?(.+?)["']?\)/)?.[1] ?? undefined)
+                        : undefined),
                   },
                 }}
                 theme={{
