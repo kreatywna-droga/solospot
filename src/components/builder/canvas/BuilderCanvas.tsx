@@ -341,7 +341,6 @@ function InlineEditableText({
       onKeyDown={handleKeyDown}
       onMouseEnter={(e: React.MouseEvent) => e.stopPropagation()}
       onMouseLeave={(e: React.MouseEvent) => e.stopPropagation()}
-      onClick={(e: React.MouseEvent) => e.stopPropagation()}
       suppressContentEditableWarning
       data-inline-edit="text"
       className={`${className ?? ''} [&_:focus]:outline-none [&_:focus]:ring-1 [&_:focus]:ring-violet-500/60 rounded-sm cursor-text`}

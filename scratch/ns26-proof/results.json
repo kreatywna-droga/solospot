@@ -1,0 +1,37 @@
+{
+  "results": [
+    {
+      "n": "setup (register/login/tenant/store)",
+      "ok": true
+    },
+    {
+      "n": "studio opens",
+      "ok": true
+    },
+    {
+      "n": "add Image element",
+      "ok": true
+    },
+    {
+      "n": "click Image → EXACTLY ONE selection frame",
+      "ok": false
+    },
+    {
+      "n": "click Section → Kolor/Zdjęcie/Wideo tabs",
+      "ok": false
+    },
+    {
+      "n": "set background image → canvas renders it",
+      "ok": false
+    },
+    {
+      "n": "set background video → canvas <video> renders",
+      "ok": false
+    },
+    {
+      "n": "save → background persisted in store config (API)",
+      "ok": false
+    }
+  ],
+  "errors": []
+}

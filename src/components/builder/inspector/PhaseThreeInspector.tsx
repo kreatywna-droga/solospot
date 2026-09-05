@@ -98,6 +98,9 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
   const nodeLabel = selectedNode.label ?? selectedNode.type;
   const nodeType = selectedNode.type;
   const props = selectedNode.props ?? {};
+  // Root-level nodes (sections: navbar, hero, footer, container, section...)
+  // all support full background editing — not only the generic 'section' type.
+  const isRootSection = selectedNode.parentId == null;
 
   return (
     <div className="flex flex-col h-full overflow-hidden bg-[#07070f] text-white select-none">
@@ -487,9 +490,9 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
         )}
 
         {/* ============================================================= */}
-        {/* SIMPLE CONTROLS: SECTION                                       */}
+        {/* SIMPLE CONTROLS: SECTION (any root-level section type)         */}
         {/* ============================================================= */}
-        {nodeType === 'section' && (() => {
+        {isRootSection && (() => {
           const bgType: 'color' | 'image' | 'video' =
             props.backgroundVideo ? 'video'
             : currentStyles.backgroundImage && currentStyles.backgroundImage !== 'none' ? 'image'
