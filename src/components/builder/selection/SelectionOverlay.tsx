@@ -74,6 +74,15 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
   // Refs for hot-path drag tracking (zero re-renders during pointermove)
   const dragRef = useMemo(() => ({ deltaX: 0, deltaY: 0 }), [])
   const resizeRef = useMemo(() => ({ w: 0, h: 0, fontSize: 0 }), [])
+  const overlayGroupRef = useRef<HTMLDivElement>(null)
+  const moveBadgeRef = useRef<HTMLSpanElement>(null)
+
+  const selectedFound = useMemo(() => {
+    if (!canvas.selectedSectionId) return null
+    return findNode(document, canvas.selectedSectionId)
+  }, [document, canvas.selectedSectionId])
+
+  const isTextNode = selectedFound?.node.type === 'text' || selectedFound?.node.type === 'heading'
 
   // Compute toolbar data: find node in page or parent container
   const toolbarData = useMemo(() => {
@@ -136,20 +145,47 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     dragRef.deltaX = 0
     dragRef.deltaY = 0
 
+    // Disable CSS transitions during hot drag path for instant 120fps tracking
+    const prevTransition = domEl?.style.transition || ''
+    if (domEl) {
+      domEl.style.transition = 'none'
+      domEl.style.willChange = 'transform'
+    }
+
     // Show badge once at start (no per-frame re-render)
     setMoving({ startX, startY, startTx, startTy, deltaX: 0, deltaY: 0 })
 
-    const onPointerMove = (moveEvt: PointerEvent) => {
-      const deltaX = (moveEvt.clientX - startX) / zoom
-      const deltaY = (moveEvt.clientY - startY) / zoom
-      dragRef.deltaX = deltaX
-      dragRef.deltaY = deltaY
+    let rafId: number | null = null
+    let latestClientX = startX
+    let latestClientY = startY
 
-      // Direct 60fps DOM transform — zero React re-renders during drag
-      if (domEl) {
-        const curTx = startTx + Math.round(deltaX)
-        const curTy = startTy + Math.round(deltaY)
-        domEl.style.transform = `translate(${curTx}px, ${curTy}px) rotate(${baseRotate}) scale(${baseScale})`
+    const onPointerMove = (moveEvt: PointerEvent) => {
+      latestClientX = moveEvt.clientX
+      latestClientY = moveEvt.clientY
+
+      if (rafId === null) {
+        rafId = requestAnimationFrame(() => {
+          rafId = null
+          const deltaX = (latestClientX - startX) / zoom
+          const deltaY = (latestClientY - startY) / zoom
+          dragRef.deltaX = deltaX
+          dragRef.deltaY = deltaY
+
+          const curTx = startTx + Math.round(deltaX)
+          const curTy = startTy + Math.round(deltaY)
+
+          // Direct 60/120fps hardware-accelerated DOM transform
+          if (domEl) {
+            domEl.style.transform = `translate(${curTx}px, ${curTy}px) rotate(${baseRotate}) scale(${baseScale})`
+          }
+          // Synchronously move the overlay box and grip with zero lag
+          if (overlayGroupRef.current) {
+            overlayGroupRef.current.style.transform = `translate3d(${Math.round(deltaX)}px, ${Math.round(deltaY)}px, 0px)`
+          }
+          if (moveBadgeRef.current) {
+            moveBadgeRef.current.textContent = `X: ${curTx}px, Y: ${curTy}px`
+          }
+        })
       }
     }
 
@@ -157,6 +193,20 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
       window.removeEventListener('pointermove', onPointerMove)
       window.removeEventListener('pointerup', onPointerUp)
       window.removeEventListener('pointercancel', onPointerUp)
+
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId)
+        rafId = null
+      }
+
+      // Reset overlay transform so document state takes over
+      if (overlayGroupRef.current) {
+        overlayGroupRef.current.style.transform = ''
+      }
+      if (domEl) {
+        domEl.style.transition = prevTransition
+        domEl.style.willChange = ''
+      }
 
       const deltaX = (upEvt.clientX - startX) / zoom
       const deltaY = (upEvt.clientY - startY) / zoom
@@ -234,6 +284,13 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     resizeRef.h = startHeight
     resizeRef.fontSize = startFontSize
 
+    // Disable transitions during live resize
+    const prevTransition = domEl?.style.transition || ''
+    if (domEl) {
+      domEl.style.transition = 'none'
+      domEl.style.willChange = isTextNode ? 'font-size' : 'width, height'
+    }
+
     // Show badge once at start
     setResizing({
       handle,
@@ -248,43 +305,55 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
       currentFontSize: startFontSize,
     })
 
+    let rafId: number | null = null
+    let latestClientX = startX
+    let latestClientY = startY
+
     const onPointerMove = (moveEvt: PointerEvent) => {
-      const deltaX = (moveEvt.clientX - startX) / zoom
-      const deltaY = (moveEvt.clientY - startY) / zoom
+      latestClientX = moveEvt.clientX
+      latestClientY = moveEvt.clientY
 
-      let w = startWidth
-      let h = startHeight
+      if (rafId === null) {
+        rafId = requestAnimationFrame(() => {
+          rafId = null
+          const deltaX = (latestClientX - startX) / zoom
+          const deltaY = (latestClientY - startY) / zoom
 
-      if (handle.includes('E')) w = Math.max(40, startWidth + deltaX)
-      if (handle.includes('W')) w = Math.max(40, startWidth - deltaX)
-      if (handle.includes('S')) h = Math.max(20, startHeight + deltaY)
-      if (handle.includes('N')) h = Math.max(20, startHeight - deltaY)
+          let w = startWidth
+          let h = startHeight
 
-      let currentFontSize = startFontSize
-      if (isTextNode) {
-        let ratio = 1
-        if (handle.includes('E') || handle.includes('W')) {
-          ratio = w / Math.max(1, startWidth)
-        } else if (handle.includes('S') || handle.includes('N')) {
-          ratio = h / Math.max(1, startHeight)
-        } else {
-          ratio = Math.max(w / Math.max(1, startWidth), h / Math.max(1, startHeight))
-        }
-        currentFontSize = Math.min(150, Math.max(8, Math.round(startFontSize * ratio)))
-      }
+          if (handle.includes('E')) w = Math.max(40, startWidth + deltaX)
+          if (handle.includes('W')) w = Math.max(40, startWidth - deltaX)
+          if (handle.includes('S')) h = Math.max(20, startHeight + deltaY)
+          if (handle.includes('N')) h = Math.max(20, startHeight - deltaY)
 
-      resizeRef.w = Math.round(w)
-      resizeRef.h = Math.round(h)
-      resizeRef.fontSize = currentFontSize
+          let currentFontSize = startFontSize
+          if (isTextNode) {
+            let ratio = 1
+            if (handle.includes('E') || handle.includes('W')) {
+              ratio = w / Math.max(1, startWidth)
+            } else if (handle.includes('S') || handle.includes('N')) {
+              ratio = h / Math.max(1, startHeight)
+            } else {
+              ratio = Math.max(w / Math.max(1, startWidth), h / Math.max(1, startHeight))
+            }
+            currentFontSize = Math.min(150, Math.max(8, Math.round(startFontSize * ratio)))
+          }
 
-      // Direct 60fps DOM preview — zero re-renders
-      if (domEl) {
-        if (isTextNode) {
-          domEl.style.fontSize = `${currentFontSize}px`
-        } else {
-          if (handle.includes('E') || handle.includes('W')) domEl.style.width = `${Math.round(w)}px`
-          if (handle.includes('S') || handle.includes('N')) domEl.style.height = `${Math.round(h)}px`
-        }
+          resizeRef.w = Math.round(w)
+          resizeRef.h = Math.round(h)
+          resizeRef.fontSize = currentFontSize
+
+          // Direct 60fps DOM preview — zero re-renders
+          if (domEl) {
+            if (isTextNode) {
+              domEl.style.fontSize = `${currentFontSize}px`
+            } else {
+              if (handle.includes('E') || handle.includes('W')) domEl.style.width = `${Math.round(w)}px`
+              if (handle.includes('S') || handle.includes('N')) domEl.style.height = `${Math.round(h)}px`
+            }
+          }
+        })
       }
     }
 
@@ -292,6 +361,16 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
       window.removeEventListener('pointermove', onPointerMove)
       window.removeEventListener('pointerup', onPointerUp)
       window.removeEventListener('pointercancel', onPointerUp)
+
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId)
+        rafId = null
+      }
+
+      if (domEl) {
+        domEl.style.transition = prevTransition
+        domEl.style.willChange = ''
+      }
 
       const deltaX = (upEvt.clientX - startX) / zoom
       const deltaY = (upEvt.clientY - startY) / zoom
@@ -338,8 +417,8 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
             })
           }
         } else {
-          const roundedW = `${Math.round(finalW)}px`
-          const roundedH = `${Math.round(finalH)}px`
+          const finalWidthStr = `${Math.round(finalW)}px`
+          const finalHeightStr = `${Math.round(finalH)}px`
 
           if (activeBp === 'tablet' || activeBp === 'mobile') {
             const currentResp = (found.node.responsive as Record<string, any>) || {}
@@ -350,7 +429,7 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
               updates: {
                 responsive: {
                   ...currentResp,
-                  [activeBp]: { ...currentBpStyles, width: roundedW, height: roundedH },
+                  [activeBp]: { ...currentBpStyles, width: finalWidthStr, height: finalHeightStr },
                 },
               },
               pageId: found.page.id,
@@ -359,14 +438,14 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
             dispatch({
               type: 'SET_NODE_STYLES',
               nodeId: targetNodeId,
-              styles: { width: roundedW, height: roundedH },
+              styles: { width: finalWidthStr, height: finalHeightStr },
             })
 
             dispatch({
               type: 'UPDATE_PROPS',
               pageId: found.page.id,
               sectionId: targetNodeId,
-              props: { width: roundedW, height: roundedH },
+              props: { width: finalWidthStr, height: finalHeightStr },
             })
           }
         }
@@ -415,10 +494,14 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
             <HoverHighlight rect={overlay.hoverRect} />
           )}
 
-          {/* Selection bounding box */}
+          {/* Selection bounding box & interactive handles */}
           {displayRect && (
-            <>
-              <BoundingBox rect={displayRect} onMoveStart={handleMoveStart} />
+            <div ref={overlayGroupRef} className="absolute inset-0 pointer-events-none">
+              <BoundingBox
+                rect={displayRect}
+                onMoveStart={handleMoveStart}
+                isTextNode={isTextNode}
+              />
 
               {/* Move Grip Handle — pointer capture for smooth drag even at high velocity */}
               <div
@@ -437,11 +520,12 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
               >
                 <Move className="w-3.5 h-3.5 text-violet-400 group-hover:text-white transition-colors" />
                 <span className="font-semibold">Przesuń</span>
-                {moving && (
-                  <span className="ml-1 text-[10px] font-mono text-violet-200 bg-black/40 px-1.5 py-0.5 rounded border border-white/10">
-                    X: {moving.startTx + Math.round(moving.deltaX)}px, Y: {moving.startTy + Math.round(moving.deltaY)}px
-                  </span>
-                )}
+                <span
+                  ref={moveBadgeRef}
+                  className={`ml-1 text-[10px] font-mono text-violet-200 bg-black/40 px-1.5 py-0.5 rounded border border-white/10 ${moving ? '' : 'hidden'}`}
+                >
+                  {moving ? `X: ${moving.startTx + Math.round(moving.deltaX)}px, Y: ${moving.startTy + Math.round(moving.deltaY)}px` : ''}
+                </span>
               </div>
 
               {/* Resize handles */}
@@ -473,7 +557,7 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
                   )}
                 </div>
               )}
-            </>
+            </div>
           )}
 
           {/* Quick toolbar */}

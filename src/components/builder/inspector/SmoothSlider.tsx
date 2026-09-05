@@ -9,7 +9,7 @@
  * On release (pointerup): fires onChange once — commits to BuilderDocument SSOT.
  */
 
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useEffect } from 'react';
 
 interface SmoothSliderProps {
   min: number;
@@ -45,6 +45,15 @@ export const SmoothSlider: React.FC<SmoothSliderProps> = ({
     const pct = ((v - min) / (max - min)) * 100;
     el.style.background = `linear-gradient(to right, #7c3aed ${pct}%, rgba(255,255,255,0.1) ${pct}%)`;
   }, [min, max]);
+
+  // Sync external value changes (e.g. selection changed or numeric input typed)
+  useEffect(() => {
+    if (inputRef.current && !isDragging.current) {
+      inputRef.current.value = String(value);
+      lastCommitted.current = value;
+      updateTrackFill(value, inputRef.current);
+    }
+  }, [value, updateTrackFill]);
 
   const handlePointerDown = useCallback((e: React.PointerEvent<HTMLInputElement>) => {
     isDragging.current = true;

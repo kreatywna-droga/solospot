@@ -33,12 +33,14 @@ interface BoundingBoxProps {
   borderWidth?: number
   /** Border style */
   borderStyle?: 'solid' | 'dashed'
-  /** Animation duration in ms */
+  /** Animation duration in ms (0 for instant 60fps tracking) */
   animationDuration?: number
   /** Z-index */
   zIndex?: number
   /** Callback to initiate dragging/moving */
   onMoveStart?: (e: React.MouseEvent) => void
+  /** Is selected node a text node */
+  isTextNode?: boolean
 }
 
 export function BoundingBox({
@@ -46,9 +48,10 @@ export function BoundingBox({
   color = '#7c3aed',
   borderWidth = 2,
   borderStyle = 'solid',
-  animationDuration = 150,
+  animationDuration = 0,
   zIndex,
   onMoveStart,
+  isTextNode = false,
 }: BoundingBoxProps) {
   if (!rect.visible) return null
 
@@ -68,7 +71,7 @@ export function BoundingBox({
       }}
       transition={{
         duration: animationDuration / 1000,
-        ease: 'easeOut',
+        ease: 'linear',
       }}
       style={{
         zIndex: zIndex ?? rect.zIndex,
@@ -80,31 +83,37 @@ export function BoundingBox({
         boxShadow: `0 0 0 1px ${color}33, 0 0 12px ${color}22`,
       }}
     >
-      {/* Interactive border drag zones allowing user to grab any border to move element */}
+      {/* Interactive drag zones allowing user to grab anywhere on the asset to move it */}
       {onMoveStart && (
         <>
-          {/* Top border drag zone */}
+          {/* Full body drag surface for non-text assets (images, videos, icons, buttons) */}
+          {!isTextNode && (
+            <div
+              onMouseDown={onMoveStart}
+              className="absolute inset-0 pointer-events-auto cursor-grab active:cursor-grabbing select-none"
+              title="Przeciągnij myszą, aby przesunąć asset po Canvasie"
+            />
+          )}
+
+          {/* Precision border drag zones */}
           <div
             onMouseDown={onMoveStart}
-            className="absolute -top-1.5 left-0 right-0 h-3 pointer-events-auto cursor-move"
+            className="absolute -top-2 left-0 right-0 h-4 pointer-events-auto cursor-move"
             title="Przeciągnij krawędź, aby przesunąć element"
           />
-          {/* Bottom border drag zone */}
           <div
             onMouseDown={onMoveStart}
-            className="absolute -bottom-1.5 left-0 right-0 h-3 pointer-events-auto cursor-move"
+            className="absolute -bottom-2 left-0 right-0 h-4 pointer-events-auto cursor-move"
             title="Przeciągnij krawędź, aby przesunąć element"
           />
-          {/* Left border drag zone */}
           <div
             onMouseDown={onMoveStart}
-            className="absolute -left-1.5 top-0 bottom-0 w-3 pointer-events-auto cursor-move"
+            className="absolute -left-2 top-0 bottom-0 w-4 pointer-events-auto cursor-move"
             title="Przeciągnij krawędź, aby przesunąć element"
           />
-          {/* Right border drag zone */}
           <div
             onMouseDown={onMoveStart}
-            className="absolute -right-1.5 top-0 bottom-0 w-3 pointer-events-auto cursor-move"
+            className="absolute -right-2 top-0 bottom-0 w-4 pointer-events-auto cursor-move"
             title="Przeciągnij krawędź, aby przesunąć element"
           />
         </>

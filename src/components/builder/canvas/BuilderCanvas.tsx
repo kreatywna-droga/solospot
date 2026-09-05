@@ -456,7 +456,7 @@ function CanvasNode({
           opacity,
           transform: formatTransform(styles),
         }}
-        className={`relative cursor-pointer transition-all duration-150 rounded-lg ${
+        className={`relative cursor-pointer transition-colors duration-150 rounded-lg ${
           !node.visible ? 'opacity-30' : ''
         } ${
           isSelected ? 'z-20' :
@@ -533,7 +533,7 @@ function CanvasNode({
           opacity,
           transform: formatTransform(styles),
         }}
-        className={`relative cursor-pointer transition-all duration-150 rounded-lg ${
+        className={`relative cursor-pointer transition-colors duration-150 rounded-lg ${
           !node.visible ? 'opacity-30' : ''
         } ${
           isSelected ? 'z-20' :
@@ -602,7 +602,7 @@ function CanvasNode({
           display: 'inline-block',
           transform: formatTransform(styles),
         }}
-        className={`relative inline-block cursor-pointer transition-all duration-150 p-1 rounded-xl ${
+        className={`relative inline-block cursor-pointer transition-colors duration-150 p-1 rounded-xl ${
           !node.visible ? 'opacity-30' : ''
         } ${
           isSelected ? 'z-20' :
@@ -745,7 +745,7 @@ function CanvasNode({
           display: 'inline-block',
           transform: formatTransform(styles),
         }}
-        className={`relative cursor-pointer transition-all duration-150 p-1 rounded-xl ${
+        className={`relative cursor-pointer transition-colors duration-150 p-1 rounded-xl ${
           !node.visible ? 'opacity-30' : ''
         } ${
           isSelected ? 'z-20' :
@@ -755,6 +755,7 @@ function CanvasNode({
         <img
           src={src}
           alt={alt}
+          draggable={false}
           style={{
             borderRadius,
             borderWidth: borderWidth || undefined,
@@ -811,7 +812,7 @@ function CanvasNode({
           display: 'inline-block',
           transform: formatTransform(styles),
         }}
-        className={`relative cursor-pointer transition-all duration-150 p-1 rounded-xl overflow-hidden ${
+        className={`relative cursor-pointer transition-colors duration-150 p-1 rounded-xl overflow-hidden ${
           !node.visible ? 'opacity-30' : ''
         } ${
           isSelected ? 'z-20' :
@@ -873,7 +874,7 @@ function CanvasNode({
           justifyContent: 'center',
           transform: formatTransform(styles),
         }}
-        className={`relative cursor-pointer transition-all duration-150 p-1 rounded-lg ${
+        className={`relative cursor-pointer transition-colors duration-150 p-1 rounded-lg ${
           !node.visible ? 'opacity-30' : ''
         } ${
           isSelected ? 'z-20' :
@@ -1097,7 +1098,7 @@ function CanvasNode({
         ),
         transform: formatTransform(styles),
       }}
-      className={`relative cursor-pointer transition-all duration-150 ${
+      className={`relative cursor-pointer transition-colors duration-150 ${
         !node.visible ? 'opacity-30' : ''
       } ${
         isDropTarget ? 'ring-2 ring-violet-400 bg-violet-500/10' : ''
@@ -1433,7 +1434,7 @@ function SectionBlock({
       onDragOver={handleRootDragOver}
       onDragLeave={handleRootDragLeave}
       onDrop={handleRootDrop}
-      className={`relative group cursor-pointer transition-all duration-150 select-none
+      className={`relative group cursor-pointer transition-colors duration-150 select-none
         ${!node.visible ? 'opacity-30' : ''}
         ${dropEdge ? 'ring-1 ring-violet-400/50' : ''}
         ${isSelected
@@ -1565,7 +1566,7 @@ function SectionBlock({
               })
             }
           }}
-          className={`w-full text-white min-h-[80px] transition-all relative overflow-hidden ${
+          className={`w-full text-white min-h-[80px] transition-colors relative overflow-hidden ${
             isSectionDropTarget ? 'ring-2 ring-violet-400 bg-violet-950/20' : ''
           }`}
           style={{
