@@ -14,7 +14,7 @@
     },
     {
       "n": "set bg image URL → canvas renders it",
-      "ok": false
+      "ok": true
     },
     {
       "n": "set bg video URL → canvas <video> renders",
