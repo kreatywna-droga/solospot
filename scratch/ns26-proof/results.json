@@ -5,31 +5,23 @@
       "ok": true
     },
     {
-      "n": "studio opens",
+      "n": "click element → EXACTLY ONE selection frame (no node ring)",
       "ok": true
     },
     {
-      "n": "add Image element",
+      "n": "click root section (hero) → Kolor/Zdjęcie/Wideo tabs",
       "ok": true
     },
     {
-      "n": "click Image → EXACTLY ONE selection frame",
+      "n": "set bg image URL → canvas renders it",
       "ok": false
     },
     {
-      "n": "click Section → Kolor/Zdjęcie/Wideo tabs",
+      "n": "set bg video URL → canvas <video> renders",
       "ok": false
     },
     {
-      "n": "set background image → canvas renders it",
-      "ok": false
-    },
-    {
-      "n": "set background video → canvas <video> renders",
-      "ok": false
-    },
-    {
-      "n": "save → background persisted in store config (API)",
+      "n": "save → bg video persisted in store config (API)",
       "ok": false
     }
   ],

@@ -22,7 +22,7 @@
  */
 
 import * as React from 'react';
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import {
   Type, Image as ImageIcon, Sparkles, Sliders, ChevronDown, ChevronUp,
   FileText, AlignLeft, AlignCenter, AlignRight, ExternalLink,
@@ -61,6 +61,14 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
   const [showMediaPicker, setShowMediaPicker] = useState(false);
   /** Which property the media picker writes to */
   const [mediaPickerTarget, setMediaPickerTarget] = useState<'image' | 'section-bg' | 'video-bg'>('image');
+  /** Explicit background tab override — reset when the selection changes */
+  const [bgModeOverride, setBgModeOverride] = useState<'color' | 'image' | 'video' | null>(null);
+
+  // Reset transient UI state when the selected element changes
+  useEffect(() => {
+    setBgModeOverride(null);
+    setMediaPickerTarget('image');
+  }, [sectionId]);
   const selectedNode = useSelectedSection();
   const { canvas, document: builderDoc } = useBuilder();
 
@@ -493,10 +501,25 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
         {/* SIMPLE CONTROLS: SECTION (any root-level section type)         */}
         {/* ============================================================= */}
         {isRootSection && (() => {
-          const bgType: 'color' | 'image' | 'video' =
+          // Derived mode from the document…
+          const derived: 'color' | 'image' | 'video' =
             props.backgroundVideo ? 'video'
             : currentStyles.backgroundImage && currentStyles.backgroundImage !== 'none' ? 'image'
             : 'color';
+          // …overridden by explicit user tab choice (reset when the selection changes)
+          const bgType = bgModeOverride ?? derived;
+
+          const selectBgMode = (mode: 'color' | 'image' | 'video') => {
+            setBgModeOverride(mode);
+            if (mode === 'color') {
+              onStyleChange({ backgroundImage: 'none' });
+              onPropChange('backgroundVideo', '');
+            } else if (mode === 'image') {
+              onPropChange('backgroundVideo', '');
+            } else {
+              onStyleChange({ backgroundImage: 'none' });
+            }
+          };
 
           return (
             <div className="space-y-4">
@@ -507,16 +530,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   {(['color', 'image', 'video'] as const).map((tab) => (
                     <button
                       key={tab}
-                      onClick={() => {
-                        if (tab === 'color') {
-                          onStyleChange({ backgroundImage: 'none' });
-                          onPropChange('backgroundVideo', '');
-                        } else if (tab === 'image') {
-                          onPropChange('backgroundVideo', '');
-                        } else {
-                          onStyleChange({ backgroundImage: 'none' });
-                        }
-                      }}
+                      onClick={() => selectBgMode(tab)}
                       className={`flex-1 py-1.5 text-[11px] font-semibold rounded-lg transition-all ${
                         bgType === tab
                           ? 'bg-violet-600 text-white'
