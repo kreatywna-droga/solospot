@@ -2584,16 +2584,22 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                     </div>
                   )}
 
-                  {/* In-between section insertion divider */}
-                  <div className="relative group/divider py-1.5 flex items-center justify-center z-20">
-                    <div className="absolute inset-x-8 h-px bg-transparent group-hover/divider:bg-violet-500/40 transition-all" />
+                  {/* In-between section insertion divider — zero gap, hover area for insertion */}
+                  <div
+                    className="relative z-20 h-0 group/insert before:absolute before:inset-x-0 before:-top-3 before:h-6 before:content-[''] before:cursor-pointer"
+                    data-testid="section-divider"
+                    data-insert-index={index}
+                  >
+                    {/* Visual line — appears on hover */}
+                    <div className="absolute inset-x-8 top-0 h-px bg-transparent group-hover/insert:bg-violet-500/40 transition-all pointer-events-none" />
+                    {/* Insertion button — appears on hover, centered on boundary */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
                         setInsertSectionIndex(index)
                         setIsSectionLibraryOpen(true)
                       }}
-                      className="opacity-0 group-hover/divider:opacity-100 transition-all flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-bold shadow-lg shadow-violet-600/40 z-10 scale-95 hover:scale-105"
+                      className="absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 opacity-0 group-hover/insert:opacity-100 transition-all flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-bold shadow-lg shadow-violet-600/40 z-10 scale-95 hover:scale-105 whitespace-nowrap"
                       title="Wstaw sekcję w tym miejscu"
                     >
                       <Plus className="w-3.5 h-3.5" />
@@ -2645,17 +2651,21 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
               </div>
             )}
 
-            {/* In-between divider after the last section */}
+            {/* In-between divider after the last section — zero gap */}
             {sections.length > 0 && (
-              <div className="relative group/divider py-2 flex items-center justify-center z-20">
-                <div className="absolute inset-x-8 h-px bg-transparent group-hover/divider:bg-violet-500/40 transition-all" />
+              <div
+                className="relative z-20 h-0 group/insert before:absolute before:inset-x-0 before:-top-3 before:h-6 before:content-[''] before:cursor-pointer"
+                data-testid="section-divider-end"
+                data-insert-index={sections.length}
+              >
+                <div className="absolute inset-x-8 top-0 h-px bg-transparent group-hover/insert:bg-violet-500/40 transition-all pointer-events-none" />
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
                     setInsertSectionIndex(sections.length)
                     setIsSectionLibraryOpen(true)
                   }}
-                  className="opacity-0 group-hover/divider:opacity-100 transition-all flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-bold shadow-lg shadow-violet-600/40 z-10 scale-95 hover:scale-105"
+                  className="absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 opacity-0 group-hover/insert:opacity-100 transition-all flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-bold shadow-lg shadow-violet-600/40 z-10 scale-95 hover:scale-105 whitespace-nowrap"
                   title="Wstaw sekcję na końcu strony"
                 >
                   <Plus className="w-3.5 h-3.5" />
