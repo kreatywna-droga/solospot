@@ -65,6 +65,40 @@ export class AssetService {
     return record;
   }
 
+  /**
+   * Create an asset metadata record for files that were uploaded directly
+   * to Supabase Storage from the browser (bypassing the API body size limit).
+   */
+  async createAssetRecord(
+    tenantId: string,
+    storeId: string,
+    file: {
+      filename: string;
+      originalName: string;
+      mimeType: string;
+      size: number;
+      storagePath: string;
+      publicUrl: string;
+      type: string;
+    }
+  ): Promise<AssetRecord> {
+    if (!tenantId) throw new Error('Tenant ID required');
+    if (!storeId) throw new Error('Store ID required');
+
+    return this.repo.createAsset({
+      tenantId,
+      storeId,
+      filename: file.filename,
+      originalName: file.originalName,
+      mimeType: file.mimeType,
+      size: file.size,
+      storagePath: file.storagePath,
+      publicUrl: file.publicUrl,
+      type: file.type as any,
+      metadata: {},
+    });
+  }
+
   async listAssets(
     tenantId: string,
     storeId: string,

@@ -63,6 +63,36 @@ export async function POST(
     const storeService = new StoreService();
     await storeService.getStore(session.tenantId, storeId);
 
+    const contentType = req.headers.get('content-type') || '';
+
+    // Direct upload path: browser uploaded directly to Supabase Storage,
+    // now persists metadata only (small JSON body, no body size limit issue).
+    if (contentType.includes('application/json')) {
+      const body = await req.json();
+      if (body.directUpload && body.storagePath && body.publicUrl) {
+        const assetService = new AssetService();
+        const record = await assetService.createAssetRecord(
+          session.tenantId,
+          storeId,
+          {
+            filename: body.filename || 'uploaded_file',
+            originalName: body.originalName || body.filename || 'uploaded_file',
+            mimeType: body.mimeType || 'application/octet-stream',
+            size: body.size || 0,
+            storagePath: body.storagePath,
+            publicUrl: body.publicUrl,
+            type: body.type || 'image',
+          }
+        );
+        return NextResponse.json({ success: true, asset: record }, { status: 201 });
+      }
+      return NextResponse.json(
+        { success: false, error: 'Nieprawidłowe dane JSON' },
+        { status: 400 }
+      );
+    }
+
+    // Standard FormData upload path (files <= 4 MB)
     const formData = await req.formData();
     const file = formData.get('file');
 
@@ -102,12 +132,14 @@ export async function POST(
 
     return NextResponse.json({ success: true, asset }, { status: 201 });
   } catch (err: any) {
+    // Always return JSON, never plain text
+    const message = err?.message || 'Nieznany błąd serwera';
     if (err.message === 'Store not found') {
       return NextResponse.json({ success: false, error: 'Sklep nie istnieje lub brak dostępu' }, { status: 404 });
     }
     if (err.message?.startsWith('Walidacja pliku')) {
       return NextResponse.json({ success: false, error: err.message }, { status: 400 });
     }
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

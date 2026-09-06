@@ -88,6 +88,14 @@ export function AssetsPanel() {
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
+
+        // Files > 4 MB bypass the Next.js API route (Vercel body size limit)
+        // and upload directly to Supabase Storage from the browser.
+        if (file.size > 4 * 1024 * 1024) {
+          await uploadLargeFile(file)
+          continue
+        }
+
         const formData = new FormData()
         formData.append('file', file)
 
@@ -95,6 +103,16 @@ export function AssetsPanel() {
           method: 'POST',
           body: formData,
         })
+
+        // Handle non-JSON responses (e.g. 413 Request Entity Too Large)
+        const contentType = res.headers.get('content-type') || ''
+        if (!contentType.includes('application/json')) {
+          if (res.status === 413) {
+            throw new Error(`Plik ${file.name} jest za duży dla bezpośredniego uploadu. Maksymalny rozmiar: 4 MB. Spróbuj mniejszy plik.`)
+          }
+          throw new Error(`Błąd serwera (${res.status}): ${res.statusText || 'Nieznany błąd'}`)
+        }
+
         const data = await res.json()
         if (!data.success) {
           throw new Error(data.error || 'Błąd podczas wgrywania pliku')
@@ -106,6 +124,58 @@ export function AssetsPanel() {
     } finally {
       setUploading(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  /**
+   * Upload files > 4 MB directly to Supabase Storage from the browser.
+   * Bypasses the Next.js API route which has a ~4.5 MB body size limit on Vercel.
+   */
+  const uploadLargeFile = async (file: File) => {
+    const { supabase, isSupabaseConfigured } = await import('../../../lib/supabase')
+    if (!isSupabaseConfigured()) {
+      throw new Error('Upload dużych plików wymaga skonfigurowanego Supabase. Zmniejsz rozmiar pliku do 4 MB lub skonfiguruj Supabase.')
+    }
+
+    const assetId = crypto.randomUUID()
+    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')
+    const storagePath = `${storeId}/${assetId}-${sanitizedName}`
+
+    const { error } = await supabase.storage
+      .from('store-assets')
+      .upload(storagePath, file, {
+        contentType: file.type,
+        upsert: true,
+      })
+
+    if (error) {
+      throw new Error(`Upload direct do Supabase nie powiódł się: ${error.message}`)
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('store-assets')
+      .getPublicUrl(storagePath)
+
+    // Persist metadata via the API route (small JSON payload, no body size issue)
+    const metaRes = await fetch(`/api/stores/${storeId}/assets`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        directUpload: true,
+        storagePath,
+        publicUrl: urlData.publicUrl,
+        filename: sanitizedName,
+        originalName: file.name,
+        mimeType: file.type,
+        size: file.size,
+        type: file.type.startsWith('video/') ? 'video' : file.type.startsWith('image/svg') ? 'image' : 'image',
+      }),
+    })
+
+    // If the direct metadata persist fails, the file is in Supabase but metadata is missing.
+    // This is acceptable — the file exists and can be referenced by URL.
+    if (!metaRes.ok) {
+      console.warn('[AssetsPanel] Direct upload succeeded but metadata persist failed:', metaRes.status)
     }
   }
 

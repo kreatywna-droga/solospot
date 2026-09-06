@@ -106,8 +106,11 @@ function UnitInput({
 
   const commit = (num: string, u: string) => onChange(num ? `${num}${u}` : '');
 
-  const commitNumber = (n: number, u: string) =>
-    onChange(`${Math.round(n * 100) / 100}${u}`);
+  const commitNumber = (n: number, u: string) => {
+    const rounded = Math.round(n * 100) / 100;
+    // When unit is empty, store as unitless number (e.g. line-height "1.4", not "1.4px")
+    onChange(u ? `${rounded}${u}` : `${rounded}`);
+  };
 
   return (
     <div className="flex flex-col gap-1">
@@ -149,7 +152,9 @@ function UnitInput({
           step={step ?? 1}
           value={hasNum ? Math.min(max, Math.max(min, numVal)) : min}
           onInput={(e) => {
-            const v = `${Math.round(parseFloat((e.target as HTMLInputElement).value) * 100) / 100}${unit}`;
+            const n = parseFloat((e.target as HTMLInputElement).value);
+            const rounded = Math.round(n * 100) / 100;
+            const v = unit ? `${rounded}${unit}` : `${rounded}`;
             onLivePreview?.(v);
           }}
           onChange={(e) => commitNumber(parseFloat(e.target.value), unit)}
