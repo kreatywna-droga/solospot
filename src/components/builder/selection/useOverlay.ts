@@ -132,14 +132,31 @@ export function useOverlay(
       const containerRect = container.getBoundingClientRect()
       const elRect = el.getBoundingClientRect()
 
+      let left = elRect.left
+      let top = elRect.top
+      let right = elRect.right
+      let bottom = elRect.bottom
+
+      // Ensure the selection box tightly encloses child text elements even during dynamic wrapping or font scaling
+      const textChild = el.querySelector('[data-inline-edit="text"], h1, h2, h3, h4, h5, h6, p, span, button') as HTMLElement | null
+      if (textChild) {
+        const textRect = textChild.getBoundingClientRect()
+        if (textRect.width > 0 && textRect.height > 0) {
+          left = Math.min(left, textRect.left)
+          top = Math.min(top, textRect.top)
+          right = Math.max(right, textRect.right)
+          bottom = Math.max(bottom, textRect.bottom)
+        }
+      }
+
       // Position relative to canvasFrameRef in unscaled canvas logical pixels
       // Both measurements are in screen space (post-zoom), so dividing by the
       // actual CSS scale gives us the correct CSS-position within canvasFrameRef.
       return {
-        x: (elRect.left - containerRect.left) / actualScale,
-        y: (elRect.top - containerRect.top) / actualScale,
-        width: elRect.width / actualScale,
-        height: elRect.height / actualScale,
+        x: (left - containerRect.left) / actualScale,
+        y: (top - containerRect.top) / actualScale,
+        width: (right - left) / actualScale,
+        height: (bottom - top) / actualScale,
       }
     },
     [canvasContainerRef, options.sectionSelector, options.externalRects]

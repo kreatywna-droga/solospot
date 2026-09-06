@@ -94,6 +94,16 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
     ) as HTMLElement | null;
   }, [sectionId]);
 
+  // Helper: get the actual text element inside the node for typography live preview.
+  // InlineEditableText has its own inline fontSize/lineHeight/letterSpacing that
+  // overrides CSS inheritance, so we must set styles directly on it.
+  const getTextEl = useCallback((): HTMLElement | null => {
+    if (!sectionId) return null;
+    const nodeWrapper = document.querySelector(`[data-node-id="${sectionId}"]`);
+    if (!nodeWrapper) return null;
+    return nodeWrapper.querySelector('[data-inline-edit="text"]') as HTMLElement | null;
+  }, [sectionId]);
+
   if (!sectionId || !selectedNode) {
     return <EmptyInspectorState />;
   }
@@ -172,8 +182,10 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                 labelRef={fontSizeLabelRef}
                 unit=""
                 onLivePreview={(v) => {
-                  const el = getCanvasEl();
-                  if (el) el.style.fontSize = `${v}px`;
+                  const el = getTextEl() || getCanvasEl();
+                  if (el) {
+                    el.style.setProperty('font-size', `${v}px`, 'important');
+                  }
                 }}
                 onChange={(v) => onStyleChange({ fontSize: `${v}px` })}
               />
@@ -1065,6 +1077,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                 onStyleChange={onStyleChange}
                 nodeLabel={nodeLabel}
                 nodeType={nodeType}
+                sectionId={sectionId}
               />
             </div>
           )}

@@ -351,7 +351,11 @@ function InlineEditableText({
       suppressContentEditableWarning
       data-inline-edit="text"
       className={`${className ?? ''} [&_:focus]:outline-none [&_:focus]:ring-1 [&_:focus]:ring-violet-500/60 rounded-sm cursor-text`}
-      style={style}
+      style={{
+        wordBreak: 'normal',
+        overflowWrap: 'break-word',
+        ...style,
+      }}
     >
       {value}
     </Tag>
@@ -456,7 +460,9 @@ function CanvasNode({
         onMouseLeave={handleMouseLeave}
         style={{
           width,
-          height,
+          minHeight: (styles.minHeight as string) || undefined,
+          height: 'auto',
+          maxWidth: '100%',
           margin,
           padding,
           backgroundColor: bg,
@@ -531,7 +537,9 @@ function CanvasNode({
         onMouseLeave={handleMouseLeave}
         style={{
           width,
-          height,
+          minHeight: (styles.minHeight as string) || undefined,
+          height: 'auto',
+          maxWidth: '100%',
           margin,
           padding,
           backgroundColor: bg,
@@ -768,6 +776,15 @@ function CanvasNode({
           src={src}
           alt={alt}
           draggable={false}
+          loading="eager"
+          onError={(e) => {
+            const imgEl = e.currentTarget as HTMLImageElement
+            console.warn(`[BuilderCanvas] Image load error: src=${src}`, {
+              naturalWidth: imgEl.naturalWidth,
+              naturalHeight: imgEl.naturalHeight,
+              complete: imgEl.complete,
+            })
+          }}
           style={{
             borderRadius,
             borderWidth: borderWidth || undefined,
@@ -836,6 +853,16 @@ function CanvasNode({
           loop={loop}
           muted={muted}
           controls={controls}
+          playsInline
+          preload="metadata"
+          onError={(e) => {
+            const videoEl = e.currentTarget as HTMLVideoElement
+            console.warn(`[BuilderCanvas] Video load error: src=${src}`, {
+              error: videoEl.error,
+              networkState: videoEl.networkState,
+              readyState: videoEl.readyState,
+            })
+          }}
           style={{
             width: '100%',
             height: '100%',

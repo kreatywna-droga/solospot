@@ -75,7 +75,25 @@ export function QuickToolbar({
   }, [node, activeBp])
   const props = node?.props || {}
 
+  const handleLiveFontSize = useCallback((val: number) => {
+    const el = (
+      window.document.querySelector(`[data-node-id="${sectionId}"]`) ??
+      window.document.querySelector(`[data-section-id="${sectionId}"]`)
+    ) as HTMLElement | null
+    if (el) {
+      el.style.setProperty('font-size', `${val}px`, 'important')
+      const textEls = el.querySelectorAll('[data-inline-edit="text"], h1, h2, h3, h4, h5, h6, p, span, button')
+      textEls.forEach((t) => (t as HTMLElement).style.setProperty('font-size', `${val}px`, 'important'))
+      el.style.height = 'auto'
+    }
+  }, [sectionId])
+
   const handleUpdateStyles = useCallback((patch: Record<string, any>) => {
+    const effectivePatch = { ...patch }
+    if (patch.fontSize && (nodeType === 'text' || nodeType === 'heading')) {
+      effectivePatch.height = undefined
+    }
+
     if (activeBp === 'tablet' || activeBp === 'mobile') {
       if (found) {
         const currentResp = (found.node.responsive as Record<string, any>) || {}
@@ -86,7 +104,7 @@ export function QuickToolbar({
           updates: {
             responsive: {
               ...currentResp,
-              [activeBp]: { ...currentBpStyles, ...patch },
+              [activeBp]: { ...currentBpStyles, ...effectivePatch },
             },
           },
           pageId,
@@ -96,10 +114,10 @@ export function QuickToolbar({
       dispatch({
         type: 'SET_NODE_STYLES',
         nodeId: sectionId,
-        styles: patch,
+        styles: effectivePatch,
       } as any)
     }
-  }, [dispatch, sectionId, activeBp, found, pageId])
+  }, [dispatch, sectionId, activeBp, found, pageId, nodeType])
 
   const handleUpdateProps = useCallback((patch: Record<string, any>) => {
     dispatch({
@@ -289,6 +307,7 @@ export function QuickToolbar({
 
   const direction = position.position
   const isTop = direction === 'top'
+  const popoverPlacement = isTop && position.y > 110 ? 'bottom-full mb-2' : 'top-full mt-2'
 
   return (
     <>
@@ -333,7 +352,7 @@ export function QuickToolbar({
                 </button>
 
                 {showFontPicker && (
-                  <div className="absolute top-full left-0 mt-2 z-[300]">
+                  <div className={`absolute left-0 z-[300] ${popoverPlacement}`}>
                     <FontPicker
                       value={styles.fontFamily || 'Inter'}
                       onChange={(font) => {
@@ -357,7 +376,7 @@ export function QuickToolbar({
                 </button>
 
                 {showFontSizePopover && (
-                  <div className="absolute top-full left-0 mt-2 p-3 bg-[#0d0d18] border border-white/15 rounded-xl shadow-2xl z-[300] min-w-[200px] space-y-2">
+                  <div className={`absolute left-0 p-3 bg-[#0d0d18] border border-white/15 rounded-xl shadow-2xl z-[300] min-w-[200px] space-y-2 ${popoverPlacement}`}>
                     <div className="flex items-center justify-between text-[11px] font-medium text-zinc-300">
                       <span>Rozmiar tekstu</span>
                       <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded px-1.5 py-0.5">
@@ -368,7 +387,8 @@ export function QuickToolbar({
                           value={parseInt(String(styles.fontSize || '16px').replace('px', '')) || 16}
                           onChange={(e) => {
                             const v = Math.min(150, Math.max(8, Number(e.target.value) || 8))
-                            handleUpdateStyles({ fontSize: `${v}px` })
+                            handleLiveFontSize(v)
+                            handleUpdateStyles({ fontSize: `${v}px`, height: undefined })
                           }}
                           className="w-10 bg-transparent text-right font-mono text-white text-xs focus:outline-none"
                         />
@@ -381,14 +401,21 @@ export function QuickToolbar({
                       max={150}
                       step={1}
                       value={parseInt(String(styles.fontSize || '16px').replace('px', '')) || 16}
-                      onChange={(e) => handleUpdateStyles({ fontSize: `${e.target.value}px` })}
+                      onInput={(e) => {
+                        const v = Number((e.target as HTMLInputElement).value)
+                        handleLiveFontSize(v)
+                      }}
+                      onChange={(e) => handleUpdateStyles({ fontSize: `${e.target.value}px`, height: undefined })}
                       className="w-full accent-violet-500 h-1 cursor-pointer"
                     />
                     <div className="flex items-center gap-1 pt-1 border-t border-white/5">
                       {[16, 24, 32, 48, 64].map((sz) => (
                         <button
                           key={sz}
-                          onClick={() => handleUpdateStyles({ fontSize: `${sz}px` })}
+                          onClick={() => {
+                            handleLiveFontSize(sz)
+                            handleUpdateStyles({ fontSize: `${sz}px`, height: undefined })
+                          }}
                           className={`flex-1 py-0.5 text-[9px] font-mono rounded border transition-all ${
                             (parseInt(String(styles.fontSize || '16px').replace('px', '')) || 16) === sz
                               ? 'bg-[#8B5CF6]/40 text-[#A78BFA] border-violet-500/50'

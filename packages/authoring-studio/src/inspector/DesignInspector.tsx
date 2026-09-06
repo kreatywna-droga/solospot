@@ -73,6 +73,7 @@ const unitInputCls =
 function UnitInput({
   value,
   onChange,
+  onLivePreview,
   placeholder = '0',
   min,
   max,
@@ -81,6 +82,8 @@ function UnitInput({
 }: {
   value?: string;
   onChange: (v: string) => void;
+  /** Called on every slider input for immediate DOM preview (no re-render) */
+  onLivePreview?: (v: string) => void;
   placeholder?: string;
   min?: number;
   max?: number;
@@ -145,6 +148,10 @@ function UnitInput({
           max={max}
           step={step ?? 1}
           value={hasNum ? Math.min(max, Math.max(min, numVal)) : min}
+          onInput={(e) => {
+            const v = `${Math.round(parseFloat((e.target as HTMLInputElement).value) * 100) / 100}${unit}`;
+            onLivePreview?.(v);
+          }}
           onChange={(e) => commitNumber(parseFloat(e.target.value), unit)}
           className="w-full accent-violet-500 h-1"
         />
@@ -1042,10 +1049,21 @@ function SpacingTab({
 function TypographyTab({
   styles,
   onChange,
+  sectionId,
 }: {
   styles: NodeStyles;
   onChange: (patch: Partial<NodeStyles>) => void;
+  sectionId?: string;
 }) {
+  // Live preview: find the text element and apply style directly during slider drag
+  const livePreview = (prop: string, value: string) => {
+    if (!sectionId) return;
+    const nodeWrapper = window.document.querySelector(`[data-node-id="${sectionId}"]`);
+    if (!nodeWrapper) return;
+    const textEl = nodeWrapper.querySelector('[data-inline-edit="text"]') as HTMLElement | null;
+    if (textEl) textEl.style.setProperty(prop, value, 'important');
+  };
+
   return (
     <>
       <Section title="Font">
@@ -1059,6 +1077,7 @@ function TypographyTab({
           <UnitInput
             value={styles.fontSize}
             onChange={(v) => onChange({ fontSize: v })}
+            onLivePreview={(v) => livePreview('font-size', v)}
             placeholder="16px"
             slider
             min={8}
@@ -1087,6 +1106,7 @@ function TypographyTab({
           <UnitInput
             value={styles.lineHeight}
             onChange={(v) => onChange({ lineHeight: v })}
+            onLivePreview={(v) => livePreview('line-height', v)}
             placeholder="1.5"
             slider
             min={0.8}
@@ -1098,6 +1118,7 @@ function TypographyTab({
           <UnitInput
             value={styles.letterSpacing}
             onChange={(v) => onChange({ letterSpacing: v })}
+            onLivePreview={(v) => livePreview('letter-spacing', v)}
             placeholder="0px"
             slider
             min={-2}
@@ -1167,6 +1188,8 @@ export interface DesignInspectorProps {
   nodeLabel?: string;
   /** Node type for the header */
   nodeType?: string;
+  /** Selected node ID for live DOM preview during slider drag */
+  sectionId?: string;
 }
 
 const TABS: { id: DesignTab; label: string; icon: React.ReactNode }[] = [
@@ -1182,6 +1205,7 @@ export const DesignInspector: React.FC<DesignInspectorProps> = ({
   onStyleChange,
   nodeLabel,
   nodeType,
+  sectionId,
 }) => {
   const getInitialTab = (type?: string): DesignTab => {
     if (type === 'heading' || type === 'text') return 'typography';
@@ -1243,7 +1267,7 @@ export const DesignInspector: React.FC<DesignInspectorProps> = ({
           <SpacingTab styles={styles} onChange={onStyleChange} />
         )}
         {activeTab === 'typography' && (
-          <TypographyTab styles={styles} onChange={onStyleChange} />
+          <TypographyTab styles={styles} onChange={onStyleChange} sectionId={sectionId} />
         )}
         {activeTab === 'advanced' && (
           <AdvancedTab styles={styles} onChange={onStyleChange} />
