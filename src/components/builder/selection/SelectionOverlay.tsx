@@ -482,42 +482,21 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
       let currentFontSize = startFontSize
 
       if (isButtonNode) {
-        // BUTTON: Box dimensions and inner text font size scale in harmony
-        const ratioW = w / Math.max(1, startWidth)
-        const ratioH = h / Math.max(1, startHeight)
-
-        let btnRatio = 1.0
-        if (handle.length === 2) {
-          // Corner drag: follow dominant movement (zoom in/out)
-          btnRatio = Math.abs(ratioH - 1) >= Math.abs(ratioW - 1) ? ratioH : ratioW
-        } else if (handle === 'S' || handle === 'N') {
-          // Height drag: font scales directly with button height
-          btnRatio = ratioH
-        } else {
-          // Width drag: font scales gently with button width
-          btnRatio = 0.5 + 0.5 * ratioW
-        }
-
-        currentFontSize = Math.min(64, Math.max(9, Math.round(startFontSize * btnRatio)))
+        // BUTTON: Box dimensions only. Text inside button does NOT scale!
+        // "NAPIS W PRZYCISKU NIE POWINIEN SIE SKALOWAĆ . TO POWINIEN BYC ODDZIELNY ELEMENT KTÓRY POTEM DOPASOWYWUJE."
+        currentFontSize = startFontSize
       } else if (isTextNode) {
-        // TEXT / HEADING: Shrink or grow in the blink of an eye
-        const ratioW = w / Math.max(1, startWidth)
-        const ratioH = h / Math.max(1, startHeight)
-
+        // TEXT / HEADING:
+        // "ROZCIAGANIE DZIAŁA TYLKO Z PUNKTAMI W NAROZNIKACH SRODKOWE KROPKI SŁUZA DO ZMNIEJSZANIA I POWIEKSZANIA OKNA ALBO NA BOKI ALBO DO GÓRY I NADÓŁ"
+        // "POPRAW JEWSZCZE KIEDY POMNIEJSZE NAPIS I BEDE CHCIAC ZNORMALIZOWAC CZYLI WYRÓWNAC DOCIAGAJAC RAMKE DO NAPISU ABY PRZY TYM NIE ZMNIEJSZAŁ SIE NAPIS."
         if (handle.length === 2) {
-          // Corner drag: scale font size & width proportionally
+          // Corner handles ONLY (SE, SW, NE, NW): scale both font-size and width proportionally
+          const ratioW = w / Math.max(1, startWidth)
+          const ratioH = h / Math.max(1, startHeight)
           const ratio = Math.abs(ratioW - 1) >= Math.abs(ratioH - 1) ? ratioW : ratioH
           currentFontSize = Math.min(200, Math.max(8, Math.round(startFontSize * ratio)))
-        } else if (handle === 'S' || handle === 'N') {
-          // Vertical drag: font size scales directly with height
-          const ratio = ratioH
-          currentFontSize = Math.min(200, Math.max(8, Math.round(startFontSize * ratio)))
-        } else if (isHeadingNode) {
-          // Heading width drag: heading text grows/shrinks as width expands/contracts
-          const ratio = ratioW
-          currentFontSize = Math.min(200, Math.max(8, Math.round(startFontSize * ratio)))
         } else {
-          // Paragraph width drag: wraps text to new width
+          // Middle edge handles (E, W, S, N): Window/box resize only — NEVER change font size!
           currentFontSize = startFontSize
         }
       }
@@ -531,32 +510,34 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
         if (isButtonNode) {
           domEl.style.setProperty('width', `${Math.round(w)}px`, 'important')
           domEl.style.setProperty('height', `${Math.round(h)}px`, 'important')
-          domEl.style.setProperty('font-size', `${currentFontSize}px`, 'important')
 
-          const btnChildren = domEl.querySelectorAll<HTMLElement>('button, button *')
+          const btnChildren = domEl.querySelectorAll<HTMLElement>('button')
           btnChildren.forEach(b => {
             b.style.setProperty('width', '100%', 'important')
             b.style.setProperty('height', '100%', 'important')
-            b.style.setProperty('font-size', `${currentFontSize}px`, 'important')
-            b.style.setProperty('line-height', '1.2', 'important')
             b.style.setProperty('transition', 'none', 'important')
           })
         } else if (isTextNode) {
-          domEl.style.setProperty('font-size', `${currentFontSize}px`, 'important')
-          if (handle.includes('E') || handle.includes('W') || handle.length === 2) {
+          if (handle.length === 2) {
+            // Corner handles: set font size and width
+            domEl.style.setProperty('font-size', `${currentFontSize}px`, 'important')
             domEl.style.setProperty('width', `${Math.round(w)}px`, 'important')
-          }
-          if (handle.includes('S') || handle.includes('N')) {
-            domEl.style.setProperty('min-height', `${Math.round(h)}px`, 'important')
-          }
 
-          // Target child headings, paragraphs, spans directly
-          const textEls = domEl.querySelectorAll<HTMLElement>('[data-inline-edit="text"], h1, h2, h3, h4, h5, h6, p, span')
-          textEls.forEach(el => {
-            el.style.setProperty('font-size', `${currentFontSize}px`, 'important')
-            el.style.setProperty('line-height', '1.15', 'important')
-            el.style.setProperty('transition', 'none', 'important')
-          })
+            // Target child headings, paragraphs, spans directly
+            const textEls = domEl.querySelectorAll<HTMLElement>('[data-inline-edit="text"], h1, h2, h3, h4, h5, h6, p, span')
+            textEls.forEach(el => {
+              el.style.setProperty('font-size', `${currentFontSize}px`, 'important')
+              el.style.setProperty('line-height', '1.15', 'important')
+              el.style.setProperty('transition', 'none', 'important')
+            })
+          } else if (handle === 'E' || handle === 'W') {
+            // Middle width dots: change ONLY width of container ("na boki")
+            domEl.style.setProperty('width', `${Math.round(w)}px`, 'important')
+          } else if (handle === 'S' || handle === 'N') {
+            // Middle height dots: change ONLY height of container ("do góry i na dół")
+            domEl.style.setProperty('min-height', `${Math.round(h)}px`, 'important')
+            domEl.style.setProperty('height', `${Math.round(h)}px`, 'important')
+          }
         } else {
           if (handle.includes('E') || handle.includes('W')) domEl.style.width = `${Math.round(w)}px`
           if (handle.includes('S') || handle.includes('N')) {
@@ -643,12 +624,10 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
         if (isButtonNode) {
           const finalWidthStr = `${Math.round(finalW)}px`
           const finalHeightStr = `${Math.round(finalH)}px`
-          const finalFontSizeStr = `${finalFontSizeNum}px`
 
           const styleUpdates: Record<string, any> = {
             width: finalWidthStr,
             height: finalHeightStr,
-            fontSize: finalFontSizeStr,
           }
 
           if (activeBp === 'tablet' || activeBp === 'mobile') {
@@ -679,20 +658,20 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
             })
           }
         } else if (isTextNode) {
-          const finalFontSizeStr = `${finalFontSizeNum}px`
           const finalWidthStr = `${Math.round(finalW)}px`
+          const finalHeightStr = `${Math.round(finalH)}px`
 
           const styleUpdates: Record<string, any> = {}
-          if (handle === 'E' || handle === 'W') {
+          if (handle.length === 2) {
+            // Corner handles ONLY: update both font-size and width
+            styleUpdates.fontSize = `${finalFontSizeNum}px`
             styleUpdates.width = finalWidthStr
-            if (isHeadingNode) {
-              styleUpdates.fontSize = finalFontSizeStr
-            }
+          } else if (handle === 'E' || handle === 'W') {
+            // Middle width dots: update ONLY width (normalizing frame to text)
+            styleUpdates.width = finalWidthStr
           } else if (handle === 'S' || handle === 'N') {
-            styleUpdates.fontSize = finalFontSizeStr
-          } else {
-            styleUpdates.fontSize = finalFontSizeStr
-            styleUpdates.width = finalWidthStr
+            // Middle height dots: update ONLY height/minHeight
+            styleUpdates.minHeight = finalHeightStr
           }
 
           if (activeBp === 'tablet' || activeBp === 'mobile') {
@@ -900,13 +879,7 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
                   }}
                   className="absolute z-[120] bg-violet-600 text-white text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg shadow-xl border border-white/20 pointer-events-none whitespace-nowrap flex items-center gap-1.5"
                 >
-                  {resizing.isButtonNode ? (
-                    <>
-                      <span>{resizing.currentWidth}px × {resizing.currentHeight}px</span>
-                      <span className="text-violet-200 text-[10px] uppercase ml-1">Tekst:</span>
-                      <span>{resizing.currentFontSize}px</span>
-                    </>
-                  ) : resizing.isTextNode ? (
+                  {resizing.isTextNode && resizing.handle.length === 2 ? (
                     <>
                       <span className="text-violet-200 text-[10px] uppercase">Czcionka:</span>
                       <span>{resizing.currentFontSize}px</span>
