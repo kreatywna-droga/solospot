@@ -66,18 +66,18 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-5xl max-h-[85vh] bg-[#0c0c16] border border-white/15 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        className="w-full max-w-5xl max-h-[85vh] bg-[#0c0c16] border border-white/[0.12] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#080810]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-[#27272A]">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center text-violet-400">
+            <div className="w-9 h-9 rounded-xl bg-violet-600/20 border border-[#8B5CF6]/25 flex items-center justify-center text-violet-400">
               <LayoutGrid className="w-5 h-5" />
             </div>
             <div>
               <h2 className="text-sm font-bold text-white tracking-wide">Wizualna Mapa Witryny (Visual Site Map)</h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-zinc-400">
                 Struktura hierarchiczna i sekcje wszystkich stron w projekcie ({document.pages.length} stron)
               </p>
             </div>
@@ -93,7 +93,7 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
             </button>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+              className="p-1.5 rounded-lg hover:bg-white/[0.08] text-zinc-400 hover:text-white transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -101,7 +101,7 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
         </div>
 
         {/* Content: Visual Page Cards Grid */}
-        <div className="flex-1 overflow-y-auto p-6 bg-[#06060c]">
+        <div className="flex-1 overflow-y-auto p-6 bg-[#202024]">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {document.pages.map(page => {
               const isActive = page.id === activePageId
@@ -111,30 +111,30 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
                   key={page.id}
                   className={`flex flex-col rounded-2xl border transition-all duration-200 overflow-hidden ${
                     isActive
-                      ? 'bg-violet-950/20 border-violet-500/50 shadow-xl shadow-violet-500/10 ring-1 ring-violet-500/30'
-                      : 'bg-white/[0.03] border-white/10 hover:border-white/20'
+                      ? 'bg-violet-950/20 border-[#8B5CF6]/40 shadow-xl shadow-violet-500/10 ring-1 ring-violet-500/30'
+                      : 'bg-white/[0.03] border-white/[0.08] hover:border-white/20'
                   }`}
                 >
                   {/* Page Card Header */}
                   <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <Globe className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-violet-400' : 'text-slate-400'}`} />
+                      <Globe className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-violet-400' : 'text-zinc-400'}`} />
                       <div className="min-w-0">
                         <div className="font-bold text-xs text-white truncate flex items-center gap-2">
                           {page.name}
                           {page.isHome && (
-                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300 font-mono font-bold uppercase">
+                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#8B5CF6]/15 text-[#A78BFA] font-mono font-bold uppercase">
                               Home
                             </span>
                           )}
                         </div>
-                        <div className="text-[10px] text-slate-500 font-mono truncate">{page.slug}</div>
+                        <div className="text-[10px] text-zinc-500 font-mono truncate">{page.slug}</div>
                       </div>
                     </div>
 
                     <button
                       onClick={() => handleNavigateToPage(page.id)}
-                      className="p-1.5 rounded-lg bg-white/5 hover:bg-violet-600 text-slate-300 hover:text-white transition-all text-xs flex items-center gap-1"
+                      className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-violet-600 text-zinc-300 hover:text-white transition-all text-xs flex items-center gap-1"
                       title="Otwórz stronę w edytorze"
                     >
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -157,18 +157,18 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
                           onClick={() => handleNavigateToPage(page.id, section.id)}
                           className={`group flex items-center justify-between px-3 py-2 rounded-xl text-xs cursor-pointer border transition-all ${
                             hoveredSectionId === section.id
-                              ? 'bg-violet-500/20 border-violet-500/40 text-white'
-                              : 'bg-white/5 border-white/5 text-slate-300 hover:bg-white/10'
+                              ? 'bg-[#8B5CF6]/15 border-violet-500/40 text-white'
+                              : 'bg-white/[0.04] border-white/5 text-zinc-300 hover:bg-white/[0.08]'
                           }`}
                         >
                           <div className="flex items-center gap-2 min-w-0">
-                            <span className="text-[10px] font-mono text-slate-500 w-4 text-center">
+                            <span className="text-[10px] font-mono text-zinc-500 w-4 text-center">
                               {idx + 1}
                             </span>
                             <span className="w-1.5 h-1.5 rounded-full bg-violet-400 flex-shrink-0" />
                             <span className="font-medium truncate">{section.label}</span>
                           </div>
-                          <span className="text-[9px] text-slate-500 font-mono hidden group-hover:block">
+                          <span className="text-[9px] text-zinc-500 font-mono hidden group-hover:block">
                             {section.type}
                           </span>
                         </div>
@@ -177,11 +177,11 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
                   </div>
 
                   {/* Page Card Footer */}
-                  <div className="p-3 border-t border-white/5 bg-black/30 flex items-center justify-between text-[11px] text-slate-500">
+                  <div className="p-3 border-t border-white/5 bg-black/30 flex items-center justify-between text-[11px] text-zinc-500">
                     <span>{page.sections.length} sekcji</span>
                     <button
                       onClick={() => handleNavigateToPage(page.id)}
-                      className="text-violet-400 hover:text-violet-300 font-medium hover:underline flex items-center gap-1"
+                      className="text-violet-400 hover:text-[#A78BFA] font-medium hover:underline flex items-center gap-1"
                     >
                       <span>Edytuj stronę</span>
                       <ChevronRight className="w-3 h-3" />

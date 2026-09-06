@@ -140,7 +140,7 @@ function GridOverlay({ width }: { width: number }) {
     lines.push(
       <div
         key={i}
-        className="absolute top-0 bottom-0 w-px bg-violet-500/10"
+        className="absolute top-0 bottom-0 w-px bg-[#8B5CF6]/10"
         style={{ left: x }}
       />
     )
@@ -149,7 +149,7 @@ function GridOverlay({ width }: { width: number }) {
       lines.push(
         <div
           key={`gutter-${i}`}
-          className="absolute top-0 bottom-0 w-px bg-violet-500/5"
+          className="absolute top-0 bottom-0 w-px bg-[#8B5CF6]/5"
           style={{ left: gutterX }}
         />
       )
@@ -1802,19 +1802,19 @@ function SectionBlock({
       {showOverlay && (
         <div className="absolute top-2 left-0 right-0 flex items-center justify-between px-3 z-10 pointer-events-none">
           {/* Section label chip */}
-          <div className="flex items-center gap-1 bg-violet-600 text-white text-[11px] font-bold
-                          px-2.5 py-1 rounded-full pointer-events-auto shadow-lg">
+          <div className="flex items-center gap-1 bg-[#8B5CF6] text-white text-[11px] font-bold
+                          px-2.5 py-1 rounded-full pointer-events-auto shadow-lg shadow-[#8B5CF6]/25">
             {node.label}
-            <span className="ml-1 text-violet-200 font-normal">#{index + 1}</span>
+            <span className="ml-1 text-white/70 font-normal">#{index + 1}</span>
           </div>
 
           {/* Action toolbar */}
-          <div className="flex items-center gap-1 bg-[#080a14]/90 backdrop-blur rounded-xl p-1
-                          border border-white/10 shadow-xl pointer-events-auto">
+          <div className="flex items-center gap-1 bg-[#202024]/95 backdrop-blur rounded-xl p-1
+                          border border-white/[0.10] shadow-xl pointer-events-auto">
             <button
               onClick={handleMoveUp}
               disabled={index === 0}
-              className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white
+              className="p-1.5 rounded-lg hover:bg-white/[0.08] text-zinc-400 hover:text-white
                          disabled:opacity-30 disabled:cursor-not-allowed transition-all"
               title="Przesuń w górę"
             >
@@ -1823,13 +1823,13 @@ function SectionBlock({
             <button
               onClick={handleMoveDown}
               disabled={index === total - 1}
-              className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white
+              className="p-1.5 rounded-lg hover:bg-white/[0.08] text-zinc-400 hover:text-white
                          disabled:opacity-30 disabled:cursor-not-allowed transition-all"
               title="Przesuń w dół"
             >
               <ArrowDown className="w-3.5 h-3.5" />
             </button>
-            <div className="w-px h-4 bg-white/10 mx-0.5" />
+            <div className="w-px h-4 bg-white/[0.08] mx-0.5" />
             <button
               onClick={handleDuplicate}
               className="p-1.5 rounded-lg hover:bg-violet-500/20 text-slate-400 hover:text-violet-300 transition-all"
@@ -2088,7 +2088,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
   return (
     <div
       ref={containerRef}
-      className="flex-1 flex flex-col items-center justify-start overflow-auto bg-[#030305] p-8"
+      className="flex-1 flex flex-col items-center justify-start overflow-auto bg-[#09090B] p-8"
       onClick={handleCanvasClick}
     >
       {/* Scalable Canvas Frame Container */}
@@ -2111,7 +2111,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.2 }}
           style={{ width: '100%' }}
-          className="relative bg-[#08080f] rounded-2xl shadow-2xl border border-white/10 overflow-hidden min-h-[600px] w-full transition-colors"
+          className="relative bg-white rounded-2xl shadow-2xl shadow-black/50 border border-black/20 overflow-hidden min-h-[600px] w-full transition-colors"
           onClick={e => {
             e.stopPropagation()
             // Click on empty canvas background (not a section/node) clears selection
@@ -2455,7 +2455,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
 
         {/* Add section & Layout Presets at bottom */}
         {sections.length > 0 && (
-          <div className="border-t border-white/10 bg-[#06060c] p-5 flex flex-col items-center gap-4">
+          <div className="border-t border-white/[0.08] bg-[#1a1a1e] p-5 flex flex-col items-center gap-4">
             <div className="flex items-center gap-3">
               <button
                 onClick={(e) => {
@@ -2463,7 +2463,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                   setInsertSectionIndex(sections.length)
                   setIsSectionLibraryOpen(true)
                 }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold transition-all shadow-md shadow-violet-600/25 hover:scale-105 active:scale-95"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#8B5CF6] hover:bg-[#7C3AED] text-white text-xs font-bold transition-all shadow-md shadow-[#8B5CF6]/25 hover:scale-105 active:scale-95"
               >
                 <Plus className="w-4 h-4" />
                 <span>+ Dodaj Sekcję z Biblioteki</span>
@@ -2474,15 +2474,15 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                   e.stopPropagation()
                   setIsTemplatePickerOpen(true)
                 }}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-semibold transition-all border border-white/10"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.10] text-zinc-300 hover:text-white text-xs font-semibold transition-all border border-white/[0.08]"
               >
-                <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+                <Sparkles className="w-3.5 h-3.5 text-[#8B5CF6]" />
                 <span>Zmień Szablon Strony</span>
               </button>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-2 text-xs pt-1 border-t border-white/5 w-full">
-              <span className="text-[11px] font-semibold text-slate-500">Szybkie kolumny:</span>
+            <div className="flex flex-wrap items-center justify-center gap-2 text-xs pt-1 border-t border-white/[0.06] w-full">
+              <span className="text-[11px] font-semibold text-zinc-500">Szybkie kolumny:</span>
               {[
                 { label: '1 Kolumna', display: 'flex-col' },
                 { label: '2 Kolumny (50/50)', display: 'grid-2' },
@@ -2503,7 +2503,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                       label: `Układ: ${preset.label}`,
                     })
                   }}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-violet-600 hover:text-white text-slate-400 hover:border-violet-500 border border-white/5 transition-all font-medium text-[11px]"
+                  className="px-2.5 py-1 rounded-lg bg-white/[0.04] hover:bg-[#8B5CF6] hover:text-white text-zinc-400 hover:border-[#8B5CF6] border border-white/[0.06] transition-all font-medium text-[11px]"
                 >
                   + {preset.label}
                 </button>

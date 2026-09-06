@@ -19,6 +19,31 @@
   --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
+
+  /* ── Builder Visual Hierarchy System ── */
+  /* LAYER 1 — Builder Shell (outermost frame) */
+  --builder-shell: #18181B;
+  /* LAYER 2 — Panels (sidebar, inspector, toolbars) */
+  --builder-panel: #202024;
+  --builder-panel-lighter: #27272A;
+  /* LAYER 3 — Canvas Workspace (the dark area around the page) */
+  --builder-canvas: #09090B;
+  /* LAYER 4 — Website Page (default white, user-editable) */
+  --builder-page: #FFFFFF;
+  /* LAYER 5 — Controls (inputs, buttons inside panels) */
+  --builder-control: #2A2A2E;
+  --builder-control-hover: #333338;
+  /* Borders */
+  --builder-border: rgba(255, 255, 255, 0.08);
+  --builder-border-strong: rgba(255, 255, 255, 0.12);
+  /* Text hierarchy */
+  --builder-text-primary: #FAFAFA;
+  --builder-text-secondary: #A1A1AA;
+  --builder-text-muted: #71717A;
+  /* Accent (violet) */
+  --builder-accent: #8B5CF6;
+  --builder-accent-dim: rgba(139, 92, 246, 0.15);
+  --builder-accent-border: rgba(139, 92, 246, 0.30);
 }
 
 body {

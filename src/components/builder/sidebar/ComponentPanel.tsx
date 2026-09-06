@@ -42,8 +42,8 @@ function CategoryTabs({ categories, active, onChange }: CategoryTabsProps) {
         onClick={() => onChange('all')}
         className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-all
           ${active === 'all'
-            ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30'
-            : 'bg-white/5 text-slate-500 hover:text-white hover:bg-white/10 border border-transparent'
+            ? 'bg-[#8B5CF6]/15 text-[#A78BFA] border border-[#8B5CF6]/25'
+            : 'bg-white/[0.04] text-zinc-500 hover:text-white hover:bg-white/[0.08] border border-transparent'
           }`}
       >
         Wszystkie
@@ -54,8 +54,8 @@ function CategoryTabs({ categories, active, onChange }: CategoryTabsProps) {
           onClick={() => onChange(cat)}
           className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-all
             ${active === cat
-              ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30'
-              : 'bg-white/5 text-slate-500 hover:text-white hover:bg-white/10 border border-transparent'
+              ? 'bg-[#8B5CF6]/15 text-[#A78BFA] border border-[#8B5CF6]/25'
+              : 'bg-white/[0.04] text-zinc-500 hover:text-white hover:bg-white/[0.08] border border-transparent'
             }`}
         >
           {cat}
@@ -132,25 +132,25 @@ function ComponentCard({ descriptor, onAdd }: ComponentCardProps) {
           onAdd(descriptor)
         }
       }}
-      className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/5
-                 hover:border-violet-500/30 hover:bg-violet-500/10 active:scale-[0.98]
-                 transition-all text-left group overflow-hidden cursor-grab active:cursor-grabbing select-none focus:outline-none focus:border-violet-500/50"
+      className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.04] border border-white/5
+                 hover:border-[#8B5CF6]/25 hover:bg-[#8B5CF6]/[0.07] active:scale-[0.98]
+                 transition-all text-left group overflow-hidden cursor-grab active:cursor-grabbing select-none focus:outline-none focus:border-[#8B5CF6]/50"
     >
       {/* Icon / thumbnail */}
       <div className="w-9 h-9 min-w-[36px] max-w-[36px] min-h-[36px] max-h-[36px] rounded-lg bg-violet-500/15 flex items-center justify-center
-                      text-violet-400 flex-shrink-0 group-hover:bg-violet-500/25 group-hover:text-violet-300 transition-colors overflow-hidden">
+                      text-[#A78BFA] flex-shrink-0 group-hover:bg-violet-500/25 group-hover:text-[#A78BFA] transition-colors overflow-hidden">
         {renderComponentIcon(descriptor.icon)}
       </div>
 
       {/* Info */}
       <div className="flex-1 min-w-0 overflow-hidden flex flex-col justify-center">
         <div className="font-semibold text-white text-xs sm:text-sm truncate leading-snug">{descriptor.label}</div>
-        <div className="text-[10px] sm:text-[11px] text-slate-400 truncate leading-snug">{descriptor.category}</div>
+        <div className="text-[10px] sm:text-[11px] text-zinc-400 truncate leading-snug">{descriptor.category}</div>
       </div>
 
       {/* Add hint */}
-      <div className="flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center bg-white/0 group-hover:bg-violet-500/20 transition-colors">
-        <Plus className="w-3.5 h-3.5 text-slate-500 group-hover:text-violet-300 transition-colors shrink-0" />
+      <div className="flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center bg-white/0 group-hover:bg-[#8B5CF6]/15 transition-colors">
+        <Plus className="w-3.5 h-3.5 text-zinc-500 group-hover:text-[#A78BFA] transition-colors shrink-0" />
       </div>
     </div>
   )
@@ -380,24 +380,24 @@ export function ComponentPanel({ onClose }: ComponentPanelProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-white/10">
+      <div className="flex items-center justify-between p-4 border-b border-white/[0.08]">
         <h2 className="text-xs font-bold text-white uppercase tracking-wider">Biblioteka Tworzenia</h2>
         {onClose && (
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors">
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-white/[0.08] text-zinc-400 hover:text-white transition-colors">
             <X className="w-4 h-4" />
           </button>
         )}
       </div>
 
       {/* Sub-tab switcher */}
-      <div className="flex border-b border-white/10 px-3 pt-2 gap-1">
+      <div className="flex border-b border-white/[0.08] px-3 pt-2 gap-1">
         <button
           type="button"
           onClick={() => setSubTab('components')}
           className={`flex-1 py-1.5 text-xs font-semibold rounded-t-lg transition-all border-b-2 ${
             subTab === 'components'
-              ? 'text-white border-violet-500 bg-white/5'
-              : 'text-slate-500 border-transparent hover:text-slate-300'
+              ? 'text-white border-violet-500 bg-white/[0.04]'
+              : 'text-zinc-500 border-transparent hover:text-zinc-300'
           }`}
         >
           Komponenty
@@ -407,8 +407,8 @@ export function ComponentPanel({ onClose }: ComponentPanelProps) {
           onClick={() => setSubTab('typography')}
           className={`flex-1 py-1.5 text-xs font-semibold rounded-t-lg transition-all border-b-2 ${
             subTab === 'typography'
-              ? 'text-white border-violet-500 bg-white/5'
-              : 'text-slate-500 border-transparent hover:text-slate-300'
+              ? 'text-white border-violet-500 bg-white/[0.04]'
+              : 'text-zinc-500 border-transparent hover:text-zinc-300'
           }`}
         >
           Typografia
@@ -424,14 +424,14 @@ export function ComponentPanel({ onClose }: ComponentPanelProps) {
           {/* Search */}
           <div className="px-3 pt-3 pb-2">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
               <input
                 type="text"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Szukaj sekcji lub elementu..."
-                className="w-full bg-white/5 border border-white/10 rounded-lg pl-8 pr-3 py-2 text-sm text-white
-                           placeholder-slate-600 focus:outline-none focus:border-violet-500/50 transition-all"
+                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-8 pr-3 py-2 text-sm text-white
+                           placeholder-zinc-600 focus:outline-none focus:border-[#8B5CF6]/50 transition-all"
               />
             </div>
           </div>
@@ -451,7 +451,7 @@ export function ComponentPanel({ onClose }: ComponentPanelProps) {
               <div className="text-xs text-slate-600 text-center py-8">
                 Brak komponentów
                 {search && (
-                  <> dla zapytania: <span className="text-slate-400">&ldquo;{search}&rdquo;</span></>
+                  <> dla zapytania: <span className="text-zinc-400">&ldquo;{search}&rdquo;</span></>
                 )}
                 <br />
                 Zarejestruj komponenty w BuilderComponentRegistry.

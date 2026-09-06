@@ -145,7 +145,7 @@ export function MediaPickerModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-4xl max-h-[85vh] bg-[#0c0c16] border border-white/15 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        className="w-full max-w-4xl max-h-[85vh] bg-[#0c0c16] border border-white/[0.12] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Hidden File Input */}
@@ -159,24 +159,24 @@ export function MediaPickerModal({
         />
 
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#080810]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-[#27272A]">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-violet-600/20 border border-violet-500/30 flex items-center justify-center text-violet-400">
+            <div className="w-8 h-8 rounded-lg bg-violet-600/20 border border-[#8B5CF6]/25 flex items-center justify-center text-violet-400">
               <ImageIcon className="w-4 h-4" />
             </div>
             <div>
               <h3 className="text-sm font-bold text-white">{title}</h3>
-              <p className="text-[11px] text-slate-400">Wybierz obraz z biblioteki lub wgraj z dysku</p>
+              <p className="text-[11px] text-zinc-400">Wybierz obraz z biblioteki lub wgraj z dysku</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white">
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-white/[0.08] text-zinc-400 hover:text-white">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Navigation Tabs & Search */}
-        <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-3 border-b border-white/10 bg-[#06060c]">
-          <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/5">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-3 border-b border-white/[0.08] bg-[#202024]">
+          <div className="flex items-center gap-1 bg-white/[0.04] p-1 rounded-xl border border-white/5">
             {[
               { id: 'my_files', label: 'Moje pliki', count: assets.length },
               { id: 'library', label: 'Biblioteka SoloSpot', count: CURATED_LIBRARY.length },
@@ -189,7 +189,7 @@ export function MediaPickerModal({
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   activeTab === tab.id
                     ? 'bg-violet-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                    : 'text-zinc-400 hover:text-white hover:bg-white/[0.05]'
                 }`}
               >
                 <span>{tab.label}</span>
@@ -202,13 +202,13 @@ export function MediaPickerModal({
 
           {(activeTab === 'my_files' || activeTab === 'library') && (
             <div className="relative min-w-[220px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Szukaj grafik..."
-                className="w-full bg-white/5 border border-white/10 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-violet-500"
+                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#8B5CF6]"
               />
             </div>
           )}
@@ -227,15 +227,15 @@ export function MediaPickerModal({
           {/* Tab: My Files */}
           {activeTab === 'my_files' && (
             loading ? (
-              <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+              <div className="flex flex-col items-center justify-center py-20 text-zinc-500">
                 <Loader2 className="w-8 h-8 animate-spin text-violet-500 mb-2" />
                 <span className="text-xs">Ładowanie plików...</span>
               </div>
             ) : filteredAssets.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-white/10 rounded-2xl bg-white/[0.01]">
+              <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-white/[0.08] rounded-2xl bg-white/[0.01]">
                 <ImageIcon className="w-10 h-10 text-slate-600 mb-2" />
-                <p className="text-xs font-semibold text-slate-300 mb-1">Brak wgranych plików</p>
-                <p className="text-[11px] text-slate-500 mb-4">Wgraj grafikę z dysku lub wybierz z biblioteki SoloSpot</p>
+                <p className="text-xs font-semibold text-zinc-300 mb-1">Brak wgranych plików</p>
+                <p className="text-[11px] text-zinc-500 mb-4">Wgraj grafikę z dysku lub wybierz z biblioteki SoloSpot</p>
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold transition-all"
@@ -255,7 +255,7 @@ export function MediaPickerModal({
                       className={`group relative aspect-square rounded-xl border overflow-hidden cursor-pointer transition-all ${
                         isSelected
                           ? 'border-violet-500 ring-2 ring-violet-500/50 shadow-lg shadow-violet-500/20'
-                          : 'border-white/10 hover:border-white/25 bg-white/5'
+                          : 'border-white/[0.08] hover:border-white/25 bg-white/[0.04]'
                       }`}
                     >
                       <img
@@ -291,7 +291,7 @@ export function MediaPickerModal({
                     className={`group relative aspect-video rounded-xl border overflow-hidden cursor-pointer transition-all ${
                       isSelected
                         ? 'border-violet-500 ring-2 ring-violet-500/50 shadow-lg shadow-violet-500/20'
-                        : 'border-white/10 hover:border-white/25 bg-white/5'
+                        : 'border-white/[0.08] hover:border-white/25 bg-white/[0.04]'
                     }`}
                   >
                     <img
@@ -306,7 +306,7 @@ export function MediaPickerModal({
                     )}
                     <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/90 to-transparent">
                       <p className="text-xs text-white font-semibold truncate">{item.name}</p>
-                      <p className="text-[10px] text-slate-400 capitalize">{item.category}</p>
+                      <p className="text-[10px] text-zinc-400 capitalize">{item.category}</p>
                     </div>
                   </div>
                 )
@@ -332,11 +332,11 @@ export function MediaPickerModal({
                 </div>
               ) : (
                 <>
-                  <div className="w-12 h-12 rounded-2xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center text-violet-400 mb-3">
+                  <div className="w-12 h-12 rounded-2xl bg-violet-600/20 border border-[#8B5CF6]/25 flex items-center justify-center text-violet-400 mb-3">
                     <Upload className="w-6 h-6" />
                   </div>
                   <h4 className="text-sm font-bold text-white mb-1">Przeciągnij i upuść pliki tutaj</h4>
-                  <p className="text-xs text-slate-400 mb-4">Obsługiwane formaty: PNG, JPG, WebP, SVG, MP4</p>
+                  <p className="text-xs text-zinc-400 mb-4">Obsługiwane formaty: PNG, JPG, WebP, SVG, MP4</p>
                   <button
                     type="button"
                     className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold transition-all shadow-md shadow-violet-600/20"
@@ -352,7 +352,7 @@ export function MediaPickerModal({
           {activeTab === 'url' && (
             <div className="max-w-xl mx-auto py-8 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
                   Bezpośredni adres URL do grafiki lub wideo:
                 </label>
                 <input
@@ -363,13 +363,13 @@ export function MediaPickerModal({
                     setSelectedUrl(e.target.value)
                   }}
                   placeholder="https://images.unsplash.com/photo-..."
-                  className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white font-mono placeholder-slate-600 focus:outline-none focus:border-violet-500"
+                  className="w-full bg-white/[0.04] border border-white/[0.12] rounded-xl px-4 py-2.5 text-xs text-white font-mono placeholder-slate-600 focus:outline-none focus:border-[#8B5CF6]"
                 />
               </div>
 
               {customUrl && (
-                <div className="border border-white/10 rounded-xl p-3 bg-black/40">
-                  <p className="text-[11px] text-slate-400 mb-2 font-medium">Podgląd:</p>
+                <div className="border border-white/[0.08] rounded-xl p-3 bg-black/40">
+                  <p className="text-[11px] text-zinc-400 mb-2 font-medium">Podgląd:</p>
                   <div className="max-h-48 flex items-center justify-center overflow-hidden rounded-lg bg-black/60">
                     <img
                       src={customUrl}
@@ -387,10 +387,10 @@ export function MediaPickerModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-4 border-t border-white/10 bg-[#080810] flex items-center justify-between">
-          <div className="text-xs text-slate-400 truncate max-w-sm">
+        <div className="px-6 py-4 border-t border-white/[0.08] bg-[#27272A] flex items-center justify-between">
+          <div className="text-xs text-zinc-400 truncate max-w-sm">
             {selectedUrl ? (
-              <span className="text-violet-300 font-mono text-[11px] truncate">Wybrano: {selectedUrl.slice(0, 45)}...</span>
+              <span className="text-[#A78BFA] font-mono text-[11px] truncate">Wybrano: {selectedUrl.slice(0, 45)}...</span>
             ) : (
               <span>Wybierz element, aby wstawić go do projektu</span>
             )}
@@ -399,7 +399,7 @@ export function MediaPickerModal({
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold"
+              className="px-4 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 text-xs font-semibold"
             >
               Anuluj
             </button>

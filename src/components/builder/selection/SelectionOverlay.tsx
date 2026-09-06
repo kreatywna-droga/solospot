@@ -552,10 +552,10 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
                   e.currentTarget.setPointerCapture(e.pointerId)
                 }}
                 onMouseDown={handleMoveStart}
-                className="absolute z-[125] pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 bg-[#121124] hover:bg-violet-600 text-violet-200 hover:text-white text-[11px] font-medium rounded-lg shadow-xl border border-violet-500/40 cursor-grab active:cursor-grabbing transition-all select-none group touch-none"
+                className="absolute z-[125] pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 bg-[#121124] hover:bg-violet-600 text-violet-200 hover:text-white text-[11px] font-medium rounded-lg shadow-xl border border-[#8B5CF6]/40 cursor-grab active:cursor-grabbing transition-all select-none group touch-none"
                 title="Przeciągnij myszą, aby swobodnie przesunąć element po Canvasie"
               >
-                <Move className="w-3.5 h-3.5 text-violet-400 group-hover:text-white transition-colors" />
+                <Move className="w-3.5 h-3.5 text-[#A78BFA] group-hover:text-white transition-colors" />
                 <span className="font-semibold">Przesuń</span>
                 <span
                   ref={moveBadgeRef}

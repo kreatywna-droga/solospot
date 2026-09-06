@@ -49,7 +49,7 @@ export const SECTION_TEMPLATES: SectionTemplateItem[] = [
     category: 'hero',
     badge: 'Popularne',
     description: 'Mocny nagłówek, podtytuł, dwa przyciski akcji i subtelny gradient w tle.',
-    preview: 'bg-gradient-to-b from-violet-950/40 to-[#06060c] p-4 text-center',
+    preview: 'bg-gradient-to-b from-[#8B5CF6]/[0.15] to-[#06060c] p-4 text-center',
     createNode: () => {
       const secId = generateNodeId('section');
       const contId = generateNodeId('container');
@@ -679,7 +679,7 @@ export const SECTION_TEMPLATES: SectionTemplateItem[] = [
     category: 'cta',
     badge: 'Wysoka Konwersja',
     description: 'Przyciągający wzrok baner zachęcający do zakupu lub rejestracji.',
-    preview: 'bg-gradient-to-r from-violet-900 to-fuchsia-950 p-4 text-center',
+    preview: 'bg-gradient-to-r from-[#8B5CF6]/20 to-fuchsia-950/50 p-4 text-center',
     createNode: () => {
       const secId = generateNodeId('section');
       const contId = generateNodeId('container');
@@ -820,7 +820,7 @@ export const SECTION_TEMPLATES: SectionTemplateItem[] = [
     name: 'Stopka: Nowoczesna z Linkami',
     category: 'footer',
     description: 'Elegancka stopka z nazwą marki, prawami autorskimi i linkami.',
-    preview: 'bg-[#040408] p-4 text-center border-t border-white/10',
+    preview: 'bg-[#040408] p-4 text-center border-t border-white/[0.08]',
     createNode: () => {
       const secId = generateNodeId('section');
       const contId = generateNodeId('container');
@@ -945,24 +945,24 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
   return (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-150">
       <div
-        className="w-full max-w-4xl max-h-[85vh] bg-[#0c0c14] border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
+        className="w-full max-w-4xl max-h-[85vh] bg-[#27272A] border border-white/[0.08] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#0e0e18]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-[#0e0e18]">
           <div>
             <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <LayoutDashboard className="w-5 h-5 text-violet-400" />
+              <LayoutDashboard className="w-5 h-5 text-[#A78BFA]" />
               <span>Wizualna Biblioteka Sekcji</span>
               {insertIndex !== undefined && (
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 font-normal">
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#8B5CF6]/15 text-[#A78BFA] font-normal">
                   Wstawianie na pozycji #{insertIndex + 1}
                 </span>
               )}
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-zinc-400 mt-0.5">
               {insertIndex !== undefined ? (
-                <span className="text-violet-300 font-medium">
+                <span className="text-[#A78BFA] font-medium">
                   Nowa sekcja zostanie wstawiona {predecessor && successor ? `pomiędzy "${predecessor}" a "${successor}"` : predecessor ? `po sekcji "${predecessor}"` : successor ? `przed sekcją "${successor}"` : 'na początku strony'}.
                 </span>
               ) : (
@@ -972,7 +972,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -981,13 +981,13 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
         {/* Search & Categories Bar */}
         <div className="p-4 border-b border-white/5 bg-[#090910] flex flex-col gap-3">
           <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Szukaj sekcji po nazwie lub typie (np. Hero, Opinie, Cechy)..."
-              className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-violet-500"
+              className="w-full pl-9 pr-4 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-violet-500"
             />
           </div>
 
@@ -1002,7 +1002,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
                     isSelected
                       ? 'bg-violet-600 text-white shadow-md shadow-violet-600/30'
-                      : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
+                      : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08]'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -1016,9 +1016,9 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
         {/* Templates Grid */}
         <div className="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredTemplates.length === 0 ? (
-            <div className="col-span-2 py-16 flex flex-col items-center justify-center text-slate-500 text-center gap-2">
+            <div className="col-span-2 py-16 flex flex-col items-center justify-center text-zinc-500 text-center gap-2">
               <LayoutDashboard className="w-10 h-10 text-slate-600" />
-              <p className="text-sm font-semibold text-slate-400">Nie znaleziono sekcji</p>
+              <p className="text-sm font-semibold text-zinc-400">Nie znaleziono sekcji</p>
               <p className="text-xs">Spróbuj zmienić kategorię lub frazę wyszukiwania.</p>
             </div>
           ) : (
@@ -1030,20 +1030,20 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
               >
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-bold text-white group-hover:text-violet-300 transition-colors">
+                    <h3 className="text-sm font-bold text-white group-hover:text-[#A78BFA] transition-colors">
                       {template.name}
                     </h3>
                     {template.badge && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#8B5CF6]/15 text-[#A78BFA]">
                         {template.badge}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-slate-400 mb-4 line-clamp-2">
+                  <p className="text-xs text-zinc-400 mb-4 line-clamp-2">
                     {template.description}
                   </p>
                   <div
-                    className={`w-full h-24 rounded-lg border border-white/10 mb-3 flex items-center justify-center text-[11px] text-slate-400 ${template.preview}`}
+                    className={`w-full h-24 rounded-lg border border-white/[0.08] mb-3 flex items-center justify-center text-[11px] text-zinc-400 ${template.preview}`}
                   >
                     <span className="opacity-70 group-hover:opacity-100 transition-opacity">
                       Podgląd sekcji
@@ -1052,10 +1052,10 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
                 </div>
 
                 <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                  <span className="text-[11px] font-mono text-slate-500 uppercase">
+                  <span className="text-[11px] font-mono text-zinc-500 uppercase">
                     {template.category}
                   </span>
-                  <button className="flex items-center gap-1 text-xs font-semibold text-violet-400 group-hover:text-violet-300 transition-colors">
+                  <button className="flex items-center gap-1 text-xs font-semibold text-[#A78BFA] group-hover:text-[#A78BFA] transition-colors">
                     <span>Wstaw sekcję</span>
                     <Plus className="w-3.5 h-3.5" />
                   </button>

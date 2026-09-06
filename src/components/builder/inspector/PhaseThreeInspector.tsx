@@ -111,17 +111,17 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
   const isRootSection = selectedNode.parentId == null;
 
   return (
-    <div className="flex flex-col h-full overflow-hidden bg-[#07070f] text-white select-none">
+    <div className="flex flex-col h-full overflow-hidden bg-[#202024] text-white select-none">
       {/* Element Header */}
-      <div className="px-4 py-3 border-b border-white/10 bg-[#090914] flex items-center justify-between">
+      <div className="px-4 py-3 border-b border-white/[0.08] bg-[#27272A] flex items-center justify-between">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-white truncate">{nodeLabel}</span>
-            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-violet-500/20 text-violet-300 uppercase">
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#8B5CF6]/15 text-[#A78BFA] uppercase">
               {nodeType}
             </span>
           </div>
-          <p className="text-[11px] text-slate-500 mt-0.5">Szybka edycja wizualna</p>
+          <p className="text-[11px] text-zinc-500 mt-0.5">Szybka edycja wizualna</p>
         </div>
       </div>
 
@@ -134,19 +134,19 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
           <div className="space-y-4">
             {/* Direct Text Input */}
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-slate-300">Treść tekstu</label>
+              <label className="text-[11px] font-semibold text-zinc-300">Treść tekstu</label>
               <textarea
                 value={String(props.text ?? '')}
                 onChange={(e) => onPropChange('text', e.target.value)}
                 placeholder="Wpisz treść tekstu..."
                 rows={3}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 resize-none"
+                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#8B5CF6] resize-none"
               />
             </div>
 
             {/* Font Family */}
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-slate-300">Czcionka (Google Fonts)</label>
+              <label className="text-[11px] font-semibold text-zinc-300">Czcionka (Google Fonts)</label>
               <FontPicker
                 value={currentStyles.fontFamily || 'Inter'}
                 onChange={(font) => onStyleChange({ fontFamily: font })}
@@ -156,12 +156,12 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             {/* Font Size — Exact Input + SmoothSlider (zero re-render during drag) */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-[11px]">
-                <span className="font-semibold text-slate-300">Rozmiar tekstu</span>
-                <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-lg px-2 py-0.5">
+                <span className="font-semibold text-zinc-300">Rozmiar tekstu</span>
+                <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-2 py-0.5">
                   <span ref={fontSizeLabelRef} className="w-10 text-right font-mono text-white text-xs">
                     {parseInt(String(currentStyles.fontSize || '16px').replace('px', '')) || 16}
                   </span>
-                  <span className="text-slate-400 text-[10px]">px</span>
+                  <span className="text-zinc-400 text-[10px]">px</span>
                 </div>
               </div>
               <SmoothSlider
@@ -184,8 +184,8 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                     onClick={() => onStyleChange({ fontSize: `${sz}px` })}
                     className={`flex-1 py-0.5 text-[9px] font-mono rounded border transition-all ${
                       (parseInt(String(currentStyles.fontSize || '16px').replace('px', '')) || 16) === sz
-                        ? 'bg-violet-600/30 text-violet-300 border-violet-500/50'
-                        : 'bg-white/5 text-slate-500 border-white/5 hover:text-slate-300'
+                        ? 'bg-[#8B5CF6]/20 text-[#A78BFA] border-[#8B5CF6]/30'
+                        : 'bg-white/[0.04] text-zinc-500 border-white/[0.06] hover:text-zinc-300'
                     }`}
                   >
                     {sz}px
@@ -197,8 +197,8 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             {/* Color & Alignment */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold text-slate-300">Kolor tekstu</label>
-                <div className="flex items-center gap-2 p-1.5 bg-white/5 border border-white/10 rounded-xl">
+                <label className="text-[11px] font-semibold text-zinc-300">Kolor tekstu</label>
+                <div className="flex items-center gap-2 p-1.5 bg-white/[0.04] border border-white/[0.08] rounded-xl">
                   <input
                     type="color"
                     value={currentStyles.color || '#ffffff'}
@@ -210,18 +210,18 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                     value={currentStyles.color || '#ffffff'}
                     onChange={(e) => onStyleChange({ color: e.target.value })}
                     placeholder="#ffffff"
-                    className="w-full bg-transparent text-[11px] font-mono text-slate-300 focus:outline-none focus:text-white"
+                    className="w-full bg-transparent text-[11px] font-mono text-zinc-300 focus:outline-none focus:text-white"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold text-slate-300">Wyrównanie</label>
-                <div className="flex items-center p-1 bg-white/5 border border-white/10 rounded-xl gap-1">
+                <label className="text-[11px] font-semibold text-zinc-300">Wyrównanie</label>
+                <div className="flex items-center p-1 bg-white/[0.04] border border-white/[0.08] rounded-xl gap-1">
                   <button
                     onClick={() => onStyleChange({ textAlign: 'left' })}
                     className={`flex-1 py-1.5 rounded-lg flex items-center justify-center transition-colors ${
-                      currentStyles.textAlign === 'left' || !currentStyles.textAlign ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'
+                      currentStyles.textAlign === 'left' || !currentStyles.textAlign ? 'bg-violet-600 text-white' : 'text-zinc-400 hover:text-white'
                     }`}
                   >
                     <AlignLeft className="w-3.5 h-3.5" />
@@ -229,7 +229,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   <button
                     onClick={() => onStyleChange({ textAlign: 'center' })}
                     className={`flex-1 py-1.5 rounded-lg flex items-center justify-center transition-colors ${
-                      currentStyles.textAlign === 'center' ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'
+                      currentStyles.textAlign === 'center' ? 'bg-violet-600 text-white' : 'text-zinc-400 hover:text-white'
                     }`}
                   >
                     <AlignCenter className="w-3.5 h-3.5" />
@@ -237,7 +237,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   <button
                     onClick={() => onStyleChange({ textAlign: 'right' })}
                     className={`flex-1 py-1.5 rounded-lg flex items-center justify-center transition-colors ${
-                      currentStyles.textAlign === 'right' ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'
+                      currentStyles.textAlign === 'right' ? 'bg-violet-600 text-white' : 'text-zinc-400 hover:text-white'
                     }`}
                   >
                     <AlignRight className="w-3.5 h-3.5" />
@@ -254,7 +254,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
         {nodeType === 'image' && (
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-[11px] font-semibold text-slate-300">Zdjęcie</label>
+              <label className="text-[11px] font-semibold text-zinc-300">Zdjęcie</label>
               <button
                 onClick={() => { setMediaPickerTarget('image'); setShowMediaPicker(true); }}
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 font-semibold text-xs text-white transition-all shadow-md shadow-violet-600/20"
@@ -265,25 +265,25 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-slate-300">Adres URL grafiki</label>
+              <label className="text-[11px] font-semibold text-zinc-300">Adres URL grafiki</label>
               <input
                 type="text"
                 value={String(props.src ?? '')}
                 onChange={(e) => onPropChange('src', e.target.value)}
                 placeholder="https://..."
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-violet-500"
+                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#8B5CF6]"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-slate-300">Dopasowanie (Object Fit)</label>
+              <label className="text-[11px] font-semibold text-zinc-300">Dopasowanie (Object Fit)</label>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => onStyleChange({ objectFit: 'cover' })}
                   className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
                     currentStyles.objectFit === 'cover' || !currentStyles.objectFit
                       ? 'bg-violet-600 text-white border-violet-500'
-                      : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                      : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
                   }`}
                 >
                   Wypełnij (Cover)
@@ -293,7 +293,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
                     currentStyles.objectFit === 'contain'
                       ? 'bg-violet-600 text-white border-violet-500'
-                      : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                      : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
                   }`}
                 >
                   Dopasuj (Contain)
@@ -302,7 +302,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-slate-300">Zaokrąglenie narożników</label>
+              <label className="text-[11px] font-semibold text-zinc-300">Zaokrąglenie narożników</label>
               <div className="grid grid-cols-4 gap-1.5">
                 {[
                   { label: 'Proste', val: '0px' },
@@ -316,7 +316,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                     className={`py-1 text-[11px] font-semibold rounded-lg border transition-all ${
                       currentStyles.borderRadius === r.val
                         ? 'bg-violet-600 text-white border-violet-500'
-                        : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                        : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
                     }`}
                   >
                     {r.label}
@@ -326,14 +326,14 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             </div>
 
             {/* Image Width & Height — SmoothSlider */}
-            <div className="space-y-2 pt-1 border-t border-white/5">
+            <div className="space-y-2 pt-1 border-t border-white/[0.06]">
               <div className="flex items-center justify-between">
-                <label className="text-[11px] font-semibold text-slate-300">Szerokość obrazu</label>
-                <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-0.5">
+                <label className="text-[11px] font-semibold text-zinc-300">Szerokość obrazu</label>
+                <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded px-2 py-0.5">
                   <span ref={imgWidthLabelRef} className="w-12 text-right font-mono text-white text-xs">
                     {parseInt(String(currentStyles.width || '400px').replace('px', '')) || 400}
                   </span>
-                  <span className="text-[10px] text-slate-400">px</span>
+                  <span className="text-[10px] text-zinc-400">px</span>
                 </div>
               </div>
               <SmoothSlider
@@ -352,12 +352,12 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-[11px] font-semibold text-slate-300">Wysokość obrazu</label>
-                <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-0.5">
+                <label className="text-[11px] font-semibold text-zinc-300">Wysokość obrazu</label>
+                <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded px-2 py-0.5">
                   <span ref={imgHeightLabelRef} className="w-12 text-right font-mono text-white text-xs">
                     {parseInt(String(currentStyles.height || '260px').replace('px', '')) || 260}
                   </span>
-                  <span className="text-[10px] text-slate-400">px</span>
+                  <span className="text-[10px] text-zinc-400">px</span>
                 </div>
               </div>
               <SmoothSlider
@@ -382,34 +382,34 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
         {nodeType === 'button' && (
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-slate-300">Tekst na przycisku</label>
+              <label className="text-[11px] font-semibold text-zinc-300">Tekst na przycisku</label>
               <input
                 type="text"
                 value={String(props.text ?? '')}
                 onChange={(e) => onPropChange('text', e.target.value)}
                 placeholder="np. Kup Teraz, Zarejestruj się"
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-violet-500"
+                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#8B5CF6]"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-slate-300">Link docelowy (URL)</label>
+              <label className="text-[11px] font-semibold text-zinc-300">Link docelowy (URL)</label>
               <div className="relative">
-                <ExternalLink className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <ExternalLink className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
                 <input
                   type="text"
                   value={String(props.href ?? '')}
                   onChange={(e) => onPropChange('href', e.target.value)}
                   placeholder="https://... lub #kontakt"
-                  className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-violet-500"
+                  className="w-full pl-9 pr-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#8B5CF6]"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold text-slate-300">Kolor tła</label>
-                <div className="flex items-center gap-2 p-1.5 bg-white/5 border border-white/10 rounded-xl">
+                <label className="text-[11px] font-semibold text-zinc-300">Kolor tła</label>
+                <div className="flex items-center gap-2 p-1.5 bg-white/[0.04] border border-white/[0.08] rounded-xl">
                   <input
                     type="color"
                     value={currentStyles.backgroundColor || '#7c3aed'}
@@ -421,14 +421,14 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                     value={currentStyles.backgroundColor || '#7c3aed'}
                     onChange={(e) => onStyleChange({ backgroundColor: e.target.value })}
                     placeholder="#7c3aed"
-                    className="w-full bg-transparent text-[11px] font-mono text-slate-300 focus:outline-none focus:text-white"
+                    className="w-full bg-transparent text-[11px] font-mono text-zinc-300 focus:outline-none focus:text-white"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold text-slate-300">Kolor tekstu</label>
-                <div className="flex items-center gap-2 p-1.5 bg-white/5 border border-white/10 rounded-xl">
+                <label className="text-[11px] font-semibold text-zinc-300">Kolor tekstu</label>
+                <div className="flex items-center gap-2 p-1.5 bg-white/[0.04] border border-white/[0.08] rounded-xl">
                   <input
                     type="color"
                     value={currentStyles.color || '#ffffff'}
@@ -440,21 +440,21 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                     value={currentStyles.color || '#ffffff'}
                     onChange={(e) => onStyleChange({ color: e.target.value })}
                     placeholder="#ffffff"
-                    className="w-full bg-transparent text-[11px] font-mono text-slate-300 focus:outline-none focus:text-white"
+                    className="w-full bg-transparent text-[11px] font-mono text-zinc-300 focus:outline-none focus:text-white"
                   />
                 </div>
               </div>
             </div>
 
             {/* Button Width & Height — SmoothSlider */}
-            <div className="space-y-2 pt-1 border-t border-white/5">
+            <div className="space-y-2 pt-1 border-t border-white/[0.06]">
               <div className="flex items-center justify-between">
-                <label className="text-[11px] font-semibold text-slate-300">Szerokość przycisku</label>
-                <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-0.5">
+                <label className="text-[11px] font-semibold text-zinc-300">Szerokość przycisku</label>
+                <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded px-2 py-0.5">
                   <span ref={btnWidthLabelRef} className="w-12 text-right font-mono text-white text-xs">
                     {parseInt(String(currentStyles.width || '180px').replace('px', '')) || 180}
                   </span>
-                  <span className="text-[10px] text-slate-400">px</span>
+                  <span className="text-[10px] text-zinc-400">px</span>
                 </div>
               </div>
               <SmoothSlider
@@ -473,12 +473,12 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-[11px] font-semibold text-slate-300">Wysokość przycisku</label>
-                <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-0.5">
+                <label className="text-[11px] font-semibold text-zinc-300">Wysokość przycisku</label>
+                <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded px-2 py-0.5">
                   <span ref={btnHeightLabelRef} className="w-12 text-right font-mono text-white text-xs">
                     {parseInt(String(currentStyles.height || '44px').replace('px', '')) || 44}
                   </span>
-                  <span className="text-[10px] text-slate-400">px</span>
+                  <span className="text-[10px] text-zinc-400">px</span>
                 </div>
               </div>
               <SmoothSlider
@@ -525,8 +525,8 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             <div className="space-y-4">
               {/* ---- Background type tabs: Kolor | Zdjęcie | Wideo ---- */}
               <div className="space-y-2">
-                <label className="text-[11px] font-semibold text-slate-300">Tło sekcji</label>
-                <div className="flex items-center p-1 bg-white/5 border border-white/10 rounded-xl gap-1">
+                <label className="text-[11px] font-semibold text-zinc-300">Tło sekcji</label>
+                <div className="flex items-center p-1 bg-white/[0.04] border border-white/[0.08] rounded-xl gap-1">
                   {(['color', 'image', 'video'] as const).map((tab) => (
                     <button
                       key={tab}
@@ -534,7 +534,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                       className={`flex-1 py-1.5 text-[11px] font-semibold rounded-lg transition-all ${
                         bgType === tab
                           ? 'bg-violet-600 text-white'
-                          : 'text-slate-400 hover:text-white'
+                          : 'text-zinc-400 hover:text-white'
                       }`}
                     >
                       {tab === 'color' ? '🎨 Kolor' : tab === 'image' ? '🖼 Zdjęcie' : '🎬 Wideo'}
@@ -545,7 +545,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
 
               {/* ---- Solid colour ---- */}
               {bgType === 'color' && (
-                <div className="flex items-center gap-3 p-2 bg-white/5 border border-white/10 rounded-xl">
+                <div className="flex items-center gap-3 p-2 bg-white/[0.04] border border-white/[0.08] rounded-xl">
                   <input
                     type="color"
                     value={currentStyles.backgroundColor || '#06060c'}
@@ -559,7 +559,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                       value={currentStyles.backgroundColor || '#06060c'}
                       onChange={(e) => onStyleChange({ backgroundColor: e.target.value })}
                       placeholder="#06060c"
-                      className="w-full bg-transparent text-[11px] font-mono text-slate-300 focus:outline-none focus:text-white"
+                      className="w-full bg-transparent text-[11px] font-mono text-zinc-300 focus:outline-none focus:text-white"
                     />
                   </div>
                 </div>
@@ -577,7 +577,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   </button>
 
                   <div className="space-y-1.5">
-                    <label className="text-[11px] font-semibold text-slate-300">URL zdjęcia</label>
+                    <label className="text-[11px] font-semibold text-zinc-300">URL zdjęcia</label>
                     <input
                       type="text"
                       value={(() => {
@@ -595,13 +595,13 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                         });
                       }}
                       placeholder="https://..."
-                      className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-violet-500"
+                      className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#8B5CF6]"
                     />
                   </div>
 
                   {/* Fit */}
                   <div className="space-y-1.5">
-                    <label className="text-[11px] font-semibold text-slate-300">Dopasowanie</label>
+                    <label className="text-[11px] font-semibold text-zinc-300">Dopasowanie</label>
                     <div className="grid grid-cols-3 gap-1.5">
                       {[
                         { label: 'Wypełnij', size: 'cover' },
@@ -614,7 +614,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                           className={`py-1 text-[11px] font-semibold rounded-lg border transition-all ${
                             currentStyles.backgroundSize === opt.size || (!currentStyles.backgroundSize && opt.size === 'cover')
                               ? 'bg-violet-600 text-white border-violet-500'
-                              : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                              : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
                           }`}
                         >
                           {opt.label}
@@ -624,9 +624,9 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   </div>
 
                   {/* Darkening overlay */}
-                  <div className="space-y-1.5 pt-1 border-t border-white/5">
+                  <div className="space-y-1.5 pt-1 border-t border-white/[0.06]">
                     <div className="flex items-center justify-between">
-                      <label className="text-[11px] font-semibold text-slate-300">Przyciemnienie (overlay)</label>
+                      <label className="text-[11px] font-semibold text-zinc-300">Przyciemnienie (overlay)</label>
                       <span className="text-[11px] font-mono text-white">
                         {Math.round((currentStyles.overlayOpacity ?? 0.4) * 100)}%
                       </span>
@@ -656,21 +656,21 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   </button>
 
                   <div className="space-y-1.5">
-                    <label className="text-[11px] font-semibold text-slate-300">URL wideo tła (mp4 / webm)</label>
+                    <label className="text-[11px] font-semibold text-zinc-300">URL wideo tła (mp4 / webm)</label>
                     <input
                       type="text"
                       value={String(props.backgroundVideo ?? '')}
                       onChange={(e) => onPropChange('backgroundVideo', e.target.value)}
                       placeholder="https://... (mp4, webm)"
-                      className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-violet-500"
+                      className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#8B5CF6]"
                     />
-                    <p className="text-[10px] text-slate-500">Wideo odtwarzane automatycznie w tle (bez dźwięku, w pętli)</p>
+                    <p className="text-[10px] text-zinc-500">Wideo odtwarzane automatycznie w tle (bez dźwięku, w pętli)</p>
                   </div>
 
                   {/* Darkening overlay */}
-                  <div className="space-y-1.5 pt-1 border-t border-white/5">
+                  <div className="space-y-1.5 pt-1 border-t border-white/[0.06]">
                     <div className="flex items-center justify-between">
-                      <label className="text-[11px] font-semibold text-slate-300">Przyciemnienie (overlay)</label>
+                      <label className="text-[11px] font-semibold text-zinc-300">Przyciemnienie (overlay)</label>
                       <span className="text-[11px] font-mono text-white">
                         {Math.round((currentStyles.overlayOpacity ?? 0.4) * 100)}%
                       </span>
@@ -688,8 +688,8 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                 </div>
               )}
 
-              <div className="space-y-1.5 pt-2 border-t border-white/5">
-                <label className="text-[11px] font-semibold text-slate-300">Odstępy pionowe (Padding)</label>
+              <div className="space-y-1.5 pt-2 border-t border-white/[0.06]">
+                <label className="text-[11px] font-semibold text-zinc-300">Odstępy pionowe (Padding)</label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
                     { label: 'Kompaktowe', top: '40px', bottom: '40px' },
@@ -710,7 +710,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                         className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
                           isSelected
                             ? 'bg-violet-600 text-white border-violet-500'
-                            : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                            : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
                         }`}
                       >
                         {p.label}
@@ -729,14 +729,14 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
         {nodeType === 'container' && (
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-slate-300">Układ elementów</label>
+              <label className="text-[11px] font-semibold text-zinc-300">Układ elementów</label>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => onStyleChange({ display: 'flex', flexDirection: 'column' })}
                   className={`py-2 text-xs font-semibold rounded-xl border transition-all ${
                     currentStyles.flexDirection === 'column' || !currentStyles.flexDirection
                       ? 'bg-violet-600 text-white border-violet-500'
-                      : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                      : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
                   }`}
                 >
                   W pionie (Kolumna)
@@ -746,7 +746,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   className={`py-2 text-xs font-semibold rounded-xl border transition-all ${
                     currentStyles.flexDirection === 'row'
                       ? 'bg-violet-600 text-white border-violet-500'
-                      : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                      : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
                   }`}
                 >
                   W poziomie (Wiersz)
@@ -755,7 +755,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-slate-300">Odstęp między elementami (Gap)</label>
+              <label className="text-[11px] font-semibold text-zinc-300">Odstęp między elementami (Gap)</label>
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { label: 'Mały (8px)', val: '8px' },
@@ -768,7 +768,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                     className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
                       currentStyles.gap === g.val
                         ? 'bg-violet-600 text-white border-violet-500'
-                        : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                        : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
                     }`}
                   >
                     {g.label.split(' ')[0]}
@@ -785,7 +785,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
         {nodeType === 'video' && (
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-slate-300">Adres URL wideo</label>
+              <label className="text-[11px] font-semibold text-zinc-300">Adres URL wideo</label>
               <input
                 type="text"
                 value={String(props.src ?? '')}
@@ -794,18 +794,18 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   onPropChange('url', e.target.value)
                 }}
                 placeholder="https://... (mp4, webm)"
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-violet-500"
+                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#8B5CF6]"
               />
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-[11px] font-semibold text-slate-300">Szerokość wideo</label>
-                <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-0.5">
+                <label className="text-[11px] font-semibold text-zinc-300">Szerokość wideo</label>
+                <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded px-2 py-0.5">
                   <span ref={vidWidthLabelRef} className="w-12 text-right font-mono text-white text-xs">
                     {parseInt(String(currentStyles.width || '480px').replace('px', '')) || 480}
                   </span>
-                  <span className="text-[10px] text-slate-400">px</span>
+                  <span className="text-[10px] text-zinc-400">px</span>
                 </div>
               </div>
               <SmoothSlider
@@ -824,12 +824,12 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-[11px] font-semibold text-slate-300">Wysokość wideo</label>
-                <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-0.5">
+                <label className="text-[11px] font-semibold text-zinc-300">Wysokość wideo</label>
+                <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded px-2 py-0.5">
                   <span ref={vidHeightLabelRef} className="w-12 text-right font-mono text-white text-xs">
                     {parseInt(String(currentStyles.height || '270px').replace('px', '')) || 270}
                   </span>
-                  <span className="text-[10px] text-slate-400">px</span>
+                  <span className="text-[10px] text-zinc-400">px</span>
                 </div>
               </div>
               <SmoothSlider
@@ -846,11 +846,11 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-2 pt-1 border-t border-white/5">
+            <div className="grid grid-cols-2 gap-2 pt-1 border-t border-white/[0.06]">
               <button
                 onClick={() => onPropChange('loop', !props.loop)}
                 className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
-                  props.loop ? 'bg-violet-600 text-white border-violet-500' : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                  props.loop ? 'bg-violet-600 text-white border-violet-500' : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
                 }`}
               >
                 Pętla (Loop)
@@ -858,7 +858,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
               <button
                 onClick={() => onPropChange('autoPlay', !props.autoPlay)}
                 className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
-                  props.autoPlay ? 'bg-violet-600 text-white border-violet-500' : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                  props.autoPlay ? 'bg-violet-600 text-white border-violet-500' : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
                 }`}
               >
                 Autoodtwarzanie
@@ -874,12 +874,12 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
           <div className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-[11px] font-semibold text-slate-300">Rozmiar ikony</label>
-                <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-0.5">
+                <label className="text-[11px] font-semibold text-zinc-300">Rozmiar ikony</label>
+                <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded px-2 py-0.5">
                   <span ref={svgSizeLabelRef} className="w-10 text-right font-mono text-white text-xs">
                     {parseInt(String(currentStyles.width || '48px').replace('px', '')) || 48}
                   </span>
-                  <span className="text-[10px] text-slate-400">px</span>
+                  <span className="text-[10px] text-zinc-400">px</span>
                 </div>
               </div>
               <SmoothSlider
@@ -897,8 +897,8 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-slate-300">Kolor ikony</label>
-              <div className="flex items-center gap-2 p-1.5 bg-white/5 border border-white/10 rounded-xl">
+              <label className="text-[11px] font-semibold text-zinc-300">Kolor ikony</label>
+              <div className="flex items-center gap-2 p-1.5 bg-white/[0.04] border border-white/[0.08] rounded-xl">
                 <input
                   type="color"
                   value={currentStyles.color || '#8b5cf6'}
@@ -910,7 +910,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   value={currentStyles.color || '#8b5cf6'}
                   onChange={(e) => onStyleChange({ color: e.target.value })}
                   placeholder="#8b5cf6"
-                  className="w-full bg-transparent text-[11px] font-mono text-slate-300 focus:outline-none focus:text-white"
+                  className="w-full bg-transparent text-[11px] font-mono text-zinc-300 focus:outline-none focus:text-white"
                 />
               </div>
             </div>
@@ -920,16 +920,16 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
         {/* ============================================================= */}
         {/* UNIVERSAL CANVAS POSITION (X / Y)                             */}
         {/* ============================================================= */}
-        <div className="pt-3 border-t border-white/10 space-y-3">
+        <div className="pt-3 border-t border-white/[0.08] space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-300">
+            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-300">
               <Move className="w-3.5 h-3.5 text-violet-400" />
               <span>Pozycja na Canvasie</span>
             </div>
             {(currentStyles.translateX || currentStyles.translateY) && (
               <button
                 onClick={() => onStyleChange({ translateX: '0px', translateY: '0px' })}
-                className="text-[10px] text-violet-400 hover:text-violet-300 font-medium transition-colors"
+                className="text-[10px] text-violet-400 hover:text-[#A78BFA] font-medium transition-colors"
               >
                 Resetuj (0, 0)
               </button>
@@ -938,8 +938,8 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
 
           <div className="grid grid-cols-2 gap-2">
             {/* Position X — SmoothSlider */}
-            <div className="space-y-1 bg-white/5 p-2 rounded-xl border border-white/5">
-              <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+            <div className="space-y-1 bg-white/[0.04] p-2 rounded-xl border border-white/[0.06]">
+              <div className="flex items-center justify-between text-[10px] text-zinc-400 font-medium">
                 <span>Oś X</span>
                 <span ref={txLabelRef} className="font-mono text-white">
                   {currentStyles.translateX || '0px'}
@@ -963,8 +963,8 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             </div>
 
             {/* Position Y — SmoothSlider */}
-            <div className="space-y-1 bg-white/5 p-2 rounded-xl border border-white/5">
-              <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+            <div className="space-y-1 bg-white/[0.04] p-2 rounded-xl border border-white/[0.06]">
+              <div className="flex items-center justify-between text-[10px] text-zinc-400 font-medium">
                 <span>Oś Y</span>
                 <span ref={tyLabelRef} className="font-mono text-white">
                   {currentStyles.translateY || '0px'}
@@ -992,24 +992,24 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
         {/* ============================================================= */}
         {/* ADVANCED COLLAPSIBLE ACCORDION                                */}
         {/* ============================================================= */}
-        <div className="pt-3 border-t border-white/10">
+        <div className="pt-3 border-t border-white/[0.08]">
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-slate-300 hover:text-white transition-all border border-white/5"
+            className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-xs font-bold text-zinc-300 hover:text-white transition-all border border-white/[0.06]"
           >
             <div className="flex items-center gap-2">
               <Sliders className="w-3.5 h-3.5 text-violet-400" />
               <span>Zaawansowane ustawienia (Advanced)</span>
             </div>
             {showAdvanced ? (
-              <ChevronUp className="w-4 h-4 text-slate-400" />
+              <ChevronUp className="w-4 h-4 text-zinc-400" />
             ) : (
-              <ChevronDown className="w-4 h-4 text-slate-400" />
+              <ChevronDown className="w-4 h-4 text-zinc-400" />
             )}
           </button>
 
           {showAdvanced && (
-            <div className="mt-3 pt-3 border-t border-white/5">
+            <div className="mt-3 pt-3 border-t border-white/[0.06]">
               <DesignInspector
                 styles={currentStyles}
                 onStyleChange={onStyleChange}

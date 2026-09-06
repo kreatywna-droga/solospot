@@ -50,7 +50,7 @@ function getNodeIcon(type: string, hasChildren: boolean) {
       return hasChildren ? (
         <Box className="w-3.5 h-3.5 text-violet-400" />
       ) : (
-        <LayoutDashboard className="w-3.5 h-3.5 text-slate-400" />
+        <LayoutDashboard className="w-3.5 h-3.5 text-zinc-400" />
       )
   }
 }
@@ -150,8 +150,8 @@ function LayerRow({ node, depth, pageId, selectedId, onSelect }: LayerRowProps) 
         onClick={() => onSelect(node.id)}
         className={`group flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer transition-all text-sm select-none relative
           ${isSelected
-            ? 'bg-violet-500/20 border border-violet-500/40 text-white shadow-sm shadow-violet-500/10'
-            : 'hover:bg-white/5 text-slate-300 hover:text-white border border-transparent'
+            ? 'bg-[#8B5CF6]/15 border border-violet-500/40 text-white shadow-sm shadow-violet-500/10'
+            : 'hover:bg-white/[0.05] text-zinc-300 hover:text-white border border-transparent'
           }
           ${!node.visible ? 'opacity-40' : ''}
           ${isDragOver ? 'ring-2 ring-violet-400 bg-violet-500/30' : ''}
@@ -162,7 +162,7 @@ function LayerRow({ node, depth, pageId, selectedId, onSelect }: LayerRowProps) 
         {hasChildren ? (
           <button
             onClick={e => { e.stopPropagation(); setExpanded(v => !v) }}
-            className="text-slate-500 hover:text-white transition-colors flex-shrink-0"
+            className="text-zinc-500 hover:text-white transition-colors flex-shrink-0"
           >
             {expanded
               ? <ChevronDown className="w-3.5 h-3.5" />
@@ -179,7 +179,7 @@ function LayerRow({ node, depth, pageId, selectedId, onSelect }: LayerRowProps) 
         </span>
 
         {/* Drag handle */}
-        <GripVertical className="w-3 h-3 text-slate-600 group-hover:text-slate-400 transition-colors flex-shrink-0 cursor-grab active:cursor-grabbing" />
+        <GripVertical className="w-3 h-3 text-slate-600 group-hover:text-zinc-400 transition-colors flex-shrink-0 cursor-grab active:cursor-grabbing" />
 
         {/* Label or Inline Rename Input */}
         {isEditing ? (
@@ -197,7 +197,7 @@ function LayerRow({ node, depth, pageId, selectedId, onSelect }: LayerRowProps) 
               }
             }}
             onClick={e => e.stopPropagation()}
-            className="flex-1 text-xs bg-[#0b0b14] border border-violet-500 rounded px-1.5 py-0.5 text-white outline-none"
+            className="flex-1 text-xs bg-[#202024] border border-violet-500 rounded px-1.5 py-0.5 text-white outline-none"
           />
         ) : (
           <span
@@ -216,7 +216,7 @@ function LayerRow({ node, depth, pageId, selectedId, onSelect }: LayerRowProps) 
         )}
 
         {/* Type badge */}
-        <span className="text-[9px] text-slate-500 font-mono hidden group-hover:block flex-shrink-0 bg-white/5 px-1 py-0.5 rounded">
+        <span className="text-[9px] text-zinc-500 font-mono hidden group-hover:block flex-shrink-0 bg-white/[0.04] px-1 py-0.5 rounded">
           {node.type}
         </span>
 
@@ -224,7 +224,7 @@ function LayerRow({ node, depth, pageId, selectedId, onSelect }: LayerRowProps) 
         <div className={`flex items-center gap-0.5 flex-shrink-0 ${isSelected ? 'flex' : 'hidden group-hover:flex'}`}>
           <button
             onClick={handleToggleLock}
-            className="p-0.5 rounded hover:bg-white/10 text-slate-500 hover:text-amber-400 transition-colors"
+            className="p-0.5 rounded hover:bg-white/[0.08] text-zinc-500 hover:text-amber-400 transition-colors"
             title={node.locked ? 'Odblokuj' : 'Zablokuj'}
           >
             {node.locked
@@ -234,7 +234,7 @@ function LayerRow({ node, depth, pageId, selectedId, onSelect }: LayerRowProps) 
           </button>
           <button
             onClick={handleToggleVisibility}
-            className="p-0.5 rounded hover:bg-white/10 text-slate-500 hover:text-white transition-colors"
+            className="p-0.5 rounded hover:bg-white/[0.08] text-zinc-500 hover:text-white transition-colors"
             title={node.visible ? 'Ukryj' : 'Pokaż'}
           >
             {node.visible
@@ -244,14 +244,14 @@ function LayerRow({ node, depth, pageId, selectedId, onSelect }: LayerRowProps) 
           </button>
           <button
             onClick={handleDuplicate}
-            className="p-0.5 rounded hover:bg-white/10 text-slate-500 hover:text-violet-400 transition-colors"
+            className="p-0.5 rounded hover:bg-white/[0.08] text-zinc-500 hover:text-violet-400 transition-colors"
             title="Duplikuj"
           >
             <Copy className="w-3 h-3" />
           </button>
           <button
             onClick={handleDelete}
-            className="p-0.5 rounded hover:bg-red-500/10 text-slate-500 hover:text-red-400 transition-colors"
+            className="p-0.5 rounded hover:bg-red-500/10 text-zinc-500 hover:text-red-400 transition-colors"
             title="Usuń"
           >
             <Trash2 className="w-3 h-3" />
@@ -302,7 +302,7 @@ export function LayerTree() {
 
   if (!activePage) {
     return (
-      <div className="flex flex-col items-center justify-center h-32 text-slate-500 text-sm">
+      <div className="flex flex-col items-center justify-center h-32 text-zinc-500 text-sm">
         Brak stron
       </div>
     )
@@ -318,11 +318,11 @@ export function LayerTree() {
     <div className="flex flex-col gap-0.5 p-2">
       {/* Filters */}
       <div className="flex items-center gap-1 px-2 py-1.5">
-        <Filter className="w-3.5 h-3.5 text-slate-500" />
+        <Filter className="w-3.5 h-3.5 text-zinc-500" />
         <button
           onClick={() => setShowVisibleOnly(v => !v)}
           className={`text-[11px] px-2 py-1 rounded transition-all ${
-            showVisibleOnly ? 'bg-violet-500/20 text-violet-300' : 'text-slate-500 hover:text-white'
+            showVisibleOnly ? 'bg-[#8B5CF6]/15 text-[#A78BFA]' : 'text-zinc-500 hover:text-white'
           }`}
         >
           Widoczne
@@ -330,7 +330,7 @@ export function LayerTree() {
         <button
           onClick={() => setShowUnlockedOnly(v => !v)}
           className={`text-[11px] px-2 py-1 rounded transition-all ${
-            showUnlockedOnly ? 'bg-violet-500/20 text-violet-300' : 'text-slate-500 hover:text-white'
+            showUnlockedOnly ? 'bg-[#8B5CF6]/15 text-[#A78BFA]' : 'text-zinc-500 hover:text-white'
           }`}
         >
           Odblokowane

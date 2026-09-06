@@ -70,15 +70,15 @@ export function BuilderTopBar({
 
   return (
     <>
-      <div className="h-14 flex items-center justify-between px-4 border-b border-white/10
-                      bg-[#050508]/90 backdrop-blur-md flex-shrink-0 z-30 select-none">
+      <div className="h-14 flex items-center justify-between px-4 border-b border-white/[0.08]
+                      bg-[#1E1E22]/95 backdrop-blur-md flex-shrink-0 z-30 select-none">
         {/* Left: back + store info */}
         <div className="flex items-center gap-3 min-w-0">
           <Link
             href={`/dashboard/stores/${storeId}`}
             className="flex items-center justify-center w-9 h-9 rounded-xl
-                       bg-white/5 hover:bg-white/10 border border-white/10
-                       text-slate-400 hover:text-white transition-all"
+                       bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08]
+                       text-zinc-400 hover:text-white transition-all"
             title="Powrót do dashboardu"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -99,20 +99,20 @@ export function BuilderTopBar({
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-slate-600 font-mono truncate">{document.metadata.storeSlug}</p>
+            <p className="text-[11px] text-zinc-500 font-mono truncate">{document.metadata.storeSlug}</p>
           </div>
         </div>
 
         {/* Center: Navigation Tabs */}
-        <div className="flex items-center gap-0.5 bg-white/5 rounded-xl p-0.5 border border-white/5">
+        <div className="flex items-center gap-0.5 bg-white/[0.04] rounded-xl p-0.5 border border-white/[0.06]">
           {TABS.map(tab => (
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all
                 ${activeTab === tab.id
-                  ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30 shadow-lg'
-                  : 'text-slate-500 hover:text-white hover:bg-white/5 border border-transparent'
+                  ? 'bg-[#8B5CF6]/15 text-[#A78BFA] border border-[#8B5CF6]/25 shadow-lg shadow-[#8B5CF6]/10'
+                  : 'text-zinc-500 hover:text-white hover:bg-white/[0.05] border border-transparent'
                 }`}
               title={`${tab.label} (${tab.shortcut})`}
             >
@@ -128,10 +128,10 @@ export function BuilderTopBar({
           <div className="flex items-center gap-1">
             <button
               onClick={() => setShowTemplatePicker(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-600/15 hover:bg-violet-600/25 text-violet-300 border border-violet-500/30 text-xs font-semibold transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#8B5CF6]/12 hover:bg-[#8B5CF6]/20 text-[#A78BFA] border border-[#8B5CF6]/25 text-xs font-semibold transition-all shadow-sm"
               title="Wybierz gotowy szablon strony"
             >
-              <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+              <Sparkles className="w-3.5 h-3.5 text-[#8B5CF6]" />
               <span className="hidden sm:inline">Szablony</span>
             </button>
 
@@ -142,8 +142,8 @@ export function BuilderTopBar({
               }}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
                 canvas.runtimeMode === 'PREVIEW'
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm'
-                  : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 hover:text-white'
+                  ? 'bg-amber-500/15 text-amber-300 border-amber-500/30 shadow-sm'
+                  : 'bg-white/[0.04] text-zinc-300 border-white/[0.08] hover:bg-white/[0.08] hover:text-white'
               }`}
               title="Przełącz tryb podglądu"
             >
@@ -152,18 +152,18 @@ export function BuilderTopBar({
             </button>
           </div>
 
-          <div className="w-px h-6 bg-white/10 mx-1" />
+          <div className="w-px h-6 bg-white/[0.08] mx-1" />
 
           {/* Viewport */}
-          <div className="flex items-center gap-0.5 bg-white/5 rounded-xl p-0.5 border border-white/5">
+          <div className="flex items-center gap-0.5 bg-white/[0.04] rounded-xl p-0.5 border border-white/[0.06]">
             {(['DESKTOP', 'TABLET', 'MOBILE'] as ViewportLabel[]).map(label => (
               <button
                 key={label}
                 onClick={() => setViewport(label)}
                 className={`p-1.5 rounded-lg transition-all
                   ${currentViewport === label
-                    ? 'bg-violet-500/20 text-violet-400'
-                    : 'text-slate-600 hover:text-white'
+                    ? 'bg-[#8B5CF6]/15 text-[#A78BFA]'
+                    : 'text-zinc-500 hover:text-white'
                   }`}
                 title={label === 'DESKTOP' ? 'Desktop (1280px)' : label === 'TABLET' ? 'Tablet (768px)' : 'Mobile (375px)'}
               >
@@ -174,14 +174,14 @@ export function BuilderTopBar({
             ))}
           </div>
 
-          <div className="w-px h-6 bg-white/10 mx-1" />
+          <div className="w-px h-6 bg-white/[0.08] mx-1" />
 
           {/* Undo/Redo */}
-          <div className="flex items-center gap-0.5 bg-white/5 rounded-xl p-0.5 border border-white/5">
+          <div className="flex items-center gap-0.5 bg-white/[0.04] rounded-xl p-0.5 border border-white/[0.06]">
             <button
               onClick={undo}
               disabled={!canUndo}
-              className="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-white/5
+              className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-white/[0.05]
                          disabled:opacity-30 disabled:cursor-not-allowed transition-all"
               title="Undo (Ctrl+Z)"
             >
@@ -190,7 +190,7 @@ export function BuilderTopBar({
             <button
               onClick={redo}
               disabled={!canRedo}
-              className="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-white/5
+              className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-white/[0.05]
                          disabled:opacity-30 disabled:cursor-not-allowed transition-all"
               title="Redo (Ctrl+Shift+Z)"
             >
@@ -198,14 +198,14 @@ export function BuilderTopBar({
             </button>
           </div>
 
-          <div className="w-px h-6 bg-white/10 mx-1" />
+          <div className="w-px h-6 bg-white/[0.08] mx-1" />
 
           {/* Save */}
           <button
             onClick={onSave}
             disabled={saving}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10
-                       text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08]
+                       text-xs font-medium text-zinc-300 hover:bg-white/[0.08] hover:text-white
                        transition-all disabled:opacity-50"
           >
             <Save className="w-3.5 h-3.5" />
@@ -228,8 +228,8 @@ export function BuilderTopBar({
           {/* Command Palette */}
           <button
             onClick={() => setShowCommandPalette(true)}
-            className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-white/5 border border-white/10
-                       text-[10px] text-slate-600 hover:text-white hover:bg-white/10 transition-all"
+            className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08]
+                       text-[10px] text-zinc-500 hover:text-white hover:bg-white/[0.08] transition-all"
             title="Command Palette (Ctrl+K)"
           >
             <Command className="w-3 h-3" />
@@ -323,26 +323,26 @@ function CommandPaletteModal({ onClose }: { onClose: () => void }): React.ReactE
     : commands
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] bg-black/60 backdrop-blur-sm"
-      onClick={onClose}
-    >
       <div
-        className="w-full max-w-xl bg-[#0c0c14] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+        className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      >
+        <div
+          className="w-full max-w-xl bg-[#202024] border border-white/[0.10] rounded-2xl shadow-2xl overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10">
-          <Search className="w-4 h-4 text-slate-500" />
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.08]">
+          <Search className="w-4 h-4 text-zinc-500" />
           <input
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Type a command or search..."
-            className="flex-1 bg-transparent text-sm text-white placeholder-slate-600
+            className="flex-1 bg-transparent text-sm text-white placeholder-zinc-500
                        focus:outline-none"
             autoFocus
           />
-          <button onClick={onClose} className="text-[10px] text-slate-600 bg-white/5 px-2 py-1 rounded-lg">
+          <button onClick={onClose} className="text-[10px] text-zinc-500 bg-white/[0.05] px-2 py-1 rounded-lg">
             ESC
           </button>
         </div>
@@ -352,17 +352,17 @@ function CommandPaletteModal({ onClose }: { onClose: () => void }): React.ReactE
               key={i}
               onClick={() => { cmd.action(); onClose() }}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl
-                         text-sm text-slate-300 hover:bg-white/5 hover:text-white
+                         text-sm text-zinc-300 hover:bg-white/[0.05] hover:text-white
                          transition-all text-left"
             >
-              <span className="w-6 h-6 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-400 text-xs">
+              <span className="w-6 h-6 rounded-lg bg-[#8B5CF6]/10 flex items-center justify-center text-[#8B5CF6] text-xs">
                 {cmd.label.charAt(0)}
               </span>
               {cmd.label}
             </button>
           ))}
           {filtered.length === 0 && (
-            <div className="text-sm text-slate-600 text-center py-8">
+            <div className="text-sm text-zinc-500 text-center py-8">
               No commands found for &ldquo;{query}&rdquo;
             </div>
           )}

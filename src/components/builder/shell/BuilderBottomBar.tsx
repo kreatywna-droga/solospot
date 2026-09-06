@@ -43,31 +43,31 @@ export function BuilderBottomBar({ onSave, onPublish, saving, onTabChange }: Bui
   const zoomPresets = [50, 75, 100, 125, 150, 200]
 
   return (
-    <div className="h-10 flex items-center justify-between px-4 border-t border-white/10
-                    bg-[#050508]/80 backdrop-blur-sm flex-shrink-0 z-20 select-none">
+    <div className="h-10 flex items-center justify-between px-4 border-t border-white/[0.08]
+                    bg-[#1E1E22]/90 backdrop-blur-sm flex-shrink-0 z-20 select-none">
       {/* Left: Zoom */}
       <div className="flex items-center gap-1">
         <button
           onClick={() => setZoom(Math.max(0.25, Math.round((zoom - 0.25) * 100) / 100))}
-          className="p-1 rounded-md text-slate-500 hover:text-white hover:bg-white/5 transition-all"
+          className="p-1 rounded-md text-zinc-500 hover:text-white hover:bg-white/[0.05] transition-all"
           title="Zoom out"
         >
           <ZoomOut className="w-3.5 h-3.5" />
         </button>
         <div className="relative group">
-          <button className="px-2 py-1 rounded-md text-[11px] font-mono text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+          <button className="px-2 py-1 rounded-md text-[11px] font-mono text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-all">
             {Math.round(zoom * 100)}%
           </button>
           <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block">
-            <div className="bg-[#0c0c14] border border-white/10 rounded-xl p-1 shadow-2xl flex items-center gap-0.5">
+            <div className="bg-[#202024] border border-white/[0.10] rounded-xl p-1 shadow-2xl flex items-center gap-0.5">
               {zoomPresets.map(p => (
                 <button
                   key={p}
                   onClick={() => setZoom(p / 100)}
                   className={`px-2 py-1 rounded-md text-[10px] font-mono transition-all
                     ${Math.abs(zoom * 100 - p) < 1
-                      ? 'bg-violet-500/20 text-violet-300'
-                      : 'text-slate-500 hover:text-white hover:bg-white/5'
+                      ? 'bg-[#8B5CF6]/15 text-[#A78BFA]'
+                      : 'text-zinc-500 hover:text-white hover:bg-white/[0.05]'
                     }`}
                 >
                   {p}%
@@ -78,7 +78,7 @@ export function BuilderBottomBar({ onSave, onPublish, saving, onTabChange }: Bui
         </div>
         <button
           onClick={() => setZoom(Math.min(2.0, Math.round((zoom + 0.25) * 100) / 100))}
-          className="p-1 rounded-md text-slate-500 hover:text-white hover:bg-white/5 transition-all"
+          className="p-1 rounded-md text-zinc-500 hover:text-white hover:bg-white/[0.05] transition-all"
           title="Zoom in"
         >
           <ZoomIn className="w-3.5 h-3.5" />
@@ -91,8 +91,8 @@ export function BuilderBottomBar({ onSave, onPublish, saving, onTabChange }: Bui
           onClick={togglePreview}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] transition-all
             ${isPreview
-              ? 'bg-violet-600 text-white font-semibold shadow-lg shadow-violet-500/25'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
+              ? 'bg-[#8B5CF6] text-white font-semibold shadow-lg shadow-[#8B5CF6]/25'
+              : 'text-zinc-400 hover:text-white hover:bg-white/[0.05]'
             }`}
           title={isPreview ? 'Przełącz do trybu edycji' : 'Podgląd na żywo'}
         >
@@ -101,7 +101,7 @@ export function BuilderBottomBar({ onSave, onPublish, saving, onTabChange }: Bui
         </button>
         <button
           onClick={() => onTabChange?.('history')}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-all"
           title="Historia zmian"
         >
           <History className="w-3.5 h-3.5" />
@@ -109,13 +109,13 @@ export function BuilderBottomBar({ onSave, onPublish, saving, onTabChange }: Bui
         </button>
         <button
           onClick={() => onTabChange?.('ai')}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-all"
           title="Asystent AI"
         >
           <Bot className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">AI</span>
         </button>
-        <div className="w-px h-4 bg-white/10" />
+        <div className="w-px h-4 bg-white/[0.08]" />
         <button
           onClick={onPublish}
           disabled={saving}

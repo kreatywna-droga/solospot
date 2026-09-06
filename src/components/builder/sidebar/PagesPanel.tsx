@@ -89,19 +89,19 @@ export function PagesPanel() {
   })
 
   return (
-    <div className="flex flex-col h-full bg-[#06060c] text-white">
+    <div className="flex flex-col h-full bg-[#202024] text-white">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08]">
         <div className="flex items-center gap-2">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-300">Strony</h2>
-          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-slate-400 font-mono">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-300">Strony</h2>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.08] text-zinc-400 font-mono">
             {document.pages.length}
           </span>
         </div>
         <div className="flex items-center gap-1.5">
           <button
             onClick={() => setShowSiteMap(true)}
-            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+            className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-400 hover:text-white transition-colors"
             title="Wizualna mapa witryny (Site Map)"
           >
             <Map className="w-3.5 h-3.5" />
@@ -120,14 +120,14 @@ export function PagesPanel() {
       {/* Search */}
       <div className="px-3 pt-3 pb-2">
         <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-500" />
           <input
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Szukaj strony..."
-            className="w-full bg-white/5 border border-white/10 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white
-                       placeholder-slate-500 focus:outline-none focus:border-violet-500/50 transition-all"
+            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white
+                       placeholder-zinc-500 focus:outline-none focus:border-violet-500/50 transition-all"
           />
         </div>
       </div>
@@ -143,23 +143,23 @@ export function PagesPanel() {
               key={page.id}
               className={`group relative flex items-center justify-between px-3 py-2.5 rounded-xl text-xs transition-all cursor-pointer select-none ${
                 isActive
-                  ? 'bg-violet-500/20 text-white border border-violet-500/30 shadow-md shadow-violet-500/10'
-                  : 'bg-white/[0.02] text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
+                  ? 'bg-[#8B5CF6]/15 text-white border border-violet-500/30 shadow-md shadow-violet-500/10'
+                  : 'bg-white/[0.02] text-zinc-400 hover:text-white hover:bg-white/[0.05] border border-transparent'
               }`}
               onClick={() => selectPage(page.id)}
             >
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                <Globe className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-violet-400' : 'text-slate-500'}`} />
+                <Globe className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-violet-400' : 'text-zinc-500'}`} />
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold text-xs truncate text-white flex items-center gap-1.5">
                     {page.name}
                     {page.isHome && (
-                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-violet-500/20 text-violet-300 font-bold uppercase">
+                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#8B5CF6]/15 text-[#A78BFA] font-bold uppercase">
                         Home
                       </span>
                     )}
                   </div>
-                  <div className="text-[10px] text-slate-500 font-mono truncate">{page.slug}</div>
+                  <div className="text-[10px] text-zinc-500 font-mono truncate">{page.slug}</div>
                 </div>
               </div>
 
@@ -167,7 +167,7 @@ export function PagesPanel() {
               <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
                 <button
                   onClick={() => setShowSettingsModal(page)}
-                  className="p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="p-1 rounded hover:bg-white/[0.08] text-zinc-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
                   title="Ustawienia SEO i parametry strony"
                 >
                   <Settings className="w-3.5 h-3.5" />
@@ -176,18 +176,18 @@ export function PagesPanel() {
                 <div className="relative">
                   <button
                     onClick={() => setMenuOpenPageId(isMenuOpen ? null : page.id)}
-                    className="p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+                    className="p-1 rounded hover:bg-white/[0.08] text-zinc-400 hover:text-white transition-colors"
                   >
                     <MoreVertical className="w-3.5 h-3.5" />
                   </button>
 
                   {/* Context Menu */}
                   {isMenuOpen && (
-                    <div className="absolute right-0 top-6 z-40 w-40 bg-[#0e0e18] border border-white/15 rounded-xl shadow-2xl p-1 space-y-0.5">
+                    <div className="absolute right-0 top-6 z-40 w-40 bg-[#27272A] border border-white/15 rounded-xl shadow-2xl p-1 space-y-0.5">
                       {!page.isHome && (
                         <button
                           onClick={() => handleSetHome(page.id)}
-                          className="w-full flex items-center gap-2 px-2.5 py-1.5 text-[11px] rounded-lg text-slate-300 hover:bg-white/10 hover:text-white text-left"
+                          className="w-full flex items-center gap-2 px-2.5 py-1.5 text-[11px] rounded-lg text-zinc-300 hover:bg-white/[0.08] hover:text-white text-left"
                         >
                           <Home className="w-3 h-3 text-violet-400" />
                           <span>Ustaw jako główną</span>
@@ -195,14 +195,14 @@ export function PagesPanel() {
                       )}
                       <button
                         onClick={() => handleDuplicatePage(page.id)}
-                        className="w-full flex items-center gap-2 px-2.5 py-1.5 text-[11px] rounded-lg text-slate-300 hover:bg-white/10 hover:text-white text-left"
+                        className="w-full flex items-center gap-2 px-2.5 py-1.5 text-[11px] rounded-lg text-zinc-300 hover:bg-white/[0.08] hover:text-white text-left"
                       >
                         <Copy className="w-3 h-3" />
                         <span>Duplikuj stronę</span>
                       </button>
                       <button
                         onClick={() => { setShowSettingsModal(page); setMenuOpenPageId(null) }}
-                        className="w-full flex items-center gap-2 px-2.5 py-1.5 text-[11px] rounded-lg text-slate-300 hover:bg-white/10 hover:text-white text-left"
+                        className="w-full flex items-center gap-2 px-2.5 py-1.5 text-[11px] rounded-lg text-zinc-300 hover:bg-white/[0.08] hover:text-white text-left"
                       >
                         <Settings className="w-3 h-3" />
                         <span>Ustawienia / SEO</span>
@@ -226,14 +226,14 @@ export function PagesPanel() {
       </div>
 
       {/* Footer / Summary */}
-      <div className="p-3 border-t border-white/10 bg-[#05050a] flex items-center justify-between text-[11px] text-slate-500">
+      <div className="p-3 border-t border-white/[0.08] bg-[#05050a] flex items-center justify-between text-[11px] text-zinc-500">
         <div className="flex items-center gap-1.5">
           <FileText className="w-3 h-3" />
           <span>{document.pages.length} stron</span>
         </div>
         <button
           onClick={() => setShowSiteMap(true)}
-          className="text-violet-400 hover:text-violet-300 font-medium flex items-center gap-1"
+          className="text-violet-400 hover:text-[#A78BFA] font-medium flex items-center gap-1"
         >
           <Map className="w-3 h-3" />
           <span>Mapa witryny</span>
@@ -295,70 +295,70 @@ function PageSettingsModal({ page, onClose }: PageSettingsModalProps) {
         className="w-full max-w-md bg-[#0c0c16] border border-white/15 rounded-2xl shadow-2xl p-6 space-y-4"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between pb-3 border-b border-white/10">
+        <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
           <h3 className="font-bold text-sm text-white flex items-center gap-2">
             <Settings className="w-4 h-4 text-violet-400" />
             <span>Ustawienia strony: {page.name}</span>
           </h3>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white">
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-white/[0.08] text-zinc-400 hover:text-white">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         <div className="space-y-3 text-xs">
           <div>
-            <label className="block text-slate-400 font-medium mb-1">Nazwa strony</label>
+            <label className="block text-zinc-400 font-medium mb-1">Nazwa strony</label>
             <input
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-violet-500"
+              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-violet-500"
             />
           </div>
 
           <div>
-            <label className="block text-slate-400 font-medium mb-1">Ścieżka URL (Slug)</label>
+            <label className="block text-zinc-400 font-medium mb-1">Ścieżka URL (Slug)</label>
             <input
               type="text"
               value={slug}
               onChange={e => setSlug(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-violet-500"
+              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-violet-500"
             />
           </div>
 
-          <div className="pt-2 border-t border-white/10">
-            <h4 className="text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-2">Meta SEO</h4>
+          <div className="pt-2 border-t border-white/[0.08]">
+            <h4 className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider mb-2">Meta SEO</h4>
 
             <div className="space-y-2">
               <div>
-                <label className="block text-slate-400 mb-1">Tytuł SEO (Title)</label>
+                <label className="block text-zinc-400 mb-1">Tytuł SEO (Title)</label>
                 <input
                   type="text"
                   value={title}
                   onChange={e => setTitle(e.target.value)}
                   placeholder="np. O nas | Mój Sklep"
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:border-violet-500"
+                  className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 text-white focus:outline-none focus:border-violet-500"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Opis SEO (Meta Description)</label>
+                <label className="block text-zinc-400 mb-1">Opis SEO (Meta Description)</label>
                 <textarea
                   rows={3}
                   value={description}
                   onChange={e => setDescription(e.target.value)}
                   placeholder="Krótki opis strony dla wyszukiwarki Google..."
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:border-violet-500"
+                  className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 text-white focus:outline-none focus:border-violet-500"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
+        <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/[0.08]">
           <button
             onClick={onClose}
-            className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-medium"
+            className="px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 text-xs font-medium"
           >
             Anuluj
           </button>

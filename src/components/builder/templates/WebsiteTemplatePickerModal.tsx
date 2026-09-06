@@ -157,23 +157,23 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
   return (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-150">
       <div
-        className="w-full max-w-5xl max-h-[90vh] bg-[#0c0c14] border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
+        className="w-full max-w-5xl max-h-[90vh] bg-[#27272A] border border-white/[0.08] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-white/10 bg-[#0e0e18]">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-white/[0.08] bg-[#0e0e18]">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <Sparkles className="w-5 h-5 text-violet-400" />
               <h2 className="text-lg font-bold text-white">Wybierz Szablon Startowy Strony</h2>
             </div>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-zinc-400">
               Rozpocznij z kompletną, profesjonalnie skomponowaną stroną lub pustą kanwą. Wszystkie sekcje możesz potem dowolnie edytować.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -195,23 +195,23 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
                       <Icon className="w-5 h-5" />
                     </div>
                     {tmpl.badge && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#8B5CF6]/15 text-[#A78BFA]">
                         {tmpl.badge}
                       </span>
                     )}
                   </div>
-                  <h3 className="text-sm font-bold text-white group-hover:text-violet-300 transition-colors mb-1">
+                  <h3 className="text-sm font-bold text-white group-hover:text-[#A78BFA] transition-colors mb-1">
                     {tmpl.name}
                   </h3>
                   <p className="text-[11px] font-semibold text-violet-400/90 mb-2">
                     {tmpl.tagline}
                   </p>
-                  <p className="text-xs text-slate-400 line-clamp-3">
+                  <p className="text-xs text-zinc-400 line-clamp-3">
                     {tmpl.description}
                   </p>
                 </div>
 
-                <div className="pt-4 mt-4 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-slate-400 group-hover:text-violet-300 transition-colors">
+                <div className="pt-4 mt-4 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-zinc-400 group-hover:text-[#A78BFA] transition-colors">
                   <span>{tmpl.sectionTemplateIds.length > 0 ? `${tmpl.sectionTemplateIds.length} sekcji` : 'Od zera'}</span>
                   <div className="flex items-center gap-1 text-violet-400">
                     <span>Użyj</span>

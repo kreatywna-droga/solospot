@@ -250,7 +250,7 @@ export function AssetsPanel() {
 
   return (
     <div
-      className="flex flex-col h-full bg-[#06060c] text-white"
+      className="flex flex-col h-full bg-[#202024] text-white"
       onDragOver={e => { e.preventDefault(); setIsDragging(true) }}
       onDragLeave={() => setIsDragging(false)}
       onDrop={e => {
@@ -270,10 +270,10 @@ export function AssetsPanel() {
       />
 
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08]">
         <div className="flex items-center gap-2">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-300">Asset Hub</h2>
-          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-slate-400 font-mono">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-300">Asset Hub</h2>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.08] text-zinc-400 font-mono">
             {assets.length}
           </span>
         </div>
@@ -308,14 +308,14 @@ export function AssetsPanel() {
       {/* Search */}
       <div className="px-3 pt-3 pb-2">
         <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-500" />
           <input
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Szukaj plików..."
-            className="w-full bg-white/5 border border-white/10 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white
-                       placeholder-slate-500 focus:outline-none focus:border-violet-500/50 transition-all"
+            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white
+                       placeholder-zinc-500 focus:outline-none focus:border-[#8B5CF6]/50 transition-all"
           />
         </div>
       </div>
@@ -328,8 +328,8 @@ export function AssetsPanel() {
             onClick={() => setActiveCategory(cat.id)}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-medium whitespace-nowrap transition-colors ${
               activeCategory === cat.id
-                ? 'bg-violet-600/30 text-violet-300 border border-violet-500/40 shadow-sm'
-                : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 border border-transparent'
+                ? 'bg-violet-600/30 text-[#A78BFA] border border-violet-500/40 shadow-sm'
+                : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08] border border-transparent'
             }`}
           >
             {cat.label}
@@ -341,21 +341,21 @@ export function AssetsPanel() {
       <div className="flex-1 overflow-y-auto p-3 relative">
         {isDragging && (
           <div className="absolute inset-2 rounded-xl border-2 border-dashed border-violet-500 bg-violet-600/20 backdrop-blur-sm z-30 flex flex-col items-center justify-center pointer-events-none">
-            <Upload className="w-8 h-8 text-violet-300 animate-bounce mb-2" />
+            <Upload className="w-8 h-8 text-[#A78BFA] animate-bounce mb-2" />
             <p className="text-xs font-semibold text-white">Upuść pliki tutaj, aby wgrać</p>
           </div>
         )}
 
         {loading ? (
-          <div className="flex flex-col items-center justify-center h-48 text-slate-500">
+          <div className="flex flex-col items-center justify-center h-48 text-zinc-500">
             <Loader2 className="w-6 h-6 animate-spin mb-2 text-violet-400" />
             <span className="text-xs">Ładowanie mediów...</span>
           </div>
         ) : filteredAssets.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-56 text-center px-4 border border-dashed border-white/10 rounded-xl bg-white/[0.02]">
+          <div className="flex flex-col items-center justify-center h-56 text-center px-4 border border-dashed border-white/[0.08] rounded-xl bg-white/[0.02]">
             <ImageIcon className="w-8 h-8 text-slate-600 mb-2" />
-            <p className="text-xs font-semibold text-slate-300 mb-1">Brak assetów w tej kategorii</p>
-            <p className="text-[11px] text-slate-500 mb-4">
+            <p className="text-xs font-semibold text-zinc-300 mb-1">Brak assetów w tej kategorii</p>
+            <p className="text-[11px] text-zinc-500 mb-4">
               Przeciągnij pliki tutaj lub użyj przycisku poniżej
             </p>
             <button
@@ -371,7 +371,7 @@ export function AssetsPanel() {
               <div
                 key={asset.id}
                 onClick={() => setSelectedAsset(asset)}
-                className="group relative aspect-square rounded-xl bg-white/5 border border-white/10 overflow-hidden cursor-pointer hover:border-violet-500/50 hover:shadow-lg hover:shadow-violet-500/10 transition-all flex flex-col"
+                className="group relative aspect-square rounded-xl bg-white/[0.04] border border-white/[0.08] overflow-hidden cursor-pointer hover:border-violet-500/50 hover:shadow-lg hover:shadow-violet-500/10 transition-all flex flex-col"
               >
                 <div className="flex-1 w-full overflow-hidden bg-black/40 flex items-center justify-center">
                   {asset.type === 'image' || asset.mimeType.includes('svg') ? (
@@ -382,19 +382,19 @@ export function AssetsPanel() {
                       loading="lazy"
                     />
                   ) : asset.type === 'video' ? (
-                    <div className="flex flex-col items-center text-slate-400">
+                    <div className="flex flex-col items-center text-zinc-400">
                       <Video className="w-6 h-6 text-violet-400" />
                       <span className="text-[9px] uppercase tracking-wider font-bold mt-1">Video</span>
                     </div>
                   ) : (
-                    <FileText className="w-6 h-6 text-slate-400" />
+                    <FileText className="w-6 h-6 text-zinc-400" />
                   )}
                 </div>
                 <div className="p-1.5 bg-[#080810]/95 border-t border-white/5">
-                  <p className="text-[10px] font-medium text-slate-300 truncate" title={asset.originalName}>
+                  <p className="text-[10px] font-medium text-zinc-300 truncate" title={asset.originalName}>
                     {asset.originalName}
                   </p>
-                  <p className="text-[9px] text-slate-500 font-mono">
+                  <p className="text-[9px] text-zinc-500 font-mono">
                     {(asset.size / 1024).toFixed(0)} KB
                   </p>
                 </div>
@@ -408,13 +408,13 @@ export function AssetsPanel() {
       {selectedAsset && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="relative w-full max-w-lg bg-[#0c0c16] rounded-2xl border border-white/15 overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08]">
               <span className="text-xs font-bold text-white truncate max-w-xs">
                 {selectedAsset.originalName}
               </span>
               <button
                 onClick={() => { setSelectedAsset(null); setDeleteConfirm(false) }}
-                className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white"
+                className="p-1 rounded-lg hover:bg-white/[0.08] text-zinc-400 hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -431,14 +431,14 @@ export function AssetsPanel() {
                 <video src={selectedAsset.publicUrl} controls className="max-h-56 max-w-full rounded-lg" />
               ) : (
                 <div className="py-12 flex flex-col items-center">
-                  <FileText className="w-12 h-12 text-slate-500 mb-2" />
-                  <span className="text-xs text-slate-400 font-mono">{selectedAsset.mimeType}</span>
+                  <FileText className="w-12 h-12 text-zinc-500 mb-2" />
+                  <span className="text-xs text-zinc-400 font-mono">{selectedAsset.mimeType}</span>
                 </div>
               )}
             </div>
 
-            <div className="p-4 space-y-2 border-t border-white/10 text-xs">
-              <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-400">
+            <div className="p-4 space-y-2 border-t border-white/[0.08] text-xs">
+              <div className="grid grid-cols-2 gap-2 text-[11px] text-zinc-400">
                 <div>Rozmiar: <span className="text-white font-mono font-medium">{(selectedAsset.size / 1024).toFixed(1)} KB</span></div>
                 <div>Typ: <span className="text-white font-mono">{selectedAsset.mimeType}</span></div>
                 <div>Wgrano: <span className="text-white">{new Date(selectedAsset.createdAt).toLocaleString('pl-PL')}</span></div>
@@ -450,11 +450,11 @@ export function AssetsPanel() {
                   type="text"
                   readOnly
                   value={selectedAsset.publicUrl}
-                  className="flex-1 bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 text-[11px] text-slate-300 font-mono truncate focus:outline-none"
+                  className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-2.5 py-1.5 text-[11px] text-zinc-300 font-mono truncate focus:outline-none"
                 />
                 <button
                   onClick={() => handleCopyUrl(selectedAsset.publicUrl, selectedAsset.id)}
-                  className="px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-medium flex items-center gap-1 transition-colors"
+                  className="px-2.5 py-1.5 rounded-lg bg-white/[0.08] hover:bg-white/[0.12] text-white text-xs font-medium flex items-center gap-1 transition-colors"
                 >
                   {copiedId === selectedAsset.id ? (
                     <>
@@ -471,7 +471,7 @@ export function AssetsPanel() {
               </div>
             </div>
 
-            <div className="px-4 py-3 bg-[#080810] border-t border-white/10 flex items-center justify-between">
+            <div className="px-4 py-3 bg-[#080810] border-t border-white/[0.08] flex items-center justify-between">
               {deleteConfirm ? (
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] text-red-400">Potwierdzić?</span>
@@ -483,7 +483,7 @@ export function AssetsPanel() {
                   </button>
                   <button
                     onClick={() => setDeleteConfirm(false)}
-                    className="px-2.5 py-1 bg-white/10 hover:bg-white/15 text-white rounded text-xs transition-colors"
+                    className="px-2.5 py-1 bg-white/[0.08] hover:bg-white/[0.12] text-white rounded text-xs transition-colors"
                   >
                     Anuluj
                   </button>
