@@ -127,32 +127,6 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
   }, [canvas.selectedSectionId, containerRef])
 
   // Compute toolbar data: find node in page or parent container
-  const toolbarData = useMemo(() => {
-    if (!overlay.toolbarPosition || !overlay.selectedSection) return null
-    if (!canvas.selectedSectionId) return null
-
-    const found = findNode(document, canvas.selectedSectionId)
-    if (!found) return null
-
-    const siblings = found.parent ? found.parent.children : found.page.sections
-    const index = siblings.findIndex(s => s.id === canvas.selectedSectionId)
-
-    return {
-      position: overlay.toolbarPosition,
-      sectionId: canvas.selectedSectionId,
-      pageId: found.page.id,
-      locked: overlay.selectedSection.locked,
-      hidden: !overlay.selectedSection.visible,
-      index: Math.max(0, index),
-      total: Math.max(1, siblings.length),
-    }
-  }, [
-    overlay.toolbarPosition,
-    overlay.selectedSection,
-    canvas.selectedSectionId,
-    document,
-  ])
-
   // ---------------------------------------------------------------------------
   // Universal Canvas Move: Dragging element via Move Grip or BoundingBox edges
   // Supports MAGNETIC SECTION SNAP with zoom-aware threshold & flow reflow
@@ -675,6 +649,47 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     }
     return rect
   }, [overlay.boundingRect, resizing, moving])
+
+  // Compute toolbar data: find node in page or parent container
+  const toolbarData = useMemo(() => {
+    if (!overlay.toolbarPosition || !overlay.selectedSection) return null
+    if (!canvas.selectedSectionId) return null
+
+    const found = findNode(document, canvas.selectedSectionId)
+    if (!found) return null
+
+    const siblings = found.parent ? found.parent.children : found.page.sections
+    const index = siblings.findIndex(s => s.id === canvas.selectedSectionId)
+
+    const isSection = found.node.type === 'section' || found.page.sections.some(s => s.id === canvas.selectedSectionId)
+
+    // For a SECTION / BANNER:
+    // Position the contextual toolbar at the TOP, INSIDE the banner (displayRect.y + 14px),
+    // NEVER at the bottom where it collides with "+ Dodaj Sekcję z Biblioteki" and column controls!
+    const position = isSection && displayRect
+      ? {
+          x: displayRect.x + displayRect.width / 2,
+          y: displayRect.y + 14,
+          position: 'top' as const,
+        }
+      : overlay.toolbarPosition
+
+    return {
+      position,
+      sectionId: canvas.selectedSectionId,
+      pageId: found.page.id,
+      locked: overlay.selectedSection.locked,
+      hidden: !overlay.selectedSection.visible,
+      index: Math.max(0, index),
+      total: Math.max(1, siblings.length),
+    }
+  }, [
+    overlay.toolbarPosition,
+    overlay.selectedSection,
+    canvas.selectedSectionId,
+    document,
+    displayRect,
+  ])
 
   return (
     <AnimatePresence>

@@ -769,12 +769,14 @@ export function QuickToolbar({
           </button>
         </div>
 
-        {/* Small pointer arrow pointing to the selected element */}
-        <div
-          className={`w-2 h-2 bg-[#0c0c16] border border-white/15 rotate-45 ${
-            isTop ? 'border-t-0 border-l-0' : 'border-b-0 border-r-0'
-          }`}
-        />
+        {/* Small pointer arrow pointing to the selected element (for non-sections) */}
+        {nodeType !== 'section' && (
+          <div
+            className={`w-2 h-2 bg-[#0c0c16] border border-white/15 rotate-45 ${
+              isTop ? 'border-t-0 border-l-0' : 'border-b-0 border-r-0'
+            }`}
+          />
+        )}
       </motion.div>
 
       {/* Media Picker Modal for Image elements */}

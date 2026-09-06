@@ -36,6 +36,7 @@ import {
   HANDLE_POSITIONS,
   DEFAULT_OVERLAY_CONFIG,
 } from './OverlayConstants';
+export { DEFAULT_OVERLAY_CONFIG };
 import type { BuilderDocument } from './BuilderDocument';
 import { buildBreadcrumbs } from './SelectionEngine';
 
@@ -129,7 +130,8 @@ export class OverlayController {
           zIndex: mergedConfig.zIndex,
         });
 
-        toolbarPosition = this.computeToolbarPosition(boundingRect, mergedConfig);
+        const isSection = document.pages.some(p => p.sections.some(s => s.id === selectedId));
+        toolbarPosition = this.computeToolbarPosition(boundingRect, mergedConfig, isSection);
         activeHandles = this.computeActiveHandles(selection.lockedIds.includes(selectedId), mergedConfig);
         breadcrumbs = buildBreadcrumbs(document, selectedId);
         selectedSection = this.findSectionById(document, selectedId);
@@ -221,9 +223,21 @@ export class OverlayController {
 
   static computeToolbarPosition(
     rect: OverlayRect,
-    config: OverlayConfig
+    config: OverlayConfig,
+    isSection = false
   ): ToolbarPositionResult {
-    const toolbarY = rect.y + config.toolbarOffsetY;
+    // For sections / banners: place toolbar at the top inside the banner (rect.y + 14px)
+    // to prevent overlap with the inter-section insertion bar ("+ Dodaj Sekcję z Biblioteki")
+    if (isSection) {
+      return {
+        x: rect.x + rect.width / 2,
+        y: rect.y + 14,
+        position: 'top',
+      };
+    }
+
+    const toolbarOffsetY = config?.toolbarOffsetY ?? DEFAULT_OVERLAY_CONFIG.toolbarOffsetY;
+    const toolbarY = rect.y + toolbarOffsetY;
 
     // Default: centered above the element
     // For elements near the top of viewport, show below

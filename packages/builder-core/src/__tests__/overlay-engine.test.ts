@@ -26,6 +26,8 @@ import {
 } from '../SelectionEngine'
 import type { SelectionState, BuilderDocument, CanvasAction } from '../index'
 import { createBuilderDocument, createBuilderPage, createSectionNode } from '../BuilderDocument'
+import { OverlayController } from '../OverlayController'
+import { DEFAULT_OVERLAY_CONFIG } from '../OverlayConstants'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -315,6 +317,57 @@ describe('SelectionEngine Integration', () => {
     expect(state.selectedIds).toContain('sec_1')
     expect(state.selectedIds).toContain('sec_2')
     expect(state.selectionMode).toBe('MULTI')
+  })
+})
+
+describe('OverlayController.computeToolbarPosition', () => {
+  it('positions section toolbar at the top inside the banner (rect.y + 14px), preventing overlap with bottom controls', () => {
+    const sectionRect = OverlayController.computeOverlayRect({
+      x: 0,
+      y: 0,
+      width: 1200,
+      height: 450,
+      viewport: { label: 'DESKTOP', width: 1920, zoom: 1.0, offsetX: 0, offsetY: 0 },
+    })
+
+    const pos = OverlayController.computeToolbarPosition(sectionRect, DEFAULT_OVERLAY_CONFIG, true)
+
+    // Must be inside the banner at top: y = 14px, not at bottom: y = 458px
+    expect(pos.position).toBe('top')
+    expect(pos.x).toBe(600)
+    expect(pos.y).toBe(14)
+  })
+
+  it('positions child elements near top below the element', () => {
+    const childRect = OverlayController.computeOverlayRect({
+      x: 100,
+      y: 20,
+      width: 200,
+      height: 40,
+      viewport: { label: 'DESKTOP', width: 1920, zoom: 1.0, offsetX: 0, offsetY: 0 },
+    })
+
+    const pos = OverlayController.computeToolbarPosition(childRect, DEFAULT_OVERLAY_CONFIG, false)
+
+    expect(pos.position).toBe('bottom')
+    expect(pos.x).toBe(200)
+    expect(pos.y).toBe(68) // 20 + 40 + 8
+  })
+
+  it('positions child elements away from top above the element', () => {
+    const childRect = OverlayController.computeOverlayRect({
+      x: 100,
+      y: 200,
+      width: 200,
+      height: 40,
+      viewport: { label: 'DESKTOP', width: 1920, zoom: 1.0, offsetX: 0, offsetY: 0 },
+    })
+
+    const pos = OverlayController.computeToolbarPosition(childRect, DEFAULT_OVERLAY_CONFIG, false)
+
+    expect(pos.position).toBe('top')
+    expect(pos.x).toBe(200)
+    expect(pos.y).toBe(200 + DEFAULT_OVERLAY_CONFIG.toolbarOffsetY)
   })
 })
 
