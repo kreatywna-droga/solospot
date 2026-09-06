@@ -594,21 +594,21 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
                   )}
                 </div>
               )}
-            </div>
-          )}
 
-          {/* Quick toolbar */}
-          {toolbarData && !resizing && !moving && (
-            <div className="pointer-events-auto">
-              <QuickToolbar
-                position={toolbarData.position}
-                sectionId={toolbarData.sectionId}
-                pageId={toolbarData.pageId}
-                locked={toolbarData.locked}
-                hidden={toolbarData.hidden}
-                index={toolbarData.index}
-                total={toolbarData.total}
-              />
+              {/* Quick toolbar */}
+              {toolbarData && !resizing && (
+                <div className="pointer-events-auto">
+                  <QuickToolbar
+                    position={toolbarData.position}
+                    sectionId={toolbarData.sectionId}
+                    pageId={toolbarData.pageId}
+                    locked={toolbarData.locked}
+                    hidden={toolbarData.hidden}
+                    index={toolbarData.index}
+                    total={toolbarData.total}
+                  />
+                </div>
+              )}
             </div>
           )}
         </motion.div>

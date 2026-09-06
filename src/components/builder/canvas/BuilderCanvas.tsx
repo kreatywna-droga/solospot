@@ -1437,10 +1437,14 @@ function SectionBlock({
 
   return (
     <div
+      data-node-id={node.id}
       onClick={onSelect}
       onMouseDown={(e) => {
         if (e.button !== 0 || node.locked) return
-        if (e.target === e.currentTarget) {
+        const target = e.target as HTMLElement | null
+        const closestChild = target?.closest('[data-node-id]')
+        const isChildNode = closestChild && closestChild !== e.currentTarget && closestChild.getAttribute('data-node-id') !== node.id
+        if (!isChildNode) {
           if (!isSelected) {
             onSelect()
           }
@@ -1453,9 +1457,6 @@ function SectionBlock({
       onDragOver={handleRootDragOver}
       onDragLeave={handleRootDragLeave}
       onDrop={handleRootDrop}
-      style={{
-        transform: formatTransform(resolvedStyles),
-      }}
       className={`relative group cursor-pointer transition-colors duration-150 select-none
         ${!node.visible ? 'opacity-30' : ''}
         ${dropEdge ? 'ring-1 ring-violet-400/50' : ''}
@@ -1600,7 +1601,7 @@ function SectionBlock({
               })
             }
           }}
-          className={`w-full text-white min-h-[80px] transition-colors relative overflow-hidden ${
+          className={`w-full text-white min-h-[80px] transition-colors relative overflow-hidden cursor-grab active:cursor-grabbing ${
             isSectionDropTarget ? 'ring-2 ring-violet-400 bg-violet-950/20' : ''
           }`}
           style={{
@@ -1622,12 +1623,11 @@ function SectionBlock({
             width: resolvedStyles.width || (node.props as any)?.width || '100%',
             height: resolvedStyles.height || (node.props as any)?.height,
             minWidth: resolvedStyles.minWidth,
-            maxWidth: resolvedStyles.maxWidth || (node.props as any)?.maxWidth,
+            maxWidth: node.type === 'section' ? undefined : (resolvedStyles.maxWidth || (node.props as any)?.maxWidth),
             minHeight: resolvedStyles.minHeight || (node.props as any)?.minHeight || (node.type === 'section' ? '120px' : '80px'),
             maxHeight: resolvedStyles.maxHeight,
             position: resolvedStyles.position as any,
             zIndex: resolvedStyles.zIndex,
-            transform: formatTransform(resolvedStyles),
           }}
         >
           {/* Ambient Section Video Background (legacy videoSrc or new props.backgroundVideo) */}
@@ -2528,32 +2528,36 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
         ) : (
           <>
             {sections.length === 0 && (
-              <div className="flex flex-col items-center justify-center h-full min-h-[550px] text-center p-12">
-                <div className="w-20 h-20 rounded-3xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-6">
-                  <Sparkles className="w-10 h-10 text-violet-400" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">Rozpocznij tworzenie strony</h3>
-                <p className="text-slate-400 text-sm mb-8 max-w-md">
-                  Wybierz gotowy, profesjonalnie skomponowany szablon strony lub dodaj pojedyncze sekcje z biblioteki.
-                </p>
-                <div className="flex flex-wrap items-center justify-center gap-4">
-                  <button
-                    onClick={() => setIsTemplatePickerOpen(true)}
-                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold text-sm hover:shadow-xl hover:shadow-violet-500/30 transition-all hover:scale-105 active:scale-95"
-                  >
-                    <Sparkles className="w-4 h-4" />
-                    <span>Wybierz gotowy szablon strony</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setInsertSectionIndex(0)
-                      setIsSectionLibraryOpen(true)
-                    }}
-                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-200 hover:text-white font-bold text-sm border border-white/10 transition-all"
-                  >
-                    <Plus className="w-4 h-4 text-violet-400" />
-                    <span>Przeglądaj bibliotekę sekcji</span>
-                  </button>
+              <div className="flex flex-col items-center justify-center h-full min-h-[550px] text-center p-8 z-10 w-full">
+                <div className="flex flex-col items-center justify-center p-10 max-w-xl w-full rounded-2xl bg-[#18181B] border border-[#27272A] shadow-2xl shadow-black/50 text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-violet-500/10 border border-violet-500/25 flex items-center justify-center mb-5 shadow-inner">
+                    <Sparkles className="w-8 h-8 text-violet-400" />
+                  </div>
+                  <h3 className="text-2xl font-extrabold text-white mb-2 tracking-tight">Zacznij budować swoją stronę</h3>
+                  <p className="text-zinc-400 text-sm mb-8 max-w-md leading-relaxed">
+                    Twoja strona jest pusta. Dodaj pierwszą sekcję z biblioteki lub załaduj gotowy szablon, aby zacząć edycję.
+                  </p>
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full">
+                    <button
+                      onClick={() => {
+                        setInsertSectionIndex(0)
+                        setIsSectionLibraryOpen(true)
+                      }}
+                      data-testid="empty-canvas-add-section-btn"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-extrabold text-sm shadow-xl shadow-violet-600/30 hover:shadow-violet-600/50 transition-all hover:scale-105 active:scale-95"
+                    >
+                      <Plus className="w-4 h-4 text-white stroke-[3]" />
+                      <span>+ DODAJ SEKCJĘ</span>
+                    </button>
+                    <button
+                      onClick={() => setIsTemplatePickerOpen(true)}
+                      data-testid="empty-canvas-choose-template-btn"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] text-zinc-200 hover:text-white font-semibold text-sm border border-white/10 transition-all active:scale-95"
+                    >
+                      <Sparkles className="w-4 h-4 text-violet-400" />
+                      <span>Wybierz gotowy szablon strony</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -2600,11 +2604,12 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                   <div
                     id={String((node.props as any)?.anchorId || (node.metadata as any)?.anchorId || node.id)}
                     data-section-id={node.id}
+                    data-node-id={node.id}
                     data-layer-id={node.id}
                     data-section-anchor={String((node.props as any)?.anchorId || (node.metadata as any)?.anchorId || '')}
                     style={{ 
                       opacity: isDragSource ? 0.3 : 1,
-                      transform: formatTransform(node.styles || {}),
+                      transform: formatTransform(resolveEffectiveStyles(node, canvas.viewport.label)),
                     }}
                     className="relative w-full scroll-mt-16"
                   >

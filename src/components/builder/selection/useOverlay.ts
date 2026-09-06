@@ -86,26 +86,28 @@ export function useOverlay(
 
       const containerRect = container.getBoundingClientRect()
       const elRect = el.getBoundingClientRect()
+      const zoom = canvas.zoom && canvas.zoom > 0 ? canvas.zoom : 1
 
-      // Position relative to the canvas container
+      // Position relative to canvasFrameRef in unscaled canvas logical pixels
       return {
-        x: elRect.left - containerRect.left + container.scrollLeft,
-        y: elRect.top - containerRect.top + container.scrollTop,
-        width: elRect.width,
-        height: elRect.height,
+        x: (elRect.left - containerRect.left) / zoom,
+        y: (elRect.top - containerRect.top) / zoom,
+        width: elRect.width / zoom,
+        height: elRect.height / zoom,
       }
     },
-    [canvasContainerRef, options.sectionSelector, options.externalRects]
+    [canvasContainerRef, options.sectionSelector, options.externalRects, canvas.zoom]
   )
 
   // Compute overlay state whenever selection or canvas changes
   useEffect(() => {
+    // Inside canvasFrameRef, coordinates are in 1:1 canvas space because canvasFrameRef has CSS scale(zoom) applied to its parent container
     const viewport = {
       label: canvas.viewport.label as ViewportLabel,
       width: canvas.viewport.width,
-      zoom: canvas.zoom,
-      offsetX: canvasContainerRef.current?.scrollLeft ?? 0,
-      offsetY: canvasContainerRef.current?.scrollTop ?? 0,
+      zoom: 1.0,
+      offsetX: 0,
+      offsetY: 0,
     }
 
     const state = OverlayController.computeOverlayState({

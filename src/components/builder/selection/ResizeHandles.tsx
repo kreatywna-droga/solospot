@@ -36,18 +36,19 @@ function getHandlePosition(
   handle: HandleType,
   handleSize: number
 ): HandlePosition {
-  const screen = overlayRectToScreenRect(rect)
+  const width = rect.width
+  const height = rect.height
   const half = handleSize / 2
 
   switch (handle) {
     case 'NW': return { x: -half, y: -half, cursor: HANDLE_CURSOR.NW }
-    case 'N':  return { x: screen.width / 2 - half, y: -half, cursor: HANDLE_CURSOR.N }
-    case 'NE': return { x: screen.width - half, y: -half, cursor: HANDLE_CURSOR.NE }
-    case 'E':  return { x: screen.width - half, y: screen.height / 2 - half, cursor: HANDLE_CURSOR.E }
-    case 'SE': return { x: screen.width - half, y: screen.height - half, cursor: HANDLE_CURSOR.SE }
-    case 'S':  return { x: screen.width / 2 - half, y: screen.height - half, cursor: HANDLE_CURSOR.S }
-    case 'SW': return { x: -half, y: screen.height - half, cursor: HANDLE_CURSOR.SW }
-    case 'W':  return { x: -half, y: screen.height / 2 - half, cursor: HANDLE_CURSOR.W }
+    case 'N':  return { x: width / 2 - half, y: -half, cursor: HANDLE_CURSOR.N }
+    case 'NE': return { x: width - half, y: -half, cursor: HANDLE_CURSOR.NE }
+    case 'E':  return { x: width - half, y: height / 2 - half, cursor: HANDLE_CURSOR.E }
+    case 'SE': return { x: width - half, y: height - half, cursor: HANDLE_CURSOR.SE }
+    case 'S':  return { x: width / 2 - half, y: height - half, cursor: HANDLE_CURSOR.S }
+    case 'SW': return { x: -half, y: height - half, cursor: HANDLE_CURSOR.SW }
+    case 'W':  return { x: -half, y: height / 2 - half, cursor: HANDLE_CURSOR.W }
   }
 }
 
@@ -90,8 +91,8 @@ export function ResizeHandles({
             key={handle}
             className="absolute"
             style={{
-              left: pos.x,
-              top: pos.y,
+              left: rect.x + pos.x,
+              top: rect.y + pos.y,
               width: handleSize,
               height: handleSize,
               cursor: pos.cursor,
