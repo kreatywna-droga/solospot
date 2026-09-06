@@ -27,7 +27,7 @@ import { useMemo, useState, useCallback, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Move } from 'lucide-react'
 import { useBuilder } from '../state/BuilderProvider'
-import { ExternalSectionRect, useOverlay } from './useOverlay'
+import { ExternalSectionRect, useOverlay, readCurrentScale } from './useOverlay'
 import { BoundingBox } from './BoundingBox'
 import { ResizeHandles } from './ResizeHandles'
 import { HoverHighlight } from './HoverHighlight'
@@ -39,6 +39,7 @@ import {
   computeSectionSnap,
   SectionBounds,
   SectionSnapResult,
+  OverlayRect,
 } from '../../../../packages/builder-core/src'
 
 // ---------------------------------------------------------------------------
@@ -66,8 +67,7 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     isTextNode?: boolean
     startFontSize?: number
     currentFontSize?: number
-    deltaTx?: number
-    deltaTy?: number
+    liveRect?: OverlayRect
   } | null>(null)
 
   const [moving, setMoving] = useState<{
@@ -429,16 +429,12 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     resizeRef.w = startWidth
     resizeRef.h = startHeight
     resizeRef.fontSize = startFontSize
-    resizeRef.deltaTx = 0
-    resizeRef.deltaTy = 0
-    resizeRef.curTx = startTx
-    resizeRef.curTy = startTy
 
     // Disable transitions during live resize for instant 60fps tracking
     const prevTransition = domEl?.style.transition || ''
     if (domEl) {
       domEl.style.transition = 'none'
-      domEl.style.willChange = isTextNode ? 'font-size, width, transform' : 'width, height, transform'
+      domEl.style.willChange = isTextNode ? 'font-size, width' : 'width, height'
     }
 
     // Show badge once at start
@@ -453,15 +449,13 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
       isTextNode,
       startFontSize,
       currentFontSize: startFontSize,
-      deltaTx: 0,
-      deltaTy: 0,
     })
 
     let rafId: number | null = null
     let latestClientX = startX
     let latestClientY = startY
 
-    const onPointerMove = (moveEvt: PointerEvent) => {
+    const onPointerMove = (moveEvt: MouseEvent | PointerEvent) => {
       latestClientX = moveEvt.clientX
       latestClientY = moveEvt.clientY
 
@@ -475,11 +469,6 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
       if (handle.includes('W')) w = Math.max(20, startWidth - deltaX)
       if (handle.includes('S')) h = Math.max(20, startHeight + deltaY)
       if (handle.includes('N')) h = Math.max(20, startHeight - deltaY)
-
-      const deltaTx = handle.includes('W') ? Math.round(startWidth - w) : 0
-      const deltaTy = handle.includes('N') ? Math.round(startHeight - h) : 0
-      const curTx = startTx + deltaTx
-      const curTy = startTy + deltaTy
 
       let currentFontSize = startFontSize
       if (isTextNode) {
@@ -500,12 +489,8 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
       resizeRef.w = Math.round(w)
       resizeRef.h = Math.round(h)
       resizeRef.fontSize = currentFontSize
-      resizeRef.deltaTx = deltaTx
-      resizeRef.deltaTy = deltaTy
-      resizeRef.curTx = curTx
-      resizeRef.curTy = curTy
 
-      // Direct synchronous DOM preview — ZERO LATENCY (0ms)
+      // 1. Direct synchronous DOM preview — ZERO LATENCY (0ms)
       if (domEl) {
         if (isTextNode) {
           domEl.style.fontSize = `${currentFontSize}px`
@@ -522,9 +507,6 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
           }
         }
 
-        // Apply translation compensation so West / North handles track cursor 1:1
-        domEl.style.transform = `translate(${curTx}px, ${curTy}px) rotate(${baseRotate}) scale(${baseScale})`
-
         // Synchronously stretch all inner visual elements to 100% of the bounding container
         const innerVisuals = domEl.querySelectorAll<HTMLElement>('button, img, video, svg, canvas')
         innerVisuals.forEach(v => {
@@ -534,7 +516,37 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
         })
       }
 
-      // Live frame update: updates displayRect, BoundingBox, ResizeHandles, and QuickToolbar in real time
+      // 2. Measure actual ground-truth element rectangle from the browser.
+      // This automatically and perfectly tracks flex centering, grid placement, margins,
+      // and natural alignment with 0px offset, preventing the selection box from escaping.
+      let liveRect: OverlayRect | undefined = undefined
+      const container = containerRef.current
+      if (container && domEl) {
+        const zoomWrapper = container.parentElement
+        const actualScale = zoomWrapper ? readCurrentScale(zoomWrapper) : (zoom || 1)
+        const containerRect = container.getBoundingClientRect()
+        const elRect = domEl.getBoundingClientRect()
+
+        liveRect = {
+          x: (elRect.left - containerRect.left) / actualScale,
+          y: (elRect.top - containerRect.top) / actualScale,
+          width: elRect.width / actualScale,
+          height: elRect.height / actualScale,
+          visible: true,
+          zIndex: overlay.boundingRect?.zIndex ?? 100,
+          rotation: overlay.boundingRect?.rotation ?? 0,
+          scale: overlay.boundingRect?.scale ?? 1,
+          viewport: overlay.boundingRect?.viewport ?? {
+            label: canvas.viewport.label as any,
+            width: canvas.viewport.width,
+            zoom: 1.0,
+            offsetX: 0,
+            offsetY: 0,
+          },
+        }
+      }
+
+      // 3. Live frame update: updates displayRect, BoundingBox, ResizeHandles, and QuickToolbar in real time
       if (rafId === null) {
         rafId = requestAnimationFrame(() => {
           rafId = null
@@ -549,16 +561,17 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
             isTextNode,
             startFontSize,
             currentFontSize,
-            deltaTx,
-            deltaTy,
+            liveRect,
           })
         })
       }
     }
 
-    const onPointerUp = (upEvt: PointerEvent) => {
+    const onPointerUp = (upEvt: MouseEvent | PointerEvent) => {
       window.removeEventListener('pointermove', onPointerMove)
+      window.removeEventListener('mousemove', onPointerMove)
       window.removeEventListener('pointerup', onPointerUp)
+      window.removeEventListener('mouseup', onPointerUp)
       window.removeEventListener('pointercancel', onPointerUp)
 
       if (rafId !== null) {
@@ -588,12 +601,6 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
           } else {
             styleUpdates.fontSize = finalFontSizeStr
             styleUpdates.width = finalWidthStr
-          }
-          if (resizeRef.deltaTx !== 0) {
-            styleUpdates.translateX = `${resizeRef.curTx}px`
-          }
-          if (resizeRef.deltaTy !== 0) {
-            styleUpdates.translateY = `${resizeRef.curTy}px`
           }
 
           if (activeBp === 'tablet' || activeBp === 'mobile') {
@@ -635,12 +642,6 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
               styleUpdates.minHeight = finalHeightStr
             }
           }
-          if (resizeRef.deltaTx !== 0) {
-            styleUpdates.translateX = `${resizeRef.curTx}px`
-          }
-          if (resizeRef.deltaTy !== 0) {
-            styleUpdates.translateY = `${resizeRef.curTy}px`
-          }
 
           if (activeBp === 'tablet' || activeBp === 'mobile') {
             const currentResp = (found.node.responsive as Record<string, any>) || {}
@@ -677,24 +678,18 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     }
 
     window.addEventListener('pointermove', onPointerMove, { passive: true })
+    window.addEventListener('mousemove', onPointerMove, { passive: true })
     window.addEventListener('pointerup', onPointerUp)
+    window.addEventListener('mouseup', onPointerUp)
     window.addEventListener('pointercancel', onPointerUp)
   }, [overlay.boundingRect, canvas.selectedSectionId, canvas.viewport.label, canvas.zoom, containerRef, dispatch, document, resizeRef])
 
   const displayRect = useMemo(() => {
+    if (resizing?.liveRect) {
+      return resizing.liveRect
+    }
     if (!overlay.boundingRect) return null
     let rect = overlay.boundingRect
-    if (resizing) {
-      const isW = resizing.handle.includes('W')
-      const isN = resizing.handle.includes('N')
-      rect = {
-        ...rect,
-        x: isW ? rect.x - (resizing.currentWidth - resizing.startWidth) : rect.x,
-        y: isN ? rect.y - (resizing.currentHeight - resizing.startHeight) : rect.y,
-        width: resizing.currentWidth,
-        height: resizing.currentHeight,
-      }
-    }
     if (moving) {
       rect = {
         ...rect,

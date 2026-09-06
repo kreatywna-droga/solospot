@@ -53,7 +53,7 @@ import {
  * Returns the uniform scale factor (assumes scaleX ≈ scaleY).
  * This accounts for any ongoing CSS transitions on the zoom wrapper.
  */
-function readCurrentScale(el: HTMLElement): number {
+export function readCurrentScale(el: HTMLElement): number {
   try {
     const cs = window.getComputedStyle(el)
     const t = cs.transform
