@@ -79,6 +79,7 @@ function UnitInput({
   max,
   step,
   slider,
+  defaultUnit = 'px',
 }: {
   value?: string;
   onChange: (v: string) => void;
@@ -90,28 +91,34 @@ function UnitInput({
   step?: number;
   /** When provided, renders a slider + numeric input pair sharing the same value */
   slider?: boolean;
+  /** Default unit to append if no unit is detected (default: 'px') */
+  defaultUnit?: string;
 }) {
   const match = value ? String(value).match(/^([+-]?(?:\d*\.)?\d+)([a-zA-Z%]*)$/) : null;
   const numVal = match ? parseFloat(match[1]) : (value ? parseFloat(String(value).replace(/[^0-9.-]/g, '')) : NaN);
-  const isUnitless = match !== null && !match[2];
-  const detectedUnit = match && match[2] ? match[2] : '';
+  const detectedUnit = match && match[2] ? match[2] : defaultUnit;
   const hasNum = !Number.isNaN(numVal);
 
   const [unit, setUnit] = React.useState(detectedUnit);
 
   React.useEffect(() => {
-    const newUnit = match && match[2] ? match[2] : '';
-    if (newUnit !== unit) {
-      setUnit(newUnit);
-    }
-  }, [value]);
+    const newUnit = match && match[2] ? match[2] : defaultUnit;
+    setUnit(newUnit);
+  }, [value, defaultUnit]);
 
-  const commit = (num: string, u: string) => onChange(num ? `${num}${u}` : '');
+  const commit = (num: string, u: string) => {
+    if (!num) {
+      onChange('');
+      return;
+    }
+    const activeUnit = u !== undefined ? u : defaultUnit;
+    onChange(`${num}${activeUnit}`);
+  };
 
   const commitNumber = (n: number, u: string) => {
     const rounded = Math.round(n * 100) / 100;
-    // When unit is empty, store as unitless number (e.g. line-height "1.4", not "1.4px")
-    onChange(u ? `${rounded}${u}` : `${rounded}`);
+    const activeUnit = u !== undefined ? u : defaultUnit;
+    onChange(`${rounded}${activeUnit}`);
   };
 
   return (
@@ -157,11 +164,15 @@ function UnitInput({
           onInput={(e) => {
             const n = parseFloat((e.target as HTMLInputElement).value);
             const rounded = Math.round(n * 100) / 100;
-            const v = unit ? `${rounded}${unit}` : `${rounded}`;
+            const activeUnit = unit || defaultUnit || 'px';
+            const v = activeUnit ? `${rounded}${activeUnit}` : `${rounded}`;
             onLivePreview?.(v);
           }}
-          onChange={(e) => commitNumber(parseFloat(e.target.value), unit)}
-          className="w-full accent-violet-500 h-1"
+          onChange={(e) => {
+            const activeUnit = unit || defaultUnit || 'px';
+            commitNumber(parseFloat(e.target.value), activeUnit);
+          }}
+          className="w-full accent-violet-500 h-1 cursor-pointer"
         />
       )}
     </div>
@@ -463,17 +474,46 @@ function parseBoxShadow(raw?: string): { x: number; y: number; blur: number; spr
   // Match: [inset] offset-x offset-y [blur-radius] [spread-radius] [color]
   const m = raw.match(/^-?(?:inset\s+)?(-?\d+(?:\.\d+)?)(?:px)?\s+(-?\d+(?:\.\d+)?)(?:px)?\s+(-?\d+(?:\.\d+)?)(?:px)?(?:\s+(-?\d+(?:\.\d+)?)(?:px)?)?\s*(.*)$/);
   if (!m) return { x: 0, y: 4, blur: 16, spread: 0, color: '#000000', opacity: 0.25, enabled: true };
-  const x = parseFloat(m[1]);
-  const y = parseFloat(m[2]);
-  const blur = parseFloat(m[3]);
-  const spread = m[4] ? parseFloat(m[4]) : 0;
+  const x = parseFloat(m[1]) || 0;
+  const y = parseFloat(m[2]) || 0;
+  const blur = parseFloat(m[3]) || 0;
+  const spread = m[4] ? (parseFloat(m[4]) || 0) : 0;
   const colorStr = (m[5] || '#000000').trim();
-  // Try to extract rgba opacity
-  const rgbaMatch = colorStr.match(/rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*([\d.]+)\s*\)/);
-  const opacity = rgbaMatch ? parseFloat(rgbaMatch[1]) : 1;
-  // Extract hex color
-  const hexMatch = colorStr.match(/#([0-9a-fA-F]{6})/);
-  const color = hexMatch ? `#${hexMatch[1]}` : '#000000';
+
+  let color = '#000000';
+  let opacity = 0.25;
+
+  // Case 1: rgba(r, g, b, a)
+  const rgbaMatch = colorStr.match(/rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)/i);
+  if (rgbaMatch) {
+    const r = Math.min(255, Math.max(0, parseInt(rgbaMatch[1], 10))).toString(16).padStart(2, '0');
+    const g = Math.min(255, Math.max(0, parseInt(rgbaMatch[2], 10))).toString(16).padStart(2, '0');
+    const b = Math.min(255, Math.max(0, parseInt(rgbaMatch[3], 10))).toString(16).padStart(2, '0');
+    color = `#${r}${g}${b}`;
+    opacity = parseFloat(rgbaMatch[4]);
+  } else {
+    // Case 2: rgb(r, g, b)
+    const rgbMatch = colorStr.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i);
+    if (rgbMatch) {
+      const r = Math.min(255, Math.max(0, parseInt(rgbMatch[1], 10))).toString(16).padStart(2, '0');
+      const g = Math.min(255, Math.max(0, parseInt(rgbMatch[2], 10))).toString(16).padStart(2, '0');
+      const b = Math.min(255, Math.max(0, parseInt(rgbMatch[3], 10))).toString(16).padStart(2, '0');
+      color = `#${r}${g}${b}`;
+      opacity = 1;
+    } else {
+      // Case 3: #rrggbb or #rgb
+      const hexMatch = colorStr.match(/#([0-9a-fA-F]{3,6})/);
+      if (hexMatch) {
+        let hex = hexMatch[1];
+        if (hex.length === 3) {
+          hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+        }
+        color = `#${hex}`;
+        opacity = 1;
+      }
+    }
+  }
+
   return { x, y, blur, spread, color, opacity, enabled: true };
 }
 
@@ -588,7 +628,10 @@ function DesignTab({
 }) {
   const livePreview = (prop: string, value: string) => {
     if (!sectionId) return;
-    const el = window.document.querySelector(`[data-node-id="${sectionId}"]`) as HTMLElement | null;
+    const el = (
+      window.document.querySelector(`[data-node-id="${sectionId}"]`) ??
+      window.document.querySelector(`[data-section-id="${sectionId}"]`)
+    ) as HTMLElement | null;
     if (el) el.style.setProperty(prop, value, 'important');
   };
 
