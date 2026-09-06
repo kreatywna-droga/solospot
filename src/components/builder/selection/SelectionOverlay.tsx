@@ -193,7 +193,7 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     let latestClientX = startX
     let latestClientY = startY
 
-    const onPointerMove = (moveEvt: PointerEvent) => {
+    const onMove = (moveEvt: MouseEvent | PointerEvent) => {
       latestClientX = moveEvt.clientX
       latestClientY = moveEvt.clientY
 
@@ -223,10 +223,12 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
       }
     }
 
-    const onPointerUp = (upEvt: PointerEvent) => {
-      window.removeEventListener('pointermove', onPointerMove)
-      window.removeEventListener('pointerup', onPointerUp)
-      window.removeEventListener('pointercancel', onPointerUp)
+    const onUp = (upEvt: MouseEvent | PointerEvent) => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('mouseup', onUp)
+      window.removeEventListener('pointercancel', onUp)
 
       if (rafId !== null) {
         cancelAnimationFrame(rafId)
@@ -279,9 +281,11 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
       setMoving(null)
     }
 
-    window.addEventListener('pointermove', onPointerMove, { passive: true })
-    window.addEventListener('pointerup', onPointerUp)
-    window.addEventListener('pointercancel', onPointerUp)
+    window.addEventListener('pointermove', onMove, { passive: true })
+    window.addEventListener('mousemove', onMove, { passive: true })
+    window.addEventListener('pointerup', onUp)
+    window.addEventListener('mouseup', onUp)
+    window.addEventListener('pointercancel', onUp)
   }, [overlay.boundingRect, canvas.selectedSectionId, canvas.viewport.label, canvas.zoom, containerRef, dispatch, document, dragRef])
 
   // ---------------------------------------------------------------------------
@@ -540,16 +544,12 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
                 onDoubleClick={handleDoubleClickText}
               />
 
-              {/* Move Grip Handle — pointer capture for smooth drag even at high velocity */}
+              {/* Move Grip Handle — smooth drag anywhere */}
               <div
                 style={{
                   left: displayRect.x + displayRect.width / 2,
                   top: displayRect.y - 8,
                   transform: 'translate(-50%, -100%)',
-                }}
-                onPointerDown={(e) => {
-                  // Capture pointer so drag continues even if mouse leaves the element
-                  e.currentTarget.setPointerCapture(e.pointerId)
                 }}
                 onMouseDown={handleMoveStart}
                 className="absolute z-[125] pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 bg-[#121124] hover:bg-violet-600 text-violet-200 hover:text-white text-[11px] font-medium rounded-lg shadow-xl border border-[#8B5CF6]/40 cursor-grab active:cursor-grabbing transition-all select-none group touch-none"

@@ -172,6 +172,7 @@ interface SectionBlockProps {
   isHovered: boolean
   onSelect: () => void
   onHover: (id: string | null) => void
+  onStartDragNode?: (node: SectionNode, e: React.MouseEvent) => void
 }
 
 // ---------------------------------------------------------------------------
@@ -248,6 +249,7 @@ interface CanvasNodeProps {
   onSelectNode: (id: string, e: React.MouseEvent) => void
   onHoverNode: (id: string | null) => void
   onDoubleClickNode: (node: SectionNode, e: React.MouseEvent) => void
+  onStartDragNode?: (node: SectionNode, e: React.MouseEvent) => void
 }
 
 // ---------------------------------------------------------------------------
@@ -361,6 +363,7 @@ function CanvasNode({
   onSelectNode,
   onHoverNode,
   onDoubleClickNode,
+  onStartDragNode,
 }: CanvasNodeProps) {
   const { dispatch, ctx } = useBuilder()
   const [isDropTarget, setIsDropTarget] = useState(false)
@@ -371,10 +374,16 @@ function CanvasNode({
   const props = resolveEffectiveProps(node, viewport)
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0 || node.locked) return
+    const target = e.target as HTMLElement | null
+    if (target?.getAttribute('contenteditable') === 'true' || target?.getAttribute('data-inline-edit') === 'text') {
+      return
+    }
     e.stopPropagation()
-    if (selectedId !== node.id && !node.locked) {
+    if (selectedId !== node.id) {
       onSelectNode(node.id, e)
     }
+    onStartDragNode?.(node, e)
   }
 
   const handleClick = (e: React.MouseEvent) => {
@@ -395,21 +404,6 @@ function CanvasNode({
   const handleMouseLeave = (e: React.MouseEvent) => {
     e.stopPropagation()
     onHoverNode(null)
-  }
-
-  const handleDragStart = (e: React.DragEvent) => {
-    if (node.locked) {
-      e.preventDefault()
-      return
-    }
-    e.stopPropagation()
-    currentlyDraggedNodeId = node.id
-    e.dataTransfer.setData('application/solospot-node-id', node.id)
-    e.dataTransfer.effectAllowed = 'move'
-  }
-
-  const handleDragEnd = () => {
-    currentlyDraggedNodeId = null
   }
 
   if (node.type === 'heading') {
@@ -442,9 +436,6 @@ function CanvasNode({
         data-node-id={node.id}
         data-node-type={node.type}
         data-parent-id={node.parentId}
-        draggable={!node.locked}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
         onMouseDown={handleMouseDown}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
@@ -520,9 +511,6 @@ function CanvasNode({
         data-node-id={node.id}
         data-node-type={node.type}
         data-parent-id={node.parentId}
-        draggable={!node.locked}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
         onMouseDown={handleMouseDown}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
@@ -597,9 +585,6 @@ function CanvasNode({
         data-node-id={node.id}
         data-node-type={node.type}
         data-parent-id={node.parentId}
-        draggable={!node.locked}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
         onMouseDown={handleMouseDown}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
@@ -711,9 +696,6 @@ function CanvasNode({
         data-node-id={node.id}
         data-node-type={node.type}
         data-parent-id={node.parentId}
-        draggable={!node.locked}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
         onMouseDown={handleMouseDown}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
@@ -808,9 +790,6 @@ function CanvasNode({
         data-node-id={node.id}
         data-node-type={node.type}
         data-parent-id={node.parentId}
-        draggable={!node.locked}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
         onMouseDown={handleMouseDown}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
@@ -868,9 +847,6 @@ function CanvasNode({
         data-node-id={node.id}
         data-node-type={node.type}
         data-parent-id={node.parentId}
-        draggable={!node.locked}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
         onMouseDown={handleMouseDown}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
@@ -1066,8 +1042,6 @@ function CanvasNode({
       data-node-id={node.id}
       data-node-type={node.type}
       data-parent-id={node.parentId}
-      draggable={!node.locked}
-      onDragStart={handleDragStart}
       onMouseDown={handleMouseDown}
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
@@ -1171,6 +1145,7 @@ function CanvasNode({
             onSelectNode={onSelectNode}
             onHoverNode={onHoverNode}
             onDoubleClickNode={onDoubleClickNode}
+            onStartDragNode={onStartDragNode}
           />
         ))}
         </div>
@@ -1301,7 +1276,7 @@ function CanvasNode({
 }
 
 function SectionBlock({
-  node, pageId, index, total, isSelected, isHovered, onSelect, onHover,
+  node, pageId, index, total, isSelected, isHovered, onSelect, onHover, onStartDragNode,
 }: SectionBlockProps) {
   const { dispatch, document, canvas, ctx } = useBuilder()
   const [isSectionDropTarget, setIsSectionDropTarget] = useState(false)
@@ -1439,12 +1414,18 @@ function SectionBlock({
   return (
     <div
       onClick={onSelect}
+      onMouseDown={(e) => {
+        if (e.button !== 0 || node.locked) return
+        if (e.target === e.currentTarget) {
+          if (!isSelected) {
+            onSelect()
+          }
+          onStartDragNode?.(node, e)
+        }
+      }}
       onDoubleClick={handleDoubleClick}
       onMouseEnter={() => onHover(node.id)}
       onMouseLeave={() => onHover(null)}
-      draggable={!node.locked}
-      onDragStart={handleRootDragStart}
-      onDragEnd={handleRootDragEnd}
       onDragOver={handleRootDragOver}
       onDragLeave={handleRootDragLeave}
       onDrop={handleRootDrop}
@@ -1671,6 +1652,7 @@ function SectionBlock({
                   onSelectNode={handleSelectChildNode}
                   onHoverNode={onHover}
                   onDoubleClickNode={handleDoubleClickChildNode}
+                  onStartDragNode={onStartDragNode}
                 />
               ))
             ) : (
@@ -1791,6 +1773,7 @@ function SectionBlock({
                   onSelectNode={handleSelectChildNode}
                   onHoverNode={onHover}
                   onDoubleClickNode={handleDoubleClickChildNode}
+                  onStartDragNode={onStartDragNode}
                 />
               ))}
             </div>
@@ -2059,6 +2042,137 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
       container.removeEventListener('wheel', onWheel)
     }
   }, [canvas.zoom, dispatch])
+
+  // ---------------------------------------------------------------------------
+  // Universal Direct Node Drag: lets any node be dragged directly from the canvas
+  // ---------------------------------------------------------------------------
+  const handleDirectNodeDragStart = useCallback((node: SectionNode, e: React.MouseEvent) => {
+    if (e.button !== 0 || node.locked) return
+
+    // Don't drag if user is actively editing text inside this node
+    const target = e.target as HTMLElement | null
+    if (target?.getAttribute('contenteditable') === 'true' || target?.getAttribute('data-inline-edit') === 'text') {
+      return
+    }
+
+    e.stopPropagation()
+
+    // 1. Select the node immediately if not already selected
+    if (canvas.selectedSectionId !== node.id) {
+      dispatch({
+        type: 'CANVAS',
+        action: { type: 'SELECT_SECTION', sectionId: node.id, pageId: activePage?.id },
+      })
+    }
+
+    const startX = e.clientX
+    const startY = e.clientY
+    const zoomVal = canvas.zoom ?? 1.0
+
+    const isTablet = canvas.viewport.label === 'TABLET'
+    const isMobile = canvas.viewport.label === 'MOBILE'
+    const activeBp = isTablet ? 'tablet' : isMobile ? 'mobile' : 'desktop'
+
+    const activeStyles = activeBp === 'desktop'
+      ? (node.styles || {})
+      : { ...(node.styles || {}), ...((node.responsive as Record<string, any>)?.[activeBp] || {}) }
+
+    const startTx = parseInt(String(activeStyles.translateX || '0px').replace('px', '')) || 0
+    const startTy = parseInt(String(activeStyles.translateY || '0px').replace('px', '')) || 0
+    const baseRotate = (activeStyles as any).rotate || '0deg'
+    const baseScale = (activeStyles as any).scale || 1
+
+    const domEl = canvasFrameRef.current?.querySelector(`[data-section-id="${node.id}"], [data-node-id="${node.id}"]`) as HTMLElement | null
+    const prevTransition = domEl?.style.transition || ''
+
+    let hasDragged = false
+    let rafId: number | null = null
+    let latestClientX = startX
+    let latestClientY = startY
+
+    const onMove = (moveEvt: MouseEvent | PointerEvent) => {
+      latestClientX = moveEvt.clientX
+      latestClientY = moveEvt.clientY
+
+      const deltaX = (latestClientX - startX) / zoomVal
+      const deltaY = (latestClientY - startY) / zoomVal
+
+      if (!hasDragged && Math.hypot(deltaX, deltaY) > 3) {
+        hasDragged = true
+        if (domEl) {
+          domEl.style.transition = 'none'
+          domEl.style.willChange = 'transform'
+        }
+      }
+
+      if (hasDragged) {
+        if (rafId === null) {
+          rafId = requestAnimationFrame(() => {
+            rafId = null
+            const curTx = startTx + Math.round((latestClientX - startX) / zoomVal)
+            const curTy = startTy + Math.round((latestClientY - startY) / zoomVal)
+            if (domEl) {
+              domEl.style.transform = `translate(${curTx}px, ${curTy}px) rotate(${baseRotate}) scale(${baseScale})`
+            }
+          })
+        }
+      }
+    }
+
+    const onUp = (upEvt: MouseEvent | PointerEvent) => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('mouseup', onUp)
+      window.removeEventListener('pointercancel', onUp)
+
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId)
+        rafId = null
+      }
+
+      if (domEl) {
+        domEl.style.transition = prevTransition
+        domEl.style.willChange = ''
+      }
+
+      if (hasDragged) {
+        const deltaX = (upEvt.clientX - startX) / zoomVal
+        const deltaY = (upEvt.clientY - startY) / zoomVal
+        const finalTx = startTx + Math.round(deltaX)
+        const finalTy = startTy + Math.round(deltaY)
+
+        if (activeBp === 'tablet' || activeBp === 'mobile') {
+          const currentResp = (node.responsive as Record<string, any>) || {}
+          const currentBpStyles = currentResp[activeBp] || {}
+          dispatch({
+            type: 'UPDATE_NODE',
+            nodeId: node.id,
+            updates: {
+              responsive: {
+                ...currentResp,
+                [activeBp]: { ...currentBpStyles, translateX: `${finalTx}px`, translateY: `${finalTy}px` },
+              },
+            },
+            pageId: activePage?.id,
+          } as any)
+        } else {
+          dispatch({
+            type: 'SET_NODE_STYLES',
+            nodeId: node.id,
+            styles: { translateX: `${finalTx}px`, translateY: `${finalTy}px` },
+          })
+        }
+      }
+    }
+
+    window.addEventListener('pointermove', onMove, { passive: true })
+    window.addEventListener('mousemove', onMove, { passive: true })
+    window.addEventListener('pointerup', onUp)
+    window.addEventListener('mouseup', onUp)
+    window.addEventListener('pointercancel', onUp)
+  }, [canvas.selectedSectionId, canvas.zoom, canvas.viewport.label, activePage, dispatch])
+
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -2404,6 +2518,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                       isHovered={canvas.hoveredSectionId === node.id && canvas.selectedSectionId !== node.id}
                       onSelect={() => handleSelectSection(node.id, activePage!.id)}
                       onHover={handleHoverSection}
+                      onStartDragNode={handleDirectNodeDragStart}
                     />
                   </div>
                 </React.Fragment>

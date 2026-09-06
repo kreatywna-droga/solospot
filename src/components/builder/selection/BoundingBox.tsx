@@ -38,7 +38,7 @@ interface BoundingBoxProps {
   /** Z-index */
   zIndex?: number
   /** Callback to initiate dragging/moving */
-  onMoveStart?: (e: React.MouseEvent) => void
+  onMoveStart?: (e: React.MouseEvent | React.PointerEvent) => void
   /** Is selected node a text node */
   isTextNode?: boolean
   /** Does selected node have children (container/parent node) */
