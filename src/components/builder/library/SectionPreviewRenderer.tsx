@@ -37,8 +37,8 @@ function sanitizeLineHeight(val?: string | number): string | undefined {
  */
 export function ScaleToFitContainer({
   children,
-  targetWidth = 1200,
-  maxHeight = 320,
+  targetWidth = 1000,
+  maxHeight = 360,
   className = '',
   interactiveVideo = false,
 }: {
@@ -49,14 +49,14 @@ export function ScaleToFitContainer({
   interactiveVideo?: boolean
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [scale, setScale] = useState<number>(0.3)
+  const [scale, setScale] = useState<number>(0.45)
 
   useLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
 
     const updateScale = () => {
-      const cw = el.clientWidth || 360
+      const cw = el.clientWidth || 450
       const calculatedScale = Math.min(1, cw / targetWidth)
       setScale(calculatedScale)
     }
@@ -67,7 +67,7 @@ export function ScaleToFitContainer({
     return () => ro.disconnect()
   }, [targetWidth])
 
-  const scaledHeight = Math.min(maxHeight, Math.max(140, Math.round(targetWidth * scale * 0.55)))
+  const scaledHeight = Math.min(maxHeight, Math.max(260, Math.round(targetWidth * scale * 0.55)))
 
   return (
     <div
