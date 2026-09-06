@@ -4,9 +4,10 @@ import React, { useState, useMemo, useRef } from 'react';
 import {
   X, Search, Plus, LayoutDashboard, UserCheck, Star, Sparkles,
   CreditCard, HelpCircle, ArrowRight, Mail, Compass, Grid, Layers,
-  ChevronRight, ChevronLeft, CheckCircle2,
+  ChevronRight, ChevronLeft, CheckCircle2, Eye, Monitor, Tablet, Smartphone,
 } from 'lucide-react';
 import { useBuilder } from '../state/BuilderProvider';
+import { SectionPreviewRenderer, ScaleToFitContainer } from './SectionPreviewRenderer';
 import {
   BuilderNode,
   SectionNode,
@@ -900,17 +901,35 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
   const { dispatch, canvas, document: builderDoc } = useBuilder();
   const [selectedCategory, setSelectedCategory] = useState<SectionCategory>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [previewModalTemplate, setPreviewModalTemplate] = useState<SectionTemplateItem | null>(null);
+  const [previewViewport, setPreviewViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
 
   const predecessor = insertIndex !== undefined && insertIndex > 0 ? sections?.[insertIndex - 1]?.label || `Sekcja #${insertIndex}` : null;
   const successor = insertIndex !== undefined && sections && insertIndex < sections.length ? sections?.[insertIndex]?.label || `Sekcja #${insertIndex + 1}` : null;
 
+  // Cache template nodes so tree creation runs once per template
+  const templateNodes = useMemo(() => {
+    const map = new Map<string, BuilderNode>();
+    SECTION_TEMPLATES.forEach(t => {
+      map.set(t.id, t.createNode());
+    });
+    return map;
+  }, []);
+
+  const getTemplateNode = (template: SectionTemplateItem): BuilderNode => {
+    return templateNodes.get(template.id) || template.createNode();
+  };
+
   const filteredTemplates = useMemo(() => {
     return SECTION_TEMPLATES.filter((item) => {
       const matchCat = selectedCategory === 'all' || item.category === selectedCategory;
+      const q = searchQuery.toLowerCase().trim();
       const matchQuery =
-        !searchQuery.trim() ||
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.description.toLowerCase().includes(searchQuery.toLowerCase());
+        !q ||
+        item.name.toLowerCase().includes(q) ||
+        item.description.toLowerCase().includes(q) ||
+        item.category.toLowerCase().includes(q) ||
+        (item.badge && item.badge.toLowerCase().includes(q));
       return matchCat && matchQuery;
     });
   }, [selectedCategory, searchQuery]);
@@ -996,152 +1015,301 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
   };
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-150 select-none">
-      <div
-        className="w-full max-w-4xl max-h-[85vh] bg-[#202024] border border-[#2D2D32] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#27272A] bg-[#18181B]">
-          <div>
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <LayoutDashboard className="w-5 h-5 text-[#A78BFA]" />
-              <span>Wizualna Biblioteka Sekcji</span>
-              {insertIndex !== undefined && (
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#8B5CF6]/15 text-[#A78BFA] font-normal">
-                  Wstawianie na pozycji #{insertIndex + 1}
+    <>
+      <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-150 select-none">
+        <div
+          className="w-full max-w-6xl max-h-[90vh] bg-[#1a1a20] border border-[#2D2D32] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[#27272A] bg-[#141418]">
+            <div>
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <LayoutDashboard className="w-5 h-5 text-[#A78BFA]" />
+                <span>Wizualna Biblioteka Sekcji</span>
+                <span className="text-xs font-semibold text-zinc-400 px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
+                  {SECTION_TEMPLATES.length} gotowych layoutów
                 </span>
-              )}
-            </h2>
-            <p className="text-xs text-zinc-400 mt-0.5">
-              {insertIndex !== undefined ? (
-                <span className="text-[#A78BFA] font-medium">
-                  Nowa sekcja zostanie wstawiona {predecessor && successor ? `pomiędzy "${predecessor}" a "${successor}"` : predecessor ? `po sekcji "${predecessor}"` : successor ? `przed sekcją "${successor}"` : 'na początku strony'}.
-                </span>
-              ) : (
-                'Wybierz gotową sekcję z dopracowaną typografią, układem i treścią.'
-              )}
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-[#2D2D32] transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Search & Categories Bar — Unclipped with navigation controls */}
-        <div className="p-4 border-b border-[#27272A] bg-[#202024] flex flex-col gap-3">
-          <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Szukaj sekcji po nazwie lub typie (np. Hero, Cennik, Opinie, Cechy)..."
-              className="w-full pl-9 pr-4 py-2 bg-[#2D2D32] border border-[#3F3F46]/50 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-violet-500"
-            />
-          </div>
-
-          <div className="relative flex items-center">
-            {/* Scroll Left Button */}
-            <button
-              onClick={() => scrollCategories('left')}
-              className="p-1.5 rounded-lg bg-[#27272A] hover:bg-[#2D2D32] border border-[#3F3F46]/40 text-zinc-400 hover:text-white mr-1.5 flex-shrink-0 transition-colors"
-              title="Przewiń kategorie w lewo"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-
-            {/* Scrollable Categories List */}
-            <div
-              ref={categoryScrollRef}
-              className="flex items-center gap-1.5 overflow-x-auto scroll-smooth py-1 px-1 scrollbar-none flex-1"
-            >
-              {CATEGORIES.map((cat) => {
-                const Icon = cat.icon;
-                const isSelected = selectedCategory === cat.id;
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
-                      isSelected
-                        ? 'bg-violet-600 text-white shadow-md shadow-violet-600/30 border border-violet-500'
-                        : 'bg-[#27272A] text-zinc-400 hover:text-white hover:bg-[#2D2D32] border border-[#3F3F46]/30'
-                    }`}
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                    <span>{cat.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Scroll Right Button */}
-            <button
-              onClick={() => scrollCategories('right')}
-              className="p-1.5 rounded-lg bg-[#27272A] hover:bg-[#2D2D32] border border-[#3F3F46]/40 text-zinc-400 hover:text-white ml-1.5 flex-shrink-0 transition-colors"
-              title="Przewiń kategorie w prawo"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Templates Grid */}
-        <div className="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredTemplates.length === 0 ? (
-            <div className="col-span-2 py-16 flex flex-col items-center justify-center text-zinc-500 text-center gap-2">
-              <LayoutDashboard className="w-10 h-10 text-slate-600" />
-              <p className="text-sm font-semibold text-zinc-400">Nie znaleziono sekcji</p>
-              <p className="text-xs">Spróbuj zmienić kategorię lub frazę wyszukiwania.</p>
-            </div>
-          ) : (
-            filteredTemplates.map((template) => (
-              <div
-                key={template.id}
-                onClick={() => handleSelectTemplate(template)}
-                className="group p-4 rounded-xl bg-[#27272A] border border-[#2D2D32] hover:border-violet-500/50 hover:bg-[#2D2D32]/80 transition-all cursor-pointer flex flex-col justify-between shadow-sm"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-bold text-white group-hover:text-[#A78BFA] transition-colors">
-                      {template.name}
-                    </h3>
-                    {template.badge && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#8B5CF6]/15 text-[#A78BFA]">
-                        {template.badge}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-zinc-400 mb-4 line-clamp-2">
-                    {template.description}
-                  </p>
-                  <div
-                    className={`w-full h-24 rounded-lg border border-[#3F3F46]/40 mb-3 flex items-center justify-center text-[11px] text-zinc-400 ${template.preview}`}
-                  >
-                    <span className="opacity-70 group-hover:opacity-100 transition-opacity">
-                      Podgląd sekcji
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-2 border-t border-[#2D2D32]">
-                  <span className="text-[11px] font-mono text-zinc-500 uppercase">
-                    {template.category}
+                {insertIndex !== undefined && (
+                  <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-violet-500/20 text-[#A78BFA] font-medium border border-violet-500/30">
+                    Wstawianie na pozycji #{insertIndex + 1}
                   </span>
-                  <button className="flex items-center gap-1 text-xs font-semibold text-[#A78BFA] group-hover:text-[#A78BFA] transition-colors">
-                    <span>Wstaw sekcję</span>
-                    <Plus className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+                )}
+              </h2>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                {insertIndex !== undefined ? (
+                  <span className="text-[#A78BFA] font-medium">
+                    Nowa sekcja zostanie wstawiona {predecessor && successor ? `pomiędzy "${predecessor}" a "${successor}"` : predecessor ? `po sekcji "${predecessor}"` : successor ? `przed sekcją "${successor}"` : 'na początku strony'}.
+                  </span>
+                ) : (
+                  'Wybierz wizualnie dopracowaną sekcję i wstaw ją bezpośrednio do swojej strony.'
+                )}
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-[#2D2D32] transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Search & Categories Bar */}
+          <div className="p-4 border-b border-[#27272A] bg-[#18181e] flex flex-col gap-3">
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Szukaj sekcji po nazwie, typie lub przeznaczeniu (np. Hero, Produkty, Cennik, Opinie)..."
+                className="w-full pl-10 pr-4 py-2.5 bg-[#22222a] border border-[#3F3F46]/50 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-violet-500 transition-colors"
+              />
+            </div>
+
+            <div className="relative flex items-center">
+              <button
+                onClick={() => scrollCategories('left')}
+                className="p-1.5 rounded-lg bg-[#22222a] hover:bg-[#2D2D32] border border-[#3F3F46]/40 text-zinc-400 hover:text-white mr-1.5 flex-shrink-0 transition-colors"
+                title="Przewiń kategorie w lewo"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+
+              <div
+                ref={categoryScrollRef}
+                className="flex items-center gap-1.5 overflow-x-auto scroll-smooth py-1 px-1 scrollbar-none flex-1"
+              >
+                {CATEGORIES.map((cat) => {
+                  const Icon = cat.icon;
+                  const isSelected = selectedCategory === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                        isSelected
+                          ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/30 border border-violet-400'
+                          : 'bg-[#22222a] text-zinc-400 hover:text-white hover:bg-[#2B2B36] border border-[#3F3F46]/30'
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      <span>{cat.label}</span>
+                    </button>
+                  );
+                })}
               </div>
-            ))
-          )}
+
+              <button
+                onClick={() => scrollCategories('right')}
+                className="p-1.5 rounded-lg bg-[#22222a] hover:bg-[#2D2D32] border border-[#3F3F46]/40 text-zinc-400 hover:text-white ml-1.5 flex-shrink-0 transition-colors"
+                title="Przewiń kategorie w prawo"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Templates Visual Grid */}
+          <div className="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {filteredTemplates.length === 0 ? (
+              <div className="col-span-full py-20 flex flex-col items-center justify-center text-zinc-500 text-center gap-3">
+                <LayoutDashboard className="w-12 h-12 text-slate-600" />
+                <p className="text-base font-bold text-zinc-300">Nie znaleziono sekcji</p>
+                <p className="text-xs text-zinc-400 max-w-sm">
+                  Spróbuj wpisać inną frazę wyszukiwania lub przełącz na inną kategorię z paska powyżej.
+                </p>
+              </div>
+            ) : (
+              filteredTemplates.map((template) => {
+                const node = getTemplateNode(template);
+                return (
+                  <div
+                    key={template.id}
+                    className="group relative rounded-2xl bg-[#141418] border border-[#27272A] hover:border-violet-500/60 hover:shadow-xl hover:shadow-violet-950/20 transition-all duration-200 flex flex-col justify-between overflow-hidden"
+                  >
+                    {/* Card Header */}
+                    <div className="p-4 pb-3 flex items-start justify-between gap-2 border-b border-[#22222a] bg-[#1a1a22]">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-xs font-bold text-white group-hover:text-violet-300 transition-colors line-clamp-1">
+                            {template.name}
+                          </h3>
+                        </div>
+                        <p className="text-[11px] text-zinc-400 mt-0.5 line-clamp-1">
+                          {template.description}
+                        </p>
+                      </div>
+                      {template.badge && (
+                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-violet-500/15 text-violet-400 border border-violet-500/30 whitespace-nowrap">
+                          {template.badge}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Scale-To-Fit Real Visual Preview */}
+                    <div
+                      className="relative w-full cursor-pointer overflow-hidden group/preview bg-[#090910] p-2"
+                      onClick={() => setPreviewModalTemplate(template)}
+                    >
+                      <ScaleToFitContainer targetWidth={1200} maxHeight={210}>
+                        <SectionPreviewRenderer sectionNode={node} />
+                      </ScaleToFitContainer>
+
+                      {/* Hover Overlay with Action Triggers */}
+                      <div className="absolute inset-0 bg-black/65 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2.5 p-4">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectTemplate(template);
+                          }}
+                          className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold shadow-lg shadow-violet-600/40 flex items-center gap-1.5 transition-transform active:scale-95"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span>Wstaw sekcję</span>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewModalTemplate(template);
+                          }}
+                          className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/20 flex items-center gap-1.5 transition-all"
+                        >
+                          <Eye className="w-3.5 h-3.5 text-violet-300" />
+                          <span>Podgląd</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Card Footer */}
+                    <div className="px-4 py-3 bg-[#16161c] border-t border-[#22222a] flex items-center justify-between">
+                      <span className="text-[10px] font-mono font-semibold text-zinc-500 uppercase tracking-wider">
+                        {template.category}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setPreviewModalTemplate(template)}
+                          className="text-xs text-zinc-400 hover:text-white flex items-center gap-1 transition-colors px-2 py-1 rounded-md hover:bg-white/5"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Podgląd</span>
+                        </button>
+                        <button
+                          onClick={() => handleSelectTemplate(template)}
+                          className="text-xs font-bold text-violet-400 hover:text-violet-300 flex items-center gap-1 transition-colors bg-violet-500/10 hover:bg-violet-500/20 px-2.5 py-1 rounded-md border border-violet-500/20"
+                        >
+                          <span>Wstaw</span>
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Large Detailed Preview Modal */}
+      {previewModalTemplate && (
+        <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-150">
+          <div className="w-full max-w-6xl max-h-[92vh] bg-[#141418] border border-[#27272A] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#27272A] bg-[#1a1a20]">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base font-bold text-white">{previewModalTemplate.name}</h2>
+                  {previewModalTemplate.badge && (
+                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30">
+                      {previewModalTemplate.badge}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-zinc-400 mt-0.5">{previewModalTemplate.description}</p>
+              </div>
+
+              {/* Viewport Switcher */}
+              <div className="flex items-center gap-1 bg-[#0e0e14] p-1 rounded-xl border border-white/10">
+                <button
+                  onClick={() => setPreviewViewport('desktop')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    previewViewport === 'desktop' ? 'bg-violet-600 text-white shadow' : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Monitor className="w-3.5 h-3.5" />
+                  <span>Desktop (1280px)</span>
+                </button>
+                <button
+                  onClick={() => setPreviewViewport('tablet')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    previewViewport === 'tablet' ? 'bg-violet-600 text-white shadow' : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Tablet className="w-3.5 h-3.5" />
+                  <span>Tablet (768px)</span>
+                </button>
+                <button
+                  onClick={() => setPreviewViewport('mobile')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    previewViewport === 'mobile' ? 'bg-violet-600 text-white shadow' : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Smartphone className="w-3.5 h-3.5" />
+                  <span>Mobile (375px)</span>
+                </button>
+              </div>
+
+              {/* Close Button */}
+              <button
+                onClick={() => setPreviewModalTemplate(null)}
+                className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Large Live Section Preview */}
+            <div className="flex-1 overflow-y-auto p-6 bg-[#090910] flex items-center justify-center min-h-[420px]">
+              <ScaleToFitContainer
+                targetWidth={previewViewport === 'desktop' ? 1280 : previewViewport === 'tablet' ? 768 : 375}
+                maxHeight={560}
+                className="shadow-2xl border border-white/10"
+                interactiveVideo={true}
+              >
+                <SectionPreviewRenderer sectionNode={getTemplateNode(previewModalTemplate)} />
+              </ScaleToFitContainer>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between px-6 py-4 border-t border-[#27272A] bg-[#1a1a20]">
+              <div className="flex items-center gap-2 text-xs text-zinc-400">
+                <span className="font-mono text-violet-400 uppercase font-semibold">{previewModalTemplate.category}</span>
+                <span>•</span>
+                <span>Rzeczywisty układ i stylowanie SoloSpot Canvas</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setPreviewModalTemplate(null)}
+                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-semibold transition-colors"
+                >
+                  Zamknij podgląd
+                </button>
+                <button
+                  onClick={() => {
+                    handleSelectTemplate(previewModalTemplate);
+                    setPreviewModalTemplate(null);
+                  }}
+                  className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold shadow-lg shadow-violet-600/30 flex items-center gap-2 transition-all active:scale-95"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Wstaw tę sekcję do strony</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
