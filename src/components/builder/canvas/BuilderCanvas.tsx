@@ -2292,6 +2292,34 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
     }
   }, [dispatch])
 
+  // Diagnostic: detect section overlap after layout
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => {
+      const sectionEls = window.document.querySelectorAll<HTMLElement>('[data-section-id]')
+      if (sectionEls.length < 2) return
+      const rects = Array.from(sectionEls).map((el) => {
+        const r = el.getBoundingClientRect()
+        return { id: el.dataset.sectionId, top: r.top, bottom: r.bottom, height: r.height }
+      })
+      for (let i = 0; i < rects.length - 1; i++) {
+        const curr = rects[i]
+        const next = rects[i + 1]
+        if (curr.bottom > next.top + 0.5) {
+          console.warn(
+            `SECTION_OVERLAP_DETECTED: section "${curr.id}" bottom=${curr.bottom.toFixed(1)} overlaps next "${next.id}" top=${next.top.toFixed(1)} by ${(curr.bottom - next.top).toFixed(1)}px`,
+            { curr, next }
+          )
+        } else if (next.top - curr.bottom > 1) {
+          console.warn(
+            `SECTION_GAP_DETECTED: section "${curr.id}" bottom=${curr.bottom.toFixed(1)} gap to "${next.id}" top=${next.top.toFixed(1)} = ${(next.top - curr.bottom).toFixed(1)}px`,
+            { curr, next }
+          )
+        }
+      }
+    })
+    return () => cancelAnimationFrame(raf)
+  })
+
   return (
     <div
       ref={containerRef}
@@ -2584,27 +2612,14 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                     </div>
                   )}
 
-                  {/* In-between section insertion divider — zero gap, hover area for insertion */}
+                  {/* In-between section insertion divider — zero gap, hover visual line only */}
                   <div
-                    className="relative z-20 h-0 group/insert before:absolute before:inset-x-0 before:-top-3 before:h-6 before:content-[''] before:cursor-pointer"
+                    className="relative z-20 h-0 group/insert"
                     data-testid="section-divider"
                     data-insert-index={index}
                   >
                     {/* Visual line — appears on hover */}
                     <div className="absolute inset-x-8 top-0 h-px bg-transparent group-hover/insert:bg-violet-500/40 transition-all pointer-events-none" />
-                    {/* Insertion button — appears on hover, centered on boundary */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setInsertSectionIndex(index)
-                        setIsSectionLibraryOpen(true)
-                      }}
-                      className="absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 opacity-0 group-hover/insert:opacity-100 transition-all flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-bold shadow-lg shadow-violet-600/40 z-10 scale-95 hover:scale-105 whitespace-nowrap"
-                      title="Wstaw sekcję w tym miejscu"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Dodaj sekcję tutaj</span>
-                    </button>
                   </div>
 
                   <div
@@ -2615,7 +2630,6 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                     data-section-anchor={String((node.props as any)?.anchorId || (node.metadata as any)?.anchorId || '')}
                     style={{ 
                       opacity: isDragSource ? 0.3 : 1,
-                      transform: formatTransform(resolveEffectiveStyles(node, canvas.viewport.label)),
                     }}
                     className="relative w-full scroll-mt-16"
                   >
@@ -2630,6 +2644,21 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                       onHover={handleHoverSection}
                       onStartDragNode={handleDirectNodeDragStart}
                     />
+                    {/* Add Section button — anchored to this section's bottom area */}
+                    {(canvas.selectedSectionId === node.id || canvas.hoveredSectionId === node.id) && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setInsertSectionIndex(index + 1)
+                          setIsSectionLibraryOpen(true)
+                        }}
+                        className="absolute bottom-2 right-2 z-20 flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-bold shadow-lg shadow-violet-600/40 scale-95 hover:scale-105 whitespace-nowrap pointer-events-auto"
+                        title={`Dodaj sekcję po "${node.label || 'Sekcja #' + (index + 1)}"`}
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Dodaj sekcję</span>
+                      </button>
+                    )}
                   </div>
                 </React.Fragment>
               )
@@ -2651,26 +2680,14 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
               </div>
             )}
 
-            {/* In-between divider after the last section — zero gap */}
+            {/* In-between divider after the last section — zero gap, visual line only */}
             {sections.length > 0 && (
               <div
-                className="relative z-20 h-0 group/insert before:absolute before:inset-x-0 before:-top-3 before:h-6 before:content-[''] before:cursor-pointer"
+                className="relative z-20 h-0 group/insert"
                 data-testid="section-divider-end"
                 data-insert-index={sections.length}
               >
                 <div className="absolute inset-x-8 top-0 h-px bg-transparent group-hover/insert:bg-violet-500/40 transition-all pointer-events-none" />
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setInsertSectionIndex(sections.length)
-                    setIsSectionLibraryOpen(true)
-                  }}
-                  className="absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 opacity-0 group-hover/insert:opacity-100 transition-all flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-bold shadow-lg shadow-violet-600/40 z-10 scale-95 hover:scale-105 whitespace-nowrap"
-                  title="Wstaw sekcję na końcu strony"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Dodaj sekcję tutaj</span>
-                </button>
               </div>
             )}
           </>
