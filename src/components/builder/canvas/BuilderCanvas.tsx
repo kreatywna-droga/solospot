@@ -30,7 +30,7 @@ import { motion } from 'framer-motion'
 import {
   ArrowUp, ArrowDown, Trash2, Copy, Plus,
   Layers, Package, Star, FileText, LayoutDashboard, Grid, Sparkles,
-  Video, Upload, Image as ImageIcon, Type,
+  Video, Upload, Image as ImageIcon, Type, GripVertical, Move, Hand,
 } from 'lucide-react'
 import { useBuilder } from '../state/BuilderProvider'
 import { SectionNode } from '../../../../packages/builder-core/src/BuilderDocument'
@@ -1131,6 +1131,22 @@ function CanvasNode({
           style={{ opacity: parseFloat(styles.overlayOpacity) }}
         />
       )}
+      {/* Floating Grab Handle for container — lets user move the whole container window with its contents */}
+      {(isHovered || isSelected) && (
+        <div
+          onMouseDown={(e) => {
+            e.stopPropagation()
+            if (!isSelected) onSelectNode(node.id, e)
+            onStartDragNode?.(node, e)
+          }}
+          className="absolute -top-3 left-3 z-30 flex items-center gap-1.5 px-2.5 py-0.5 bg-[#121024] hover:bg-violet-600 text-violet-200 hover:text-white text-[10px] font-semibold rounded-md shadow-xl border border-violet-500/40 cursor-grab active:cursor-grabbing transition-all select-none pointer-events-auto group/contgrab"
+          title="Chwyć łapką, aby przesunąć całe okno kontenera wraz z zawartością (Góra / Dół)"
+        >
+          <GripVertical className="w-3 h-3 text-violet-400 group-hover/contgrab:text-white" />
+          <span>{node.label || 'Kontener'}</span>
+          <span className="text-[9px] bg-white/10 px-1 py-0.2 rounded text-violet-300">Łapka</span>
+        </div>
+      )}
       {node.children && node.children.length > 0 ? (
         <div className="relative z-10 contents">
         {node.children.map(child => (
@@ -1429,6 +1445,9 @@ function SectionBlock({
       onDragOver={handleRootDragOver}
       onDragLeave={handleRootDragLeave}
       onDrop={handleRootDrop}
+      style={{
+        transform: formatTransform(resolvedStyles),
+      }}
       className={`relative group cursor-pointer transition-colors duration-150 select-none
         ${!node.visible ? 'opacity-30' : ''}
         ${dropEdge ? 'ring-1 ring-violet-400/50' : ''}
@@ -1440,6 +1459,18 @@ function SectionBlock({
         }
       `}
     >
+      {/* Interactive Top Edge Drag Bar — allows grabbing the whole window with a hand cursor */}
+      <div
+        onMouseDown={(e) => {
+          e.stopPropagation()
+          if (!isSelected) onSelect()
+          onStartDragNode?.(node, e)
+        }}
+        className={`absolute top-0 left-0 right-0 h-5 z-20 cursor-grab active:cursor-grabbing transition-all ${
+          isHovered || isSelected ? 'bg-gradient-to-b from-violet-500/25 to-transparent' : 'bg-transparent'
+        }`}
+        title="Chwyć łapką za górną krawędź, aby przesunąć całe okno w górę lub w dół"
+      />
       {/* Root reorder drop indicator */}
       {dropEdge && (
         <div
@@ -1784,22 +1815,48 @@ function SectionBlock({
       {/* Hover / selected toolbar */}
       {showOverlay && (
         <div className="absolute top-2 left-0 right-0 flex items-center justify-between px-3 z-10 pointer-events-none">
-          {/* Section label chip */}
-          <div className="flex items-center gap-1 bg-[#8B5CF6] text-white text-[11px] font-bold
-                          px-2.5 py-1 rounded-full pointer-events-auto shadow-lg shadow-[#8B5CF6]/25">
-            {node.label}
-            <span className="ml-1 text-white/70 font-normal">#{index + 1}</span>
+          {/* Section label chip as interactive Grab Handle */}
+          <div
+            onMouseDown={(e) => {
+              e.stopPropagation()
+              if (!isSelected) onSelect()
+              onStartDragNode?.(node, e)
+            }}
+            className="flex items-center gap-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl pointer-events-auto shadow-xl shadow-violet-600/30 cursor-grab active:cursor-grabbing hover:scale-105 transition-all select-none border border-white/20 group/grab"
+            title="Chwyć łapką i przeciągnij całe okno wraz z całą zawartością (Góra / Dół)"
+          >
+            <GripVertical className="w-4 h-4 text-violet-200 group-hover/grab:text-white" />
+            <span>{node.label}</span>
+            <span className="text-violet-200/80 font-mono text-[10px]">#{index + 1}</span>
+            <span className="ml-1 text-[10px] bg-black/30 px-2 py-0.5 rounded-md text-violet-100 flex items-center gap-1 font-medium">
+              <Move className="w-3 h-3 text-violet-300" />
+              <span>Łapka: Przesuń całe okno</span>
+            </span>
           </div>
 
           {/* Action toolbar */}
           <div className="flex items-center gap-1 bg-[#202024]/95 backdrop-blur rounded-xl p-1
                           border border-white/[0.10] shadow-xl pointer-events-auto">
+            {/* Dedicated Move Window Button with Hand / Grip */}
+            <button
+              onMouseDown={(e) => {
+                e.stopPropagation()
+                if (!isSelected) onSelect()
+                onStartDragNode?.(node, e)
+              }}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-semibold cursor-grab active:cursor-grabbing transition-all shadow-md"
+              title="Chwyć łapką, aby swobodnie przesunąć całe okno w górę lub w dół"
+            >
+              <Hand className="w-3.5 h-3.5 text-violet-200" />
+              <span>Łapka</span>
+            </button>
+            <div className="w-px h-4 bg-white/[0.08] mx-0.5" />
             <button
               onClick={handleMoveUp}
               disabled={index === 0}
               className="p-1.5 rounded-lg hover:bg-white/[0.08] text-zinc-400 hover:text-white
                          disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-              title="Przesuń w górę"
+              title="Przesuń sekcję w górę"
             >
               <ArrowUp className="w-3.5 h-3.5" />
             </button>
@@ -1808,7 +1865,7 @@ function SectionBlock({
               disabled={index === total - 1}
               className="p-1.5 rounded-lg hover:bg-white/[0.08] text-zinc-400 hover:text-white
                          disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-              title="Przesuń w dół"
+              title="Przesuń sekcję w dół"
             >
               <ArrowDown className="w-3.5 h-3.5" />
             </button>
@@ -2506,6 +2563,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                     data-layer-id={node.id}
                     style={{ 
                       opacity: isDragSource ? 0.3 : 1,
+                      transform: formatTransform(node.styles || {}),
                     }}
                     className="relative w-full"
                   >
