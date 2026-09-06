@@ -13,15 +13,24 @@
  * All child components (BoundingBox, ResizeHandles, etc.) consume
  * the returned OverlayState without additional logic.
  *
+ * COORDINATE MODEL:
+ *   The overlay renders INSIDE canvasFrameRef (which is inside a
+ *   transform: scale(zoom) wrapper). Both elements and the overlay
+ *   share the same coordinate space. getElementRect() measures
+ *   element positions in this shared space by reading the ACTUAL
+ *   CSS transform scale from the zoom wrapper's computed style.
+ *
+ *   screen space → (divide by actualScale) → canvas-local coords
+ *   canvas-local coords → overlay CSS left/top → visual position
+ *
+ *   We read the actual CSS scale (not canvas.zoom) to handle
+ *   mid-transition measurements correctly.
+ *
  * Architecture:
  *   SelectionEvents → useOverlay → OverlayState → [SelectionOverlay, ...]
- *
- * Usage:
- *   const overlay = useOverlay(containerRef);
- *   return <SelectionOverlay overlay={overlay} />;
  */
 
-import { useCallback, useMemo, useRef, useState, useEffect } from 'react'
+import { useCallback, useMemo, useState, useLayoutEffect } from 'react'
 import { useBuilder } from '../state/BuilderProvider'
 import type {
   SelectionState,
@@ -34,6 +43,27 @@ import {
   DEFAULT_OVERLAY_CONFIG,
   OverlayConfig,
 } from '../../../../packages/builder-core/src'
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Read the actual CSS transform scale from an element's computed style.
+ * Returns the uniform scale factor (assumes scaleX ≈ scaleY).
+ * This accounts for any ongoing CSS transitions on the zoom wrapper.
+ */
+function readCurrentScale(el: HTMLElement): number {
+  try {
+    const cs = window.getComputedStyle(el)
+    const t = cs.transform
+    if (!t || t === 'none') return 1
+    const m = new DOMMatrix(t)
+    return m.a || 1
+  } catch {
+    return 1
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Hook
@@ -68,7 +98,14 @@ export function useOverlay(
     [options.config]
   )
 
-  // Build a getElementRect function that reads DOM positions or uses externalRects
+  /**
+   * getElementRect — measures a node's bounding rect in canvas-local coordinates.
+   *
+   * Reads the ACTUAL CSS scale from the zoom wrapper's computed transform
+   * instead of using canvas.zoom. This ensures correct measurements even
+   * during CSS zoom transitions where the visual scale differs from the
+   * target zoom value.
+   */
   const getElementRect = useCallback(
     (sectionId: string): { x: number; y: number; width: number; height: number } | null => {
       // Architectural decision #3: prioritize externalRects reported by iframe
@@ -84,24 +121,38 @@ export function useOverlay(
       const el = container.querySelector(selector) as HTMLElement | null
       if (!el) return null
 
+      // Read the ACTUAL current CSS scale from the zoom wrapper.
+      // The zoom wrapper (parent of canvasFrameRef) applies transform: scale(zoom)
+      // with a CSS transition. During the transition, canvas.zoom is the TARGET
+      // but getBoundingClientRect() reflects the INTERMEDIATE visual scale.
+      // Reading the actual computed scale ensures correct coordinate conversion.
+      const zoomWrapper = container.parentElement
+      const actualScale = zoomWrapper ? readCurrentScale(zoomWrapper) : 1
+
       const containerRect = container.getBoundingClientRect()
       const elRect = el.getBoundingClientRect()
-      const zoom = canvas.zoom && canvas.zoom > 0 ? canvas.zoom : 1
 
       // Position relative to canvasFrameRef in unscaled canvas logical pixels
+      // Both measurements are in screen space (post-zoom), so dividing by the
+      // actual CSS scale gives us the correct CSS-position within canvasFrameRef.
       return {
-        x: (elRect.left - containerRect.left) / zoom,
-        y: (elRect.top - containerRect.top) / zoom,
-        width: elRect.width / zoom,
-        height: elRect.height / zoom,
+        x: (elRect.left - containerRect.left) / actualScale,
+        y: (elRect.top - containerRect.top) / actualScale,
+        width: elRect.width / actualScale,
+        height: elRect.height / actualScale,
       }
     },
-    [canvasContainerRef, options.sectionSelector, options.externalRects, canvas.zoom]
+    [canvasContainerRef, options.sectionSelector, options.externalRects]
   )
 
-  // Compute overlay state whenever selection or canvas changes
-  useEffect(() => {
-    // Inside canvasFrameRef, coordinates are in 1:1 canvas space because canvasFrameRef has CSS scale(zoom) applied to its parent container
+  // Use useLayoutEffect for measurement BEFORE paint to avoid visual glitches.
+  // The overlay state is set synchronously after DOM mutations, ensuring the
+  // browser paints with the correct overlay position on the first frame.
+  useLayoutEffect(() => {
+    // Inside canvasFrameRef, coordinates are in 1:1 canvas space because
+    // canvasFrameRef has CSS scale(zoom) applied to its parent container.
+    // viewport.zoom = 1.0 because the overlay renders INSIDE the scaled
+    // container, and getElementRect already converts to unscaled coords.
     const viewport = {
       label: canvas.viewport.label as ViewportLabel,
       width: canvas.viewport.width,
@@ -119,6 +170,22 @@ export function useOverlay(
     })
 
     setOverlayState(state)
+
+    // Follow-up measurement after CSS transitions settle.
+    // The zoom wrapper has a ~120ms CSS transition. We schedule a
+    // follow-up measurement at 160ms to catch the final state.
+    const followUp = setTimeout(() => {
+      const finalState = OverlayController.computeOverlayState({
+        selection: selection as SelectionState,
+        document,
+        viewport,
+        config,
+        getElementRect,
+      })
+      setOverlayState(finalState)
+    }, 160)
+
+    return () => clearTimeout(followUp)
   }, [
     selection,
     document,
@@ -134,4 +201,3 @@ export function useOverlay(
 
   return overlayState
 }
-
