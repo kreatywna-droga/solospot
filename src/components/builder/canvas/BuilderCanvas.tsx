@@ -607,10 +607,11 @@ function CanvasNode({
           width,
           height: height || undefined,
           margin,
-          display: 'inline-block',
+          display: 'inline-flex',
+          boxSizing: 'border-box',
           transform: formatTransform(styles),
         }}
-        className={`relative inline-block cursor-pointer transition-colors duration-150 p-1 rounded-xl ${
+        className={`relative inline-flex cursor-pointer transition-colors duration-150 p-1 rounded-xl ${
           !node.visible ? 'opacity-30' : ''
         } ${
           isSelected ? 'z-20' :
@@ -633,8 +634,13 @@ function CanvasNode({
             fontFamily,
             textAlign,
             padding,
-            width: width ? '100%' : undefined,
-            height: height || undefined,
+            width: '100%',
+            height: '100%',
+            minHeight: height ? '100%' : undefined,
+            boxSizing: 'border-box',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
           className="font-medium pointer-events-none transition-transform"
         >

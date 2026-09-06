@@ -66,6 +66,8 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     isTextNode?: boolean
     startFontSize?: number
     currentFontSize?: number
+    deltaTx?: number
+    deltaTy?: number
   } | null>(null)
 
   const [moving, setMoving] = useState<{
@@ -81,7 +83,15 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
 
   // Refs for hot-path drag tracking (zero re-renders during pointermove)
   const dragRef = useMemo(() => ({ deltaX: 0, deltaY: 0 }), [])
-  const resizeRef = useMemo(() => ({ w: 0, h: 0, fontSize: 0 }), [])
+  const resizeRef = useMemo(() => ({
+    w: 0,
+    h: 0,
+    fontSize: 0,
+    deltaTx: 0,
+    deltaTy: 0,
+    curTx: 0,
+    curTy: 0,
+  }), [])
   const overlayGroupRef = useRef<HTMLDivElement>(null)
   const moveBadgeRef = useRef<HTMLSpanElement>(null)
 
@@ -396,12 +406,17 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     const isMobile = canvas.viewport.label === 'MOBILE'
     const activeBp = isTablet ? 'tablet' : isMobile ? 'mobile' : 'desktop'
 
-    const activeStyles = isTextNode && found
+    const activeStyles = found
       ? (activeBp === 'desktop'
           ? (found.node.styles || {})
           : { ...(found.node.styles || {}), ...((found.node.responsive as Record<string, any>)?.[activeBp] || {}) })
       : {}
     const startFontSize = parseInt(String((activeStyles as any).fontSize || '16px').replace('px', '')) || 16
+
+    const startTx = parseInt(String(activeStyles.translateX || '0px').replace('px', '')) || 0
+    const startTy = parseInt(String(activeStyles.translateY || '0px').replace('px', '')) || 0
+    const baseRotate = (activeStyles as any).rotate || '0deg'
+    const baseScale = (activeStyles as any).scale || 1
 
     const zoom = canvas.zoom ?? 1.0
     const startX = e.clientX
@@ -414,12 +429,16 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     resizeRef.w = startWidth
     resizeRef.h = startHeight
     resizeRef.fontSize = startFontSize
+    resizeRef.deltaTx = 0
+    resizeRef.deltaTy = 0
+    resizeRef.curTx = startTx
+    resizeRef.curTy = startTy
 
     // Disable transitions during live resize for instant 60fps tracking
     const prevTransition = domEl?.style.transition || ''
     if (domEl) {
       domEl.style.transition = 'none'
-      domEl.style.willChange = isTextNode ? 'font-size, width' : 'width, height'
+      domEl.style.willChange = isTextNode ? 'font-size, width, transform' : 'width, height, transform'
     }
 
     // Show badge once at start
@@ -434,6 +453,8 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
       isTextNode,
       startFontSize,
       currentFontSize: startFontSize,
+      deltaTx: 0,
+      deltaTy: 0,
     })
 
     let rafId: number | null = null
@@ -444,59 +465,79 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
       latestClientX = moveEvt.clientX
       latestClientY = moveEvt.clientY
 
+      const deltaX = (latestClientX - startX) / zoom
+      const deltaY = (latestClientY - startY) / zoom
+
+      let w = startWidth
+      let h = startHeight
+
+      if (handle.includes('E')) w = Math.max(20, startWidth + deltaX)
+      if (handle.includes('W')) w = Math.max(20, startWidth - deltaX)
+      if (handle.includes('S')) h = Math.max(20, startHeight + deltaY)
+      if (handle.includes('N')) h = Math.max(20, startHeight - deltaY)
+
+      const deltaTx = handle.includes('W') ? Math.round(startWidth - w) : 0
+      const deltaTy = handle.includes('N') ? Math.round(startHeight - h) : 0
+      const curTx = startTx + deltaTx
+      const curTy = startTy + deltaTy
+
+      let currentFontSize = startFontSize
+      if (isTextNode) {
+        if (handle === 'E' || handle === 'W') {
+          // Direct width resize
+          currentFontSize = startFontSize
+        } else if (handle === 'S' || handle === 'N') {
+          // Direct font size resize
+          const ratio = h / Math.max(1, startHeight)
+          currentFontSize = Math.min(150, Math.max(8, Math.round(startFontSize * ratio)))
+        } else {
+          // Corner resize: scale both width & font size
+          const ratio = Math.max(w / Math.max(1, startWidth), h / Math.max(1, startHeight))
+          currentFontSize = Math.min(150, Math.max(8, Math.round(startFontSize * ratio)))
+        }
+      }
+
+      resizeRef.w = Math.round(w)
+      resizeRef.h = Math.round(h)
+      resizeRef.fontSize = currentFontSize
+      resizeRef.deltaTx = deltaTx
+      resizeRef.deltaTy = deltaTy
+      resizeRef.curTx = curTx
+      resizeRef.curTy = curTy
+
+      // Direct synchronous DOM preview — ZERO LATENCY (0ms)
+      if (domEl) {
+        if (isTextNode) {
+          domEl.style.fontSize = `${currentFontSize}px`
+          if (handle.includes('E') || handle.includes('W') || handle.length === 2) {
+            domEl.style.width = `${Math.round(w)}px`
+          }
+        } else {
+          if (handle.includes('E') || handle.includes('W')) domEl.style.width = `${Math.round(w)}px`
+          if (handle.includes('S') || handle.includes('N')) {
+            domEl.style.height = `${Math.round(h)}px`
+            if (found?.node.type === 'section') {
+              domEl.style.minHeight = `${Math.round(h)}px`
+            }
+          }
+        }
+
+        // Apply translation compensation so West / North handles track cursor 1:1
+        domEl.style.transform = `translate(${curTx}px, ${curTy}px) rotate(${baseRotate}) scale(${baseScale})`
+
+        // Synchronously stretch all inner visual elements to 100% of the bounding container
+        const innerVisuals = domEl.querySelectorAll<HTMLElement>('button, img, video, svg, canvas')
+        innerVisuals.forEach(v => {
+          v.style.width = '100%'
+          v.style.height = '100%'
+          v.style.minHeight = '100%'
+        })
+      }
+
+      // Live frame update: updates displayRect, BoundingBox, ResizeHandles, and QuickToolbar in real time
       if (rafId === null) {
         rafId = requestAnimationFrame(() => {
           rafId = null
-          const deltaX = (latestClientX - startX) / zoom
-          const deltaY = (latestClientY - startY) / zoom
-
-          let w = startWidth
-          let h = startHeight
-
-          if (handle.includes('E')) w = Math.max(40, startWidth + deltaX)
-          if (handle.includes('W')) w = Math.max(40, startWidth - deltaX)
-          if (handle.includes('S')) h = Math.max(20, startHeight + deltaY)
-          if (handle.includes('N')) h = Math.max(20, startHeight - deltaY)
-
-          let currentFontSize = startFontSize
-          if (isTextNode) {
-            if (handle === 'E' || handle === 'W') {
-              // Direct width resize
-              currentFontSize = startFontSize
-            } else if (handle === 'S' || handle === 'N') {
-              // Direct font size resize
-              const ratio = h / Math.max(1, startHeight)
-              currentFontSize = Math.min(150, Math.max(8, Math.round(startFontSize * ratio)))
-            } else {
-              // Corner resize: scale both width & font size
-              const ratio = Math.max(w / Math.max(1, startWidth), h / Math.max(1, startHeight))
-              currentFontSize = Math.min(150, Math.max(8, Math.round(startFontSize * ratio)))
-            }
-          }
-
-          resizeRef.w = Math.round(w)
-          resizeRef.h = Math.round(h)
-          resizeRef.fontSize = currentFontSize
-
-          // Direct 60fps DOM preview — zero lag
-          if (domEl) {
-            if (isTextNode) {
-              domEl.style.fontSize = `${currentFontSize}px`
-              if (handle.includes('E') || handle.includes('W') || handle.length === 2) {
-                domEl.style.width = `${Math.round(w)}px`
-              }
-            } else {
-              if (handle.includes('E') || handle.includes('W')) domEl.style.width = `${Math.round(w)}px`
-              if (handle.includes('S') || handle.includes('N')) {
-                domEl.style.height = `${Math.round(h)}px`
-                if (found?.node.type === 'section') {
-                  domEl.style.minHeight = `${Math.round(h)}px`
-                }
-              }
-            }
-          }
-
-          // Live state update: updates displayRect, BoundingBox, ResizeHandles, and QuickToolbar in real time
           setResizing({
             handle,
             startX,
@@ -508,6 +549,8 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
             isTextNode,
             startFontSize,
             currentFontSize,
+            deltaTx,
+            deltaTy,
           })
         })
       }
@@ -545,6 +588,12 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
           } else {
             styleUpdates.fontSize = finalFontSizeStr
             styleUpdates.width = finalWidthStr
+          }
+          if (resizeRef.deltaTx !== 0) {
+            styleUpdates.translateX = `${resizeRef.curTx}px`
+          }
+          if (resizeRef.deltaTy !== 0) {
+            styleUpdates.translateY = `${resizeRef.curTy}px`
           }
 
           if (activeBp === 'tablet' || activeBp === 'mobile') {
@@ -585,6 +634,12 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
             if (found.node.type === 'section') {
               styleUpdates.minHeight = finalHeightStr
             }
+          }
+          if (resizeRef.deltaTx !== 0) {
+            styleUpdates.translateX = `${resizeRef.curTx}px`
+          }
+          if (resizeRef.deltaTy !== 0) {
+            styleUpdates.translateY = `${resizeRef.curTy}px`
           }
 
           if (activeBp === 'tablet' || activeBp === 'mobile') {

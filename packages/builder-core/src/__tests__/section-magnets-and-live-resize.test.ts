@@ -356,4 +356,99 @@ describe('PART B: Real-Time Live Resize & Single Commit History', () => {
     ctx = ctx.dispatch({ type: 'REDO' });
     expect(ctx.document.pages[0].sections[0].children[0].styles?.width).toBe('220px');
   });
+
+  it('5. Universal live resize: West (W) & South-West (SW) handle compensation glues element and bounding box with zero offset', () => {
+    let ctx = setupEnv({
+      id: 'btn-cta',
+      type: 'button',
+      label: 'Rozpocznij Teraz',
+      styles: { width: '160px', height: '44px', translateX: '50px', translateY: '20px' },
+      props: { text: 'Rozpocznij Teraz' },
+      children: [],
+    });
+
+    const startWidth = 160;
+    const startHeight = 44;
+    const startTx = 50;
+    const startTy = 20;
+
+    // Simulate SW handle drag: user drags left by 100px (deltaX = -100) and down by 50px (deltaY = 50)
+    const deltaX = -100;
+    const deltaY = 50;
+    const newWidth = startWidth - deltaX; // 260px
+    const newHeight = startHeight + deltaY; // 94px
+
+    // W compensation formula
+    const deltaTx = startWidth - newWidth; // -100px
+    const curTx = startTx + deltaTx; // -50px
+    const curTy = startTy; // 20px (S doesn't move origin)
+
+    ctx = ctx.dispatch({
+      type: 'SET_NODE_STYLES',
+      nodeId: 'btn-cta',
+      styles: {
+        width: `${newWidth}px`,
+        height: `${newHeight}px`,
+        translateX: `${curTx}px`,
+        translateY: `${curTy}px`,
+      },
+    });
+
+    const btn = ctx.document.pages[0].sections[0].children[0];
+    expect(btn.styles?.width).toBe('260px');
+    expect(btn.styles?.height).toBe('94px');
+    expect(btn.styles?.translateX).toBe('-50px');
+    expect(btn.styles?.translateY).toBe('20px');
+
+    // Verify right edge remains stationary:
+    // Before: startTx + startWidth = 50 + 160 = 210px
+    // After: curTx + newWidth = -50 + 260 = 210px (Exact match, zero offset!)
+    expect(curTx + newWidth).toBe(startTx + startWidth);
+  });
+
+  it('6. Universal live resize: North (N) & North-West (NW) handle compensation glues bottom/right edges', () => {
+    let ctx = setupEnv({
+      id: 'card-1',
+      type: 'container',
+      label: 'Card',
+      styles: { width: '300px', height: '200px', translateX: '100px', translateY: '150px' },
+      props: {},
+      children: [],
+    });
+
+    const startWidth = 300;
+    const startHeight = 200;
+    const startTx = 100;
+    const startTy = 150;
+
+    // NW handle drag: drags left by 40px, up by 60px
+    const deltaX = -40;
+    const deltaY = -60;
+    const newWidth = startWidth - deltaX; // 340px
+    const newHeight = startHeight - deltaY; // 260px
+
+    const curTx = startTx + (startWidth - newWidth); // 100 - 40 = 60px
+    const curTy = startTy + (startHeight - newHeight); // 150 - 60 = 90px
+
+    ctx = ctx.dispatch({
+      type: 'SET_NODE_STYLES',
+      nodeId: 'card-1',
+      styles: {
+        width: `${newWidth}px`,
+        height: `${newHeight}px`,
+        translateX: `${curTx}px`,
+        translateY: `${curTy}px`,
+      },
+    });
+
+    const card = ctx.document.pages[0].sections[0].children[0];
+    expect(card.styles?.width).toBe('340px');
+    expect(card.styles?.height).toBe('260px');
+    expect(card.styles?.translateX).toBe('60px');
+    expect(card.styles?.translateY).toBe('90px');
+
+    // Right and bottom edges remain pinned
+    expect(curTx + newWidth).toBe(startTx + startWidth); // 60 + 340 = 400 == 100 + 300
+    expect(curTy + newHeight).toBe(startTy + startHeight); // 90 + 260 = 350 == 150 + 200
+  });
 });
