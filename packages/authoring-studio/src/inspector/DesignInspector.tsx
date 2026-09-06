@@ -458,11 +458,19 @@ function DesignTab({
   styles,
   onChange,
   nodeType,
+  sectionId,
 }: {
   styles: NodeStyles;
   onChange: (patch: Partial<NodeStyles>) => void;
   nodeType?: string;
+  sectionId?: string;
 }) {
+  const livePreview = (prop: string, value: string) => {
+    if (!sectionId) return;
+    const el = window.document.querySelector(`[data-node-id="${sectionId}"]`) as HTMLElement | null;
+    if (el) el.style.setProperty(prop, value, 'important');
+  };
+
   return (
     <>
       {/* Contextual: Image Source section when an Image element is selected */}
@@ -590,6 +598,7 @@ function DesignTab({
           <UnitInput
             value={styles.width}
             onChange={(v) => onChange({ width: v })}
+            onLivePreview={(v) => livePreview('width', v)}
             slider
             min={20}
             max={1600}
@@ -600,6 +609,7 @@ function DesignTab({
           <UnitInput
             value={styles.height}
             onChange={(v) => onChange({ height: v })}
+            onLivePreview={(v) => livePreview('height', v)}
             slider
             min={20}
             max={1200}
@@ -610,6 +620,7 @@ function DesignTab({
           <UnitInput
             value={styles.minWidth}
             onChange={(v) => onChange({ minWidth: v })}
+            onLivePreview={(v) => livePreview('min-width', v)}
             slider
             min={0}
             max={1600}
@@ -620,6 +631,7 @@ function DesignTab({
           <UnitInput
             value={styles.maxWidth}
             onChange={(v) => onChange({ maxWidth: v })}
+            onLivePreview={(v) => livePreview('max-width', v)}
             slider
             min={200}
             max={1920}
@@ -630,6 +642,7 @@ function DesignTab({
           <UnitInput
             value={styles.minHeight}
             onChange={(v) => onChange({ minHeight: v })}
+            onLivePreview={(v) => livePreview('min-height', v)}
             slider
             min={0}
             max={1200}
@@ -640,6 +653,7 @@ function DesignTab({
           <UnitInput
             value={styles.maxHeight}
             onChange={(v) => onChange({ maxHeight: v })}
+            onLivePreview={(v) => livePreview('max-height', v)}
             slider
             min={100}
             max={1600}
@@ -652,7 +666,10 @@ function DesignTab({
         <Row label="Background">
           <ColorInput
             value={styles.backgroundColor}
-            onChange={(v) => onChange({ backgroundColor: v })}
+            onChange={(v) => {
+              onChange({ backgroundColor: v });
+              livePreview('background-color', v);
+            }}
           />
         </Row>
         <Row label="Image URL">
@@ -667,7 +684,10 @@ function DesignTab({
         <Row label="Color">
           <ColorInput
             value={styles.color}
-            onChange={(v) => onChange({ color: v })}
+            onChange={(v) => {
+              onChange({ color: v });
+              livePreview('color', v);
+            }}
           />
         </Row>
         <Row label="Opacity">
@@ -678,6 +698,7 @@ function DesignTab({
               max={1}
               step={0.01}
               value={styles.opacity ?? 1}
+              onInput={(e) => livePreview('opacity', (e.target as HTMLInputElement).value)}
               onChange={(e) => onChange({ opacity: parseFloat(e.target.value) })}
               className="flex-1 accent-violet-500 h-1 cursor-pointer"
             />
@@ -706,13 +727,17 @@ function DesignTab({
         <Row label="Color">
           <ColorInput
             value={styles.borderColor}
-            onChange={(v) => onChange({ borderColor: v })}
+            onChange={(v) => {
+              onChange({ borderColor: v });
+              livePreview('border-color', v);
+            }}
           />
         </Row>
         <Row label="Width">
           <UnitInput
             value={styles.borderWidth}
             onChange={(v) => onChange({ borderWidth: v })}
+            onLivePreview={(v) => livePreview('border-width', v)}
             slider
             min={0}
             max={30}
@@ -722,7 +747,10 @@ function DesignTab({
         <Row label="Style">
           <SelectInput
             value={styles.borderStyle}
-            onChange={(v) => onChange({ borderStyle: v })}
+            onChange={(v) => {
+              onChange({ borderStyle: v });
+              livePreview('border-style', v);
+            }}
             options={[
               { value: 'solid', label: 'Solid' },
               { value: 'dashed', label: 'Dashed' },
@@ -735,6 +763,7 @@ function DesignTab({
           <UnitInput
             value={styles.borderRadius}
             onChange={(v) => onChange({ borderRadius: v })}
+            onLivePreview={(v) => livePreview('border-radius', v)}
             slider
             min={0}
             max={100}
@@ -750,6 +779,7 @@ function DesignTab({
             value={styles.boxShadow || ''}
             placeholder="0 4px 24px rgba(0,0,0,0.3)"
             onChange={(e) => onChange({ boxShadow: e.target.value })}
+            onInput={(e) => livePreview('box-shadow', (e.target as HTMLInputElement).value)}
             className={inputCls}
           />
         </Row>
@@ -1266,7 +1296,7 @@ export const DesignInspector: React.FC<DesignInspectorProps> = ({
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto">
         {activeTab === 'design' && (
-          <DesignTab styles={styles} onChange={onStyleChange} nodeType={nodeType} />
+          <DesignTab styles={styles} onChange={onStyleChange} nodeType={nodeType} sectionId={sectionId} />
         )}
         {activeTab === 'layout' && (
           <LayoutTab styles={styles} onChange={onStyleChange} />
