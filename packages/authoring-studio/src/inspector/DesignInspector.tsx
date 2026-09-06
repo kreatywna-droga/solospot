@@ -454,6 +454,127 @@ function IconToggleGroup<T extends string>({
 // Design tab
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Shadow Editor — parses/builds CSS box-shadow string
+// ---------------------------------------------------------------------------
+
+function parseBoxShadow(raw?: string): { x: number; y: number; blur: number; spread: number; color: string; opacity: number; enabled: boolean } {
+  if (!raw || raw === 'none') return { x: 0, y: 4, blur: 16, spread: 0, color: '#000000', opacity: 0.25, enabled: false };
+  // Match: [inset] offset-x offset-y [blur-radius] [spread-radius] [color]
+  const m = raw.match(/^-?(?:inset\s+)?(-?\d+(?:\.\d+)?)(?:px)?\s+(-?\d+(?:\.\d+)?)(?:px)?\s+(-?\d+(?:\.\d+)?)(?:px)?(?:\s+(-?\d+(?:\.\d+)?)(?:px)?)?\s*(.*)$/);
+  if (!m) return { x: 0, y: 4, blur: 16, spread: 0, color: '#000000', opacity: 0.25, enabled: true };
+  const x = parseFloat(m[1]);
+  const y = parseFloat(m[2]);
+  const blur = parseFloat(m[3]);
+  const spread = m[4] ? parseFloat(m[4]) : 0;
+  const colorStr = (m[5] || '#000000').trim();
+  // Try to extract rgba opacity
+  const rgbaMatch = colorStr.match(/rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*([\d.]+)\s*\)/);
+  const opacity = rgbaMatch ? parseFloat(rgbaMatch[1]) : 1;
+  // Extract hex color
+  const hexMatch = colorStr.match(/#([0-9a-fA-F]{6})/);
+  const color = hexMatch ? `#${hexMatch[1]}` : '#000000';
+  return { x, y, blur, spread, color, opacity, enabled: true };
+}
+
+function buildBoxShadow(s: { x: number; y: number; blur: number; spread: number; color: string; opacity: number; enabled: boolean }): string {
+  if (!s.enabled) return 'none';
+  const r = parseInt(s.color.slice(1, 3), 16);
+  const g = parseInt(s.color.slice(3, 5), 16);
+  const b = parseInt(s.color.slice(5, 7), 16);
+  return `${s.x}px ${s.y}px ${s.blur}px ${s.spread}px rgba(${r},${g},${b},${s.opacity})`;
+}
+
+function ShadowEditor({
+  value,
+  onChange,
+  onLivePreview,
+}: {
+  value?: string;
+  onChange: (v: string) => void;
+  onLivePreview?: (v: string) => void;
+}) {
+  const shadow = React.useMemo(() => parseBoxShadow(value), [value]);
+  const [local, setLocal] = React.useState(shadow);
+  React.useEffect(() => { setLocal(shadow); }, [value]);
+
+  const update = (patch: Partial<typeof local>) => {
+    const next = { ...local, ...patch };
+    setLocal(next);
+    const css = buildBoxShadow(next);
+    onChange(css);
+    onLivePreview?.(css);
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] text-slate-400 font-medium">Shadow</span>
+        <button
+          type="button"
+          onClick={() => update({ enabled: !local.enabled })}
+          className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-colors ${
+            local.enabled
+              ? 'bg-violet-600 text-white'
+              : 'bg-white/5 text-slate-500 hover:text-white'
+          }`}
+        >
+          {local.enabled ? 'ON' : 'OFF'}
+        </button>
+      </div>
+      {local.enabled && (
+        <>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-[10px] text-slate-500">X</label>
+              <input type="range" min={-50} max={50} step={1} value={local.x}
+                onInput={(e) => update({ x: parseFloat((e.target as HTMLInputElement).value) })}
+                className="w-full accent-violet-500 h-1" />
+              <div className="text-[10px] text-slate-400 text-right font-mono">{local.x}px</div>
+            </div>
+            <div>
+              <label className="text-[10px] text-slate-500">Y</label>
+              <input type="range" min={-50} max={50} step={1} value={local.y}
+                onInput={(e) => update({ y: parseFloat((e.target as HTMLInputElement).value) })}
+                className="w-full accent-violet-500 h-1" />
+              <div className="text-[10px] text-slate-400 text-right font-mono">{local.y}px</div>
+            </div>
+            <div>
+              <label className="text-[10px] text-slate-500">Blur</label>
+              <input type="range" min={0} max={100} step={1} value={local.blur}
+                onInput={(e) => update({ blur: parseFloat((e.target as HTMLInputElement).value) })}
+                className="w-full accent-violet-500 h-1" />
+              <div className="text-[10px] text-slate-400 text-right font-mono">{local.blur}px</div>
+            </div>
+            <div>
+              <label className="text-[10px] text-slate-500">Spread</label>
+              <input type="range" min={-50} max={50} step={1} value={local.spread}
+                onInput={(e) => update({ spread: parseFloat((e.target as HTMLInputElement).value) })}
+                className="w-full accent-violet-500 h-1" />
+              <div className="text-[10px] text-slate-400 text-right font-mono">{local.spread}px</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="relative w-7 h-7 rounded-lg border border-white/20 flex-shrink-0 overflow-hidden shadow-inner"
+              style={{ background: local.color }}>
+              <input type="color" value={local.color}
+                onChange={(e) => update({ color: e.target.value })}
+                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
+            </div>
+            <div className="flex-1">
+              <label className="text-[10px] text-slate-500">Opacity</label>
+              <input type="range" min={0} max={1} step={0.01} value={local.opacity}
+                onInput={(e) => update({ opacity: parseFloat((e.target as HTMLInputElement).value) })}
+                className="w-full accent-violet-500 h-1" />
+            </div>
+            <div className="text-[10px] text-slate-400 font-mono w-10 text-right">{Math.round(local.opacity * 100)}%</div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function DesignTab({
   styles,
   onChange,
@@ -773,16 +894,11 @@ function DesignTab({
       </Section>
 
       <Section title="Shadow">
-        <Row label="Box Shadow">
-          <input
-            type="text"
-            value={styles.boxShadow || ''}
-            placeholder="0 4px 24px rgba(0,0,0,0.3)"
-            onChange={(e) => onChange({ boxShadow: e.target.value })}
-            onInput={(e) => livePreview('box-shadow', (e.target as HTMLInputElement).value)}
-            className={inputCls}
-          />
-        </Row>
+        <ShadowEditor
+          value={styles.boxShadow}
+          onChange={(v) => onChange({ boxShadow: v })}
+          onLivePreview={(v) => livePreview('box-shadow', v)}
+        />
       </Section>
 
       <Section title="Transformacje (Transform)">

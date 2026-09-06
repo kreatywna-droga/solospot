@@ -459,8 +459,8 @@ function CanvasNode({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         style={{
+          boxSizing: 'border-box' as const,
           width,
-          minHeight: (styles.minHeight as string) || undefined,
           height: 'auto',
           maxWidth: '100%',
           margin,
@@ -468,9 +468,9 @@ function CanvasNode({
           backgroundColor: bg,
           borderRadius,
           borderWidth: borderWidth || undefined,
-          borderColor: borderWidth ? borderColor : undefined,
-          borderStyle: borderWidth ? borderStyle : undefined,
-          boxShadow,
+          borderColor: borderColor || undefined,
+          borderStyle: borderStyle || undefined,
+          boxShadow: boxShadow || undefined,
           opacity,
           transform: formatTransform(styles),
         }}
@@ -536,6 +536,7 @@ function CanvasNode({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         style={{
+          boxSizing: 'border-box' as const,
           width,
           minHeight: (styles.minHeight as string) || undefined,
           height: 'auto',
@@ -545,9 +546,9 @@ function CanvasNode({
           backgroundColor: bg,
           borderRadius,
           borderWidth: borderWidth || undefined,
-          borderColor: borderWidth ? borderColor : undefined,
-          borderStyle: borderWidth ? borderStyle : undefined,
-          boxShadow,
+          borderColor: borderColor || undefined,
+          borderStyle: borderStyle || undefined,
+          boxShadow: boxShadow || undefined,
           opacity,
           transform: formatTransform(styles),
         }}
@@ -758,6 +759,7 @@ function CanvasNode({
           }
         }}
         style={{
+          boxSizing: 'border-box' as const,
           width,
           height: height === 'auto' ? undefined : height,
           margin,
@@ -1097,6 +1099,7 @@ function CanvasNode({
       onDragLeave={handleContainerDragLeave}
       onDrop={handleContainerDrop}
       style={{
+        boxSizing: 'border-box' as const,
         backgroundColor: bg,
         backgroundImage: styles.backgroundImage && styles.backgroundImage !== 'none'
           ? (styles.backgroundImage.startsWith('url(') ? styles.backgroundImage : `url("${styles.backgroundImage}")`)
