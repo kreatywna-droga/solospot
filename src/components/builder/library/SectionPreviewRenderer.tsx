@@ -305,6 +305,12 @@ export function SectionPreviewRenderer({
                 background: (sectionNode.styles as any)?.backgroundColor || (sectionNode.props as any)?.background,
               },
             }}
+            theme={{
+              primaryColor: '#7c3aed',
+              secondaryColor: '#ec4899',
+              font: 'Inter',
+            }}
+            storeName="SoloSpot"
             products={[]}
             navigation={[]}
           />
