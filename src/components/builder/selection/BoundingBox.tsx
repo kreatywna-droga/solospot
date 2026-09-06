@@ -67,6 +67,71 @@ export function BoundingBox({
   const screenRect = overlayRectToScreenRect(rect)
   const transform = overlayTransform(rect)
 
+  if (animationDuration === 0) {
+    return (
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          left: screenRect.left - borderWidth,
+          top: screenRect.top - borderWidth,
+          width: screenRect.width + borderWidth * 2,
+          height: screenRect.height + borderWidth * 2,
+          zIndex: zIndex ?? rect.zIndex,
+          borderWidth,
+          borderStyle,
+          borderColor: color,
+          borderRadius: 4,
+          transform,
+          boxShadow: `0 0 0 1px ${color}33, 0 0 12px ${color}22`,
+          transition: 'none',
+        }}
+      >
+        {/* Interactive drag zones allowing user to grab anywhere on the asset to move it */}
+        {onMoveStart && (
+          <>
+            {!hasChildren && (
+              <div
+                onMouseDown={isEditingText ? undefined : onMoveStart}
+                onDoubleClick={(e) => {
+                  if (isTextNode && onDoubleClick) {
+                    e.stopPropagation()
+                    onDoubleClick(e)
+                  }
+                }}
+                className={`absolute inset-0 select-none ${
+                  isEditingText ? 'pointer-events-none' : 'pointer-events-auto cursor-grab active:cursor-grabbing'
+                }`}
+                title={isTextNode ? "Kliknij dwukrotnie, aby edytować tekst, lub przeciągnij, aby przesunąć" : "Przeciągnij myszą, aby przesunąć asset po Canvasie"}
+              />
+            )}
+
+            {/* Precision border drag zones */}
+            <div
+              onMouseDown={onMoveStart}
+              className="absolute -top-2 left-0 right-0 h-4 pointer-events-auto cursor-move"
+              title="Przeciągnij krawędź, aby przesunąć element"
+            />
+            <div
+              onMouseDown={onMoveStart}
+              className="absolute -bottom-2 left-0 right-0 h-4 pointer-events-auto cursor-move"
+              title="Przeciągnij krawędź, aby przesunąć element"
+            />
+            <div
+              onMouseDown={onMoveStart}
+              className="absolute -left-2 top-0 bottom-0 w-4 pointer-events-auto cursor-move"
+              title="Przeciągnij krawędź, aby przesunąć element"
+            />
+            <div
+              onMouseDown={onMoveStart}
+              className="absolute -right-2 top-0 bottom-0 w-4 pointer-events-auto cursor-move"
+              title="Przeciągnij krawędź, aby przesunąć element"
+            />
+          </>
+        )}
+      </div>
+    )
+  }
+
   return (
     <motion.div
       className="absolute pointer-events-none"

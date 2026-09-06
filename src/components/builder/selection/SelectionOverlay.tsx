@@ -65,6 +65,7 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     currentWidth: number
     currentHeight: number
     isTextNode?: boolean
+    isButtonNode?: boolean
     startFontSize?: number
     currentFontSize?: number
     liveRect?: OverlayRect
@@ -391,6 +392,7 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
   }, [overlay.boundingRect, canvas.selectedSectionId, canvas.viewport.label, canvas.zoom, containerRef, dispatch, document, dragRef])
 
   // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
   // Universal Canvas Resize: Dragging corner or edge handles
   // REAL-TIME LIVE RESIZE: 60fps DOM + BoundingBox + Handles + Toolbar update
   // ---------------------------------------------------------------------------
@@ -401,7 +403,9 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
 
     const targetNodeId = canvas.selectedSectionId
     const found = findNode(document, targetNodeId)
-    const isTextNode = found?.node.type === 'text' || found?.node.type === 'heading'
+    const isHeadingNode = found?.node.type === 'heading'
+    const isTextNode = found?.node.type === 'text' || isHeadingNode
+    const isButtonNode = found?.node.type === 'button'
     const isTablet = canvas.viewport.label === 'TABLET'
     const isMobile = canvas.viewport.label === 'MOBILE'
     const activeBp = isTablet ? 'tablet' : isMobile ? 'mobile' : 'desktop'
@@ -411,12 +415,6 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
           ? (found.node.styles || {})
           : { ...(found.node.styles || {}), ...((found.node.responsive as Record<string, any>)?.[activeBp] || {}) })
       : {}
-    const startFontSize = parseInt(String((activeStyles as any).fontSize || '16px').replace('px', '')) || 16
-
-    const startTx = parseInt(String(activeStyles.translateX || '0px').replace('px', '')) || 0
-    const startTy = parseInt(String(activeStyles.translateY || '0px').replace('px', '')) || 0
-    const baseRotate = (activeStyles as any).rotate || '0deg'
-    const baseScale = (activeStyles as any).scale || 1
 
     const zoom = canvas.zoom ?? 1.0
     const startX = e.clientX
@@ -426,18 +424,32 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
 
     const domEl = containerRef.current?.querySelector(`[data-section-id="${targetNodeId}"], [data-node-id="${targetNodeId}"]`) as HTMLElement | null
 
+    // Measure accurate computed font size directly from the active DOM element
+    const textTarget = isButtonNode
+      ? domEl?.querySelector<HTMLElement>('button')
+      : (domEl?.querySelector<HTMLElement>('[data-inline-edit="text"], h1, h2, h3, h4, h5, h6, p, span') || domEl)
+    const computedFs = textTarget ? parseFloat(window.getComputedStyle(textTarget).fontSize) : NaN
+    const startFontSize = !isNaN(computedFs) && computedFs > 0
+      ? Math.round(computedFs)
+      : (parseInt(String((activeStyles as any).fontSize || (isHeadingNode ? '36px' : isButtonNode ? '14px' : '16px')).replace('px', '')) || 16)
+
     resizeRef.w = startWidth
     resizeRef.h = startHeight
     resizeRef.fontSize = startFontSize
 
-    // Disable transitions during live resize for instant 60fps tracking
+    // Disable transitions during live resize for instant 60/120fps tracking
     const prevTransition = domEl?.style.transition || ''
     if (domEl) {
-      domEl.style.transition = 'none'
-      domEl.style.willChange = isTextNode ? 'font-size, width' : 'width, height'
+      domEl.style.setProperty('transition', 'none', 'important')
+      domEl.querySelectorAll('*').forEach((el: any) => {
+        if (el.style) {
+          el.style.setProperty('transition', 'none', 'important')
+        }
+      })
+      domEl.style.willChange = (isTextNode || isButtonNode) ? 'font-size, width, height' : 'width, height'
     }
 
-    // Show badge once at start
+    // Show badge and initial resize state
     setResizing({
       handle,
       startX,
@@ -447,17 +459,14 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
       currentWidth: startWidth,
       currentHeight: startHeight,
       isTextNode,
+      isButtonNode,
       startFontSize,
       currentFontSize: startFontSize,
     })
 
-    let rafId: number | null = null
-    let latestClientX = startX
-    let latestClientY = startY
-
     const onPointerMove = (moveEvt: MouseEvent | PointerEvent) => {
-      latestClientX = moveEvt.clientX
-      latestClientY = moveEvt.clientY
+      const latestClientX = moveEvt.clientX
+      const latestClientY = moveEvt.clientY
 
       const deltaX = (latestClientX - startX) / zoom
       const deltaY = (latestClientY - startY) / zoom
@@ -471,18 +480,45 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
       if (handle.includes('N')) h = Math.max(20, startHeight - deltaY)
 
       let currentFontSize = startFontSize
-      if (isTextNode) {
-        if (handle === 'E' || handle === 'W') {
-          // Direct width resize
-          currentFontSize = startFontSize
+
+      if (isButtonNode) {
+        // BUTTON: Box dimensions and inner text font size scale in harmony
+        const ratioW = w / Math.max(1, startWidth)
+        const ratioH = h / Math.max(1, startHeight)
+
+        let btnRatio = 1.0
+        if (handle.length === 2) {
+          // Corner drag: follow dominant movement (zoom in/out)
+          btnRatio = Math.abs(ratioH - 1) >= Math.abs(ratioW - 1) ? ratioH : ratioW
         } else if (handle === 'S' || handle === 'N') {
-          // Direct font size resize
-          const ratio = h / Math.max(1, startHeight)
-          currentFontSize = Math.min(150, Math.max(8, Math.round(startFontSize * ratio)))
+          // Height drag: font scales directly with button height
+          btnRatio = ratioH
         } else {
-          // Corner resize: scale both width & font size
-          const ratio = Math.max(w / Math.max(1, startWidth), h / Math.max(1, startHeight))
-          currentFontSize = Math.min(150, Math.max(8, Math.round(startFontSize * ratio)))
+          // Width drag: font scales gently with button width
+          btnRatio = 0.5 + 0.5 * ratioW
+        }
+
+        currentFontSize = Math.min(64, Math.max(9, Math.round(startFontSize * btnRatio)))
+      } else if (isTextNode) {
+        // TEXT / HEADING: Shrink or grow in the blink of an eye
+        const ratioW = w / Math.max(1, startWidth)
+        const ratioH = h / Math.max(1, startHeight)
+
+        if (handle.length === 2) {
+          // Corner drag: scale font size & width proportionally
+          const ratio = Math.abs(ratioW - 1) >= Math.abs(ratioH - 1) ? ratioW : ratioH
+          currentFontSize = Math.min(200, Math.max(8, Math.round(startFontSize * ratio)))
+        } else if (handle === 'S' || handle === 'N') {
+          // Vertical drag: font size scales directly with height
+          const ratio = ratioH
+          currentFontSize = Math.min(200, Math.max(8, Math.round(startFontSize * ratio)))
+        } else if (isHeadingNode) {
+          // Heading width drag: heading text grows/shrinks as width expands/contracts
+          const ratio = ratioW
+          currentFontSize = Math.min(200, Math.max(8, Math.round(startFontSize * ratio)))
+        } else {
+          // Paragraph width drag: wraps text to new width
+          currentFontSize = startFontSize
         }
       }
 
@@ -492,11 +528,35 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
 
       // 1. Direct synchronous DOM preview — ZERO LATENCY (0ms)
       if (domEl) {
-        if (isTextNode) {
-          domEl.style.fontSize = `${currentFontSize}px`
+        if (isButtonNode) {
+          domEl.style.setProperty('width', `${Math.round(w)}px`, 'important')
+          domEl.style.setProperty('height', `${Math.round(h)}px`, 'important')
+          domEl.style.setProperty('font-size', `${currentFontSize}px`, 'important')
+
+          const btnChildren = domEl.querySelectorAll<HTMLElement>('button, button *')
+          btnChildren.forEach(b => {
+            b.style.setProperty('width', '100%', 'important')
+            b.style.setProperty('height', '100%', 'important')
+            b.style.setProperty('font-size', `${currentFontSize}px`, 'important')
+            b.style.setProperty('line-height', '1.2', 'important')
+            b.style.setProperty('transition', 'none', 'important')
+          })
+        } else if (isTextNode) {
+          domEl.style.setProperty('font-size', `${currentFontSize}px`, 'important')
           if (handle.includes('E') || handle.includes('W') || handle.length === 2) {
-            domEl.style.width = `${Math.round(w)}px`
+            domEl.style.setProperty('width', `${Math.round(w)}px`, 'important')
           }
+          if (handle.includes('S') || handle.includes('N')) {
+            domEl.style.setProperty('min-height', `${Math.round(h)}px`, 'important')
+          }
+
+          // Target child headings, paragraphs, spans directly
+          const textEls = domEl.querySelectorAll<HTMLElement>('[data-inline-edit="text"], h1, h2, h3, h4, h5, h6, p, span')
+          textEls.forEach(el => {
+            el.style.setProperty('font-size', `${currentFontSize}px`, 'important')
+            el.style.setProperty('line-height', '1.15', 'important')
+            el.style.setProperty('transition', 'none', 'important')
+          })
         } else {
           if (handle.includes('E') || handle.includes('W')) domEl.style.width = `${Math.round(w)}px`
           if (handle.includes('S') || handle.includes('N')) {
@@ -505,15 +565,15 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
               domEl.style.minHeight = `${Math.round(h)}px`
             }
           }
-        }
 
-        // Synchronously stretch all inner visual elements to 100% of the bounding container
-        const innerVisuals = domEl.querySelectorAll<HTMLElement>('button, img, video, svg, canvas')
-        innerVisuals.forEach(v => {
-          v.style.width = '100%'
-          v.style.height = '100%'
-          v.style.minHeight = '100%'
-        })
+          // Synchronously stretch all inner visual elements to 100% of the bounding container
+          const innerVisuals = domEl.querySelectorAll<HTMLElement>('button, img, video, svg, canvas')
+          innerVisuals.forEach(v => {
+            v.style.width = '100%'
+            v.style.height = '100%'
+            v.style.minHeight = '100%'
+          })
+        }
       }
 
       // 2. Measure actual ground-truth element rectangle from the browser.
@@ -546,25 +606,21 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
         }
       }
 
-      // 3. Live frame update: updates displayRect, BoundingBox, ResizeHandles, and QuickToolbar in real time
-      if (rafId === null) {
-        rafId = requestAnimationFrame(() => {
-          rafId = null
-          setResizing({
-            handle,
-            startX,
-            startY,
-            startWidth,
-            startHeight,
-            currentWidth: Math.round(w),
-            currentHeight: Math.round(h),
-            isTextNode,
-            startFontSize,
-            currentFontSize,
-            liveRect,
-          })
-        })
-      }
+      // 3. Instant frame update: keeps BoundingBox and handles glued to the element with 0ms lag
+      setResizing({
+        handle,
+        startX,
+        startY,
+        startWidth,
+        startHeight,
+        currentWidth: Math.round(w),
+        currentHeight: Math.round(h),
+        isTextNode,
+        isButtonNode,
+        startFontSize,
+        currentFontSize,
+        liveRect,
+      })
     }
 
     const onPointerUp = (upEvt: MouseEvent | PointerEvent) => {
@@ -573,11 +629,6 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
       window.removeEventListener('pointerup', onPointerUp)
       window.removeEventListener('mouseup', onPointerUp)
       window.removeEventListener('pointercancel', onPointerUp)
-
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId)
-        rafId = null
-      }
 
       if (domEl) {
         domEl.style.transition = prevTransition
@@ -589,13 +640,54 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
       const finalFontSizeNum = resizeRef.fontSize || startFontSize
 
       if (found) {
-        if (isTextNode) {
+        if (isButtonNode) {
+          const finalWidthStr = `${Math.round(finalW)}px`
+          const finalHeightStr = `${Math.round(finalH)}px`
+          const finalFontSizeStr = `${finalFontSizeNum}px`
+
+          const styleUpdates: Record<string, any> = {
+            width: finalWidthStr,
+            height: finalHeightStr,
+            fontSize: finalFontSizeStr,
+          }
+
+          if (activeBp === 'tablet' || activeBp === 'mobile') {
+            const currentResp = (found.node.responsive as Record<string, any>) || {}
+            const currentBpStyles = currentResp[activeBp] || {}
+            dispatch({
+              type: 'UPDATE_NODE',
+              nodeId: targetNodeId,
+              updates: {
+                responsive: {
+                  ...currentResp,
+                  [activeBp]: { ...currentBpStyles, ...styleUpdates },
+                },
+              },
+              pageId: found.page.id,
+            } as any)
+          } else {
+            dispatch({
+              type: 'SET_NODE_STYLES',
+              nodeId: targetNodeId,
+              styles: styleUpdates,
+            })
+            dispatch({
+              type: 'UPDATE_PROPS',
+              pageId: found.page.id,
+              sectionId: targetNodeId,
+              props: styleUpdates,
+            })
+          }
+        } else if (isTextNode) {
           const finalFontSizeStr = `${finalFontSizeNum}px`
           const finalWidthStr = `${Math.round(finalW)}px`
 
           const styleUpdates: Record<string, any> = {}
           if (handle === 'E' || handle === 'W') {
             styleUpdates.width = finalWidthStr
+            if (isHeadingNode) {
+              styleUpdates.fontSize = finalFontSizeStr
+            }
           } else if (handle === 'S' || handle === 'N') {
             styleUpdates.fontSize = finalFontSizeStr
           } else {
@@ -808,10 +900,18 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
                   }}
                   className="absolute z-[120] bg-violet-600 text-white text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg shadow-xl border border-white/20 pointer-events-none whitespace-nowrap flex items-center gap-1.5"
                 >
-                  {resizing.isTextNode ? (
+                  {resizing.isButtonNode ? (
+                    <>
+                      <span>{resizing.currentWidth}px × {resizing.currentHeight}px</span>
+                      <span className="text-violet-200 text-[10px] uppercase ml-1">Tekst:</span>
+                      <span>{resizing.currentFontSize}px</span>
+                    </>
+                  ) : resizing.isTextNode ? (
                     <>
                       <span className="text-violet-200 text-[10px] uppercase">Czcionka:</span>
                       <span>{resizing.currentFontSize}px</span>
+                      <span className="text-violet-200 text-[10px] uppercase ml-1">Szer:</span>
+                      <span>{resizing.currentWidth}px</span>
                     </>
                   ) : (
                     <span>{resizing.currentWidth}px × {resizing.currentHeight}px</span>
