@@ -120,9 +120,39 @@ export function SectionRenderer(props: SectionComponentProps) {
     navigation: props.navigation ?? [],
   }
 
+  const videoSrc = rawConfig.backgroundVideo || rawConfig.videoSrc || ''
+  const overlayOpacity = parseFloat(String(rawConfig.overlayOpacity ?? '0'))
+
   return (
     <SectionErrorBoundary type={props.section.type}>
-      <Component {...normalizedProps} />
+      {videoSrc ? (
+        <div className="relative w-full">
+          <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+            <video
+              src={String(videoSrc)}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+            />
+            {overlayOpacity > 0 && (
+              <div
+                className="absolute inset-0"
+                style={{
+                  backgroundColor: String(rawConfig.overlayColor || '#000000'),
+                  opacity: overlayOpacity,
+                }}
+              />
+            )}
+          </div>
+          <div className="relative z-10">
+            <Component {...normalizedProps} />
+          </div>
+        </div>
+      ) : (
+        <Component {...normalizedProps} />
+      )}
     </SectionErrorBoundary>
   )
 }
