@@ -34,7 +34,12 @@ import {
 } from 'lucide-react'
 import { useBuilder } from '../state/BuilderProvider'
 import { SectionNode } from '../../../../packages/builder-core/src/BuilderDocument'
-import { findNode } from '../../../../packages/builder-core/src'
+import {
+  findNode,
+  computeSectionSnap,
+  SectionBounds,
+  SectionSnapResult,
+} from '../../../../packages/builder-core/src'
 import { VIEWPORT_PRESETS, DEFAULT_GRID_CONFIG, ViewportLabel } from '../../../../packages/builder-core/src/CanvasState'
 import { GridSystem } from '../../../../packages/builder-core/src/GridSystem'
 import { SelectionOverlay } from '../selection/SelectionOverlay'
@@ -1946,6 +1951,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
   const [isSectionLibraryOpen, setIsSectionLibraryOpen] = useState(false)
   const [insertSectionIndex, setInsertSectionIndex] = useState<number | undefined>(undefined)
   const [isTemplatePickerOpen, setIsTemplatePickerOpen] = useState(false)
+  const [activeCanvasSectionSnap, setActiveCanvasSectionSnap] = useState<SectionSnapResult | null>(null)
 
   const handleSectionInserted = useCallback((newSectionId: string) => {
     requestAnimationFrame(() => {
@@ -2140,6 +2146,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
 
   // ---------------------------------------------------------------------------
   // Universal Direct Node Drag: lets any node be dragged directly from the canvas
+  // Supports MAGNETIC SECTION SNAP with zoom-aware threshold & flow reflow
   // ---------------------------------------------------------------------------
   const handleDirectNodeDragStart = useCallback((node: SectionNode, e: React.MouseEvent) => {
     if (e.button !== 0 || node.locked) return
@@ -2164,6 +2171,8 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
     const startY = e.clientY
     const zoomVal = zoom
 
+    const isSection = node.type === 'section' || Boolean(activePage?.sections.some(s => s.id === node.id))
+
     const isTablet = canvas.viewport.label === 'TABLET'
     const isMobile = canvas.viewport.label === 'MOBILE'
     const activeBp = isTablet ? 'tablet' : isMobile ? 'mobile' : 'desktop'
@@ -2179,6 +2188,41 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
 
     const domEl = canvasFrameRef.current?.querySelector(`[data-section-id="${node.id}"], [data-node-id="${node.id}"]`) as HTMLElement | null
     const prevTransition = domEl?.style.transition || ''
+
+    // Measure sibling sections for magnetic snapping if dragging a section
+    const sectionsBounds: SectionBounds[] = []
+    const frame = canvasFrameRef.current
+    const frameRect = frame ? frame.getBoundingClientRect() : { left: 0, top: 0, width: 1200, height: 800 }
+    if (frame && isSection && activePage) {
+      activePage.sections.forEach((s, idx) => {
+        const el = frame.querySelector(`[data-section-id="${s.id}"]`) as HTMLElement | null
+        if (el) {
+          const r = el.getBoundingClientRect()
+          const sStyles = s.styles || {}
+          const sTx = parseInt(String(sStyles.translateX || '0px').replace('px', '')) || 0
+          const sTy = parseInt(String(sStyles.translateY || '0px').replace('px', '')) || 0
+          const left = (r.left - frameRect.left) / zoomVal - sTx
+          const top = (r.top - frameRect.top) / zoomVal - sTy
+          const width = r.width / zoomVal
+          const height = r.height / zoomVal
+          sectionsBounds.push({
+            id: s.id,
+            label: s.label || `Sekcja #${idx + 1}`,
+            index: idx,
+            left,
+            top,
+            bottom: top + height,
+            height,
+            right: left + width,
+            width,
+          })
+        }
+      })
+    }
+    const myBounds = sectionsBounds.find(s => s.id === node.id)
+    const naturalTop = myBounds?.top ?? 0
+    const naturalLeft = myBounds?.left ?? 0
+    const pageWidth = frame ? frame.clientWidth : 1200
 
     let hasDragged = false
     let rafId: number | null = null
@@ -2204,8 +2248,35 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
         if (rafId === null) {
           rafId = requestAnimationFrame(() => {
             rafId = null
-            const curTx = startTx + Math.round((latestClientX - startX) / zoomVal)
-            const curTy = startTy + Math.round((latestClientY - startY) / zoomVal)
+            let curTx = startTx + Math.round((latestClientX - startX) / zoomVal)
+            let curTy = startTy + Math.round((latestClientY - startY) / zoomVal)
+
+            if (isSection && domEl) {
+              const currentLeft = naturalLeft + curTx
+              const currentTop = naturalTop + curTy
+              const snapRes = computeSectionSnap({
+                draggingSectionId: node.id,
+                currentLeft,
+                currentTop,
+                width: domEl.offsetWidth || 1200,
+                height: domEl.offsetHeight || 200,
+                naturalTop,
+                naturalLeft,
+                sections: sectionsBounds,
+                pageWidth,
+                zoom: zoomVal,
+                threshold: 16,
+              })
+
+              if (snapRes.snapped) {
+                if (snapRes.snappedX) curTx = snapRes.curTx
+                if (snapRes.snappedY) curTy = snapRes.curTy
+                setActiveCanvasSectionSnap(snapRes)
+              } else {
+                setActiveCanvasSectionSnap(null)
+              }
+            }
+
             if (domEl) {
               domEl.style.transform = `translate(${curTx}px, ${curTy}px) rotate(${baseRotate}) scale(${baseScale})`
             }
@@ -2226,6 +2297,8 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
         rafId = null
       }
 
+      setActiveCanvasSectionSnap(null)
+
       if (domEl) {
         domEl.style.transition = prevTransition
         domEl.style.willChange = ''
@@ -2234,6 +2307,50 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
       if (hasDragged) {
         const deltaX = (upEvt.clientX - startX) / zoomVal
         const deltaY = (upEvt.clientY - startY) / zoomVal
+
+        if (isSection && activePage && domEl) {
+          const currentLeft = naturalLeft + startTx + deltaX
+          const currentTop = naturalTop + startTy + deltaY
+          const finalSnap = computeSectionSnap({
+            draggingSectionId: node.id,
+            currentLeft,
+            currentTop,
+            width: domEl.offsetWidth || 1200,
+            height: domEl.offsetHeight || 200,
+            naturalTop,
+            naturalLeft,
+            sections: sectionsBounds,
+            pageWidth,
+            zoom: zoomVal,
+            threshold: 16,
+          })
+
+          if (finalSnap.snapped) {
+            if (finalSnap.reorderTargetIndex !== undefined && myBounds && finalSnap.reorderTargetIndex !== myBounds.index) {
+              dispatch({
+                type: 'MOVE_SECTION',
+                pageId: activePage.id,
+                fromIndex: myBounds.index,
+                toIndex: finalSnap.reorderTargetIndex,
+              })
+              dispatch({
+                type: 'SET_NODE_STYLES',
+                nodeId: node.id,
+                styles: { translateX: '0px', translateY: '0px' },
+              })
+            } else {
+              const finalTx = finalSnap.snappedX ? finalSnap.curTx : (startTx + Math.round(deltaX))
+              const finalTy = finalSnap.snappedY ? finalSnap.curTy : (startTy + Math.round(deltaY))
+              dispatch({
+                type: 'SET_NODE_STYLES',
+                nodeId: node.id,
+                styles: { translateX: `${finalTx}px`, translateY: `${finalTy}px` },
+              })
+            }
+            return
+          }
+        }
+
         const finalTx = startTx + Math.round(deltaX)
         const finalTy = startTy + Math.round(deltaY)
 
@@ -2691,6 +2808,47 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
               </div>
             )}
           </>
+        )}
+
+        {/* Magnetic Section Snap Visual Glow Overlay */}
+        {activeCanvasSectionSnap && (
+          <div className="absolute inset-0 pointer-events-none z-[160]">
+            {activeCanvasSectionSnap.guideY !== undefined && (
+              <div
+                style={{
+                  top: activeCanvasSectionSnap.guideY,
+                  left: 0,
+                  right: 0,
+                }}
+                className="absolute h-0.5 bg-emerald-400 shadow-[0_0_18px_5px_rgba(16,185,129,0.95)] animate-pulse"
+              >
+                <div className="absolute left-1/2 -top-8 -translate-x-1/2 flex items-center gap-2 px-3.5 py-1.5 bg-[#0a0a14]/95 border-2 border-emerald-400 text-emerald-300 font-extrabold text-[11px] rounded-full shadow-2xl uppercase tracking-wider whitespace-nowrap backdrop-blur-md">
+                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                  <span>TAK — JESTEŚ NA WŁAŚCIWYM MIEJSCU 🧲</span>
+                  {activeCanvasSectionSnap.label && (
+                    <span className="text-emerald-100 font-mono text-[10px] normal-case bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                      {activeCanvasSectionSnap.label}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+            {activeCanvasSectionSnap.guideX !== undefined && (
+              <div
+                style={{
+                  left: activeCanvasSectionSnap.guideX,
+                  top: 0,
+                  bottom: 0,
+                }}
+                className="absolute w-0.5 bg-emerald-400 shadow-[0_0_18px_5px_rgba(16,185,129,0.95)] animate-pulse"
+              >
+                <div className="absolute top-10 left-3 flex items-center gap-1.5 px-3 py-1 bg-[#0a0a14]/95 border-2 border-emerald-400 text-emerald-300 font-extrabold text-[11px] rounded-full shadow-2xl uppercase tracking-wider whitespace-nowrap backdrop-blur-md">
+                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                  <span>TAK — KRAWĘDŹ STRONY 🧲</span>
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Selection Overlay — renders on top of sections with external rects support */}

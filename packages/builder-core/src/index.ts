@@ -542,3 +542,7 @@ export * from './fonts/FontCatalog';
 // Navigation Shortcuts
 export * from './NavigationShortcuts';
 
+// Smart Guide Engine & Section Magnetic Snapping (C16.19)
+export * from './SmartGuideEngine';
+export * from './SmartGuideTypes';
+

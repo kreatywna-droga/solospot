@@ -758,6 +758,305 @@ export class SmartGuideEngine {
       input.config.threshold
     );
   }
+
+  /**
+   * Section-level magnetic snapping engine.
+   */
+  computeSectionSnap(input: SectionSnapInput): SectionSnapResult {
+    return computeSectionSnap(input);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Section Snap Types & Pure Engine Function
+// ---------------------------------------------------------------------------
+
+export interface SectionBounds {
+  id: string;
+  label?: string;
+  index: number;
+  top: number;
+  bottom: number;
+  height: number;
+  left: number;
+  right: number;
+  width: number;
+}
+
+export interface SectionSnapInput {
+  draggingSectionId: string;
+  currentLeft: number;
+  currentTop: number;
+  width: number;
+  height: number;
+  naturalTop: number;
+  naturalLeft: number;
+  sections: ReadonlyArray<SectionBounds>;
+  pageWidth: number;
+  zoom?: number;
+  threshold?: number;
+}
+
+export interface SectionSnapResult {
+  snapped: boolean;
+  snappedX: boolean;
+  snappedY: boolean;
+  curTx: number;
+  curTy: number;
+  targetLeft: number;
+  targetTop: number;
+  snapTarget:
+    | 'PREVIOUS_BOTTOM'
+    | 'NEXT_TOP'
+    | 'PAGE_LEFT'
+    | 'PAGE_RIGHT'
+    | 'PAGE_TOP'
+    | 'REORDER_BELOW'
+    | 'REORDER_ABOVE'
+    | null;
+  glowEdge: 'top' | 'bottom' | 'left' | 'right' | null;
+  label: string | null;
+  targetSectionId?: string;
+  reorderTargetIndex?: number;
+  guideY?: number;
+  guideX?: number;
+}
+
+export function computeSectionSnap(input: SectionSnapInput): SectionSnapResult {
+  const zoom = Math.max(0.1, input.zoom ?? 1.0);
+  const screenThreshold = input.threshold ?? 16;
+  const canvasThreshold = screenThreshold / zoom;
+
+  let snappedX = false;
+  let snappedY = false;
+  let curTx = input.currentLeft - input.naturalLeft;
+  let curTy = input.currentTop - input.naturalTop;
+  let targetLeft = input.currentLeft;
+  let targetTop = input.currentTop;
+  let snapTarget: SectionSnapResult['snapTarget'] = null;
+  let glowEdge: SectionSnapResult['glowEdge'] = null;
+  let label: string | null = null;
+  let targetSectionId: string | undefined = undefined;
+  let reorderTargetIndex: number | undefined = undefined;
+  let guideY: number | undefined = undefined;
+  let guideX: number | undefined = undefined;
+
+  // --- Horizontal Snapping (X-axis) ---
+  const isMovedX = Math.abs(input.currentLeft - input.naturalLeft) > 0.001;
+  const isMovedY = Math.abs(input.currentTop - input.naturalTop) > 0.001;
+
+  let glowEdgeX: SectionSnapResult['glowEdge'] = null;
+  let labelX: string | null = null;
+  let distX = Infinity;
+
+  // Snap to Page Left
+  const distToLeft = Math.abs(input.currentLeft);
+  if (distToLeft <= canvasThreshold) {
+    snappedX = true;
+    targetLeft = 0;
+    curTx = -input.naturalLeft;
+    guideX = 0;
+    glowEdgeX = 'left';
+    labelX = 'KRAWĘDŹ STRONY (LEWA)';
+    distX = distToLeft;
+  } else {
+    // Snap to Page Right
+    const currentRight = input.currentLeft + input.width;
+    const distToRight = Math.abs(currentRight - input.pageWidth);
+    if (distToRight <= canvasThreshold) {
+      snappedX = true;
+      targetLeft = input.pageWidth - input.width;
+      curTx = targetLeft - input.naturalLeft;
+      guideX = input.pageWidth;
+      glowEdgeX = 'right';
+      labelX = 'KRAWĘDŹ STRONY (PRAWA)';
+      distX = distToRight;
+    }
+  }
+
+  // --- Vertical Snapping (Y-axis) ---
+  const currentIndex = input.sections.findIndex(s => s.id === input.draggingSectionId);
+  const prevSection = currentIndex > 0 ? input.sections[currentIndex - 1] : null;
+  const nextSection = currentIndex >= 0 && currentIndex < input.sections.length - 1 ? input.sections[currentIndex + 1] : null;
+
+  interface YCandidate {
+    targetTop: number;
+    curTy: number;
+    dist: number;
+    snapTarget: SectionSnapResult['snapTarget'];
+    glowEdge: 'top' | 'bottom';
+    label: string;
+    guideY: number;
+    targetSectionId?: string;
+    reorderTargetIndex?: number;
+  }
+
+  const yCandidates: YCandidate[] = [];
+
+  // 1. Snap to Previous Section Bottom (B.top === A.bottom)
+  if (prevSection) {
+    const desiredTop = prevSection.bottom;
+    const dist = Math.abs(input.currentTop - desiredTop);
+    if (dist <= canvasThreshold) {
+      yCandidates.push({
+        targetTop: desiredTop,
+        curTy: desiredTop - input.naturalTop,
+        dist,
+        snapTarget: 'PREVIOUS_BOTTOM',
+        glowEdge: 'top',
+        label: `MAGNES: ${prevSection.label || 'Sekcja #' + (prevSection.index + 1)} ↓ ${input.sections[currentIndex]?.label || 'Sekcja'}`,
+        guideY: desiredTop,
+        targetSectionId: prevSection.id,
+      });
+    }
+  }
+
+  // 2. Snap to Next Section Top (B.bottom === C.top -> B.top === C.top - height)
+  if (nextSection) {
+    const desiredTop = nextSection.top - input.height;
+    const dist = Math.abs(input.currentTop - desiredTop);
+    if (dist <= canvasThreshold) {
+      yCandidates.push({
+        targetTop: desiredTop,
+        curTy: desiredTop - input.naturalTop,
+        dist,
+        snapTarget: 'NEXT_TOP',
+        glowEdge: 'bottom',
+        label: `MAGNES: ${input.sections[currentIndex]?.label || 'Sekcja'} ↑ ${nextSection.label || 'Sekcja #' + (nextSection.index + 1)}`,
+        guideY: nextSection.top,
+        targetSectionId: nextSection.id,
+      });
+    }
+  }
+
+  // 3. Snap to Page Top (when near top of page)
+  const distToPageTop = Math.abs(input.currentTop);
+  if (distToPageTop <= canvasThreshold) {
+    yCandidates.push({
+      targetTop: 0,
+      curTy: -input.naturalTop,
+      dist: distToPageTop,
+      snapTarget: 'PAGE_TOP',
+      glowEdge: 'top',
+      label: 'MAGNES: POCZĄTEK STRONY (TOP: 0px)',
+      guideY: 0,
+    });
+  }
+
+  // 4. Snap to Natural Flow Position (translateY = 0)
+  const distToNatural = Math.abs(input.currentTop - input.naturalTop);
+  if (distToNatural <= canvasThreshold) {
+    yCandidates.push({
+      targetTop: input.naturalTop,
+      curTy: 0,
+      dist: distToNatural,
+      snapTarget: prevSection ? 'PREVIOUS_BOTTOM' : 'PAGE_TOP',
+      glowEdge: 'top',
+      label: 'MAGNES: POŁOŻENIE BAZOWE (0px)',
+      guideY: input.naturalTop,
+    });
+  }
+
+  // 5. Cross-Section Snapping for Reordering
+  // Dragged below nextSection: B.top -> nextSection.bottom
+  if (nextSection) {
+    const desiredTop = nextSection.bottom;
+    const dist = Math.abs(input.currentTop - desiredTop);
+    if (dist <= canvasThreshold) {
+      yCandidates.push({
+        targetTop: desiredTop,
+        curTy: desiredTop - input.naturalTop,
+        dist,
+        snapTarget: 'REORDER_BELOW',
+        glowEdge: 'top',
+        label: `MAGNES: WSTAW ZA ${nextSection.label || 'Sekcją #' + (nextSection.index + 1)}`,
+        guideY: desiredTop,
+        targetSectionId: nextSection.id,
+        reorderTargetIndex: nextSection.index,
+      });
+    }
+  }
+
+  // Dragged above prevSection: B.bottom -> prevSection.top (B.top -> prevSection.top - height)
+  if (prevSection) {
+    const desiredTop = prevSection.top - input.height;
+    const dist = Math.abs(input.currentTop - desiredTop);
+    if (dist <= canvasThreshold) {
+      yCandidates.push({
+        targetTop: desiredTop,
+        curTy: desiredTop - input.naturalTop,
+        dist,
+        snapTarget: 'REORDER_ABOVE',
+        glowEdge: 'bottom',
+        label: `MAGNES: WSTAW PRZED ${prevSection.label || 'Sekcją #' + (prevSection.index + 1)}`,
+        guideY: prevSection.top,
+        targetSectionId: prevSection.id,
+        reorderTargetIndex: prevSection.index,
+      });
+    }
+  }
+
+  // Pick closest Y candidate
+  let glowEdgeY: SectionSnapResult['glowEdge'] = null;
+  let labelY: string | null = null;
+  let distY = Infinity;
+
+  if (yCandidates.length > 0) {
+    yCandidates.sort((a, b) => a.dist - b.dist);
+    const best = yCandidates[0];
+    snappedY = true;
+    targetTop = best.targetTop;
+    curTy = best.curTy;
+    snapTarget = best.snapTarget;
+    glowEdgeY = best.glowEdge;
+    labelY = best.label;
+    guideY = best.guideY;
+    targetSectionId = best.targetSectionId;
+    reorderTargetIndex = best.reorderTargetIndex;
+    distY = best.dist;
+  }
+
+  // Resolve active glowEdge and label between X and Y axes
+  if (snappedX && !snappedY) {
+    glowEdge = glowEdgeX;
+    label = labelX;
+  } else if (snappedY && !snappedX) {
+    glowEdge = glowEdgeY;
+    label = labelY;
+  } else if (snappedX && snappedY) {
+    if (isMovedX && !isMovedY) {
+      // User specifically dragged horizontally, Y was not displaced
+      glowEdge = glowEdgeX;
+      label = labelX;
+    } else if (isMovedY && !isMovedX) {
+      // User specifically dragged vertically, X was not displaced
+      glowEdge = glowEdgeY;
+      label = labelY;
+    } else if (distX <= distY) {
+      glowEdge = glowEdgeX;
+      label = labelX;
+    } else {
+      glowEdge = glowEdgeY;
+      label = labelY;
+    }
+  }
+
+  return {
+    snapped: snappedX || snappedY,
+    snappedX,
+    snappedY,
+    curTx: Math.round(curTx) === 0 ? 0 : Math.round(curTx),
+    curTy: Math.round(curTy) === 0 ? 0 : Math.round(curTy),
+    targetLeft: Math.round(targetLeft) === 0 ? 0 : Math.round(targetLeft),
+    targetTop: Math.round(targetTop) === 0 ? 0 : Math.round(targetTop),
+    snapTarget,
+    glowEdge,
+    label,
+    targetSectionId,
+    reorderTargetIndex,
+    guideY: guideY !== undefined ? (Math.round(guideY) === 0 ? 0 : Math.round(guideY)) : undefined,
+    guideX: guideX !== undefined ? (Math.round(guideX) === 0 ? 0 : Math.round(guideX)) : undefined,
+  };
 }
 
 // ---------------------------------------------------------------------------
