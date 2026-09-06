@@ -545,6 +545,64 @@ export function QuickToolbar({
                 )}
               </div>
 
+              {/* Font Size for Button */}
+              <div className="relative flex items-center">
+                <button
+                  onClick={() => setShowFontSizePopover(!showFontSizePopover)}
+                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[11px] font-mono font-semibold text-white border border-white/[0.08] transition-colors"
+                  title="Rozmiar czcionki przycisku"
+                >
+                  <span>{parseInt(String(styles.fontSize || '14px').replace('px', '')) || 14}px</span>
+                  <ChevronDown className={`w-3 h-3 text-zinc-400 transition-transform ${showFontSizePopover ? 'rotate-180' : ''}`} />
+                </button>
+
+                {showFontSizePopover && (
+                  <div className="absolute top-full left-0 mt-2 p-3 bg-[#0d0d18] border border-white/15 rounded-xl shadow-2xl z-[300] min-w-[180px] space-y-2">
+                    <div className="flex items-center justify-between text-[11px] font-medium text-zinc-300">
+                      <span>Rozmiar tekstu</span>
+                      <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded px-1.5 py-0.5">
+                        <input
+                          type="number"
+                          min={10}
+                          max={48}
+                          value={parseInt(String(styles.fontSize || '14px').replace('px', '')) || 14}
+                          onChange={(e) => {
+                            const v = Math.min(48, Math.max(10, Number(e.target.value) || 10))
+                            handleUpdateStyles({ fontSize: `${v}px` })
+                          }}
+                          className="w-10 bg-transparent text-right font-mono text-white text-xs focus:outline-none"
+                        />
+                        <span className="text-[10px] text-zinc-400">px</span>
+                      </div>
+                    </div>
+                    <input
+                      type="range"
+                      min={10}
+                      max={48}
+                      step={1}
+                      value={parseInt(String(styles.fontSize || '14px').replace('px', '')) || 14}
+                      onChange={(e) => handleUpdateStyles({ fontSize: `${e.target.value}px` })}
+                      className="w-full accent-violet-500 h-1 cursor-pointer"
+                    />
+                    <div className="flex items-center gap-1 pt-1 border-t border-white/5">
+                      {[12, 14, 16, 18, 22].map((sz) => (
+                        <button
+                          key={sz}
+                          onClick={() => handleUpdateStyles({ fontSize: `${sz}px` })}
+                          className={`flex-1 py-0.5 text-[9px] font-mono rounded border transition-all ${
+                            (parseInt(String(styles.fontSize || '14px').replace('px', '')) || 14) === sz
+                              ? 'bg-[#8B5CF6]/40 text-[#A78BFA] border-violet-500/50'
+                              : 'bg-white/[0.04] text-zinc-400 border-white/5 hover:text-white'
+                          }`}
+                        >
+                          {sz}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Color Swatch for Button Background */}
               <input
                 type="color"

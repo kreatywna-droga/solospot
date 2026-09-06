@@ -80,6 +80,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
   const vidHeightLabelRef = useRef<HTMLSpanElement>(null);
   const btnWidthLabelRef = useRef<HTMLSpanElement>(null);
   const btnHeightLabelRef = useRef<HTMLSpanElement>(null);
+  const btnFontSizeLabelRef = useRef<HTMLSpanElement>(null);
   const svgSizeLabelRef = useRef<HTMLSpanElement>(null);
   const txLabelRef = useRef<HTMLSpanElement>(null);
   const tyLabelRef = useRef<HTMLSpanElement>(null);
@@ -489,10 +490,59 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                 unit=""
                 onLivePreview={(v) => {
                   const el = getCanvasEl();
-                  if (el) el.style.height = `${v}px`;
+                  if (el) {
+                    el.style.height = `${v}px`;
+                    const btn = el.querySelector('button');
+                    if (btn) btn.style.height = '100%';
+                  }
                 }}
                 onChange={(v) => onStyleChange({ height: `${v}px` })}
               />
+            </div>
+
+            {/* Button Font Size — SmoothSlider */}
+            <div className="space-y-2 pt-1 border-t border-white/[0.06]">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="font-semibold text-zinc-300">Rozmiar tekstu przycisku</span>
+                <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded px-2 py-0.5">
+                  <span ref={btnFontSizeLabelRef} className="w-10 text-right font-mono text-white text-xs">
+                    {parseInt(String(currentStyles.fontSize || '14px').replace('px', '')) || 14}
+                  </span>
+                  <span className="text-[10px] text-zinc-400">px</span>
+                </div>
+              </div>
+              <SmoothSlider
+                min={10}
+                max={48}
+                value={parseInt(String(currentStyles.fontSize || '14px').replace('px', '')) || 14}
+                labelRef={btnFontSizeLabelRef}
+                unit=""
+                onLivePreview={(v) => {
+                  const el = getCanvasEl();
+                  if (el) {
+                    el.style.setProperty('font-size', `${v}px`, 'important');
+                    const btns = el.querySelectorAll('button, button *');
+                    btns.forEach(b => (b as HTMLElement).style.setProperty('font-size', `${v}px`, 'important'));
+                  }
+                }}
+                onChange={(v) => onStyleChange({ fontSize: `${v}px` })}
+              />
+              {/* Quick Jumps for Button Font Size */}
+              <div className="flex items-center gap-1">
+                {[12, 14, 16, 18, 22].map((sz) => (
+                  <button
+                    key={sz}
+                    onClick={() => onStyleChange({ fontSize: `${sz}px` })}
+                    className={`flex-1 py-0.5 text-[9px] font-mono rounded border transition-all ${
+                      (parseInt(String(currentStyles.fontSize || '14px').replace('px', '')) || 14) === sz
+                        ? 'bg-[#8B5CF6]/20 text-[#A78BFA] border-[#8B5CF6]/30'
+                        : 'bg-white/[0.04] text-zinc-500 border-white/[0.06] hover:text-zinc-300'
+                    }`}
+                  >
+                    {sz}px
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
