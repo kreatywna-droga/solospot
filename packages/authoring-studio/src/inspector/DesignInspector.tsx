@@ -93,14 +93,16 @@ function UnitInput({
 }) {
   const match = value ? String(value).match(/^([+-]?(?:\d*\.)?\d+)([a-zA-Z%]*)$/) : null;
   const numVal = match ? parseFloat(match[1]) : (value ? parseFloat(String(value).replace(/[^0-9.-]/g, '')) : NaN);
-  const detectedUnit = match && match[2] ? match[2] : 'px';
+  const isUnitless = match !== null && !match[2];
+  const detectedUnit = match && match[2] ? match[2] : '';
   const hasNum = !Number.isNaN(numVal);
 
   const [unit, setUnit] = React.useState(detectedUnit);
 
   React.useEffect(() => {
-    if (match && match[2] && match[2] !== unit) {
-      setUnit(match[2]);
+    const newUnit = match && match[2] ? match[2] : '';
+    if (newUnit !== unit) {
+      setUnit(newUnit);
     }
   }, [value]);
 
@@ -134,6 +136,7 @@ function UnitInput({
           }}
           className="bg-[#0e0e1a] border border-l-0 border-white/10 rounded-r text-[11px] text-slate-400 px-1 focus:outline-none"
         >
+          <option value="">—</option>
           <option>px</option>
           <option>%</option>
           <option>rem</option>
