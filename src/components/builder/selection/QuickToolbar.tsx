@@ -639,6 +639,30 @@ export function QuickToolbar({
                 title="Kolor tła przycisku"
               />
 
+              {/* Button Image Background Upload */}
+              <label className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[11px] font-semibold text-white border border-white/[0.08] cursor-pointer transition-colors" title="Wgraj obraz jako tło przycisku">
+                <ImageIcon className="w-3 h-3 text-violet-400" />
+                <span>Obraz tła</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      const file = e.target.files[0];
+                      const reader = new FileReader();
+                      reader.onload = (evt) => {
+                        const dataUrl = evt.target?.result as string;
+                        if (dataUrl) {
+                          handleUpdateStyles({ backgroundImage: `url("${dataUrl}")` });
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </label>
+
               <div className="w-px h-4 bg-white/[0.08] mx-0.5" />
             </>
           )}

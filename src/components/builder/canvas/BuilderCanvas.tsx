@@ -631,6 +631,12 @@ function CanvasNode({
           type="button"
           style={{
             backgroundColor: variant === 'outline' ? 'transparent' : bg,
+            backgroundImage: styles.backgroundImage && styles.backgroundImage !== 'none'
+              ? (styles.backgroundImage.startsWith('url(') ? styles.backgroundImage : `url("${styles.backgroundImage}")`)
+              : undefined,
+            backgroundSize: styles.backgroundImage && styles.backgroundImage !== 'none' ? (styles.backgroundSize || 'cover') : undefined,
+            backgroundPosition: styles.backgroundImage && styles.backgroundImage !== 'none' ? (styles.backgroundPosition || 'center') : undefined,
+            backgroundRepeat: styles.backgroundImage && styles.backgroundImage !== 'none' ? (styles.backgroundRepeat || 'no-repeat') : undefined,
             color: textColor,
             borderRadius,
             borderWidth,

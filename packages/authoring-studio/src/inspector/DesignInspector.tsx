@@ -24,7 +24,7 @@ import {
   AlignCenter, AlignRight, AlignJustify,
   AlignStartVertical, AlignCenterVertical, AlignEndVertical,
   ChevronDown, Lock, Eye, EyeOff,
-  StretchHorizontal, Grid3X3,
+  StretchHorizontal, Grid3X3, Upload,
 } from 'lucide-react';
 import type { NodeStyles } from '../../../builder-core/src/BuilderDocument';
 import { FontPicker } from './widgets/FontPicker';
@@ -837,13 +837,56 @@ function DesignTab({
           />
         </Row>
         <Row label="Image URL">
-          <input
-            type="text"
-            value={styles.backgroundImage || ''}
-            placeholder="https://... or url('...')"
-            onChange={(e) => onChange({ backgroundImage: e.target.value })}
-            className={inputCls}
-          />
+          <div className="flex items-center gap-1.5 w-full">
+            <input
+              type="text"
+              value={styles.backgroundImage || ''}
+              placeholder="https://... lub plik"
+              onChange={(e) => {
+                const val = e.target.value;
+                onChange({ backgroundImage: val });
+                livePreview('background-image', val);
+              }}
+              className={inputCls}
+            />
+            <label className="flex items-center justify-center gap-1 px-2 py-1 rounded bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-semibold cursor-pointer flex-shrink-0 transition-colors" title="Wgraj obraz z dysku">
+              <Upload className="w-3 h-3" />
+              <span>Wgraj</span>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    const file = e.target.files[0];
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                      const dataUrl = evt.target?.result as string;
+                      if (dataUrl) {
+                        const bgVal = `url("${dataUrl}")`;
+                        onChange({ backgroundImage: bgVal });
+                        livePreview('background-image', bgVal);
+                      }
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
+            </label>
+            {styles.backgroundImage && styles.backgroundImage !== 'none' && (
+              <button
+                type="button"
+                onClick={() => {
+                  onChange({ backgroundImage: 'none' });
+                  livePreview('background-image', 'none');
+                }}
+                className="px-1.5 py-1 rounded bg-red-500/20 hover:bg-red-500/40 text-red-300 text-[10px] font-mono flex-shrink-0"
+                title="Usuń obraz tła"
+              >
+                ✕
+              </button>
+            )}
+          </div>
         </Row>
         <Row label="Color">
           <ColorInput

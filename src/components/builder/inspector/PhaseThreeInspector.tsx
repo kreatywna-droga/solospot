@@ -459,6 +459,52 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
               </div>
             </div>
 
+            {/* Button Background Image Upload */}
+            <div className="space-y-1.5 pt-1 border-t border-white/[0.06]">
+              <label className="text-[11px] font-semibold text-zinc-300">Tło obrazkowe przycisku</label>
+              <div className="flex items-center gap-2 p-1.5 bg-white/[0.04] border border-white/[0.08] rounded-xl">
+                <input
+                  type="text"
+                  value={currentStyles.backgroundImage || ''}
+                  onChange={(e) => onStyleChange({ backgroundImage: e.target.value })}
+                  placeholder="https://... URL lub plik"
+                  className="flex-1 bg-transparent text-[11px] font-mono text-zinc-300 focus:outline-none focus:text-white"
+                />
+                <label className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#8B5CF6] hover:bg-[#7C3AED] text-white text-[11px] font-semibold cursor-pointer transition-colors flex-shrink-0">
+                  <Upload className="w-3 h-3" />
+                  <span>Wgraj</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        const file = e.target.files[0];
+                        const reader = new FileReader();
+                        reader.onload = (evt) => {
+                          const dataUrl = evt.target?.result as string;
+                          if (dataUrl) {
+                            onStyleChange({ backgroundImage: `url("${dataUrl}")` });
+                          }
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                </label>
+                {currentStyles.backgroundImage && currentStyles.backgroundImage !== 'none' && (
+                  <button
+                    type="button"
+                    onClick={() => onStyleChange({ backgroundImage: 'none' })}
+                    className="px-1.5 py-1 rounded-lg bg-red-500/20 text-red-300 hover:bg-red-500/40 text-[10px] flex-shrink-0"
+                    title="Usuń obrazek tła"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
+
             {/* Button Width & Height — SmoothSlider */}
             <div className="space-y-2 pt-1 border-t border-white/[0.06]">
               <div className="flex items-center justify-between">
