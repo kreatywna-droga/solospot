@@ -46,6 +46,25 @@ export const isSupabaseConfigured = (): boolean => {
   );
 };
 
+/**
+ * Zwraca true tylko gdy skonfigurowany jest prawdziwy klucz serwisowy SUPABASE_SERVICE_ROLE_KEY.
+ * Wymagane dla operacji administracyjnych i Supabase Storage.
+ */
+export const isSupabaseServiceConfigured = (): boolean => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
+  const placeholderPatterns = ['placeholder', 'dummy', 'dev-', 'local-only'];
+  const isPlaceholder = (val: string) =>
+    placeholderPatterns.some(p => val.toLowerCase().includes(p));
+  return (
+    url.startsWith('https://') &&
+    url.includes('.supabase.co') &&
+    Boolean(serviceKey) &&
+    !isPlaceholder(url) &&
+    !isPlaceholder(serviceKey)
+  );
+};
+
 // Klient używany po stronie przeglądarki (bezpieczny, z ograniczeniami RLS)
 export const supabase = createClientFn(supabaseUrl, supabaseAnonKey);
 

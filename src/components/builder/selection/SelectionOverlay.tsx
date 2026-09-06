@@ -23,7 +23,7 @@
  * All actions flow through dispatch(command).
  */
 
-import { useMemo, useState, useCallback } from 'react'
+import { useMemo, useState, useCallback, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Move } from 'lucide-react'
 import { useBuilder } from '../state/BuilderProvider'
@@ -83,6 +83,40 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
   }, [document, canvas.selectedSectionId])
 
   const isTextNode = selectedFound?.node.type === 'text' || selectedFound?.node.type === 'heading'
+  const hasChildren = Boolean(selectedFound?.node.children && selectedFound.node.children.length > 0)
+
+  const [isInlineEditing, setIsInlineEditing] = useState(false)
+
+  useEffect(() => {
+    const handleFocus = () => {
+      const active = window.document.activeElement
+      const isEditing = active?.getAttribute('data-inline-edit') === 'text' || (active as HTMLElement)?.isContentEditable === true
+      setIsInlineEditing(Boolean(isEditing))
+    }
+    window.document.addEventListener('focusin', handleFocus)
+    window.document.addEventListener('focusout', handleFocus)
+    return () => {
+      window.document.removeEventListener('focusin', handleFocus)
+      window.document.removeEventListener('focusout', handleFocus)
+    }
+  }, [])
+
+  const handleDoubleClickText = useCallback((e: React.MouseEvent) => {
+    const targetNodeId = canvas.selectedSectionId
+    if (!targetNodeId) return
+    const el = containerRef.current?.querySelector(`[data-node-id="${targetNodeId}"] [data-inline-edit="text"], [data-section-id="${targetNodeId}"] [data-inline-edit="text"]`) as HTMLElement | null
+    if (el) {
+      el.contentEditable = 'true'
+      el.focus()
+      const sel = window.getSelection()
+      if (sel) {
+        const range = window.document.createRange()
+        range.selectNodeContents(el)
+        sel.removeAllRanges()
+        sel.addRange(range)
+      }
+    }
+  }, [canvas.selectedSectionId, containerRef])
 
   // Compute toolbar data: find node in page or parent container
   const toolbarData = useMemo(() => {
@@ -501,6 +535,9 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
                 rect={displayRect}
                 onMoveStart={handleMoveStart}
                 isTextNode={isTextNode}
+                hasChildren={hasChildren}
+                isEditingText={isInlineEditing}
+                onDoubleClick={handleDoubleClickText}
               />
 
               {/* Move Grip Handle — pointer capture for smooth drag even at high velocity */}

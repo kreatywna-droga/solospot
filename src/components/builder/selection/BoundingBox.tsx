@@ -41,6 +41,12 @@ interface BoundingBoxProps {
   onMoveStart?: (e: React.MouseEvent) => void
   /** Is selected node a text node */
   isTextNode?: boolean
+  /** Does selected node have children (container/parent node) */
+  hasChildren?: boolean
+  /** Whether the user is currently editing text inside this node */
+  isEditingText?: boolean
+  /** Callback for double-click to edit text */
+  onDoubleClick?: (e: React.MouseEvent) => void
 }
 
 export function BoundingBox({
@@ -52,6 +58,9 @@ export function BoundingBox({
   zIndex,
   onMoveStart,
   isTextNode = false,
+  hasChildren = false,
+  isEditingText = false,
+  onDoubleClick,
 }: BoundingBoxProps) {
   if (!rect.visible) return null
 
@@ -86,12 +95,21 @@ export function BoundingBox({
       {/* Interactive drag zones allowing user to grab anywhere on the asset to move it */}
       {onMoveStart && (
         <>
-          {/* Full body drag surface for non-text assets (images, videos, icons, buttons) */}
-          {!isTextNode && (
+          {/* Full body drag surface for leaf elements (images, videos, icons, buttons, SVGs, text, empty containers) */}
+          {/* If the element has children, do NOT block clicks to child elements! */}
+          {!hasChildren && (
             <div
-              onMouseDown={onMoveStart}
-              className="absolute inset-0 pointer-events-auto cursor-grab active:cursor-grabbing select-none"
-              title="Przeciągnij myszą, aby przesunąć asset po Canvasie"
+              onMouseDown={isEditingText ? undefined : onMoveStart}
+              onDoubleClick={(e) => {
+                if (isTextNode && onDoubleClick) {
+                  e.stopPropagation()
+                  onDoubleClick(e)
+                }
+              }}
+              className={`absolute inset-0 select-none ${
+                isEditingText ? 'pointer-events-none' : 'pointer-events-auto cursor-grab active:cursor-grabbing'
+              }`}
+              title={isTextNode ? "Kliknij dwukrotnie, aby edytować tekst, lub przeciągnij, aby przesunąć" : "Przeciągnij myszą, aby przesunąć asset po Canvasie"}
             />
           )}
 

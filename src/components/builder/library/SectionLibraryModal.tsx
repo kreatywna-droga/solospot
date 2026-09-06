@@ -9,6 +9,7 @@ import {
 import { useBuilder } from '../state/BuilderProvider';
 import {
   BuilderNode,
+  SectionNode,
   createBuilderNode,
   createSectionNode,
   generateNodeId,
@@ -890,12 +891,17 @@ export interface SectionLibraryModalProps {
   isOpen: boolean;
   onClose: () => void;
   insertIndex?: number;
+  sections?: SectionNode[];
+  onInserted?: (newSectionId: string) => void;
 }
 
-export function SectionLibraryModal({ isOpen, onClose, insertIndex }: SectionLibraryModalProps) {
+export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, onInserted }: SectionLibraryModalProps) {
   const { dispatch, canvas, document: builderDoc } = useBuilder();
   const [selectedCategory, setSelectedCategory] = useState<SectionCategory>('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const predecessor = insertIndex !== undefined && insertIndex > 0 ? sections?.[insertIndex - 1]?.label || `Sekcja #${insertIndex}` : null;
+  const successor = insertIndex !== undefined && sections && insertIndex < sections.length ? sections?.[insertIndex]?.label || `Sekcja #${insertIndex + 1}` : null;
 
   const filteredTemplates = useMemo(() => {
     return SECTION_TEMPLATES.filter((item) => {
@@ -929,6 +935,10 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex }: SectionLib
       action: { type: 'SELECT_SECTION', sectionId: newSectionNode.id },
     });
 
+    if (onInserted) {
+      onInserted(newSectionNode.id);
+    }
+
     onClose();
   };
 
@@ -951,7 +961,13 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex }: SectionLib
               )}
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
-              Wybierz gotową sekcję z dopracowaną typografią, układem i treścią.
+              {insertIndex !== undefined ? (
+                <span className="text-violet-300 font-medium">
+                  Nowa sekcja zostanie wstawiona {predecessor && successor ? `pomiędzy "${predecessor}" a "${successor}"` : predecessor ? `po sekcji "${predecessor}"` : successor ? `przed sekcją "${successor}"` : 'na początku strony'}.
+                </span>
+              ) : (
+                'Wybierz gotową sekcję z dopracowaną typografią, układem i treścią.'
+              )}
             </p>
           </div>
           <button

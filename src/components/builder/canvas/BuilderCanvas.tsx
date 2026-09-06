@@ -370,6 +370,13 @@ function CanvasNode({
   const styles = resolveEffectiveStyles(node, viewport)
   const props = resolveEffectiveProps(node, viewport)
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (selectedId !== node.id && !node.locked) {
+      onSelectNode(node.id, e)
+    }
+  }
+
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
     onSelectNode(node.id, e)
@@ -438,6 +445,7 @@ function CanvasNode({
         draggable={!node.locked}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        onMouseDown={handleMouseDown}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         onMouseEnter={handleMouseEnter}
@@ -515,6 +523,7 @@ function CanvasNode({
         draggable={!node.locked}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        onMouseDown={handleMouseDown}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         onMouseEnter={handleMouseEnter}
@@ -591,6 +600,7 @@ function CanvasNode({
         draggable={!node.locked}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        onMouseDown={handleMouseDown}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         onMouseEnter={handleMouseEnter}
@@ -704,6 +714,7 @@ function CanvasNode({
         draggable={!node.locked}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        onMouseDown={handleMouseDown}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         onMouseEnter={handleMouseEnter}
@@ -800,6 +811,7 @@ function CanvasNode({
         draggable={!node.locked}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        onMouseDown={handleMouseDown}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         onMouseEnter={handleMouseEnter}
@@ -859,6 +871,7 @@ function CanvasNode({
         draggable={!node.locked}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        onMouseDown={handleMouseDown}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         onMouseEnter={handleMouseEnter}
@@ -1055,6 +1068,7 @@ function CanvasNode({
       data-parent-id={node.parentId}
       draggable={!node.locked}
       onDragStart={handleDragStart}
+      onMouseDown={handleMouseDown}
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       onMouseEnter={handleMouseEnter}
@@ -1144,7 +1158,7 @@ function CanvasNode({
         />
       )}
       {node.children && node.children.length > 0 ? (
-        <div className="relative z-10">
+        <div className="relative z-10 contents">
         {node.children.map(child => (
           <CanvasNode
             key={child.id}
@@ -1885,6 +1899,17 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
   const [insertSectionIndex, setInsertSectionIndex] = useState<number | undefined>(undefined)
   const [isTemplatePickerOpen, setIsTemplatePickerOpen] = useState(false)
 
+  const handleSectionInserted = useCallback((newSectionId: string) => {
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        const el = canvasFrameRef.current?.querySelector(`[data-section-id="${newSectionId}"]`)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      }, 50)
+    })
+  }, [])
+
   const handleSelectSection = useCallback((sectionId: string, pageId: string) => {
     dispatch({
       type: 'CANVAS',
@@ -2327,6 +2352,24 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
               const isDragSource = isDragging && canvas.dragState?.sectionId === node.id
               return (
                 <React.Fragment key={node.id}>
+                  {/* Glowing Section Insertion Beacon */}
+                  {isSectionLibraryOpen && insertSectionIndex === index && (
+                    <div
+                      data-testid="section-insertion-beacon"
+                      className="my-3 mx-4 p-4 rounded-xl border-2 border-dashed border-violet-500 bg-violet-950/40 text-center animate-pulse shadow-xl shadow-violet-500/25 z-30 flex flex-col items-center justify-center gap-1 backdrop-blur-sm"
+                    >
+                      <div className="flex items-center justify-center gap-2 text-xs font-bold text-violet-300 tracking-wide uppercase">
+                        <Plus className="w-4 h-4 text-violet-400" />
+                        <span>Tu zostanie wstawiona nowa sekcja (Pozycja #{index + 1})</span>
+                      </div>
+                      <p className="text-[11px] text-slate-300">
+                        {index === 0
+                          ? 'Na samym początku strony'
+                          : `Pomiędzy "${sections[index - 1]?.label || 'Sekcja #' + index}" a "${sections[index]?.label || 'Sekcja #' + (index + 1)}"`}
+                      </p>
+                    </div>
+                  )}
+
                   {/* In-between section insertion divider */}
                   <div className="relative group/divider py-1.5 flex items-center justify-center z-20">
                     <div className="absolute inset-x-8 h-px bg-transparent group-hover/divider:bg-violet-500/40 transition-all" />
@@ -2366,6 +2409,22 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                 </React.Fragment>
               )
             })}
+
+            {/* Glowing Section Insertion Beacon after the last section */}
+            {isSectionLibraryOpen && insertSectionIndex === sections.length && (
+              <div
+                data-testid="section-insertion-beacon"
+                className="my-3 mx-4 p-4 rounded-xl border-2 border-dashed border-violet-500 bg-violet-950/40 text-center animate-pulse shadow-xl shadow-violet-500/25 z-30 flex flex-col items-center justify-center gap-1 backdrop-blur-sm"
+              >
+                <div className="flex items-center justify-center gap-2 text-xs font-bold text-violet-300 tracking-wide uppercase">
+                  <Plus className="w-4 h-4 text-violet-400" />
+                  <span>Tu zostanie wstawiona nowa sekcja (Na końcu strony, Pozycja #{sections.length + 1})</span>
+                </div>
+                <p className="text-[11px] text-slate-300">
+                  Po sekcji: &quot;{sections[sections.length - 1]?.label || 'Sekcja #' + sections.length}&quot;
+                </p>
+              </div>
+            )}
 
             {/* In-between divider after the last section */}
             {sections.length > 0 && (
@@ -2458,6 +2517,8 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
           isOpen={isSectionLibraryOpen}
           onClose={() => setIsSectionLibraryOpen(false)}
           insertIndex={insertSectionIndex}
+          sections={sections}
+          onInserted={handleSectionInserted}
         />
 
         {/* Website Template Picker Modal */}

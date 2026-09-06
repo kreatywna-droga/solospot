@@ -18,6 +18,7 @@ import {
   Sparkles, Layers, Box, ExternalLink, Plus, Eye,
 } from 'lucide-react'
 import { useBuilder } from '../state/BuilderProvider'
+import { findNode, SectionNode } from '../../../../packages/builder-core/src'
 
 interface AssetItem {
   id: string
@@ -138,18 +139,92 @@ export function AssetsPanel() {
 
   const handleInsertIntoCanvas = (asset: AssetItem) => {
     const activePage = document.pages.find(p => p.id === canvas.selectedPageId) || document.pages[0]
+    if (!activePage) return
+
     const selectedSectionId = canvas.selectedSectionId
-    if (!activePage || !selectedSectionId) {
-      alert('Najpierw zaznacz sekcję na płótnie roboczym, do której chcesz przypisać ten plik.')
+    const found = selectedSectionId ? findNode(document, selectedSectionId) : null
+
+    const isVideo = asset.type === 'video' || asset.mimeType.includes('video')
+    const isSvg = asset.mimeType.includes('svg') || asset.filename.endsWith('.svg')
+    const nodeType = isVideo ? 'video' : isSvg ? 'svg' : 'image'
+
+    // If an image or video node is already selected, update its source directly
+    if (found && (found.node.type === 'image' || found.node.type === 'video')) {
+      dispatch({
+        type: 'UPDATE_PROPS',
+        pageId: activePage.id,
+        sectionId: selectedSectionId!,
+        props: { image: asset.publicUrl, src: asset.publicUrl, url: asset.publicUrl },
+      })
+      setSelectedAsset(null)
       return
     }
 
+    // Contextual placement: determine target parent container
+    let targetParentId: string | null = null
+    let targetIndex = 0
+
+    if (found) {
+      if (found.node.type === 'container' || found.node.type === 'section') {
+        targetParentId = found.node.id
+        targetIndex = found.node.children?.length ?? 0
+      } else if (found.parent) {
+        // Insert as sibling right next to selected node in its parent container
+        targetParentId = found.parent.id
+        const siblingIdx = found.parent.children.findIndex(c => c.id === found.node.id)
+        targetIndex = siblingIdx >= 0 ? siblingIdx + 1 : found.parent.children.length
+      } else {
+        targetParentId = found.node.id
+        targetIndex = found.node.children?.length ?? 0
+      }
+    } else {
+      // Fallback: target the last section or container in the page
+      const lastSec = activePage.sections[activePage.sections.length - 1]
+      if (lastSec) {
+        targetParentId = lastSec.id
+        targetIndex = lastSec.children?.length ?? 0
+      }
+    }
+
+    const newNodeId = `node_${nodeType}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+    const newNode: SectionNode = {
+      id: newNodeId,
+      type: nodeType,
+      label: asset.originalName || asset.filename,
+      parentId: targetParentId,
+      order: targetIndex,
+      visible: true,
+      locked: false,
+      props: {
+        src: asset.publicUrl,
+        url: asset.publicUrl,
+        alt: asset.originalName,
+        controls: isVideo,
+        autoPlay: isVideo,
+        muted: isVideo,
+        loop: isVideo,
+      },
+      styles: {
+        width: isSvg ? '64px' : '100%',
+        height: isVideo ? '320px' : isSvg ? '64px' : 'auto',
+        borderRadius: '12px',
+      },
+      children: [],
+    }
+
     dispatch({
-      type: 'UPDATE_PROPS',
+      type: 'INSERT_NODE',
       pageId: activePage.id,
-      sectionId: selectedSectionId,
-      props: { image: asset.publicUrl, src: asset.publicUrl, videoUrl: asset.publicUrl },
+      parentId: targetParentId,
+      node: newNode,
+      index: targetIndex,
     })
+
+    dispatch({
+      type: 'CANVAS',
+      action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId: activePage.id },
+    })
+
     setSelectedAsset(null)
   }
 

@@ -1,4 +1,4 @@
-import { getServiceSupabase, isSupabaseConfigured } from '../supabase';
+import { getServiceSupabase, isSupabaseConfigured, isSupabaseServiceConfigured } from '../supabase';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -20,6 +20,43 @@ export interface IAssetStorageProvider {
   getPublicUrl(storagePath: string): Promise<string>;
 }
 
+export function formatStorageError(error: any, bucket = 'assets', storagePath = '', operation = 'upload'): string {
+  if (!error) return `Supabase storage ${operation} failed: Nieznany błąd (bucket: '${bucket}', path: '${storagePath}')`;
+
+  const rawMsg = typeof error.message === 'string' ? error.message.trim() : '';
+  const rawCode = (error as any).statusCode || (error as any).status;
+  const rawError = (error as any).error;
+  const name = error.name || 'StorageError';
+
+  // Extract meaningful message, never accepting literal "<none>" or empty string
+  let meaningfulReason = '';
+  if (rawMsg && rawMsg !== '<none>') {
+    meaningfulReason = rawMsg;
+  } else if (rawError && typeof rawError === 'string' && rawError.trim() !== '<none>') {
+    meaningfulReason = rawError.trim();
+  } else if (rawCode) {
+    if (String(rawCode) === '401' || String(rawCode) === '403') {
+      meaningfulReason = 'Brak autoryzacji Supabase Storage — zweryfikuj klucz SUPABASE_SERVICE_ROLE_KEY';
+    } else if (String(rawCode) === '404') {
+      meaningfulReason = `Bucket '${bucket}' nie istnieje w projekcie Supabase`;
+    } else {
+      meaningfulReason = `Błąd HTTP ${rawCode}`;
+    }
+  } else {
+    meaningfulReason = name || 'Błąd operacji storage';
+  }
+
+  const parts = [
+    `SupabaseAssetStorage ${operation} failed: ${meaningfulReason}`,
+    `[bucket: '${bucket}'`,
+    rawCode ? `status: ${rawCode}` : null,
+    rawError && rawError !== meaningfulReason ? `error: ${rawError}` : null,
+    `path: '${storagePath}']`,
+  ].filter(Boolean);
+
+  return parts.join(', ');
+}
+
 export class SupabaseAssetStorage implements IAssetStorageProvider {
   private readonly bucket = 'store-assets';
   private bucketChecked = false;
@@ -28,17 +65,23 @@ export class SupabaseAssetStorage implements IAssetStorageProvider {
     if (this.bucketChecked) return;
     try {
       const supabase = getServiceSupabase();
-      const { data: buckets } = await supabase.storage.listBuckets();
+      const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+      if (listError) {
+        console.warn('[SupabaseAssetStorage] listBuckets warning:', listError.message);
+      }
       const exists = buckets?.some((b: any) => b.name === this.bucket);
-      if (!exists) {
-        await supabase.storage.createBucket(this.bucket, {
+      if (!exists && !listError) {
+        const { error: createError } = await supabase.storage.createBucket(this.bucket, {
           public: true,
           fileSizeLimit: 50 * 1024 * 1024,
         });
+        if (createError) {
+          console.warn('[SupabaseAssetStorage] createBucket warning:', createError.message);
+        }
       }
       this.bucketChecked = true;
-    } catch {
-      // Best-effort check; continue if bucket already exists or permissions permit
+    } catch (err: any) {
+      console.warn('[SupabaseAssetStorage] ensureBucket caught exception:', err?.message);
       this.bucketChecked = true;
     }
   }
@@ -59,7 +102,7 @@ export class SupabaseAssetStorage implements IAssetStorageProvider {
       });
 
     if (error) {
-      throw new Error(`SupabaseAssetStorage upload failed: ${error.message}`);
+      throw new Error(formatStorageError(error, this.bucket, storagePath, 'upload'));
     }
 
     const { data } = supabase.storage
@@ -140,7 +183,7 @@ let activeStorage: IAssetStorageProvider | null = null;
 
 export function getAssetStorage(): IAssetStorageProvider {
   if (activeStorage) return activeStorage;
-  if (isSupabaseConfigured()) {
+  if (isSupabaseServiceConfigured()) {
     activeStorage = new SupabaseAssetStorage();
   } else {
     activeStorage = new LocalPersistentAssetStorage();
