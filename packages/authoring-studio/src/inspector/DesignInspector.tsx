@@ -96,13 +96,22 @@ function UnitInput({
 }) {
   const match = value ? String(value).match(/^([+-]?(?:\d*\.)?\d+)([a-zA-Z%]*)$/) : null;
   const numVal = match ? parseFloat(match[1]) : (value ? parseFloat(String(value).replace(/[^0-9.-]/g, '')) : NaN);
-  const detectedUnit = match && match[2] ? match[2] : defaultUnit;
+  let rawUnit = match && match[2] !== undefined ? match[2] : undefined;
+  // If defaultUnit is empty string (unitless ratio) and rawUnit is 'px' on a small number (< 5), treat as legacy corrupted unit
+  if (defaultUnit === '' && rawUnit === 'px' && !Number.isNaN(numVal) && numVal < 5) {
+    rawUnit = '';
+  }
+  const detectedUnit = rawUnit !== undefined ? rawUnit : defaultUnit;
   const hasNum = !Number.isNaN(numVal);
 
   const [unit, setUnit] = React.useState(detectedUnit);
 
   React.useEffect(() => {
-    const newUnit = match && match[2] ? match[2] : defaultUnit;
+    let rawUnit = match && match[2] !== undefined ? match[2] : undefined;
+    if (defaultUnit === '' && rawUnit === 'px' && !Number.isNaN(numVal) && numVal < 5) {
+      rawUnit = '';
+    }
+    const newUnit = rawUnit !== undefined ? rawUnit : defaultUnit;
     setUnit(newUnit);
   }, [value, defaultUnit]);
 
@@ -164,12 +173,12 @@ function UnitInput({
           onInput={(e) => {
             const n = parseFloat((e.target as HTMLInputElement).value);
             const rounded = Math.round(n * 100) / 100;
-            const activeUnit = unit || defaultUnit || 'px';
+            const activeUnit = unit !== undefined ? unit : defaultUnit;
             const v = activeUnit ? `${rounded}${activeUnit}` : `${rounded}`;
             onLivePreview?.(v);
           }}
           onChange={(e) => {
-            const activeUnit = unit || defaultUnit || 'px';
+            const activeUnit = unit !== undefined ? unit : defaultUnit;
             commitNumber(parseFloat(e.target.value), activeUnit);
           }}
           className="w-full accent-violet-500 h-1 cursor-pointer"
@@ -1352,6 +1361,7 @@ function TypographyTab({
             min={0.8}
             max={3.0}
             step={0.05}
+            defaultUnit=""
           />
         </Row>
         <Row label="Tracking">

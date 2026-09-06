@@ -262,6 +262,16 @@ interface CanvasNodeProps {
 // The document remains the single source of truth; no fake overlay state.
 // ---------------------------------------------------------------------------
 
+function sanitizeLineHeight(val?: string | number): string | undefined {
+  if (val === undefined || val === null || val === '') return undefined
+  const str = String(val).trim()
+  if (str.endsWith('px') && parseFloat(str) < 5) {
+    const num = parseFloat(str)
+    if (!Number.isNaN(num)) return String(num)
+  }
+  return str
+}
+
 function useInlineTextCommit(
   nodeId: string,
   pageId: string,
@@ -430,7 +440,8 @@ function CanvasNode({
     const textAlign = (styles.textAlign as any) || (props.textAlign as any) || 'left'
     const fontSize = styles.fontSize || (props.fontSize as string) || (level === 'h1' ? '2.25rem' : level === 'h3' ? '1.25rem' : level === 'h4' ? '1.125rem' : '1.75rem')
     const fontWeight = styles.fontWeight || (props.fontWeight as string) || (level === 'h1' ? '800' : level === 'h3' ? '600' : '700')
-    const lineHeight = styles.lineHeight || (props.lineHeight as string) || '1.2'
+    const rawLineHeight = styles.lineHeight || (props.lineHeight as string) || '1.2'
+    const lineHeight = sanitizeLineHeight(rawLineHeight) || '1.2'
     const letterSpacing = styles.letterSpacing || (props.letterSpacing as string)
     const fontFamily = styles.fontFamily || (props.fontFamily as string)
     if (fontFamily) {
@@ -507,7 +518,8 @@ function CanvasNode({
     const textAlign = (styles.textAlign as any) || (props.textAlign as any) || 'left'
     const fontSize = styles.fontSize || (props.fontSize as string) || '1rem'
     const fontWeight = styles.fontWeight || (props.fontWeight as string) || '400'
-    const lineHeight = styles.lineHeight || (props.lineHeight as string) || '1.6'
+    const rawLineHeight = styles.lineHeight || (props.lineHeight as string) || '1.6'
+    const lineHeight = sanitizeLineHeight(rawLineHeight) || '1.6'
     const letterSpacing = styles.letterSpacing || (props.letterSpacing as string)
     const fontFamily = styles.fontFamily || (props.fontFamily as string)
     if (fontFamily) {
