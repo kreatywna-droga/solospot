@@ -76,4 +76,19 @@ export class StoreService {
     if (!tenantId) throw new Error('Tenant ID is required');
     return this.repo.updateStoreBranding(storeId, tenantId, branding);
   }
+
+  async deactivateStore(tenantId: string, storeId: string): Promise<Store> {
+    if (!tenantId) throw new Error('Tenant ID is required');
+    return this.updateStore(tenantId, storeId, { status: 'DEACTIVATED' });
+  }
+
+  async activateStore(tenantId: string, storeId: string): Promise<Store> {
+    if (!tenantId) throw new Error('Tenant ID is required');
+    return this.updateStore(tenantId, storeId, { status: 'ACTIVE' });
+  }
+
+  async deleteStore(tenantId: string, storeId: string): Promise<boolean> {
+    if (!tenantId) throw new Error('Tenant ID is required');
+    return this.repo.deleteStore(storeId, tenantId);
+  }
 }

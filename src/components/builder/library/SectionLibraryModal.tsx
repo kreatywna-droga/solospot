@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   X, Search, Plus, LayoutDashboard, UserCheck, Star, Sparkles,
   CreditCard, HelpCircle, ArrowRight, Mail, Compass, Grid, Layers,
-  ChevronRight, CheckCircle2,
+  ChevronRight, ChevronLeft, CheckCircle2,
 } from 'lucide-react';
 import { useBuilder } from '../state/BuilderProvider';
 import {
@@ -13,6 +13,7 @@ import {
   createBuilderNode,
   createSectionNode,
   generateNodeId,
+  NAVIGABLE_CATEGORY_MAP,
 } from '../../../../packages/builder-core/src';
 
 export type SectionCategory =
@@ -914,6 +915,15 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
     });
   }, [selectedCategory, searchQuery]);
 
+  const categoryScrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollCategories = (direction: 'left' | 'right') => {
+    if (categoryScrollRef.current) {
+      const scrollAmount = direction === 'left' ? -220 : 220;
+      categoryScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
   if (!isOpen) return null;
 
   const handleSelectTemplate = (template: SectionTemplateItem) => {
@@ -921,6 +931,121 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
     if (!targetPageId) return;
 
     const newSectionNode = template.createNode();
+    const navInfo = NAVIGABLE_CATEGORY_MAP[template.category];
+
+    if (navInfo) {
+      const cleanAnchor = navInfo.anchor.replace('#', '');
+      newSectionNode.props = {
+        ...newSectionNode.props,
+        anchorId: cleanAnchor,
+      };
+      newSectionNode.metadata = {
+        ...newSectionNode.metadata,
+        anchorId: cleanAnchor,
+        category: template.category,
+      };
+
+      const activePage = builderDoc.pages.find(p => p.id === targetPageId) || builderDoc.pages[0];
+      const sectionsList = activePage?.sections || [];
+      const navbarSection = sectionsList.find(s =>
+        s.type === 'navbar' ||
+        s.label.toLowerCase().includes('nawigacja') ||
+        s.label.toLowerCase().includes('menu') ||
+        s.label.toLowerCase().includes('header')
+      );
+
+      if (navbarSection) {
+        const existingLinks = ((navbarSection.props?.links as Array<{ label: string; href: string }>) || []);
+        const alreadyExists = existingLinks.some(
+          l => l.href === navInfo.anchor || l.label.toLowerCase() === navInfo.label.toLowerCase()
+        );
+        if (!alreadyExists) {
+          dispatch({
+            type: 'UPDATE_NODE',
+            nodeId: navbarSection.id,
+            updates: {
+              props: {
+                ...navbarSection.props,
+                links: [...existingLinks, { label: navInfo.label, href: navInfo.anchor }],
+              },
+            },
+            pageId: targetPageId,
+          });
+        }
+      } else {
+        // Automatically create a standard Header/Navbar at index 0 if not present
+        const navId = generateNodeId('section');
+        const navNode = createSectionNode({
+          id: navId,
+          type: 'section',
+          label: 'Nawigacja główna',
+          styles: {
+            backgroundColor: '#0d0d18',
+            padding: { top: '16px', right: '32px', bottom: '16px', left: '32px' },
+            borderWidth: '1px',
+            borderColor: 'rgba(255, 255, 255, 0.08)',
+            position: 'sticky' as any,
+            zIndex: 40,
+          },
+          props: {
+            links: [{ label: navInfo.label, href: navInfo.anchor }],
+          },
+          children: [
+            createBuilderNode({
+              id: generateNodeId('container'),
+              type: 'container',
+              label: 'Nav Container',
+              styles: {
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                width: '100%',
+                maxWidth: '1280px',
+                margin: { top: '0px', right: 'auto', bottom: '0px', left: 'auto' },
+              },
+              children: [
+                createBuilderNode({
+                  id: generateNodeId('heading'),
+                  type: 'heading',
+                  label: 'Logo / Nazwa Marki',
+                  props: { text: builderDoc.metadata.storeName || 'SoloSpot', level: 'h3' },
+                  styles: { fontSize: '20px', fontWeight: '800', color: '#ffffff' },
+                }),
+                createBuilderNode({
+                  id: generateNodeId('container'),
+                  type: 'container',
+                  label: 'Nav Links',
+                  styles: { display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '20px' },
+                  children: [
+                    createBuilderNode({
+                      id: generateNodeId('button'),
+                      type: 'button',
+                      label: navInfo.label,
+                      props: { text: navInfo.label, href: navInfo.anchor },
+                      styles: {
+                        backgroundColor: 'transparent',
+                        color: '#e2e8f0',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        padding: { top: '6px', right: '12px', bottom: '6px', left: '12px' },
+                      },
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+        dispatch({
+          type: 'INSERT_NODE',
+          parentId: null,
+          node: navNode,
+          index: 0,
+          pageId: targetPageId,
+        });
+      }
+    }
 
     dispatch({
       type: 'INSERT_NODE',
@@ -943,13 +1068,13 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
   };
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-150 select-none">
       <div
-        className="w-full max-w-4xl max-h-[85vh] bg-[#27272A] border border-white/[0.08] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
+        className="w-full max-w-4xl max-h-[85vh] bg-[#202024] border border-[#2D2D32] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-[#0e0e18]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#27272A] bg-[#18181B]">
           <div>
             <h2 className="text-base font-bold text-white flex items-center gap-2">
               <LayoutDashboard className="w-5 h-5 text-[#A78BFA]" />
@@ -972,44 +1097,68 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-colors"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-[#2D2D32] transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Search & Categories Bar */}
-        <div className="p-4 border-b border-white/5 bg-[#090910] flex flex-col gap-3">
+        {/* Search & Categories Bar — Unclipped with navigation controls */}
+        <div className="p-4 border-b border-[#27272A] bg-[#202024] flex flex-col gap-3">
           <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Szukaj sekcji po nazwie lub typie (np. Hero, Opinie, Cechy)..."
-              className="w-full pl-9 pr-4 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-violet-500"
+              placeholder="Szukaj sekcji po nazwie lub typie (np. Hero, Cennik, Opinie, Cechy)..."
+              className="w-full pl-9 pr-4 py-2 bg-[#2D2D32] border border-[#3F3F46]/50 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-violet-500"
             />
           </div>
 
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-            {CATEGORIES.map((cat) => {
-              const Icon = cat.icon;
-              const isSelected = selectedCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
-                    isSelected
-                      ? 'bg-violet-600 text-white shadow-md shadow-violet-600/30'
-                      : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08]'
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{cat.label}</span>
-                </button>
-              );
-            })}
+          <div className="relative flex items-center">
+            {/* Scroll Left Button */}
+            <button
+              onClick={() => scrollCategories('left')}
+              className="p-1.5 rounded-lg bg-[#27272A] hover:bg-[#2D2D32] border border-[#3F3F46]/40 text-zinc-400 hover:text-white mr-1.5 flex-shrink-0 transition-colors"
+              title="Przewiń kategorie w lewo"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+
+            {/* Scrollable Categories List */}
+            <div
+              ref={categoryScrollRef}
+              className="flex items-center gap-1.5 overflow-x-auto scroll-smooth py-1 px-1 scrollbar-none flex-1"
+            >
+              {CATEGORIES.map((cat) => {
+                const Icon = cat.icon;
+                const isSelected = selectedCategory === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+                      isSelected
+                        ? 'bg-violet-600 text-white shadow-md shadow-violet-600/30 border border-violet-500'
+                        : 'bg-[#27272A] text-zinc-400 hover:text-white hover:bg-[#2D2D32] border border-[#3F3F46]/30'
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{cat.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Scroll Right Button */}
+            <button
+              onClick={() => scrollCategories('right')}
+              className="p-1.5 rounded-lg bg-[#27272A] hover:bg-[#2D2D32] border border-[#3F3F46]/40 text-zinc-400 hover:text-white ml-1.5 flex-shrink-0 transition-colors"
+              title="Przewiń kategorie w prawo"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
@@ -1026,7 +1175,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
               <div
                 key={template.id}
                 onClick={() => handleSelectTemplate(template)}
-                className="group p-4 rounded-xl bg-white/[0.03] border border-white/5 hover:border-violet-500/50 hover:bg-violet-500/[0.04] transition-all cursor-pointer flex flex-col justify-between"
+                className="group p-4 rounded-xl bg-[#27272A] border border-[#2D2D32] hover:border-violet-500/50 hover:bg-[#2D2D32]/80 transition-all cursor-pointer flex flex-col justify-between shadow-sm"
               >
                 <div>
                   <div className="flex items-center justify-between mb-2">
@@ -1043,7 +1192,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
                     {template.description}
                   </p>
                   <div
-                    className={`w-full h-24 rounded-lg border border-white/[0.08] mb-3 flex items-center justify-center text-[11px] text-zinc-400 ${template.preview}`}
+                    className={`w-full h-24 rounded-lg border border-[#3F3F46]/40 mb-3 flex items-center justify-center text-[11px] text-zinc-400 ${template.preview}`}
                   >
                     <span className="opacity-70 group-hover:opacity-100 transition-opacity">
                       Podgląd sekcji
@@ -1051,7 +1200,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                <div className="flex items-center justify-between pt-2 border-t border-[#2D2D32]">
                   <span className="text-[11px] font-mono text-zinc-500 uppercase">
                     {template.category}
                   </span>

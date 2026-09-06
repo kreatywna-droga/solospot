@@ -1,4 +1,4 @@
-export type StoreStatus = 'CREATED' | 'PROVISIONING' | 'ACTIVE' | 'SUSPENDED' | 'ARCHIVED';
+export type StoreStatus = 'CREATED' | 'PROVISIONING' | 'ACTIVE' | 'DEACTIVATED' | 'SUSPENDED' | 'ARCHIVED';
 export type PublicationStatus = 'DRAFT' | 'READY' | 'PUBLISHED';
 
 export interface StoreBranding {
@@ -39,6 +39,7 @@ export interface CreateStoreRequest {
 export interface UpdateStoreRequest {
   name?: string;
   domain?: string;
+  status?: StoreStatus;
   config?: StoreConfig;
 }
 

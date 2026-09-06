@@ -43,7 +43,7 @@ function BuilderBreadcrumbs() {
   if (breadcrumbs.length === 0) return null
 
   return (
-    <nav className="h-7 flex items-center gap-1 px-4 border-b border-white/[0.06] bg-[#1a1a1e]/80 text-[10px]">
+    <nav className="h-7 flex items-center gap-1 px-4 border-b border-[#27272A] bg-[#18181B] text-[10px]">
       {breadcrumbs.map((crumb, index) => (
         <div key={crumb.id} className="flex items-center gap-1">
           {index > 0 && <span className="text-zinc-500 mx-0.5">/</span>}
@@ -301,7 +301,7 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
         {/* Inspector (Right Panel) — Phase 3 Inspector (Design + Content tabs) */}
         <aside
           style={{ width: `${rightWidth}px` }}
-          className="border-l border-white/[0.08] bg-[#202024] flex flex-col overflow-hidden flex-shrink-0 h-full select-none"
+          className="border-l border-[#27272A] bg-[#202024] flex flex-col overflow-hidden flex-shrink-0 h-full select-none"
         >
           <PhaseThreeInspector
             sectionId={canvas.selectedSectionId}

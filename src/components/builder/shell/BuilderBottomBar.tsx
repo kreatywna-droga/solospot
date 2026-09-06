@@ -40,11 +40,18 @@ export function BuilderBottomBar({ onSave, onPublish, saving, onTabChange }: Bui
     dispatch({ type: 'CANVAS', action: { type: 'SET_ZOOM', zoom: z } })
   }, [dispatch])
 
-  const zoomPresets = [50, 75, 100, 125, 150, 200]
+  const zoomPresets = [
+    { label: 'Dopasuj', value: 0 },
+    { label: '50%', value: 0.5 },
+    { label: '75%', value: 0.75 },
+    { label: '100%', value: 1.0 },
+    { label: '125%', value: 1.25 },
+    { label: '150%', value: 1.5 },
+  ]
 
   return (
-    <div className="h-10 flex items-center justify-between px-4 border-t border-white/[0.08]
-                    bg-[#1E1E22]/90 backdrop-blur-sm flex-shrink-0 z-20 select-none">
+    <div className="h-10 flex items-center justify-between px-4 border-t border-[#27272A]
+                    bg-[#18181B] backdrop-blur-sm flex-shrink-0 z-20 select-none">
       {/* Left: Zoom */}
       <div className="flex items-center gap-1">
         <button
@@ -56,21 +63,21 @@ export function BuilderBottomBar({ onSave, onPublish, saving, onTabChange }: Bui
         </button>
         <div className="relative group">
           <button className="px-2 py-1 rounded-md text-[11px] font-mono text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-all">
-            {Math.round(zoom * 100)}%
+            {zoom === 0 || !zoom ? 'Dopasuj (Fit)' : `${Math.round(zoom * 100)}%`}
           </button>
           <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block">
-            <div className="bg-[#202024] border border-white/[0.10] rounded-xl p-1 shadow-2xl flex items-center gap-0.5">
+            <div className="bg-[#202024] border border-[#2D2D32] rounded-xl p-1 shadow-2xl flex items-center gap-0.5">
               {zoomPresets.map(p => (
                 <button
-                  key={p}
-                  onClick={() => setZoom(p / 100)}
-                  className={`px-2 py-1 rounded-md text-[10px] font-mono transition-all
-                    ${Math.abs(zoom * 100 - p) < 1
+                  key={p.label}
+                  onClick={() => setZoom(p.value)}
+                  className={`px-2 py-1 rounded-md text-[10px] font-mono transition-all ${
+                    (p.value === 0 && (zoom === 0 || !zoom)) || (p.value > 0 && Math.abs(zoom - p.value) < 0.01)
                       ? 'bg-[#8B5CF6]/15 text-[#A78BFA]'
-                      : 'text-zinc-500 hover:text-white hover:bg-white/[0.05]'
-                    }`}
+                      : 'text-zinc-400 hover:text-white hover:bg-white/[0.05]'
+                  }`}
                 >
-                  {p}%
+                  {p.label}
                 </button>
               ))}
             </div>

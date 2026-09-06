@@ -13,12 +13,13 @@ import {
   ChevronLeft, Monitor, Tablet, Smartphone,
   Undo2, Redo2, Save, Zap, AlertCircle, CheckCircle2,
   PanelLeft, Layers, ImageIcon, Bot, History,
-  Search, Command, Plus, Palette, Eye, Sparkles,
+  Search, Command, Plus, Palette, Eye, Sparkles, Power,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useBuilder, useBuilderHistory } from '../state/BuilderProvider'
 import { VIEWPORT_PRESETS, ViewportLabel, RuntimeMode } from '../../../../packages/builder-core/src/CanvasState'
 import { WebsiteTemplatePickerModal } from '../templates/WebsiteTemplatePickerModal'
+import { StoreLifecycleModal } from '../modals/StoreLifecycleModal'
 
 export type StudioTab = 'pages' | 'layers' | 'components' | 'assets' | 'style' | 'ai' | 'history'
 
@@ -51,6 +52,7 @@ export function BuilderTopBar({
   const { canUndo, canRedo, undo, redo } = useBuilderHistory()
   const [showCommandPalette, setShowCommandPalette] = useState(false)
   const [showTemplatePicker, setShowTemplatePicker] = useState(false)
+  const [showLifecycleModal, setShowLifecycleModal] = useState(false)
 
   const setViewport = useCallback((label: ViewportLabel) => {
     dispatch({
@@ -70,14 +72,14 @@ export function BuilderTopBar({
 
   return (
     <>
-      <div className="h-14 flex items-center justify-between px-4 border-b border-white/[0.08]
-                      bg-[#1E1E22]/95 backdrop-blur-md flex-shrink-0 z-30 select-none">
+      <div className="h-14 flex items-center justify-between px-4 border-b border-[#27272A]
+                      bg-[#18181B] backdrop-blur-md flex-shrink-0 z-30 select-none">
         {/* Left: back + store info */}
         <div className="flex items-center gap-3 min-w-0">
           <Link
             href={`/dashboard/stores/${storeId}`}
             className="flex items-center justify-center w-9 h-9 rounded-xl
-                       bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08]
+                       bg-[#202024] hover:bg-[#27272A] border border-[#27272A]
                        text-zinc-400 hover:text-white transition-all"
             title="Powrót do dashboardu"
           >
@@ -99,12 +101,22 @@ export function BuilderTopBar({
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-zinc-500 font-mono truncate">{document.metadata.storeSlug}</p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <p className="text-[11px] text-zinc-500 font-mono truncate">{document.metadata.storeSlug}</p>
+              <button
+                onClick={() => setShowLifecycleModal(true)}
+                className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#202024] hover:bg-[#27272A] border border-[#2D2D32] text-[10px] text-zinc-300 hover:text-white transition-all"
+                title="Zarządzaj cyklem życia sklepu (Aktywuj / Dezaktywuj / Usuń)"
+              >
+                <Power className="w-2.5 h-2.5 text-emerald-400" />
+                <span>Sklep</span>
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Center: Navigation Tabs */}
-        <div className="flex items-center gap-0.5 bg-white/[0.04] rounded-xl p-0.5 border border-white/[0.06]">
+        <div className="flex items-center gap-0.5 bg-[#202024] rounded-xl p-0.5 border border-[#27272A]">
           {TABS.map(tab => (
             <button
               key={tab.id}
@@ -112,7 +124,7 @@ export function BuilderTopBar({
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all
                 ${activeTab === tab.id
                   ? 'bg-[#8B5CF6]/15 text-[#A78BFA] border border-[#8B5CF6]/25 shadow-lg shadow-[#8B5CF6]/10'
-                  : 'text-zinc-500 hover:text-white hover:bg-white/[0.05] border border-transparent'
+                  : 'text-zinc-400 hover:text-white hover:bg-white/[0.05] border border-transparent'
                 }`}
               title={`${tab.label} (${tab.shortcut})`}
             >
@@ -143,7 +155,7 @@ export function BuilderTopBar({
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
                 canvas.runtimeMode === 'PREVIEW'
                   ? 'bg-amber-500/15 text-amber-300 border-amber-500/30 shadow-sm'
-                  : 'bg-white/[0.04] text-zinc-300 border-white/[0.08] hover:bg-white/[0.08] hover:text-white'
+                  : 'bg-[#202024] text-zinc-300 border-[#2D2D32] hover:bg-[#27272A] hover:text-white'
               }`}
               title="Przełącz tryb podglądu"
             >
@@ -152,10 +164,10 @@ export function BuilderTopBar({
             </button>
           </div>
 
-          <div className="w-px h-6 bg-white/[0.08] mx-1" />
+          <div className="w-px h-6 bg-[#27272A] mx-1" />
 
           {/* Viewport */}
-          <div className="flex items-center gap-0.5 bg-white/[0.04] rounded-xl p-0.5 border border-white/[0.06]">
+          <div className="flex items-center gap-0.5 bg-[#202024] rounded-xl p-0.5 border border-[#27272A]">
             {(['DESKTOP', 'TABLET', 'MOBILE'] as ViewportLabel[]).map(label => (
               <button
                 key={label}
@@ -174,14 +186,14 @@ export function BuilderTopBar({
             ))}
           </div>
 
-          <div className="w-px h-6 bg-white/[0.08] mx-1" />
+          <div className="w-px h-6 bg-[#27272A] mx-1" />
 
           {/* Undo/Redo */}
-          <div className="flex items-center gap-0.5 bg-white/[0.04] rounded-xl p-0.5 border border-white/[0.06]">
+          <div className="flex items-center gap-0.5 bg-[#202024] rounded-xl p-0.5 border border-[#27272A]">
             <button
               onClick={undo}
               disabled={!canUndo}
-              className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-white/[0.05]
+              className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.05]
                          disabled:opacity-30 disabled:cursor-not-allowed transition-all"
               title="Undo (Ctrl+Z)"
             >
@@ -190,7 +202,7 @@ export function BuilderTopBar({
             <button
               onClick={redo}
               disabled={!canRedo}
-              className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-white/[0.05]
+              className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.05]
                          disabled:opacity-30 disabled:cursor-not-allowed transition-all"
               title="Redo (Ctrl+Shift+Z)"
             >
@@ -198,14 +210,14 @@ export function BuilderTopBar({
             </button>
           </div>
 
-          <div className="w-px h-6 bg-white/[0.08] mx-1" />
+          <div className="w-px h-6 bg-[#27272A] mx-1" />
 
           {/* Save */}
           <button
             onClick={onSave}
             disabled={saving}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08]
-                       text-xs font-medium text-zinc-300 hover:bg-white/[0.08] hover:text-white
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#202024] border border-[#2D2D32]
+                       text-xs font-medium text-zinc-300 hover:bg-[#27272A] hover:text-white
                        transition-all disabled:opacity-50"
           >
             <Save className="w-3.5 h-3.5" />
@@ -228,8 +240,8 @@ export function BuilderTopBar({
           {/* Command Palette */}
           <button
             onClick={() => setShowCommandPalette(true)}
-            className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08]
-                       text-[10px] text-zinc-500 hover:text-white hover:bg-white/[0.08] transition-all"
+            className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-[#202024] border border-[#2D2D32]
+                       text-[10px] text-zinc-400 hover:text-white hover:bg-[#27272A] transition-all"
             title="Command Palette (Ctrl+K)"
           >
             <Command className="w-3 h-3" />
@@ -247,6 +259,14 @@ export function BuilderTopBar({
       <WebsiteTemplatePickerModal
         isOpen={showTemplatePicker}
         onClose={() => setShowTemplatePicker(false)}
+      />
+
+      {/* Store Lifecycle Modal */}
+      <StoreLifecycleModal
+        storeId={storeId}
+        storeName={document.metadata.storeName}
+        isOpen={showLifecycleModal}
+        onClose={() => setShowLifecycleModal(false)}
       />
     </>
   )
@@ -323,15 +343,15 @@ function CommandPaletteModal({ onClose }: { onClose: () => void }): React.ReactE
     : commands
 
   return (
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] bg-black/60 backdrop-blur-sm"
+      onClick={onClose}
+    >
       <div
-        className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      >
-        <div
-          className="w-full max-w-xl bg-[#202024] border border-white/[0.10] rounded-2xl shadow-2xl overflow-hidden"
+        className="w-full max-w-xl bg-[#202024] border border-[#2D2D32] rounded-2xl shadow-2xl overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.08]">
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-[#27272A]">
           <Search className="w-4 h-4 text-zinc-500" />
           <input
             type="text"
@@ -371,4 +391,3 @@ function CommandPaletteModal({ onClose }: { onClose: () => void }): React.ReactE
     </div>
   )
 }
-

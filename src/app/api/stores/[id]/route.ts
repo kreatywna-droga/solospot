@@ -47,6 +47,7 @@ export async function PATCH(
     const updateReq: UpdateStoreRequest = {
       name: body.name,
       domain: body.domain,
+      status: body.status,
       config: config as any,
     };
 
@@ -59,6 +60,29 @@ export async function PATCH(
     }
     if (err.message?.startsWith('Validation failed')) {
       return NextResponse.json({ success: false, error: err.message }, { status: 400 });
+    }
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  try {
+    const session = await resolveTenantSession();
+    if (!session.isAuthenticated || !session.tenantId) {
+      return NextResponse.json({ error: 'No tenant associated with this account' }, { status: 403 });
+    }
+
+    const storeService = new StoreService();
+    await storeService.deleteStore(session.tenantId, id);
+
+    return NextResponse.json({ success: true, message: 'Store deleted successfully' });
+  } catch (err: any) {
+    if (err.message === 'Store not found') {
+      return NextResponse.json({ success: false, error: err.message }, { status: 404 });
     }
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }

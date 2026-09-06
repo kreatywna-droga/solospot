@@ -389,6 +389,14 @@ function CanvasNode({
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
     onSelectNode(node.id, e)
+    const href = ((props.href as string) || (node.props?.href as string) || '')
+    if (href && href.startsWith('#')) {
+      const anchor = href.slice(1)
+      const targetEl = window.document.getElementById(anchor) || window.document.querySelector(`[data-section-anchor="${anchor}"]`)
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }
   }
 
   const handleDoubleClick = (e: React.MouseEvent) => {
@@ -1978,7 +1986,37 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
   }, [dispatch, canvas.selectedSectionId])
 
   const containerRef = useRef<HTMLDivElement>(null)
-  const zoom = canvas.zoom ?? 1.0
+  const [containerWidth, setContainerWidth] = useState<number>(0)
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const updateWidth = () => {
+      if (el) setContainerWidth(el.clientWidth)
+    }
+    updateWidth()
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setContainerWidth(entry.contentRect.width)
+      }
+    })
+    ro.observe(el)
+    window.addEventListener('resize', updateWidth)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', updateWidth)
+    }
+  }, [])
+
+  // Auto-fit calculations
+  const viewportWidth = VIEWPORT_PRESETS[canvas.viewport.label].width
+  const manualZoom = canvas.zoom ?? 0
+  const fitScale = (containerWidth > 0 && viewportWidth > 0)
+    ? Math.min(1.0, Math.max(0.1, containerWidth / viewportWidth))
+    : 1.0
+  const zoom = (manualZoom > 0 && manualZoom !== 1.0)
+    ? manualZoom
+    : (containerWidth > 0 && containerWidth < viewportWidth ? fitScale : (manualZoom || 1.0))
 
   // ---------------------------------------------------------------------------
   // Marquee box-select (real): starts only on empty canvas background,
@@ -2124,7 +2162,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
 
     const startX = e.clientX
     const startY = e.clientY
-    const zoomVal = canvas.zoom ?? 1.0
+    const zoomVal = zoom
 
     const isTablet = canvas.viewport.label === 'TABLET'
     const isMobile = canvas.viewport.label === 'MOBILE'
@@ -2254,12 +2292,10 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
     }
   }, [dispatch])
 
-  const viewportWidth = VIEWPORT_PRESETS[canvas.viewport.label].width
-
   return (
     <div
       ref={containerRef}
-      className="flex-1 flex flex-col items-center justify-start overflow-auto bg-[#09090B] p-8"
+      className="flex-1 flex flex-col items-center justify-start overflow-y-auto overflow-x-hidden bg-[#09090B] p-0 relative w-full h-full select-none"
       onClick={handleCanvasClick}
     >
       {/* Scalable Canvas Frame Container */}
@@ -2267,22 +2303,25 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
         style={{
           transform: `scale(${zoom})`,
           transformOrigin: 'top center',
-          transition: 'transform 0.15s cubic-bezier(0.2, 0, 0, 1)',
+          transition: 'transform 0.12s cubic-bezier(0.2, 0, 0, 1)',
           width: viewportWidth,
           maxWidth: zoom <= 1 ? '100%' : undefined,
           marginBottom: zoom > 1 ? `${(zoom - 1) * 800}px` : undefined,
         }}
-        className="flex justify-center flex-shrink-0"
+        className="flex justify-center flex-shrink-0 min-h-full"
       >
-        {/* Canvas frame */}
+        {/* Canvas frame — clean website page sheet inside workspace */}
         <motion.div
           key={canvas.viewport.label}
           ref={canvasFrameRef}
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.2 }}
-          style={{ width: '100%' }}
-          className="relative bg-white rounded-2xl shadow-2xl shadow-black/50 border border-black/20 overflow-hidden min-h-[600px] w-full transition-colors"
+          style={{
+            width: '100%',
+            backgroundColor: (activePage as any)?.styles?.backgroundColor || '#ffffff',
+          }}
+          className="relative shadow-2xl shadow-black/80 overflow-hidden min-h-screen w-full transition-colors"
           onClick={e => {
             e.stopPropagation()
             // Click on empty canvas background (not a section/node) clears selection
@@ -2523,17 +2562,17 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
               const isDragSource = isDragging && canvas.dragState?.sectionId === node.id
               return (
                 <React.Fragment key={node.id}>
-                  {/* Glowing Section Insertion Beacon */}
+                  {/* Glowing Section Insertion Magnet / Anchor */}
                   {isSectionLibraryOpen && insertSectionIndex === index && (
                     <div
                       data-testid="section-insertion-beacon"
-                      className="my-3 mx-4 p-4 rounded-xl border-2 border-dashed border-violet-500 bg-violet-950/40 text-center animate-pulse shadow-xl shadow-violet-500/25 z-30 flex flex-col items-center justify-center gap-1 backdrop-blur-sm"
+                      className="my-3 mx-4 p-5 rounded-xl border-2 border-dashed border-violet-500 bg-violet-950/70 text-center animate-pulse shadow-2xl shadow-violet-500/40 z-30 flex flex-col items-center justify-center gap-1.5 backdrop-blur-md"
                     >
-                      <div className="flex items-center justify-center gap-2 text-xs font-bold text-violet-300 tracking-wide uppercase">
-                        <Plus className="w-4 h-4 text-violet-400" />
-                        <span>Tu zostanie wstawiona nowa sekcja (Pozycja #{index + 1})</span>
+                      <div className="flex items-center justify-center gap-2 text-sm font-extrabold text-violet-200 tracking-wider uppercase">
+                        <Plus className="w-5 h-5 text-violet-400" />
+                        <span>✚ WSTAW TUTAJ (POZYCJA #{index + 1})</span>
                       </div>
-                      <p className="text-[11px] text-slate-300">
+                      <p className="text-xs text-violet-300 font-medium">
                         {index === 0
                           ? 'Na samym początku strony'
                           : `Pomiędzy "${sections[index - 1]?.label || 'Sekcja #' + index}" a "${sections[index]?.label || 'Sekcja #' + (index + 1)}"`}
@@ -2559,13 +2598,15 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                   </div>
 
                   <div
+                    id={String((node.props as any)?.anchorId || (node.metadata as any)?.anchorId || node.id)}
                     data-section-id={node.id}
                     data-layer-id={node.id}
+                    data-section-anchor={String((node.props as any)?.anchorId || (node.metadata as any)?.anchorId || '')}
                     style={{ 
                       opacity: isDragSource ? 0.3 : 1,
                       transform: formatTransform(node.styles || {}),
                     }}
-                    className="relative w-full"
+                    className="relative w-full scroll-mt-16"
                   >
                     <SectionBlock
                       node={node}
@@ -2583,17 +2624,17 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
               )
             })}
 
-            {/* Glowing Section Insertion Beacon after the last section */}
+            {/* Glowing Section Insertion Magnet after the last section */}
             {isSectionLibraryOpen && insertSectionIndex === sections.length && (
               <div
                 data-testid="section-insertion-beacon"
-                className="my-3 mx-4 p-4 rounded-xl border-2 border-dashed border-violet-500 bg-violet-950/40 text-center animate-pulse shadow-xl shadow-violet-500/25 z-30 flex flex-col items-center justify-center gap-1 backdrop-blur-sm"
+                className="my-3 mx-4 p-5 rounded-xl border-2 border-dashed border-violet-500 bg-violet-950/70 text-center animate-pulse shadow-2xl shadow-violet-500/40 z-30 flex flex-col items-center justify-center gap-1.5 backdrop-blur-md"
               >
-                <div className="flex items-center justify-center gap-2 text-xs font-bold text-violet-300 tracking-wide uppercase">
-                  <Plus className="w-4 h-4 text-violet-400" />
-                  <span>Tu zostanie wstawiona nowa sekcja (Na końcu strony, Pozycja #{sections.length + 1})</span>
+                <div className="flex items-center justify-center gap-2 text-sm font-extrabold text-violet-200 tracking-wider uppercase">
+                  <Plus className="w-5 h-5 text-violet-400" />
+                  <span>✚ WSTAW TUTAJ (NA KOŃCU STRONY)</span>
                 </div>
-                <p className="text-[11px] text-slate-300">
+                <p className="text-xs text-violet-300 font-medium">
                   Po sekcji: &quot;{sections[sections.length - 1]?.label || 'Sekcja #' + sections.length}&quot;
                 </p>
               </div>

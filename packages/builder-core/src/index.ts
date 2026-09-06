@@ -539,3 +539,6 @@ export * from './rendering';
 // 100+ Google Fonts Catalog
 export * from './fonts/FontCatalog';
 
+// Navigation Shortcuts
+export * from './NavigationShortcuts';
+

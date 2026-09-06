@@ -40,6 +40,13 @@ export function validateUpdateStore(req: UpdateStoreRequest): ValidationResult {
     }
   }
 
+  if (req.status !== undefined) {
+    const validStatuses = ['CREATED', 'PROVISIONING', 'ACTIVE', 'DEACTIVATED', 'SUSPENDED', 'ARCHIVED'];
+    if (!validStatuses.includes(req.status)) {
+      errors.push(`Invalid store status: ${req.status}`);
+    }
+  }
+
   if (req.domain !== undefined && req.domain !== null && !/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/.test(req.domain)) {
     errors.push('Invalid domain format');
   }

@@ -85,6 +85,7 @@ export class StoreRepository {
     const updates: Record<string, unknown> = { updated_at: now };
     if (req.name !== undefined) updates.name = req.name;
     if (req.domain !== undefined) updates.domain = req.domain;
+    if (req.status !== undefined) updates.status = req.status;
     if (req.config !== undefined) updates.config = req.config;
 
     const { data, error } = await supabase
@@ -100,6 +101,21 @@ export class StoreRepository {
     }
 
     return this.mapStore(data);
+  }
+
+  async deleteStore(id: string, tenantId: string): Promise<boolean> {
+    const supabase = getServiceSupabase();
+    const { error } = await supabase
+      .from(this.table)
+      .delete()
+      .eq('id', id)
+      .eq('tenant_id', tenantId);
+
+    if (error) {
+      throw new Error(`StoreRepository.deleteStore failed: ${error.message}`);
+    }
+
+    return true;
   }
 
   async updateStorePublication(

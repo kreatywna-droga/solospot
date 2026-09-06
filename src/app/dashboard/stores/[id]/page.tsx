@@ -8,7 +8,7 @@ import {
   Package, LayoutDashboard, Eye, Plus, Trash2, Edit, Search, Filter,
   ShoppingCart, CreditCard, BarChart3, Layers, FileText, ImageIcon,
   ArrowRight, ChevronDown, MoreVertical, Star, Truck, Zap,
-  Mail, Download, Loader2, Info, AlertTriangle, ShieldCheck
+  Mail, Download, Loader2, Info, AlertTriangle, ShieldCheck, Power, ShieldAlert
 } from 'lucide-react'
 
 import { PageContainer } from '@/components/ui/PageContainer'
@@ -74,6 +74,7 @@ const tabs = [
   { id: 'packages', label: 'Pakiety & Dodatki', icon: <Layers className="w-4 h-4" /> },
   { id: 'domains', label: 'Domeny', icon: <Globe className="w-4 h-4" /> },
   { id: 'publish', label: 'Publikacja sklepu', icon: <Zap className="w-4 h-4" /> },
+  { id: 'lifecycle', label: 'Cykl życia & Status', icon: <Power className="w-4 h-4" /> },
 ]
 
 const sectionTypes = [
@@ -127,6 +128,52 @@ export default function StoreManagementPage({ params }: { params: Promise<{ id: 
   const [secondaryColor, setSecondaryColor] = useState('#d946ef')
   const [font, setFont] = useState('Inter')
   const [description, setDescription] = useState('')
+
+  // Lifecycle States
+  const [lifecycleLoading, setLifecycleLoading] = useState(false)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+
+  const handleToggleDeactivate = async () => {
+    if (!store) return
+    setLifecycleLoading(true)
+    const targetStatus = store.status === 'DEACTIVATED' ? 'ACTIVE' : 'DEACTIVATED'
+    try {
+      const res = await fetch(`/api/stores/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: targetStatus }),
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        setStore(prev => prev ? { ...prev, status: targetStatus } : null)
+      } else {
+        alert(data.error || 'Błąd podczas zmiany statusu')
+      }
+    } catch (e: any) {
+      alert(e.message || 'Błąd połączenia')
+    } finally {
+      setLifecycleLoading(false)
+    }
+  }
+
+  const handleDeleteStore = async () => {
+    if (!store || deleteConfirmText.trim() !== store.name.trim()) return
+    setLifecycleLoading(true)
+    try {
+      const res = await fetch(`/api/stores/${id}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        window.location.href = '/dashboard'
+      } else {
+        alert(data.error || 'Błąd podczas usuwania sklepu')
+      }
+    } catch (e: any) {
+      alert(e.message || 'Błąd połączenia')
+    } finally {
+      setLifecycleLoading(false)
+    }
+  }
 
   // Load General Store Info
   useEffect(() => {
@@ -776,6 +823,109 @@ export default function StoreManagementPage({ params }: { params: Promise<{ id: 
                 </div>
               </CardBody>
             </Card>
+          )}
+
+          {/* Tab 7: Store Lifecycle Controls */}
+          {activeTab === 'lifecycle' && (
+            <div className="space-y-6 max-w-2xl">
+              <Card>
+                <CardHeader>
+                  <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    <Power className="w-4 h-4 text-violet-400" />
+                    <span>Stan i Dostępność Sklepu</span>
+                  </h3>
+                </CardHeader>
+                <CardBody className="space-y-6">
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5">
+                    <div>
+                      <span className="text-xs text-slate-400">Aktualny status operacyjny:</span>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant={store?.status === 'DEACTIVATED' ? 'warning' : 'success'} dot>
+                          {store?.status === 'DEACTIVATED' ? 'Dezaktywowany (Zawieszony)' : 'Aktywny (Online)'}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <Button
+                      onClick={handleToggleDeactivate}
+                      loading={lifecycleLoading}
+                      variant={store?.status === 'DEACTIVATED' ? 'primary' : 'outline'}
+                      className={store?.status === 'DEACTIVATED' ? 'bg-emerald-600 hover:bg-emerald-500 text-white font-bold' : 'border-amber-500/40 text-amber-300 hover:bg-amber-500/10 font-bold'}
+                    >
+                      {store?.status === 'DEACTIVATED' ? 'Aktywuj sklep' : 'Dezaktywuj sklep'}
+                    </Button>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-2 text-xs text-slate-400">
+                    <h4 className="font-semibold text-white">Co oznacza dezaktywacja sklepu?</h4>
+                    <p>
+                      Dezaktywacja tymczasowo wstrzymuje widoczność sklepu dla klientów zewnętrznych. Wszystkie strony, produkty, zamówienia, multimedia i konfiguracja są w 100% zachowane. Możesz w każdej chwili przywrócić aktywność sklepu jednym kliknięciem.
+                    </p>
+                  </div>
+                </CardBody>
+              </Card>
+
+              {/* Destructive Zone */}
+              <Card className="border-rose-500/20 bg-rose-950/10">
+                <CardHeader>
+                  <h3 className="text-sm font-bold text-rose-300 uppercase tracking-wider flex items-center gap-2">
+                    <ShieldAlert className="w-4 h-4 text-rose-400" />
+                    <span>Strefa Niebezpieczna — Usunięcie Sklepu</span>
+                  </h3>
+                </CardHeader>
+                <CardBody className="space-y-4">
+                  <p className="text-xs text-slate-400">
+                    Usunięcie sklepu jest operacją nieodwracalną. Wszystkie powiązane strony, szablony i ustawienia zostaną bezpowrotnie usunięte.
+                  </p>
+
+                  {!deleteConfirmOpen ? (
+                    <Button
+                      variant="danger"
+                      onClick={() => setDeleteConfirmOpen(true)}
+                      icon={<Trash2 className="w-4 h-4" />}
+                    >
+                      Usuń sklep
+                    </Button>
+                  ) : (
+                    <div className="p-4 rounded-xl bg-black/40 border border-rose-500/30 space-y-3">
+                      <p className="text-xs text-rose-200">
+                        Aby potwierdzić trwałe usunięcie, wpisz dokładną nazwę sklepu:
+                        <strong className="block text-white font-mono mt-1 bg-black/60 p-2 rounded border border-rose-500/30">
+                          {store?.name}
+                        </strong>
+                      </p>
+
+                      <Input
+                        type="text"
+                        value={deleteConfirmText}
+                        onChange={(e) => setDeleteConfirmText(e.target.value)}
+                        placeholder="Wpisz nazwę sklepu..."
+                      />
+
+                      <div className="flex items-center gap-3 pt-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setDeleteConfirmOpen(false)
+                            setDeleteConfirmText('')
+                          }}
+                        >
+                          Anuluj
+                        </Button>
+                        <Button
+                          variant="danger"
+                          loading={lifecycleLoading}
+                          disabled={deleteConfirmText.trim() !== store?.name.trim()}
+                          onClick={handleDeleteStore}
+                        >
+                          Potwierdzam, usuń sklep na zawsze
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </CardBody>
+              </Card>
+            </div>
           )}
         </motion.div>
       </AnimatePresence>

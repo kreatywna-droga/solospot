@@ -44,7 +44,7 @@ export function BuilderLeftSidebar({ activeTab, onTabChange, width = 320 }: Buil
   return (
     <aside
       style={{ width: `${width}px` }}
-      className="border-r border-white/[0.08] bg-[#202024] flex flex-col overflow-hidden flex-shrink-0 h-full select-none"
+      className="border-r border-[#27272A] bg-[#202024] flex flex-col overflow-hidden flex-shrink-0 h-full select-none"
     >
       <div className="flex-1 overflow-hidden">
         {currentTab === 'pages' && <PagesPanel />}
