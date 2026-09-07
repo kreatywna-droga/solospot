@@ -1,0 +1,192 @@
+import React from 'react';
+import { NodeStyles } from '../../../../packages/builder-core/src/BuilderDocument';
+
+export interface TypographyPreset {
+  id: string;
+  name: string;
+  category: 'headings' | 'body' | 'special';
+  type: 'heading' | 'text';
+  iconName?: string;
+  icon?: React.ElementType;
+  defaultText: string;
+  styles: Partial<NodeStyles>;
+  previewStyle: React.CSSProperties;
+}
+
+export const TYPOGRAPHY_PRESETS: readonly TypographyPreset[] = [
+  {
+    id: 'hero-title',
+    name: 'Hero Title',
+    category: 'headings',
+    type: 'heading',
+    iconName: 'Heading1',
+    icon: (() => null) as any,
+    defaultText: 'Główny Tytuł Sekcji',
+    styles: {
+      fontSize: '56px',
+      fontWeight: '800',
+      lineHeight: '1.1',
+      letterSpacing: '-1.5px',
+      color: '#ffffff',
+      margin: { top: '0px', right: '0px', bottom: '16px', left: '0px' },
+    },
+    previewStyle: { fontSize: '20px', fontWeight: 800, letterSpacing: '-0.5px' },
+  },
+  {
+    id: 'heading-1',
+    name: 'Nagłówek H1',
+    category: 'headings',
+    type: 'heading',
+    iconName: 'Heading1',
+    icon: (() => null) as any,
+    defaultText: 'Nagłówek Poziomu 1',
+    styles: {
+      fontSize: '40px',
+      fontWeight: '700',
+      lineHeight: '1.2',
+      letterSpacing: '-1px',
+      color: '#ffffff',
+      margin: { top: '0px', right: '0px', bottom: '12px', left: '0px' },
+    },
+    previewStyle: { fontSize: '18px', fontWeight: 700 },
+  },
+  {
+    id: 'heading-2',
+    name: 'Nagłówek H2',
+    category: 'headings',
+    type: 'heading',
+    iconName: 'Heading2',
+    icon: (() => null) as any,
+    defaultText: 'Podtytuł Sekcji H2',
+    styles: {
+      fontSize: '32px',
+      fontWeight: '700',
+      lineHeight: '1.25',
+      letterSpacing: '-0.5px',
+      color: '#ffffff',
+      margin: { top: '0px', right: '0px', bottom: '10px', left: '0px' },
+    },
+    previewStyle: { fontSize: '16px', fontWeight: 700 },
+  },
+  {
+    id: 'heading-3',
+    name: 'Nagłówek H3',
+    category: 'headings',
+    type: 'heading',
+    iconName: 'Heading3',
+    icon: (() => null) as any,
+    defaultText: 'Tytuł Grupy H3',
+    styles: {
+      fontSize: '24px',
+      fontWeight: '600',
+      lineHeight: '1.3',
+      color: '#ffffff',
+      margin: { top: '0px', right: '0px', bottom: '8px', left: '0px' },
+    },
+    previewStyle: { fontSize: '14px', fontWeight: 600 },
+  },
+  {
+    id: 'subheading',
+    name: 'Subheading',
+    category: 'headings',
+    type: 'text',
+    iconName: 'Type',
+    icon: (() => null) as any,
+    defaultText: 'Wprowadzenie do sekcji lub kluczowy opis tematu.',
+    styles: {
+      fontSize: '20px',
+      fontWeight: '500',
+      lineHeight: '1.4',
+      color: '#94a3b8',
+      margin: { top: '0px', right: '0px', bottom: '16px', left: '0px' },
+    },
+    previewStyle: { fontSize: '13px', fontWeight: 500, color: '#94a3b8' },
+  },
+  {
+    id: 'paragraph',
+    name: 'Akapit Tekstu',
+    category: 'body',
+    type: 'text',
+    iconName: 'AlignLeft',
+    icon: (() => null) as any,
+    defaultText: 'Opisuj zalety oferty, funkcje produktu i informacje pomocne dla klientów w prosty i czytelny sposób.',
+    styles: {
+      fontSize: '16px',
+      fontWeight: '400',
+      lineHeight: '1.6',
+      color: '#cbd5e1',
+      margin: { top: '0px', right: '0px', bottom: '16px', left: '0px' },
+    },
+    previewStyle: { fontSize: '12px', fontWeight: 400, color: '#cbd5e1' },
+  },
+  {
+    id: 'quote',
+    name: 'Cytat / Wyróżnienie',
+    category: 'special',
+    type: 'text',
+    iconName: 'Quote',
+    icon: (() => null) as any,
+    defaultText: '„Sukces e-commerce wymaga precyzji w każdym detalu.”',
+    styles: {
+      fontSize: '18px',
+      fontWeight: '400',
+      lineHeight: '1.5',
+      color: '#e2e8f0',
+      borderLeft: '3px solid #8b5cf6',
+      padding: { top: '4px', right: '0px', bottom: '4px', left: '16px' },
+      margin: { top: '0px', right: '0px', bottom: '16px', left: '0px' },
+    },
+    previewStyle: { fontSize: '12px', fontStyle: 'italic', borderLeft: '2px solid #8b5cf6', paddingLeft: '8px' },
+  },
+  {
+    id: 'caption',
+    name: 'Podpis (Caption)',
+    category: 'body',
+    type: 'text',
+    iconName: 'FileText',
+    icon: (() => null) as any,
+    defaultText: 'Ilustracja 1: Prezentacja produktu na platformie SoloSpot',
+    styles: {
+      fontSize: '12px',
+      fontWeight: '400',
+      lineHeight: '1.4',
+      color: '#64748b',
+    },
+    previewStyle: { fontSize: '11px', color: '#64748b' },
+  },
+  {
+    id: 'label',
+    name: 'Etykieta / Badge',
+    category: 'special',
+    type: 'text',
+    iconName: 'Tag',
+    icon: (() => null) as any,
+    defaultText: 'NOWOŚĆ 2026',
+    styles: {
+      fontSize: '11px',
+      fontWeight: '700',
+      letterSpacing: '1px',
+      color: '#a78bfa',
+      backgroundColor: 'rgba(139, 92, 246, 0.15)',
+      padding: { top: '4px', right: '8px', bottom: '4px', left: '8px' },
+      borderRadius: '4px',
+      display: 'inline-block',
+    },
+    previewStyle: { fontSize: '10px', fontWeight: 700, letterSpacing: '0.5px', color: '#a78bfa' },
+  },
+  {
+    id: 'custom-text',
+    name: 'Dowolny Tekst',
+    category: 'body',
+    type: 'text',
+    iconName: 'Type',
+    icon: (() => null) as any,
+    defaultText: 'Kliknij dwukrotnie, aby edytować tekst...',
+    styles: {
+      fontSize: '16px',
+      fontWeight: '400',
+      color: '#ffffff',
+    },
+    previewStyle: { fontSize: '12px', color: '#ffffff' },
+  },
+];

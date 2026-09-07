@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test';
+import { describe, test, expect } from 'vitest';
 import { resolveAssetToMutationPayload, applyAssetToNode } from './AssetResolver';
 import type { UniversalAsset } from './AssetTypes';
 

@@ -7,8 +7,8 @@ import {
   BuilderNode,
   SectionNode,
 } from '../index';
-import { SECTION_TEMPLATES, CATEGORIES } from '../../../../src/components/builder/library/SectionLibraryModal';
-import { WEBSITE_TEMPLATES } from '../../../../src/components/builder/templates/WebsiteTemplatePickerModal';
+import { SECTION_TEMPLATES } from '../../../../src/components/builder/library/SectionTemplatesData';
+import { WEBSITE_TEMPLATES } from '../../../../src/components/builder/templates/WebsiteTemplatesData';
 
 describe('SoloSpot Builder — Simple-First / Canvas-First UX Transformation', () => {
   describe('Visual Section Library (11 Categories)', () => {

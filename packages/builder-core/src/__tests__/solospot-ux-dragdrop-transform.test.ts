@@ -9,7 +9,7 @@ import {
   getFontsByCategory,
   searchFonts,
 } from '../index';
-import { TYPOGRAPHY_PRESETS } from '../../../../src/components/builder/sidebar/TypographyPresetsPanel';
+import { TYPOGRAPHY_PRESETS } from '../../../../src/components/builder/sidebar/TypographyPresetsData';
 
 describe('SoloSpot Builder - UX / Drag & Drop / Media / Typography / Transform System', () => {
   describe('Typography Presets', () => {

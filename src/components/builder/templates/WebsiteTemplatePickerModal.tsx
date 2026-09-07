@@ -9,85 +9,18 @@ import { useBuilder } from '../state/BuilderProvider';
 import { SECTION_TEMPLATES } from '../library/SectionLibraryModal';
 import { SectionNode } from '../../../../packages/builder-core/src/BuilderDocument';
 
-export interface WebsiteTemplate {
-  id: string;
-  name: string;
-  tagline: string;
-  description: string;
-  badge?: string;
-  icon: React.ElementType;
-  sectionTemplateIds: string[];
-}
+import { WEBSITE_TEMPLATES as WEBSITE_TEMPLATES_DATA, WebsiteTemplate as WebsiteTemplateDataType } from './WebsiteTemplatesData';
 
-export const WEBSITE_TEMPLATES: WebsiteTemplate[] = [
-  {
-    id: 'landing-page',
-    name: 'Strona Docelowa (Landing Page)',
-    tagline: 'Maksymalna konwersja dla produktów i SaaS',
-    description: 'Hero wyśrodkowany, 3 karty korzyści, opinie klientów, baner CTA oraz profesjonalna stopka.',
-    badge: 'Rekomendowane',
-    icon: Sparkles,
-    sectionTemplateIds: ['hero-centered', 'features-3-cards', 'testimonials-cards', 'cta-banner', 'footer-modern'],
-  },
-  {
-    id: 'business',
-    name: 'Firma & Usługi (Business)',
-    tagline: 'Wiarygodny wizerunek nowoczesnej firmy',
-    description: 'Hero z grafiką split, sekcja O Nas z misją, cechy oferty, formularz kontaktowy i stopka.',
-    badge: 'Popularne',
-    icon: Briefcase,
-    sectionTemplateIds: ['hero-split-image', 'about-story', 'features-3-cards', 'contact-simple', 'footer-modern'],
-  },
-  {
-    id: 'portfolio',
-    name: 'Portfolio / Twórca',
-    tagline: 'Wyeksponuj swoje projekty i osiągnięcia',
-    description: 'Hero filmowe, sekcja O Mnie, opinie zadowolonych klientów, kontakt i stopka.',
-    icon: Camera,
-    sectionTemplateIds: ['hero-video-ambient', 'about-story', 'testimonials-cards', 'contact-simple', 'footer-modern'],
-  },
-  {
-    id: 'agency',
-    name: 'Agencja Kreatywna',
-    tagline: 'Prezentacja usług o wysokiej estetyce',
-    description: 'Hero z grafiką split, sekcja O Nas, 3 cechy/usługi, opinie klientów i CTA.',
-    icon: Palette,
-    sectionTemplateIds: ['hero-split-image', 'features-3-cards', 'about-story', 'cta-banner', 'footer-modern'],
-  },
-  {
-    id: 'restaurant',
-    name: 'Restauracja / Kawiarnia',
-    tagline: 'Smakowite menu i atmosfera lokalu',
-    description: 'Hero z klimatycznym tłem, historia lokalu, opinie gości i kontakt rezerwacyjny.',
-    icon: Utensils,
-    sectionTemplateIds: ['hero-video-ambient', 'about-story', 'testimonials-cards', 'contact-simple', 'footer-modern'],
-  },
-  {
-    id: 'store',
-    name: 'Sklep E-Commerce',
-    tagline: 'Szybki start sprzedaży produktów online',
-    description: 'Hero banner z przyciskiem do zakupów, 3 zalety sklepu, opinie i wezwanie do akcji.',
-    badge: 'Sklep',
-    icon: ShoppingBag,
-    sectionTemplateIds: ['hero-centered', 'features-3-cards', 'testimonials-cards', 'cta-banner', 'footer-modern'],
-  },
-  {
-    id: 'creative',
-    name: 'Kreatywna Strona Wizualna',
-    tagline: 'Dla marek ceniących odważny styl',
-    description: 'Hero filmowe w pełnej szerokości, sekcja O Nas, baner CTA i nowoczesna stopka.',
-    icon: Palette,
-    sectionTemplateIds: ['hero-video-ambient', 'about-story', 'cta-banner', 'footer-modern'],
-  },
-  {
-    id: 'blank',
-    name: 'Czysta Strona (Od zera)',
-    tagline: 'Pełna swoboda projektowania od podstaw',
-    description: 'Rozpocznij z pustą kanwą i dodawaj sekcje oraz komponenty według własnego pomysłu.',
-    icon: FilePlus,
-    sectionTemplateIds: [],
-  },
-];
+const ICON_MAP: Record<string, React.ElementType> = {
+  Sparkles, Briefcase, Camera, Palette, Utensils, ShoppingBag, FilePlus,
+};
+
+export type WebsiteTemplate = WebsiteTemplateDataType;
+
+export const WEBSITE_TEMPLATES: WebsiteTemplate[] = WEBSITE_TEMPLATES_DATA.map((t) => ({
+  ...t,
+  icon: ICON_MAP[t.iconName] || Sparkles,
+}));
 
 export interface WebsiteTemplatePickerModalProps {
   isOpen: boolean;
@@ -192,7 +125,7 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <div className="w-10 h-10 rounded-xl bg-violet-500/10 text-violet-400 flex items-center justify-center group-hover:bg-violet-600 group-hover:text-white transition-all">
-                      <Icon className="w-5 h-5" />
+                      {Icon ? <Icon className="w-5 h-5" /> : null}
                     </div>
                     {tmpl.badge && (
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#8B5CF6]/15 text-[#A78BFA]">
