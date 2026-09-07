@@ -120,7 +120,7 @@ export function SectionRenderer(props: SectionComponentProps) {
     navigation: props.navigation ?? [],
   }
 
-  const videoSrc = rawConfig.backgroundVideo || rawConfig.videoSrc || ''
+  const videoSrc = rawConfig.backgroundVideo || rawConfig.backgroundVideoUrl || rawConfig.videoSrc || ''
   const overlayOpacity = parseFloat(String(rawConfig.overlayOpacity ?? '0'))
 
   return (

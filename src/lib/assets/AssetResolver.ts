@@ -60,6 +60,7 @@ export function resolveAssetToMutationPayload(
     case 'BACKGROUND_VIDEO':
       return {
         props: {
+          backgroundVideo: url,
           backgroundVideoUrl: url,
           bgVideoAssetMetadata: providerMeta,
           autoplay: true,

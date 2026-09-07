@@ -36,6 +36,7 @@ import { EmptyInspectorState } from '../../../../packages/authoring-studio/src/i
 import { InspectorRuntime } from '../../../../packages/builder-core/src/InspectorRuntime';
 import { FontPicker } from '../../../../packages/authoring-studio/src/inspector/widgets/FontPicker';
 import { MediaPickerModal } from '../sidebar/MediaPickerModal';
+import { resolveAssetToMutationPayload } from '@/lib/assets/AssetResolver';
 import { SmoothSlider } from './SmoothSlider';
 import type { InspectorCategory } from '../../../../packages/builder-core/src/InspectorRuntime';
 import type { NodeStyles, NodeResponsive } from '../../../../packages/builder-core/src/BuilderDocument';
@@ -1134,24 +1135,49 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
       {showMediaPicker && (
         <MediaPickerModal
           isOpen={showMediaPicker}
+          slotType={
+            mediaPickerTarget === 'video-bg' ? 'BACKGROUND_VIDEO'
+            : mediaPickerTarget === 'section-bg' ? 'BACKGROUND_IMAGE'
+            : 'IMAGE'
+          }
           title={
             mediaPickerTarget === 'section-bg' ? 'Zdjęcie tła sekcji'
             : mediaPickerTarget === 'video-bg' ? 'Wideo tła sekcji'
             : 'Zdjęcie'
           }
           onClose={() => setShowMediaPicker(false)}
-          onSelect={(url) => {
+          onSelect={(url, asset) => {
             if (mediaPickerTarget === 'section-bg') {
-              onStyleChange({
-                backgroundImage: url ? `url("${url}")` : 'none',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-              });
+              if (asset && asset.provider) {
+                const payload = resolveAssetToMutationPayload(asset, 'BACKGROUND_IMAGE');
+                if (payload.styles) onStyleChange(payload.styles);
+              } else {
+                onStyleChange({
+                  backgroundImage: url ? `url("${url}")` : 'none',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                });
+              }
             } else if (mediaPickerTarget === 'video-bg') {
-              onPropChange('backgroundVideo', url);
+              if (asset && asset.provider) {
+                const payload = resolveAssetToMutationPayload(asset, 'BACKGROUND_VIDEO');
+                if (payload.props) {
+                  Object.entries(payload.props).forEach(([k, v]) => onPropChange(k, v));
+                }
+              } else {
+                onPropChange('backgroundVideo', url);
+                onPropChange('backgroundVideoUrl', url);
+              }
             } else {
-              onPropChange('src', url);
+              if (asset && asset.provider) {
+                const payload = resolveAssetToMutationPayload(asset, 'IMAGE');
+                if (payload.props) {
+                  Object.entries(payload.props).forEach(([k, v]) => onPropChange(k, v));
+                }
+              } else {
+                onPropChange('src', url);
+              }
             }
             setShowMediaPicker(false);
           }}

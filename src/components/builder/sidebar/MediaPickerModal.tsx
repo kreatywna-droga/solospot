@@ -122,6 +122,14 @@ export function MediaPickerModal({
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
+
+        // Large files > 4 MB bypass the Next.js API body limit (Vercel 4.5 MB limit)
+        // and upload directly to Supabase Storage from the browser.
+        if (file.size > 4 * 1024 * 1024) {
+          await uploadLargeFile(file)
+          continue
+        }
+
         const formData = new FormData()
         formData.append('file', file)
 
@@ -129,6 +137,16 @@ export function MediaPickerModal({
           method: 'POST',
           body: formData,
         })
+
+        // Handle non-JSON responses (e.g. 413 Request Entity Too Large HTML)
+        const contentType = res.headers.get('content-type') || ''
+        if (!contentType.includes('application/json')) {
+          if (res.status === 413) {
+            throw new Error(`Plik ${file.name} jest za duży dla bezpośredniego API uploadu. Przełączanie na direct storage upload.`)
+          }
+          throw new Error(`Błąd serwera (${res.status}): ${res.statusText || 'Nieznany błąd'}`)
+        }
+
         const data = await res.json()
         if (!data.success) throw new Error(data.error || 'Błąd uploadu')
         if (data.asset?.publicUrl) {
@@ -144,6 +162,74 @@ export function MediaPickerModal({
       setUploading(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
     }
+  }
+
+  const uploadLargeFile = async (file: File) => {
+    const { supabase, isSupabaseConfigured } = await import('../../../lib/supabase')
+    if (!isSupabaseConfigured()) {
+      throw new Error('Upload dużych plików wymaga skonfigurowanego Supabase. Zmniejsz rozmiar pliku do 4 MB lub skonfiguruj Supabase.')
+    }
+
+    const assetId = crypto.randomUUID()
+    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')
+    const storagePath = `${storeId}/${assetId}-${sanitizedName}`
+
+    const { error } = await supabase.storage
+      .from('store-assets')
+      .upload(storagePath, file, {
+        contentType: file.type,
+        upsert: true,
+      })
+
+    if (error) {
+      throw new Error(`Upload direct do Supabase nie powiódł się: ${error.message}`)
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('store-assets')
+      .getPublicUrl(storagePath)
+
+    const metaRes = await fetch(`/api/stores/${storeId}/assets`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        directUpload: true,
+        storagePath,
+        publicUrl: urlData.publicUrl,
+        filename: sanitizedName,
+        originalName: file.name,
+        mimeType: file.type,
+        size: file.size,
+        type: file.type.startsWith('video/') ? 'video' : file.type.startsWith('image/svg') ? 'image' : 'image',
+      }),
+    })
+
+    if (metaRes.ok) {
+      const metaData = await metaRes.json()
+      if (metaData.asset) {
+        setSelectedUrl(metaData.asset.publicUrl || urlData.publicUrl)
+        setSelectedAsset(metaData.asset)
+        return
+      }
+    }
+
+    const fallbackAsset = {
+      id: assetId,
+      provider: 'solospot',
+      providerAssetId: assetId,
+      type: file.type.startsWith('video/') ? 'video' : 'image',
+      previewUrl: urlData.publicUrl,
+      sourceUrl: urlData.publicUrl,
+      publicUrl: urlData.publicUrl,
+      title: file.name,
+      filename: sanitizedName,
+      originalName: file.name,
+      mimeType: file.type,
+      size: file.size,
+      storagePath,
+    }
+    setSelectedUrl(urlData.publicUrl)
+    setSelectedAsset(fallbackAsset)
   }
 
   const handleConfirm = async () => {
@@ -325,11 +411,22 @@ export function MediaPickerModal({
                           : 'border-white/[0.08] hover:border-white/25 bg-white/[0.04]'
                       }`}
                     >
-                      <img
-                        src={asset.publicUrl}
-                        alt={asset.originalName}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                      />
+                      {asset.mimeType?.startsWith('video/') || asset.type === 'video' ? (
+                        <video
+                          src={asset.publicUrl}
+                          muted
+                          loop
+                          autoPlay
+                          playsInline
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <img
+                          src={asset.publicUrl}
+                          alt={asset.originalName}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                        />
+                      )}
                       {isSelected && (
                         <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-violet-600 text-white flex items-center justify-center shadow-md">
                           <Check className="w-3 h-3" />

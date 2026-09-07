@@ -49,6 +49,7 @@ describe('AssetResolver Unit Tests', () => {
 
     const payload = resolveAssetToMutationPayload(mockVideoAsset, 'BACKGROUND_VIDEO');
     expect(payload.props).toBeDefined();
+    expect(payload.props?.backgroundVideo).toBe('https://example.com/video_full.mp4');
     expect(payload.props?.backgroundVideoUrl).toBe('https://example.com/video_full.mp4');
     expect(payload.props?.autoplay).toBe(true);
     expect(payload.props?.muted).toBe(true);
