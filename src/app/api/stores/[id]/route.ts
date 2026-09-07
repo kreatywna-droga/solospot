@@ -17,7 +17,9 @@ export async function GET(
     const storeService = new StoreService();
     const store = await storeService.getStore(session.tenantId, id);
 
-    return NextResponse.json({ success: true, store });
+    const storeWithTenant = { ...store, tenantId: session.tenantId };
+
+    return NextResponse.json({ success: true, store: storeWithTenant });
   } catch (err: any) {
     if (err.message === 'Store not found') {
       return NextResponse.json({ success: false, error: err.message }, { status: 404 });

@@ -40,10 +40,12 @@ describe('storagePath (browser <-> server storage contract)', () => {
     expect(storagePathOwnedByStore('tenant-1/store-12/a.png', 'tenant-1', 'store-1')).toBe(false);
   });
 
-  it('formatDirectUploadError maps RLS errors to an actionable message', () => {
+  it('formatDirectUploadError maps RLS errors to an actionable UX message (no SQL/migration hint)', () => {
     const msg = formatDirectUploadError({ message: 'new row violates row-level security policy' });
-    expect(msg).toContain('RLS');
-    expect(msg).toContain('0018_assets_storage_rls.sql');
+    expect(msg).toBe('Brak uprawnień do zapisania pliku. Sprawdź sesję i uprawnienia sklepu.');
+    expect(msg).not.toContain('RLS');
+    expect(msg).not.toContain('0018_assets_storage_rls.sql');
+    expect(msg).not.toContain('polit');
   });
 
   it('formatDirectUploadError passes through unknown messages', () => {

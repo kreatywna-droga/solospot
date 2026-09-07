@@ -209,3 +209,45 @@ A secondary, latent defect was confirmed during the fix: **migration `0017_asset
 - Storage RLS verifies tenant ownership **per object path**, mirroring the `assets` table RLS which verifies `tenant_id`+`store_id` ownership — defense in depth across both layers.
 - The `assets` UPDATE policy (missing since 0017) is now present so tenant-owned metadata updates never require a service-role/bypass path.
 - The pre-existing 223 unrelated test failures (authoring-studio jsdom, mission-control, etc.) are untouched and out of scope for this task.
+
+---
+
+## 9. Production Still Failed After 8 — Real Root Cause: Wrong Tenant Identifier in the Storage Path (September 7, 2026)
+
+> **Reported (production browser acceptance, D-block)**:
+> `Upload directo do Supabase nie powiódł się: Odmowa zapisu do storage: brak uprawnień RLS (polityka bazy danych). Uruchom migrację 0018_assets_storage_rls.sql i zaloguj się ponownie.`
+>
+> The error text is the **new** `formatDirectUploadError` mapping — proof the §8 fix was **deployed** and the `storage.objects` INSERT was **still rejected by RLS** in production.
+
+### 9.1 Why §8 did not fix the production upload
+
+The §8 fix verified the **database side** (migration 0018 applied, policies present, remote DB up to date) but never verified what the **application actually sends**. The policy is correct and enforced; the application was feeding it the wrong tenant prefix:
+
+- **POLICY EXPECTS** (0018): `split_part(name,'/',1) = tenants.id` (real TENANT uuid) and `split_part(name,'/',2) = stores.id`.
+- **APPLICATION SENT**: `{store.id}/{store.id}/{assetId}-{filename}` — **both path segments are the STORE uuid**, because the builder document's `tenantId` was hardcoded to the store id.
+  - `packages/builder-core/src/BuilderDocument.ts` `createBuilderDocument` defaults `tenantId ?? 'tenant_default'`.
+  - `src/app/studio/[storeId]/page.tsx` (line 165, old): `tenantId: store.id, // will be replaced when tenant API is available` — **it was never replaced**.
+  - Browser uploaders (`MediaPickerModal`, `AssetsPanel`, `AssetPicker`) build the path from `document.tenantId` → a STORE uuid ≠ any `tenants.id` → `exists(...)` false → `WITH CHECK` false → RLS deny, exactly as §6/§11 of the fail-conditions predicted ("compare what policy expects vs what app actually sends").
+
+### 9.2 FIX (application-side; zero RLS changes, tenant isolation preserved)
+
+1. **`src/lib/builder/studioDoc.ts`** (new, pure & testable): converters moved out of the page; `apiStoreToBuilderDoc` now sets `document.tenantId = store.tenantId` — the **real tenant uuid**.
+2. **`src/app/api/stores/[id]/route.ts` GET**: now returns `store.tenantId` resolved **from the authenticated session** (`resolveTenantSession().tenantId`), server-authoritative — never trusted from client input, never hardcoded (§1/§20 satisfied).
+3. **`src/app/studio/[storeId]/page.tsx`**: delegates to `studioDoc`; uploaders now emit `{realTenantUuid}/{storeUuid}/{file}` → matches the RLS join.
+4. **`src/lib/assets/storagePath.ts`**: RLS error message changed to the §19 UX-safe text `Brak uprawnień do zapisania pliku. Sprawdź sesję i uprawnienia sklepu.` (no migration/SQL hint — the migration is applied).
+
+Auth/role path verified separately: `/api/auth/login` persists the browser session via `supabase.auth.setSession` (login/page.tsx), so the anonymous-key client carries an `authenticated` JWT at upload time; the only failing condition was the path tenant prefix.
+
+### 9.3 Regression tests (all PASS — 32/32 relevant)
+
+- `src/lib/builder/__tests__/studioDoc.test.ts` — document.tenantId = real tenant uuid (≠ store uuid); browser path = `{tenantUuid}/{storeUuid}/file`; GUARD that the old buggy path (`{storeId}/{storeId}/file`) is rejected by `storagePathOwnedByStore`; round-trip + branding.
+- `src/app/api/stores/[id]/__tests__/store-route.test.ts` — GET returns session tenantId; 403 unauthenticated.
+- Updated `storagePath.test.ts` — RLS message has no migration hint.
+- Existing asset-service-rls / storage-rls-migration / assets-route suites unchanged (PASS).
+- `bun x tsc --noEmit`: 0 errors. `bun run build`: PASS.
+
+### 9.4 Status
+
+- **Root cause**: `document.tenantId` held the STORE uuid, producing a storage path the RLS policy can never authorize. Confirmed by static trace (page line 165) + ownership predicate regression tests.
+- **Commit**: `fix(assets): resolve production storage RLS authorization` (this section documents it).
+- **Deployment**: `npx vercel deploy --prod --yes` after commit; production re-verification per user D1–D22 with a real user/session/MP4 still required (cannot be executed from this machine — requires the real browser session).

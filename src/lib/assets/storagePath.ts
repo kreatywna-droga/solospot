@@ -19,7 +19,7 @@ export function storagePathOwnedByStore(storagePath: string, tenantId: string, s
 export function formatDirectUploadError(error: { message?: string }): string {
   const message = error?.message ?? 'Nieznany błąd'
   if (/row-level security|row level security|new row violates/i.test(message)) {
-    return 'Odmowa zapisu do storage: brak uprawnień RLS (polityka bazy danych). Uruchom migrację 0018_assets_storage_rls.sql i zaloguj się ponownie.'
+    return 'Brak uprawnień do zapisania pliku. Sprawdź sesję i uprawnienia sklepu.'
   }
   if (/invalid api key|unauthorized|authentication/i.test(message)) {
     return 'Brak autoryzacji. Zaloguj się ponownie.'
