@@ -156,3 +156,56 @@ PUBLISHED STORE (Production site rendering)
 | **Production Verified** | PASS |
 | **Browser Acceptance D1–D26** | 26 / 26 PASS |
 | **End-to-End Status** | **PASS** |
+
+---
+
+## 8. Follow-up: Supabase Storage RLS Upload Authorization Fix (September 7, 2026)
+
+> **Commit**: `e46e49f` — `fix(assets): repair Supabase Storage RLS for direct uploads (Wgraj z dysku)`  
+> **Final Status**: PASS (Production migration applied, remote DB up to date)
+
+### 8.1 Separately Reported Failure (pre-existing)
+
+Users reported that "Wgraj z dysku" (browser direct upload) failed with:
+
+> **`Upload direct do Supabase nie powiódł się: new row violates row-level security policy`**
+
+The exact error prefix proves the failure is thrown by the **client-side `storage.objects` INSERT** (`uploadLargeFile` using the anon-key browser client), **not** by the server-side `assets` row insert (which uses the service role and bypasses RLS).
+
+### 8.2 ROOT CAUSE
+
+The `store-assets` Supabase Storage bucket ships with **no `storage.objects` RLS policies** (the bucket is created programmatically with `public: true` in `AssetStorage.ts`; no SQL migration defined storage policies). Supabase Storage **default-denies** any object write that lacks a matching policy → `new row violates row-level security policy`.
+
+A secondary, latent defect was confirmed during the fix: **migration `0017_assets.sql` had never been applied to production**, so the `assets` table did not exist in prod. Server-side metadata persistence had therefore been silently falling back to the in-memory store on every asset insert (objects were uploaded but metadata was not persisted in the database).
+
+### 8.3 FIX (no security bypass, RLS stays enabled, direct browser upload preserved)
+
+1. **Shared storage-path contract** — `src/lib/assets/storagePath.ts`:
+   - `buildStoragePath(tenantId, storeId, filename)` → `{tenantId}/{storeId}/{filename}` + filename sanitization; now the single source of truth for both client and server.
+   - `storagePathOwnedByTenant` / `storagePathOwnedByStore` ownership predicates.
+   - `formatDirectUploadError` friendly UI mapping for RLS/unauthorized/HTTP-413.
+2. **Migration `0018_assets_storage_rls.sql`**:
+   - `storage.objects` INSERT / SELECT / UPDATE / DELETE policies for the `store-assets` bucket, each gated on `auth.jwt()->>'email'` → `tenants.owner_email` → tenant folder = `split_part(name,'/',1)` → store folder = `split_part(name,'/',2)`. **No `using (true)` / `with check (true)`** anywhere.
+   - Explicit service-role full-access object policy (parity with existing DB tables).
+   - Hardened `assets` table policies: case-insensitive email match, added the previously-missing **UPDATE** policy, and strengthened SELECT/INSERT/DELETE to also require the store belonging to the tenant.
+3. **Client uploaders updated** (`MediaPickerModal`, `AssetsPanel`, `AssetPicker` + `PropsPanel` plumbing `tenantId`): direct uploads now use tenant-prefixed paths (`document.tenantId` / passed `tenantId`) instead of bare `{storeId}/...`.
+4. **Server-side defense-in-depth** — `AssetService.createAssetRecord` rejects any `storagePath` not owned by the requesting tenant+store (403 `Nieautoryzowana ścieżka storage`), enforcing cross-tenant / cross-store isolation even if a client sends a forged path.
+
+### 8.4 Verification
+
+- **Automated tests added (all PASS)**:
+  - `src/lib/assets/__tests__/storagePath.test.ts`
+  - `src/lib/assets/__tests__/asset-service-rls.test.ts` (server ownership enforcement)
+  - `src/lib/assets/__tests__/storage-rls-migration.test.ts` (SQL static guards: no bypass patterns, INSERT/SELECT/UPDATE/DELETE present, UPDATE policy present)
+  - `src/app/api/stores/[id]/assets/__tests__/assets-route.test.ts` (route: 403 on unauthenticated, 403 on cross-tenant/cross-store path, 201 on owned path; 200 on list)
+- **TypeScript** `bun x tsc --noEmit`: 0 errors (PASS)
+- **Build** `bun run build`: `✓ Compiled successfully` (PASS)
+- **Production migration**: `npx supabase db push` — applied `0017_assets.sql` + `0018_assets_storage_rls.sql`; subsequent push confirms **remote DB up to date**.
+- **Git**: committed `e46e49f`, pushed `897afed..e46e49f main -> main`.
+
+### 8.5 Tenant-Isolation / Security Notes
+
+- No service-role key is exposed to the browser; direct uploads use the authenticated user's session token.
+- Storage RLS verifies tenant ownership **per object path**, mirroring the `assets` table RLS which verifies `tenant_id`+`store_id` ownership — defense in depth across both layers.
+- The `assets` UPDATE policy (missing since 0017) is now present so tenant-owned metadata updates never require a service-role/bypass path.
+- The pre-existing 223 unrelated test failures (authoring-studio jsdom, mission-control, etc.) are untouched and out of scope for this task.
