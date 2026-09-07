@@ -371,3 +371,47 @@ describe('OverlayController.computeToolbarPosition', () => {
   })
 })
 
+describe('Overlay Continuous Drag Tracking', () => {
+  it('updates overlay bounding rect in real-time on every continuous drag movement tick', () => {
+    const doc = createTestDoc()
+    const selection = sel({ selectedIds: ['sec_1'] })
+    const viewport = { label: 'DESKTOP' as const, width: 1200, zoom: 1.0, offsetX: 0, offsetY: 0 }
+
+    let currentDomRect = { x: 50, y: 100, width: 400, height: 200 }
+    const getElementRect = (id: string) => (id === 'sec_1' ? currentDomRect : null)
+
+    // Initial state
+    let state = OverlayController.computeOverlayState({
+      selection,
+      document: doc,
+      viewport,
+      config: DEFAULT_OVERLAY_CONFIG,
+      getElementRect,
+    })
+    expect(state.boundingRect).toEqual(expect.objectContaining({ x: 50, y: 100, width: 400, height: 200 }))
+
+    // Continuous drag ticks (pointermove #1..#4)
+    const dragTicks = [
+      { x: 55, y: 105, width: 400, height: 200 },
+      { x: 65, y: 115, width: 400, height: 200 },
+      { x: 80, y: 130, width: 400, height: 200 },
+      { x: 100, y: 150, width: 400, height: 200 },
+    ]
+
+    for (const tickRect of dragTicks) {
+      currentDomRect = tickRect
+      state = OverlayController.computeOverlayState({
+        selection,
+        document: doc,
+        viewport,
+        config: DEFAULT_OVERLAY_CONFIG,
+        getElementRect,
+      })
+      // Verify overlay frame tracks element position with zero lag
+      expect(state.boundingRect?.x).toBe(tickRect.x)
+      expect(state.boundingRect?.y).toBe(tickRect.y)
+    }
+  })
+})
+
+

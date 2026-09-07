@@ -120,6 +120,36 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     }
   }, [])
 
+  // Synchronize overlay frame position with direct canvas node dragging in real-time
+  useEffect(() => {
+    const handleNodeDragMove = (e: Event) => {
+      const detail = (e as CustomEvent).detail
+      if (detail && detail.nodeId === canvas.selectedSectionId && overlayGroupRef.current) {
+        overlayGroupRef.current.style.transform = `translate3d(${detail.deltaX}px, ${detail.deltaY}px, 0px)`
+        if (moveBadgeRef.current) {
+          moveBadgeRef.current.textContent = `X: ${detail.curTx}px, Y: ${detail.curTy}px`
+          moveBadgeRef.current.classList.remove('hidden')
+        }
+      }
+    }
+
+    const handleNodeDragEnd = () => {
+      if (overlayGroupRef.current) {
+        overlayGroupRef.current.style.transform = ''
+      }
+      if (moveBadgeRef.current) {
+        moveBadgeRef.current.classList.add('hidden')
+      }
+    }
+
+    window.addEventListener('solospot:node-drag-move', handleNodeDragMove)
+    window.addEventListener('solospot:node-drag-end', handleNodeDragEnd)
+    return () => {
+      window.removeEventListener('solospot:node-drag-move', handleNodeDragMove)
+      window.removeEventListener('solospot:node-drag-end', handleNodeDragEnd)
+    }
+  }, [canvas.selectedSectionId])
+
   const handleDoubleClickText = useCallback((e: React.MouseEvent) => {
     const targetNodeId = canvas.selectedSectionId
     if (!targetNodeId) return

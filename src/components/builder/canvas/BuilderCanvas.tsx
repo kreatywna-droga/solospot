@@ -2334,6 +2334,17 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
             if (domEl) {
               domEl.style.transform = `translate(${curTx}px, ${curTy}px) rotate(${baseRotate}) scale(${baseScale})`
             }
+
+            // Broadcast real-time drag position so SelectionOverlay tracks element with zero lag
+            window.dispatchEvent(new CustomEvent('solospot:node-drag-move', {
+              detail: {
+                nodeId: node.id,
+                deltaX: curTx - startTx,
+                deltaY: curTy - startTy,
+                curTx,
+                curTy,
+              },
+            }))
           })
         }
       }
@@ -2350,6 +2361,10 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
         cancelAnimationFrame(rafId)
         rafId = null
       }
+
+      window.dispatchEvent(new CustomEvent('solospot:node-drag-end', {
+        detail: { nodeId: node.id },
+      }))
 
       setActiveCanvasSectionSnap(null)
 
