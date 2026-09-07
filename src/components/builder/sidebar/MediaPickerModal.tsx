@@ -43,26 +43,31 @@ interface MediaPickerModalProps {
   isOpen?: boolean
   title?: string
   currentValue?: string
-  onSelect: (url: string) => void
+  slotType?: string
+  onSelect: (url: string, asset?: any) => void
   onClose: () => void
 }
 
 export function MediaPickerModal({
   title = 'Wybierz Media',
   currentValue = '',
+  slotType = 'IMAGE',
   onSelect,
   onClose,
 }: MediaPickerModalProps) {
   const { document } = useBuilder()
   const storeId = document.id || document.tenantId
 
-  const [activeTab, setActiveTab] = useState<'my_files' | 'library' | 'upload' | 'url'>('my_files')
+  const [activeTab, setActiveTab] = useState<'my_files' | 'library' | 'shutterstock' | 'upload' | 'url'>('my_files')
   const [assets, setAssets] = useState<AssetItem[]>([])
+  const [shutterstockAssets, setShutterstockAssets] = useState<any[]>([])
+  const [shutterstockLoading, setShutterstockLoading] = useState(false)
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [customUrl, setCustomUrl] = useState(currentValue)
   const [selectedUrl, setSelectedUrl] = useState<string>(currentValue)
+  const [selectedAsset, setSelectedAsset] = useState<any | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -83,9 +88,31 @@ export function MediaPickerModal({
     }
   }, [storeId])
 
+  const searchShutterstock = useCallback(async (query: string) => {
+    try {
+      setShutterstockLoading(true)
+      const isVideo = slotType === 'VIDEO' || slotType === 'BACKGROUND_VIDEO'
+      const res = await fetch(`/api/assets/shutterstock/search?query=${encodeURIComponent(query)}&type=${isVideo ? 'video' : 'image'}`)
+      const data = await res.json()
+      if (data.success && Array.isArray(data.assets)) {
+        setShutterstockAssets(data.assets)
+      }
+    } catch (err) {
+      console.error('Failed to search Shutterstock:', err)
+    } finally {
+      setShutterstockLoading(false)
+    }
+  }, [slotType])
+
   useEffect(() => {
     loadAssets()
   }, [loadAssets])
+
+  useEffect(() => {
+    if (activeTab === 'shutterstock') {
+      searchShutterstock(searchQuery || 'luxury')
+    }
+  }, [activeTab, searchQuery, searchShutterstock])
 
   const handleFileUpload = async (files: FileList | File[]) => {
     if (!files || files.length === 0 || !storeId) return
@@ -106,6 +133,7 @@ export function MediaPickerModal({
         if (!data.success) throw new Error(data.error || 'Błąd uploadu')
         if (data.asset?.publicUrl) {
           setSelectedUrl(data.asset.publicUrl)
+          setSelectedAsset(data.asset)
         }
       }
       await loadAssets()
@@ -118,11 +146,41 @@ export function MediaPickerModal({
     }
   }
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
+    let finalUrl = selectedUrl
+    let finalAsset = selectedAsset
+
     if (activeTab === 'url' && customUrl.trim()) {
-      onSelect(customUrl.trim())
-    } else if (selectedUrl) {
-      onSelect(selectedUrl)
+      finalUrl = customUrl.trim()
+    } else if (activeTab === 'shutterstock' && selectedAsset) {
+      // License Shutterstock asset via API
+      try {
+        const res = await fetch('/api/assets/shutterstock/license', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            assetId: selectedAsset.id,
+            tenantId: document.tenantId || 'tenant_default',
+            storeId: document.id || 'store_default',
+            type: selectedAsset.type,
+            previewUrl: selectedAsset.previewUrl,
+            sourceUrl: selectedAsset.sourceUrl,
+            title: selectedAsset.title,
+            author: selectedAsset.author,
+          }),
+        })
+        const data = await res.json()
+        if (data.success && data.asset) {
+          finalAsset = data.asset
+          finalUrl = data.asset.sourceUrl || data.asset.previewUrl
+        }
+      } catch (err) {
+        console.warn('Sandbox licensing error, proceeding with selected asset:', err)
+      }
+    }
+
+    if (finalUrl) {
+      onSelect(finalUrl, finalAsset)
     }
     onClose()
   }
@@ -166,7 +224,7 @@ export function MediaPickerModal({
             </div>
             <div>
               <h3 className="text-sm font-bold text-white">{title}</h3>
-              <p className="text-[11px] text-zinc-400">Wybierz obraz z biblioteki lub wgraj z dysku</p>
+              <p className="text-[11px] text-zinc-400">Wybierz obraz z biblioteki, Shutterstock Sandbox lub wgraj z dysku</p>
             </div>
           </div>
           <button onClick={onClose} className="p-1 rounded-lg hover:bg-white/[0.08] text-zinc-400 hover:text-white">
@@ -179,14 +237,15 @@ export function MediaPickerModal({
           <div className="flex items-center gap-1 bg-white/[0.04] p-1 rounded-xl border border-white/5">
             {[
               { id: 'my_files', label: 'Moje pliki', count: assets.length },
-              { id: 'library', label: 'Biblioteka SoloSpot', count: CURATED_LIBRARY.length },
+              { id: 'library', label: 'SoloSpot Library', count: CURATED_LIBRARY.length },
+              { id: 'shutterstock', label: 'Shutterstock (Sandbox)', badge: 'PREMIUM' },
               { id: 'upload', label: 'Wgraj z dysku' },
               { id: 'url', label: 'Link URL' },
             ].map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
                   activeTab === tab.id
                     ? 'bg-violet-600 text-white shadow-md'
                     : 'text-zinc-400 hover:text-white hover:bg-white/[0.05]'
@@ -194,20 +253,25 @@ export function MediaPickerModal({
               >
                 <span>{tab.label}</span>
                 {tab.count !== undefined && (
-                  <span className="ml-1 text-[10px] opacity-70">({tab.count})</span>
+                  <span className="text-[10px] opacity-70">({tab.count})</span>
+                )}
+                {tab.badge && (
+                  <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    {tab.badge}
+                  </span>
                 )}
               </button>
             ))}
           </div>
 
-          {(activeTab === 'my_files' || activeTab === 'library') && (
+          {(activeTab === 'my_files' || activeTab === 'library' || activeTab === 'shutterstock') && (
             <div className="relative min-w-[220px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Szukaj grafik..."
+                placeholder={activeTab === 'shutterstock' ? "Szukaj w Shutterstock..." : "Szukaj grafik..."}
                 className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#8B5CF6]"
               />
             </div>
@@ -235,7 +299,7 @@ export function MediaPickerModal({
               <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-white/[0.08] rounded-2xl bg-white/[0.01]">
                 <ImageIcon className="w-10 h-10 text-slate-600 mb-2" />
                 <p className="text-xs font-semibold text-zinc-300 mb-1">Brak wgranych plików</p>
-                <p className="text-[11px] text-zinc-500 mb-4">Wgraj grafikę z dysku lub wybierz z biblioteki SoloSpot</p>
+                <p className="text-[11px] text-zinc-500 mb-4">Wgraj grafikę z dysku lub wybierz z biblioteki SoloSpot / Shutterstock</p>
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold transition-all"
@@ -251,7 +315,10 @@ export function MediaPickerModal({
                   return (
                     <div
                       key={asset.id}
-                      onClick={() => setSelectedUrl(asset.publicUrl)}
+                      onClick={() => {
+                        setSelectedUrl(asset.publicUrl)
+                        setSelectedAsset(asset)
+                      }}
                       className={`group relative aspect-square rounded-xl border overflow-hidden cursor-pointer transition-all ${
                         isSelected
                           ? 'border-violet-500 ring-2 ring-violet-500/50 shadow-lg shadow-violet-500/20'
@@ -287,7 +354,18 @@ export function MediaPickerModal({
                 return (
                   <div
                     key={item.id}
-                    onClick={() => setSelectedUrl(item.url)}
+                    onClick={() => {
+                      setSelectedUrl(item.url)
+                      setSelectedAsset({
+                        id: item.id,
+                        provider: 'solospot',
+                        providerAssetId: item.id,
+                        type: 'image',
+                        previewUrl: item.url,
+                        sourceUrl: item.url,
+                        title: item.name,
+                      })
+                    }}
                     className={`group relative aspect-video rounded-xl border overflow-hidden cursor-pointer transition-all ${
                       isSelected
                         ? 'border-violet-500 ring-2 ring-violet-500/50 shadow-lg shadow-violet-500/20'
@@ -312,6 +390,78 @@ export function MediaPickerModal({
                 )
               })}
             </div>
+          )}
+
+          {/* Tab: Shutterstock Sandbox */}
+          {activeTab === 'shutterstock' && (
+            shutterstockLoading ? (
+              <div className="flex flex-col items-center justify-center py-20 text-zinc-500">
+                <Loader2 className="w-8 h-8 animate-spin text-amber-400 mb-2" />
+                <span className="text-xs">Przeszukiwanie Shutterstock Sandbox...</span>
+              </div>
+            ) : (
+              <div>
+                <div className="mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-amber-400" />
+                    <span className="text-xs font-semibold text-amber-200">Shutterstock Premium Licensing Sandbox</span>
+                  </div>
+                  <span className="text-[10px] text-amber-400/80 font-mono">Sandbox Mode — Zero Credits Used</span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {shutterstockAssets.map(item => {
+                    const isSelected = selectedAsset?.id === item.id || selectedUrl === (item.sourceUrl || item.previewUrl)
+
+                    return (
+                      <div
+                        key={item.id}
+                        onClick={() => {
+                          setSelectedUrl(item.sourceUrl || item.previewUrl)
+                          setSelectedAsset(item)
+                        }}
+                        className={`group relative aspect-video rounded-xl border overflow-hidden cursor-pointer transition-all ${
+                          isSelected
+                            ? 'border-amber-400 ring-2 ring-amber-400/50 shadow-lg shadow-amber-400/20'
+                            : 'border-white/[0.08] hover:border-white/25 bg-white/[0.04]'
+                        }`}
+                      >
+                        {item.type === 'video' ? (
+                          <video
+                            src={item.previewUrl}
+                            muted
+                            loop
+                            autoPlay
+                            playsInline
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <img
+                            src={item.previewUrl}
+                            alt={item.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                          />
+                        )}
+                        {isSelected && (
+                          <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-amber-500 text-black flex items-center justify-center font-bold shadow-md">
+                            <Check className="w-3 h-3" />
+                          </div>
+                        )}
+                        <div className="absolute inset-x-0 bottom-0 p-2.5 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
+                          <p className="text-xs text-white font-bold truncate">{item.title}</p>
+                          <div className="flex items-center justify-between text-[10px] text-zinc-400 mt-0.5">
+                            <span className="truncate">{item.author}</span>
+                            <span className="px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 font-mono text-[9px]">
+                              Shutterstock
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
           )}
 
           {/* Tab: Direct Upload Zone */}

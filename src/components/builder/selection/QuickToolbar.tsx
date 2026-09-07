@@ -30,6 +30,7 @@ import { findNode, type ToolbarPositionResult, type ToolbarActionType } from '..
 import { useBuilder } from '../state/BuilderProvider'
 import { MediaPickerModal } from '../sidebar/MediaPickerModal'
 import { FontPicker } from '../../../../packages/authoring-studio/src/inspector/widgets/FontPicker'
+import { applyAssetToNode } from '@/lib/assets/AssetResolver'
 
 interface QuickToolbarProps {
   position: ToolbarPositionResult
@@ -888,13 +889,20 @@ export function QuickToolbar({
         )}
       </motion.div>
 
-      {/* Media Picker Modal for Image elements */}
+      {/* Media Picker Modal for Image / Background / Video elements */}
       {showMediaPicker && (
         <MediaPickerModal
           isOpen={showMediaPicker}
+          slotType={nodeType === 'image' ? 'IMAGE' : 'BACKGROUND_IMAGE'}
           onClose={() => setShowMediaPicker(false)}
-          onSelect={(url) => {
-            handleUpdateProps({ src: url })
+          onSelect={(url, asset) => {
+            if (asset) {
+              applyAssetToNode(dispatch, sectionId, asset, nodeType === 'image' ? 'IMAGE' : 'BACKGROUND_IMAGE')
+            } else if (nodeType === 'image') {
+              handleUpdateProps({ src: url })
+            } else {
+              handleUpdateStyles({ backgroundImage: `url("${url}")`, backgroundSize: 'cover', backgroundPosition: 'center' })
+            }
             setShowMediaPicker(false)
           }}
         />
