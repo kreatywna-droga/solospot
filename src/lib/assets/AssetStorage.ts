@@ -1,4 +1,5 @@
 import { getServiceSupabase, isSupabaseConfigured, isSupabaseServiceConfigured } from '../supabase';
+import { STORE_ASSETS_BUCKET } from './storagePath';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -58,7 +59,7 @@ export function formatStorageError(error: any, bucket = 'assets', storagePath = 
 }
 
 export class SupabaseAssetStorage implements IAssetStorageProvider {
-  private readonly bucket = 'store-assets';
+  private readonly bucket = STORE_ASSETS_BUCKET;
   private bucketChecked = false;
 
   private async ensureBucket(): Promise<void> {

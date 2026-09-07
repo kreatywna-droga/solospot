@@ -13,6 +13,7 @@ interface AssetPickerProps {
   onSelect: (asset: MediaAsset & { publicUrl?: string }) => void
   document?: MediaDocument
   storeId?: string
+  tenantId?: string
   accept?: string[]
 }
 
@@ -28,7 +29,7 @@ interface ApiAssetItem {
   createdAt: string
 }
 
-export function AssetPicker({ isOpen, onClose, onSelect, storeId, accept }: AssetPickerProps) {
+export function AssetPicker({ isOpen, onClose, onSelect, storeId, tenantId, accept }: AssetPickerProps) {
   const [activeTab, setActiveTab] = useState<'library' | 'upload' | 'url'>('library')
   const [searchQuery, setSearchQuery] = useState('')
   const [assets, setAssets] = useState<ApiAssetItem[]>([])
@@ -113,27 +114,31 @@ export function AssetPicker({ isOpen, onClose, onSelect, storeId, accept }: Asse
 
   const uploadLargeFile = async (file: File) => {
     const { supabase, isSupabaseConfigured } = await import('../../lib/supabase')
+    const { buildStoragePath, sanitizeFilename, STORE_ASSETS_BUCKET, formatDirectUploadError } = await import('../../lib/assets/storagePath')
     if (!isSupabaseConfigured()) {
       throw new Error('Upload dużych plików wymaga skonfigurowanego Supabase.')
     }
+    if (!tenantId) {
+      throw new Error('Upload dużych plików wymaga identyfikatora tenanta. Zapisz sklep i spróbuj ponownie.')
+    }
 
     const assetId = crypto.randomUUID()
-    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')
-    const storagePath = `${storeId}/${assetId}-${sanitizedName}`
+    const sanitizedName = sanitizeFilename(file.name)
+    const storagePath = buildStoragePath(tenantId, storeId!, `${assetId}-${sanitizedName}`)
 
     const { error } = await supabase.storage
-      .from('store-assets')
+      .from(STORE_ASSETS_BUCKET)
       .upload(storagePath, file, {
         contentType: file.type,
         upsert: true,
       })
 
     if (error) {
-      throw new Error(`Upload direct do Supabase nie powiódł się: ${error.message}`)
+      throw new Error(`Upload direct do Supabase nie powiódł się: ${formatDirectUploadError(error)}`)
     }
 
     const { data: urlData } = supabase.storage
-      .from('store-assets')
+      .from(STORE_ASSETS_BUCKET)
       .getPublicUrl(storagePath)
 
     // Persist metadata via API (small JSON, no body size issue)
@@ -144,7 +149,7 @@ export function AssetPicker({ isOpen, onClose, onSelect, storeId, accept }: Asse
         directUpload: true,
         storagePath,
         publicUrl: urlData.publicUrl,
-        filename: sanitizedName,
+        filename: `${assetId}-${sanitizedName}`,
         originalName: file.name,
         mimeType: file.type,
         size: file.size,
@@ -153,7 +158,12 @@ export function AssetPicker({ isOpen, onClose, onSelect, storeId, accept }: Asse
     })
 
     if (!metaRes.ok) {
-      console.warn('[AssetPicker] Direct upload succeeded but metadata persist failed:', metaRes.status)
+      let detail = `Status ${metaRes.status}`
+      try {
+        const metaData = await metaRes.json()
+        if (metaData.error) detail = metaData.error
+      } catch { /* non-JSON response */ }
+      throw new Error(`Bezpośredni upload przeszedł, ale zapis metadanych nie powiódł się: ${detail}`)
     }
   }
 

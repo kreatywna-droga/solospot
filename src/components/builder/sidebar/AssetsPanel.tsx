@@ -133,27 +133,31 @@ export function AssetsPanel() {
    */
   const uploadLargeFile = async (file: File) => {
     const { supabase, isSupabaseConfigured } = await import('../../../lib/supabase')
+    const { buildStoragePath, sanitizeFilename, STORE_ASSETS_BUCKET, formatDirectUploadError } = await import('../../../lib/assets/storagePath')
     if (!isSupabaseConfigured()) {
       throw new Error('Upload dużych plików wymaga skonfigurowanego Supabase. Zmniejsz rozmiar pliku do 4 MB lub skonfiguruj Supabase.')
     }
+    if (!document.tenantId) {
+      throw new Error('Upload dużych plików wymaga identyfikatora tenanta. Zapisz sklep i spróbuj ponownie.')
+    }
 
     const assetId = crypto.randomUUID()
-    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')
-    const storagePath = `${storeId}/${assetId}-${sanitizedName}`
+    const sanitizedName = sanitizeFilename(file.name)
+    const storagePath = buildStoragePath(document.tenantId, storeId, `${assetId}-${sanitizedName}`)
 
     const { error } = await supabase.storage
-      .from('store-assets')
+      .from(STORE_ASSETS_BUCKET)
       .upload(storagePath, file, {
         contentType: file.type,
         upsert: true,
       })
 
     if (error) {
-      throw new Error(`Upload direct do Supabase nie powiódł się: ${error.message}`)
+      throw new Error(`Upload direct do Supabase nie powiódł się: ${formatDirectUploadError(error)}`)
     }
 
     const { data: urlData } = supabase.storage
-      .from('store-assets')
+      .from(STORE_ASSETS_BUCKET)
       .getPublicUrl(storagePath)
 
     // Persist metadata via the API route (small JSON payload, no body size issue)
@@ -164,7 +168,7 @@ export function AssetsPanel() {
         directUpload: true,
         storagePath,
         publicUrl: urlData.publicUrl,
-        filename: sanitizedName,
+        filename: `${assetId}-${sanitizedName}`,
         originalName: file.name,
         mimeType: file.type,
         size: file.size,
@@ -172,10 +176,13 @@ export function AssetsPanel() {
       }),
     })
 
-    // If the direct metadata persist fails, the file is in Supabase but metadata is missing.
-    // This is acceptable — the file exists and can be referenced by URL.
     if (!metaRes.ok) {
-      console.warn('[AssetsPanel] Direct upload succeeded but metadata persist failed:', metaRes.status)
+      let detail = `Status ${metaRes.status}`
+      try {
+        const metaData = await metaRes.json()
+        if (metaData.error) detail = metaData.error
+      } catch { /* non-JSON response */ }
+      throw new Error(`Bezpośredni upload przeszedł, ale zapis metadanych nie powiódł się: ${detail}`)
     }
   }
 

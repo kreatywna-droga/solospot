@@ -166,27 +166,31 @@ export function MediaPickerModal({
 
   const uploadLargeFile = async (file: File) => {
     const { supabase, isSupabaseConfigured } = await import('../../../lib/supabase')
+    const { buildStoragePath, sanitizeFilename, STORE_ASSETS_BUCKET, formatDirectUploadError } = await import('../../../lib/assets/storagePath')
     if (!isSupabaseConfigured()) {
       throw new Error('Upload dużych plików wymaga skonfigurowanego Supabase. Zmniejsz rozmiar pliku do 4 MB lub skonfiguruj Supabase.')
     }
+    if (!document.tenantId) {
+      throw new Error('Upload dużych plików wymaga identyfikatora tenanta. Zapisz sklep i spróbuj ponownie.')
+    }
 
     const assetId = crypto.randomUUID()
-    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')
-    const storagePath = `${storeId}/${assetId}-${sanitizedName}`
+    const sanitizedName = sanitizeFilename(file.name)
+    const storagePath = buildStoragePath(document.tenantId, storeId, `${assetId}-${sanitizedName}`)
 
     const { error } = await supabase.storage
-      .from('store-assets')
+      .from(STORE_ASSETS_BUCKET)
       .upload(storagePath, file, {
         contentType: file.type,
         upsert: true,
       })
 
     if (error) {
-      throw new Error(`Upload direct do Supabase nie powiódł się: ${error.message}`)
+      throw new Error(`Upload direct do Supabase nie powiódł się: ${formatDirectUploadError(error)}`)
     }
 
     const { data: urlData } = supabase.storage
-      .from('store-assets')
+      .from(STORE_ASSETS_BUCKET)
       .getPublicUrl(storagePath)
 
     const metaRes = await fetch(`/api/stores/${storeId}/assets`, {
@@ -222,7 +226,7 @@ export function MediaPickerModal({
       sourceUrl: urlData.publicUrl,
       publicUrl: urlData.publicUrl,
       title: file.name,
-      filename: sanitizedName,
+      filename: `${assetId}-${sanitizedName}`,
       originalName: file.name,
       mimeType: file.type,
       size: file.size,

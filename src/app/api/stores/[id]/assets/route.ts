@@ -140,6 +140,9 @@ export async function POST(
     if (err.message?.startsWith('Walidacja pliku')) {
       return NextResponse.json({ success: false, error: err.message }, { status: 400 });
     }
+    if (err.message?.startsWith('Nieautoryzowana ścieżka storage')) {
+      return NextResponse.json({ success: false, error: err.message }, { status: 403 });
+    }
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

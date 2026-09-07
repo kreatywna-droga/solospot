@@ -2,6 +2,7 @@ import { AssetValidator, type FileToValidate } from './AssetValidator';
 import { getAssetStorage, type IAssetStorageProvider } from './AssetStorage';
 import { AssetRepository } from './AssetRepository';
 import { StoreRepository } from '../store/StoreRepository';
+import { buildStoragePath, storagePathOwnedByStore } from './storagePath';
 import type { AssetRecord, AssetFilterOptions, AssetMetadata } from './AssetTypes';
 
 export class AssetService {
@@ -36,7 +37,7 @@ export class AssetService {
 
     const assetId = crypto.randomUUID();
     const filename = `${assetId}-${validation.sanitizedFilename}`;
-    const storagePath = `${tenantId}/${storeId}/${filename}`;
+    const storagePath = buildStoragePath(tenantId, storeId, filename);
 
     // 2. Upload to storage provider
     const uploadResult = await this.storage.upload(
@@ -84,6 +85,14 @@ export class AssetService {
   ): Promise<AssetRecord> {
     if (!tenantId) throw new Error('Tenant ID required');
     if (!storeId) throw new Error('Store ID required');
+
+    // Direct uploads from the browser must reference objects inside the
+    // requesting tenant's own folder. This is the application-level
+    // counterpart of the storage.objects RLS policies (migration 0018)
+    // and prevents registering cross-tenant or cross-store object paths.
+    if (!file.storagePath || !storagePathOwnedByStore(file.storagePath, tenantId, storeId)) {
+      throw new Error(`Nieautoryzowana ścieżka storage: oczekiwano prefiksu "${tenantId}/${storeId}/"`);
+    }
 
     return this.repo.createAsset({
       tenantId,

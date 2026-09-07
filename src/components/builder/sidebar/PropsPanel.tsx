@@ -185,6 +185,7 @@ function ImageField({ schema, value, onChange }: FieldProps) {
       <AssetPicker
         isOpen={showPicker}
         storeId={storeId}
+        tenantId={document.tenantId}
         onClose={() => setShowPicker(false)}
         onSelect={(asset) => {
           const url = asset.publicUrl || (asset.metadata as any)?.publicUrl || asset.id
