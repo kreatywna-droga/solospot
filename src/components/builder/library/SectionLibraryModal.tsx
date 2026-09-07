@@ -4,17 +4,15 @@ import React, { useState, useMemo, useRef } from 'react';
 import {
   X, Search, Plus, LayoutDashboard, UserCheck, Star, Sparkles,
   CreditCard, HelpCircle, ArrowRight, Mail, Compass, Grid, Layers,
-  ChevronRight, ChevronLeft, CheckCircle2, Eye, Monitor, Tablet, Smartphone,
-  ChevronDown, ListFilter, SlidersHorizontal, Layers3, LayoutGrid, List,
+  ChevronRight, ChevronLeft, Eye, Monitor, Tablet, Smartphone,
+  ChevronDown, LayoutGrid, List, Images, BarChart3, Briefcase,
+  Newspaper, Bookmark, Navigation, ShoppingBag,
 } from 'lucide-react';
 import { useBuilder } from '../state/BuilderProvider';
 import { SectionPreviewRenderer, ScaleToFitContainer } from './SectionPreviewRenderer';
 import {
   BuilderNode,
   SectionNode,
-  createBuilderNode,
-  createSectionNode,
-  generateNodeId,
   NAVIGABLE_CATEGORY_MAP,
 } from '../../../../packages/builder-core/src';
 
@@ -25,18 +23,43 @@ export { SECTION_TEMPLATES };
 
 
 export const CATEGORIES: { id: SectionCategory; label: string; icon: React.ElementType }[] = [
-  { id: 'all', label: 'Wszystkie', icon: Grid },
-  { id: 'hero', label: 'Hero Banners', icon: LayoutDashboard },
-  { id: 'about', label: 'O Nas', icon: UserCheck },
-  { id: 'features', label: 'Cechy & Zalety', icon: Sparkles },
-  { id: 'services', label: 'Usługi', icon: Compass },
-  { id: 'gallery', label: 'Galeria', icon: Grid },
-  { id: 'testimonials', label: 'Opinie', icon: Star },
-  { id: 'pricing', label: 'Cennik', icon: CreditCard },
-  { id: 'faq', label: 'Pytania FAQ', icon: HelpCircle },
-  { id: 'cta', label: 'Wezwanie CTA', icon: ArrowRight },
-  { id: 'contact', label: 'Kontakt', icon: Mail },
-  { id: 'footer', label: 'Stopka', icon: Layers },
+  { id: 'all', label: 'All', icon: Grid },
+  { id: 'hero', label: 'Hero', icon: LayoutDashboard },
+  { id: 'features', label: 'Features', icon: Sparkles },
+  { id: 'services', label: 'Services', icon: Compass },
+  { id: 'products', label: 'Products', icon: ShoppingBag },
+  { id: 'about', label: 'About', icon: UserCheck },
+  { id: 'team', label: 'Team', icon: Users },
+  { id: 'testimonials', label: 'Testimonials', icon: Star },
+  { id: 'pricing', label: 'Pricing', icon: CreditCard },
+  { id: 'cta', label: 'CTA', icon: ArrowRight },
+  { id: 'logos', label: 'Logos', icon: Briefcase },
+  { id: 'stats', label: 'Stats', icon: BarChart3 },
+  { id: 'gallery', label: 'Gallery', icon: Images },
+  { id: 'portfolio', label: 'Portfolio', icon: Eye },
+  { id: 'faq', label: 'FAQ', icon: HelpCircle },
+  { id: 'contact', label: 'Contact', icon: Mail },
+  { id: 'blog', label: 'Blog', icon: Newspaper },
+  { id: 'newsletter', label: 'Newsletter', icon: Bookmark },
+  { id: 'navigation', label: 'Navigation', icon: Navigation },
+  { id: 'footer', label: 'Footer', icon: Layers },
+];
+
+// Users icon component (not in lucide imports above)
+function Users({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  );
+}
+
+const STYLE_OPTIONS = [
+  'All', 'Modern', 'Minimal', 'Bold', 'Dark', 'Light', 'Luxury', 'Editorial',
+  'Creative', 'Corporate', 'Premium', 'Elegant', 'Organic', 'Cinematic',
 ];
 
 export interface SectionLibraryModalProps {
@@ -51,25 +74,14 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
   const { dispatch, canvas, document: builderDoc } = useBuilder();
   const [selectedCategory, setSelectedCategory] = useState<SectionCategory>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedStyle, setSelectedStyle] = useState('All');
   const [viewMode, setViewMode] = useState<'grid' | 'accordion'>('grid');
-  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
-    hero: true,
-    about: true,
-    features: true,
-    services: true,
-    gallery: true,
-    testimonials: true,
-    pricing: true,
-    faq: true,
-    cta: true,
-    contact: true,
-    footer: true,
-  });
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [previewModalTemplate, setPreviewModalTemplate] = useState<SectionTemplateItem | null>(null);
   const [previewViewport, setPreviewViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
 
-  const predecessor = insertIndex !== undefined && insertIndex > 0 ? sections?.[insertIndex - 1]?.label || `Sekcja #${insertIndex}` : null;
-  const successor = insertIndex !== undefined && sections && insertIndex < sections.length ? sections?.[insertIndex]?.label || `Sekcja #${insertIndex + 1}` : null;
+  const predecessor = insertIndex !== undefined && insertIndex > 0 ? sections?.[insertIndex - 1]?.label || `Section #${insertIndex}` : null;
+  const successor = insertIndex !== undefined && sections && insertIndex < sections.length ? sections?.[insertIndex]?.label || `Section #${insertIndex + 1}` : null;
 
   // Cache template nodes so tree creation runs once per template
   const templateNodes = useMemo(() => {
@@ -93,10 +105,13 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
         item.name.toLowerCase().includes(q) ||
         item.description.toLowerCase().includes(q) ||
         item.category.toLowerCase().includes(q) ||
-        (item.badge && item.badge.toLowerCase().includes(q));
-      return matchCat && matchQuery;
+        (item.badge && item.badge.toLowerCase().includes(q)) ||
+        (item.tags && item.tags.some(t => t.toLowerCase().includes(q))) ||
+        (item.industry && item.industry.some(i => i.toLowerCase().includes(q)));
+      const matchStyle = selectedStyle === 'All' || item.style?.toLowerCase() === selectedStyle.toLowerCase();
+      return matchCat && matchQuery && matchStyle;
     });
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, selectedStyle]);
 
   // Group templates by category for Accordion View
   const groupedCategories = useMemo(() => {
@@ -204,7 +219,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
         key={template.id}
         className="group relative rounded-2xl bg-[#14141a] border border-[#272730] hover:border-violet-500/70 hover:shadow-2xl hover:shadow-violet-950/30 transition-all duration-200 flex flex-col justify-between overflow-hidden"
       >
-        {/* Card Header — Large & Readable */}
+        {/* Card Header */}
         <div className="p-5 pb-4 flex items-start justify-between gap-3 border-b border-[#22222a] bg-[#1a1a22]">
           <div>
             <div className="flex items-center gap-2.5">
@@ -242,7 +257,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
               className="px-5 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-extrabold shadow-xl shadow-violet-600/50 flex items-center gap-2 transition-transform active:scale-95"
             >
               <Plus className="w-4 h-4" />
-              <span>WSTAW TĘ SEKCJĘ</span>
+              <span>INSERT SECTION</span>
             </button>
             <button
               onClick={(e) => {
@@ -252,29 +267,36 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
               className="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/25 flex items-center gap-2 transition-all"
             >
               <Eye className="w-4 h-4 text-violet-300" />
-              <span>POWIĘKSZ PODGLĄD</span>
+              <span>ENLARGE PREVIEW</span>
             </button>
           </div>
         </div>
 
         {/* Card Footer */}
         <div className="px-5 py-4 bg-[#16161c] border-t border-[#22222a] flex items-center justify-between gap-3">
-          <span className="text-[11px] font-mono font-bold text-violet-400 uppercase tracking-wider bg-violet-500/10 px-2.5 py-1 rounded-md border border-violet-500/20">
-            {template.category}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-mono font-bold text-violet-400 uppercase tracking-wider bg-violet-500/10 px-2.5 py-1 rounded-md border border-violet-500/20">
+              {template.category}
+            </span>
+            {template.style && (
+              <span className="text-[10px] font-medium text-zinc-500 px-2 py-0.5 rounded bg-white/5">
+                {template.style}
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-2.5">
             <button
               onClick={() => setPreviewModalTemplate(template)}
               className="text-xs text-zinc-300 hover:text-white font-semibold flex items-center gap-1.5 transition-colors px-3 py-1.5 rounded-lg hover:bg-white/10 border border-white/10"
             >
               <Eye className="w-3.5 h-3.5" />
-              <span>Powiększ</span>
+              <span>Expand</span>
             </button>
             <button
               onClick={() => handleSelectTemplate(template)}
               className="text-xs font-extrabold text-white flex items-center gap-1.5 transition-all bg-violet-600 hover:bg-violet-500 px-4 py-1.5 rounded-lg shadow-md shadow-violet-600/30"
             >
-              <span>Wstaw sekcję</span>
+              <span>Insert</span>
               <Plus className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -295,23 +317,23 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
             <div>
               <h2 className="text-base md:text-lg font-extrabold text-white flex items-center gap-2.5">
                 <LayoutDashboard className="w-5 h-5 text-[#A78BFA]" />
-                <span>Wizualna Biblioteka Sekcji</span>
+                <span>Visual Section Library</span>
                 <span className="text-xs font-semibold text-zinc-300 px-2.5 py-0.5 rounded-full bg-white/10 border border-white/15">
-                  {SECTION_TEMPLATES.length} gotowych układów
+                  {SECTION_TEMPLATES.length} ready-made layouts
                 </span>
                 {insertIndex !== undefined && (
                   <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-violet-500/20 text-[#A78BFA] font-bold border border-violet-500/30">
-                    Wstawianie na pozycji #{insertIndex + 1}
+                    Inserting at position #{insertIndex + 1}
                   </span>
                 )}
               </h2>
               <p className="text-xs text-zinc-400 mt-0.5">
                 {insertIndex !== undefined ? (
                   <span className="text-[#A78BFA] font-medium">
-                    Nowa sekcja zostanie wstawiona {predecessor && successor ? `pomiędzy "${predecessor}" a "${successor}"` : predecessor ? `po sekcji "${predecessor}"` : successor ? `przed sekcją "${successor}"` : 'na początku strony'}.
+                    New section will be inserted {predecessor && successor ? `between "${predecessor}" and "${successor}"` : predecessor ? `after "${predecessor}"` : successor ? `before "${successor}"` : 'at the beginning of the page'}.
                   </span>
                 ) : (
-                  'Wybierz z gotowych układów z zachowaniem pełnego wyglądu, typografii i elementów akcji.'
+                  'Choose from ready-made layouts with full appearance, typography, and action elements preserved.'
                 )}
               </p>
             </div>
@@ -323,7 +345,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
             </button>
           </div>
 
-          {/* Search, Category Select & View Switcher Bar */}
+          {/* Search, Filters & View Switcher Bar */}
           <div className="p-4 border-b border-[#27272A] bg-[#18181e] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             {/* Search Input */}
             <div className="relative flex-1">
@@ -332,12 +354,12 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Szukaj sekcji po nazwie, typie lub przeznaczeniu (np. Hero, Produkty, Cennik, Opinie)..."
+                placeholder="Search sections by name, category, tag, or use case (e.g. Hero, Pricing, Restaurant, E-commerce)..."
                 className="w-full pl-10 pr-4 py-2.5 bg-[#22222a] border border-[#3F3F46]/50 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-violet-500 transition-colors"
               />
             </div>
 
-            {/* Rozwijane Menu Kategorii (Dropdown Select) */}
+            {/* Filters */}
             <div className="flex items-center gap-2">
               <div className="relative flex-shrink-0">
                 <select
@@ -345,7 +367,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
                   onChange={(e) => setSelectedCategory(e.target.value as SectionCategory)}
                   className="appearance-none bg-[#22222a] hover:bg-[#2B2B36] border border-violet-500/40 text-xs font-bold text-violet-300 rounded-xl px-4 py-2.5 pr-8 focus:outline-none focus:border-violet-500 cursor-pointer transition-colors"
                 >
-                  <option value="all">Rozwijane kategorie — Wszystkie ({SECTION_TEMPLATES.length})</option>
+                  <option value="all">All Categories ({SECTION_TEMPLATES.length})</option>
                   {CATEGORIES.filter(c => c.id !== 'all').map(cat => {
                     const count = SECTION_TEMPLATES.filter(t => t.category === cat.id).length;
                     return (
@@ -358,27 +380,40 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
                 <ChevronDown className="w-4 h-4 text-violet-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
 
-              {/* View Mode Switcher (Large Grid vs Accordion) */}
+              <div className="relative flex-shrink-0">
+                <select
+                  value={selectedStyle}
+                  onChange={(e) => setSelectedStyle(e.target.value)}
+                  className="appearance-none bg-[#22222a] hover:bg-[#2B2B36] border border-violet-500/40 text-xs font-bold text-violet-300 rounded-xl px-4 py-2.5 pr-8 focus:outline-none focus:border-violet-500 cursor-pointer transition-colors"
+                >
+                  {STYLE_OPTIONS.map(s => (
+                    <option key={s} value={s}>{s === 'All' ? 'All Styles' : s}</option>
+                  ))}
+                </select>
+                <ChevronDown className="w-4 h-4 text-violet-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+
+              {/* View Mode Switcher */}
               <div className="flex items-center bg-[#22222a] p-1 rounded-xl border border-[#3F3F46]/40">
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                     viewMode === 'grid' ? 'bg-violet-600 text-white shadow' : 'text-zinc-400 hover:text-white'
                   }`}
-                  title="Widok dużych kart"
+                  title="Large card view"
                 >
                   <LayoutGrid className="w-3.5 h-3.5" />
-                  <span>Siatka</span>
+                  <span>Grid</span>
                 </button>
                 <button
                   onClick={() => setViewMode('accordion')}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                     viewMode === 'accordion' ? 'bg-violet-600 text-white shadow' : 'text-zinc-400 hover:text-white'
                   }`}
-                  title="Rozwijane kategorie"
+                  title="Expandable categories"
                 >
                   <List className="w-3.5 h-3.5" />
-                  <span>Rozwijane</span>
+                  <span>Accordion</span>
                 </button>
               </div>
             </div>
@@ -430,9 +465,9 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
             {filteredTemplates.length === 0 ? (
               <div className="py-24 flex flex-col items-center justify-center text-zinc-500 text-center gap-3">
                 <LayoutDashboard className="w-14 h-14 text-slate-600" />
-                <p className="text-lg font-bold text-zinc-300">Nie znaleziono sekcji</p>
+                <p className="text-lg font-bold text-zinc-300">No sections found</p>
                 <p className="text-xs text-zinc-400 max-w-md">
-                  Spróbuj zmienić frazę wyszukiwania lub wybierz inną kategorię z rozwijanego menu powyżej.
+                  Try changing the search phrase or selecting a different category.
                 </p>
               </div>
             ) : viewMode === 'accordion' ? (
@@ -450,11 +485,11 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
                           <group.icon className="w-5 h-5 text-violet-400" />
                           <span className="text-base font-extrabold text-white">{group.label}</span>
                           <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30">
-                            {group.items.length} {group.items.length === 1 ? 'sekcja' : 'sekcje'}
+                            {group.items.length} {group.items.length === 1 ? 'section' : 'sections'}
                           </span>
                         </div>
                         <div className="flex items-center gap-2 text-xs font-semibold text-zinc-400">
-                          <span>{isExpanded ? 'Zwiń' : 'Rozwiń'}</span>
+                          <span>{isExpanded ? 'Collapse' : 'Expand'}</span>
                           <ChevronDown className={`w-4 h-4 text-violet-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
                         </div>
                       </button>
@@ -469,7 +504,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
                 })}
               </div>
             ) : (
-              /* Large Grid View (1 or 2 Columns) */
+              /* Large Grid View */
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 {filteredTemplates.map((template) => renderSectionCard(template))}
               </div>
@@ -498,33 +533,22 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
 
               {/* Viewport Switcher */}
               <div className="flex items-center gap-1 bg-[#0e0e14] p-1 rounded-xl border border-white/10">
-                <button
-                  onClick={() => setPreviewViewport('desktop')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    previewViewport === 'desktop' ? 'bg-violet-600 text-white shadow font-bold' : 'text-zinc-400 hover:text-white'
-                  }`}
-                >
-                  <Monitor className="w-3.5 h-3.5" />
-                  <span>Desktop (1280px)</span>
-                </button>
-                <button
-                  onClick={() => setPreviewViewport('tablet')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    previewViewport === 'tablet' ? 'bg-violet-600 text-white shadow font-bold' : 'text-zinc-400 hover:text-white'
-                  }`}
-                >
-                  <Tablet className="w-3.5 h-3.5" />
-                  <span>Tablet (768px)</span>
-                </button>
-                <button
-                  onClick={() => setPreviewViewport('mobile')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    previewViewport === 'mobile' ? 'bg-violet-600 text-white shadow font-bold' : 'text-zinc-400 hover:text-white'
-                  }`}
-                >
-                  <Smartphone className="w-3.5 h-3.5" />
-                  <span>Mobile (375px)</span>
-                </button>
+                {([
+                  ['desktop', Monitor, 'Desktop (1280px)'],
+                  ['tablet', Tablet, 'Tablet (768px)'],
+                  ['mobile', Smartphone, 'Mobile (375px)'],
+                ] as const).map(([vp, Icon, label]) => (
+                  <button
+                    key={vp}
+                    onClick={() => setPreviewViewport(vp)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                      previewViewport === vp ? 'bg-violet-600 text-white shadow font-bold' : 'text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{label}</span>
+                  </button>
+                ))}
               </div>
 
               {/* Close Button */}
@@ -552,15 +576,21 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
             <div className="flex items-center justify-between px-6 py-4 border-t border-[#27272A] bg-[#1a1a20]">
               <div className="flex items-center gap-2 text-xs text-zinc-400">
                 <span className="font-mono text-violet-400 uppercase font-semibold">{previewModalTemplate.category}</span>
-                <span>•</span>
-                <span>Rzeczywisty układ i stylowanie SoloSpot Canvas</span>
+                {previewModalTemplate.style && (
+                  <>
+                    <span>·</span>
+                    <span>{previewModalTemplate.style}</span>
+                  </>
+                )}
+                <span>·</span>
+                <span>Real layout & styling in SoloSpot Canvas</span>
               </div>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setPreviewModalTemplate(null)}
                   className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-semibold transition-colors"
                 >
-                  Zamknij podgląd
+                  Close preview
                 </button>
                 <button
                   onClick={() => {
@@ -570,7 +600,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
                   className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold shadow-lg shadow-violet-600/30 flex items-center gap-2 transition-all active:scale-95"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Wstaw tę sekcję do strony</span>
+                  <span>Insert this section</span>
                 </button>
               </div>
             </div>

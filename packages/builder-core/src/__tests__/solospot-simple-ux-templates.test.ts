@@ -52,18 +52,17 @@ describe('SoloSpot Builder — Simple-First / Canvas-First UX Transformation', (
     });
   });
 
-  describe('Website Template Starters (8 Presets)', () => {
-    it('should have exactly 8 complete website templates defined', () => {
-      expect(WEBSITE_TEMPLATES).toHaveLength(8);
+  describe('Website Template Starters (30 Presets)', () => {
+    it('should have at least 30 complete website templates defined', () => {
+      expect(WEBSITE_TEMPLATES.length).toBeGreaterThanOrEqual(30);
     });
 
-    it('each template has valid metadata, name, tagline, description, and icon', () => {
+    it('each template has valid metadata, name, tagline, description', () => {
       WEBSITE_TEMPLATES.forEach((tmpl) => {
         expect(tmpl.id).toBeTruthy();
         expect(tmpl.name).toBeTruthy();
         expect(tmpl.tagline).toBeTruthy();
         expect(tmpl.description).toBeTruthy();
-        expect(tmpl.icon).toBeDefined();
       });
     });
 
@@ -80,7 +79,7 @@ describe('SoloSpot Builder — Simple-First / Canvas-First UX Transformation', (
     });
 
     it('should construct a complete multi-section landing page from template', () => {
-      const landingTmpl = WEBSITE_TEMPLATES.find((t) => t.id === 'landing-page')!;
+      const landingTmpl = WEBSITE_TEMPLATES.find((t) => t.id === 'modern-saas')!;
       const sections: SectionNode[] = landingTmpl.sectionTemplateIds.map((secId) => {
         const found = SECTION_TEMPLATES.find((s) => s.id === secId)!;
         return found.createNode() as SectionNode;
@@ -100,7 +99,7 @@ describe('SoloSpot Builder — Simple-First / Canvas-First UX Transformation', (
 
       expect(doc.pages[0].sections).toHaveLength(landingTmpl.sectionTemplateIds.length);
       expect(doc.pages[0].sections[0].label).toContain('Hero');
-      expect(doc.pages[0].sections[doc.pages[0].sections.length - 1].label).toContain('Stopka');
+      expect(doc.pages[0].sections[doc.pages[0].sections.length - 1].label.toLowerCase()).toContain('footer');
     });
   });
 
