@@ -24,6 +24,7 @@ import { useBuilder } from '../state/BuilderProvider'
 import { ComponentDescriptor } from '../../../../packages/builder-core/src/ComponentRegistry'
 import { BuilderNode, createBuilderNode, generateNodeId, findNode } from '../../../../packages/builder-core/src'
 import { TypographyPresetsPanel, TypographyPreset } from './TypographyPresetsPanel'
+import { ExperienceLibraryModal } from '../experience/ExperienceLibraryModal'
 
 // ---------------------------------------------------------------------------
 // Category tabs
@@ -376,6 +377,7 @@ export function ComponentPanel({ onClose }: ComponentPanelProps) {
   }, [dispatch, canvas.selectedSectionId, canvas.selectedPageId, builderDoc, onClose])
 
   const [subTab, setSubTab] = useState<'components' | 'typography'>('components')
+  const [showExperiences, setShowExperiences] = useState(false)
 
   return (
     <div className="flex flex-col h-full">
@@ -387,6 +389,31 @@ export function ComponentPanel({ onClose }: ComponentPanelProps) {
             <X className="w-4 h-4" />
           </button>
         )}
+      </div>
+
+      {/* Experience Library v2.0 Quick Access Banner */}
+      <div className="px-3 pt-3 pb-1">
+        <button
+          type="button"
+          onClick={() => setShowExperiences(true)}
+          className="w-full flex items-center justify-between p-2.5 rounded-xl bg-gradient-to-r from-violet-950/70 via-purple-900/40 to-indigo-950/70 border border-violet-500/30 hover:border-violet-500/60 text-left transition-all group shadow-sm hover:shadow-violet-500/10"
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-7 h-7 rounded-lg bg-violet-600/20 border border-violet-500/30 flex items-center justify-center text-violet-400 group-hover:scale-105 transition-transform shrink-0">
+              <Sparkles className="w-3.5 h-3.5" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-xs font-bold text-white group-hover:text-violet-200 transition-colors flex items-center gap-1.5">
+                <span>Experience Library</span>
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30">v2.0</span>
+              </div>
+              <p className="text-[10px] text-zinc-400 truncate">Przeglądaj 270+ gotowych sekcji i efektów</p>
+            </div>
+          </div>
+          <div className="text-xs text-violet-400 group-hover:translate-x-0.5 transition-transform font-bold ml-1">
+            &rarr;
+          </div>
+        </button>
       </div>
 
       {/* Sub-tab switcher */}
@@ -468,6 +495,12 @@ export function ComponentPanel({ onClose }: ComponentPanelProps) {
           </div>
         </>
       )}
+
+      {/* Experience Library Modal */}
+      <ExperienceLibraryModal
+        isOpen={showExperiences}
+        onClose={() => setShowExperiences(false)}
+      />
     </div>
   )
 }

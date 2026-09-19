@@ -19,6 +19,7 @@ import Link from 'next/link'
 import { useBuilder, useBuilderHistory } from '../state/BuilderProvider'
 import { VIEWPORT_PRESETS, ViewportLabel, RuntimeMode } from '../../../../packages/builder-core/src/CanvasState'
 import { WebsiteTemplatePickerModal } from '../templates/WebsiteTemplatePickerModal'
+import { ExperienceLibraryModal } from '../experience/ExperienceLibraryModal'
 import { StoreLifecycleModal } from '../modals/StoreLifecycleModal'
 
 export type StudioTab = 'pages' | 'layers' | 'components' | 'assets' | 'style' | 'ai' | 'history'
@@ -52,6 +53,7 @@ export function BuilderTopBar({
   const { canUndo, canRedo, undo, redo } = useBuilderHistory()
   const [showCommandPalette, setShowCommandPalette] = useState(false)
   const [showTemplatePicker, setShowTemplatePicker] = useState(false)
+  const [showExperienceLibrary, setShowExperienceLibrary] = useState(false)
   const [showLifecycleModal, setShowLifecycleModal] = useState(false)
 
   const setViewport = useCallback((label: ViewportLabel) => {
@@ -136,8 +138,17 @@ export function BuilderTopBar({
 
         {/* Right: viewport + templates / preview + undo/redo + save/publish */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Templates & Preview Mode Buttons */}
+          {/* Templates, Experiences & Preview Mode Buttons */}
           <div className="flex items-center gap-1">
+            <button
+              onClick={() => setShowExperienceLibrary(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold text-xs transition-all shadow-md shadow-violet-500/20 active:scale-95"
+              title="Biblioteka gotowych doświadczeń, sekcji i interakcji (Experience Library v2.0)"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-violet-200" />
+              <span className="hidden sm:inline">Experiences</span>
+            </button>
+
             <button
               onClick={() => setShowTemplatePicker(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#8B5CF6]/12 hover:bg-[#8B5CF6]/20 text-[#A78BFA] border border-[#8B5CF6]/25 text-xs font-semibold transition-all shadow-sm"
@@ -267,6 +278,12 @@ export function BuilderTopBar({
         storeName={document.metadata.storeName}
         isOpen={showLifecycleModal}
         onClose={() => setShowLifecycleModal(false)}
+      />
+
+      {/* Experience Library Modal */}
+      <ExperienceLibraryModal
+        isOpen={showExperienceLibrary}
+        onClose={() => setShowExperienceLibrary(false)}
       />
     </>
   )

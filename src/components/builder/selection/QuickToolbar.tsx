@@ -31,6 +31,7 @@ import { useBuilder } from '../state/BuilderProvider'
 import { MediaPickerModal } from '../sidebar/MediaPickerModal'
 import { FontPicker } from '../../../../packages/authoring-studio/src/inspector/widgets/FontPicker'
 import { applyAssetToNode } from '@/lib/assets/AssetResolver'
+import { SaveExperienceModal } from '../experience/SaveExperienceModal'
 
 interface QuickToolbarProps {
   position: ToolbarPositionResult
@@ -58,6 +59,7 @@ export function QuickToolbar({
   const [showMediaPicker, setShowMediaPicker] = useState(false)
   const [showLinkInput, setShowLinkInput] = useState(false)
   const [showAddMenu, setShowAddMenu] = useState(false)
+  const [showSaveExperience, setShowSaveExperience] = useState(false)
   const [linkVal, setLinkVal] = useState('')
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
@@ -870,6 +872,16 @@ export function QuickToolbar({
             <Copy className="w-3.5 h-3.5" />
           </button>
 
+          {node && (
+            <button
+              onClick={() => setShowSaveExperience(true)}
+              className="p-1 rounded-lg text-zinc-400 hover:text-violet-300 hover:bg-violet-500/10 transition-colors"
+              title="Zapisz jako Experience (Save as Experience)"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+            </button>
+          )}
+
           <button
             onClick={() => handleAction('DELETE')}
             className="p-1 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
@@ -888,6 +900,15 @@ export function QuickToolbar({
           />
         )}
       </motion.div>
+
+      {/* Save Experience Modal */}
+      {showSaveExperience && node && (
+        <SaveExperienceModal
+          isOpen={showSaveExperience}
+          onClose={() => setShowSaveExperience(false)}
+          sectionNode={node}
+        />
+      )}
 
       {/* Media Picker Modal for Image / Background / Video elements */}
       {showMediaPicker && (

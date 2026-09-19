@@ -33,7 +33,7 @@ import {
   Video, Upload, Image as ImageIcon, Type, GripVertical, Move, Hand,
 } from 'lucide-react'
 import { useBuilder } from '../state/BuilderProvider'
-import { SectionNode } from '../../../../packages/builder-core/src/BuilderDocument'
+import { SectionNode, BuilderNode } from '../../../../packages/builder-core/src/BuilderDocument'
 import {
   findNode,
   computeSectionSnap,
@@ -47,7 +47,7 @@ import { useRuntimePreview } from './useRuntimePreview'
 import { SectionRenderer } from '@/components/runtime/SectionRenderer'
 import { CartProvider } from '@/lib/cart/CartStore'
 import { loadGoogleFont } from '../../../../packages/builder-core/src/fonts/FontCatalog'
-import { SectionLibraryModal } from '../library/SectionLibraryModal'
+import { ExperienceLibraryModal, SaveExperienceModal } from '../experience'
 import { WebsiteTemplatePickerModal } from '../templates/WebsiteTemplatePickerModal'
 
 // ---------------------------------------------------------------------------
@@ -2005,6 +2005,8 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
   const [isSectionLibraryOpen, setIsSectionLibraryOpen] = useState(false)
   const [insertSectionIndex, setInsertSectionIndex] = useState<number | undefined>(undefined)
   const [isTemplatePickerOpen, setIsTemplatePickerOpen] = useState(false)
+  const [isSaveExperienceOpen, setIsSaveExperienceOpen] = useState(false)
+  const [saveExperienceTargetNode, setSaveExperienceTargetNode] = useState<BuilderNode | null>(null)
   const [activeCanvasSectionSnap, setActiveCanvasSectionSnap] = useState<SectionSnapResult | null>(null)
 
   const handleSectionInserted = useCallback((newSectionId: string) => {
@@ -2830,20 +2832,36 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                       onHover={handleHoverSection}
                       onStartDragNode={handleDirectNodeDragStart}
                     />
-                    {/* Add Section button — anchored to this section's bottom area */}
+                    {/* Actions anchored to selected/hovered section */}
                     {(canvas.selectedSectionId === node.id || canvas.hoveredSectionId === node.id) && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setInsertSectionIndex(index + 1)
-                          setIsSectionLibraryOpen(true)
-                        }}
-                        className="absolute bottom-2 right-2 z-20 flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-bold shadow-lg shadow-violet-600/40 scale-95 hover:scale-105 whitespace-nowrap pointer-events-auto"
-                        title={`Dodaj sekcję po "${node.label || 'Sekcja #' + (index + 1)}"`}
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Dodaj sekcję</span>
-                      </button>
+                      <div className="absolute bottom-2 right-2 z-20 flex items-center gap-1.5 pointer-events-auto">
+                        {canvas.selectedSectionId === node.id && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSaveExperienceTargetNode(node)
+                              setIsSaveExperienceOpen(true)
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1e1b4b] hover:bg-[#2e2a72] border border-violet-500/40 text-violet-300 hover:text-white text-[11px] font-bold shadow-lg shadow-violet-950/40 transition-all scale-95 hover:scale-105 whitespace-nowrap"
+                            title="Zapisz tę sekcję do swoich Experience (My Experiences)"
+                          >
+                            <Sparkles className="w-3 h-3 text-violet-400" />
+                            <span>Zapisz Experience</span>
+                          </button>
+                        )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setInsertSectionIndex(index + 1)
+                            setIsSectionLibraryOpen(true)
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-bold shadow-lg shadow-violet-600/40 scale-95 hover:scale-105 whitespace-nowrap"
+                          title={`Dodaj sekcję po "${node.label || 'Sekcja #' + (index + 1)}"`}
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Dodaj sekcję</span>
+                        </button>
+                      </div>
                     )}
                   </div>
                 </React.Fragment>
@@ -2985,13 +3003,22 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
           </div>
         )}
 
-        {/* Section Library Modal */}
-        <SectionLibraryModal
+        {/* Experience Library Modal v2.0 */}
+        <ExperienceLibraryModal
           isOpen={isSectionLibraryOpen}
           onClose={() => setIsSectionLibraryOpen(false)}
           insertIndex={insertSectionIndex}
-          sections={sections}
           onInserted={handleSectionInserted}
+        />
+
+        {/* Save as Experience Modal */}
+        <SaveExperienceModal
+          isOpen={isSaveExperienceOpen}
+          onClose={() => {
+            setIsSaveExperienceOpen(false)
+            setSaveExperienceTargetNode(null)
+          }}
+          sectionNode={saveExperienceTargetNode}
         />
 
         {/* Website Template Picker Modal */}
