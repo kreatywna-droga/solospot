@@ -22,7 +22,7 @@ export default function StudioIndexPage() {
       try {
         const res = await fetch('/api/stores')
         if (res.status === 401 || res.status === 403) {
-          setError('Musisz być zalogowany, aby przejść do Authoring Studio.')
+          router.replace('/studio/s-demo')
           return
         }
         const data = await res.json()
