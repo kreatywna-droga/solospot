@@ -38,6 +38,7 @@ import { FontPicker } from '../../../../packages/authoring-studio/src/inspector/
 import { MediaPickerModal } from '../sidebar/MediaPickerModal';
 import { resolveAssetToMutationPayload } from '@/lib/assets/AssetResolver';
 import { SmoothSlider } from './SmoothSlider';
+import { ExperienceInspectorControls } from './ExperienceInspectorControls';
 import type { InspectorCategory } from '../../../../packages/builder-core/src/InspectorRuntime';
 import type { NodeStyles, NodeResponsive } from '../../../../packages/builder-core/src/BuilderDocument';
 
@@ -139,6 +140,16 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
 
       {/* Main Scrollable Inspector Body */}
       <div className="flex-1 overflow-y-auto p-4 space-y-5">
+        {/* ============================================================= */}
+        {/* EXPERIENCE RUNTIME CONTROLS (v2.0)                             */}
+        {/* ============================================================= */}
+        {(props as any).experienceConfig && (
+          <ExperienceInspectorControls
+            config={(props as any).experienceConfig}
+            onChange={(newConfig) => onPropChange('experienceConfig', newConfig)}
+          />
+        )}
+
         {/* ============================================================= */}
         {/* SIMPLE CONTROLS: TEXT / HEADING                                */}
         {/* ============================================================= */}
