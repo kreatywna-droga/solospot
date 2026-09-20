@@ -24,6 +24,7 @@ import { LayerTree } from '../sidebar/LayerTree'
 import { ComponentPanel } from '../sidebar/ComponentPanel'
 import { AssetsPanel } from '../sidebar/AssetsPanel'
 import { StylePanel } from '../sidebar/StylePanel'
+import { AiCopilotWorkspace } from '../ai/AiCopilotWorkspace'
 
 // ---------------------------------------------------------------------------
 // Left Sidebar Root
@@ -41,9 +42,11 @@ export function BuilderLeftSidebar({ activeTab, onTabChange, width = 320 }: Buil
       ? activeTab
       : 'layers'
 
+  const actualWidth = currentTab === 'ai' ? Math.max(width, 360) : width
+
   return (
     <aside
-      style={{ width: `${width}px` }}
+      style={{ width: `${actualWidth}px` }}
       className="border-r border-[#1A1F2E] bg-[#0D1118] flex flex-col overflow-hidden flex-shrink-0 h-full select-none"
     >
       <div className="flex-1 overflow-hidden">
@@ -53,7 +56,7 @@ export function BuilderLeftSidebar({ activeTab, onTabChange, width = 320 }: Buil
         {currentTab === 'assets' && <AssetsPanel />}
         {currentTab === 'style' && <StylePanel />}
         {currentTab === 'history' && <HistoryPanel />}
-        {currentTab === 'ai' && <AiPanel />}
+        {currentTab === 'ai' && <AiCopilotWorkspace />}
       </div>
     </aside>
   )
@@ -137,126 +140,6 @@ function HistoryPanel() {
       <div className="p-3 border-t border-white/[0.08] bg-[#080B10] text-[11px] text-zinc-500 text-center">
         Zarejestrowano {entries.length} krok{entries.length === 1 ? '' : entries.length < 5 ? 'i' : 'ów'}
       </div>
-    </div>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// AI Panel
-// ---------------------------------------------------------------------------
-
-function AiPanel() {
-  const [prompt, setPrompt] = useState('')
-  const [generating, setGenerating] = useState(false)
-  const { dispatch, canvas, document } = useBuilder()
-
-  const handleQuickAction = (actionType: string) => {
-    const activePage = document.pages.find(p => p.id === canvas.selectedPageId) || document.pages[0]
-    if (!activePage) return
-
-    setGenerating(true)
-    setTimeout(() => {
-      setGenerating(false)
-      if (actionType === 'add_hero') {
-        dispatch({
-          type: 'ADD_SECTION',
-          pageId: activePage.id,
-          sectionType: 'hero',
-          defaultProps: {
-            title: 'Nowoczesny Sklep Przyszłości',
-            subtitle: 'Wygenerowano przez SoloSpot AI na podstawie Twojej branży.',
-            cta: 'Zobacz produkty',
-          },
-          label: 'AI Wygenerowany Hero',
-        })
-      } else if (actionType === 'add_features') {
-        dispatch({
-          type: 'ADD_SECTION',
-          pageId: activePage.id,
-          sectionType: 'feature-grid',
-          defaultProps: {
-            title: 'Kluczowe Przewagi Naszej Oferty',
-            f1: 'Automatyczna personalizacja 24/7',
-            f2: 'Brak prowizji od transakcji',
-            f3: 'Ekspresowa integracja w 1 klik',
-          },
-          label: 'AI Cechy i Korzyści',
-        })
-      }
-    }, 600)
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!prompt.trim()) return
-    handleQuickAction('add_hero')
-    setPrompt('')
-  }
-
-  return (
-    <div className="flex flex-col h-full bg-[#0D1118] text-white">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08]">
-        <div className="flex items-center gap-2">
-          <Bot className="w-4 h-4 text-[#D9A86C]" />
-          <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-300">Asystent AI</h2>
-        </div>
-        <span className="text-[9px] text-[#F2C27F] bg-[#D9A86C]/15 border border-[#D9A86C]/25 px-2 py-0.5 rounded-full font-bold">
-          SOLOSPOT AI
-        </span>
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#D9A86C]/15 to-[#B8893A]/[0.07] border border-[#D9A86C]/25 space-y-2">
-          <div className="flex items-center gap-2 text-[#F2C27F] font-bold text-xs">
-            <Bot className="w-4 h-4" />
-            <span>Generuj sekcje i treści za pomocą AI</span>
-          </div>
-          <p className="text-[11px] text-zinc-300 leading-relaxed">
-            Wpisz opis pożądanego układu lub skorzystaj z poniższych szybkich akcji, aby AI dodało zoptymalizowane sekcje do Twojej strony.
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Szybkie operacje AI:</span>
-          <div className="space-y-1.5">
-            {[
-              { id: 'add_hero', label: 'Stwórz nowoczesny Hero Banner', desc: 'Generuje tytuł, podtytuł i CTA dla Twojego sklepu' },
-              { id: 'add_features', label: 'Wygeneruj sekcję Korzyści (Features)', desc: 'Dodaje 3 kluczowe unikalne zalety oferty' },
-            ].map(item => (
-              <button
-                key={item.id}
-                onClick={() => handleQuickAction(item.id)}
-                disabled={generating}
-                className="w-full p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.08] hover:border-[#D9A86C]/30 hover:bg-[#D9A86C]/[0.07] text-left transition-all group disabled:opacity-50"
-              >
-                <div className="font-semibold text-xs text-zinc-200 group-hover:text-[#F2C27F] transition-colors">
-                  {item.label}
-                </div>
-                <div className="text-[10px] text-zinc-500 mt-0.5">{item.desc}</div>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <form onSubmit={handleSubmit} className="p-3 border-t border-white/[0.08] bg-[#080B10]">
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={prompt}
-            onChange={e => setPrompt(e.target.value)}
-            placeholder="Opisz sekcję, np. stwórz baner promocyjny..."
-            className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C]/50"
-          />
-          <button
-            type="submit"
-            disabled={!prompt.trim() || generating}
-            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#B8893A] to-[#D9A86C] hover:from-[#C99A4A] hover:to-[#F2C27F] text-[#080B10] disabled:opacity-40 transition-all shadow-md shadow-[#D9A86C]/20"
-          >
-            {generating ? 'Generowanie...' : 'Wyślij'}
-          </button>
-        </div>
-      </form>
     </div>
   )
 }
