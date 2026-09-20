@@ -27,13 +27,13 @@ import type { SmartGuide } from '../../../../../packages/builder-core/src/SmartG
 // ---------------------------------------------------------------------------
 
 const GUIDE_STYLES: Record<string, { stroke: string; strokeWidth: number; dasharray?: string }> = {
-  ALIGNMENT: { stroke: '#ff0000', strokeWidth: 1 },
-  DISTANCE:  { stroke: '#00cc00', strokeWidth: 1, dasharray: '6,3' },
-  CENTER:    { stroke: '#ff0000', strokeWidth: 1, dasharray: '8,4' },
-  MARGIN:    { stroke: '#ff8800', strokeWidth: 1, dasharray: '4,4' },
-  SPACING:   { stroke: '#00ccff', strokeWidth: 2, dasharray: '8,4' },
-  ANCHOR:    { stroke: '#ff6600', strokeWidth: 1.5 },
-  RULE:      { stroke: '#888888', strokeWidth: 1 },
+  ALIGNMENT: { stroke: '#a78bfa', strokeWidth: 1 },       // violet-400 — edge/side alignment
+  DISTANCE:  { stroke: '#34d399', strokeWidth: 1, dasharray: '6,3' }, // emerald-400 — distance annotation
+  CENTER:    { stroke: '#818cf8', strokeWidth: 1, dasharray: '8,4' }, // indigo-400 — center axis
+  MARGIN:    { stroke: '#fb923c', strokeWidth: 1, dasharray: '4,4' }, // orange-400 — margin guide
+  SPACING:   { stroke: '#22d3ee', strokeWidth: 1.5, dasharray: '8,4' }, // cyan-400 — equal spacing
+  ANCHOR:    { stroke: '#c084fc', strokeWidth: 1.5 },     // purple-400 — anchor reference
+  RULE:      { stroke: '#4b5563', strokeWidth: 1 },       // gray-600 — ruler guide
 }
 
 // ---------------------------------------------------------------------------
@@ -61,7 +61,7 @@ export function SmartGuidesOverlay({
 
   return (
     <svg
-      className="absolute inset-0 pointer-events-none z-20"
+      className="absolute inset-0 pointer-events-none z-50"
       width={width}
       height={height}
       style={{ overflow: 'visible' }}

@@ -142,35 +142,58 @@ export function useSmartGuides(input: UseSmartGuidesInput): SmartGuidesState {
 }
 
 // ---------------------------------------------------------------------------
-// Utility hook for canvas element extraction
+// Utility helpers for canvas element extraction
 // ---------------------------------------------------------------------------
 
 /**
- * Extracts element bounds from canvas section nodes.
- * Bridge between SectionNode[] and ElementBounds[].
+ * Collects bounds for all elements and sections on the canvas, converted
+ * to unzoomed canvas space relative to the canvas frame.
+ */
+export function collectCanvasElementBounds(
+  frame: HTMLElement | null,
+  zoom: number = 1.0,
+  excludeId?: string
+): ElementBounds[] {
+  if (!frame) return []
+  const frameRect = frame.getBoundingClientRect()
+  const safeZoom = Math.max(0.1, zoom)
+
+  const elements = frame.querySelectorAll<HTMLElement>('[data-node-id], [data-section-id]')
+  const seenIds = new Set<string>()
+  const bounds: ElementBounds[] = []
+
+  elements.forEach((el) => {
+    const id = el.getAttribute('data-node-id') || el.getAttribute('data-section-id')
+    if (!id || id === excludeId || seenIds.has(id)) return
+    seenIds.add(id)
+
+    const r = el.getBoundingClientRect()
+    // Ignore invisible / zero-size nodes
+    if (r.width <= 0 || r.height <= 0) return
+
+    bounds.push({
+      id,
+      x: (r.left - frameRect.left) / safeZoom,
+      y: (r.top - frameRect.top) / safeZoom,
+      width: r.width / safeZoom,
+      height: r.height / safeZoom,
+    })
+  })
+
+  return bounds
+}
+
+/**
+ * Extracts element bounds from canvas section nodes and child nodes.
+ * Bridge between DOM nodes and ElementBounds[].
  */
 export function useElementBounds(
   containerRef: React.RefObject<HTMLDivElement | null>,
-  sectionIds: ReadonlyArray<string>
+  sectionIds: ReadonlyArray<string>,
+  zoom: number = 1.0
 ): ReadonlyArray<ElementBounds> {
   return useMemo(() => {
-    if (!containerRef.current) return []
-    const container = containerRef.current
-    const containerRect = container.getBoundingClientRect()
-
-    return sectionIds
-      .map(id => {
-        const el = container.querySelector(`[data-section-id="${id}"]`)
-        if (!el) return null
-        const rect = el.getBoundingClientRect()
-        return createElementBounds({
-          id,
-          x: rect.left - containerRect.left,
-          y: rect.top - containerRect.top,
-          width: rect.width,
-          height: rect.height,
-        })
-      })
-      .filter((e): e is ElementBounds => e !== null)
-  }, [containerRef, sectionIds])
+    return collectCanvasElementBounds(containerRef.current, zoom)
+  }, [containerRef, sectionIds, zoom])
 }
+

@@ -40,7 +40,13 @@ import {
   SectionBounds,
   SectionSnapResult,
   OverlayRect,
+  SmartGuideEngine,
+  createContainerBounds,
+  DEFAULT_SMART_GUIDE_CONFIG,
 } from '../../../../packages/builder-core/src'
+import { collectCanvasElementBounds } from '../canvas/guides/useSmartGuides'
+
+
 
 // ---------------------------------------------------------------------------
 // SelectionOverlay
@@ -240,6 +246,14 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     const naturalLeft = myBounds?.left ?? (overlay.boundingRect.x - startTx)
     const pageWidth = container ? container.clientWidth : 1200
 
+    // Initialize Smart Guide Engine & Canvas Element Bounds for real-time alignment
+    const smartGuideEngine = new SmartGuideEngine()
+    const allElementBounds = collectCanvasElementBounds(containerRef.current, zoom, targetNodeId)
+    const containerBounds = createContainerBounds({
+      width: container ? container.clientWidth : 1200,
+      height: container ? Math.max(container.scrollHeight, 800) : 800,
+    })
+
     // Disable CSS transitions during hot drag path for instant 120fps tracking
     const prevTransition = domEl?.style.transition || ''
     if (domEl) {
@@ -269,9 +283,46 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
           let curTx = startTx + Math.round(deltaX)
           let curTy = startTy + Math.round(deltaY)
 
+          const currentLeft = naturalLeft + curTx
+          const currentTop = naturalTop + curTy
+
+          // Live Smart Guide Engine computation for all elements & sections
+          const guideRes = smartGuideEngine.computeAll({
+            draggingElement: {
+              id: targetNodeId,
+              x: currentLeft,
+              y: currentTop,
+              width: overlay.boundingRect?.width || 200,
+              height: overlay.boundingRect?.height || 100,
+            },
+            allElements: allElementBounds,
+            container: containerBounds,
+            config: {
+              ...DEFAULT_SMART_GUIDE_CONFIG,
+              threshold: Math.max(8, 12 / zoom),
+              showAlignmentGuides: true,
+              showCenterGuides: true,
+              showDistanceGuides: true,
+              showSpacingGuides: true,
+              snapToGuides: true,
+            },
+          })
+
+          if (guideRes.snapGuidance.snapped) {
+            if (guideRes.snapGuidance.snapAxis === 'X' || guideRes.snapGuidance.snapAxis === 'BOTH') {
+              curTx = Math.round(guideRes.snapGuidance.x - naturalLeft)
+            }
+            if (guideRes.snapGuidance.snapAxis === 'Y' || guideRes.snapGuidance.snapAxis === 'BOTH') {
+              curTy = Math.round(guideRes.snapGuidance.y - naturalTop)
+            }
+          }
+
+          // Broadcast live smart guides to SmartGuidesOverlay
+          window.dispatchEvent(new CustomEvent('solospot:smart-guides-update', {
+            detail: { guides: guideRes.guides }
+          }))
+
           if (isSection && overlay.boundingRect) {
-            const currentLeft = naturalLeft + curTx
-            const currentTop = naturalTop + curTy
             const snapRes = computeSectionSnap({
               draggingSectionId: targetNodeId,
               currentLeft,
@@ -323,6 +374,11 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
       }
 
       setActiveSnap(null)
+
+      // Clear smart guides on canvas overlay
+      window.dispatchEvent(new CustomEvent('solospot:smart-guides-update', {
+        detail: { guides: [] }
+      }))
 
       // Reset overlay transform so document state takes over
       if (overlayGroupRef.current) {

@@ -16,11 +16,16 @@ import React, { createContext, useContext, useRef, useState, useEffect } from 'r
 import type { ExperienceSceneConfig } from '@/lib/experience/ExperienceRuntimeTypes';
 import { normalizeSceneConfig } from '@/lib/experience/runtime/CapabilityEngine';
 import { usePointerEngine } from '@/lib/experience/runtime/usePointerEngine';
+import { usePointerSignal } from '@/lib/experience/runtime/usePointerSignal';
 import { useMotionEngine } from '@/lib/experience/runtime/useMotionEngine';
 import { ExperienceBackgroundLayer } from '@/lib/experience/runtime/useBackgroundEngine';
 import { useScrollDriver } from '@/lib/experience/runtime/useScrollDriver';
 import { useDepth3DEngine } from '@/lib/experience/runtime/useDepth3DEngine';
 import { useInteractiveCarousel } from '@/lib/experience/runtime/useInteractiveCarousel';
+import { useShaderEngine } from '@/lib/experience/runtime/useShaderEngine';
+import { useInteractiveGradient } from '@/lib/experience/runtime/useInteractiveGradient';
+import { useParticleEngine } from '@/lib/experience/runtime/useParticleEngine';
+import { detectPerformanceTier } from '@/lib/experience/runtime/PerformanceTier';
 
 // Context for child components
 interface ExperienceRuntimeContextValue {
@@ -98,6 +103,7 @@ export function ExperienceRuntimeScene({
 }: ExperienceRuntimeSceneProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [perfTier] = useState(() => detectPerformanceTier());
 
   // Normalize config with safe defaults
   const config = normalizeSceneConfig(rawConfig);
@@ -113,7 +119,15 @@ export function ExperienceRuntimeScene({
     return () => mediaQuery.removeEventListener('change', handler);
   }, []);
 
-  // 1. Pointer interaction engine (tilt, spotlight, cursor variables)
+  // 0. Shared pointer signal (v2.0 — feeds shader, gradient, particles without React state)
+  const { signal: pointerSignal } = usePointerSignal({
+    containerRef,
+    config: config.pointer,
+    isInteractive,
+    reducedMotion,
+  });
+
+  // 1. Legacy pointer interaction engine (tilt, spotlight, cursor variables)
   usePointerEngine({
     containerRef,
     config: config.pointer,
@@ -148,6 +162,37 @@ export function ExperienceRuntimeScene({
     isInteractive,
   });
 
+  // 6. WebGL Shader Background (v2.0)
+  const isShaderBackground = Boolean(config.background?.type === 'shader' && config.background?.shader);
+  useShaderEngine({
+    containerRef,
+    config: config.background?.shader,
+    pointerX: pointerSignal.current.x,
+    pointerY: pointerSignal.current.y,
+    isPlaying: isPlaying && isShaderBackground,
+    reducedMotion,
+  });
+
+  // 7. Interactive Gradient Background (v2.0)
+  const isGradientBackground = Boolean(config.background?.type === 'interactive-gradient' && config.background?.gradient);
+  useInteractiveGradient({
+    containerRef,
+    config: config.background?.gradient,
+    pointerX: pointerSignal.current.x,
+    pointerY: pointerSignal.current.y,
+    isPlaying: isPlaying && isGradientBackground,
+    reducedMotion,
+  });
+
+  // 8. Particle Runtime (v2.0)
+  useParticleEngine({
+    containerRef,
+    config: config.particles,
+    pointerSignal,
+    isPlaying,
+    reducedMotion,
+  });
+
   const contextValue: ExperienceRuntimeContextValue = {
     isPlaying,
     isInteractive,
@@ -164,6 +209,9 @@ export function ExperienceRuntimeScene({
   const spotlightColor = config.pointer?.color || 'rgba(139, 92, 246, 0.18)';
   const spotlightRadius = config.pointer?.radius || 350;
 
+  // When shader or interactive-gradient engine handles background, suppress CSS background layer
+  const useWebGLBackground = isShaderBackground || isGradientBackground;
+
   return (
     <ExperienceErrorBoundary>
       <ExperienceRuntimeContext.Provider value={contextValue}>
@@ -175,8 +223,8 @@ export function ExperienceRuntimeScene({
             ...style,
           }}
         >
-          {/* Dynamic Motion Background Layer */}
-          {config.background && config.background.type !== 'none' && (
+          {/* Dynamic Motion Background Layer (CSS-based, skipped when WebGL engine handles background) */}
+          {config.background && config.background.type !== 'none' && !useWebGLBackground && (
             <ExperienceBackgroundLayer
               config={config.background}
               isPlaying={isPlaying}

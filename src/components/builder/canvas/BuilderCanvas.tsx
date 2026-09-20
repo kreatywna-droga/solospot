@@ -39,6 +39,10 @@ import {
   computeSectionSnap,
   SectionBounds,
   SectionSnapResult,
+  createContainerBounds,
+  SmartGuideEngine,
+  SmartGuide,
+  DEFAULT_SMART_GUIDE_CONFIG,
 } from '../../../../packages/builder-core/src'
 import { VIEWPORT_PRESETS, DEFAULT_GRID_CONFIG, ViewportLabel } from '../../../../packages/builder-core/src/CanvasState'
 import { GridSystem } from '../../../../packages/builder-core/src/GridSystem'
@@ -49,6 +53,10 @@ import { CartProvider } from '@/lib/cart/CartStore'
 import { loadGoogleFont } from '../../../../packages/builder-core/src/fonts/FontCatalog'
 import { ExperienceLibraryModal, SaveExperienceModal, ExperienceRuntimeScene } from '../experience'
 import { WebsiteTemplatePickerModal } from '../templates/WebsiteTemplatePickerModal'
+import { SmartGuidesOverlay } from './guides/SmartGuidesOverlay'
+import { useSmartGuides, useElementBounds, collectCanvasElementBounds } from './guides/useSmartGuides'
+import { GuidesToggle } from './guides/GuidesToggle'
+
 
 // ---------------------------------------------------------------------------
 // Section type → icon mapping (used for wireframe preview)
@@ -110,6 +118,25 @@ function formatTransform(styles: Record<string, any>): string | undefined {
     parts.push(styles.transform)
   }
   return parts.length > 0 ? parts.join(' ') : undefined
+}
+
+/**
+ * Safely resolves a backgroundImage value to valid CSS.
+ * CSS gradient strings (linear-gradient, radial-gradient, etc.) must NOT be
+ * wrapped in url() — only plain image URL strings need that wrapper.
+ */
+function resolveBackgroundImageCss(img: string | undefined): string | undefined {
+  if (!img || img === 'none') return undefined
+  if (
+    img.startsWith('url(') ||
+    img.startsWith('linear-gradient') ||
+    img.startsWith('radial-gradient') ||
+    img.startsWith('conic-gradient') ||
+    img.startsWith('repeating-')
+  ) {
+    return img
+  }
+  return `url("${img}")`
 }
 
 // ---------------------------------------------------------------------------
@@ -1665,9 +1692,7 @@ function SectionBlock({
           }`}
           style={{
             backgroundColor: resolvedStyles.backgroundColor || (node.props as any)?.background || (node.type === 'section' ? '#0a0a14' : '#08080f'),
-            backgroundImage: resolvedStyles.backgroundImage && resolvedStyles.backgroundImage !== 'none'
-              ? (resolvedStyles.backgroundImage.startsWith('url(') ? resolvedStyles.backgroundImage : `url("${resolvedStyles.backgroundImage}")`)
-              : undefined,
+            backgroundImage: resolveBackgroundImageCss(resolvedStyles.backgroundImage),
             backgroundSize: resolvedStyles.backgroundImage && resolvedStyles.backgroundImage !== 'none' ? (resolvedStyles.backgroundSize || 'cover') : undefined,
             backgroundPosition: resolvedStyles.backgroundImage && resolvedStyles.backgroundImage !== 'none' ? (resolvedStyles.backgroundPosition || 'center') : undefined,
             backgroundRepeat: resolvedStyles.backgroundImage && resolvedStyles.backgroundImage !== 'none' ? (resolvedStyles.backgroundRepeat || 'no-repeat') : undefined,
@@ -1791,9 +1816,7 @@ function SectionBlock({
             className="w-full relative pointer-events-none overflow-hidden text-slate-900 min-h-[60px]"
             style={{
               backgroundColor: resolvedStyles.backgroundColor || (node.props as any)?.background || (node.type === 'section' ? '#0a0a14' : '#ffffff'),
-              backgroundImage: resolvedStyles.backgroundImage && resolvedStyles.backgroundImage !== 'none'
-                ? (resolvedStyles.backgroundImage.startsWith('url(') ? resolvedStyles.backgroundImage : `url("${resolvedStyles.backgroundImage}")`)
-                : undefined,
+              backgroundImage: resolveBackgroundImageCss(resolvedStyles.backgroundImage),
               backgroundSize: resolvedStyles.backgroundImage && resolvedStyles.backgroundImage !== 'none' ? (resolvedStyles.backgroundSize || 'cover') : undefined,
               backgroundPosition: resolvedStyles.backgroundImage && resolvedStyles.backgroundImage !== 'none' ? (resolvedStyles.backgroundPosition || 'center') : undefined,
               backgroundRepeat: resolvedStyles.backgroundImage && resolvedStyles.backgroundImage !== 'none' ? (resolvedStyles.backgroundRepeat || 'no-repeat') : undefined,
@@ -2034,6 +2057,9 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
   const [saveExperienceTargetNode, setSaveExperienceTargetNode] = useState<BuilderNode | null>(null)
   const [activeCanvasSectionSnap, setActiveCanvasSectionSnap] = useState<SectionSnapResult | null>(null)
 
+  // Smart Guide state hooks (useElementBounds and useSmartGuides must be called
+  // after zoom is computed — see the block below the zoom calculation)
+
   const handleSectionInserted = useCallback((newSectionId: string) => {
     requestAnimationFrame(() => {
       setTimeout(() => {
@@ -2104,6 +2130,27 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
   const zoom = (manualZoom > 0 && manualZoom !== 1.0)
     ? manualZoom
     : (containerWidth > 0 && containerWidth < viewportWidth ? fitScale : (manualZoom || 1.0))
+
+  // ---------------------------------------------------------------------------
+  // Smart Guides — real-time alignment guide overlay during element drag
+  // ---------------------------------------------------------------------------
+  const [showSmartGuides, setShowSmartGuides] = useState(true)
+  const [liveSmartGuides, setLiveSmartGuides] = useState<ReadonlyArray<SmartGuide>>([])
+  const [externalSmartGuides, setExternalSmartGuides] = useState<ReadonlyArray<SmartGuide>>([])
+
+  useEffect(() => {
+    const handleGuidesUpdate = (e: Event) => {
+      const detail = (e as CustomEvent).detail
+      if (detail && Array.isArray(detail.guides)) {
+        setExternalSmartGuides(detail.guides)
+      }
+    }
+    window.addEventListener('solospot:smart-guides-update', handleGuidesUpdate)
+    return () => window.removeEventListener('solospot:smart-guides-update', handleGuidesUpdate)
+  }, [])
+
+  const activeRenderedGuides = liveSmartGuides.length > 0 ? liveSmartGuides : externalSmartGuides
+
 
   // ---------------------------------------------------------------------------
   // Marquee box-select (real): starts only on empty canvas background,
@@ -2270,10 +2317,25 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
     const domEl = canvasFrameRef.current?.querySelector(`[data-section-id="${node.id}"], [data-node-id="${node.id}"]`) as HTMLElement | null
     const prevTransition = domEl?.style.transition || ''
 
-    // Measure sibling sections for magnetic snapping if dragging a section
-    const sectionsBounds: SectionBounds[] = []
     const frame = canvasFrameRef.current
     const frameRect = frame ? frame.getBoundingClientRect() : { left: 0, top: 0, width: 1200, height: 800 }
+    const domRect = domEl ? domEl.getBoundingClientRect() : { left: frameRect.left, top: frameRect.top, width: 200 * zoomVal, height: 100 * zoomVal }
+    const naturalLeft = (domRect.left - frameRect.left) / zoomVal - startTx
+    const naturalTop = (domRect.top - frameRect.top) / zoomVal - startTy
+    const nodeWidth = domRect.width / zoomVal
+    const nodeHeight = domRect.height / zoomVal
+    const pageWidth = frame ? frame.clientWidth : 1200
+
+    // Initialize Smart Guide Engine & Canvas Element Bounds
+    const smartGuideEngine = new SmartGuideEngine()
+    const allElementBounds = collectCanvasElementBounds(frame, zoomVal, node.id)
+    const containerBounds = createContainerBounds({
+      width: pageWidth,
+      height: frame ? Math.max(frame.scrollHeight, 800) : 800,
+    })
+
+    // Measure sibling sections for magnetic snapping if dragging a section
+    const sectionsBounds: SectionBounds[] = []
     if (frame && isSection && activePage) {
       activePage.sections.forEach((s, idx) => {
         const el = frame.querySelector(`[data-section-id="${s.id}"]`) as HTMLElement | null
@@ -2301,9 +2363,6 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
       })
     }
     const myBounds = sectionsBounds.find(s => s.id === node.id)
-    const naturalTop = myBounds?.top ?? 0
-    const naturalLeft = myBounds?.left ?? 0
-    const pageWidth = frame ? frame.clientWidth : 1200
 
     let hasDragged = false
     let rafId: number | null = null
@@ -2332,9 +2391,45 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
             let curTx = startTx + Math.round((latestClientX - startX) / zoomVal)
             let curTy = startTy + Math.round((latestClientY - startY) / zoomVal)
 
+            const currentLeft = naturalLeft + curTx
+            const currentTop = naturalTop + curTy
+
+            // Live Smart Guide Engine computation for all canvas nodes
+            if (showSmartGuides) {
+              const guideRes = smartGuideEngine.computeAll({
+                draggingElement: {
+                  id: node.id,
+                  x: currentLeft,
+                  y: currentTop,
+                  width: nodeWidth,
+                  height: nodeHeight,
+                },
+                allElements: allElementBounds,
+                container: containerBounds,
+                config: {
+                  ...DEFAULT_SMART_GUIDE_CONFIG,
+                  threshold: Math.max(8, 12 / zoomVal),
+                  showAlignmentGuides: true,
+                  showCenterGuides: true,
+                  showDistanceGuides: true,
+                  showSpacingGuides: true,
+                  snapToGuides: true,
+                },
+              })
+
+              if (guideRes.snapGuidance.snapped) {
+                if (guideRes.snapGuidance.snapAxis === 'X' || guideRes.snapGuidance.snapAxis === 'BOTH') {
+                  curTx = Math.round(guideRes.snapGuidance.x - naturalLeft)
+                }
+                if (guideRes.snapGuidance.snapAxis === 'Y' || guideRes.snapGuidance.snapAxis === 'BOTH') {
+                  curTy = Math.round(guideRes.snapGuidance.y - naturalTop)
+                }
+              }
+
+              setLiveSmartGuides(guideRes.guides)
+            }
+
             if (isSection && domEl) {
-              const currentLeft = naturalLeft + curTx
-              const currentTop = naturalTop + curTy
               const snapRes = computeSectionSnap({
                 draggingSectionId: node.id,
                 currentLeft,
@@ -2394,6 +2489,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
       }))
 
       setActiveCanvasSectionSnap(null)
+      setLiveSmartGuides([])
 
       if (domEl) {
         domEl.style.transition = prevTransition
@@ -2969,10 +3065,27 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
           externalRects={externalRects}
         />
 
+        {/* Smart Guides Alignment Overlay — SVG lines visible during drag */}
+        {showSmartGuides && activeRenderedGuides.length > 0 && (
+          <SmartGuidesOverlay
+            guides={activeRenderedGuides}
+            width={canvasFrameRef.current?.clientWidth ?? viewportWidth}
+            height={canvasFrameRef.current?.scrollHeight ?? 800}
+            visible={showSmartGuides && activeRenderedGuides.length > 0}
+          />
+        )}
+
         {/* Add section & Layout Presets at bottom */}
         {sections.length > 0 && (
           <div className="border-t border-white/[0.08] bg-[#1a1a1e] p-5 flex flex-col items-center gap-4">
             <div className="flex items-center gap-3">
+              {/* Smart Guides Toggle */}
+              <GuidesToggle
+                enabled={showSmartGuides}
+                onChange={setShowSmartGuides}
+                activeGuideCount={activeRenderedGuides.length}
+                size="sm"
+              />
               <button
                 onClick={(e) => {
                   e.stopPropagation()

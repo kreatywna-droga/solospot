@@ -74,7 +74,7 @@ class AlignmentCalculator implements GuideCalculator {
   readonly name = 'AlignmentCalculator';
 
   compute(input: CalculatorInput): ReadonlyArray<SmartGuide> {
-    const { draggingElement, allElements, config } = input;
+    const { draggingElement, allElements, container, config } = input;
     if (!config.showAlignmentGuides) return [];
 
     const guides: SmartGuide[] = [];
@@ -84,6 +84,67 @@ class AlignmentCalculator implements GuideCalculator {
     const dragCenterY = draggingElement.y + draggingElement.height / 2;
     const threshold = config.threshold;
 
+    // --- Container Edge Alignments (Canvas Left / Right / Top / Bottom) ---
+    if (container && container.width > 0) {
+      // Left Canvas Edge
+      if (Math.abs(draggingElement.x - 0) < threshold) {
+        const dist = Math.abs(draggingElement.x - 0);
+        guides.push({
+          type: 'ALIGNMENT',
+          source: 'CONTAINER',
+          orientation: 'VERTICAL',
+          priority: GUIDE_PRIORITY.CONTAINER,
+          position: 0,
+          start: 0,
+          end: container.height,
+          label: 'Left Edge',
+          color: GUIDE_COLORS.ALIGNMENT,
+          opacity: 1 - (dist / threshold) * 0.3,
+          threshold,
+          distance: dist,
+        });
+      }
+
+      // Right Canvas Edge
+      if (Math.abs(dragRight - container.width) < threshold) {
+        const dist = Math.abs(dragRight - container.width);
+        guides.push({
+          type: 'ALIGNMENT',
+          source: 'CONTAINER',
+          orientation: 'VERTICAL',
+          priority: GUIDE_PRIORITY.CONTAINER,
+          position: container.width,
+          start: 0,
+          end: container.height,
+          label: 'Right Edge',
+          color: GUIDE_COLORS.ALIGNMENT,
+          opacity: 1 - (dist / threshold) * 0.3,
+          threshold,
+          distance: dist,
+        });
+      }
+
+      // Top Canvas Edge
+      if (Math.abs(draggingElement.y - 0) < threshold) {
+        const dist = Math.abs(draggingElement.y - 0);
+        guides.push({
+          type: 'ALIGNMENT',
+          source: 'CONTAINER',
+          orientation: 'HORIZONTAL',
+          priority: GUIDE_PRIORITY.CONTAINER,
+          position: 0,
+          start: 0,
+          end: container.width,
+          label: 'Top Edge',
+          color: GUIDE_COLORS.ALIGNMENT,
+          opacity: 1 - (dist / threshold) * 0.3,
+          threshold,
+          distance: dist,
+        });
+      }
+    }
+
+    // --- Element-to-Element Alignments ---
     for (const el of allElements) {
       if (el.id === draggingElement.id) continue;
 
@@ -559,7 +620,7 @@ class SnapCalculator implements GuideCalculator {
     return [];
   }
 
-/**
+  /**
    * Compute snap guidance from a set of guides.
    * Pure function — separate from the calculator interface.
    * Only snap to ALIGNMENT and CENTER guides — DISTANCE and SPACING guides are informational only.
@@ -569,61 +630,99 @@ class SnapCalculator implements GuideCalculator {
     guides: ReadonlyArray<SmartGuide>,
     threshold: number
   ): SnapGuidance {
-    let snapX = currentPosition.x;
-    let snapY = currentPosition.y;
-    let snappedX = false;
-    let snappedY = false;
+    let bestSnapX: { val: number; priority: number; dist: number; guide: SmartGuide } | null = null;
+    let bestSnapY: { val: number; priority: number; dist: number; guide: SmartGuide } | null = null;
     const activeGuides: SmartGuide[] = [];
 
     for (const guide of guides) {
-      // Only snap to alignment and center guides — distance and spacing guides are visual only
       if (guide.type !== 'ALIGNMENT' && guide.type !== 'CENTER') continue;
+
       if (guide.orientation === 'VERTICAL') {
-        // Snap to vertical guide
         const dragCenterX = currentPosition.x + currentPosition.width / 2;
         const dragLeft = currentPosition.x;
         const dragRight = currentPosition.x + currentPosition.width;
 
-        // Snap left edge to guide
-        if (Math.abs(dragLeft - guide.position) < threshold) {
-          snapX = guide.position;
-          snappedX = true;
-          activeGuides.push(guide);
+        let targetVal: number | null = null;
+        let dist = Infinity;
+
+        // Snap left edge
+        const distLeft = Math.abs(dragLeft - guide.position);
+        if (distLeft < threshold && distLeft < dist) {
+          targetVal = guide.position;
+          dist = distLeft;
         }
-        // Snap right edge to guide
-        else if (Math.abs(dragRight - guide.position) < threshold) {
-          snapX = guide.position - currentPosition.width;
-          snappedX = true;
-          activeGuides.push(guide);
+
+        // Snap right edge
+        const distRight = Math.abs(dragRight - guide.position);
+        if (distRight < threshold && distRight < dist) {
+          targetVal = guide.position - currentPosition.width;
+          dist = distRight;
         }
-        // Snap center to guide
-        else if (Math.abs(dragCenterX - guide.position) < threshold) {
-          snapX = guide.position - currentPosition.width / 2;
-          snappedX = true;
-          activeGuides.push(guide);
+
+        // Snap center
+        const distCenter = Math.abs(dragCenterX - guide.position);
+        if (distCenter < threshold && distCenter < dist) {
+          targetVal = guide.position - currentPosition.width / 2;
+          dist = distCenter;
+        }
+
+        if (targetVal !== null) {
+          if (
+            !bestSnapX ||
+            guide.priority > bestSnapX.priority ||
+            (guide.priority === bestSnapX.priority && dist < bestSnapX.dist)
+          ) {
+            bestSnapX = { val: targetVal, priority: guide.priority, dist, guide };
+          }
         }
       } else {
-        // Horizontal guide
         const dragCenterY = currentPosition.y + currentPosition.height / 2;
         const dragTop = currentPosition.y;
         const dragBottom = currentPosition.y + currentPosition.height;
 
-        if (Math.abs(dragTop - guide.position) < threshold) {
-          snapY = guide.position;
-          snappedY = true;
-          activeGuides.push(guide);
-        } else if (Math.abs(dragBottom - guide.position) < threshold) {
-          snapY = guide.position - currentPosition.height;
-          snappedY = true;
-          activeGuides.push(guide);
-        } else if (Math.abs(dragCenterY - guide.position) < threshold) {
-          snapY = guide.position - currentPosition.height / 2;
-          snappedY = true;
-          activeGuides.push(guide);
+        let targetVal: number | null = null;
+        let dist = Infinity;
+
+        // Snap top edge
+        const distTop = Math.abs(dragTop - guide.position);
+        if (distTop < threshold && distTop < dist) {
+          targetVal = guide.position;
+          dist = distTop;
+        }
+
+        // Snap bottom edge
+        const distBottom = Math.abs(dragBottom - guide.position);
+        if (distBottom < threshold && distBottom < dist) {
+          targetVal = guide.position - currentPosition.height;
+          dist = distBottom;
+        }
+
+        // Snap center
+        const distCenter = Math.abs(dragCenterY - guide.position);
+        if (distCenter < threshold && distCenter < dist) {
+          targetVal = guide.position - currentPosition.height / 2;
+          dist = distCenter;
+        }
+
+        if (targetVal !== null) {
+          if (
+            !bestSnapY ||
+            guide.priority > bestSnapY.priority ||
+            (guide.priority === bestSnapY.priority && dist < bestSnapY.dist)
+          ) {
+            bestSnapY = { val: targetVal, priority: guide.priority, dist, guide };
+          }
         }
       }
     }
 
+    if (bestSnapX) activeGuides.push(bestSnapX.guide);
+    if (bestSnapY) activeGuides.push(bestSnapY.guide);
+
+    const snappedX = bestSnapX !== null;
+    const snappedY = bestSnapY !== null;
+    const snapX = bestSnapX ? bestSnapX.val : currentPosition.x;
+    const snapY = bestSnapY ? bestSnapY.val : currentPosition.y;
     const snapAxis = snappedX && snappedY ? 'BOTH' : snappedX ? 'X' : snappedY ? 'Y' : 'NONE';
 
     return {

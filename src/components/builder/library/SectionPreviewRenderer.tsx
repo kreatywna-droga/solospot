@@ -22,6 +22,27 @@ function formatSides(val: any, defaultVal?: string): string | undefined {
   return defaultVal
 }
 
+/**
+ * Safely resolves a backgroundImage value to valid CSS.
+ * CSS gradient strings (linear-gradient, radial-gradient, etc.) must NOT be
+ * wrapped in url() — only plain image URL strings need that treatment.
+ */
+function resolveBackgroundImageCss(img: string | undefined): string | undefined {
+  if (!img || img === 'none') return undefined
+  // Already a CSS function (gradient or explicit url())
+  if (
+    img.startsWith('url(') ||
+    img.startsWith('linear-gradient') ||
+    img.startsWith('radial-gradient') ||
+    img.startsWith('conic-gradient') ||
+    img.startsWith('repeating-')
+  ) {
+    return img
+  }
+  // Plain URL — wrap it
+  return `url("${img}")`
+}
+
 function sanitizeLineHeight(val?: string | number): string | undefined {
   if (val === undefined || val === null || val === '') return undefined
   const str = String(val).trim()
@@ -338,7 +359,7 @@ function ReadOnlyNodeRenderer({ node }: { node: BuilderNode }) {
         padding,
         margin,
         backgroundColor: bg,
-        backgroundImage: bgImage && bgImage !== 'none' ? (bgImage.startsWith('url(') ? bgImage : `url("${bgImage}")`) : undefined,
+        backgroundImage: resolveBackgroundImageCss(bgImage),
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         borderRadius: styles.borderRadius || props.borderRadius,

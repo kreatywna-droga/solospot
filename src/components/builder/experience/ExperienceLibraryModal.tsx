@@ -320,7 +320,7 @@ export function ExperienceLibraryModal({
                           </button>
                         </div>
 
-                        <ScaleToFitContainer targetWidth={960} maxHeight={290} interactive={false}>
+                        <ScaleToFitContainer targetWidth={960} maxHeight={380} interactive={false}>
                           <SectionPreviewRenderer
                             sectionNode={node}
                             isPlaying={true}
