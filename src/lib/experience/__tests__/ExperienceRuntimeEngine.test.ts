@@ -4,10 +4,10 @@ import { FLAGSHIP_EXPERIENCES } from '../ExperienceDefinitions/flagship-experien
 import { insertExperienceToCanvas, type InsertionContext } from '../ExperienceInsertionEngine';
 import { createBuilderDocument } from '../../../../packages/builder-core/src/BuilderDocument';
 
-describe('Experience Runtime Engine v1.0 — Architecture & Contract Tests', () => {
+describe('Experience Runtime Engine v2.0 — Architecture & Contract Tests', () => {
   it('normalizes undefined config to a safe default config', () => {
     const config = normalizeSceneConfig(undefined);
-    expect(config.version).toBe('1.0.0');
+    expect(config.version).toBe('2.0.0');
     expect(config.motion?.type).toBe('none');
     expect(config.pointer?.type).toBe('none');
     expect(config.background?.type).toBe('none');

@@ -1,14 +1,20 @@
 /**
- * useScrollDriver.ts — Dual-Mode Scroll & Storytelling Progress Driver
+ * useScrollDriver.ts — Enhanced Scroll & Storytelling Progress Driver v2.0
  *
  * Supports:
- *   1. Simulated Scroll Mode (driven by scrollProgress prop in ExperienceDetailModal)
- *   2. Real Scroll-Driven Mode (in Published & Canvas viewport via IntersectionObserver + RAF)
+ *   1. Simulated Scroll Mode (driven by scrollProgress prop)
+ *   2. Real Scroll-Driven Mode (IntersectionObserver + RAF)
+ *   3. Parallax Depth (multi-plane scroll ratio)
+ *   4. Timeline Scrub (element-bound progress)
  *
  * Mutates CSS custom properties:
  *   - --scene-progress: [0.0, 1.0]
- *   - --horizontal-offset: percentage / px offset for horizontal showcase
+ *   - --horizontal-offset: percentage for horizontal showcase
  *   - --story-step: [0, steps - 1]
+ *   - --parallax-depth: parallax displacement
+ *   - --timeline-progress: scrub progress for timeline-bound elements
+ *   - --scroll-velocity: scroll speed for velocity-based effects
+ *   - --scroll-direction: 1 (down) or -1 (up)
  */
 
 import { useState, useEffect, useRef } from 'react';
@@ -17,7 +23,7 @@ import type { ScrollDriverConfig } from '../ExperienceRuntimeTypes';
 interface UseScrollDriverOptions {
   containerRef: React.RefObject<HTMLElement | null>;
   config?: ScrollDriverConfig;
-  simulatedProgress?: number; // 0 to 100
+  simulatedProgress?: number;
 }
 
 export function useScrollDriver({
@@ -29,6 +35,8 @@ export function useScrollDriver({
   const steps = config?.steps ?? 3;
   const horizontalFactor = config?.horizontalFactor ?? 1.0;
   const rafIdRef = useRef<number | null>(null);
+  const prevScrollRef = useRef<number>(0);
+  const velocityRef = useRef<number>(0);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -37,11 +45,15 @@ export function useScrollDriver({
         el.style.setProperty('--scene-progress', '0');
         el.style.setProperty('--horizontal-offset', '0%');
         el.style.setProperty('--story-step', '0');
+        el.style.setProperty('--parallax-depth', '0px');
+        el.style.setProperty('--timeline-progress', '0');
+        el.style.setProperty('--scroll-velocity', '0');
+        el.style.setProperty('--scroll-direction', '1');
       }
       return;
     }
 
-    const applyProgress = (normProgress: number) => {
+    const applyProgress = (normProgress: number, isRealScroll = false) => {
       const p = Math.max(0, Math.min(1, normProgress));
       setEffectiveProgress(p);
 
@@ -51,34 +63,45 @@ export function useScrollDriver({
       el.style.setProperty('--scene-progress', p.toFixed(3));
       el.style.setProperty('--horizontal-offset', `${horizOffset}%`);
       el.style.setProperty('--story-step', `${stepIndex}`);
+      el.style.setProperty('--timeline-progress', p.toFixed(3));
+
+      if (isRealScroll) {
+        const scrollY = window.scrollY || 0;
+        const delta = scrollY - prevScrollRef.current;
+        velocityRef.current = delta;
+        prevScrollRef.current = scrollY;
+
+        el.style.setProperty('--scroll-velocity', velocityRef.current.toFixed(2));
+        el.style.setProperty('--scroll-direction', delta >= 0 ? '1' : '-1');
+      }
+
+      // Parallax depth: elements deeper in the scene move slower
+      const parallaxDisplacement = (1 - p) * 60;
+      el.style.setProperty('--parallax-depth', `${parallaxDisplacement.toFixed(1)}px`);
     };
 
-    // 1. Simulated mode takes precedence if provided (e.g. Detail Modal slider)
     if (simulatedProgress !== undefined) {
       applyProgress(simulatedProgress / 100);
       return;
     }
 
-    // 2. Real viewport scroll calculation
     const handleScroll = () => {
       if (rafIdRef.current) return;
 
       rafIdRef.current = requestAnimationFrame(() => {
         const rect = el.getBoundingClientRect();
         const windowHeight = window.innerHeight || 800;
-
-        // Progress 0 when top enters bottom of viewport, 1 when bottom leaves top
         const totalDistance = windowHeight + rect.height;
         const currentDistance = windowHeight - rect.top;
         const rawProgress = currentDistance / totalDistance;
 
-        applyProgress(rawProgress);
+        applyProgress(rawProgress, true);
         rafIdRef.current = null;
       });
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // initial measurement
+    handleScroll();
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -94,5 +117,7 @@ export function useScrollDriver({
   return {
     scrollProgress: effectiveProgress,
     activeStep,
+    scrollVelocity: velocityRef.current,
+    scrollDirection: velocityRef.current >= 0 ? 1 : -1,
   };
 }
