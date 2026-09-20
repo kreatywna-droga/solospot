@@ -181,7 +181,7 @@ export default function ProductsPage() {
               onChange={(e) => setNewDescription(e.target.value)}
               placeholder="Krótki opis produktu"
               rows={3}
-              className="w-full rounded-xl border border-white/10 bg-[#0a0a0e] text-white placeholder:text-slate-500 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+              className="w-full rounded-xl border border-white/10 bg-[#080B10] text-[#F5F1EA] placeholder:text-[#77736D] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D9A86C]/50"
             />
           </div>
           <div className="flex gap-3 pt-2">

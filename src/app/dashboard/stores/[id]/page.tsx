@@ -411,12 +411,12 @@ export default function StoreManagementPage({ params }: { params: Promise<{ id: 
   return (
     <PageContainer>
       {/* Premium Header */}
-      <div className="relative mb-8 p-8 rounded-3xl border border-white/5 bg-[#080912]/80 backdrop-blur-xl overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-violet-600/10 rounded-full blur-[80px] pointer-events-none" />
+      <div className="relative mb-8 p-8 rounded-3xl border border-white/10 bg-[#0D1118]/85 backdrop-blur-xl overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-[#D9A86C]/10 rounded-full blur-[80px] pointer-events-none" />
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="text-2xl font-black text-white">{store.name}</span>
+              <span className="text-2xl font-black text-[#F5F1EA]">{store.name}</span>
               <span className={`text-[10px] tracking-wider uppercase px-2.5 py-0.5 rounded-full font-bold border ${
                 store.status === 'ACTIVE'
                   ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
@@ -432,14 +432,14 @@ export default function StoreManagementPage({ params }: { params: Promise<{ id: 
                 {currentPubStatus === 'PUBLISHED' ? 'Opublikowany' : 'Szkic'}
               </span>
             </div>
-            <p className="text-sm text-slate-400 max-w-xl">
-              Identyfikator sklepu: <span className="font-mono text-slate-300">{store.slug}</span>
+            <p className="text-sm text-[#B8B1A7] max-w-xl">
+              Identyfikator sklepu: <span className="font-mono text-[#F5F1EA]">{store.slug}</span>
             </p>
           </div>
           <div className="flex items-center gap-3">
             <Link
               href={`/studio/${store.id}`}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 border border-violet-400/30 rounded-full text-xs font-bold text-white shadow-lg shadow-violet-500/20 transition-all"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] border border-[#D9A86C]/50 rounded-full text-xs font-bold text-[#080B10] shadow-lg shadow-[#D9A86C]/20 hover:opacity-90 transition-all"
             >
               <Palette className="w-3.5 h-3.5" />
               Otwórz Studio
@@ -478,18 +478,18 @@ export default function StoreManagementPage({ params }: { params: Promise<{ id: 
             <div className="space-y-6">
               {statsLoading ? (
                 <div className="flex items-center justify-center py-20">
-                  <Loader2 className="w-10 h-10 animate-spin text-violet-500" />
+                  <Loader2 className="w-10 h-10 animate-spin text-[#D9A86C]" />
                 </div>
               ) : (
                 <>
                   {/* KPI Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="p-6 rounded-2xl border border-white/5 bg-[#090b14]/50">
+                    <div className="p-6 rounded-2xl border border-white/10 bg-[#0D1118]/60">
                       <div className="flex items-center justify-between mb-4">
-                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Produkty w sklepie</span>
-                        <Package className="w-4 h-4 text-violet-400" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#77736D]">Produkty w sklepie</span>
+                        <Package className="w-4 h-4 text-[#F2C27F]" />
                       </div>
-                      <div className="text-3xl font-black text-white">{stats?.overview?.productCount || 0}</div>
+                      <div className="text-3xl font-black text-[#F5F1EA]">{stats?.overview?.productCount || 0}</div>
                       <p className="text-[10px] text-slate-600 mt-1">zsynchronizowanych z bazą</p>
                     </div>
                     <div className="p-6 rounded-2xl border border-white/5 bg-[#090b14]/50">
@@ -531,7 +531,7 @@ export default function StoreManagementPage({ params }: { params: Promise<{ id: 
                             <span className="font-bold text-white">{Math.round(((stats?.usage?.pageCount || 0) / (stats?.usage?.pageLimit || 10)) * 100)}%</span>
                           </div>
                           <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                            <div className="h-full bg-violet-500" style={{ width: `${Math.min(100, ((stats?.usage?.pageCount || 0) / (stats?.usage?.pageLimit || 10)) * 100)}%` }} />
+                            <div className="h-full bg-[#D9A86C]" style={{ width: `${Math.min(100, ((stats?.usage?.pageCount || 0) / (stats?.usage?.pageLimit || 10)) * 100)}%` }} />
                           </div>
                         </div>
 
@@ -558,7 +558,7 @@ export default function StoreManagementPage({ params }: { params: Promise<{ id: 
                           <div><span className="text-slate-400 font-bold block mb-0.5">Unikalne ID:</span> <span className="font-mono">{store.id}</span></div>
                           <div><span className="text-slate-400 font-bold block mb-0.5">System operacyjny:</span> Edge Server v2.5</div>
                         </div>
-                        <div className="p-3 rounded-xl bg-violet-500/5 border border-violet-500/10 flex items-start gap-3 mt-4 text-[11px] text-violet-300">
+                        <div className="p-3 rounded-xl bg-[#D9A86C]/10 border border-[#D9A86C]/25 flex items-start gap-3 mt-4 text-[11px] text-[#F2C27F]">
                           <Info className="w-4 h-4 flex-shrink-0" />
                           <span>Wszystkie dane na tym ekranie są odpytywane w czasie rzeczywistym z zabezpieczonej bramki API oraz sprawdzane przez middleware platformy.</span>
                         </div>
@@ -649,7 +649,7 @@ export default function StoreManagementPage({ params }: { params: Promise<{ id: 
 
               {productsLoading ? (
                 <div className="flex items-center justify-center py-20">
-                  <Loader2 className="w-10 h-10 animate-spin text-violet-500" />
+                  <Loader2 className="w-10 h-10 animate-spin text-[#D9A86C]" />
                 </div>
               ) : products.length === 0 ? (
                 <Card className="text-center py-12">
@@ -744,7 +744,7 @@ export default function StoreManagementPage({ params }: { params: Promise<{ id: 
                 <CardBody>
                   {domainsLoading ? (
                     <div className="flex items-center justify-center py-10">
-                      <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+                      <Loader2 className="w-8 h-8 animate-spin text-[#D9A86C]" />
                     </div>
                   ) : (
                     <form onSubmit={handleUpdateDomain} className="space-y-6">
@@ -817,7 +817,7 @@ export default function StoreManagementPage({ params }: { params: Promise<{ id: 
                 </div>
 
                 <div className="pt-4 border-t border-white/5">
-                  <Button onClick={handleTriggerPublish} loading={saving} className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:shadow-lg transition-all text-white font-bold rounded-xl py-3 text-sm">
+                  <Button onClick={handleTriggerPublish} loading={saving} className="w-full bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] hover:shadow-lg transition-all text-[#080B10] font-bold rounded-xl py-3 text-sm">
                     {saving ? 'Wdrażanie na serwery...' : 'Wdróż i Publikuj Nową Wersję'}
                   </Button>
                 </div>
@@ -831,7 +831,7 @@ export default function StoreManagementPage({ params }: { params: Promise<{ id: 
               <Card>
                 <CardHeader>
                   <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                    <Power className="w-4 h-4 text-violet-400" />
+                    <Power className="w-4 h-4 text-[#F2C27F]" />
                     <span>Stan i Dostępność Sklepu</span>
                   </h3>
                 </CardHeader>
@@ -958,7 +958,7 @@ export default function StoreManagementPage({ params }: { params: Promise<{ id: 
               <Button variant="outline" onClick={() => { setShowProductModal(false); setEditingProduct(null); setNewProduct({ name: '', description: '', price: 0, images: [] }) }} className="flex-1">
                 Anuluj
               </Button>
-              <Button type="submit" loading={saving} className="flex-1 bg-gradient-to-r from-violet-600 to-fuchsia-600">
+              <Button type="submit" loading={saving} className="flex-1 bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#080B10] font-bold">
                 {editingProduct ? 'Zapisz zmiany' : 'Dodaj produkt'}
               </Button>
             </div>

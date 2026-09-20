@@ -30,7 +30,7 @@ interface StoreOption {
 
 const categoryColors: Record<string, string> = {
   fashion: 'from-pink-500/20 to-rose-500/10 border-pink-500/30',
-  beauty: 'from-purple-500/20 to-violet-500/10 border-purple-500/30',
+  beauty: 'from-[#D9A86C]/25 to-[#F2C27F]/10 border-[#D9A86C]/30',
   food: 'from-orange-500/20 to-amber-500/10 border-orange-500/30',
   digital: 'from-blue-500/20 to-cyan-500/10 border-blue-500/30',
 }
@@ -128,8 +128,8 @@ export default function TemplatesPage() {
             onClick={() => setFilter(cat)}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap
               ${filter === cat
-                ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30'
-                : 'bg-white/5 text-slate-400 border border-white/10 hover:bg-white/10'
+                ? 'bg-[#D9A86C]/15 text-[#F2C27F] border border-[#D9A86C]/30 font-semibold'
+                : 'bg-white/5 text-[#B8B1A7] border border-white/10 hover:bg-white/10 hover:text-[#F5F1EA]'
               }`}
           >
             {cat === 'all' ? 'Wszystkie' : categoryLabels[cat] || cat}
@@ -156,8 +156,8 @@ export default function TemplatesPage() {
               <p className="text-sm text-slate-400">{t.description}</p>
               <div className="flex flex-wrap gap-1.5">
                 {t.features.map((f, i) => (
-                  <span key={i} className="inline-flex items-center gap-1 text-xs text-slate-500 bg-white/5 px-2 py-1 rounded-full">
-                    <Sparkles className="w-3 h-3 text-violet-400" />
+                  <span key={i} className="inline-flex items-center gap-1 text-xs text-[#B8B1A7] bg-white/5 px-2 py-1 rounded-full">
+                    <Sparkles className="w-3 h-3 text-[#F2C27F]" />
                     {f}
                   </span>
                 ))}

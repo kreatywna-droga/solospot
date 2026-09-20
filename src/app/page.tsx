@@ -323,8 +323,11 @@ function FlowStepsSection() {
           <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D9A86C] block mb-2">
             PROSTY PROCES
           </span>
-          <h2 className="text-2xl sm:text-3xl font-bold text-[#F5F1EA] tracking-tight">
-            Jak to działa w SoloSpot
+          <h2 className="text-4xl sm:text-5xl lg:text-[62px] font-bold text-[#F5F1EA] tracking-[-0.03em] leading-[1.06] mb-4">
+            Jak to działa<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
+              w SoloSpot.
+            </span>
           </h2>
         </div>
 
@@ -364,10 +367,18 @@ function StackPanel() {
   return (
     <section id="stack" className="relative py-20 px-6 sm:px-8 lg:px-12 max-w-7xl mx-auto bg-transparent">
       <div className="max-w-2xl">
+        <div className="mb-8">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D9A86C] block mb-2">
+            WARSTWY ARCHITEKTURY
+          </span>
+          <h2 className="text-4xl sm:text-5xl lg:text-[62px] font-bold text-[#F5F1EA] tracking-[-0.03em] leading-[1.06] mb-4">
+            Stos platformy.<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
+              6 warstw technologii.
+            </span>
+          </h2>
+        </div>
         <div className="relative bg-[#0D1118]/85 backdrop-blur-md border border-white/10 rounded-3xl p-6 sm:p-8">
-          <div className="text-xs font-bold text-[#D9A86C] uppercase tracking-[0.2em] mb-6">
-            Stos platformy — 6 warstw
-          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {stackLayers.map((layer, i) => (
               <motion.div
@@ -435,7 +446,7 @@ function PlatformArchitecture() {
             <Layers className="w-3.5 h-3.5 text-[#D9A86C]" />
             <span className="text-[11px] font-bold tracking-[0.2em] text-[#D9A86C] uppercase">Architektura platformy</span>
           </motion.div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F5F1EA] tracking-tight mb-3">
+          <h2 className="text-4xl sm:text-5xl lg:text-[62px] font-bold text-[#F5F1EA] tracking-[-0.03em] leading-[1.06] mb-4">
             Zbudowana pod skalę,<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
               zaprojektowana dla produktów.
@@ -490,7 +501,7 @@ function MarketplaceSection() {
             <Box className="w-3.5 h-3.5 text-[#D9A86C]" />
             <span className="text-[11px] font-bold tracking-[0.2em] text-[#D9A86C] uppercase">Marketplace</span>
           </motion.div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F5F1EA] tracking-tight mb-3">
+          <h2 className="text-4xl sm:text-5xl lg:text-[62px] font-bold text-[#F5F1EA] tracking-[-0.03em] leading-[1.06] mb-4">
             Nie kupujesz szablonu.<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
               Kupujesz gotowy biznes.
@@ -566,7 +577,7 @@ function StudioSection() {
             <LayoutDashboard className="w-3.5 h-3.5 text-[#D9A86C]" />
             <span className="text-[11px] font-bold tracking-[0.2em] text-[#D9A86C] uppercase">Studio Builder</span>
           </motion.div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F5F1EA] tracking-tight mb-3">
+          <h2 className="text-4xl sm:text-5xl lg:text-[62px] font-bold text-[#F5F1EA] tracking-[-0.03em] leading-[1.06] mb-4">
             Konfigurujesz w <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">Studio.</span>
             <br />Publikujesz w sekundy.
           </h2>
@@ -658,7 +669,7 @@ function RuntimeEngineSection() {
             <Cpu className="w-3.5 h-3.5 text-[#D9A86C]" />
             <span className="text-[11px] font-bold tracking-[0.2em] text-[#D9A86C] uppercase">Runtime Engine</span>
           </motion.div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F5F1EA] tracking-tight mb-3">
+          <h2 className="text-4xl sm:text-5xl lg:text-[62px] font-bold text-[#F5F1EA] tracking-[-0.03em] leading-[1.06] mb-4">
             Silnik wykonawczy:<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
               JSON → Sklep na żywo.
@@ -732,7 +743,7 @@ function HTMLExportSection() {
             <Download className="w-3.5 h-3.5 text-[#D9A86C]" />
             <span className="text-[11px] font-bold tracking-[0.2em] text-[#D9A86C] uppercase">HTML Export</span>
           </motion.div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F5F1EA] tracking-tight mb-3">
+          <h2 className="text-4xl sm:text-5xl lg:text-[62px] font-bold text-[#F5F1EA] tracking-[-0.03em] leading-[1.06] mb-4">
             Eksportuj na<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
               dowolny hosting.
@@ -861,7 +872,7 @@ function MissionControlSection() {
             <BarChart3 className="w-3.5 h-3.5 text-[#D9A86C]" />
             <span className="text-[11px] font-bold tracking-[0.2em] text-[#D9A86C] uppercase">Mission Control</span>
           </motion.div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F5F1EA] tracking-tight mb-3">
+          <h2 className="text-4xl sm:text-5xl lg:text-[62px] font-bold text-[#F5F1EA] tracking-[-0.03em] leading-[1.06] mb-4">
             Centrum dowodzenia<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
               platformy.
@@ -952,7 +963,7 @@ function WhySoloSpotSection() {
             <Target className="w-3.5 h-3.5 text-[#D9A86C]" />
             <span className="text-[11px] font-bold tracking-[0.2em] text-[#D9A86C] uppercase">Dlaczego SoloSpot</span>
           </motion.div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F5F1EA] tracking-tight mb-3">
+          <h2 className="text-4xl sm:text-5xl lg:text-[62px] font-bold text-[#F5F1EA] tracking-[-0.03em] leading-[1.06] mb-4">
             Nie budujemy sklepów.<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
               Budujemy system operacyjny.
@@ -1008,7 +1019,7 @@ function IntegrationsSection() {
             <GitBranch className="w-3.5 h-3.5 text-[#D9A86C]" />
             <span className="text-[11px] font-bold tracking-[0.2em] text-[#D9A86C] uppercase">Ekosystem integracji</span>
           </motion.div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F5F1EA] tracking-tight mb-3">
+          <h2 className="text-4xl sm:text-5xl lg:text-[62px] font-bold text-[#F5F1EA] tracking-[-0.03em] leading-[1.06] mb-4">
             Połączony z Twoim<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
               ekosystemem.
@@ -1117,7 +1128,7 @@ function PricingSection() {
             <Star className="w-3.5 h-3.5 text-[#D9A86C]" />
             <span className="text-[11px] font-bold tracking-[0.2em] text-[#D9A86C] uppercase">Cennik platformy</span>
           </motion.div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F5F1EA] tracking-tight mb-3">
+          <h2 className="text-4xl sm:text-5xl lg:text-[62px] font-bold text-[#F5F1EA] tracking-[-0.03em] leading-[1.06] mb-4">
             Płacisz za platformę,<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
               nie za liczbę produktów.
@@ -1204,7 +1215,7 @@ function FAQSection() {
             <HelpCircle className="w-3.5 h-3.5 text-[#D9A86C]" />
             <span className="text-[11px] font-bold tracking-[0.2em] text-[#D9A86C] uppercase">FAQ</span>
           </motion.div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F5F1EA] tracking-tight mb-3">
+          <h2 className="text-4xl sm:text-5xl lg:text-[62px] font-bold text-[#F5F1EA] tracking-[-0.03em] leading-[1.06] mb-4">
             Pytania o platformę?<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
               Mamy odpowiedzi.
@@ -1263,7 +1274,7 @@ function CTASection() {
       <div className="max-w-2xl">
         <div className="relative bg-[#0D1118]/90 backdrop-blur-md border border-white/10 rounded-3xl p-8 sm:p-10 overflow-hidden">
           <div className="absolute top-0 left-0 w-48 h-48 bg-gradient-to-br from-[#D9A86C]/20 to-transparent rounded-full blur-3xl pointer-events-none" />
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F5F1EA] mb-3 relative z-10">
+          <h2 className="text-4xl sm:text-5xl lg:text-[62px] font-bold text-[#F5F1EA] tracking-[-0.03em] leading-[1.06] mb-4 relative z-10">
             Gotowy wdrożyć<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
               Commerce Operating System?

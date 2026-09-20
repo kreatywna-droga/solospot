@@ -134,15 +134,15 @@ export default function StoresPage() {
             <Card key={s.id} hover>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/10 border border-white/5 flex items-center justify-center">
-                    <StoreIcon className="w-5 h-5 text-violet-400" />
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#D9A86C]/20 to-[#F2C27F]/10 border border-[#D9A86C]/30 flex items-center justify-center">
+                    <StoreIcon className="w-5 h-5 text-[#F2C27F]" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-white">{s.name}</h3>
-                    <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
-                      <span className="font-mono">{s.slug}</span>
+                    <h3 className="font-bold text-[#F5F1EA]">{s.name}</h3>
+                    <div className="flex items-center gap-3 mt-1 text-xs text-[#77736D]">
+                      <span className="font-mono text-[#B8B1A7]">{s.slug}</span>
                       {s.domain && <span>{s.domain}</span>}
-                      <span className="text-[10px] text-slate-600">
+                      <span className="text-[10px] text-[#77736D]">
                         Utworzono: {new Date(s.createdAt).toLocaleDateString('pl-PL')}
                       </span>
                     </div>
@@ -154,13 +154,13 @@ export default function StoresPage() {
                     href={`/store/${s.slug}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-slate-500 hover:text-white transition-colors"
+                    className="text-xs text-[#77736D] hover:text-[#F5F1EA] transition-colors"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                   <Link
                     href={`/dashboard/stores/${s.id}`}
-                    className="text-xs text-violet-400 hover:text-violet-300 transition-colors"
+                    className="text-xs text-[#F2C27F] hover:text-[#F6D7AA] font-semibold transition-colors"
                   >
                     Zarządzaj →
                   </Link>

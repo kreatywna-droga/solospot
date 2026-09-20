@@ -15,13 +15,13 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold hover:shadow-lg hover:shadow-violet-500/30 hover:scale-105 active:scale-95',
+    'bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#080B10] font-bold shadow-md shadow-[#D9A86C]/20 hover:shadow-lg hover:shadow-[#D9A86C]/30 hover:scale-105 active:scale-95',
   secondary:
-    'border border-white/10 bg-white/5 text-slate-200 hover:bg-white/10 hover:border-white/20 active:scale-95',
+    'border border-white/10 bg-white/5 text-[#F5F1EA] hover:bg-white/10 hover:border-white/20 active:scale-95',
   outline:
-    'border border-violet-500/30 text-violet-400 hover:bg-violet-500/10 hover:border-violet-500/50 active:scale-95',
+    'border border-[#D9A86C]/40 text-[#F2C27F] hover:bg-[#D9A86C]/10 hover:border-[#D9A86C]/60 active:scale-95',
   ghost:
-    'text-slate-400 hover:text-white hover:bg-white/5 active:scale-95',
+    'text-[#B8B1A7] hover:text-[#F5F1EA] hover:bg-white/5 active:scale-95',
   danger:
     'bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold hover:shadow-lg hover:shadow-red-500/30 hover:scale-105 active:scale-95',
 }
@@ -39,7 +39,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={disabled || loading}
         className={`inline-flex items-center justify-center rounded-full font-semibold
-          transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-violet-500/50
+          transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#D9A86C]/50
           disabled:opacity-50 disabled:pointer-events-none disabled:scale-100
           ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
         {...props}

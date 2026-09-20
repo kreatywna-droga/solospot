@@ -10,7 +10,7 @@ interface BadgeProps {
 }
 
 const dotColors: Record<BadgeVariant, string> = {
-  default: 'bg-slate-400',
+  default: 'bg-[#D9A86C]',
   success: 'bg-emerald-400',
   warning: 'bg-amber-400',
   danger: 'bg-red-400',
@@ -18,7 +18,7 @@ const dotColors: Record<BadgeVariant, string> = {
 }
 
 const badgeStyles: Record<BadgeVariant, string> = {
-  default: 'border-slate-500/30 bg-slate-500/10 text-slate-300',
+  default: 'border-[#D9A86C]/30 bg-[#D9A86C]/10 text-[#F2C27F]',
   success: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
   warning: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
   danger: 'border-red-500/30 bg-red-500/10 text-red-300',

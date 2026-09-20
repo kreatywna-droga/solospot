@@ -18,32 +18,32 @@ interface TableProps<T> {
 export function Table<T>({ columns, data, keyExtractor, emptyMessage = 'Brak danych', className = '' }: TableProps<T>) {
   if (data.length === 0) {
     return (
-      <div className="text-center py-12 text-slate-500 text-sm">
+      <div className="text-center py-12 text-[#77736D] text-sm">
         {emptyMessage}
       </div>
     )
   }
 
   return (
-    <div className={`overflow-x-auto rounded-xl border border-white/5 ${className}`}>
+    <div className={`overflow-x-auto rounded-xl border border-white/10 ${className}`}>
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-white/5 bg-white/[0.02]">
+          <tr className="border-b border-white/10 bg-white/[0.02]">
             {columns.map((col) => (
               <th
                 key={col.key}
-                className={`px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider ${col.className || ''}`}
+                className={`px-4 py-3 text-left text-xs font-semibold text-[#B8B1A7] uppercase tracking-wider ${col.className || ''}`}
               >
                 {col.label}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-white/5">
+        <tbody className="divide-y divide-white/10">
           {data.map((item) => (
             <tr key={keyExtractor(item)} className="hover:bg-white/[0.02] transition-colors">
               {columns.map((col) => (
-                <td key={col.key} className={`px-4 py-3 text-slate-300 ${col.className || ''}`}>
+                <td key={col.key} className={`px-4 py-3 text-[#F5F1EA] ${col.className || ''}`}>
                   {col.render ? col.render(item) : String((item as any)[col.key] ?? '')}
                 </td>
               ))}

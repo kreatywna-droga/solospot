@@ -18,8 +18,8 @@ const statusColors: Record<string, { dot: string; bg: string; border: string; te
   PENDING: { dot: 'bg-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/30', text: 'text-amber-300' },
   PAYMENT_PENDING: { dot: 'bg-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/30', text: 'text-amber-300' },
   FAILED: { dot: 'bg-red-500', bg: 'bg-red-500/10', border: 'border-red-500/30', text: 'text-red-300' },
-  CANCELLED: { dot: 'bg-slate-500', bg: 'bg-slate-500/10', border: 'border-slate-500/30', text: 'text-slate-300' },
-  REFUNDED: { dot: 'bg-violet-500', bg: 'bg-violet-500/10', border: 'border-violet-500/30', text: 'text-violet-300' },
+  CANCELLED: { dot: 'bg-white/20', bg: 'bg-white/5', border: 'border-white/10', text: 'text-[#B8B1A7]' },
+  REFUNDED: { dot: 'bg-[#D9A86C]', bg: 'bg-[#D9A86C]/10', border: 'border-[#D9A86C]/30', text: 'text-[#F2C27F]' },
   FULFILLED: { dot: 'bg-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-300' },
 };
 
@@ -42,7 +42,7 @@ export default function DashboardOrdersPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-violet-500/30 border-t-violet-500 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-[#D9A86C]/30 border-t-[#D9A86C] rounded-full animate-spin" />
       </div>
     );
   }

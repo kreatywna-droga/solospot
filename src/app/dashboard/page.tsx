@@ -50,14 +50,14 @@ interface DashboardData {
 const statusConfig: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
   ACTIVE: { label: 'Aktywny', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/30', icon: <CheckCircle2 className="w-3 h-3" /> },
   CREATED: { label: 'Utworzony', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/30', icon: <Clock className="w-3 h-3" /> },
-  PROVISIONING: { label: 'Provisioning', color: 'text-violet-400', bg: 'bg-violet-500/10 border-violet-500/30', icon: <Activity className="w-3 h-3 animate-pulse" /> },
+  PROVISIONING: { label: 'Provisioning', color: 'text-[#F2C27F]', bg: 'bg-[#D9A86C]/10 border-[#D9A86C]/30', icon: <Activity className="w-3 h-3 animate-pulse" /> },
   ERROR: { label: 'Błąd', color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/30', icon: <AlertCircle className="w-3 h-3" /> },
 }
 
 const pubStatusConfig: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
   PUBLISHED: { label: 'Opublikowany', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/30', icon: <Globe className="w-3 h-3" /> },
   READY: { label: 'Gotowy do publikacji', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/30', icon: <CheckCircle2 className="w-3 h-3" /> },
-  DRAFT: { label: 'Szkic', color: 'text-slate-400', bg: 'bg-slate-500/10 border-slate-500/30', icon: <LayoutTemplate className="w-3 h-3" /> },
+  DRAFT: { label: 'Szkic', color: 'text-[#B8B1A7]', bg: 'bg-white/5 border-white/10', icon: <LayoutTemplate className="w-3 h-3" /> },
 }
 
 export default function BusinessDashboard() {
@@ -90,11 +90,11 @@ export default function BusinessDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050508] flex items-center justify-center">
+      <div className="min-h-screen bg-[#080B10] flex items-center justify-center">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-          className="w-12 h-12 border-4 border-violet-500/30 border-t-violet-500 rounded-full"
+          className="w-12 h-12 border-4 border-[#D9A86C]/30 border-t-[#D9A86C] rounded-full"
         />
       </div>
     )
@@ -102,12 +102,12 @@ export default function BusinessDashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#050508] flex items-center justify-center">
+      <div className="min-h-screen bg-[#080B10] flex items-center justify-center">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-md px-6">
           <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-white mb-2">Brak dostępu</h2>
-          <p className="text-slate-400 mb-6">{error}</p>
-          <Link href="/login" className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold rounded-full">
+          <h2 className="text-xl font-bold text-[#F5F1EA] mb-2">Brak dostępu</h2>
+          <p className="text-[#B8B1A7] mb-6">{error}</p>
+          <Link href="/login" className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#080B10] font-bold rounded-full shadow-lg shadow-[#D9A86C]/20">
             Zaloguj się
           </Link>
         </motion.div>
@@ -136,9 +136,9 @@ export default function BusinessDashboard() {
       label: 'Zamówienia (30d)',
       value: totals.totalOrders,
       icon: ShoppingCart,
-      gradient: 'from-violet-500/20 to-fuchsia-500/10',
-      border: 'border-violet-500/20',
-      iconColor: 'text-violet-400',
+      gradient: 'from-[#D9A86C]/15 to-[#F2C27F]/5',
+      border: 'border-[#D9A86C]/25',
+      iconColor: 'text-[#F2C27F]',
       trend: '+8%',
       trendColor: 'text-emerald-400',
       href: '/dashboard/stores',
@@ -168,14 +168,14 @@ export default function BusinessDashboard() {
   ]
 
   const quickActions = [
-    { label: 'Nowy sklep', icon: PlusCircle, href: '/dashboard/stores', color: 'from-violet-600 to-fuchsia-600', desc: 'Z marketplace lub od zera' },
-    { label: 'Marketplace', icon: LayoutTemplate, href: '/marketplace', color: 'from-emerald-600 to-teal-600', desc: 'Gotowe biznesy cyfrowe' },
-    { label: 'Produkty', icon: Package, href: '/dashboard/products', color: 'from-amber-600 to-orange-600', desc: 'Zarządzaj katalogiem' },
-    { label: 'Mission Control', icon: BarChart3, href: '/mission-control', color: 'from-pink-600 to-rose-600', desc: 'Centrum operacyjne' },
+    { label: 'Nowy sklep', icon: PlusCircle, href: '/dashboard/stores', color: 'from-[#D9A86C] to-[#F2C27F] text-[#080B10]', desc: 'Z marketplace lub od zera' },
+    { label: 'Marketplace', icon: LayoutTemplate, href: '/marketplace', color: 'from-emerald-600 to-teal-600 text-white', desc: 'Gotowe biznesy cyfrowe' },
+    { label: 'Produkty', icon: Package, href: '/dashboard/products', color: 'from-amber-600 to-orange-600 text-white', desc: 'Zarządzaj katalogiem' },
+    { label: 'Mission Control', icon: BarChart3, href: '/mission-control', color: 'from-rose-600 to-pink-600 text-white', desc: 'Centrum operacyjne' },
   ]
 
   return (
-    <div className="min-h-screen bg-[#050508] text-slate-200">
+    <div className="min-h-screen bg-[#080B10] text-[#F5F1EA]">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -188,19 +188,19 @@ export default function BusinessDashboard() {
           className="flex items-start justify-between mb-12"
         >
           <div>
-            <h1 className="text-3xl font-black text-white mb-2">Centrum zarządzania biznesem</h1>
+            <h1 className="text-3xl font-black text-[#F5F1EA] mb-2">Centrum zarządzania biznesem</h1>
             {tenant ? (
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
-                className="flex flex-wrap items-center gap-3 text-sm text-slate-500"
+                className="flex flex-wrap items-center gap-3 text-sm text-[#77736D]"
               >
-                <span>Tenant: <span className="font-mono text-slate-300">{tenant.id}</span></span>
-                <span className="w-1 h-1 rounded-full bg-slate-600" />
-                <span>Pakiet: <span className="font-bold text-slate-300">{tenant.packageId}</span></span>
-                <span className="w-1 h-1 rounded-full bg-slate-600" />
-                <span className={`ml-2 text-xs font-bold px-2.5 py-1 rounded-full border ${statusConfig[tenant.status]?.bg || 'bg-slate-500/10 border-slate-500/30'}`}>
+                <span>Tenant: <span className="font-mono text-[#F5F1EA]">{tenant.id}</span></span>
+                <span className="w-1 h-1 rounded-full bg-white/20" />
+                <span>Pakiet: <span className="font-bold text-[#F5F1EA]">{tenant.packageId}</span></span>
+                <span className="w-1 h-1 rounded-full bg-white/20" />
+                <span className={`ml-2 text-xs font-bold px-2.5 py-1 rounded-full border ${statusConfig[tenant.status]?.bg || 'bg-white/5 border-white/10'}`}>
                   {statusConfig[tenant.status]?.label || tenant.status}
                 </span>
               </motion.div>
@@ -209,15 +209,15 @@ export default function BusinessDashboard() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-sm text-slate-500"
+                className="text-sm text-[#B8B1A7]"
               >
-                Nie masz jeszcze aktywnego tenanta. <Link href="/register" className="text-violet-400 hover:text-violet-300">Utwórz konto</Link>
+                Nie masz jeszcze aktywnego tenanta. <Link href="/register" className="text-[#F2C27F] hover:text-[#F6D7AA]">Utwórz konto</Link>
               </motion.p>
             )}
           </div>
           <Link
             href="/mission-control"
-            className="hidden lg:flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm font-medium text-slate-300 hover:text-white transition-all"
+            className="hidden lg:flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm font-medium text-[#B8B1A7] hover:text-[#F5F1EA] transition-all"
           >
             Centrum dowodzenia <ArrowRight className="w-4 h-4" />
           </Link>
@@ -258,14 +258,14 @@ export default function BusinessDashboard() {
           transition={{ delay: 0.2 }}
           className="grid lg:grid-cols-[2fr_1fr] gap-6 mb-10"
         >
-          <div className="rounded-2xl border border-white/5 bg-[#080a12] p-6">
+          <div className="rounded-2xl border border-white/10 bg-[#0D1118]/85 backdrop-blur-md p-6">
             <motion.div
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               className="flex items-center justify-between mb-6"
             >
-              <h2 className="text-sm font-bold text-white uppercase tracking-wider">Twoje sklepy</h2>
-              <Link href="/dashboard/stores" className="text-sm text-violet-400 hover:text-violet-300 font-medium flex items-center gap-1">
+              <h2 className="text-sm font-bold text-[#F5F1EA] uppercase tracking-wider">Twoje sklepy</h2>
+              <Link href="/dashboard/stores" className="text-sm text-[#F2C27F] hover:text-[#F6D7AA] font-medium flex items-center gap-1">
                 Zobacz wszystkie <ArrowRight className="w-3 h-3" />
               </Link>
             </motion.div>
@@ -276,11 +276,11 @@ export default function BusinessDashboard() {
                 animate={{ opacity: 1, y: 0 }}
                 className="text-center py-12"
               >
-                <Package className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-                <p className="text-slate-400 mb-4">Nie masz jeszcze żadnego sklepu</p>
+                <Package className="w-12 h-12 text-[#77736D] mx-auto mb-4" />
+                <p className="text-[#B8B1A7] mb-4">Nie masz jeszcze żadnego sklepu</p>
                 <Link
                   href="/marketplace"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold rounded-full"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#080B10] font-bold rounded-full shadow-lg shadow-[#D9A86C]/20"
                 >
                   Kup gotowy sklep w Marketplace
                 </Link>
@@ -333,9 +333,9 @@ export default function BusinessDashboard() {
             animate={{ opacity: 1, x: 0 }}
             className="space-y-6"
           >
-            <div className="rounded-2xl border border-white/5 bg-[#080a12] p-6">
-              <h2 className="text-sm font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-                <Activity className="w-4 h-4 text-violet-400" />
+            <div className="rounded-2xl border border-white/10 bg-[#0D1118]/85 backdrop-blur-md p-6">
+              <h2 className="text-sm font-bold text-[#F5F1EA] uppercase tracking-wider mb-4 flex items-center gap-2">
+                <Activity className="w-4 h-4 text-[#F2C27F]" />
                 Ostatnia aktywność
               </h2>
               {!activity.length ? (
@@ -378,8 +378,8 @@ export default function BusinessDashboard() {
               )}
             </div>
 
-            <div className="rounded-2xl border border-white/5 bg-[#080a12] p-6">
-              <h2 className="text-sm font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+            <div className="rounded-2xl border border-white/10 bg-[#0D1118]/85 backdrop-blur-md p-6">
+              <h2 className="text-sm font-bold text-[#F5F1EA] uppercase tracking-wider mb-4 flex items-center gap-2">
                 <Zap className="w-4 h-4 text-amber-400" />
                 Szybkie akcje
               </h2>
@@ -412,11 +412,11 @@ export default function BusinessDashboard() {
           transition={{ delay: 0.25 }}
           className="grid lg:grid-cols-3 gap-6"
         >
-          <div className="rounded-2xl border border-violet-500/10 bg-gradient-to-br from-violet-500/5 to-fuchsia-500/5 p-8 text-center lg:col-span-2">
-            <h2 className="text-xl font-bold text-white mb-2">
+          <div className="rounded-2xl border border-[#D9A86C]/25 bg-gradient-to-br from-[#D9A86C]/10 via-[#0D1118] to-[#080B10] p-8 text-center lg:col-span-2">
+            <h2 className="text-xl font-bold text-[#F5F1EA] mb-2">
               {data?.tenant?.status === 'ACTIVE' ? 'Platforma aktywna' : 'Oczekuje na aktywację'}
             </h2>
-            <p className="text-slate-400 text-sm mb-6 max-w-lg mx-auto">
+            <p className="text-[#B8B1A7] text-sm mb-6 max-w-lg mx-auto">
               {data?.tenant?.status === 'ACTIVE'
                 ? 'Twoja platforma jest aktywna. Twórz sklepy, instaluj szablony, zarządzaj produktami i publikuj na Edge CDN.'
                 : 'Tenant utworzony. Po opłaceniu pakietu sklep zostanie automatycznie provisionowany w ciągu 30 sekund.'}
@@ -441,8 +441,8 @@ export default function BusinessDashboard() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/5 bg-[#080a12] p-6">
-            <h2 className="text-sm font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+          <div className="rounded-2xl border border-white/10 bg-[#0D1118]/85 backdrop-blur-md p-6">
+            <h2 className="text-sm font-bold text-[#F5F1EA] uppercase tracking-wider mb-4 flex items-center gap-2">
               <Shield className="w-4 h-4 text-emerald-400" />
               Status platformy
             </h2>

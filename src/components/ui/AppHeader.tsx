@@ -15,7 +15,7 @@ interface AppHeaderProps {
 
 export function AppHeader({ backHref, backLabel, actions, className = '' }: AppHeaderProps) {
   return (
-    <header className={`sticky top-0 z-30 border-b border-white/5 bg-[#050508]/80 backdrop-blur-xl ${className}`}>
+    <header className={`sticky top-0 z-30 border-b border-white/10 bg-[#080B10]/80 backdrop-blur-xl ${className}`}>
       <div className="flex items-center justify-between px-4 lg:px-8 h-16">
         <div className="flex items-center gap-4">
           <div className="lg:hidden">
@@ -24,7 +24,7 @@ export function AppHeader({ backHref, backLabel, actions, className = '' }: AppH
           {backHref && (
             <Link
               href={backHref}
-              className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors"
+              className="flex items-center gap-2 text-sm text-[#B8B1A7] hover:text-[#F5F1EA] transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               {backLabel || 'Powrót'}
