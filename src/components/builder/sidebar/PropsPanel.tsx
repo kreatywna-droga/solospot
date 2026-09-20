@@ -51,7 +51,7 @@ function StringField({ schema, value, onChange }: FieldProps) {
         onChange={e => onChange(schema.key, e.target.value)}
         placeholder={(schema as { placeholder?: string }).placeholder ?? schema.label}
         className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600
-                   focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 transition-all"
+                   focus:outline-none focus:border-[#D9A86C]/50 focus:ring-1 focus:ring-violet-500/30 transition-all"
       />
       {schema.description && (
         <p className="text-[11px] text-slate-600 mt-1">{schema.description}</p>
@@ -71,7 +71,7 @@ function TextField({ schema, value, onChange }: FieldProps) {
         onChange={e => onChange(schema.key, e.target.value)}
         rows={3}
         className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white
-                   focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 transition-all resize-none"
+                   focus:outline-none focus:border-[#D9A86C]/50 focus:ring-1 focus:ring-violet-500/30 transition-all resize-none"
       />
     </div>
   )
@@ -92,7 +92,7 @@ function NumberField({ schema, value, onChange }: FieldProps) {
         step={s.step ?? 1}
         onChange={e => onChange(schema.key, parseFloat(e.target.value))}
         className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white
-                   focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 transition-all"
+                   focus:outline-none focus:border-[#D9A86C]/50 focus:ring-1 focus:ring-violet-500/30 transition-all"
       />
     </div>
   )
@@ -135,7 +135,7 @@ function ColorField({ schema, value, onChange }: FieldProps) {
           value={colorVal}
           onChange={e => onChange(schema.key, e.target.value)}
           className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white font-mono
-                     focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 transition-all"
+                     focus:outline-none focus:border-[#D9A86C]/50 focus:ring-1 focus:ring-violet-500/30 transition-all"
         />
       </div>
     </div>
@@ -176,7 +176,7 @@ function ImageField({ schema, value, onChange }: FieldProps) {
         />
         <button
           onClick={() => setShowPicker(true)}
-          className="p-2 rounded-lg bg-violet-600 text-white hover:bg-violet-500 transition-colors flex-shrink-0"
+          className="p-2 rounded-lg bg-[#D9A86C] text-white hover:bg-[#C99A4A] transition-colors flex-shrink-0"
           title="Wybierz z biblioteki"
         >
           <Image className="w-4 h-4" />
@@ -213,7 +213,7 @@ function SelectField({ schema, value, onChange }: FieldProps) {
           onChange(schema.key, opt?.value ?? e.target.value)
         }}
         className="w-full bg-[#0a0a14] border border-white/10 rounded-lg px-3 py-2 text-sm text-white
-                   focus:outline-none focus:border-violet-500/50 transition-all"
+                   focus:outline-none focus:border-[#D9A86C]/50 transition-all"
       >
         {options.map(opt => (
           <option key={String(opt.value)} value={String(opt.value)}>
@@ -336,7 +336,7 @@ export function PropsPanel() {
                     seo: { title: e.target.value }
                   })}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white
-                             focus:outline-none focus:border-violet-500/50 transition-all"
+                             focus:outline-none focus:border-[#D9A86C]/50 transition-all"
                 />
               </div>
               <div>
@@ -352,7 +352,7 @@ export function PropsPanel() {
                   })}
                   rows={3}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white
-                             focus:outline-none focus:border-violet-500/50 transition-all resize-none"
+                             focus:outline-none focus:border-[#D9A86C]/50 transition-all resize-none"
                 />
               </div>
             </>

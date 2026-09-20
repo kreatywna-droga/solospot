@@ -112,7 +112,7 @@ export function StylePanel() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#202024] text-white">
+    <div className="flex flex-col h-full bg-[#0D1118] text-white">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08]">
         <div className="flex items-center gap-2">
@@ -138,7 +138,7 @@ export function StylePanel() {
               onClick={() => setActiveSubTab(tab.id as any)}
               className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 isActive
-                  ? 'bg-violet-600 text-white shadow-md'
+                  ? 'bg-[#D9A86C] text-white shadow-md'
                   : 'text-zinc-400 hover:text-white hover:bg-white/[0.05]'
               }`}
             >
@@ -167,7 +167,7 @@ export function StylePanel() {
                   type="text"
                   value={theme.primaryColor || '#7c3aed'}
                   onChange={e => updateColor('primaryColor', e.target.value)}
-                  className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-violet-500"
+                  className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-[#D9A86C]"
                 />
               </div>
             </div>
@@ -185,7 +185,7 @@ export function StylePanel() {
                   type="text"
                   value={theme.secondaryColor || '#d946ef'}
                   onChange={e => updateColor('secondaryColor', e.target.value)}
-                  className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-violet-500"
+                  className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-[#D9A86C]"
                 />
               </div>
             </div>
@@ -203,7 +203,7 @@ export function StylePanel() {
                   type="text"
                   value={theme.backgroundColor || '#090910'}
                   onChange={e => updateColor('backgroundColor', e.target.value)}
-                  className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-violet-500"
+                  className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-[#D9A86C]"
                 />
               </div>
             </div>
@@ -234,7 +234,7 @@ export function StylePanel() {
               <select
                 value={theme.font || 'Inter'}
                 onChange={e => updateFont(e.target.value)}
-                className="w-full bg-[#27272A] border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-violet-500"
+                className="w-full bg-[#1A1F2E] border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#D9A86C]"
               >
                 {FONT_OPTIONS.map(font => (
                   <option key={font.value} value={font.value}>
@@ -275,7 +275,7 @@ export function StylePanel() {
                     onClick={() => updateRadius(r.val)}
                     className={`py-2 px-1 rounded-lg border text-center transition-all ${
                       theme.borderRadius === r.val
-                        ? 'border-violet-500 bg-violet-600/20 text-white font-bold'
+                        ? 'border-[#D9A86C] bg-[#D9A86C]/20 text-white font-bold'
                         : 'border-white/[0.08] hover:border-white/20 bg-white/[0.04] text-zinc-400'
                     }`}
                   >
@@ -288,7 +288,7 @@ export function StylePanel() {
 
             <div className="p-3 rounded-xl border border-white/[0.08] bg-white/[0.02] space-y-2">
               <span className="text-[11px] font-bold text-zinc-300">Globalne Tokeny CSS:</span>
-              <pre className="text-[10px] font-mono text-[#A78BFA] bg-black/60 p-2.5 rounded-lg overflow-x-auto">
+              <pre className="text-[10px] font-mono text-[#F2C27F] bg-black/60 p-2.5 rounded-lg overflow-x-auto">
 {`:root {
   --primary: ${theme.primaryColor || '#7c3aed'};
   --secondary: ${theme.secondaryColor || '#d946ef'};
@@ -307,10 +307,10 @@ export function StylePanel() {
               <button
                 key={preset.name}
                 onClick={() => applyPreset(preset)}
-                className="w-full flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:border-violet-500/50 hover:bg-[#8B5CF6]/[0.07] transition-all text-left group"
+                className="w-full flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:border-[#D9A86C]/50 hover:bg-[#D9A86C]/[0.07] transition-all text-left group"
               >
                 <div className="space-y-1">
-                  <div className="font-bold text-xs text-white group-hover:text-[#A78BFA] transition-colors">
+                  <div className="font-bold text-xs text-white group-hover:text-[#F2C27F] transition-colors">
                     {preset.name}
                   </div>
                   <div className="text-[10px] text-zinc-400 flex items-center gap-2">

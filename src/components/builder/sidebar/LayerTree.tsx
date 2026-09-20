@@ -150,7 +150,7 @@ function LayerRow({ node, depth, pageId, selectedId, onSelect }: LayerRowProps) 
         onClick={() => onSelect(node.id)}
         className={`group flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer transition-all text-sm select-none relative
           ${isSelected
-            ? 'bg-[#8B5CF6]/15 border border-violet-500/40 text-white shadow-sm shadow-violet-500/10'
+            ? 'bg-[#D9A86C]/15 border border-[#D9A86C]/40 text-white shadow-sm shadow-[#D9A86C]-500/10'
             : 'hover:bg-white/[0.05] text-zinc-300 hover:text-white border border-transparent'
           }
           ${!node.visible ? 'opacity-40' : ''}
@@ -197,7 +197,7 @@ function LayerRow({ node, depth, pageId, selectedId, onSelect }: LayerRowProps) 
               }
             }}
             onClick={e => e.stopPropagation()}
-            className="flex-1 text-xs bg-[#202024] border border-violet-500 rounded px-1.5 py-0.5 text-white outline-none"
+            className="flex-1 text-xs bg-[#0D1118] border border-[#D9A86C] rounded px-1.5 py-0.5 text-white outline-none"
           />
         ) : (
           <span
@@ -322,7 +322,7 @@ export function LayerTree() {
         <button
           onClick={() => setShowVisibleOnly(v => !v)}
           className={`text-[11px] px-2 py-1 rounded transition-all ${
-            showVisibleOnly ? 'bg-[#8B5CF6]/15 text-[#A78BFA]' : 'text-zinc-500 hover:text-white'
+            showVisibleOnly ? 'bg-[#D9A86C]/15 text-[#F2C27F]' : 'text-zinc-500 hover:text-white'
           }`}
         >
           Widoczne
@@ -330,7 +330,7 @@ export function LayerTree() {
         <button
           onClick={() => setShowUnlockedOnly(v => !v)}
           className={`text-[11px] px-2 py-1 rounded transition-all ${
-            showUnlockedOnly ? 'bg-[#8B5CF6]/15 text-[#A78BFA]' : 'text-zinc-500 hover:text-white'
+            showUnlockedOnly ? 'bg-[#D9A86C]/15 text-[#F2C27F]' : 'text-zinc-500 hover:text-white'
           }`}
         >
           Odblokowane

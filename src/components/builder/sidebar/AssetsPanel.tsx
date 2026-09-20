@@ -327,7 +327,7 @@ export function AssetsPanel() {
 
   return (
     <div
-      className="flex flex-col h-full bg-[#202024] text-white"
+      className="flex flex-col h-full bg-[#0D1118] text-white"
       onDragOver={e => { e.preventDefault(); setIsDragging(true) }}
       onDragLeave={() => setIsDragging(false)}
       onDrop={e => {
@@ -357,7 +357,7 @@ export function AssetsPanel() {
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition-all shadow-md shadow-violet-600/20 disabled:opacity-50"
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-xs font-semibold transition-all shadow-md shadow-[#D9A86C]-600/20 disabled:opacity-50"
           title="Wgraj nowe pliki z dysku"
         >
           {uploading ? (
@@ -392,7 +392,7 @@ export function AssetsPanel() {
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Szukaj plików..."
             className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white
-                       placeholder-zinc-500 focus:outline-none focus:border-[#8B5CF6]/50 transition-all"
+                       placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C]/50 transition-all"
           />
         </div>
       </div>
@@ -405,7 +405,7 @@ export function AssetsPanel() {
             onClick={() => setActiveCategory(cat.id)}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-medium whitespace-nowrap transition-colors ${
               activeCategory === cat.id
-                ? 'bg-violet-600/30 text-[#A78BFA] border border-violet-500/40 shadow-sm'
+                ? 'bg-[#D9A86C]/30 text-[#F2C27F] border border-[#D9A86C]/40 shadow-sm'
                 : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08] border border-transparent'
             }`}
           >
@@ -417,8 +417,8 @@ export function AssetsPanel() {
       {/* Asset Grid */}
       <div className="flex-1 overflow-y-auto p-3 relative">
         {isDragging && (
-          <div className="absolute inset-2 rounded-xl border-2 border-dashed border-violet-500 bg-violet-600/20 backdrop-blur-sm z-30 flex flex-col items-center justify-center pointer-events-none">
-            <Upload className="w-8 h-8 text-[#A78BFA] animate-bounce mb-2" />
+          <div className="absolute inset-2 rounded-xl border-2 border-dashed border-[#D9A86C] bg-[#D9A86C]/20 backdrop-blur-sm z-30 flex flex-col items-center justify-center pointer-events-none">
+            <Upload className="w-8 h-8 text-[#F2C27F] animate-bounce mb-2" />
             <p className="text-xs font-semibold text-white">Upuść pliki tutaj, aby wgrać</p>
           </div>
         )}
@@ -437,7 +437,7 @@ export function AssetsPanel() {
             </p>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="px-3 py-1.5 rounded-lg bg-violet-600 text-white text-xs font-medium hover:bg-violet-500 transition-colors"
+              className="px-3 py-1.5 rounded-lg bg-[#D9A86C] text-white text-xs font-medium hover:bg-[#C99A4A] transition-colors"
             >
               Wgraj pliki
             </button>
@@ -448,7 +448,7 @@ export function AssetsPanel() {
               <div
                 key={asset.id}
                 onClick={() => setSelectedAsset(asset)}
-                className="group relative aspect-square rounded-xl bg-white/[0.04] border border-white/[0.08] overflow-hidden cursor-pointer hover:border-violet-500/50 hover:shadow-lg hover:shadow-violet-500/10 transition-all flex flex-col"
+                className="group relative aspect-square rounded-xl bg-white/[0.04] border border-white/[0.08] overflow-hidden cursor-pointer hover:border-[#D9A86C]/50 hover:shadow-lg hover:shadow-[#D9A86C]-500/10 transition-all flex flex-col"
               >
                 <div className="flex-1 w-full overflow-hidden bg-black/40 flex items-center justify-center">
                   {asset.type === 'image' || asset.mimeType.includes('svg') ? (
@@ -577,7 +577,7 @@ export function AssetsPanel() {
 
               <button
                 onClick={() => handleInsertIntoCanvas(selectedAsset)}
-                className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold transition-all shadow-md shadow-violet-600/20"
+                className="px-4 py-2 rounded-xl bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-xs font-bold transition-all shadow-md shadow-[#D9A86C]-600/20"
               >
                 Wstaw do zaznaczonej sekcji
               </button>

@@ -43,7 +43,7 @@ function CategoryTabs({ categories, active, onChange }: CategoryTabsProps) {
         onClick={() => onChange('all')}
         className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-all
           ${active === 'all'
-            ? 'bg-[#8B5CF6]/15 text-[#A78BFA] border border-[#8B5CF6]/25'
+            ? 'bg-[#D9A86C]/15 text-[#F2C27F] border border-[#D9A86C]/25'
             : 'bg-white/[0.04] text-zinc-500 hover:text-white hover:bg-white/[0.08] border border-transparent'
           }`}
       >
@@ -55,7 +55,7 @@ function CategoryTabs({ categories, active, onChange }: CategoryTabsProps) {
           onClick={() => onChange(cat)}
           className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-all
             ${active === cat
-              ? 'bg-[#8B5CF6]/15 text-[#A78BFA] border border-[#8B5CF6]/25'
+              ? 'bg-[#D9A86C]/15 text-[#F2C27F] border border-[#D9A86C]/25'
               : 'bg-white/[0.04] text-zinc-500 hover:text-white hover:bg-white/[0.08] border border-transparent'
             }`}
         >
@@ -134,12 +134,12 @@ function ComponentCard({ descriptor, onAdd }: ComponentCardProps) {
         }
       }}
       className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.04] border border-white/5
-                 hover:border-[#8B5CF6]/25 hover:bg-[#8B5CF6]/[0.07] active:scale-[0.98]
-                 transition-all text-left group overflow-hidden cursor-grab active:cursor-grabbing select-none focus:outline-none focus:border-[#8B5CF6]/50"
+                 hover:border-[#D9A86C]/25 hover:bg-[#D9A86C]/[0.07] active:scale-[0.98]
+                 transition-all text-left group overflow-hidden cursor-grab active:cursor-grabbing select-none focus:outline-none focus:border-[#D9A86C]/50"
     >
       {/* Icon / thumbnail */}
       <div className="w-9 h-9 min-w-[36px] max-w-[36px] min-h-[36px] max-h-[36px] rounded-lg bg-violet-500/15 flex items-center justify-center
-                      text-[#A78BFA] flex-shrink-0 group-hover:bg-violet-500/25 group-hover:text-[#A78BFA] transition-colors overflow-hidden">
+                      text-[#F2C27F] flex-shrink-0 group-hover:bg-[#C99A4A]/25 group-hover:text-[#F2C27F] transition-colors overflow-hidden">
         {renderComponentIcon(descriptor.icon)}
       </div>
 
@@ -150,8 +150,8 @@ function ComponentCard({ descriptor, onAdd }: ComponentCardProps) {
       </div>
 
       {/* Add hint */}
-      <div className="flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center bg-white/0 group-hover:bg-[#8B5CF6]/15 transition-colors">
-        <Plus className="w-3.5 h-3.5 text-zinc-500 group-hover:text-[#A78BFA] transition-colors shrink-0" />
+      <div className="flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center bg-white/0 group-hover:bg-[#D9A86C]/15 transition-colors">
+        <Plus className="w-3.5 h-3.5 text-zinc-500 group-hover:text-[#F2C27F] transition-colors shrink-0" />
       </div>
     </div>
   )
@@ -396,16 +396,16 @@ export function ComponentPanel({ onClose }: ComponentPanelProps) {
         <button
           type="button"
           onClick={() => setShowExperiences(true)}
-          className="w-full flex items-center justify-between p-2.5 rounded-xl bg-gradient-to-r from-violet-950/70 via-purple-900/40 to-indigo-950/70 border border-violet-500/30 hover:border-violet-500/60 text-left transition-all group shadow-sm hover:shadow-violet-500/10"
+          className="w-full flex items-center justify-between p-2.5 rounded-xl bg-gradient-to-r from-violet-950/70 via-purple-900/40 to-indigo-950/70 border border-[#D9A86C]/30 hover:border-[#D9A86C]/60 text-left transition-all group shadow-sm hover:shadow-[#D9A86C]-500/10"
         >
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-7 h-7 rounded-lg bg-violet-600/20 border border-violet-500/30 flex items-center justify-center text-violet-400 group-hover:scale-105 transition-transform shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-[#D9A86C]/20 border border-[#D9A86C]/30 flex items-center justify-center text-violet-400 group-hover:scale-105 transition-transform shrink-0">
               <Sparkles className="w-3.5 h-3.5" />
             </div>
             <div className="min-w-0">
               <div className="text-xs font-bold text-white group-hover:text-violet-200 transition-colors flex items-center gap-1.5">
                 <span>Experience Library</span>
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30">v2.0</span>
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-[#D9A86C]/30">v2.0</span>
               </div>
               <p className="text-[10px] text-zinc-400 truncate">Przeglądaj 270+ gotowych sekcji i efektów</p>
             </div>
@@ -423,7 +423,7 @@ export function ComponentPanel({ onClose }: ComponentPanelProps) {
           onClick={() => setSubTab('components')}
           className={`flex-1 py-1.5 text-xs font-semibold rounded-t-lg transition-all border-b-2 ${
             subTab === 'components'
-              ? 'text-white border-violet-500 bg-white/[0.04]'
+              ? 'text-white border-[#D9A86C] bg-white/[0.04]'
               : 'text-zinc-500 border-transparent hover:text-zinc-300'
           }`}
         >
@@ -434,7 +434,7 @@ export function ComponentPanel({ onClose }: ComponentPanelProps) {
           onClick={() => setSubTab('typography')}
           className={`flex-1 py-1.5 text-xs font-semibold rounded-t-lg transition-all border-b-2 ${
             subTab === 'typography'
-              ? 'text-white border-violet-500 bg-white/[0.04]'
+              ? 'text-white border-[#D9A86C] bg-white/[0.04]'
               : 'text-zinc-500 border-transparent hover:text-zinc-300'
           }`}
         >
@@ -458,7 +458,7 @@ export function ComponentPanel({ onClose }: ComponentPanelProps) {
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Szukaj sekcji lub elementu..."
                 className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-8 pr-3 py-2 text-sm text-white
-                           placeholder-zinc-600 focus:outline-none focus:border-[#8B5CF6]/50 transition-all"
+                           placeholder-zinc-600 focus:outline-none focus:border-[#D9A86C]/50 transition-all"
               />
             </div>
           </div>

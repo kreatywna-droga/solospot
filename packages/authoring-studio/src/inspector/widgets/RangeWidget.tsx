@@ -30,7 +30,7 @@ const RangeWidget: React.FC<WidgetProps<number>> = ({ value, onChange, field }) 
         onChange={(e) => onChange(parseFloat(e.target.value))}
         className="flex-1 h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer
                    [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5
-                   [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:bg-violet-500
+                   [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:bg-gold-placeholder-500
                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer"
       />
       <span className="text-xs text-white font-mono w-8 text-right tabular-nums">{num}</span>

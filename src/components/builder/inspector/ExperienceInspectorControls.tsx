@@ -76,7 +76,7 @@ const POINTER_TYPES: { value: PointerInteractionType; label: string }[] = [
   { value: 'perspective', label: 'Perspective' },
 ];
 
-const DEFAULT_COLORS = ['#7c3aed', '#3b82f6', '#ec4899', '#06b6d4'];
+const DEFAULT_COLORS = ['#B8893A', '#3b82f6', '#ec4899', '#06b6d4'];
 
 function FieldGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -104,7 +104,7 @@ function SelectField({
           onClick={() => onChange(opt.value)}
           className={`px-2 py-1 text-[11px] font-semibold rounded-lg border transition-all ${
             value === opt.value
-              ? 'bg-violet-600 text-white border-violet-500'
+              ? 'bg-[#D9A86C] text-white border-[#D9A86C]'
               : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
           }`}
         >
@@ -148,9 +148,9 @@ function SliderField({
         step={step ?? 1}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-1.5 rounded-full cursor-pointer accent-violet-500"
+        className="w-full h-1.5 rounded-full cursor-pointer accent-[#D9A86C]"
         style={{
-          background: `linear-gradient(to right, #7c3aed ${((value - min) / (max - min)) * 100}%, rgba(255,255,255,0.1) ${((value - min) / (max - min)) * 100}%)`,
+          background: `linear-gradient(to right, #B8893A ${((value - min) / (max - min)) * 100}%, rgba(255,255,255,0.1) ${((value - min) / (max - min)) * 100}%)`,
         }}
       />
     </div>
@@ -172,7 +172,7 @@ function ToggleField({
       <button
         onClick={() => onChange(!checked)}
         className={`relative w-9 h-5 rounded-full transition-colors ${
-          checked ? 'bg-violet-600' : 'bg-white/10'
+          checked ? 'bg-[#D9A86C]' : 'bg-white/10'
         }`}
       >
         <span
@@ -192,7 +192,7 @@ function ColorArrayField({
   colors: string[];
   onChange: (c: string[]) => void;
 }) {
-  const addColor = () => onChange([...colors, '#7c3aed']);
+  const addColor = () => onChange([...colors, '#B8893A']);
   const removeColor = (idx: number) => onChange(colors.filter((_, i) => i !== idx));
   const updateColor = (idx: number, c: string) => {
     const next = [...colors];
@@ -279,8 +279,8 @@ export function ExperienceInspectorControls({
   );
 
   return (
-    <div className="flex flex-col h-full bg-[#202024] text-white select-none">
-      <div className="px-4 py-3 border-b border-white/[0.08] bg-[#27272A]">
+    <div className="flex flex-col h-full bg-[#0D1118] text-white select-none">
+      <div className="px-4 py-3 border-b border-white/[0.08] bg-[#1A1F2E]">
         <div className="text-xs font-bold text-white">Experience Controls</div>
         <p className="text-[11px] text-zinc-500 mt-0.5">Scene configuration</p>
       </div>
@@ -292,7 +292,7 @@ export function ExperienceInspectorControls({
             onClick={() => setActiveTab(tab.id)}
             className={`flex-1 py-2 text-[11px] font-semibold transition-all ${
               activeTab === tab.id
-                ? 'text-violet-400 border-b-2 border-violet-500'
+                ? 'text-violet-400 border-b-2 border-[#D9A86C]'
                 : 'text-zinc-500 hover:text-zinc-300'
             }`}
           >
@@ -516,7 +516,7 @@ export function ExperienceInspectorControls({
                     onClick={() => patch({ performanceTier: tier })}
                     className={`flex-1 py-2 text-[11px] font-semibold rounded-lg border transition-all capitalize ${
                       config.performanceTier === tier
-                        ? 'bg-violet-600 text-white border-violet-500'
+                        ? 'bg-[#D9A86C] text-white border-[#D9A86C]'
                         : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
                     }`}
                   >

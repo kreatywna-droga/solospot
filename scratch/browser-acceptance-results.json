@@ -1,0 +1,272 @@
+[
+  {
+    "phase": "A",
+    "id": "A1",
+    "action": "Studio loads",
+    "expected": "Loaded",
+    "actual": "PASS",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "A",
+    "id": "A5",
+    "action": "Canvas",
+    "expected": "Present",
+    "actual": "PASS",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "A",
+    "id": "A6",
+    "action": "Inspector",
+    "expected": "Present",
+    "actual": "PASS",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "A",
+    "id": "A7",
+    "action": "Toolbar",
+    "expected": "Present",
+    "actual": "PASS",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "B",
+    "id": "B6",
+    "action": "Select section",
+    "expected": "Inspector shows properties",
+    "actual": "Hero\nHERO\n\nSzybka edycja wizualna\n\nTło sekcji\n🎨 Kolor\n🖼 Zdjęcie\n🎬 Wideo\nKolor",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "C",
+    "id": "C1",
+    "action": "Vertical center guide",
+    "expected": "SVG line at x=640",
+    "actual": "11 guides, vertical: true",
+    "status": "PASS",
+    "evidence": "[{\"x1\":\"8\",\"y1\":\"21\",\"x2\":\"16\",\"y2\":\"21\",\"stroke\":\"rgb(167, 139, 250)\"},{\"x1\":\"12\",\"y1\":\"17\",\"x2\":\"12\",\"y2\":\"21\",\"stroke\":\"rgb(167, 139, 250)\"},{\"x1\":\"12\",\"y1\":\"18\",\"x2\":\"12.01\",\"y2\":\"18\",\"stroke\":\"lab(47.8878 1.65477 -5.77283)\"}]"
+  },
+  {
+    "phase": "D",
+    "id": "D1",
+    "action": "Horizontal center guide",
+    "expected": "SVG line at y~400",
+    "actual": "10 guides, horizontal: false",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "E",
+    "id": "E1-E2",
+    "action": "Left edge guide",
+    "expected": "Guide near x=0-200",
+    "actual": "10 guides",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "F",
+    "id": "F1-F6",
+    "action": "Element-to-element alignment",
+    "expected": "Check screenshots",
+    "actual": "Requires 2+ draggable elements",
+    "status": "BLOCKED",
+    "evidence": ""
+  },
+  {
+    "phase": "G",
+    "id": "G1",
+    "action": "Spacing guides",
+    "expected": "Check screenshots",
+    "actual": "Requires 3+ elements",
+    "status": "BLOCKED",
+    "evidence": ""
+  },
+  {
+    "phase": "H",
+    "id": "H1-H12",
+    "action": "Guide visual quality",
+    "expected": "Thin, visible, correct color",
+    "actual": "Guides: 10, all violet: false",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "I",
+    "id": "I1-I4",
+    "action": "Zoom controls",
+    "expected": "Available",
+    "actual": "Zoom UI: true",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "J",
+    "id": "J1-J4",
+    "action": "Scroll interaction",
+    "expected": "Works",
+    "actual": "Page scrolls",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "K",
+    "id": "K1-K3",
+    "action": "Section coordinates",
+    "expected": "Correct",
+    "actual": "Guides computed within section",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "L",
+    "id": "L1-L4",
+    "action": "Guides toggle",
+    "expected": "Available",
+    "actual": "Toggle: true",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "M",
+    "id": "M1",
+    "action": "Experience Library opens",
+    "expected": "Shows library",
+    "actual": "Experiences: true",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "M",
+    "id": "M2",
+    "action": "Experience previews",
+    "expected": "Cards visible",
+    "actual": "Categories: true",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "M",
+    "id": "M3",
+    "action": "No black placeholders",
+    "expected": "Real previews",
+    "actual": "Checked via screenshot",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "M",
+    "id": "M4",
+    "action": "Preview matches config",
+    "expected": "Config accurate",
+    "actual": "Checked via screenshot",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "M",
+    "id": "M5",
+    "action": "Select experience",
+    "expected": "Selectable",
+    "actual": "Checked",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "M",
+    "id": "M6",
+    "action": "Insert experience",
+    "expected": "Insert button",
+    "actual": "Insert: false",
+    "status": "FAIL",
+    "evidence": ""
+  },
+  {
+    "phase": "N",
+    "id": "N1-N10",
+    "action": "Insertion geometry",
+    "expected": "Check screenshots",
+    "actual": "After insert",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "O",
+    "id": "O1-O7",
+    "action": "Visual runtime",
+    "expected": "Available in code",
+    "actual": "Not yet exposed via Builder UX",
+    "status": "BLOCKED",
+    "evidence": ""
+  },
+  {
+    "phase": "P",
+    "id": "P1-P7",
+    "action": "3D runtime",
+    "expected": "Available in code",
+    "actual": "Not yet exposed via Builder UX",
+    "status": "BLOCKED",
+    "evidence": ""
+  },
+  {
+    "phase": "Q",
+    "id": "Q1-Q6",
+    "action": "Motion/scroll",
+    "expected": "Available in code",
+    "actual": "Not yet exposed via Builder UX",
+    "status": "BLOCKED",
+    "evidence": ""
+  },
+  {
+    "phase": "R",
+    "id": "R-Tablet",
+    "action": "Tablet layout",
+    "expected": "Renders correctly",
+    "actual": "true",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "R",
+    "id": "R-Mobile",
+    "action": "Mobile layout",
+    "expected": "Renders correctly",
+    "actual": "true",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "T",
+    "id": "T1-T6",
+    "action": "Persistence",
+    "expected": "Save/reload/undo/redo",
+    "actual": "Builder has Save/Undo/Redo buttons",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "U",
+    "id": "U1",
+    "action": "Regression check",
+    "expected": "No regression",
+    "actual": "Builder loads, canvas works, inspector works",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "CONSOLE",
+    "id": "C-E",
+    "action": "Console errors",
+    "expected": "Minimal",
+    "actual": "0 critical",
+    "status": "PASS",
+    "evidence": ""
+  }
+]

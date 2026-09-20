@@ -43,7 +43,7 @@ export const SmoothSlider: React.FC<SmoothSliderProps> = ({
   // Update gradient fill so the track reflects slider thumb position live
   const updateTrackFill = useCallback((v: number, el: HTMLInputElement) => {
     const pct = ((v - min) / (max - min)) * 100;
-    el.style.background = `linear-gradient(to right, #7c3aed ${pct}%, rgba(255,255,255,0.1) ${pct}%)`;
+    el.style.background = `linear-gradient(to right, #B8893A ${pct}%, rgba(255,255,255,0.1) ${pct}%)`;
   }, [min, max]);
 
   // Sync external value changes (e.g. selection changed or numeric input typed)
@@ -107,8 +107,8 @@ export const SmoothSlider: React.FC<SmoothSliderProps> = ({
       onChange={handleChange}
       className={`w-full h-2 rounded-full cursor-pointer ${className}`}
       style={{
-        background: `linear-gradient(to right, #7c3aed ${pct}%, rgba(255,255,255,0.1) ${pct}%)`,
-        accentColor: '#7c3aed',
+        background: `linear-gradient(to right, #B8893A ${pct}%, rgba(255,255,255,0.1) ${pct}%)`,
+        accentColor: '#B8893A',
       }}
     />
   );

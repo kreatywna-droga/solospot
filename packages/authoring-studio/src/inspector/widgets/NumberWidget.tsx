@@ -48,7 +48,7 @@ const NumberWidget: React.FC<WidgetProps<number | undefined>> = ({ value, onChan
           onChange={(e) => onChange(parseFloat(e.target.value))}
           className="mt-1.5 w-full h-1 bg-white/10 rounded-full appearance-none cursor-pointer
                      [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3
-                     [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-violet-500
+                     [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-gold-placeholder-500
                      [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer"
         />
       )}

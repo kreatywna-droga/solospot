@@ -12,7 +12,7 @@ export const TimelineTrackView: React.FC<TimelineTrackViewProps> = ({ trackId, p
       <span style={{ fontWeight: 600, width: '100px' }}>{propertyKey}</span>
       <div style={{ flex: 1, display: 'flex', gap: '4px' }}>
         {keyframeNames.map((k, i) => (
-          <span key={i} style={{ backgroundColor: '#8b5cf6', padding: '2px 4px', borderRadius: '3px', fontSize: '10px' }}>
+          <span key={i} style={{ backgroundColor: '#D9A86C', padding: '2px 4px', borderRadius: '3px', fontSize: '10px' }}>
             {k}
           </span>
         ))}

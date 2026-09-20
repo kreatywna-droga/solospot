@@ -51,7 +51,7 @@ interface BoundingBoxProps {
 
 export function BoundingBox({
   rect,
-  color = '#7c3aed',
+  color = '#B8893A',
   borderWidth = 2,
   borderStyle = 'solid',
   animationDuration = 0,

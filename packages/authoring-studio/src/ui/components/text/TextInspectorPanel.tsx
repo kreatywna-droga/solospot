@@ -57,7 +57,7 @@ export const TextInspectorPanel: React.FC<TextInspectorPanelProps> = ({
               key={preset.name}
               type="button"
               onClick={() => handleStyleChange(preset.style)}
-              className="px-2 py-1 bg-slate-800 hover:bg-violet-900/60 border border-slate-700 rounded text-left text-[11px] font-medium text-slate-200 transition-colors"
+              className="px-2 py-1 bg-slate-800 hover:bg-gold-placeholder-900/60 border border-slate-700 rounded text-left text-[11px] font-medium text-slate-200 transition-colors"
               data-testid={`preset-${preset.name.toLowerCase().replace(/\s+/g, '-')}`}
             >
               {preset.name}
@@ -72,7 +72,7 @@ export const TextInspectorPanel: React.FC<TextInspectorPanelProps> = ({
         <select
           value={style.fontFamily}
           onChange={(e) => handleStyleChange({ fontFamily: e.target.value })}
-          className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-200 focus:outline-none focus:border-violet-500"
+          className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-200 focus:outline-none focus:border-gold-placeholder-500"
           data-testid="font-family-select"
         >
           {COMMON_FONTS.map((font) => (
@@ -91,7 +91,7 @@ export const TextInspectorPanel: React.FC<TextInspectorPanelProps> = ({
             max={200}
             value={style.fontSize}
             onChange={(e) => handleStyleChange({ fontSize: Math.max(1, Number(e.target.value)) })}
-            className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-200 focus:outline-none focus:border-violet-500"
+            className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-200 focus:outline-none focus:border-gold-placeholder-500"
             data-testid="font-size-input"
           />
         </div>
@@ -104,7 +104,7 @@ export const TextInspectorPanel: React.FC<TextInspectorPanelProps> = ({
             max={3.0}
             value={style.lineHeight}
             onChange={(e) => handleStyleChange({ lineHeight: Number(e.target.value) })}
-            className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-200 focus:outline-none focus:border-violet-500"
+            className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-200 focus:outline-none focus:border-gold-placeholder-500"
             data-testid="line-height-input"
           />
         </div>
@@ -119,7 +119,7 @@ export const TextInspectorPanel: React.FC<TextInspectorPanelProps> = ({
             step={0.5}
             value={style.letterSpacing}
             onChange={(e) => handleStyleChange({ letterSpacing: Number(e.target.value) })}
-            className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-200 focus:outline-none focus:border-violet-500"
+            className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-200 focus:outline-none focus:border-gold-placeholder-500"
             data-testid="letter-spacing-input"
           />
         </div>
@@ -137,7 +137,7 @@ export const TextInspectorPanel: React.FC<TextInspectorPanelProps> = ({
               type="text"
               value={style.fill}
               onChange={(e) => handleStyleChange({ fill: e.target.value })}
-              className="flex-1 bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-[11px] text-slate-200 focus:outline-none focus:border-violet-500"
+              className="flex-1 bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-[11px] text-slate-200 focus:outline-none focus:border-gold-placeholder-500"
               data-testid="text-color-input"
             />
           </div>
@@ -154,7 +154,7 @@ export const TextInspectorPanel: React.FC<TextInspectorPanelProps> = ({
               type="button"
               onClick={() => handleStyleChange({ align })}
               className={`flex-1 py-1 rounded text-[11px] capitalize font-bold transition-colors ${
-                style.align === align ? 'bg-violet-600 text-white' : 'text-slate-400 hover:bg-slate-800'
+                style.align === align ? 'bg-[#D9A86C] text-white' : 'text-slate-400 hover:bg-slate-800'
               }`}
               data-testid={`align-${align}`}
             >

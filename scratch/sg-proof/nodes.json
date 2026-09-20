@@ -1,0 +1,35 @@
+[
+  {
+    "id": "sec-hero-init",
+    "rect": {
+      "l": 437.8,
+      "t": 56,
+      "w": 756.4,
+      "h": 668
+    },
+    "tf": "none",
+    "txt": "SoloSpot Visual Builder v2.0Bi"
+  },
+  {
+    "id": "image_mu9pl9sq_qcjkw",
+    "rect": {
+      "l": 450.1,
+      "t": 431.9,
+      "w": 731.9,
+      "h": 275.2
+    },
+    "tf": "none",
+    "txt": ""
+  },
+  {
+    "id": "text_mu9plbrd_jxids",
+    "rect": {
+      "l": 437.8,
+      "t": 724,
+      "w": 756.4,
+      "h": 66.1
+    },
+    "tf": "none",
+    "txt": "Nieznana sekcja: text"
+  }
+]

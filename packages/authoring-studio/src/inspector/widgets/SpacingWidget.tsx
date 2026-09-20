@@ -76,7 +76,7 @@ const SpacingWidget: React.FC<WidgetProps<SpacingShape>> = ({ value, onChange })
           onClick={toggleLink}
           className={`p-1 rounded transition-colors ${
             spacing.linked
-              ? 'text-violet-400 hover:text-violet-300 bg-violet-500/10'
+              ? 'text-gold-placeholder-400 hover:text-gold-placeholder-300 bg-gold-placeholder-500/10'
               : 'text-slate-500 hover:text-white bg-white/5'
           }`}
           title={spacing.linked ? 'Unlink sides' : 'Link all sides'}

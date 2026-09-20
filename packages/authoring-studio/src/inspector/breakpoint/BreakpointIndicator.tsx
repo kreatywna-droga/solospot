@@ -28,7 +28,7 @@ const DEFAULT_LABELS: Record<Breakpoint, string> = {
 };
 
 const STYLES: Record<Breakpoint, string> = {
-  desktop: 'bg-violet-500/10 text-violet-300 border-violet-500/20',
+  desktop: 'bg-gold-placeholder-500/10 text-gold-placeholder-300 border-gold-placeholder-500/20',
   tablet: 'bg-sky-500/10 text-sky-300 border-sky-500/20',
   mobile: 'bg-amber-500/10 text-amber-300 border-amber-500/20',
 };

@@ -65,10 +65,10 @@ const Row = ({ label, children }: { label: string; children: React.ReactNode }) 
 );
 
 const inputCls =
-  'w-full bg-[#0e0e1a] border border-white/10 rounded px-2 py-1 text-[12px] text-white focus:outline-none focus:border-violet-500/60 transition-colors';
+  'w-full bg-[#0e0e1a] border border-white/10 rounded px-2 py-1 text-[12px] text-white focus:outline-none focus:border-gold-placeholder-500/60 transition-colors';
 
 const unitInputCls =
-  'w-full bg-[#0e0e1a] border border-white/10 rounded-l px-2 py-1 text-[12px] text-white focus:outline-none focus:border-violet-500/60 transition-colors';
+  'w-full bg-[#0e0e1a] border border-white/10 rounded-l px-2 py-1 text-[12px] text-white focus:outline-none focus:border-gold-placeholder-500/60 transition-colors';
 
 function UnitInput({
   value,
@@ -181,7 +181,7 @@ function UnitInput({
             const activeUnit = unit !== undefined ? unit : defaultUnit;
             commitNumber(parseFloat(e.target.value), activeUnit);
           }}
-          className="w-full accent-violet-500 h-1 cursor-pointer"
+          className="w-full accent-gold-placeholder-500 h-1 cursor-pointer"
         />
       )}
     </div>
@@ -248,7 +248,7 @@ function ColorInput({
             title={preset.label}
             onClick={() => onChange(preset.value)}
             className={`w-3.5 h-3.5 rounded-sm border transition-transform hover:scale-125 ${
-              value === preset.value ? 'ring-1 ring-violet-400 border-white' : 'border-white/20'
+              value === preset.value ? 'ring-1 ring-gold-placeholder-400 border-white' : 'border-white/20'
             }`}
             style={{
               backgroundColor: preset.value === 'transparent' ? '#1a1a24' : preset.value,
@@ -364,7 +364,7 @@ function FourSideEditor({
           onClick={() => setLinked((v) => !v)}
           className={`px-1.5 py-0.5 rounded text-[10px] flex items-center gap-1 transition-colors ${
             linked
-              ? 'text-violet-400 bg-violet-500/20 border border-violet-500/30'
+              ? 'text-gold-placeholder-400 bg-gold-placeholder-500/20 border border-gold-placeholder-500/30'
               : 'text-slate-500 hover:text-white bg-white/5'
           }`}
           title={linked ? 'Rozłącz boki (edytuj każdy osobno)' : 'Połącz wszystkie boki'}
@@ -386,7 +386,7 @@ function FourSideEditor({
               const v = `${e.target.value}px`;
               onChange({ top: v, right: v, bottom: v, left: v });
             }}
-            className="flex-1 accent-violet-500 h-1 cursor-pointer"
+            className="flex-1 accent-gold-placeholder-500 h-1 cursor-pointer"
           />
           <div className="flex items-center">
             <input
@@ -398,7 +398,7 @@ function FourSideEditor({
                 const v = `${e.target.value || '0'}px`;
                 onChange({ top: v, right: v, bottom: v, left: v });
               }}
-              className="w-12 bg-[#0e0e1a] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-violet-500/60 font-mono"
+              className="w-12 bg-[#0e0e1a] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-gold-placeholder-500/60 font-mono"
             />
             <span className="text-[10px] text-slate-500 ml-1">px</span>
           </div>
@@ -417,7 +417,7 @@ function FourSideEditor({
                   step={1}
                   value={sideVal}
                   onChange={(e) => handleSide(key, `${e.target.value}px`)}
-                  className="flex-1 accent-violet-500 h-1 cursor-pointer"
+                  className="flex-1 accent-gold-placeholder-500 h-1 cursor-pointer"
                 />
                 <input
                   type="number"
@@ -425,7 +425,7 @@ function FourSideEditor({
                   max={999}
                   value={sideVal}
                   onChange={(e) => handleSide(key, `${e.target.value || '0'}px`)}
-                  className="w-12 bg-[#0e0e1a] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-violet-500/60 font-mono"
+                  className="w-12 bg-[#0e0e1a] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-gold-placeholder-500/60 font-mono"
                 />
                 <span className="text-[10px] text-slate-500">px</span>
               </div>
@@ -459,7 +459,7 @@ function IconToggleGroup<T extends string>({
           onClick={() => onChange(opt.value)}
           className={`flex-1 flex items-center justify-center p-1.5 rounded text-[11px] transition-colors ${
             value === opt.value
-              ? 'bg-violet-500/20 text-violet-300 border border-violet-500/40'
+              ? 'bg-gold-placeholder-500/20 text-gold-placeholder-300 border border-gold-placeholder-500/40'
               : 'text-slate-500 hover:text-white hover:bg-white/5 border border-transparent'
           }`}
         >
@@ -564,7 +564,7 @@ function ShadowEditor({
           onClick={() => update({ enabled: !local.enabled })}
           className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-colors ${
             local.enabled
-              ? 'bg-violet-600 text-white'
+              ? 'bg-[#D9A86C] text-white'
               : 'bg-white/5 text-slate-500 hover:text-white'
           }`}
         >
@@ -578,28 +578,28 @@ function ShadowEditor({
               <label className="text-[10px] text-slate-500">X</label>
               <input type="range" min={-50} max={50} step={1} value={local.x}
                 onInput={(e) => update({ x: parseFloat((e.target as HTMLInputElement).value) })}
-                className="w-full accent-violet-500 h-1" />
+                className="w-full accent-gold-placeholder-500 h-1" />
               <div className="text-[10px] text-slate-400 text-right font-mono">{local.x}px</div>
             </div>
             <div>
               <label className="text-[10px] text-slate-500">Y</label>
               <input type="range" min={-50} max={50} step={1} value={local.y}
                 onInput={(e) => update({ y: parseFloat((e.target as HTMLInputElement).value) })}
-                className="w-full accent-violet-500 h-1" />
+                className="w-full accent-gold-placeholder-500 h-1" />
               <div className="text-[10px] text-slate-400 text-right font-mono">{local.y}px</div>
             </div>
             <div>
               <label className="text-[10px] text-slate-500">Blur</label>
               <input type="range" min={0} max={100} step={1} value={local.blur}
                 onInput={(e) => update({ blur: parseFloat((e.target as HTMLInputElement).value) })}
-                className="w-full accent-violet-500 h-1" />
+                className="w-full accent-gold-placeholder-500 h-1" />
               <div className="text-[10px] text-slate-400 text-right font-mono">{local.blur}px</div>
             </div>
             <div>
               <label className="text-[10px] text-slate-500">Spread</label>
               <input type="range" min={-50} max={50} step={1} value={local.spread}
                 onInput={(e) => update({ spread: parseFloat((e.target as HTMLInputElement).value) })}
-                className="w-full accent-violet-500 h-1" />
+                className="w-full accent-gold-placeholder-500 h-1" />
               <div className="text-[10px] text-slate-400 text-right font-mono">{local.spread}px</div>
             </div>
           </div>
@@ -614,7 +614,7 @@ function ShadowEditor({
               <label className="text-[10px] text-slate-500">Opacity</label>
               <input type="range" min={0} max={1} step={0.01} value={local.opacity}
                 onInput={(e) => update({ opacity: parseFloat((e.target as HTMLInputElement).value) })}
-                className="w-full accent-violet-500 h-1" />
+                className="w-full accent-gold-placeholder-500 h-1" />
             </div>
             <div className="text-[10px] text-slate-400 font-mono w-10 text-right">{Math.round(local.opacity * 100)}%</div>
           </div>
@@ -721,7 +721,7 @@ function DesignTab({
                   type="checkbox"
                   checked={styles.videoMuted ?? true}
                   onChange={(e) => onChange({ videoMuted: e.target.checked })}
-                  className="accent-violet-500 rounded cursor-pointer"
+                  className="accent-gold-placeholder-500 rounded cursor-pointer"
                 />
               </Row>
               <Row label="Autoodtwarzanie">
@@ -729,7 +729,7 @@ function DesignTab({
                   type="checkbox"
                   checked={styles.videoAutoplay ?? true}
                   onChange={(e) => onChange({ videoAutoplay: e.target.checked })}
-                  className="accent-violet-500 rounded cursor-pointer"
+                  className="accent-gold-placeholder-500 rounded cursor-pointer"
                 />
               </Row>
             </>
@@ -858,7 +858,7 @@ function DesignTab({
               }}
               className={inputCls}
             />
-            <label className="flex items-center justify-center gap-1 px-2 py-1 rounded bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-semibold cursor-pointer flex-shrink-0 transition-colors" title="Wgraj obraz z dysku">
+            <label className="flex items-center justify-center gap-1 px-2 py-1 rounded bg-[#D9A86C] hover:bg-gold-placeholder-500 text-white text-[11px] font-semibold cursor-pointer flex-shrink-0 transition-colors" title="Wgraj obraz z dysku">
               <Upload className="w-3 h-3" />
               <span>Wgraj</span>
               <input
@@ -916,7 +916,7 @@ function DesignTab({
               value={styles.opacity ?? 1}
               onInput={(e) => livePreview('opacity', (e.target as HTMLInputElement).value)}
               onChange={(e) => onChange({ opacity: parseFloat(e.target.value) })}
-              className="flex-1 accent-violet-500 h-1 cursor-pointer"
+              className="flex-1 accent-gold-placeholder-500 h-1 cursor-pointer"
             />
             <div className="flex items-center">
               <input
@@ -931,7 +931,7 @@ function DesignTab({
                     onChange({ opacity: Math.min(1, Math.max(0, val / 100)) });
                   }
                 }}
-                className="w-12 bg-[#0e0e1a] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-violet-500/60 font-mono"
+                className="w-12 bg-[#0e0e1a] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-gold-placeholder-500/60 font-mono"
               />
               <span className="text-[10px] text-slate-500 ml-1">%</span>
             </div>
@@ -1028,7 +1028,7 @@ function DesignTab({
               step={1}
               value={Math.round((styles.scale ?? 1) * 100)}
               onChange={(e) => onChange({ scale: parseFloat(e.target.value) / 100 })}
-              className="flex-1 accent-violet-500 h-1 cursor-pointer"
+              className="flex-1 accent-gold-placeholder-500 h-1 cursor-pointer"
             />
             <div className="flex items-center">
               <input
@@ -1040,7 +1040,7 @@ function DesignTab({
                   const val = parseFloat(e.target.value);
                   if (!Number.isNaN(val)) onChange({ scale: Math.max(0.1, val / 100) });
                 }}
-                className="w-12 bg-[#0e0e1a] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-violet-500/60 font-mono"
+                className="w-12 bg-[#0e0e1a] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-gold-placeholder-500/60 font-mono"
               />
               <span className="text-[10px] text-slate-500 ml-1">%</span>
             </div>
@@ -1055,7 +1055,7 @@ function DesignTab({
               step={1}
               value={styles.rotate ?? 0}
               onChange={(e) => onChange({ rotate: parseInt(e.target.value, 10) })}
-              className="flex-1 accent-violet-500 h-1 cursor-pointer"
+              className="flex-1 accent-gold-placeholder-500 h-1 cursor-pointer"
             />
             <div className="flex items-center">
               <input
@@ -1067,7 +1067,7 @@ function DesignTab({
                   const val = parseInt(e.target.value, 10);
                   if (!Number.isNaN(val)) onChange({ rotate: val });
                 }}
-                className="w-12 bg-[#0e0e1a] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-violet-500/60 font-mono"
+                className="w-12 bg-[#0e0e1a] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-gold-placeholder-500/60 font-mono"
               />
               <span className="text-[10px] text-slate-500 ml-1">°</span>
             </div>
@@ -1415,7 +1415,7 @@ function AdvancedTab({
           onChange={(e) => onChange({ customCss: e.target.value })}
           placeholder={'/* custom CSS for this element */\ncolor: red;\nfont-size: 18px;'}
           rows={6}
-          className="w-full bg-[#0e0e1a] border border-white/10 rounded px-2 py-1.5 text-[11px] text-green-300 font-mono focus:outline-none focus:border-violet-500/60 resize-none"
+          className="w-full bg-[#0e0e1a] border border-white/10 rounded px-2 py-1.5 text-[11px] text-green-300 font-mono focus:outline-none focus:border-gold-placeholder-500/60 resize-none"
           spellCheck={false}
         />
       </Section>
@@ -1495,7 +1495,7 @@ export const DesignInspector: React.FC<DesignInspectorProps> = ({
             onClick={() => setActiveTab(tab.id)}
             className={`flex-1 flex flex-col items-center gap-0.5 py-2 px-1 text-[10px] font-medium transition-colors min-w-0 border-b-2 ${
               activeTab === tab.id
-                ? 'text-violet-300 border-violet-500'
+                ? 'text-gold-placeholder-300 border-gold-placeholder-500'
                 : 'text-slate-500 border-transparent hover:text-slate-300'
             }`}
           >

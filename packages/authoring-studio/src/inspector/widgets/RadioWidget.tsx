@@ -27,7 +27,7 @@ const RadioWidget: React.FC<WidgetProps<unknown>> = ({ value, onChange, field })
             key={optValue}
             className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-all text-sm ${
               isSelected
-                ? 'bg-violet-500/10 text-violet-300 border border-violet-500/30'
+                ? 'bg-gold-placeholder-500/10 text-gold-placeholder-300 border border-gold-placeholder-500/30'
                 : 'bg-white/5 text-slate-400 border border-transparent hover:bg-white/10'
             }`}
           >
@@ -42,7 +42,7 @@ const RadioWidget: React.FC<WidgetProps<unknown>> = ({ value, onChange, field })
             <span
               className={`w-3.5 h-3.5 rounded-full border-2 flex-shrink-0 ${
                 isSelected
-                  ? 'border-violet-400 bg-violet-400'
+                  ? 'border-gold-placeholder-400 bg-gold-placeholder-400'
                   : 'border-slate-500 bg-transparent'
               }`}
             />

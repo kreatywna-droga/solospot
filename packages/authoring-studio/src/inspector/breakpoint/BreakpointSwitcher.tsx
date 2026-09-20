@@ -54,7 +54,7 @@ export const BreakpointSwitcher: React.FC<BreakpointSwitcherProps> = ({
           onClick={() => onChange(bp)}
           className={`p-1 rounded transition-all flex items-center gap-1.5 ${
             active === bp
-              ? 'bg-violet-500/20 text-violet-400'
+              ? 'bg-gold-placeholder-500/20 text-gold-placeholder-400'
               : 'text-slate-500 hover:text-white'
           }`}
           title={LABELS[bp]}

@@ -72,7 +72,7 @@ class ExperienceErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="relative w-full p-4 rounded-xl bg-violet-950/20 border border-violet-500/30 text-xs text-violet-300">
+        <div className="relative w-full p-4 rounded-xl bg-violet-950/20 border border-[#D9A86C]/30 text-xs text-violet-300">
           <span className="font-semibold">Experience Runtime Fallback:</span> Running in safe mode.
           {this.props.children}
         </div>

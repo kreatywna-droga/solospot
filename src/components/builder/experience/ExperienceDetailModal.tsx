@@ -79,14 +79,14 @@ export function ExperienceDetailModal({
         {/* Modal Top Bar */}
         <div className="px-6 py-4 border-b border-[#252535] bg-[#191924] flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-violet-400 bg-violet-500/10 px-2.5 py-1 rounded-md border border-violet-500/20">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-violet-400 bg-violet-500/10 px-2.5 py-1 rounded-md border border-[#D9A86C]/20">
               {experience.type}
             </span>
             <div className="min-w-0">
               <h2 className="text-lg font-bold text-white truncate flex items-center gap-2">
                 <span>{experience.name}</span>
                 {experience.badge && (
-                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/40">
+                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-[#D9A86C]/40">
                     {experience.badge}
                   </span>
                 )}
@@ -102,7 +102,7 @@ export function ExperienceDetailModal({
             <button
               onClick={() => setViewport('desktop')}
               className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                viewport === 'desktop' ? 'bg-violet-600 text-white shadow-md' : 'text-zinc-400 hover:text-white'
+                viewport === 'desktop' ? 'bg-[#D9A86C] text-white shadow-md' : 'text-zinc-400 hover:text-white'
               }`}
               title="Desktop (1080px preview)"
             >
@@ -112,7 +112,7 @@ export function ExperienceDetailModal({
             <button
               onClick={() => setViewport('tablet')}
               className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                viewport === 'tablet' ? 'bg-violet-600 text-white shadow-md' : 'text-zinc-400 hover:text-white'
+                viewport === 'tablet' ? 'bg-[#D9A86C] text-white shadow-md' : 'text-zinc-400 hover:text-white'
               }`}
               title="Tablet (768px preview)"
             >
@@ -122,7 +122,7 @@ export function ExperienceDetailModal({
             <button
               onClick={() => setViewport('mobile')}
               className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                viewport === 'mobile' ? 'bg-violet-600 text-white shadow-md' : 'text-zinc-400 hover:text-white'
+                viewport === 'mobile' ? 'bg-[#D9A86C] text-white shadow-md' : 'text-zinc-400 hover:text-white'
               }`}
               title="Mobile (375px preview)"
             >
@@ -188,7 +188,7 @@ export function ExperienceDetailModal({
                   max={100}
                   value={scrollProgress}
                   onChange={(e) => setScrollProgress(Number(e.target.value))}
-                  className="w-20 md:w-28 accent-violet-500 cursor-pointer h-1.5 bg-[#252535] rounded-lg"
+                  className="w-20 md:w-28 accent-[#D9A86C] cursor-pointer h-1.5 bg-[#252535] rounded-lg"
                   title={`Simulated scroll progress: ${scrollProgress}%`}
                 />
                 <span className="font-mono text-[11px] text-violet-300 w-8 text-right">{scrollProgress}%</span>
@@ -330,7 +330,7 @@ export function ExperienceDetailModal({
                 <button
                   onClick={() => handleApply('add')}
                   disabled={insertedSuccess}
-                  className="w-full py-3.5 rounded-xl font-extrabold text-xs tracking-wide bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white shadow-xl shadow-violet-600/30 flex items-center justify-center gap-2 transition-transform active:scale-95 disabled:opacity-50"
+                  className="w-full py-3.5 rounded-xl font-extrabold text-xs tracking-wide bg-gradient-to-r from-[#B8893A] to-[#D9A86C] hover:from-violet-500 hover:to-fuchsia-500 text-white shadow-xl shadow-[#D9A86C]-600/30 flex items-center justify-center gap-2 transition-transform active:scale-95 disabled:opacity-50"
                 >
                   {insertedSuccess ? (
                     <>
@@ -365,7 +365,7 @@ export function ExperienceDetailModal({
                 {selectedSectionId && (
                   <button
                     onClick={() => handleApply('replace')}
-                    className="col-span-2 px-2.5 py-2 rounded-lg bg-violet-950/40 hover:bg-violet-950/70 border border-violet-500/30 text-[11px] font-semibold text-violet-300 flex items-center justify-center gap-1.5 transition-colors"
+                    className="col-span-2 px-2.5 py-2 rounded-lg bg-violet-950/40 hover:bg-violet-950/70 border border-[#D9A86C]/30 text-[11px] font-semibold text-violet-300 flex items-center justify-center gap-1.5 transition-colors"
                   >
                     <Replace className="w-3 h-3 text-violet-400" />
                     <span>Replace Selected Section</span>

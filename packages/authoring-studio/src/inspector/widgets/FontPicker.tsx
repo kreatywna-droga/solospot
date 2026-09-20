@@ -78,7 +78,7 @@ export const FontPicker: React.FC<FontPickerProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between bg-[#0e0e1a] border border-white/10 hover:border-violet-500/50 rounded px-2.5 py-1.5 text-xs text-white transition-all text-left group"
+        className="w-full flex items-center justify-between bg-[#0e0e1a] border border-white/10 hover:border-gold-placeholder-500/50 rounded px-2.5 py-1.5 text-xs text-white transition-all text-left group"
       >
         <div className="flex items-center gap-2 truncate">
           <span
@@ -88,7 +88,7 @@ export const FontPicker: React.FC<FontPickerProps> = ({
             {value}
           </span>
         </div>
-        <ChevronDown className="w-3.5 h-3.5 text-slate-500 group-hover:text-violet-400 shrink-0 ml-1 transition-transform" />
+        <ChevronDown className="w-3.5 h-3.5 text-slate-500 group-hover:text-gold-placeholder-400 shrink-0 ml-1 transition-transform" />
       </button>
 
       {/* Dropdown Popover */}
@@ -104,7 +104,7 @@ export const FontPicker: React.FC<FontPickerProps> = ({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Szukaj czcionki (100+ fontów)..."
-                className="w-full bg-[#121224] border border-white/10 rounded-lg pl-8 pr-2.5 py-1.5 text-[11px] text-white placeholder-slate-500 focus:outline-none focus:border-violet-500/80"
+                className="w-full bg-[#121224] border border-white/10 rounded-lg pl-8 pr-2.5 py-1.5 text-[11px] text-white placeholder-slate-500 focus:outline-none focus:border-gold-placeholder-500/80"
               />
             </div>
 
@@ -117,7 +117,7 @@ export const FontPicker: React.FC<FontPickerProps> = ({
                   onClick={() => setCategory(cat.id)}
                   className={`px-2 py-0.5 rounded text-[9px] font-semibold tracking-wider uppercase whitespace-nowrap transition-colors ${
                     category === cat.id
-                      ? 'bg-violet-600 text-white shadow-sm'
+                      ? 'bg-[#D9A86C] text-white shadow-sm'
                       : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
                   }`}
                 >
@@ -144,7 +144,7 @@ export const FontPicker: React.FC<FontPickerProps> = ({
                     onClick={() => handleSelect(font)}
                     className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-left transition-colors group ${
                       isSelected
-                        ? 'bg-violet-600/20 text-violet-300 border border-violet-500/30'
+                        ? 'bg-[#D9A86C]/20 text-gold-placeholder-300 border border-gold-placeholder-500/30'
                         : 'hover:bg-white/5 text-slate-200'
                     }`}
                   >
@@ -165,7 +165,7 @@ export const FontPicker: React.FC<FontPickerProps> = ({
                       </div>
                     </div>
                     {isSelected && (
-                      <Check className="w-4 h-4 text-violet-400 shrink-0" />
+                      <Check className="w-4 h-4 text-gold-placeholder-400 shrink-0" />
                     )}
                   </button>
                 );
@@ -176,7 +176,7 @@ export const FontPicker: React.FC<FontPickerProps> = ({
           {/* Footer count */}
           <div className="px-3 py-1.5 bg-[#05050c] border-t border-white/5 text-[9px] text-slate-500 flex justify-between items-center">
             <span>Dostępnych: {filteredFonts.length} fontów</span>
-            <span className="text-violet-400/80 font-mono">Google Fonts</span>
+            <span className="text-gold-placeholder-400/80 font-mono">Google Fonts</span>
           </div>
         </div>
       )}

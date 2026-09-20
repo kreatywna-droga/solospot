@@ -79,7 +79,7 @@ export function SaveExperienceModal({
         {/* Header */}
         <div className="px-6 py-4 border-b border-[#272738] bg-[#1a1a26] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center text-violet-400">
+            <div className="w-8 h-8 rounded-xl bg-[#D9A86C]/20 border border-[#D9A86C]/30 flex items-center justify-center text-violet-400">
               <BookmarkPlus className="w-4 h-4" />
             </div>
             <div>
@@ -123,7 +123,7 @@ export function SaveExperienceModal({
                 setError(null);
               }}
               placeholder="e.g. Minimal Hero with Glowing Badges"
-              className="w-full px-3.5 py-2.5 bg-[#101018] border border-[#2c2c3e] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-violet-500"
+              className="w-full px-3.5 py-2.5 bg-[#101018] border border-[#2c2c3e] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C]"
               required
             />
           </div>
@@ -136,7 +136,7 @@ export function SaveExperienceModal({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Brief description of the layout, intended mood, or purpose..."
               rows={2}
-              className="w-full px-3.5 py-2 bg-[#101018] border border-[#2c2c3e] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-violet-500 resize-none"
+              className="w-full px-3.5 py-2 bg-[#101018] border border-[#2c2c3e] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C] resize-none"
             />
           </div>
 
@@ -147,7 +147,7 @@ export function SaveExperienceModal({
               <select
                 value={mood}
                 onChange={(e) => setMood(e.target.value as ExperienceMood)}
-                className="w-full px-3 py-2 bg-[#101018] border border-[#2c2c3e] rounded-xl text-xs text-white focus:outline-none focus:border-violet-500 capitalize"
+                className="w-full px-3 py-2 bg-[#101018] border border-[#2c2c3e] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C] capitalize"
               >
                 {EXPERIENCE_MOODS.filter(m => m.id !== 'all').map(m => (
                   <option key={m.id} value={m.id}>{m.label}</option>
@@ -159,7 +159,7 @@ export function SaveExperienceModal({
               <select
                 value={motionLevel}
                 onChange={(e) => setMotionLevel(e.target.value as ExperienceMotionLevel)}
-                className="w-full px-3 py-2 bg-[#101018] border border-[#2c2c3e] rounded-xl text-xs text-white focus:outline-none focus:border-violet-500 capitalize"
+                className="w-full px-3 py-2 bg-[#101018] border border-[#2c2c3e] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C] capitalize"
               >
                 {EXPERIENCE_MOTION_LEVELS.filter(m => m.id !== 'all').map(m => (
                   <option key={m.id} value={m.id}>{m.label}</option>
@@ -176,7 +176,7 @@ export function SaveExperienceModal({
               value={tagsInput}
               onChange={(e) => setTagsInput(e.target.value)}
               placeholder="e.g. hero, luxury, dark, gradient"
-              className="w-full px-3.5 py-2 bg-[#101018] border border-[#2c2c3e] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-violet-500"
+              className="w-full px-3.5 py-2 bg-[#101018] border border-[#2c2c3e] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C]"
             />
           </div>
 
@@ -192,7 +192,7 @@ export function SaveExperienceModal({
             <button
               type="submit"
               disabled={savedSuccess}
-              className="px-5 py-2.5 rounded-xl text-xs font-bold bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-600/30 flex items-center gap-1.5 transition-transform active:scale-95 disabled:opacity-50"
+              className="px-5 py-2.5 rounded-xl text-xs font-bold bg-[#D9A86C] hover:bg-[#C99A4A] text-white shadow-lg shadow-[#D9A86C]-600/30 flex items-center gap-1.5 transition-transform active:scale-95 disabled:opacity-50"
             >
               {savedSuccess ? (
                 <>

@@ -169,13 +169,13 @@ export function QuickToolbar({
         nodeProps = {
           svgContent: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
         }
-        nodeStyles = { width: '48px', height: '48px', color: '#8b5cf6' }
+        nodeStyles = { width: '48px', height: '48px', color: '#D9A86C' }
         break
       case 'button':
         label = 'Przycisk'
         nodeProps = { text: 'Kliknij tutaj', href: '#' }
         nodeStyles = {
-          backgroundColor: '#7c3aed',
+          backgroundColor: '#B8893A',
           color: '#ffffff',
           padding: '12px 24px',
           borderRadius: '8px',
@@ -331,7 +331,7 @@ export function QuickToolbar({
           onClick={(e) => e.stopPropagation()}
         >
           {/* Element Type Badge */}
-          <span className="px-2 py-0.5 rounded-md bg-white/[0.08] text-[10px] font-mono text-[#A78BFA] font-bold uppercase tracking-wider mr-0.5">
+          <span className="px-2 py-0.5 rounded-md bg-white/[0.08] text-[10px] font-mono text-[#F2C27F] font-bold uppercase tracking-wider mr-0.5">
             {node?.label || nodeType}
           </span>
 
@@ -409,7 +409,7 @@ export function QuickToolbar({
                         handleLiveFontSize(v)
                       }}
                       onChange={(e) => handleUpdateStyles({ fontSize: `${e.target.value}px`, height: undefined })}
-                      className="w-full accent-violet-500 h-1 cursor-pointer"
+                      className="w-full accent-[#D9A86C] h-1 cursor-pointer"
                     />
                     <div className="flex items-center gap-1 pt-1 border-t border-white/5">
                       {[16, 24, 32, 48, 64].map((sz) => (
@@ -421,7 +421,7 @@ export function QuickToolbar({
                           }}
                           className={`flex-1 py-0.5 text-[9px] font-mono rounded border transition-all ${
                             (parseInt(String(styles.fontSize || '16px').replace('px', '')) || 16) === sz
-                              ? 'bg-[#8B5CF6]/40 text-[#A78BFA] border-violet-500/50'
+                              ? 'bg-[#D9A86C]/40 text-[#F2C27F] border-[#D9A86C]/50'
                               : 'bg-white/[0.04] text-zinc-400 border-white/5 hover:text-white'
                           }`}
                         >
@@ -438,7 +438,7 @@ export function QuickToolbar({
                 <button
                   onClick={() => handleUpdateStyles({ textAlign: 'left' })}
                   className={`p-1 rounded transition-colors ${
-                    styles.textAlign === 'left' || !styles.textAlign ? 'bg-[#8B5CF6] text-white' : 'text-zinc-400 hover:text-white'
+                    styles.textAlign === 'left' || !styles.textAlign ? 'bg-[#D9A86C] text-white' : 'text-zinc-400 hover:text-white'
                   }`}
                   title="Do lewej"
                 >
@@ -447,7 +447,7 @@ export function QuickToolbar({
                 <button
                   onClick={() => handleUpdateStyles({ textAlign: 'center' })}
                   className={`p-1 rounded transition-colors ${
-                    styles.textAlign === 'center' ? 'bg-[#8B5CF6] text-white' : 'text-zinc-400 hover:text-white'
+                    styles.textAlign === 'center' ? 'bg-[#D9A86C] text-white' : 'text-zinc-400 hover:text-white'
                   }`}
                   title="Wyśrodkuj"
                 >
@@ -456,7 +456,7 @@ export function QuickToolbar({
                 <button
                   onClick={() => handleUpdateStyles({ textAlign: 'right' })}
                   className={`p-1 rounded transition-colors ${
-                    styles.textAlign === 'right' ? 'bg-[#8B5CF6] text-white' : 'text-zinc-400 hover:text-white'
+                    styles.textAlign === 'right' ? 'bg-[#D9A86C] text-white' : 'text-zinc-400 hover:text-white'
                   }`}
                   title="Do prawej"
                 >
@@ -493,7 +493,7 @@ export function QuickToolbar({
             <>
               <button
                 onClick={() => setShowMediaPicker(true)}
-                className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#8B5CF6]/80 hover:bg-[#8B5CF6] text-white text-[11px] font-semibold transition-all shadow-sm"
+                className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#D9A86C]/80 hover:bg-[#D9A86C] text-white text-[11px] font-semibold transition-all shadow-sm"
               >
                 <ImageIcon className="w-3 h-3" />
                 <span>Zmień obraz</span>
@@ -521,7 +521,7 @@ export function QuickToolbar({
                     onClick={() => handleUpdateStyles({ borderRadius: item.val })}
                     className={`px-1.5 py-0.5 rounded text-[10px] font-bold transition-all ${
                       styles.borderRadius === item.val
-                        ? 'bg-[#8B5CF6] text-white'
+                        ? 'bg-[#D9A86C] text-white'
                         : 'text-zinc-400 hover:text-white'
                     }`}
                     title={`Zaokrąglenie ${item.val}`}
@@ -560,14 +560,14 @@ export function QuickToolbar({
                       value={linkVal}
                       onChange={(e) => setLinkVal(e.target.value)}
                       placeholder="https://..."
-                      className="flex-1 px-2 py-1 bg-white/[0.04] border border-white/[0.08] rounded-lg text-xs text-white focus:outline-none focus:border-[#8B5CF6]"
+                      className="flex-1 px-2 py-1 bg-white/[0.04] border border-white/[0.08] rounded-lg text-xs text-white focus:outline-none focus:border-[#D9A86C]"
                     />
                     <button
                       onClick={() => {
                         handleUpdateProps({ href: linkVal })
                         setShowLinkInput(false)
                       }}
-                      className="px-2 py-1 rounded-lg bg-[#8B5CF6] text-white text-xs font-bold"
+                      className="px-2 py-1 rounded-lg bg-[#D9A86C] text-white text-xs font-bold"
                     >
                       OK
                     </button>
@@ -612,7 +612,7 @@ export function QuickToolbar({
                       step={1}
                       value={parseInt(String(styles.fontSize || '14px').replace('px', '')) || 14}
                       onChange={(e) => handleUpdateStyles({ fontSize: `${e.target.value}px` })}
-                      className="w-full accent-violet-500 h-1 cursor-pointer"
+                      className="w-full accent-[#D9A86C] h-1 cursor-pointer"
                     />
                     <div className="flex items-center gap-1 pt-1 border-t border-white/5">
                       {[12, 14, 16, 18, 22].map((sz) => (
@@ -621,7 +621,7 @@ export function QuickToolbar({
                           onClick={() => handleUpdateStyles({ fontSize: `${sz}px` })}
                           className={`flex-1 py-0.5 text-[9px] font-mono rounded border transition-all ${
                             (parseInt(String(styles.fontSize || '14px').replace('px', '')) || 14) === sz
-                              ? 'bg-[#8B5CF6]/40 text-[#A78BFA] border-violet-500/50'
+                              ? 'bg-[#D9A86C]/40 text-[#F2C27F] border-[#D9A86C]/50'
                               : 'bg-white/[0.04] text-zinc-400 border-white/5 hover:text-white'
                           }`}
                         >
@@ -636,7 +636,7 @@ export function QuickToolbar({
               {/* Color Swatch for Button Background */}
               <input
                 type="color"
-                value={styles.backgroundColor || '#7c3aed'}
+                value={styles.backgroundColor || '#B8893A'}
                 onChange={(e) => handleUpdateStyles({ backgroundColor: e.target.value })}
                 className="w-5 h-5 rounded-md border border-white/20 cursor-pointer bg-transparent"
                 title="Kolor tła przycisku"
@@ -695,14 +695,14 @@ export function QuickToolbar({
                       value={linkVal}
                       onChange={(e) => setLinkVal(e.target.value)}
                       placeholder="https://... (mp4/webm)"
-                      className="flex-1 px-2 py-1 bg-white/[0.04] border border-white/[0.08] rounded-lg text-xs text-white focus:outline-none focus:border-[#8B5CF6]"
+                      className="flex-1 px-2 py-1 bg-white/[0.04] border border-white/[0.08] rounded-lg text-xs text-white focus:outline-none focus:border-[#D9A86C]"
                     />
                     <button
                       onClick={() => {
                         handleUpdateProps({ src: linkVal, url: linkVal })
                         setShowLinkInput(false)
                       }}
-                      className="px-2 py-1 rounded-lg bg-[#8B5CF6] text-white text-xs font-bold"
+                      className="px-2 py-1 rounded-lg bg-[#D9A86C] text-white text-xs font-bold"
                     >
                       OK
                     </button>
@@ -713,7 +713,7 @@ export function QuickToolbar({
               <button
                 onClick={() => handleUpdateProps({ loop: !props.loop })}
                 className={`px-2 py-1 rounded-lg text-[10px] font-semibold transition-colors ${
-                  props.loop ? 'bg-[#8B5CF6] text-white' : 'bg-white/[0.04] text-zinc-400 hover:text-white'
+                  props.loop ? 'bg-[#D9A86C] text-white' : 'bg-white/[0.04] text-zinc-400 hover:text-white'
                 }`}
                 title="Pętla odtwarzania wideo"
               >
@@ -723,7 +723,7 @@ export function QuickToolbar({
               <button
                 onClick={() => handleUpdateProps({ autoPlay: !props.autoPlay })}
                 className={`px-2 py-1 rounded-lg text-[10px] font-semibold transition-colors ${
-                  props.autoPlay ? 'bg-[#8B5CF6] text-white' : 'bg-white/[0.04] text-zinc-400 hover:text-white'
+                  props.autoPlay ? 'bg-[#D9A86C] text-white' : 'bg-white/[0.04] text-zinc-400 hover:text-white'
                 }`}
                 title="Autoodtwarzanie"
               >
@@ -743,7 +743,7 @@ export function QuickToolbar({
                 <span className="text-[10px] text-zinc-400">Kolor:</span>
                 <input
                   type="color"
-                  value={styles.color || '#8b5cf6'}
+                  value={styles.color || '#D9A86C'}
                   onChange={(e) => handleUpdateStyles({ color: e.target.value })}
                   className="w-4 h-4 rounded border-0 cursor-pointer bg-transparent"
                   title="Kolor ikony / SVG"
@@ -763,7 +763,7 @@ export function QuickToolbar({
               <div className="relative">
                 <button
                   onClick={() => setShowAddMenu(!showAddMenu)}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#8B5CF6] hover:bg-[#7C3AED] text-white text-[11px] font-semibold transition-all shadow-sm"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#D9A86C] hover:bg-[#B8893A] text-white text-[11px] font-semibold transition-all shadow-sm"
                   title="Dodaj element bezpośrednio do tego kontenera"
                 >
                   <Plus className="w-3.5 h-3.5" />
@@ -818,7 +818,7 @@ export function QuickToolbar({
                     <div className="h-px bg-white/[0.08] my-1" />
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left text-xs text-[#A78BFA] hover:text-white hover:bg-[#8B5CF6]/30 transition-colors"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left text-xs text-[#F2C27F] hover:text-white hover:bg-[#D9A86C]/30 transition-colors"
                     >
                       <Upload className="w-3.5 h-3.5 text-violet-400" />
                       <span>Wgraj z dysku...</span>
@@ -875,7 +875,7 @@ export function QuickToolbar({
           {node && (
             <button
               onClick={() => setShowSaveExperience(true)}
-              className="p-1 rounded-lg text-zinc-400 hover:text-violet-300 hover:bg-violet-500/10 transition-colors"
+              className="p-1 rounded-lg text-zinc-400 hover:text-violet-300 hover:bg-[#C99A4A]/10 transition-colors"
               title="Zapisz jako Experience (Save as Experience)"
             >
               <Sparkles className="w-3.5 h-3.5 text-violet-400" />

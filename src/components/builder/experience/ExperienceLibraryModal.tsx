@@ -140,12 +140,12 @@ export function ExperienceLibraryModal({
           <div className="flex items-center justify-between px-6 py-4 border-b border-[#252535] bg-[#191924]">
             <div>
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center text-violet-400">
+                <div className="w-8 h-8 rounded-xl bg-[#D9A86C]/20 border border-[#D9A86C]/30 flex items-center justify-center text-violet-400">
                   <Sparkles className="w-4 h-4" />
                 </div>
                 <h2 className="text-base md:text-lg font-extrabold text-white flex items-center gap-2">
                   <span>Experience Library</span>
-                  <span className="text-xs font-mono font-bold text-violet-400 bg-violet-500/10 px-2.5 py-0.5 rounded-full border border-violet-500/20">
+                  <span className="text-xs font-mono font-bold text-violet-400 bg-violet-500/10 px-2.5 py-0.5 rounded-full border border-[#D9A86C]/20">
                     v2.0
                   </span>
                   <span className="text-xs font-semibold text-zinc-400 px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
@@ -181,7 +181,7 @@ export function ExperienceLibraryModal({
                   onClick={() => setSelectedCategory(cat.id)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
                     isSelected
-                      ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/30 font-bold'
+                      ? 'bg-[#D9A86C] text-white shadow-lg shadow-[#D9A86C]-600/30 font-bold'
                       : 'text-zinc-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
@@ -201,7 +201,7 @@ export function ExperienceLibraryModal({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search experiences by name, keyword, style, industry (e.g. Hero, Bento, Aurora, SaaS)..."
-                className="w-full pl-10 pr-4 py-2 bg-[#1b1b26] border border-[#2d2d3e] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-violet-500 transition-colors"
+                className="w-full pl-10 pr-4 py-2 bg-[#1b1b26] border border-[#2d2d3e] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C] transition-colors"
               />
             </div>
 
@@ -211,7 +211,7 @@ export function ExperienceLibraryModal({
               <select
                 value={selectedMood}
                 onChange={(e) => setSelectedMood(e.target.value as any)}
-                className="bg-[#1b1b26] border border-[#2d2d3e] text-xs font-semibold text-zinc-300 rounded-xl px-3 py-2 focus:outline-none focus:border-violet-500 cursor-pointer"
+                className="bg-[#1b1b26] border border-[#2d2d3e] text-xs font-semibold text-zinc-300 rounded-xl px-3 py-2 focus:outline-none focus:border-[#D9A86C] cursor-pointer"
               >
                 {EXPERIENCE_MOODS.map(m => (
                   <option key={m.id} value={m.id}>{m.label}</option>
@@ -222,7 +222,7 @@ export function ExperienceLibraryModal({
               <select
                 value={selectedMotion}
                 onChange={(e) => setSelectedMotion(e.target.value as any)}
-                className="bg-[#1b1b26] border border-[#2d2d3e] text-xs font-semibold text-zinc-300 rounded-xl px-3 py-2 focus:outline-none focus:border-violet-500 cursor-pointer"
+                className="bg-[#1b1b26] border border-[#2d2d3e] text-xs font-semibold text-zinc-300 rounded-xl px-3 py-2 focus:outline-none focus:border-[#D9A86C] cursor-pointer"
               >
                 {EXPERIENCE_MOTION_LEVELS.map(m => (
                   <option key={m.id} value={m.id}>{m.label}</option>
@@ -233,7 +233,7 @@ export function ExperienceLibraryModal({
               <select
                 value={selectedIndustry}
                 onChange={(e) => setSelectedIndustry(e.target.value)}
-                className="bg-[#1b1b26] border border-[#2d2d3e] text-xs font-semibold text-zinc-300 rounded-xl px-3 py-2 focus:outline-none focus:border-violet-500 cursor-pointer"
+                className="bg-[#1b1b26] border border-[#2d2d3e] text-xs font-semibold text-zinc-300 rounded-xl px-3 py-2 focus:outline-none focus:border-[#D9A86C] cursor-pointer"
               >
                 {EXPERIENCE_INDUSTRIES.map(i => (
                   <option key={i} value={i}>{i === 'All' ? 'All Industries' : i}</option>
@@ -266,7 +266,7 @@ export function ExperienceLibraryModal({
                 </p>
                 <button
                   onClick={resetFilters}
-                  className="mt-2 px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold transition-all shadow-md shadow-violet-600/30"
+                  className="mt-2 px-4 py-2 rounded-xl bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-xs font-bold transition-all shadow-md shadow-[#D9A86C]-600/30"
                 >
                   Reset Filters
                 </button>
@@ -281,7 +281,7 @@ export function ExperienceLibraryModal({
                   return (
                     <div
                       key={exp.id}
-                      className="group relative rounded-2xl bg-[#14141d] border border-[#232332] hover:border-violet-500/60 hover:shadow-2xl hover:shadow-violet-950/30 transition-all duration-200 flex flex-col justify-between overflow-hidden"
+                      className="group relative rounded-2xl bg-[#14141d] border border-[#232332] hover:border-[#D9A86C]/60 hover:shadow-2xl hover:shadow-[#D9A86C]-950/30 transition-all duration-200 flex flex-col justify-between overflow-hidden"
                     >
                       {/* Visual-First Live Scale-To-Fit Preview */}
                       <div
@@ -295,7 +295,7 @@ export function ExperienceLibraryModal({
                               {exp.type}
                             </span>
                             {exp.badge && (
-                              <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-violet-600/90 text-white shadow-sm">
+                              <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-[#D9A86C]/90 text-white shadow-sm">
                                 {exp.badge}
                               </span>
                             )}
@@ -336,7 +336,7 @@ export function ExperienceLibraryModal({
                               e.stopPropagation();
                               handleQuickInsert(exp);
                             }}
-                            className="px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-extrabold shadow-xl shadow-violet-600/40 flex items-center gap-1.5 transition-transform active:scale-95"
+                            className="px-4 py-2.5 rounded-xl bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-xs font-extrabold shadow-xl shadow-[#D9A86C]-600/40 flex items-center gap-1.5 transition-transform active:scale-95"
                           >
                             <Plus className="w-3.5 h-3.5" />
                             <span>USE EXPERIENCE</span>
@@ -415,7 +415,7 @@ export function ExperienceLibraryModal({
                             </button>
                             <button
                               onClick={() => handleQuickInsert(exp)}
-                              className="text-xs font-extrabold text-white flex items-center gap-1 bg-violet-600 hover:bg-violet-500 px-3 py-1 rounded-lg shadow-sm shadow-violet-600/30 transition-all active:scale-95"
+                              className="text-xs font-extrabold text-white flex items-center gap-1 bg-[#D9A86C] hover:bg-[#C99A4A] px-3 py-1 rounded-lg shadow-sm shadow-[#D9A86C]-600/30 transition-all active:scale-95"
                             >
                               <span>Use</span>
                             </button>

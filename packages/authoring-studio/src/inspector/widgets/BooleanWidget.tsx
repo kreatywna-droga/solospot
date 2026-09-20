@@ -20,7 +20,7 @@ const BooleanWidget: React.FC<WidgetProps<boolean>> = ({ value, onChange }) => {
     <button
       onClick={() => onChange(!isOn)}
       className={`relative w-10 h-5 rounded-full transition-all duration-200 flex-shrink-0 ${
-        isOn ? 'bg-violet-500' : 'bg-white/10'
+        isOn ? 'bg-gold-placeholder-500' : 'bg-white/10'
       }`}
       role="switch"
       aria-checked={isOn}

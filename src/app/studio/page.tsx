@@ -66,7 +66,7 @@ export default function StudioIndexPage() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/login"
-              className="px-6 py-2.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold rounded-full text-sm hover:opacity-90 transition-opacity"
+              className="px-6 py-2.5 bg-gradient-to-r from-[#B8893A] to-[#D9A86C] text-white font-bold rounded-full text-sm hover:opacity-90 transition-opacity"
             >
               Zaloguj się
             </Link>
@@ -97,7 +97,7 @@ export default function StudioIndexPage() {
             <p className="text-slate-400 text-sm mb-6">Utwórz swój pierwszy sklep, aby uruchomić wizualny kreator stron.</p>
             <Link
               href="/dashboard/stores"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-full font-bold text-sm"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#B8893A] to-[#D9A86C] rounded-full font-bold text-sm"
             >
               Przejdź do moich sklepów
             </Link>
@@ -111,7 +111,7 @@ export default function StudioIndexPage() {
                 className="p-6 rounded-2xl border border-white/5 bg-[#0c0d16] hover:border-violet-500/30 hover:bg-white/[0.03] transition-all flex items-center justify-between group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-violet-600/10 border border-violet-500/20 flex items-center justify-center text-violet-400 group-hover:scale-105 transition-transform">
+                  <div className="w-12 h-12 rounded-xl bg-[#D9A86C]/10 border border-violet-500/20 flex items-center justify-center text-violet-400 group-hover:scale-105 transition-transform">
                     <Store className="w-6 h-6" />
                   </div>
                   <div>
@@ -119,7 +119,7 @@ export default function StudioIndexPage() {
                     <p className="text-xs font-mono text-slate-500 mt-0.5">{s.slug}</p>
                   </div>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-white group-hover:bg-violet-600 transition-all">
+                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-white group-hover:bg-[#D9A86C] transition-all">
                   <ArrowRight className="w-4 h-4" />
                 </div>
               </Link>

@@ -132,14 +132,14 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
     <>
       <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/85 backdrop-blur-md p-3 md:p-6 animate-in fade-in duration-150 select-none">
         <div
-          className="w-full max-w-7xl max-h-[94vh] bg-[#1a1a20] border border-[#2D2D32] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
+          className="w-full max-w-7xl max-h-[94vh] bg-[#1a1a20] border border-[#252B3A] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[#27272A] bg-[#141418]">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[#1A1F2E] bg-[#141418]">
             <div>
               <h2 className="text-base md:text-lg font-extrabold text-white flex items-center gap-2.5">
-                <Sparkles className="w-5 h-5 text-[#A78BFA]" />
+                <Sparkles className="w-5 h-5 text-[#F2C27F]" />
                 <span>Website Template Library</span>
                 <span className="text-xs font-semibold text-zinc-300 px-2.5 py-0.5 rounded-full bg-white/10 border border-white/15">
                   {filteredTemplates.length} templates
@@ -158,7 +158,7 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
           </div>
 
           {/* Filters Bar */}
-          <div className="p-4 border-b border-[#27272A] bg-[#18181e] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <div className="p-4 border-b border-[#1A1F2E] bg-[#18181e] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             <div className="relative flex-1">
               <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
               <input
@@ -166,7 +166,7 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search templates by name, tag, industry..."
-                className="w-full pl-10 pr-4 py-2.5 bg-[#22222a] border border-[#3F3F46]/50 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-violet-500 transition-colors"
+                className="w-full pl-10 pr-4 py-2.5 bg-[#22222a] border border-[#3F3F46]/50 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C] transition-colors"
               />
             </div>
             <div className="flex items-center gap-2">
@@ -174,7 +174,7 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
                 <select
                   value={selectedStyle}
                   onChange={(e) => setSelectedStyle(e.target.value)}
-                  className="appearance-none bg-[#22222a] hover:bg-[#2B2B36] border border-violet-500/40 text-xs font-bold text-violet-300 rounded-xl px-4 py-2.5 pr-8 focus:outline-none focus:border-violet-500 cursor-pointer transition-colors"
+                  className="appearance-none bg-[#22222a] hover:bg-[#2B2B36] border border-[#D9A86C]/40 text-xs font-bold text-violet-300 rounded-xl px-4 py-2.5 pr-8 focus:outline-none focus:border-[#D9A86C] cursor-pointer transition-colors"
                 >
                   {STYLE_OPTIONS.map(s => (
                     <option key={s} value={s}>{s === 'All' ? 'All Styles' : s}</option>
@@ -186,7 +186,7 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
                 <select
                   value={selectedIndustry}
                   onChange={(e) => setSelectedIndustry(e.target.value)}
-                  className="appearance-none bg-[#22222a] hover:bg-[#2B2B36] border border-violet-500/40 text-xs font-bold text-violet-300 rounded-xl px-4 py-2.5 pr-8 focus:outline-none focus:border-violet-500 cursor-pointer transition-colors"
+                  className="appearance-none bg-[#22222a] hover:bg-[#2B2B36] border border-[#D9A86C]/40 text-xs font-bold text-violet-300 rounded-xl px-4 py-2.5 pr-8 focus:outline-none focus:border-[#D9A86C] cursor-pointer transition-colors"
                 >
                   {INDUSTRY_OPTIONS.map(i => (
                     <option key={i} value={i}>{i === 'All' ? 'All Industries' : i}</option>
@@ -213,7 +213,7 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
                   return (
                     <div
                       key={tmpl.id}
-                      className="group relative rounded-2xl bg-[#14141a] border border-[#272730] hover:border-violet-500/70 hover:shadow-2xl hover:shadow-violet-950/30 transition-all duration-200 flex flex-col justify-between overflow-hidden"
+                      className="group relative rounded-2xl bg-[#14141a] border border-[#272730] hover:border-[#D9A86C]/70 hover:shadow-2xl hover:shadow-[#D9A86C]-950/30 transition-all duration-200 flex flex-col justify-between overflow-hidden"
                     >
                       {/* Visual Preview — Largest Element */}
                       <div
@@ -248,7 +248,7 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
                                 e.stopPropagation();
                                 handleApplyTemplate(tmpl);
                               }}
-                              className="px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-extrabold shadow-xl shadow-violet-600/50 flex items-center gap-2 transition-transform active:scale-95"
+                              className="px-4 py-2.5 rounded-xl bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-xs font-extrabold shadow-xl shadow-[#D9A86C]-600/50 flex items-center gap-2 transition-transform active:scale-95"
                             >
                               <CheckCircle2 className="w-4 h-4" />
                               <span>USE TEMPLATE</span>
@@ -280,7 +280,7 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
                           {tmpl.id !== 'blank' && (
                             <button
                               onClick={() => handleApplyTemplate(tmpl)}
-                              className="text-xs font-extrabold text-white flex items-center gap-1.5 bg-violet-600 hover:bg-violet-500 px-3 py-1.5 rounded-lg shadow-md shadow-violet-600/30 transition-all"
+                              className="text-xs font-extrabold text-white flex items-center gap-1.5 bg-[#D9A86C] hover:bg-[#C99A4A] px-3 py-1.5 rounded-lg shadow-md shadow-[#D9A86C]-600/30 transition-all"
                             >
                               <span>Use</span>
                               <ArrowRight className="w-3.5 h-3.5" />
@@ -342,14 +342,14 @@ function FullTemplatePreview({
 
   return (
     <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-150">
-      <div className="w-full max-w-6xl max-h-[92vh] bg-[#141418] border border-[#27272A] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white">
+      <div className="w-full max-w-6xl max-h-[92vh] bg-[#141418] border border-[#1A1F2E] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#27272A] bg-[#1a1a20]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#1A1F2E] bg-[#1a1a20]">
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-base font-bold text-white">{template.name}</h2>
               {template.badge && (
-                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30">
+                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-[#D9A86C]/30">
                   {template.badge}
                 </span>
               )}
@@ -368,7 +368,7 @@ function FullTemplatePreview({
                 key={vp}
                 onClick={() => onViewportChange(vp)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  viewport === vp ? 'bg-violet-600 text-white shadow font-bold' : 'text-zinc-400 hover:text-white'
+                  viewport === vp ? 'bg-[#D9A86C] text-white shadow font-bold' : 'text-zinc-400 hover:text-white'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -403,7 +403,7 @@ function FullTemplatePreview({
         </div>
 
         {/* Modal Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-[#27272A] bg-[#1a1a20]">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-[#1A1F2E] bg-[#1a1a20]">
           <div className="flex items-center gap-2 text-xs text-zinc-400">
             <span className="font-mono text-violet-400 uppercase font-semibold">{template.sectionTemplateIds.length} sections</span>
             {template.style && (
@@ -428,7 +428,7 @@ function FullTemplatePreview({
             </button>
             <button
               onClick={onUse}
-              className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold shadow-lg shadow-violet-600/30 flex items-center gap-2 transition-all active:scale-95"
+              className="px-5 py-2.5 rounded-xl bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-xs font-bold shadow-lg shadow-[#D9A86C]-600/30 flex items-center gap-2 transition-all active:scale-95"
             >
               <CheckCircle2 className="w-4 h-4" />
               <span>Use This Template</span>

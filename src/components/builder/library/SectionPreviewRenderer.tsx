@@ -215,7 +215,7 @@ function ReadOnlyNodeRenderer({ node }: { node: BuilderNode }) {
   // Button
   if (node.type === 'button') {
     const text = (props.text as string) || (props.label as string) || 'Przycisk'
-    const bg = styles.backgroundColor || props.background || props.backgroundColor || '#7c3aed'
+    const bg = styles.backgroundColor || props.background || props.backgroundColor || '#B8893A'
     const color = styles.color || props.textColor || props.color || '#ffffff'
     const borderRadius = styles.borderRadius || props.borderRadius || '12px'
     const fontSize = styles.fontSize || props.fontSize || '0.9rem'
@@ -499,7 +499,7 @@ export function SectionPreviewRenderer({
               },
             }}
             theme={{
-              primaryColor: '#7c3aed',
+              primaryColor: '#B8893A',
               secondaryColor: '#ec4899',
               font: 'Inter',
             }}

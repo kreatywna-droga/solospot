@@ -73,7 +73,7 @@ const LinkWidget: React.FC<WidgetProps<LinkShape>> = ({ value, onChange }) => {
         <select
           value={link.target || '_self'}
           onChange={(e) => update({ target: e.target.value })}
-          className="w-full bg-[#0a0a14] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-violet-500/50 transition-all"
+          className="w-full bg-[#0a0a14] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-gold-placeholder-500/50 transition-all"
         >
           {TARGET_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>

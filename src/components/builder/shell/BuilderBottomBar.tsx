@@ -50,8 +50,8 @@ export function BuilderBottomBar({ onSave, onPublish, saving, onTabChange }: Bui
   ]
 
   return (
-    <div className="h-10 flex items-center justify-between px-4 border-t border-[#27272A]
-                    bg-[#18181B] backdrop-blur-sm flex-shrink-0 z-20 select-none">
+    <div className="h-10 flex items-center justify-between px-4 border-t border-[#1A1F2E]
+                    bg-[#080B10] backdrop-blur-sm flex-shrink-0 z-20 select-none">
       {/* Left: Zoom */}
       <div className="flex items-center gap-1">
         <button
@@ -66,14 +66,13 @@ export function BuilderBottomBar({ onSave, onPublish, saving, onTabChange }: Bui
             {zoom === 0 || !zoom ? 'Dopasuj (Fit)' : `${Math.round(zoom * 100)}%`}
           </button>
           <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block">
-            <div className="bg-[#202024] border border-[#2D2D32] rounded-xl p-1 shadow-2xl flex items-center gap-0.5">
+            <div className="bg-[#0D1118] border border-[#1A1F2E] rounded-xl p-1 shadow-2xl flex items-center gap-0.5">
               {zoomPresets.map(p => (
                 <button
                   key={p.label}
                   onClick={() => setZoom(p.value)}
                   className={`px-2 py-1 rounded-md text-[10px] font-mono transition-all ${
-                    (p.value === 0 && (zoom === 0 || !zoom)) || (p.value > 0 && Math.abs(zoom - p.value) < 0.01)
-                      ? 'bg-[#8B5CF6]/15 text-[#A78BFA]'
+                      ? 'bg-[#D9A86C]/15 text-[#F2C27F]'
                       : 'text-zinc-400 hover:text-white hover:bg-white/[0.05]'
                   }`}
                 >
@@ -98,7 +97,7 @@ export function BuilderBottomBar({ onSave, onPublish, saving, onTabChange }: Bui
           onClick={togglePreview}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] transition-all
             ${isPreview
-              ? 'bg-[#8B5CF6] text-white font-semibold shadow-lg shadow-[#8B5CF6]/25'
+              ? 'bg-[#D9A86C] text-[#080B10] font-semibold shadow-lg shadow-[#D9A86C]/25'
               : 'text-zinc-400 hover:text-white hover:bg-white/[0.05]'
             }`}
           title={isPreview ? 'Przełącz do trybu edycji' : 'Podgląd na żywo'}
@@ -127,8 +126,8 @@ export function BuilderBottomBar({ onSave, onPublish, saving, onTabChange }: Bui
           onClick={onPublish}
           disabled={saving}
           className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[11px] font-bold
-                     bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white
-                     hover:shadow-lg hover:shadow-violet-500/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                     bg-gradient-to-r from-[#B8893A] to-[#D9A86C] text-[#080B10]
+                     hover:shadow-lg hover:shadow-[#D9A86C]/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           <Zap className="w-3.5 h-3.5" />
           {saving ? 'Publikowanie...' : 'Publish'}

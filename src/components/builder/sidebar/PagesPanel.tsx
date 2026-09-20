@@ -89,7 +89,7 @@ export function PagesPanel() {
   })
 
   return (
-    <div className="flex flex-col h-full bg-[#202024] text-white">
+    <div className="flex flex-col h-full bg-[#0D1118] text-white">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08]">
         <div className="flex items-center gap-2">
@@ -108,7 +108,7 @@ export function PagesPanel() {
           </button>
           <button
             onClick={handleCreatePage}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition-all shadow-md shadow-violet-600/20"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-xs font-semibold transition-all shadow-md shadow-[#D9A86C]-600/20"
             title="Dodaj nową stronę"
           >
             <Plus className="w-3.5 h-3.5" />
@@ -127,7 +127,7 @@ export function PagesPanel() {
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Szukaj strony..."
             className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white
-                       placeholder-zinc-500 focus:outline-none focus:border-violet-500/50 transition-all"
+                       placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C]/50 transition-all"
           />
         </div>
       </div>
@@ -143,7 +143,7 @@ export function PagesPanel() {
               key={page.id}
               className={`group relative flex items-center justify-between px-3 py-2.5 rounded-xl text-xs transition-all cursor-pointer select-none ${
                 isActive
-                  ? 'bg-[#8B5CF6]/15 text-white border border-violet-500/30 shadow-md shadow-violet-500/10'
+                  ? 'bg-[#D9A86C]/15 text-white border border-[#D9A86C]/30 shadow-md shadow-[#D9A86C]-500/10'
                   : 'bg-white/[0.02] text-zinc-400 hover:text-white hover:bg-white/[0.05] border border-transparent'
               }`}
               onClick={() => selectPage(page.id)}
@@ -154,7 +154,7 @@ export function PagesPanel() {
                   <div className="font-semibold text-xs truncate text-white flex items-center gap-1.5">
                     {page.name}
                     {page.isHome && (
-                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#8B5CF6]/15 text-[#A78BFA] font-bold uppercase">
+                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#D9A86C]/15 text-[#F2C27F] font-bold uppercase">
                         Home
                       </span>
                     )}
@@ -183,7 +183,7 @@ export function PagesPanel() {
 
                   {/* Context Menu */}
                   {isMenuOpen && (
-                    <div className="absolute right-0 top-6 z-40 w-40 bg-[#27272A] border border-white/15 rounded-xl shadow-2xl p-1 space-y-0.5">
+                    <div className="absolute right-0 top-6 z-40 w-40 bg-[#1A1F2E] border border-white/15 rounded-xl shadow-2xl p-1 space-y-0.5">
                       {!page.isHome && (
                         <button
                           onClick={() => handleSetHome(page.id)}
@@ -233,7 +233,7 @@ export function PagesPanel() {
         </div>
         <button
           onClick={() => setShowSiteMap(true)}
-          className="text-violet-400 hover:text-[#A78BFA] font-medium flex items-center gap-1"
+          className="text-violet-400 hover:text-[#F2C27F] font-medium flex items-center gap-1"
         >
           <Map className="w-3 h-3" />
           <span>Mapa witryny</span>
@@ -312,7 +312,7 @@ function PageSettingsModal({ page, onClose }: PageSettingsModalProps) {
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
-              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-violet-500"
+              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#D9A86C]"
             />
           </div>
 
@@ -322,7 +322,7 @@ function PageSettingsModal({ page, onClose }: PageSettingsModalProps) {
               type="text"
               value={slug}
               onChange={e => setSlug(e.target.value)}
-              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-violet-500"
+              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-[#D9A86C]"
             />
           </div>
 
@@ -337,7 +337,7 @@ function PageSettingsModal({ page, onClose }: PageSettingsModalProps) {
                   value={title}
                   onChange={e => setTitle(e.target.value)}
                   placeholder="np. O nas | Mój Sklep"
-                  className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 text-white focus:outline-none focus:border-violet-500"
+                  className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 text-white focus:outline-none focus:border-[#D9A86C]"
                 />
               </div>
 
@@ -348,7 +348,7 @@ function PageSettingsModal({ page, onClose }: PageSettingsModalProps) {
                   value={description}
                   onChange={e => setDescription(e.target.value)}
                   placeholder="Krótki opis strony dla wyszukiwarki Google..."
-                  className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 text-white focus:outline-none focus:border-violet-500"
+                  className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 text-white focus:outline-none focus:border-[#D9A86C]"
                 />
               </div>
             </div>
@@ -364,7 +364,7 @@ function PageSettingsModal({ page, onClose }: PageSettingsModalProps) {
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold shadow-md shadow-violet-600/20"
+            className="px-4 py-1.5 rounded-lg bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-xs font-bold shadow-md shadow-[#D9A86C]-600/20"
           >
             Zapisz zmiany
           </button>

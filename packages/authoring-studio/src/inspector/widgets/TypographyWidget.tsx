@@ -116,7 +116,7 @@ const TypographyWidget: React.FC<WidgetProps<TypographyShape>> = ({ value, onCha
           <select
             value={typo.fontWeight || '400'}
             onChange={(e) => update({ fontWeight: e.target.value })}
-            className="w-full bg-[#0a0a14] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-violet-500/50 transition-all"
+            className="w-full bg-[#0a0a14] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-gold-placeholder-500/50 transition-all"
           >
             {WEIGHT_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -168,7 +168,7 @@ const TypographyWidget: React.FC<WidgetProps<TypographyShape>> = ({ value, onCha
           <select
             value={typo.textAlign || 'left'}
             onChange={(e) => update({ textAlign: e.target.value })}
-            className="w-full bg-[#0a0a14] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-violet-500/50 transition-all"
+            className="w-full bg-[#0a0a14] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-gold-placeholder-500/50 transition-all"
           >
             {ALIGN_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -182,7 +182,7 @@ const TypographyWidget: React.FC<WidgetProps<TypographyShape>> = ({ value, onCha
           <select
             value={typo.textTransform || 'none'}
             onChange={(e) => update({ textTransform: e.target.value })}
-            className="w-full bg-[#0a0a14] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-violet-500/50 transition-all"
+            className="w-full bg-[#0a0a14] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-gold-placeholder-500/50 transition-all"
           >
             {TRANSFORM_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>

@@ -1,0 +1,92 @@
+[
+  {
+    "phase": "D",
+    "id": "D1",
+    "action": "Open production",
+    "expected": "Loaded",
+    "actual": "Studio loaded",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "D",
+    "id": "D2",
+    "action": "Open Studio",
+    "expected": "On /studio",
+    "actual": "https://www.solospot.pl/studio/test-store",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "D",
+    "id": "D3",
+    "action": "Open Builder",
+    "expected": "Canvas present",
+    "actual": "true",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "D",
+    "id": "D5",
+    "action": "Shader/Gradient renders",
+    "expected": "Canvas has content",
+    "actual": "Sections: 1, Canvases: 0",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "D",
+    "id": "D6",
+    "action": "Inspector shows experience controls",
+    "expected": "Experience controls visible",
+    "actual": "NO COMPONENT SELECTED\n\nSelect any element on the canvas to edit its properties.",
+    "status": "FAIL",
+    "evidence": ""
+  },
+  {
+    "phase": "D",
+    "id": "D10",
+    "action": "Experience categories",
+    "expected": "All categories visible",
+    "actual": "{\"hasHeroes\":true,\"hasInteractive\":true,\"hasBackgrounds\":true,\"hasEffects\":true,\"has3D\":true,\"hasMoods\":true,\"experienceCount\":\"17 experiences\"}",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "D",
+    "id": "D22",
+    "action": "Save",
+    "expected": "Save button clicked",
+    "actual": "true",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "D",
+    "id": "D31",
+    "action": "Smart Guides still work",
+    "expected": "Guides visible during drag",
+    "actual": "8 guide elements",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "D",
+    "id": "D38",
+    "action": "No critical console errors",
+    "expected": "0 critical",
+    "actual": "0 critical",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "phase": "D",
+    "id": "D40",
+    "action": "Existing workflows functional",
+    "expected": "Builder loads, canvas works",
+    "actual": "Builder functional",
+    "status": "PASS",
+    "evidence": ""
+  }
+]

@@ -106,7 +106,7 @@ const ShadowWidget: React.FC<WidgetProps<ShadowShape>> = ({ value, onChange }) =
         <button
           onClick={() => update({ inset: !shadow.inset })}
           className={`relative w-10 h-5 rounded-full transition-all duration-200 flex-shrink-0 ${
-            shadow.inset ? 'bg-violet-500' : 'bg-white/10'
+            shadow.inset ? 'bg-gold-placeholder-500' : 'bg-white/10'
           }`}
         >
           <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${

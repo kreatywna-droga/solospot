@@ -70,9 +70,9 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-[#27272A]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-[#1A1F2E]">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-violet-600/20 border border-[#8B5CF6]/25 flex items-center justify-center text-violet-400">
+            <div className="w-9 h-9 rounded-xl bg-[#D9A86C]/20 border border-[#D9A86C]/25 flex items-center justify-center text-violet-400">
               <LayoutGrid className="w-5 h-5" />
             </div>
             <div>
@@ -86,7 +86,7 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
           <div className="flex items-center gap-3">
             <button
               onClick={handleAddPage}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition-all shadow-md shadow-violet-600/20"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-xs font-semibold transition-all shadow-md shadow-[#D9A86C]-600/20"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Dodaj stronę</span>
@@ -101,7 +101,7 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
         </div>
 
         {/* Content: Visual Page Cards Grid */}
-        <div className="flex-1 overflow-y-auto p-6 bg-[#202024]">
+        <div className="flex-1 overflow-y-auto p-6 bg-[#0D1118]">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {document.pages.map(page => {
               const isActive = page.id === activePageId
@@ -111,7 +111,7 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
                   key={page.id}
                   className={`flex flex-col rounded-2xl border transition-all duration-200 overflow-hidden ${
                     isActive
-                      ? 'bg-violet-950/20 border-[#8B5CF6]/40 shadow-xl shadow-violet-500/10 ring-1 ring-violet-500/30'
+                      ? 'bg-violet-950/20 border-[#D9A86C]/40 shadow-xl shadow-[#D9A86C]-500/10 ring-1 ring-violet-500/30'
                       : 'bg-white/[0.03] border-white/[0.08] hover:border-white/20'
                   }`}
                 >
@@ -123,7 +123,7 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
                         <div className="font-bold text-xs text-white truncate flex items-center gap-2">
                           {page.name}
                           {page.isHome && (
-                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#8B5CF6]/15 text-[#A78BFA] font-mono font-bold uppercase">
+                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#D9A86C]/15 text-[#F2C27F] font-mono font-bold uppercase">
                               Home
                             </span>
                           )}
@@ -134,7 +134,7 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
 
                     <button
                       onClick={() => handleNavigateToPage(page.id)}
-                      className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-violet-600 text-zinc-300 hover:text-white transition-all text-xs flex items-center gap-1"
+                      className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-[#D9A86C] text-zinc-300 hover:text-white transition-all text-xs flex items-center gap-1"
                       title="Otwórz stronę w edytorze"
                     >
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -157,7 +157,7 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
                           onClick={() => handleNavigateToPage(page.id, section.id)}
                           className={`group flex items-center justify-between px-3 py-2 rounded-xl text-xs cursor-pointer border transition-all ${
                             hoveredSectionId === section.id
-                              ? 'bg-[#8B5CF6]/15 border-violet-500/40 text-white'
+                              ? 'bg-[#D9A86C]/15 border-[#D9A86C]/40 text-white'
                               : 'bg-white/[0.04] border-white/5 text-zinc-300 hover:bg-white/[0.08]'
                           }`}
                         >
@@ -181,7 +181,7 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
                     <span>{page.sections.length} sekcji</span>
                     <button
                       onClick={() => handleNavigateToPage(page.id)}
-                      className="text-violet-400 hover:text-[#A78BFA] font-medium hover:underline flex items-center gap-1"
+                      className="text-violet-400 hover:text-[#F2C27F] font-medium hover:underline flex items-center gap-1"
                     >
                       <span>Edytuj stronę</span>
                       <ChevronRight className="w-3 h-3" />

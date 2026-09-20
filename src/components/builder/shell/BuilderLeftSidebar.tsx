@@ -44,7 +44,7 @@ export function BuilderLeftSidebar({ activeTab, onTabChange, width = 320 }: Buil
   return (
     <aside
       style={{ width: `${width}px` }}
-      className="border-r border-[#27272A] bg-[#202024] flex flex-col overflow-hidden flex-shrink-0 h-full select-none"
+      className="border-r border-[#1A1F2E] bg-[#0D1118] flex flex-col overflow-hidden flex-shrink-0 h-full select-none"
     >
       <div className="flex-1 overflow-hidden">
         {currentTab === 'pages' && <PagesPanel />}
@@ -69,10 +69,10 @@ function HistoryPanel() {
   const entries = history.entries
 
   return (
-    <div className="flex flex-col h-full bg-[#202024] text-white">
+    <div className="flex flex-col h-full bg-[#0D1118] text-white">
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08]">
         <div className="flex items-center gap-2">
-          <History className="w-4 h-4 text-[#8B5CF6]" />
+          <History className="w-4 h-4 text-[#D9A86C]" />
           <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-300">Historia Zmian</h2>
         </div>
         <div className="flex items-center gap-1">
@@ -113,7 +113,7 @@ function HistoryPanel() {
                 key={entry.id}
                 className={`flex items-center gap-3 p-2.5 rounded-xl text-xs transition-all border ${
                   isCurrent
-                    ? 'bg-[#8B5CF6]/15 border-[#8B5CF6]/30 text-white shadow-md shadow-[#8B5CF6]/10'
+                    ? 'bg-[#D9A86C]/15 border-[#D9A86C]/30 text-white shadow-md shadow-[#D9A86C]/10'
                     : 'bg-white/[0.02] border-white/[0.06] text-zinc-400 hover:bg-white/[0.05] hover:text-zinc-200'
                 }`}
               >
@@ -124,7 +124,7 @@ function HistoryPanel() {
                   </div>
                 </div>
                 {isCurrent && (
-                  <span className="text-[9px] text-[#A78BFA] bg-[#8B5CF6]/25 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                  <span className="text-[9px] text-[#F2C27F] bg-[#D9A86C]/25 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
                     Aktualny
                   </span>
                 )}
@@ -134,7 +134,7 @@ function HistoryPanel() {
         )}
       </div>
 
-      <div className="p-3 border-t border-white/[0.08] bg-[#1a1a1e] text-[11px] text-zinc-500 text-center">
+      <div className="p-3 border-t border-white/[0.08] bg-[#080B10] text-[11px] text-zinc-500 text-center">
         Zarejestrowano {entries.length} krok{entries.length === 1 ? '' : entries.length < 5 ? 'i' : 'ów'}
       </div>
     </div>
@@ -194,20 +194,20 @@ function AiPanel() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#202024] text-white">
+    <div className="flex flex-col h-full bg-[#0D1118] text-white">
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08]">
         <div className="flex items-center gap-2">
-          <Bot className="w-4 h-4 text-[#8B5CF6]" />
+          <Bot className="w-4 h-4 text-[#D9A86C]" />
           <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-300">Asystent AI</h2>
         </div>
-        <span className="text-[9px] text-[#A78BFA] bg-[#8B5CF6]/15 border border-[#8B5CF6]/25 px-2 py-0.5 rounded-full font-bold">
+        <span className="text-[9px] text-[#F2C27F] bg-[#D9A86C]/15 border border-[#D9A86C]/25 px-2 py-0.5 rounded-full font-bold">
           SOLOSPOT AI
         </span>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#8B5CF6]/15 to-fuchsia-600/[0.07] border border-[#8B5CF6]/25 space-y-2">
-          <div className="flex items-center gap-2 text-[#A78BFA] font-bold text-xs">
+        <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#D9A86C]/15 to-[#B8893A]/[0.07] border border-[#D9A86C]/25 space-y-2">
+          <div className="flex items-center gap-2 text-[#F2C27F] font-bold text-xs">
             <Bot className="w-4 h-4" />
             <span>Generuj sekcje i treści za pomocą AI</span>
           </div>
@@ -227,9 +227,9 @@ function AiPanel() {
                 key={item.id}
                 onClick={() => handleQuickAction(item.id)}
                 disabled={generating}
-                className="w-full p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.08] hover:border-[#8B5CF6]/30 hover:bg-[#8B5CF6]/[0.07] text-left transition-all group disabled:opacity-50"
+                className="w-full p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.08] hover:border-[#D9A86C]/30 hover:bg-[#D9A86C]/[0.07] text-left transition-all group disabled:opacity-50"
               >
-                <div className="font-semibold text-xs text-zinc-200 group-hover:text-[#A78BFA] transition-colors">
+                <div className="font-semibold text-xs text-zinc-200 group-hover:text-[#F2C27F] transition-colors">
                   {item.label}
                 </div>
                 <div className="text-[10px] text-zinc-500 mt-0.5">{item.desc}</div>
@@ -239,19 +239,19 @@ function AiPanel() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-3 border-t border-white/[0.08] bg-[#1a1a1e]">
+      <form onSubmit={handleSubmit} className="p-3 border-t border-white/[0.08] bg-[#080B10]">
         <div className="flex gap-2">
           <input
             type="text"
             value={prompt}
             onChange={e => setPrompt(e.target.value)}
             placeholder="Opisz sekcję, np. stwórz baner promocyjny..."
-            className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#8B5CF6]/50"
+            className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C]/50"
           />
           <button
             type="submit"
             disabled={!prompt.trim() || generating}
-            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-[#8B5CF6] hover:bg-[#7C3AED] text-white disabled:opacity-40 transition-all shadow-md shadow-[#8B5CF6]/20"
+            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#B8893A] to-[#D9A86C] hover:from-[#C99A4A] hover:to-[#F2C27F] text-[#080B10] disabled:opacity-40 transition-all shadow-md shadow-[#D9A86C]/20"
           >
             {generating ? 'Generowanie...' : 'Wyślij'}
           </button>

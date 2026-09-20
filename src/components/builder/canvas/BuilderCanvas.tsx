@@ -172,7 +172,7 @@ function GridOverlay({ width }: { width: number }) {
     lines.push(
       <div
         key={i}
-        className="absolute top-0 bottom-0 w-px bg-[#8B5CF6]/10"
+        className="absolute top-0 bottom-0 w-px bg-[#D9A86C]/10"
         style={{ left: x }}
       />
     )
@@ -181,7 +181,7 @@ function GridOverlay({ width }: { width: number }) {
       lines.push(
         <div
           key={`gutter-${i}`}
-          className="absolute top-0 bottom-0 w-px bg-[#8B5CF6]/5"
+          className="absolute top-0 bottom-0 w-px bg-[#D9A86C]/5"
           style={{ left: gutterX }}
         />
       )
@@ -621,7 +621,7 @@ function CanvasNode({
   if (node.type === 'button') {
     const text = (props.text as string) || (props.label as string) || 'Kliknij tutaj'
     const variant = (props.variant as string) || 'primary'
-    const bg = (styles.backgroundColor as string) || (props.background as string) || (props.backgroundColor as string) || (variant === 'secondary' ? '#1e1e2e' : '#7c3aed')
+    const bg = (styles.backgroundColor as string) || (props.background as string) || (props.backgroundColor as string) || (variant === 'secondary' ? '#1e1e2e' : '#B8893A')
     const textColor = (styles.color as string) || (props.textColor as string) || (props.color as string) || '#ffffff'
     const borderRadius = (styles.borderRadius as string) || (props.borderRadius as string) || '12px'
     const borderWidth = styles.borderWidth || (props.borderWidth as string) || (variant === 'outline' ? '2px' : '1px')
@@ -1233,7 +1233,7 @@ function CanvasNode({
             if (!isSelected) onSelectNode(node.id, e)
             onStartDragNode?.(node, e)
           }}
-          className="absolute -top-3 left-3 z-30 flex items-center gap-1.5 px-2.5 py-0.5 bg-[#121024] hover:bg-violet-600 text-violet-200 hover:text-white text-[10px] font-semibold rounded-md shadow-xl border border-violet-500/40 cursor-grab active:cursor-grabbing transition-all select-none pointer-events-auto group/contgrab"
+          className="absolute -top-3 left-3 z-30 flex items-center gap-1.5 px-2.5 py-0.5 bg-[#121024] hover:bg-[#D9A86C] text-violet-200 hover:text-white text-[10px] font-semibold rounded-md shadow-xl border border-[#D9A86C]/40 cursor-grab active:cursor-grabbing transition-all select-none pointer-events-auto group/contgrab"
           title="Chwyć łapką, aby przesunąć całe okno kontenera wraz z zawartością (Góra / Dół)"
         >
           <GripVertical className="w-3 h-3 text-violet-400 group-hover/contgrab:text-white" />
@@ -1260,7 +1260,7 @@ function CanvasNode({
         ))}
         </div>
       ) : (
-        <div className="p-6 border-2 border-dashed border-violet-500/20 hover:border-violet-500/40 rounded-xl text-center text-xs text-slate-400 w-full select-none flex flex-col items-center justify-center gap-3 transition-colors bg-violet-950/5">
+        <div className="p-6 border-2 border-dashed border-[#D9A86C]/20 hover:border-[#D9A86C]/40 rounded-xl text-center text-xs text-slate-400 w-full select-none flex flex-col items-center justify-center gap-3 transition-colors bg-violet-950/5">
           <div className="flex items-center gap-2 text-violet-300 font-semibold text-xs">
             <Upload className="w-4 h-4 text-violet-400" />
             <span>Pusty kontener — upuść plik lub dodaj element</span>
@@ -1289,7 +1289,7 @@ function CanvasNode({
                 })
                 dispatch({ type: 'CANVAS', action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId } })
               }}
-              className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-violet-600/30 border border-white/10 hover:border-violet-500/40 text-[11px] text-slate-300 hover:text-white transition-all"
+              className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-[#D9A86C]/30 border border-white/10 hover:border-[#D9A86C]/40 text-[11px] text-slate-300 hover:text-white transition-all"
             >
               + Tekst
             </button>
@@ -1316,7 +1316,7 @@ function CanvasNode({
                 })
                 dispatch({ type: 'CANVAS', action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId } })
               }}
-              className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-violet-600/30 border border-white/10 hover:border-violet-500/40 text-[11px] text-slate-300 hover:text-white transition-all"
+              className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-[#D9A86C]/30 border border-white/10 hover:border-[#D9A86C]/40 text-[11px] text-slate-300 hover:text-white transition-all"
             >
               + Obraz
             </button>
@@ -1347,7 +1347,7 @@ function CanvasNode({
                 })
                 dispatch({ type: 'CANVAS', action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId } })
               }}
-              className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-violet-600/30 border border-white/10 hover:border-violet-500/40 text-[11px] text-slate-300 hover:text-white transition-all"
+              className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-[#D9A86C]/30 border border-white/10 hover:border-[#D9A86C]/40 text-[11px] text-slate-300 hover:text-white transition-all"
             >
               + Wideo
             </button>
@@ -1368,13 +1368,13 @@ function CanvasNode({
                     visible: true,
                     locked: false,
                     props: { text: 'Kliknij tutaj', href: '#' },
-                    styles: { backgroundColor: '#7c3aed', color: '#ffffff', padding: '10px 20px', borderRadius: '8px' },
+                    styles: { backgroundColor: '#B8893A', color: '#ffffff', padding: '10px 20px', borderRadius: '8px' },
                     children: [],
                   },
                 })
                 dispatch({ type: 'CANVAS', action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId } })
               }}
-              className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-violet-600/30 border border-white/10 hover:border-violet-500/40 text-[11px] text-slate-300 hover:text-white transition-all"
+              className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-[#D9A86C]/30 border border-white/10 hover:border-[#D9A86C]/40 text-[11px] text-slate-300 hover:text-white transition-all"
             >
               + Przycisk
             </button>
@@ -1891,7 +1891,7 @@ function SectionBlock({
                   },
                 }}
                 theme={{
-                  primaryColor: document.theme?.primaryColor || '#7c3aed',
+                  primaryColor: document.theme?.primaryColor || '#B8893A',
                   secondaryColor: document.theme?.secondaryColor || '#ec4899',
                   font: document.theme?.font || 'Inter',
                   logo: document.theme?.logo,
@@ -1937,7 +1937,7 @@ function SectionBlock({
               if (!isSelected) onSelect()
               onStartDragNode?.(node, e)
             }}
-            className="flex items-center gap-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl pointer-events-auto shadow-xl shadow-violet-600/30 cursor-grab active:cursor-grabbing hover:scale-105 transition-all select-none border border-white/20 group/grab"
+            className="flex items-center gap-1.5 bg-gradient-to-r from-[#B8893A] to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl pointer-events-auto shadow-xl shadow-[#D9A86C]-600/30 cursor-grab active:cursor-grabbing hover:scale-105 transition-all select-none border border-white/20 group/grab"
             title="Chwyć łapką i przeciągnij całe okno wraz z całą zawartością (Góra / Dół)"
           >
             <GripVertical className="w-4 h-4 text-violet-200 group-hover/grab:text-white" />
@@ -1950,7 +1950,7 @@ function SectionBlock({
           </div>
 
           {/* Action toolbar */}
-          <div className="flex items-center gap-1 bg-[#202024]/95 backdrop-blur rounded-xl p-1
+          <div className="flex items-center gap-1 bg-[#0D1118]/95 backdrop-blur rounded-xl p-1
                           border border-white/[0.10] shadow-xl pointer-events-auto">
             {/* Dedicated Move Window Button with Hand / Grip */}
             <button
@@ -1959,7 +1959,7 @@ function SectionBlock({
                 if (!isSelected) onSelect()
                 onStartDragNode?.(node, e)
               }}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-semibold cursor-grab active:cursor-grabbing transition-all shadow-md"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-[11px] font-semibold cursor-grab active:cursor-grabbing transition-all shadow-md"
               title="Chwyć łapką, aby swobodnie przesunąć całe okno w górę lub w dół"
             >
               <Hand className="w-3.5 h-3.5 text-violet-200" />
@@ -1987,7 +1987,7 @@ function SectionBlock({
             <div className="w-px h-4 bg-white/[0.08] mx-0.5" />
             <button
               onClick={handleDuplicate}
-              className="p-1.5 rounded-lg hover:bg-violet-500/20 text-slate-400 hover:text-violet-300 transition-all"
+              className="p-1.5 rounded-lg hover:bg-[#C99A4A]/20 text-slate-400 hover:text-violet-300 transition-all"
               title="Duplikuj"
             >
               <Copy className="w-3.5 h-3.5" />
@@ -2813,7 +2813,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
         {/* Marquee Selection */}
         {marquee && (
           <div
-            className="absolute bg-violet-500/10 border border-violet-500/30 pointer-events-none z-30"
+            className="absolute bg-violet-500/10 border border-[#D9A86C]/30 pointer-events-none z-30"
             style={{
               left: Math.min(marquee.startX, marquee.currentX),
               top: Math.min(marquee.startY, marquee.currentY),
@@ -2835,8 +2835,8 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
           <>
             {sections.length === 0 && (
               <div className="flex flex-col items-center justify-center h-full min-h-[550px] text-center p-8 z-10 w-full">
-                <div className="flex flex-col items-center justify-center p-10 max-w-xl w-full rounded-2xl bg-[#18181B] border border-[#27272A] shadow-2xl shadow-black/50 text-center">
-                  <div className="w-16 h-16 rounded-2xl bg-violet-500/10 border border-violet-500/25 flex items-center justify-center mb-5 shadow-inner">
+                <div className="flex flex-col items-center justify-center p-10 max-w-xl w-full rounded-2xl bg-[#080B10] border border-[#1A1F2E] shadow-2xl shadow-black/50 text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-violet-500/10 border border-[#D9A86C]/25 flex items-center justify-center mb-5 shadow-inner">
                     <Sparkles className="w-8 h-8 text-violet-400" />
                   </div>
                   <h3 className="text-2xl font-extrabold text-white mb-2 tracking-tight">Zacznij budować swoją stronę</h3>
@@ -2850,7 +2850,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                         setIsSectionLibraryOpen(true)
                       }}
                       data-testid="empty-canvas-add-section-btn"
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-extrabold text-sm shadow-xl shadow-violet-600/30 hover:shadow-violet-600/50 transition-all hover:scale-105 active:scale-95"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-xl bg-[#D9A86C] hover:bg-[#C99A4A] text-white font-extrabold text-sm shadow-xl shadow-[#D9A86C]-600/30 hover:shadow-[#D9A86C]-600/50 transition-all hover:scale-105 active:scale-95"
                     >
                       <Plus className="w-4 h-4 text-white stroke-[3]" />
                       <span>+ DODAJ SEKCJĘ</span>
@@ -2876,7 +2876,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                   {isSectionLibraryOpen && insertSectionIndex === index && (
                     <div
                       data-testid="section-insertion-beacon"
-                      className="my-3 mx-4 p-5 rounded-xl border-2 border-dashed border-violet-500 bg-violet-950/70 text-center animate-pulse shadow-2xl shadow-violet-500/40 z-30 flex flex-col items-center justify-center gap-1.5 backdrop-blur-md"
+                      className="my-3 mx-4 p-5 rounded-xl border-2 border-dashed border-[#D9A86C] bg-violet-950/70 text-center animate-pulse shadow-2xl shadow-[#D9A86C]-500/40 z-30 flex flex-col items-center justify-center gap-1.5 backdrop-blur-md"
                     >
                       <div className="flex items-center justify-center gap-2 text-sm font-extrabold text-violet-200 tracking-wider uppercase">
                         <Plus className="w-5 h-5 text-violet-400" />
@@ -2932,7 +2932,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                               setSaveExperienceTargetNode(node)
                               setIsSaveExperienceOpen(true)
                             }}
-                            className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1e1b4b] hover:bg-[#2e2a72] border border-violet-500/40 text-violet-300 hover:text-white text-[11px] font-bold shadow-lg shadow-violet-950/40 transition-all scale-95 hover:scale-105 whitespace-nowrap"
+                            className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1e1b4b] hover:bg-[#2e2a72] border border-[#D9A86C]/40 text-violet-300 hover:text-white text-[11px] font-bold shadow-lg shadow-[#D9A86C]-950/40 transition-all scale-95 hover:scale-105 whitespace-nowrap"
                             title="Zapisz tę sekcję do swoich Experience (My Experiences)"
                           >
                             <Sparkles className="w-3 h-3 text-violet-400" />
@@ -2945,7 +2945,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                             setInsertSectionIndex(index + 1)
                             setIsSectionLibraryOpen(true)
                           }}
-                          className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-bold shadow-lg shadow-violet-600/40 scale-95 hover:scale-105 whitespace-nowrap"
+                          className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-[11px] font-bold shadow-lg shadow-[#D9A86C]-600/40 scale-95 hover:scale-105 whitespace-nowrap"
                           title={`Dodaj sekcję po "${node.label || 'Sekcja #' + (index + 1)}"`}
                         >
                           <Plus className="w-3.5 h-3.5" />
@@ -2962,7 +2962,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
             {isSectionLibraryOpen && insertSectionIndex === sections.length && (
               <div
                 data-testid="section-insertion-beacon"
-                className="my-3 mx-4 p-5 rounded-xl border-2 border-dashed border-violet-500 bg-violet-950/70 text-center animate-pulse shadow-2xl shadow-violet-500/40 z-30 flex flex-col items-center justify-center gap-1.5 backdrop-blur-md"
+                className="my-3 mx-4 p-5 rounded-xl border-2 border-dashed border-[#D9A86C] bg-violet-950/70 text-center animate-pulse shadow-2xl shadow-[#D9A86C]-500/40 z-30 flex flex-col items-center justify-center gap-1.5 backdrop-blur-md"
               >
                 <div className="flex items-center justify-center gap-2 text-sm font-extrabold text-violet-200 tracking-wider uppercase">
                   <Plus className="w-5 h-5 text-violet-400" />
@@ -3016,7 +3016,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                   setInsertSectionIndex(sections.length)
                   setIsSectionLibraryOpen(true)
                 }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#8B5CF6] hover:bg-[#7C3AED] text-white text-xs font-bold transition-all shadow-md shadow-[#8B5CF6]/25 hover:scale-105 active:scale-95"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#D9A86C] hover:bg-[#B8893A] text-white text-xs font-bold transition-all shadow-md shadow-[#D9A86C]/25 hover:scale-105 active:scale-95"
               >
                 <Plus className="w-4 h-4" />
                 <span>+ Dodaj Sekcję z Biblioteki</span>
@@ -3029,7 +3029,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                 }}
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.10] text-zinc-300 hover:text-white text-xs font-semibold transition-all border border-white/[0.08]"
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#8B5CF6]" />
+                <Sparkles className="w-3.5 h-3.5 text-[#D9A86C]" />
                 <span>Zmień Szablon Strony</span>
               </button>
             </div>
@@ -3056,7 +3056,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                       label: `Układ: ${preset.label}`,
                     })
                   }}
-                  className="px-2.5 py-1 rounded-lg bg-white/[0.04] hover:bg-[#8B5CF6] hover:text-white text-zinc-400 hover:border-[#8B5CF6] border border-white/[0.06] transition-all font-medium text-[11px]"
+                  className="px-2.5 py-1 rounded-lg bg-white/[0.04] hover:bg-[#D9A86C] hover:text-white text-zinc-400 hover:border-[#D9A86C] border border-white/[0.06] transition-all font-medium text-[11px]"
                 >
                   + {preset.label}
                 </button>

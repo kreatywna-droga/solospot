@@ -124,13 +124,13 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
   const isRootSection = selectedNode.parentId == null;
 
   return (
-    <div className="flex flex-col h-full overflow-hidden bg-[#202024] text-white select-none">
+    <div className="flex flex-col h-full overflow-hidden bg-[#0D1118] text-white select-none">
       {/* Element Header */}
-      <div className="px-4 py-3 border-b border-white/[0.08] bg-[#27272A] flex items-center justify-between">
+      <div className="px-4 py-3 border-b border-white/[0.08] bg-[#1A1F2E] flex items-center justify-between">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-white truncate">{nodeLabel}</span>
-            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#8B5CF6]/15 text-[#A78BFA] uppercase">
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#D9A86C]/15 text-[#F2C27F] uppercase">
               {nodeType}
             </span>
           </div>
@@ -163,7 +163,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                 onChange={(e) => onPropChange('text', e.target.value)}
                 placeholder="Wpisz treść tekstu..."
                 rows={3}
-                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#8B5CF6] resize-none"
+                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C] resize-none"
               />
             </div>
 
@@ -209,7 +209,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                     onClick={() => onStyleChange({ fontSize: `${sz}px` })}
                     className={`flex-1 py-0.5 text-[9px] font-mono rounded border transition-all ${
                       (parseInt(String(currentStyles.fontSize || '16px').replace('px', '')) || 16) === sz
-                        ? 'bg-[#8B5CF6]/20 text-[#A78BFA] border-[#8B5CF6]/30'
+                        ? 'bg-[#D9A86C]/20 text-[#F2C27F] border-[#D9A86C]/30'
                         : 'bg-white/[0.04] text-zinc-500 border-white/[0.06] hover:text-zinc-300'
                     }`}
                   >
@@ -246,7 +246,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   <button
                     onClick={() => onStyleChange({ textAlign: 'left' })}
                     className={`flex-1 py-1.5 rounded-lg flex items-center justify-center transition-colors ${
-                      currentStyles.textAlign === 'left' || !currentStyles.textAlign ? 'bg-violet-600 text-white' : 'text-zinc-400 hover:text-white'
+                      currentStyles.textAlign === 'left' || !currentStyles.textAlign ? 'bg-[#D9A86C] text-white' : 'text-zinc-400 hover:text-white'
                     }`}
                   >
                     <AlignLeft className="w-3.5 h-3.5" />
@@ -254,7 +254,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   <button
                     onClick={() => onStyleChange({ textAlign: 'center' })}
                     className={`flex-1 py-1.5 rounded-lg flex items-center justify-center transition-colors ${
-                      currentStyles.textAlign === 'center' ? 'bg-violet-600 text-white' : 'text-zinc-400 hover:text-white'
+                      currentStyles.textAlign === 'center' ? 'bg-[#D9A86C] text-white' : 'text-zinc-400 hover:text-white'
                     }`}
                   >
                     <AlignCenter className="w-3.5 h-3.5" />
@@ -262,7 +262,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   <button
                     onClick={() => onStyleChange({ textAlign: 'right' })}
                     className={`flex-1 py-1.5 rounded-lg flex items-center justify-center transition-colors ${
-                      currentStyles.textAlign === 'right' ? 'bg-violet-600 text-white' : 'text-zinc-400 hover:text-white'
+                      currentStyles.textAlign === 'right' ? 'bg-[#D9A86C] text-white' : 'text-zinc-400 hover:text-white'
                     }`}
                   >
                     <AlignRight className="w-3.5 h-3.5" />
@@ -282,7 +282,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
               <label className="text-[11px] font-semibold text-zinc-300">Zdjęcie</label>
               <button
                 onClick={() => { setMediaPickerTarget('image'); setShowMediaPicker(true); }}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 font-semibold text-xs text-white transition-all shadow-md shadow-violet-600/20"
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#D9A86C] hover:bg-[#C99A4A] font-semibold text-xs text-white transition-all shadow-md shadow-[#D9A86C]/20"
               >
                 <ImageIcon className="w-4 h-4" />
                 <span>Wybierz lub wgraj nowe zdjęcie</span>
@@ -296,7 +296,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                 value={String(props.src ?? '')}
                 onChange={(e) => onPropChange('src', e.target.value)}
                 placeholder="https://..."
-                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#8B5CF6]"
+                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C]"
               />
             </div>
 
@@ -307,7 +307,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   onClick={() => onStyleChange({ objectFit: 'cover' })}
                   className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
                     currentStyles.objectFit === 'cover' || !currentStyles.objectFit
-                      ? 'bg-violet-600 text-white border-violet-500'
+                      ? 'bg-[#D9A86C] text-white border-[#D9A86C]'
                       : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
                   }`}
                 >
@@ -317,7 +317,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   onClick={() => onStyleChange({ objectFit: 'contain' })}
                   className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
                     currentStyles.objectFit === 'contain'
-                      ? 'bg-violet-600 text-white border-violet-500'
+                      ? 'bg-[#D9A86C] text-white border-[#D9A86C]'
                       : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
                   }`}
                 >
@@ -340,7 +340,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                     onClick={() => onStyleChange({ borderRadius: r.val })}
                     className={`py-1 text-[11px] font-semibold rounded-lg border transition-all ${
                       currentStyles.borderRadius === r.val
-                        ? 'bg-violet-600 text-white border-violet-500'
+                        ? 'bg-[#D9A86C] text-white border-[#D9A86C]'
                         : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
                     }`}
                   >
@@ -413,7 +413,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                 value={String(props.text ?? '')}
                 onChange={(e) => onPropChange('text', e.target.value)}
                 placeholder="np. Kup Teraz, Zarejestruj się"
-                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#8B5CF6]"
+                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C]"
               />
             </div>
 
@@ -426,7 +426,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   value={String(props.href ?? '')}
                   onChange={(e) => onPropChange('href', e.target.value)}
                   placeholder="https://... lub #kontakt"
-                  className="w-full pl-9 pr-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#8B5CF6]"
+                  className="w-full pl-9 pr-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C]"
                 />
               </div>
             </div>
@@ -482,7 +482,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   placeholder="https://... URL lub plik"
                   className="flex-1 bg-transparent text-[11px] font-mono text-zinc-300 focus:outline-none focus:text-white"
                 />
-                <label className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#8B5CF6] hover:bg-[#7C3AED] text-white text-[11px] font-semibold cursor-pointer transition-colors flex-shrink-0">
+                <label className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#D9A86C] hover:bg-[#7C3AED] text-white text-[11px] font-semibold cursor-pointer transition-colors flex-shrink-0">
                   <Upload className="w-3 h-3" />
                   <span>Wgraj</span>
                   <input
@@ -605,7 +605,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                     onClick={() => onStyleChange({ fontSize: `${sz}px` })}
                     className={`flex-1 py-0.5 text-[9px] font-mono rounded border transition-all ${
                       (parseInt(String(currentStyles.fontSize || '14px').replace('px', '')) || 14) === sz
-                        ? 'bg-[#8B5CF6]/20 text-[#A78BFA] border-[#8B5CF6]/30'
+                        ? 'bg-[#D9A86C]/20 text-[#F2C27F] border-[#D9A86C]/30'
                         : 'bg-white/[0.04] text-zinc-500 border-white/[0.06] hover:text-zinc-300'
                     }`}
                   >
@@ -653,7 +653,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                       onClick={() => selectBgMode(tab)}
                       className={`flex-1 py-1.5 text-[11px] font-semibold rounded-lg transition-all ${
                         bgType === tab
-                          ? 'bg-violet-600 text-white'
+                          ? 'bg-[#D9A86C] text-white'
                           : 'text-zinc-400 hover:text-white'
                       }`}
                     >
@@ -690,7 +690,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                 <div className="space-y-3">
                   <button
                     onClick={() => { setMediaPickerTarget('section-bg'); setShowMediaPicker(true); }}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 font-semibold text-xs text-white transition-all shadow-md shadow-violet-600/20"
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#D9A86C] hover:bg-[#C99A4A] font-semibold text-xs text-white transition-all shadow-md shadow-[#D9A86C]/20"
                   >
                     <Upload className="w-4 h-4" />
                     <span>Wybierz lub wgraj zdjęcie tła</span>
@@ -715,7 +715,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                         });
                       }}
                       placeholder="https://..."
-                      className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#8B5CF6]"
+                      className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C]"
                     />
                   </div>
 
@@ -733,7 +733,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                           onClick={() => onStyleChange({ backgroundSize: opt.size })}
                           className={`py-1 text-[11px] font-semibold rounded-lg border transition-all ${
                             currentStyles.backgroundSize === opt.size || (!currentStyles.backgroundSize && opt.size === 'cover')
-                              ? 'bg-violet-600 text-white border-violet-500'
+                              ? 'bg-[#D9A86C] text-white border-[#D9A86C]'
                               : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
                           }`}
                         >
@@ -758,7 +758,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                       step={5}
                       value={Math.round((currentStyles.overlayOpacity ?? 0.4) * 100)}
                       onChange={(e) => onStyleChange({ overlayOpacity: Number(e.target.value) / 100 })}
-                      className="w-full accent-violet-500 h-1 cursor-pointer"
+                      className="w-full accent-[#D9A86C] h-1 cursor-pointer"
                     />
                   </div>
                 </div>
@@ -769,7 +769,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                 <div className="space-y-3">
                   <button
                     onClick={() => { setMediaPickerTarget('video-bg'); setShowMediaPicker(true); }}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 font-semibold text-xs text-white transition-all shadow-md shadow-violet-600/20"
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#D9A86C] hover:bg-[#C99A4A] font-semibold text-xs text-white transition-all shadow-md shadow-[#D9A86C]/20"
                   >
                     <Video className="w-4 h-4" />
                     <span>Wybierz lub wgraj wideo tła</span>
@@ -782,7 +782,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                       value={String(props.backgroundVideo ?? '')}
                       onChange={(e) => onPropChange('backgroundVideo', e.target.value)}
                       placeholder="https://... (mp4, webm)"
-                      className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#8B5CF6]"
+                      className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C]"
                     />
                     <p className="text-[10px] text-zinc-500">Wideo odtwarzane automatycznie w tle (bez dźwięku, w pętli)</p>
                   </div>
@@ -802,7 +802,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                       step={5}
                       value={Math.round((currentStyles.overlayOpacity ?? 0.4) * 100)}
                       onChange={(e) => onStyleChange({ overlayOpacity: Number(e.target.value) / 100 })}
-                      className="w-full accent-violet-500 h-1 cursor-pointer"
+                      className="w-full accent-[#D9A86C] h-1 cursor-pointer"
                     />
                   </div>
                 </div>
@@ -829,7 +829,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                         }
                         className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
                           isSelected
-                            ? 'bg-violet-600 text-white border-violet-500'
+                            ? 'bg-[#D9A86C] text-white border-[#D9A86C]'
                             : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
                         }`}
                       >
@@ -855,7 +855,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   onClick={() => onStyleChange({ display: 'flex', flexDirection: 'column' })}
                   className={`py-2 text-xs font-semibold rounded-xl border transition-all ${
                     currentStyles.flexDirection === 'column' || !currentStyles.flexDirection
-                      ? 'bg-violet-600 text-white border-violet-500'
+                      ? 'bg-[#D9A86C] text-white border-[#D9A86C]'
                       : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
                   }`}
                 >
@@ -865,7 +865,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   onClick={() => onStyleChange({ display: 'flex', flexDirection: 'row' })}
                   className={`py-2 text-xs font-semibold rounded-xl border transition-all ${
                     currentStyles.flexDirection === 'row'
-                      ? 'bg-violet-600 text-white border-violet-500'
+                      ? 'bg-[#D9A86C] text-white border-[#D9A86C]'
                       : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
                   }`}
                 >
@@ -887,7 +887,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                     onClick={() => onStyleChange({ gap: g.val })}
                     className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
                       currentStyles.gap === g.val
-                        ? 'bg-violet-600 text-white border-violet-500'
+                        ? 'bg-[#D9A86C] text-white border-[#D9A86C]'
                         : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
                     }`}
                   >
@@ -914,7 +914,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   onPropChange('url', e.target.value)
                 }}
                 placeholder="https://... (mp4, webm)"
-                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#8B5CF6]"
+                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C]"
               />
             </div>
 
@@ -970,7 +970,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
               <button
                 onClick={() => onPropChange('loop', !props.loop)}
                 className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
-                  props.loop ? 'bg-violet-600 text-white border-violet-500' : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
+                  props.loop ? 'bg-[#D9A86C] text-white border-[#D9A86C]' : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
                 }`}
               >
                 Pętla (Loop)
@@ -978,7 +978,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
               <button
                 onClick={() => onPropChange('autoPlay', !props.autoPlay)}
                 className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
-                  props.autoPlay ? 'bg-violet-600 text-white border-violet-500' : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
+                  props.autoPlay ? 'bg-[#D9A86C] text-white border-[#D9A86C]' : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
                 }`}
               >
                 Autoodtwarzanie
@@ -1021,15 +1021,15 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
               <div className="flex items-center gap-2 p-1.5 bg-white/[0.04] border border-white/[0.08] rounded-xl">
                 <input
                   type="color"
-                  value={currentStyles.color || '#8b5cf6'}
+                  value={currentStyles.color || '#D9A86C'}
                   onChange={(e) => onStyleChange({ color: e.target.value })}
                   className="w-7 h-7 rounded-lg border-0 cursor-pointer bg-transparent flex-shrink-0"
                 />
                 <input
                   type="text"
-                  value={currentStyles.color || '#8b5cf6'}
+                  value={currentStyles.color || '#D9A86C'}
                   onChange={(e) => onStyleChange({ color: e.target.value })}
-                  placeholder="#8b5cf6"
+                  placeholder="#D9A86C"
                   className="w-full bg-transparent text-[11px] font-mono text-zinc-300 focus:outline-none focus:text-white"
                 />
               </div>
@@ -1049,7 +1049,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             {(currentStyles.translateX || currentStyles.translateY) && (
               <button
                 onClick={() => onStyleChange({ translateX: '0px', translateY: '0px' })}
-                className="text-[10px] text-violet-400 hover:text-[#A78BFA] font-medium transition-colors"
+                className="text-[10px] text-violet-400 hover:text-[#F2C27F] font-medium transition-colors"
               >
                 Resetuj (0, 0)
               </button>

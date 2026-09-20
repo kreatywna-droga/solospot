@@ -74,15 +74,15 @@ export function BuilderTopBar({
 
   return (
     <>
-      <div className="h-14 flex items-center justify-between px-4 border-b border-[#27272A]
-                      bg-[#18181B] backdrop-blur-md flex-shrink-0 z-30 select-none">
+      <div className="h-14 flex items-center justify-between px-4 border-b border-[#1A1F2E]
+                      bg-[#080B10] backdrop-blur-md flex-shrink-0 z-30 select-none">
         {/* Left: back + store info */}
         <div className="flex items-center gap-3 min-w-0">
           <Link
             href={`/dashboard/stores/${storeId}`}
             className="flex items-center justify-center w-9 h-9 rounded-xl
-                       bg-[#202024] hover:bg-[#27272A] border border-[#27272A]
-                       text-zinc-400 hover:text-white transition-all"
+                       bg-[#0D1118] hover:bg-[#1A1F2E] border border-[#1A1F2E]
+                       text-zinc-400 hover:text-[#D9A86C] transition-all"
             title="Powrót do dashboardu"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -92,7 +92,7 @@ export function BuilderTopBar({
             <div className="flex items-center gap-2">
               <h1 className="font-bold text-white text-sm truncate">{document.metadata.storeName}</h1>
               {isDirty ? (
-                <span className="flex items-center gap-1 text-[10px] text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full">
+                <span className="flex items-center gap-1 text-[10px] text-[#D9A86C] bg-[#D9A86C]/10 px-2 py-0.5 rounded-full">
                   <AlertCircle className="w-2.5 h-2.5" />
                   Unsaved
                 </span>
@@ -107,7 +107,7 @@ export function BuilderTopBar({
               <p className="text-[11px] text-zinc-500 font-mono truncate">{document.metadata.storeSlug}</p>
               <button
                 onClick={() => setShowLifecycleModal(true)}
-                className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#202024] hover:bg-[#27272A] border border-[#2D2D32] text-[10px] text-zinc-300 hover:text-white transition-all"
+                className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#0D1118] hover:bg-[#1A1F2E] border border-[#252B3A] text-[10px] text-zinc-300 hover:text-[#D9A86C] transition-all"
                 title="Zarządzaj cyklem życia sklepu (Aktywuj / Dezaktywuj / Usuń)"
               >
                 <Power className="w-2.5 h-2.5 text-emerald-400" />
@@ -118,14 +118,14 @@ export function BuilderTopBar({
         </div>
 
         {/* Center: Navigation Tabs */}
-        <div className="flex items-center gap-0.5 bg-[#202024] rounded-xl p-0.5 border border-[#27272A]">
+        <div className="flex items-center gap-0.5 bg-[#0D1118] rounded-xl p-0.5 border border-[#1A1F2E]">
           {TABS.map(tab => (
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all
                 ${activeTab === tab.id
-                  ? 'bg-[#8B5CF6]/15 text-[#A78BFA] border border-[#8B5CF6]/25 shadow-lg shadow-[#8B5CF6]/10'
+                  ? 'bg-[#D9A86C]/15 text-[#F2C27F] border border-[#D9A86C]/30 shadow-lg shadow-[#D9A86C]/10'
                   : 'text-zinc-400 hover:text-white hover:bg-white/[0.05] border border-transparent'
                 }`}
               title={`${tab.label} (${tab.shortcut})`}
@@ -142,19 +142,19 @@ export function BuilderTopBar({
           <div className="flex items-center gap-1">
             <button
               onClick={() => setShowExperienceLibrary(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold text-xs transition-all shadow-md shadow-violet-500/20 active:scale-95"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#B8893A] to-[#D9A86C] hover:from-[#C99A4A] hover:to-[#F2C27F] text-[#080B10] font-semibold text-xs transition-all shadow-md shadow-[#D9A86C]/20 active:scale-95"
               title="Biblioteka gotowych doświadczeń, sekcji i interakcji (Experience Library v2.0)"
             >
-              <Sparkles className="w-3.5 h-3.5 text-violet-200" />
+              <Sparkles className="w-3.5 h-3.5 text-[#080B10]/80" />
               <span className="hidden sm:inline">Experiences</span>
             </button>
 
             <button
               onClick={() => setShowTemplatePicker(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#8B5CF6]/12 hover:bg-[#8B5CF6]/20 text-[#A78BFA] border border-[#8B5CF6]/25 text-xs font-semibold transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#D9A86C]/12 hover:bg-[#D9A86C]/20 text-[#F2C27F] border border-[#D9A86C]/25 text-xs font-semibold transition-all shadow-sm"
               title="Wybierz gotowy szablon strony"
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#8B5CF6]" />
+              <Sparkles className="w-3.5 h-3.5 text-[#D9A86C]" />
               <span className="hidden sm:inline">Szablony</span>
             </button>
 
@@ -175,17 +175,17 @@ export function BuilderTopBar({
             </button>
           </div>
 
-          <div className="w-px h-6 bg-[#27272A] mx-1" />
+          <div className="w-px h-6 bg-[#1A1F2E] mx-1" />
 
           {/* Viewport */}
-          <div className="flex items-center gap-0.5 bg-[#202024] rounded-xl p-0.5 border border-[#27272A]">
+          <div className="flex items-center gap-0.5 bg-[#0D1118] rounded-xl p-0.5 border border-[#1A1F2E]">
             {(['DESKTOP', 'TABLET', 'MOBILE'] as ViewportLabel[]).map(label => (
               <button
                 key={label}
                 onClick={() => setViewport(label)}
                 className={`p-1.5 rounded-lg transition-all
                   ${currentViewport === label
-                    ? 'bg-[#8B5CF6]/15 text-[#A78BFA]'
+                    ? 'bg-[#D9A86C]/15 text-[#F2C27F]'
                     : 'text-zinc-500 hover:text-white'
                   }`}
                 title={label === 'DESKTOP' ? 'Desktop (1280px)' : label === 'TABLET' ? 'Tablet (768px)' : 'Mobile (375px)'}
@@ -197,10 +197,10 @@ export function BuilderTopBar({
             ))}
           </div>
 
-          <div className="w-px h-6 bg-[#27272A] mx-1" />
+          <div className="w-px h-6 bg-[#1A1F2E] mx-1" />
 
           {/* Undo/Redo */}
-          <div className="flex items-center gap-0.5 bg-[#202024] rounded-xl p-0.5 border border-[#27272A]">
+          <div className="flex items-center gap-0.5 bg-[#0D1118] rounded-xl p-0.5 border border-[#1A1F2E]">
             <button
               onClick={undo}
               disabled={!canUndo}
@@ -221,14 +221,14 @@ export function BuilderTopBar({
             </button>
           </div>
 
-          <div className="w-px h-6 bg-[#27272A] mx-1" />
+          <div className="w-px h-6 bg-[#1A1F2E] mx-1" />
 
           {/* Save */}
           <button
             onClick={onSave}
             disabled={saving}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#202024] border border-[#2D2D32]
-                       text-xs font-medium text-zinc-300 hover:bg-[#27272A] hover:text-white
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0D1118] border border-[#252B3A]
+                       text-xs font-medium text-zinc-300 hover:bg-[#1A1F2E] hover:text-[#D9A86C]
                        transition-all disabled:opacity-50"
           >
             <Save className="w-3.5 h-3.5" />
@@ -240,8 +240,8 @@ export function BuilderTopBar({
             onClick={onPublish}
             disabled={saving}
             className="flex items-center gap-2 px-4 py-1.5 rounded-xl font-bold text-xs
-                       bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white
-                       hover:shadow-lg hover:shadow-violet-500/25 hover:scale-105 active:scale-95
+                       bg-gradient-to-r from-[#B8893A] to-[#D9A86C] text-[#080B10]
+                       hover:shadow-lg hover:shadow-[#D9A86C]/30 hover:scale-105 active:scale-95
                        disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             <Zap className="w-3.5 h-3.5" />
@@ -251,8 +251,8 @@ export function BuilderTopBar({
           {/* Command Palette */}
           <button
             onClick={() => setShowCommandPalette(true)}
-            className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-[#202024] border border-[#2D2D32]
-                       text-[10px] text-zinc-400 hover:text-white hover:bg-[#27272A] transition-all"
+            className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-[#0D1118] border border-[#252B3A]
+                       text-[10px] text-zinc-400 hover:text-[#D9A86C] hover:bg-[#1A1F2E] transition-all"
             title="Command Palette (Ctrl+K)"
           >
             <Command className="w-3 h-3" />
@@ -365,10 +365,10 @@ function CommandPaletteModal({ onClose }: { onClose: () => void }): React.ReactE
       onClick={onClose}
     >
       <div
-        className="w-full max-w-xl bg-[#202024] border border-[#2D2D32] rounded-2xl shadow-2xl overflow-hidden"
+        className="w-full max-w-xl bg-[#0D1118] border border-[#1A1F2E] rounded-2xl shadow-2xl overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-[#27272A]">
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-[#1A1F2E]">
           <Search className="w-4 h-4 text-zinc-500" />
           <input
             type="text"
@@ -389,10 +389,10 @@ function CommandPaletteModal({ onClose }: { onClose: () => void }): React.ReactE
               key={i}
               onClick={() => { cmd.action(); onClose() }}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl
-                         text-sm text-zinc-300 hover:bg-white/[0.05] hover:text-white
+                         text-sm text-zinc-300 hover:bg-white/[0.05] hover:text-[#F2C27F]
                          transition-all text-left"
             >
-              <span className="w-6 h-6 rounded-lg bg-[#8B5CF6]/10 flex items-center justify-center text-[#8B5CF6] text-xs">
+              <span className="w-6 h-6 rounded-lg bg-[#D9A86C]/10 flex items-center justify-center text-[#D9A86C] text-xs">
                 {cmd.label.charAt(0)}
               </span>
               {cmd.label}

@@ -37,7 +37,7 @@ interface HoverHighlightProps {
 
 export function HoverHighlight({
   rect,
-  color = '#7c3aed66',
+  color = '#B8893A66',
   borderWidth = 1,
   animationDuration = 100,
 }: HoverHighlightProps) {

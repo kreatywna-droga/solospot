@@ -43,7 +43,7 @@ function BuilderBreadcrumbs() {
   if (breadcrumbs.length === 0) return null
 
   return (
-    <nav className="h-7 flex items-center gap-1 px-4 border-b border-[#27272A] bg-[#18181B] text-[10px]">
+    <nav className="h-7 flex items-center gap-1 px-4 border-b border-[#1A1F2E] bg-[#080B10] text-[10px]">
       {breadcrumbs.map((crumb, index) => (
         <div key={crumb.id} className="flex items-center gap-1">
           {index > 0 && <span className="text-zinc-500 mx-0.5">/</span>}
@@ -227,7 +227,7 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
   )
 
   return (
-    <div className="h-screen bg-[#18181B] text-white flex flex-col overflow-hidden select-none">
+    <div className="h-screen bg-[#080B10] text-white flex flex-col overflow-hidden select-none">
       {/* Overlay to capture pointer events smoothly when dragging across iframes */}
       {(isResizingLeft || isResizingRight) && (
         <div className="fixed inset-0 z-[9999] cursor-ew-resize select-none" />
@@ -266,11 +266,11 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
               }}
               title="Przeciągnij, aby zmienić szerokość lewego panelu (kliknij 2x, aby zresetować do 320px)"
               className={`w-2 hover:w-2.5 -mr-1 z-30 cursor-ew-resize transition-all flex items-center justify-center group flex-shrink-0 relative ${
-                isResizingLeft ? 'bg-[#8B5CF6] shadow-lg shadow-[#8B5CF6]/50' : 'bg-transparent hover:bg-[#8B5CF6]/30'
+                isResizingLeft ? 'bg-[#D9A86C] shadow-lg shadow-[#D9A86C]/50' : 'bg-transparent hover:bg-[#D9A86C]/30'
               }`}
             >
               <div className={`w-[2px] h-10 rounded-full transition-colors ${
-                isResizingLeft ? 'bg-white' : 'bg-white/10 group-hover:bg-[#A78BFA]'
+                isResizingLeft ? 'bg-white' : 'bg-white/10 group-hover:bg-[#F2C27F]'
               }`} />
             </div>
           </>
@@ -290,18 +290,18 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
           }}
           title="Przeciągnij, aby zmienić szerokość inspektora (kliknij 2x, aby zresetować do 288px)"
           className={`w-2 hover:w-2.5 -ml-1 z-30 cursor-ew-resize transition-all flex items-center justify-center group flex-shrink-0 relative ${
-            isResizingRight ? 'bg-[#8B5CF6] shadow-lg shadow-[#8B5CF6]/50' : 'bg-transparent hover:bg-[#8B5CF6]/30'
+            isResizingRight ? 'bg-[#D9A86C] shadow-lg shadow-[#D9A86C]/50' : 'bg-transparent hover:bg-[#D9A86C]/30'
           }`}
         >
           <div className={`w-[2px] h-10 rounded-full transition-colors ${
-            isResizingRight ? 'bg-white' : 'bg-white/10 group-hover:bg-[#A78BFA]'
+            isResizingRight ? 'bg-white' : 'bg-white/10 group-hover:bg-[#F2C27F]'
           }`} />
         </div>
 
         {/* Inspector (Right Panel) — Phase 3 Inspector (Design + Content tabs) */}
         <aside
           style={{ width: `${rightWidth}px` }}
-          className="border-l border-[#27272A] bg-[#202024] flex flex-col overflow-hidden flex-shrink-0 h-full select-none"
+          className="border-l border-[#1A1F2E] bg-[#0D1118] flex flex-col overflow-hidden flex-shrink-0 h-full select-none"
         >
           <PhaseThreeInspector
             sectionId={canvas.selectedSectionId}
