@@ -45,13 +45,13 @@ import {
 // ---------------------------------------------------------------------------
 
 const GUIDE_COLORS: Record<GuideType, string> = {
-  ALIGNMENT: '#ff0000',
-  DISTANCE: '#00cc00',
-  CENTER: '#ff0000',
-  MARGIN: '#ff8800',
-  SPACING: '#00ccff',
-  ANCHOR: '#ff6600',
-  RULE: '#888888',
+  ALIGNMENT: '#00FF66',
+  DISTANCE: '#00FF66',
+  CENTER: '#00FF66',
+  MARGIN: '#00FF66',
+  SPACING: '#00FF66',
+  ANCHOR: '#00FF66',
+  RULE: '#00FF66',
 };
 
 // ---------------------------------------------------------------------------
