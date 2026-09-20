@@ -2134,21 +2134,6 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
   // Smart Guides — real-time alignment guide overlay during element drag
   // ---------------------------------------------------------------------------
   const [showSmartGuides, setShowSmartGuides] = useState(true)
-  const [liveSmartGuides, setLiveSmartGuides] = useState<ReadonlyArray<SmartGuide>>([])
-  const [externalSmartGuides, setExternalSmartGuides] = useState<ReadonlyArray<SmartGuide>>([])
-
-  useEffect(() => {
-    const handleGuidesUpdate = (e: Event) => {
-      const detail = (e as CustomEvent).detail
-      if (detail && Array.isArray(detail.guides)) {
-        setExternalSmartGuides(detail.guides)
-      }
-    }
-    window.addEventListener('solospot:smart-guides-update', handleGuidesUpdate)
-    return () => window.removeEventListener('solospot:smart-guides-update', handleGuidesUpdate)
-  }, [])
-
-  const activeRenderedGuides = liveSmartGuides.length > 0 ? liveSmartGuides : externalSmartGuides
 
 
   // ---------------------------------------------------------------------------
@@ -2425,8 +2410,11 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                 }
               }
 
-              // Set live smart guides strictly to single active snapped guides
-              setLiveSmartGuides(guideRes.snapGuidance.snapped ? guideRes.snapGuidance.guides : [])
+              // Broadcast live smart guides directly to SmartGuidesOverlay (0 parent re-renders)
+              const activeGuidesToRender = guideRes.snapGuidance.snapped ? guideRes.snapGuidance.guides : []
+              window.dispatchEvent(new CustomEvent('solospot:smart-guides-update', {
+                detail: { guides: activeGuidesToRender }
+              }))
             }
 
             if (isSection && domEl) {
@@ -2485,7 +2473,9 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
         detail: { nodeId: node.id },
       }))
 
-      setLiveSmartGuides([])
+      window.dispatchEvent(new CustomEvent('solospot:smart-guides-update', {
+        detail: { guides: [] }
+      }))
 
       if (domEl) {
         domEl.style.transition = prevTransition
@@ -3020,15 +3010,12 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
           externalRects={externalRects}
         />
 
-        {/* Smart Guides Alignment Overlay — SVG lines visible during drag */}
-        {showSmartGuides && activeRenderedGuides.length > 0 && (
-          <SmartGuidesOverlay
-            guides={activeRenderedGuides}
-            width={canvasFrameRef.current?.clientWidth ?? viewportWidth}
-            height={canvasFrameRef.current?.scrollHeight ?? 800}
-            visible={showSmartGuides && activeRenderedGuides.length > 0}
-          />
-        )}
+        {/* Smart Guides Alignment Overlay — Autonomous 120 FPS SVG overlay */}
+        <SmartGuidesOverlay
+          width={canvasFrameRef.current?.clientWidth ?? viewportWidth}
+          height={canvasFrameRef.current?.scrollHeight ?? 800}
+          visible={showSmartGuides}
+        />
 
         {/* Add section & Layout Presets at bottom */}
         {sections.length > 0 && (
@@ -3038,7 +3025,6 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
               <GuidesToggle
                 enabled={showSmartGuides}
                 onChange={setShowSmartGuides}
-                activeGuideCount={activeRenderedGuides.length}
                 size="sm"
               />
               <button
