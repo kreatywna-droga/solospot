@@ -41,11 +41,11 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
     const viewportHeight = window.innerHeight
     const docHeight = document.documentElement.scrollHeight
 
-    // SLOW DOWN SCROLL: video scrubs leisurely through >50% of page (55% of document scroll)
+    // FULL PAGE SCROLL PACING: video scrubs leisurely across 100% of document height
     const maxScroll = Math.max(docHeight - viewportHeight, 1)
-    const videoEndScroll = Math.max(maxScroll * 0.55, 8000)
+    const videoEndScroll = maxScroll
 
-    // Global timeline progress for video: 0.0 (top) → 1.0 (55% of page)
+    // Global timeline progress for video: 0.0 (top of page) → 1.0 (bottom of page)
     const rawProgress = scrollY / videoEndScroll
     const videoProgress = Math.min(Math.max(rawProgress, 0), 1)
 
@@ -59,17 +59,10 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
     }
 
     // 2. ── Backdrop Opacity & Visibility Modulation ─────────────────────────
-    // Stays 100% visible through first half of page. Fades out smoothly past 55%.
+    // Stays 100% visible across the entire page down to footer
     if (videoBackdropRef.current) {
-      if (scrollY <= videoEndScroll) {
-        videoBackdropRef.current.style.opacity = '1'
-        videoBackdropRef.current.style.visibility = 'visible'
-      } else {
-        const fadeOut = Math.min(Math.max((scrollY - videoEndScroll) / 500, 0), 1)
-        const opacity = 1 - fadeOut
-        videoBackdropRef.current.style.opacity = opacity.toString()
-        videoBackdropRef.current.style.visibility = opacity <= 0.01 ? 'hidden' : 'visible'
-      }
+      videoBackdropRef.current.style.opacity = '1'
+      videoBackdropRef.current.style.visibility = 'visible'
     }
 
     // 3. ── Hero Micro-indicators ────────────────────────────────────────────

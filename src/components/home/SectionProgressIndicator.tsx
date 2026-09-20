@@ -29,6 +29,10 @@ const SECTIONS: Section[] = [
   { id: 'runtime',         label: 'Runtime' },
   { id: 'export',          label: 'Export HTML' },
   { id: 'mission-control', label: 'Mission Control' },
+  { id: 'why',             label: 'Dlaczego SoloSpot' },
+  { id: 'integrations',    label: 'Integracje' },
+  { id: 'pricing',         label: 'Cennik' },
+  { id: 'faq',             label: 'FAQ' },
   { id: 'cta',             label: 'Zacznij' },
 ]
 

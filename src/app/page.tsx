@@ -474,112 +474,73 @@ function PlatformArchitecture() {
 
 function MarketplaceSection() {
   const steps = [
-    { number: '01', title: 'Przeglądaj Marketplace', desc: '4 kategorie: Moda, Uroda, Gastronomia, Cyfrowe. Każdy szablon to gotowy biznes: produkty, motyw, sekcje, SEO.', icon: Store },
-    { number: '02', title: 'Kup licencję', desc: 'Jednorazowa opłata (199–399 PLN) lub subskrypcja. Natychmiastowy dostęp do pakietu JSON + assets.', icon: CreditCard },
-    { number: '03', title: 'Provisioning automatyczny', desc: 'Platforma tworzy tenant, izolowaną bazę, wstrzykuje dane, generuje klucze API. 30 sekund.', icon: Cpu },
-    { number: '04', title: 'Lądujesz w Studio', desc: 'Gotowy sklep otwiera się w builderze. Wszystko skonfigurowane. Edytujesz tylko to, co chcesz.', icon: LayoutDashboard },
-    { number: '05', title: 'Publikuj / Eksportuj', desc: 'Wdróż na platformie (Edge CDN, SSL, domeny) lub wyeksportuj HTML na własny hosting.', icon: Rocket },
+    { number: '01', title: 'Przeglądaj Marketplace', desc: '4 kategorie: Moda, Uroda, Gastronomia, Cyfrowe. Każdy szablon to gotowy biznes: produkty, motyw, sekcje, SEO.', icon: Store, tag: '12+ szablonów' },
+    { number: '02', title: 'Kup licencję', desc: 'Jednorazowa opłata (199–399 PLN) lub subskrypcja. Natychmiastowy dostęp do pakietu JSON + assets.', icon: CreditCard, tag: 'Stripe / P24 / 1Koszyk' },
+    { number: '03', title: 'Provisioning automatyczny', desc: 'Platforma tworzy tenant, izolowaną bazę, wstrzykuje dane, generuje klucze API. 30 sekund.', icon: Cpu, tag: '~30 sekund' },
+    { number: '04', title: 'Lądujesz w Studio', desc: 'Gotowy sklep otwiera się w builderze. Wszystko skonfigurowane. Edytujesz tylko to, co chcesz.', icon: LayoutDashboard, tag: 'Zero kodu' },
+    { number: '05', title: 'Publikuj / Eksportuj', desc: 'Wdróż na platformie (Edge CDN, SSL, domeny) lub wyeksportuj HTML na własny hosting.', icon: Rocket, tag: 'Edge CDN / Export' },
   ]
 
   return (
-    <section id="marketplace" className="py-32 px-6 max-w-7xl mx-auto bg-[#080B10]">
-      <div className="text-center mb-20">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#D9A86C]/10 border border-[#D9A86C]/25 mb-6">
-          <Box className="w-4 h-4 text-[#D9A86C]" />
-          <span className="text-xs font-bold tracking-[0.2em] text-[#D9A86C] uppercase">Marketplace</span>
-        </motion.div>
-        <h2 className="text-4xl md:text-5xl font-bold text-[#F5F1EA] mb-6 tracking-tight">
-          Nie kupujesz szablonu.<br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
-            Kupujesz gotowy biznes.
-          </span>
-        </h2>
-        <p className="text-xl text-[#B8B1A7] max-w-xl mx-auto">
-          Każdy produkt w Marketplace to kompletny pakiet: baza produktów, motyw, sekcje, konfiguracja płatności/wysyłki, SEO.
-          Instalacja = provisioning tenantu w 30 sekund.
-        </p>
-      </div>
+    <section id="marketplace" className="relative py-20 lg:py-28 px-6 sm:px-8 lg:px-12 max-w-7xl mx-auto bg-transparent">
+      <div className="max-w-2xl">
+        <div className="mb-8">
+          <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#D9A86C]/10 border border-[#D9A86C]/25 mb-4">
+            <Box className="w-3.5 h-3.5 text-[#D9A86C]" />
+            <span className="text-[11px] font-bold tracking-[0.2em] text-[#D9A86C] uppercase">Marketplace</span>
+          </motion.div>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F5F1EA] tracking-tight mb-3">
+            Nie kupujesz szablonu.<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
+              Kupujesz gotowy biznes.
+            </span>
+          </h2>
+          <p className="text-sm sm:text-base text-[#B8B1A7] leading-relaxed">
+            Każdy produkt w Marketplace to kompletny pakiet: baza produktów, motyw, sekcje, konfiguracja płatności i wysyłki, SEO. Instalacja to provisioning tenantu w 30 sekund.
+          </p>
+        </div>
 
-      <div className="relative">
-        <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-[#D9A86C]/30 via-[#F2C27F]/20 to-transparent -translate-x-1/2 hidden lg:block" />
-        <div className="space-y-16">
+        <div className="space-y-3.5">
           {steps.map((step, i) => (
-            <motion.div key={step.number} initial={{ opacity: 0, x: i % 2 === 0 ? -60 : 60 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.5 }}
-              className={`relative flex items-start gap-8 ${i % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'}`}>
-              <div className={`flex-1 lg:w-1/2 ${i % 2 === 1 ? 'lg:pl-16' : 'lg:pr-16'} lg:pt-4`}>
-                <div className="relative">
-                  <div className="absolute left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-[#D9A86C] border-4 border-[#080B10] z-10 hidden lg:block" />
-                  <div className={`bg-[#0D1118]/90 backdrop-blur-sm border border-white/10 rounded-2xl p-6 ${i % 2 === 1 ? 'ml-12' : 'mr-12'}`}>
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="text-3xl font-black text-[#D9A86C]/60 font-mono">{step.number}</span>
-                      <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-                        <step.icon className="w-5 h-5 text-[#F2C27F]" />
-                      </div>
-                    </div>
-                    <h3 className="text-xl font-bold text-[#F5F1EA] mb-2">{step.title}</h3>
-                    <p className="text-[#B8B1A7]">{step.desc}</p>
-                  </div>
+            <motion.div
+              key={step.number}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.05 }}
+              className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 hover:border-[#D9A86C]/30 rounded-2xl p-5 transition-all group"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:border-[#D9A86C]/40 transition-colors">
+                  <step.icon className="w-5 h-5 text-[#F2C27F]" />
                 </div>
-              </div>
-              <div className="flex-1 lg:w-1/2">
-                <div className="bg-[#0D1118]/90 backdrop-blur-sm border border-white/10 rounded-2xl p-6 aspect-[4/3] flex items-center justify-center relative overflow-hidden">
-                  <div className="relative w-full h-full bg-[#080B10] rounded-xl border border-white/5 flex items-center justify-center">
-                    {i === 0 && (
-                      <div className="text-center p-8">
-                        <Store className="w-16 h-16 mx-auto mb-4 text-[#77736D]" />
-                        <p className="text-[#B8B1A7] text-lg">Marketplace: 4 kategorie, 12+ szablonów</p>
-                        <p className="text-[#77736D] text-sm mt-2">Fashion Pro • Beauty • Restaurant • Digital</p>
-                      </div>
-                    )}
-                    {i === 1 && (
-                      <div className="text-center p-8">
-                        <CreditCard className="w-16 h-16 mx-auto mb-4 text-[#77736D]" />
-                        <p className="text-[#B8B1A7] text-lg">Checkout: Stripe / 1Koszyk / Przelewy24</p>
-                        <p className="text-[#77736D] text-sm mt-2">Licencja jednorazowa lub subskrypcja</p>
-                      </div>
-                    )}
-                    {i === 2 && (
-                      <div className="text-center p-8">
-                        <Cpu className="w-16 h-16 mx-auto mb-4 text-[#77736D]" />
-                        <p className="text-[#B8B1A7] text-lg">Provisioning: tenant + DB + klucze API</p>
-                        <p className="text-[#77736D] text-sm mt-2">~30 sekund • Zero konfiguracji ręcznej</p>
-                      </div>
-                    )}
-                    {i === 3 && (
-                      <div className="text-center p-8">
-                        <LayoutDashboard className="w-16 h-16 mx-auto mb-4 text-[#77736D]" />
-                        <p className="text-[#B8B1A7] text-lg">Studio: gotowy sklep do edycji</p>
-                        <p className="text-[#77736D] text-sm mt-2">Strony • Sekcje • Motyw • Produkty • SEO</p>
-                      </div>
-                    )}
-                    {i === 4 && (
-                      <div className="text-center p-8">
-                        <div className="flex gap-4 justify-center">
-                          <div className="p-4 bg-[#D9A86C]/20 rounded-xl">
-                            <Rocket className="w-8 h-8 text-[#F2C27F]" />
-                          </div>
-                          <div className="p-4 bg-emerald-500/20 rounded-xl">
-                            <FileCode className="w-8 h-8 text-emerald-400" />
-                          </div>
-                        </div>
-                        <p className="text-[#B8B1A7] text-lg mt-4">Publish na platformie LUB Export HTML</p>
-                        <p className="text-[#77736D] text-sm mt-2">Edge CDN • SSL • Domeny • Dowolny hosting</p>
-                      </div>
-                    )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <h3 className="text-sm sm:text-base font-bold text-[#F5F1EA] flex items-center gap-2">
+                      <span className="text-xs font-mono font-bold text-[#D9A86C]">{step.number}</span>
+                      {step.title}
+                    </h3>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[#D9A86C] flex-shrink-0">
+                      {step.tag}
+                    </span>
                   </div>
+                  <p className="text-xs sm:text-sm text-[#B8B1A7] leading-relaxed">{step.desc}</p>
                 </div>
               </div>
             </motion.div>
           ))}
         </div>
-      </div>
 
-      <div className="mt-16 text-center">
-        <Link href="/dashboard/templates"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#D9A86C]/30 rounded-full text-sm font-medium text-[#F5F1EA] transition-all">
-          Przeglądaj Marketplace <ArrowRight className="w-4 h-4 text-[#D9A86C]" />
-        </Link>
+        <div className="mt-8">
+          <Link
+            href="/dashboard/templates"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#D9A86C]/30 rounded-full text-xs sm:text-sm font-medium text-[#F5F1EA] transition-all"
+          >
+            <span>Przeglądaj Marketplace</span>
+            <ArrowRight className="w-4 h-4 text-[#D9A86C]" />
+          </Link>
+        </div>
       </div>
     </section>
   )
@@ -587,94 +548,81 @@ function MarketplaceSection() {
 
 function StudioSection() {
   const workflowSteps = [
-    { id: 1, label: 'Nowy sklep', desc: 'Z Marketplace lub pusty tenant', icon: Plus },
-    { id: 2, label: 'Wybór Template', desc: 'Fashion Pro, Beauty, Restaurant, Digital...', icon: Package },
+    { id: 1, label: 'Nowy sklep', desc: 'Z Marketplace lub czysty tenant', icon: Plus },
+    { id: 2, label: 'Wybór Template', desc: 'Fashion Pro, Beauty, Restaurant, Digital', icon: Package },
     { id: 3, label: 'Edycja w Studio', desc: 'Strony • Sekcje • Motyw • Produkty • SEO', icon: LayoutDashboard },
-    { id: 4, label: 'Live Preview', desc: 'Podgląd na żywo w czasie rzeczywistym', icon: Eye },
+    { id: 4, label: 'Live Preview', desc: 'Podgląd w czasie rzeczywistym', icon: Eye },
     { id: 5, label: 'Publikacja', desc: 'Edge deploy + SSL + domena w sekundach', icon: Rocket },
   ]
 
   const tabs = ['Strony', 'Sekcje', 'Motyw', 'Produkty', 'SEO', 'Publikuj']
 
   return (
-    <section id="studio" className="py-32 px-6 max-w-7xl mx-auto bg-[#080B10]">
-      <div className="text-center mb-20">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#D9A86C]/10 border border-[#D9A86C]/25 mb-6">
-          <LayoutDashboard className="w-4 h-4 text-[#D9A86C]" />
-          <span className="text-xs font-bold tracking-[0.2em] text-[#D9A86C] uppercase">Studio Builder</span>
-        </motion.div>
-        <h2 className="text-4xl md:text-5xl font-bold text-[#F5F1EA] mb-6 tracking-tight">
-          Konfigurujesz w <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">Studio.</span>
-          <br />Publikujesz w sekundy.
-        </h2>
-        <p className="text-xl text-[#B8B1A7] max-w-2xl mx-auto">
-          Wizualny builder dla Commerce OS. Zero kodu. Deklaratywna konfiguracja JSON.
-          Każda zmiana natychmiast widoczna w Live Preview.
-        </p>
-      </div>
-
-      <div className="grid lg:grid-cols-[1fr_2fr] gap-8">
-        <div className="space-y-6">
-          <div className="bg-[#0D1118]/90 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-            <h3 className="font-bold text-[#F5F1EA] mb-4">Workflow</h3>
-            <div className="space-y-4">
-              {workflowSteps.map((step, i) => (
-                <motion.div key={step.id} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                  className="flex items-start gap-4 p-4 rounded-xl bg-white/[0.03] border border-white/5 hover:border-[#D9A86C]/30 transition-all">
-                  <div className="w-10 h-10 rounded-xl bg-[#D9A86C]/20 border border-[#D9A86C]/30 flex items-center justify-center flex-shrink-0">
-                    <step.icon className="w-5 h-5 text-[#F2C27F]" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-[#F5F1EA]">{step.label}</p>
-                    <p className="text-xs text-[#77736D]">{step.desc}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-[#0D1118]/90 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-            <h3 className="font-bold text-[#F5F1EA] mb-4">Zakładki Studio</h3>
-            <div className="flex flex-wrap gap-2">
-              {tabs.map((tab, i) => (
-                <span key={tab} className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                  i === 0 ? 'bg-[#D9A86C]/20 text-[#F2C27F] border border-[#D9A86C]/30' : 'text-[#77736D] hover:text-[#F5F1EA] hover:bg-white/5'
-                }`}>
-                  {tab}
-                </span>
-              ))}
-            </div>
-          </div>
+    <section id="studio" className="relative py-20 lg:py-28 px-6 sm:px-8 lg:px-12 max-w-7xl mx-auto bg-transparent">
+      <div className="max-w-2xl">
+        <div className="mb-8">
+          <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#D9A86C]/10 border border-[#D9A86C]/25 mb-4">
+            <LayoutDashboard className="w-3.5 h-3.5 text-[#D9A86C]" />
+            <span className="text-[11px] font-bold tracking-[0.2em] text-[#D9A86C] uppercase">Studio Builder</span>
+          </motion.div>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F5F1EA] tracking-tight mb-3">
+            Konfigurujesz w <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">Studio.</span>
+            <br />Publikujesz w sekundy.
+          </h2>
+          <p className="text-sm sm:text-base text-[#B8B1A7] leading-relaxed">
+            Wizualny builder dla Commerce OS. Zero kodu. Deklaratywna konfiguracja JSON. Każda zmiana jest natychmiast widoczna w podglądzie Live Preview.
+          </p>
         </div>
 
-        <div className="relative">
-          <div className="bg-[#0D1118]/90 backdrop-blur-sm border border-white/10 rounded-3xl overflow-hidden">
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-[#080B10]/80">
-              <div className="flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-red-500/60" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
-                <div className="w-3 h-3 rounded-full bg-green-500/60" />
-              </div>
-              <div className="flex-1 text-center text-xs text-[#77736D] font-mono">studio.solospot.local</div>
-              <div className="w-24 h-6 bg-emerald-500/20 rounded border border-emerald-500/30 flex items-center justify-center">
-                <span className="text-xs text-emerald-400 flex items-center gap-1">
-                  <Activity className="w-3 h-3" /> Live
-                </span>
-              </div>
+        <div className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden p-4 sm:p-5">
+          <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/[0.08]">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
+              <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
+              <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
+              <span className="text-[11px] text-[#77736D] font-mono ml-2">studio.solospot.local</span>
             </div>
-            <div className="p-8 h-[500px] flex items-center justify-center">
-              <div className="w-full max-w-2xl mx-auto">
-                <div className="bg-[#080B10] rounded-2xl border border-white/5 p-8 aspect-[4/3] flex items-center justify-center relative overflow-hidden">
-                  <div className="text-center z-10">
-                    <Monitor className="w-20 h-20 mx-auto mb-4 text-[#77736D]" />
-                    <p className="text-[#B8B1A7] text-lg">Live Preview — rzeczywisty sklep</p>
-                    <p className="text-[#77736D] text-sm mt-2">Wybierz sekcję z lewego panelu w Studio</p>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-transparent via-[#D9A86C]/5 to-transparent" />
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
+              <Activity className="w-2.5 h-2.5" /> LIVE
+            </span>
+          </div>
+
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {tabs.map((tab, i) => (
+              <span
+                key={tab}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                  i === 0
+                    ? 'bg-[#D9A86C]/20 text-[#F2C27F] border border-[#D9A86C]/30'
+                    : 'text-[#77736D] bg-white/[0.02] border border-white/[0.06]'
+                }`}
+              >
+                {tab}
+              </span>
+            ))}
+          </div>
+
+          <div className="space-y-2">
+            {workflowSteps.map((step, i) => (
+              <motion.div
+                key={step.id}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.04 }}
+                className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:border-[#D9A86C]/30 transition-all"
+              >
+                <div className="w-7 h-7 rounded-lg bg-[#D9A86C]/15 flex items-center justify-center flex-shrink-0">
+                  <step.icon className="w-3.5 h-3.5 text-[#F2C27F]" />
                 </div>
-              </div>
-            </div>
+                <div className="flex-1 min-w-0">
+                  <span className="text-xs font-semibold text-[#F5F1EA] block">{step.label}</span>
+                  <span className="text-[11px] text-[#77736D] block truncate">{step.desc}</span>
+                </div>
+                <span className="text-[10px] font-mono text-[#77736D]">0{i + 1}</span>
+              </motion.div>
+            ))}
           </div>
         </div>
       </div>
@@ -684,78 +632,73 @@ function StudioSection() {
 
 function RuntimeEngineSection() {
   const pipeline = [
-    { stage: 'INPUT', label: 'Konfiguracja JSON', desc: 'Strony, sekcje, motyw, produkty, SEO, płatności, wysyłka', icon: FileCode, color: 'text-[#F2C27F]', bg: 'from-white/[0.04] to-white/[0.01]' },
-    { stage: 'RESOLVE', label: 'Resolver wykonawczy', desc: 'Rozwiązuje zależności, ładuje szablony, wstrzykuje dane tenantów', icon: GitMerge, color: 'text-[#D9A86C]', bg: 'from-white/[0.04] to-white/[0.01]' },
-    { stage: 'RENDER', label: 'Renderer sekcji', desc: 'Mapuje typy na komponenty React, SSR + CSR hydration', icon: LayoutGrid, color: 'text-[#F6D7AA]', bg: 'from-white/[0.04] to-white/[0.01]' },
-    { stage: 'RUNTIME', label: 'Środowisko sklepu', desc: 'Koszyk, checkout, konto, płatności — gotowe moduły biznesowe', icon: Store, color: 'text-[#F2C27F]', bg: 'from-white/[0.04] to-white/[0.01]' },
-    { stage: 'EXPORT', label: 'Eksport HTML/Static', desc: 'Generuje statyczne pliki + assets do CDN/Edge', icon: FileCode, color: 'text-emerald-400', bg: 'from-white/[0.04] to-white/[0.01]' },
-    { stage: 'EDGE', label: 'Runtime Edge', desc: 'Vercel Edge, Cloudflare Workers, V8 Isolates', icon: Cloud, color: 'text-[#D9A86C]', bg: 'from-white/[0.04] to-white/[0.01]' },
+    { stage: 'INPUT', label: 'Konfiguracja JSON', desc: 'Strony, sekcje, motyw, produkty, SEO', icon: FileCode, color: 'text-[#F2C27F]' },
+    { stage: 'RESOLVE', label: 'Resolver wykonawczy', desc: 'Rozwiązuje zależności, ładuje szablony, wstrzykuje dane', icon: GitMerge, color: 'text-[#D9A86C]' },
+    { stage: 'RENDER', label: 'Renderer sekcji', desc: 'Mapuje typy na komponenty React, SSR + CSR hydration', icon: LayoutGrid, color: 'text-[#F6D7AA]' },
+    { stage: 'RUNTIME', label: 'Środowisko sklepu', desc: 'Koszyk, checkout, konto, płatności', icon: Store, color: 'text-[#F2C27F]' },
+    { stage: 'EXPORT', label: 'Eksport HTML/Static', desc: 'Generuje statyczne pliki + assets do CDN/Edge', icon: FileCode, color: 'text-emerald-400' },
+    { stage: 'EDGE', label: 'Runtime Edge', desc: 'Vercel Edge, Cloudflare Workers, V8 Isolates', icon: Cloud, color: 'text-[#D9A86C]' },
   ]
 
   const techSpecs = [
-    { label: 'Zero build time', value: 'Konfiguracja w runtime' },
-    { label: 'Cold start', value: '< 50ms na Edge' },
-    { label: 'Bundle size', value: '~45KB gzipped' },
-    { label: 'Multi-tenant', value: '∞ tenantów / DB' },
-    { label: 'Schema', value: 'JSON Schema + TS' },
-    { label: 'Extensibility', value: 'Custom components' },
+    { label: 'Zero build time', value: 'W runtime' },
+    { label: 'Cold start', value: '< 50ms' },
+    { label: 'Bundle size', value: '~45KB' },
+    { label: 'Multi-tenant', value: '∞ / DB' },
+    { label: 'Schema', value: 'TS + JSON' },
+    { label: 'Extensibility', value: 'Custom' },
   ]
 
   return (
-    <section id="runtime" className="py-32 px-6 max-w-7xl mx-auto bg-[#080B10]">
-      <div className="text-center mb-20">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#D9A86C]/10 border border-[#D9A86C]/25 mb-6">
-          <Cpu className="w-4 h-4 text-[#D9A86C]" />
-          <span className="text-xs font-bold tracking-[0.2em] text-[#D9A86C] uppercase">Runtime Engine</span>
-        </motion.div>
-        <h2 className="text-4xl md:text-5xl font-bold text-[#F5F1EA] mb-6 tracking-tight">
-          Silnik wykonawczy:<br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
-            JSON → Sklep na żywo.
-          </span>
-        </h2>
-        <p className="text-xl text-[#B8B1A7] max-w-2xl mx-auto">
-          Zero buildów. Zero deployów. Konfiguracja JSON jest interpretowana w czasie rzeczywistym.
-          Sklep działa natychmiast po zapisie. To nie generator stron — to runtime engine.
-        </p>
-      </div>
+    <section id="runtime" className="relative py-20 lg:py-28 px-6 sm:px-8 lg:px-12 max-w-7xl mx-auto bg-transparent">
+      <div className="max-w-2xl">
+        <div className="mb-8">
+          <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#D9A86C]/10 border border-[#D9A86C]/25 mb-4">
+            <Cpu className="w-3.5 h-3.5 text-[#D9A86C]" />
+            <span className="text-[11px] font-bold tracking-[0.2em] text-[#D9A86C] uppercase">Runtime Engine</span>
+          </motion.div>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F5F1EA] tracking-tight mb-3">
+            Silnik wykonawczy:<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
+              JSON → Sklep na żywo.
+            </span>
+          </h2>
+          <p className="text-sm sm:text-base text-[#B8B1A7] leading-relaxed">
+            Zero buildów. Zero deployów. Konfiguracja JSON jest interpretowana w czasie rzeczywistym. Sklep działa natychmiast po zapisie.
+          </p>
+        </div>
 
-      <div className="relative mb-20">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
           {pipeline.map((step, i) => (
-            <motion.div key={step.stage} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-              className="relative">
-              <div className={`relative bg-gradient-to-br ${step.bg} border border-white/10 hover:border-[#D9A86C]/30 rounded-2xl p-6 h-full flex flex-col transition-all`}>
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-xs font-black text-[#77736D] uppercase tracking-wider">{step.stage}</span>
-                  <div className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-                    <step.icon className={`w-5 h-5 ${step.color}`} />
-                  </div>
-                </div>
-                <h3 className="text-lg font-bold text-[#F5F1EA] mb-2">{step.label}</h3>
-                <p className="text-sm text-[#B8B1A7] flex-1">{step.desc}</p>
-                {i < pipeline.length - 1 && (
-                  <div className="absolute right-0 top-1/2 w-4 h-4 -translate-y-1/2 translate-x-1/2 hidden lg:block">
-                    <ArrowRight className="w-4 h-4 text-[#D9A86C]/40" />
-                  </div>
-                )}
+            <motion.div
+              key={step.stage}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.04 }}
+              className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 hover:border-[#D9A86C]/30 rounded-2xl p-4 transition-all"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-mono font-bold text-[#77736D] uppercase tracking-wider">{step.stage}</span>
+                <step.icon className={`w-4 h-4 ${step.color}`} />
               </div>
+              <h3 className="text-xs sm:text-sm font-bold text-[#F5F1EA] mb-1">{step.label}</h3>
+              <p className="text-[11px] text-[#77736D] leading-relaxed">{step.desc}</p>
             </motion.div>
           ))}
         </div>
-      </div>
 
-      <div className="bg-[#0D1118]/90 backdrop-blur-sm border border-white/10 rounded-3xl p-8 lg:p-12">
-        <h3 className="text-lg font-bold text-[#F5F1EA] mb-8 text-center">Specyfikacja techniczna</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          {techSpecs.map((spec, i) => (
-            <motion.div key={spec.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
-              className="text-center p-4 bg-white/[0.02] rounded-xl border border-white/5">
-              <p className="text-2xl font-black text-[#F2C27F] mb-1">{spec.value}</p>
-              <p className="text-xs text-[#77736D] uppercase tracking-wider">{spec.label}</p>
-            </motion.div>
-          ))}
+        <div className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 rounded-2xl p-5">
+          <h3 className="text-xs font-bold text-[#D9A86C] uppercase tracking-[0.2em] mb-4">Specyfikacja techniczna</h3>
+          <div className="grid grid-cols-3 gap-3 text-center">
+            {techSpecs.map((spec) => (
+              <div key={spec.label} className="p-2.5 bg-white/[0.02] rounded-xl border border-white/5">
+                <p className="text-base sm:text-lg font-black text-[#F2C27F]">{spec.value}</p>
+                <p className="text-[10px] text-[#77736D] uppercase tracking-wider mt-0.5">{spec.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -765,87 +708,82 @@ function RuntimeEngineSection() {
 function HTMLExportSection() {
   const features = [
     { icon: FileCode, title: 'Statyczny HTML/CSS/JS', desc: 'Czyste pliki — bez Node.js, bez bazy, bez kontenerów. Działają wszędzie.' },
-    { icon: Globe, title: 'Edge/CDN Ready', desc: 'Optymalizowane pod cache: TTFB < 50ms globalnie. Vercel, Netlify, Cloudflare, AWS S3+CF.' },
+    { icon: Globe, title: 'Edge/CDN Ready', desc: 'Optymalizowane pod cache: TTFB < 50ms globalnie. Vercel, Netlify, Cloudflare, AWS.' },
     { icon: Zap, title: 'Hydration opcjonalny', desc: 'Dodaj interaktywność (koszyk, filtry) przez lekki layer — lub zostaw czysty HTML.' },
-    { icon: Shield, title: 'Bezpieczeństwo by design', desc: 'Brak backendu = brak powierzchni ataku. Płatności w iframe/checkout providera.' },
+    { icon: Shield, title: 'Bezpieczeństwo by design', desc: 'Brak backendu = brak powierzchni ataku. Płatności w bezpiecznym iframe.' },
     { icon: HardDrive, title: 'Wersjonowanie i rollback', desc: 'Każdy eksport to wersja. Powrót do dowolnej wersji jednym kliknięciem.' },
-    { icon: Terminal, title: 'CLI / CI/CD Native', desc: 'solospot export --store fashion-pro --output ./dist --cdn cloudflare. Gotowe do pipeline.' },
+    { icon: Terminal, title: 'CLI / CI/CD Native', desc: 'solospot export --store fashion-pro --output ./dist. Gotowe do pipeline.' },
   ]
 
   const comparison = [
-    { feature: 'Hosting', traditional: 'Vendor lock-in (Shopify, Wix)', soloSpot: 'Dowolny: Vercel, Netlify, CF Pages, AWS, VPS, on-premise' },
-    { feature: 'Backend', traditional: 'Wymagany, zarządzany przez vendor', soloSpot: 'Opcjonalny (hydration) / Brak (static)' },
-    { feature: 'Skalowanie', traditional: 'Limity planu, upgrade kosztowny', soloSpot: 'Edge CDN skaluje automatycznie, zero kosztów' },
-    { feature: 'Własność danych', traditional: 'Zamknięte API, eksport ograniczony', soloSpot: 'Pełna własność plików, bazy, kodu' },
-    { feature: 'Koszt', traditional: '% od obrotu + abonament', soloSpot: 'Stały abonament za platformę, 0% od transakcji' },
-    { feature: 'Compliance', traditional: 'Dane u vendor', soloSpot: 'Dane u Ciebie (GDPR, PCI DSS friendly)' },
+    { feature: 'Hosting', traditional: 'Vendor lock-in (Shopify, Wix)', soloSpot: 'Dowolny: Vercel, CF Pages, AWS' },
+    { feature: 'Backend', traditional: 'Zarządzany przez vendor', soloSpot: 'Opcjonalny (hydration) / Brak' },
+    { feature: 'Skalowanie', traditional: 'Limity planu, upgrade', soloSpot: 'Edge CDN skaluje automatycznie' },
+    { feature: 'Własność', traditional: 'Zamknięte API, ograniczony', soloSpot: 'Pełna własność plików i kodu' },
+    { feature: 'Koszt', traditional: '% od obrotu + abonament', soloSpot: 'Stały abonament, 0% transakcji' },
   ]
 
   return (
-    <section id="export" className="py-32 px-6 max-w-7xl mx-auto bg-[#080B10]">
-      <div className="text-center mb-20">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#D9A86C]/10 border border-[#D9A86C]/25 mb-6">
-          <Download className="w-4 h-4 text-[#D9A86C]" />
-          <span className="text-xs font-bold tracking-[0.2em] text-[#D9A86C] uppercase">HTML Export</span>
-        </motion.div>
-        <h2 className="text-4xl md:text-5xl font-bold text-[#F5F1EA] mb-6 tracking-tight">
-          Eksportuj na<br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
-            dowolny hosting.
-          </span>
-        </h2>
-        <p className="text-xl text-[#B8B1A7] max-w-2xl mx-auto">
-          To nie jest feature. To produkt. SoloSpot nie zamyka Cię w vendor lock-in.
-          Eksportuj sklep jako statyczne pliki i hostuj gdzie chcesz. Pełna suwerenność.
-        </p>
-      </div>
-
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
-        {features.map((f, i) => (
-          <motion.div key={f.title} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-            className="group bg-[#0D1118]/90 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-[#D9A86C]/30 transition-all">
-            <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 group-hover:bg-[#D9A86C]/20 group-hover:border-[#D9A86C]/30 transition-all">
-              <f.icon className="w-6 h-6 text-[#F2C27F]" />
-            </div>
-            <h3 className="text-lg font-bold text-[#F5F1EA] mb-2">{f.title}</h3>
-            <p className="text-sm text-[#B8B1A7]">{f.desc}</p>
+    <section id="export" className="relative py-20 lg:py-28 px-6 sm:px-8 lg:px-12 max-w-7xl mx-auto bg-transparent">
+      <div className="max-w-2xl">
+        <div className="mb-8">
+          <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#D9A86C]/10 border border-[#D9A86C]/25 mb-4">
+            <Download className="w-3.5 h-3.5 text-[#D9A86C]" />
+            <span className="text-[11px] font-bold tracking-[0.2em] text-[#D9A86C] uppercase">HTML Export</span>
           </motion.div>
-        ))}
-      </div>
-
-      <div className="bg-[#0D1118]/90 border border-white/10 rounded-2xl p-8 lg:p-12 mb-16">
-        <h3 className="text-2xl font-bold text-[#F5F1EA] mb-8 text-center">Porównanie: SaaS vs SoloSpot Export</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-white/10">
-                <th className="px-6 py-3 text-xs font-bold text-[#77736D] uppercase tracking-wider">Cecha</th>
-                <th className="px-6 py-3 text-xs font-bold text-[#77736D] uppercase tracking-wider">Tradycyjny SaaS</th>
-                <th className="px-6 py-3 text-xs font-bold text-[#D9A86C] uppercase tracking-wider">SoloSpot Export</th>
-              </tr>
-            </thead>
-            <tbody>
-              {comparison.map((c, i) => (
-                <tr key={c.feature} className={`border-b border-white/5 ${i % 2 === 0 ? 'bg-white/[0.02]' : ''}`}>
-                  <td className="px-6 py-4 font-medium text-[#F5F1EA]">{c.feature}</td>
-                  <td className="px-6 py-4 text-[#77736D]">{c.traditional}</td>
-                  <td className="px-6 py-4 text-[#F2C27F] font-medium">{c.soloSpot}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F5F1EA] tracking-tight mb-3">
+            Eksportuj na<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
+              dowolny hosting.
+            </span>
+          </h2>
+          <p className="text-sm sm:text-base text-[#B8B1A7] leading-relaxed">
+            SoloSpot nie zamyka Cię w vendor lock-in. Eksportuj sklep jako statyczne pliki i hostuj gdzie chcesz. Pełna suwerenność.
+          </p>
         </div>
-      </div>
 
-      <div className="text-center">
-        <div className="bg-[#0D1118] rounded-2xl p-8 max-w-2xl mx-auto border border-white/10">
-          <div className="flex items-center gap-3 justify-center mb-4">
-            <Terminal className="w-6 h-6 text-[#D9A86C]" />
-            <span className="text-lg font-bold text-[#F5F1EA]">Przykład komendy eksportu</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+          {features.map((f, i) => (
+            <motion.div
+              key={f.title}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.04 }}
+              className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 hover:border-[#D9A86C]/30 rounded-2xl p-4 transition-all"
+            >
+              <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-3">
+                <f.icon className="w-4 h-4 text-[#F2C27F]" />
+              </div>
+              <h3 className="text-xs sm:text-sm font-bold text-[#F5F1EA] mb-1">{f.title}</h3>
+              <p className="text-[11px] text-[#B8B1A7] leading-relaxed">{f.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 rounded-2xl p-5 mb-6">
+          <h3 className="text-xs font-bold text-[#D9A86C] uppercase tracking-[0.2em] mb-4">SaaS vs SoloSpot Export</h3>
+          <div className="space-y-2 text-xs">
+            {comparison.map((c) => (
+              <div key={c.feature} className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                <span className="font-semibold text-[#F5F1EA]">{c.feature}</span>
+                <div className="flex items-center gap-3 text-[11px]">
+                  <span className="text-[#77736D] line-through sm:no-underline">{c.traditional}</span>
+                  <span className="text-[#F2C27F] font-medium">{c.soloSpot}</span>
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="bg-[#080B10] rounded-xl p-4 font-mono text-sm text-[#F2C27F] text-left overflow-x-auto">
-            <span className="text-[#77736D]">$ </span><span className="text-white">solospot export</span> <span className="text-[#D9A86C]">--store</span> <span className="text-[#F6D7AA]">fashion-pro</span> <span className="text-[#D9A86C]">--output</span> <span className="text-[#F6D7AA]">./dist</span> <span className="text-[#D9A86C]">--cdn</span> <span className="text-[#F6D7AA]">cloudflare</span> <span className="text-[#D9A86C]">--hydrate</span> <span className="text-[#F6D7AA]">cart,filters</span>
+        </div>
+
+        <div className="bg-[#0D1118]/85 backdrop-blur-md rounded-2xl p-4 border border-white/10">
+          <div className="flex items-center gap-2 mb-2 text-xs font-mono text-[#D9A86C]">
+            <Terminal className="w-3.5 h-3.5" />
+            <span>CLI Native</span>
+          </div>
+          <div className="bg-[#080B10] rounded-xl p-3 font-mono text-xs text-[#F2C27F] overflow-x-auto">
+            <span className="text-[#77736D]">$ </span>solospot export --store fashion-pro --cdn cloudflare
           </div>
         </div>
       </div>
@@ -876,10 +814,10 @@ function MissionControlSection() {
   }, [])
 
   const defaultTenants = [
-    { name: 'Fashion Store Pro', domain: 'fashion.solospot.pl', plan: 'Pro', status: 'active', revenue: '12.4k PLN', health: 98, lastDeploy: '2h temu' },
-    { name: 'Beauty Lab', domain: 'beauty.solospot.pl', plan: 'Business', status: 'active', revenue: '8.7k PLN', health: 100, lastDeploy: '1d temu' },
-    { name: 'Restaurant Hub', domain: 'food.solospot.pl', plan: 'Enterprise', status: 'active', revenue: '45.2k PLN', health: 99, lastDeploy: '4h temu' },
-    { name: 'Digital Goods', domain: 'digital.solospot.pl', plan: 'Starter', status: 'trial', revenue: '1.2k PLN', health: 87, lastDeploy: '6h temu' },
+    { name: 'Fashion Store Pro', domain: 'fashion.solospot.pl', plan: 'Pro', status: 'active', revenue: '12.4k PLN', health: 98 },
+    { name: 'Beauty Lab', domain: 'beauty.solospot.pl', plan: 'Business', status: 'active', revenue: '8.7k PLN', health: 100 },
+    { name: 'Restaurant Hub', domain: 'food.solospot.pl', plan: 'Enterprise', status: 'active', revenue: '45.2k PLN', health: 99 },
+    { name: 'Digital Goods', domain: 'digital.solospot.pl', plan: 'Starter', status: 'trial', revenue: '1.2k PLN', health: 87 },
   ]
 
   const tenantsList = realTenants.length > 0
@@ -890,172 +828,104 @@ function MissionControlSection() {
         status: t.status === 'ACTIVE' ? 'active' : 'trial',
         revenue: `${((t.revenue || 0) / 100).toFixed(1)}k PLN`,
         health: t.health || 99,
-        lastDeploy: t.lastEvent ? new Date(t.lastEvent.timestamp).toLocaleTimeString('pl-PL') : '1h temu',
       }))
     : defaultTenants
 
   const eventsList = realEvents.length > 0
-    ? realEvents.slice(0, 6).map(e => ({
+    ? realEvents.slice(0, 4).map(e => ({
         time: new Date(e.timestamp).toLocaleTimeString('pl-PL'),
         type: e.eventType?.includes('deploy') ? 'deploy' : e.eventType?.includes('provision') ? 'provision' : 'export',
         message: `${e.tenantId} — ${e.eventType}`,
-        status: 'success',
       }))
     : [
-        { time: '2 min temu', type: 'deploy', message: 'fashion-pro — deployment complete (Edge CDN)', status: 'success' },
-        { time: '5 min temu', type: 'provision', message: 'New tenant: beauty-lab-pro — provisioned in 26s', status: 'success' },
-        { time: '12 min temu', type: 'export', message: 'restaurant-hub — HTML export completed', status: 'success' },
-        { time: '18 min temu', type: 'alert', message: 'Payment webhook latency check — auto-recovered', status: 'warning' },
-        { time: '35 min temu', type: 'scale', message: 'Edge nodes scaled automatically', status: 'info' },
+        { time: '2m', type: 'deploy', message: 'fashion-pro — deployment complete (Edge CDN)' },
+        { time: '5m', type: 'provision', message: 'New tenant: beauty-lab-pro — provisioned in 26s' },
+        { time: '12m', type: 'export', message: 'restaurant-hub — HTML export completed' },
       ]
 
   const metrics = [
-    { label: 'Aktywni najemcy', value: realTenants.length > 0 ? String(realTenants.length) : '1,247', change: '+12%', icon: Users, color: 'text-[#F2C27F]', trend: 'up' },
-    { label: 'Zamówienia / 24h', value: '3,891', change: '+8%', icon: ShoppingCart, color: 'text-emerald-400', trend: 'up' },
-    { label: 'Przychód platformy', value: '284k PLN', change: '+23%', icon: CreditCard, color: 'text-[#D9A86C]', trend: 'up' },
-    { label: 'Uptime', value: '99.99%', change: '0%', icon: Shield, color: 'text-[#F6D7AA]', trend: 'neutral' },
-    { label: 'Eksporty / tydzień', value: '89', change: '+34%', icon: Download, color: 'text-emerald-400', trend: 'up' },
-    { label: 'Provisioning time', value: '28s', change: '-15%', icon: Cpu, color: 'text-[#D9A86C]', trend: 'up' },
+    { label: 'Aktywni najemcy', value: realTenants.length > 0 ? String(realTenants.length) : '1,247', icon: Users, color: 'text-[#F2C27F]' },
+    { label: 'Zamówienia / 24h', value: '3,891', icon: ShoppingCart, color: 'text-emerald-400' },
+    { label: 'Przychód platformy', value: '284k PLN', icon: CreditCard, color: 'text-[#D9A86C]' },
+    { label: 'Uptime', value: '99.99%', icon: Shield, color: 'text-[#F6D7AA]' },
+    { label: 'Eksporty / tydz.', value: '89', icon: Download, color: 'text-emerald-400' },
+    { label: 'Provisioning', value: '28s', icon: Cpu, color: 'text-[#D9A86C]' },
   ]
 
   return (
-    <section id="mission-control" className="py-32 px-6 max-w-7xl mx-auto bg-[#080B10]">
-      <div className="text-center mb-20">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#D9A86C]/10 border border-[#D9A86C]/25 mb-6">
-          <BarChart3 className="w-4 h-4 text-[#D9A86C]" />
-          <span className="text-xs font-bold tracking-[0.2em] text-[#D9A86C] uppercase">Mission Control</span>
-        </motion.div>
-        <h2 className="text-4xl md:text-5xl font-bold text-[#F5F1EA] mb-6 tracking-tight">
-          Centrum dowodzenia<br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
-            platformy.
-          </span>
-        </h2>
-        <p className="text-xl text-[#B8B1A7] max-w-2xl mx-auto">
-          Pełna obserwowalność: tenantów, provisioningu, deployów, eksportów, płatności, zdarzeń, logów audytu.
-          Zarządzasz platformą z jednego miejsca.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
-        {metrics.map((m, i) => (
-          <motion.div key={m.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
-            className="bg-[#0D1118]/90 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-                <m.icon className={`w-4 h-4 ${m.color}`} />
-              </div>
-              <span className="text-xs text-[#77736D]">{m.label}</span>
-            </div>
-            <div className="text-2xl font-black text-[#F5F1EA]">{m.value}</div>
-            <div className={`text-xs font-medium mt-1 ${m.trend === 'up' ? 'text-emerald-400' : m.trend === 'down' ? 'text-red-400' : 'text-[#77736D]'}`}>
-              {m.change} vs tydzień temu
-            </div>
+    <section id="mission-control" className="relative py-20 lg:py-28 px-6 sm:px-8 lg:px-12 max-w-7xl mx-auto bg-transparent">
+      <div className="max-w-2xl">
+        <div className="mb-8">
+          <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#D9A86C]/10 border border-[#D9A86C]/25 mb-4">
+            <BarChart3 className="w-3.5 h-3.5 text-[#D9A86C]" />
+            <span className="text-[11px] font-bold tracking-[0.2em] text-[#D9A86C] uppercase">Mission Control</span>
           </motion.div>
-        ))}
-      </div>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F5F1EA] tracking-tight mb-3">
+            Centrum dowodzenia<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
+              platformy.
+            </span>
+          </h2>
+          <p className="text-sm sm:text-base text-[#B8B1A7] leading-relaxed">
+            Pełna obserwowalność: tenantów, provisioningu, deployów, eksportów, płatności i logów. Zarządzasz platformą z jednego miejsca.
+          </p>
+        </div>
 
-      <div className="grid lg:grid-cols-[2fr_1fr] gap-8">
-        <div className="bg-[#0D1118]/90 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
-          <div className="p-6 border-b border-white/10 flex items-center justify-between">
-            <h3 className="text-lg font-bold text-[#F5F1EA]">Dzierżawy na platformie</h3>
-            <Link href="/mission-control/tenants" className="text-sm text-[#D9A86C] hover:text-[#F2C27F] font-medium">Zarządzaj wszystkimi</Link>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+          {metrics.map((m, i) => (
+            <motion.div
+              key={m.label}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.04 }}
+              className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 rounded-2xl p-3.5"
+            >
+              <div className="flex items-center gap-2 mb-1.5">
+                <m.icon className={`w-3.5 h-3.5 ${m.color}`} />
+                <span className="text-[11px] text-[#77736D] truncate">{m.label}</span>
+              </div>
+              <div className="text-lg sm:text-xl font-black text-[#F5F1EA]">{m.value}</div>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 rounded-2xl p-5 mb-6">
+          <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/[0.08]">
+            <h3 className="text-xs font-bold text-[#D9A86C] uppercase tracking-[0.2em]">Dzierżawy na platformie</h3>
+            <Link href="/mission-control/tenants" className="text-xs text-[#D9A86C] hover:text-[#F2C27F] font-medium">Wszystkie →</Link>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-white/10">
-                  {['Sklep', 'Domena', 'Plan', 'Status', 'Health', 'Przychód / msc', 'Ostatni deploy'].map(h => (
-                    <th key={h} className="px-6 py-3 text-xs font-bold text-[#77736D] uppercase tracking-wider">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {tenantsList.map((t) => (
-                  <tr key={t.name} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-[#F5F1EA]">{t.name}</div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-[#B8B1A7] font-mono">{t.domain}</td>
-                    <td className="px-6 py-4">
-                      <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-[#D9A86C]/15 text-[#F2C27F] border border-[#D9A86C]/30">{t.plan}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`flex items-center gap-1.5 text-sm ${
-                        t.status === 'active' ? 'text-emerald-400' : 'text-amber-400'
-                      }`}>
-                        <span className={`w-2 h-2 rounded-full ${t.status === 'active' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
-                        {t.status === 'active' ? 'Aktywny' : 'Trial'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-24 h-2 bg-slate-800 rounded-full overflow-hidden">
-                          <div className={`h-full bg-gradient-to-r from-[#D9A86C] to-emerald-400 transition-all`} style={{ width: `${t.health}%` }} />
-                        </div>
-                        <span className="text-xs font-mono text-[#77736D] w-10">{t.health}%</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 font-mono text-sm text-[#F5F1EA]">{t.revenue}</td>
-                    <td className="px-6 py-4 text-xs text-[#77736D] font-mono">{t.lastDeploy}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="space-y-2">
+            {tenantsList.slice(0, 3).map((t) => (
+              <div key={t.name} className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.02] border border-white/5 text-xs">
+                <div>
+                  <span className="font-semibold text-[#F5F1EA] block">{t.name}</span>
+                  <span className="text-[11px] text-[#77736D] font-mono">{t.domain}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[#F2C27F] font-mono font-medium block">{t.revenue}</span>
+                  <span className="text-[10px] text-emerald-400">● {t.status}</span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="bg-[#0D1118]/90 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-[#F5F1EA]">Strumień zdarzeń platformy</h3>
-              <span className="flex items-center gap-1.5 text-xs text-emerald-400">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                Live
-              </span>
-            </div>
-            <div className="space-y-3 max-h-80 overflow-y-auto">
-              {eventsList.map((e, i) => (
-                <motion.div key={i} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
-                  className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:border-[#D9A86C]/30 transition-all">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-[#D9A86C]/10 border border-[#D9A86C]/20">
-                    {e.type === 'deploy' && <Rocket className="w-4 h-4 text-[#F2C27F]" />}
-                    {e.type === 'provision' && <Package className="w-4 h-4 text-[#D9A86C]" />}
-                    {e.type === 'export' && <Download className="w-4 h-4 text-emerald-400" />}
-                    {e.type === 'alert' && <AlertTriangle className="w-4 h-4 text-amber-400" />}
-                    {e.type === 'scale' && <Activity className="w-4 h-4 text-[#F6D7AA]" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-[#F5F1EA]">{e.message}</p>
-                    <p className="text-xs text-[#77736D] font-mono">{e.time}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+        <div className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 rounded-2xl p-4">
+          <div className="flex items-center justify-between mb-3 text-xs">
+            <span className="font-bold text-[#F5F1EA]">Strumień zdarzeń</span>
+            <span className="flex items-center gap-1 text-[11px] text-emerald-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live
+            </span>
           </div>
-
-          <div className="bg-[#0D1118]/90 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-            <h3 className="text-lg font-bold text-[#F5F1EA] mb-4">Status platformy</h3>
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { label: 'API Gateway', status: 'operational', latency: '12ms' },
-                { label: 'Runtime Engine', status: 'operational', latency: '8ms' },
-                { label: 'Edge CDN', status: 'operational', latency: '23ms' },
-                { label: 'Payment Engine', status: 'degraded', latency: '145ms' },
-                { label: 'Database (Primary)', status: 'operational', latency: '4ms' },
-                { label: 'Event Bus', status: 'operational', latency: '2ms' },
-              ].map((s, i) => (
-                <motion.div key={i} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.03 }}
-                  className="p-3 rounded-xl bg-white/[0.03] border border-white/5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-[#F5F1EA]">{s.label}</span>
-                    <span className={`w-2 h-2 rounded-full ${s.status === 'operational' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
-                  </div>
-                  <div className="text-xs text-[#77736D] mt-1">{s.latency} p95</div>
-                </motion.div>
-              ))}
-            </div>
+          <div className="space-y-2">
+            {eventsList.map((e, i) => (
+              <div key={i} className="flex items-start gap-2.5 p-2 rounded-lg bg-white/[0.02] text-xs">
+                <span className="text-[10px] font-mono text-[#D9A86C] bg-white/5 px-1.5 py-0.5 rounded flex-shrink-0">{e.time}</span>
+                <span className="text-[#B8B1A7] text-[11px] leading-tight truncate">{e.message}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -1065,78 +935,55 @@ function MissionControlSection() {
 
 function WhySoloSpotSection() {
   const pillars = [
-    {
-      icon: Zap,
-      title: 'Time-to-market: godziny, nie miesiące',
-      desc: 'Zainstaluj szablon z Marketplace → provisioning automatyczny (30s) → edycja w Studio → publish. Pierwsze zamówienie tego samego dnia.',
-      metric: '~2h od zera do live',
-    },
-    {
-      icon: ShieldCheck,
-      title: 'Izolacja tenantów na poziomie infrastruktury',
-      desc: 'Każdy sklep to oddzielny tenant z własną bazą, plikami, kluczami API, konfiguracją. Zero wycieków danych między sklepami. Architektura Enterprise.',
-      metric: '100% izolacja',
-    },
-    {
-      icon: Layers,
-      title: 'Platforma, nie generator stron',
-      desc: 'Masz silnik płatności, zamówień, podatków, wysyłki, zapasów, B2B, hurtowni. To e-commerce operating system, nie CMS.',
-      metric: '6 warstw platformy',
-    },
-    {
-      icon: Box,
-      title: 'Gotowe modele biznesowe w Marketplace',
-      desc: 'Moda, Uroda, Gastronomia, Cyfrowe — każdy szablon to produkt, produkty, motyw, sekcje, SEO, konfiguracja płatności/wysyłki.',
-      metric: '12+ szablonów gotowych',
-    },
-    {
-      icon: Globe,
-      title: 'Eksport HTML = wolność hostingu',
-      desc: 'Hostuj na Vercel, Netlify, Cloudflare, AWS, własnym serwerze. Zero vendor lock-in. Pełna suwerenność danych i kodu.',
-      metric: 'Dowolny hosting',
-    },
-    {
-      icon: Settings2,
-      title: 'Multi-tenant by design',
-      desc: 'Jedna instancja platformy obsługuje tysiące sklepów. Skalujemy pionowo (infra), Ty rosniesz poziomo (biznes).',
-      metric: '∞ tenantów / instancja',
-    },
+    { icon: Zap, title: 'Time-to-market: godziny, nie miesiące', desc: 'Szablon z Marketplace → provisioning (30s) → edycja w Studio → publish. Pierwsze zamówienie tego samego dnia.', metric: '~2h do live' },
+    { icon: ShieldCheck, title: 'Izolacja tenantów na poziomie infra', desc: 'Każdy sklep to oddzielny tenant z własną bazą, plikami, kluczami API. Zero wycieków danych.', metric: '100% izolacja' },
+    { icon: Layers, title: 'Platforma, nie generator stron', desc: 'Silnik płatności, zamówień, podatków, wysyłki, zapasów, B2B. E-commerce OS, nie prosty CMS.', metric: '6 warstw' },
+    { icon: Box, title: 'Gotowe modele biznesowe', desc: 'Moda, Uroda, Gastronomia, Cyfrowe — produkty, motyw, sekcje, SEO, konfiguracja handlowa.', metric: '12+ modeli' },
+    { icon: Globe, title: 'Eksport HTML = wolność hostingu', desc: 'Hostuj na Vercel, Netlify, Cloudflare, AWS lub własnym serwerze. Pełna suwerenność kodu.', metric: 'Dowolny host' },
+    { icon: Settings2, title: 'Multi-tenant by design', desc: 'Jedna instancja platformy obsługuje tysiące sklepów. Skalujemy infrastrukturę pod Twój wzrost.', metric: '∞ skala' },
   ]
 
   return (
-    <section id="why" className="py-32 px-6 max-w-7xl mx-auto bg-[#080B10]">
-      <div className="text-center mb-20">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#D9A86C]/10 border border-[#D9A86C]/25 mb-6">
-          <Target className="w-4 h-4 text-[#D9A86C]" />
-          <span className="text-xs font-bold tracking-[0.2em] text-[#D9A86C] uppercase">Dlaczego SoloSpot</span>
-        </motion.div>
-        <h2 className="text-4xl md:text-5xl font-bold text-[#F5F1EA] mb-6 tracking-tight">
-          Nie budujemy sklepów.<br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
-            Budujemy system operacyjny dla e-commerce.
-          </span>
-        </h2>
-        <p className="text-xl text-[#B8B1A7] max-w-2xl mx-auto">
-          SoloSpot to infrastruktura klasy Enterprise dla produktów e-commerce. Wielodostępna, rozszerzalna, bez vendor lock-in.
-        </p>
-      </div>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {pillars.map((p, i) => (
-          <motion.div key={p.title} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-            className="group relative p-6 bg-[#0D1118]/90 backdrop-blur-sm border border-white/10 rounded-2xl hover:border-[#D9A86C]/30 transition-all">
-            <div className="relative z-10">
-              <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 group-hover:bg-[#D9A86C]/20 group-hover:border-[#D9A86C]/30 transition-all">
-                <p.icon className="w-6 h-6 text-[#F2C27F]" />
-              </div>
-              <h3 className="text-lg font-bold text-[#F5F1EA] mb-2">{p.title}</h3>
-              <p className="text-sm text-[#B8B1A7] mb-4">{p.desc}</p>
-              <div className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-medium text-[#F2C27F] inline-block">
-                {p.metric}
-              </div>
-            </div>
+    <section id="why" className="relative py-20 lg:py-28 px-6 sm:px-8 lg:px-12 max-w-7xl mx-auto bg-transparent">
+      <div className="max-w-2xl">
+        <div className="mb-8">
+          <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#D9A86C]/10 border border-[#D9A86C]/25 mb-4">
+            <Target className="w-3.5 h-3.5 text-[#D9A86C]" />
+            <span className="text-[11px] font-bold tracking-[0.2em] text-[#D9A86C] uppercase">Dlaczego SoloSpot</span>
           </motion.div>
-        ))}
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F5F1EA] tracking-tight mb-3">
+            Nie budujemy sklepów.<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
+              Budujemy system operacyjny.
+            </span>
+          </h2>
+          <p className="text-sm sm:text-base text-[#B8B1A7] leading-relaxed">
+            SoloSpot to infrastruktura klasy Enterprise dla nowoczesnego handlu. Wielodostępna, rozszerzalna i pozbawiona vendor lock-in.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {pillars.map((p, i) => (
+            <motion.div
+              key={p.title}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.04 }}
+              className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 hover:border-[#D9A86C]/30 rounded-2xl p-4 transition-all group"
+            >
+              <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-3 group-hover:border-[#D9A86C]/40 transition-colors">
+                <p.icon className="w-4 h-4 text-[#F2C27F]" />
+              </div>
+              <h3 className="text-xs sm:text-sm font-bold text-[#F5F1EA] mb-1">{p.title}</h3>
+              <p className="text-[11px] text-[#B8B1A7] leading-relaxed mb-3">{p.desc}</p>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-[#F2C27F] border border-white/10 inline-block">
+                {p.metric}
+              </span>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   )
@@ -1144,58 +991,72 @@ function WhySoloSpotSection() {
 
 function IntegrationsSection() {
   const categories = [
-    { name: 'Płatności', icon: CreditCard, items: ['Stripe', '1Koszyk', 'Przelewy24', 'PayPal', 'Apple Pay', 'Google Pay'], color: 'from-[#D9A86C] to-[#F2C27F]' },
-    { name: 'Wysyłka i logistyka', icon: Truck, items: ['InPost', 'DPD', 'DHL', 'Poczta Polska', 'FedEx', 'UPS'], color: 'from-[#F2C27F] to-[#F6D7AA]' },
-    { name: 'ERP i magazyn', icon: Database, items: ['Subiekt GT', 'Enova', 'Comarch', 'SAP Business One', 'Microsoft Dynamics', 'BaseLinker'], color: 'from-[#D9A86C] to-[#B8B1A7]' },
-    { name: 'Marketing i analityka', icon: BarChart3, items: ['Google Analytics 4', 'Meta Pixel', 'TikTok Pixel', 'Klaviyo', 'Mailchimp', 'PostHog'], color: 'from-[#F6D7AA] to-[#D9A86C]' },
-    { name: 'Rozwój i CI/CD', icon: GitBranch, items: ['GitHub Actions', 'GitLab CI', 'Vercel', 'Netlify', 'Cloudflare Pages', 'Docker'], color: 'from-[#F2C27F] to-[#D9A86C]' },
-    { name: 'Tożsamość i bezpieczeństwo', icon: Shield, items: ['Auth0', 'Clerk', 'Supabase Auth', 'NextAuth', 'OAuth 2.0 / OIDC', 'SAML/SSO'], color: 'from-[#D9A86C] to-[#F2C27F]' },
+    { name: 'Płatności', icon: CreditCard, items: ['Stripe', '1Koszyk', 'P24', 'BLIK', 'Apple Pay'] },
+    { name: 'Wysyłka i logistyka', icon: Truck, items: ['InPost', 'DPD', 'DHL', 'FedEx', 'UPS'] },
+    { name: 'ERP i magazyn', icon: Database, items: ['Subiekt GT', 'BaseLinker', 'Comarch', 'Enova'] },
+    { name: 'Marketing i analityka', icon: BarChart3, items: ['GA4', 'Meta Pixel', 'TikTok Pixel', 'Klaviyo'] },
+    { name: 'CI/CD i hosting', icon: GitBranch, items: ['GitHub Actions', 'Vercel', 'Cloudflare Pages'] },
+    { name: 'Tożsamość i auth', icon: Shield, items: ['Supabase Auth', 'Auth0', 'Clerk', 'OAuth 2.0'] },
   ]
 
   return (
-    <section id="integrations" className="py-32 px-6 max-w-7xl mx-auto bg-[#080B10]">
-      <div className="text-center mb-20">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#D9A86C]/10 border border-[#D9A86C]/25 mb-6">
-          <GitBranch className="w-4 h-4 text-[#D9A86C]" />
-          <span className="text-xs font-bold tracking-[0.2em] text-[#D9A86C] uppercase">Ekosystem integracji</span>
-        </motion.div>
-        <h2 className="text-4xl md:text-5xl font-bold text-[#F5F1EA] mb-6 tracking-tight">
-          Połączony z Twoim<br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
-            ekosystemem.
-          </span>
-        </h2>
-        <p className="text-xl text-[#B8B1A7] max-w-2xl mx-auto">
-          SoloSpot nie zastępuje Twoich narzędzi — integruje się z nimi. Płatności, wysyłka, ERP, marketing, CI/CD, tożsamość.
-        </p>
-      </div>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {categories.map((cat, i) => (
-          <motion.div key={cat.name} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-            className="bg-[#0D1118]/90 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-[#D9A86C]/30 transition-all">
-            <div className="flex items-center gap-3 mb-4">
-              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${cat.color} flex items-center justify-center`}>
-                <cat.icon className="w-5 h-5 text-[#080B10]" />
-              </div>
-              <h3 className="text-lg font-bold text-[#F5F1EA]">{cat.name}</h3>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {cat.items.map((item) => (
-                <span key={item} className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-[#B8B1A7] hover:border-[#D9A86C]/40 hover:text-white transition-all">
-                  {item}
-                </span>
-              ))}
-            </div>
+    <section id="integrations" className="relative py-20 lg:py-28 px-6 sm:px-8 lg:px-12 max-w-7xl mx-auto bg-transparent">
+      <div className="max-w-2xl">
+        <div className="mb-8">
+          <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#D9A86C]/10 border border-[#D9A86C]/25 mb-4">
+            <GitBranch className="w-3.5 h-3.5 text-[#D9A86C]" />
+            <span className="text-[11px] font-bold tracking-[0.2em] text-[#D9A86C] uppercase">Ekosystem integracji</span>
           </motion.div>
-        ))}
-      </div>
-      <div className="mt-16 text-center">
-        <div className="bg-[#0D1118] border border-white/10 rounded-2xl p-8 max-w-2xl mx-auto">
-          <h3 className="text-xl font-bold text-[#F5F1EA] mb-2">Brakuje Ci integracji?</h3>
-          <p className="text-[#B8B1A7] mb-6">Mamy otwarte API i webhook system. Zbuduj własną integrację lub daj nam znać — dodamy ją do roadmapy.</p>
-          <Link href="/dashboard" className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#D9A86C]/30 rounded-full text-sm font-medium text-[#F5F1EA] transition-all">
-            Dokumentacja API <ArrowRight className="w-4 h-4 text-[#D9A86C]" />
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F5F1EA] tracking-tight mb-3">
+            Połączony z Twoim<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
+              ekosystemem.
+            </span>
+          </h2>
+          <p className="text-sm sm:text-base text-[#B8B1A7] leading-relaxed">
+            SoloSpot integruje się z Twoimi narzędziami: płatności, logistyka, ERP, marketing i tożsamość.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+          {categories.map((cat, i) => (
+            <motion.div
+              key={cat.name}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.04 }}
+              className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 hover:border-[#D9A86C]/30 rounded-2xl p-4 transition-all"
+            >
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+                  <cat.icon className="w-3.5 h-3.5 text-[#F2C27F]" />
+                </div>
+                <h3 className="text-xs sm:text-sm font-bold text-[#F5F1EA]">{cat.name}</h3>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {cat.items.map((item) => (
+                  <span key={item} className="px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.08] text-[10px] text-[#B8B1A7]">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+          <div>
+            <span className="text-xs font-bold text-[#F5F1EA] block">Brakuje Ci integracji?</span>
+            <span className="text-[11px] text-[#77736D] block">Mamy otwarte API i webhooki.</span>
+          </div>
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-xs font-medium text-[#F5F1EA] transition-all"
+          >
+            <span>Dokumentacja</span>
+            <ArrowRight className="w-3 h-3 text-[#D9A86C]" />
           </Link>
         </div>
       </div>
@@ -1207,118 +1068,118 @@ function PricingSection() {
   const tiers = [
     {
       name: 'Starter',
-      subtitle: 'Dla indywidualnych twórców',
+      subtitle: 'Dla twórców',
       price: '0',
       period: 'PLN / mc',
-      description: 'Jeden sklep. Podstawowa platforma. Bez limitów produktów.',
-      capabilities: ['1 tenant (sklep)', 'Do 100 zamówień/mc', 'Marketplace szablonów', 'Studio Builder', 'HTML Export', 'Wsparcie email (48h)'],
-      cta: 'Rozpocznij za darmo',
+      description: 'Jeden sklep. Podstawowa platforma.',
+      capabilities: ['1 tenant (sklep)', 'Do 100 zamówień/mc', 'Studio Builder', 'HTML Export'],
+      cta: 'Zacznij za darmo',
       popular: false,
-      gradient: 'from-[#0D1118] to-[#141820]',
-      border: 'border-white/10',
-      buttonGradient: 'bg-white/5 hover:bg-white/10 border border-white/10 text-[#F5F1EA]',
     },
     {
       name: 'Pro',
-      subtitle: 'Dla rosnących biznesów',
+      subtitle: 'Najczęściej wybierany',
       price: '299',
       period: 'PLN / mc',
-      description: 'Bez limitów zamówień. Mission Control. API & Webhooks.',
-      capabilities: ['Do 5 tenantów', 'Nieograniczone zamówienia', 'Wszystkie szablony Pro', 'Mission Control', 'API & Webhooks', 'Priorytetowe wsparcie (4h)', 'Własna domena'],
+      description: 'Bez limitów. Mission Control. API & Webhooks.',
+      capabilities: ['Do 5 tenantów', 'Brak limitów zamówień', 'Mission Control', 'API & Webhooks', 'Własna domena'],
       cta: 'Wybierz Pro',
       popular: true,
-      gradient: 'from-[#0D1118] to-[#141820]',
-      border: 'border-[#D9A86C]/50 ring-1 ring-[#D9A86C]/30',
-      buttonGradient: 'bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#080B10] shadow-lg shadow-[#D9A86C]/20',
     },
     {
       name: 'Business',
-      subtitle: 'Dla zespołów i agencji',
+      subtitle: 'Dla zespołów',
       price: '799',
       period: 'PLN / mc',
-      description: 'Wiele sklepów. Współpraca zespołowa. Zaawansowane uprawnienia.',
-      capabilities: ['Do 20 tenantów', 'Współpraca zespołowa', 'Role i uprawnienia', 'Audit Log', 'SSO / SAML', 'Dedykowany Success Manager', 'SLA 99.9%'],
+      description: 'Wiele sklepów. Współpraca zespołowa.',
+      capabilities: ['Do 20 tenantów', 'Role i uprawnienia', 'Audit Log', 'SSO / SAML', 'SLA 99.9%'],
       cta: 'Wybierz Business',
       popular: false,
-      gradient: 'from-[#0D1118] to-[#141820]',
-      border: 'border-white/10',
-      buttonGradient: 'bg-white/5 hover:bg-white/10 border border-white/10 text-[#F5F1EA]',
     },
     {
       name: 'Enterprise',
-      subtitle: 'Dla dużych organizacji',
+      subtitle: 'Dla organizacji',
       price: 'Custom',
       period: '',
-      description: 'Pełna kontrola. Hosting on-premise / VPC. Własny runtime.',
-      capabilities: ['Nielimitowane tenanty', 'Hosting on-premise / VPC', 'Własny runtime', 'Custom SLA', 'Dedykowany inżynier', 'Code escrow', 'Audyt bezpieczeństwa'],
+      description: 'Hosting on-premise / VPC. Własny runtime.',
+      capabilities: ['Nielimitowane tenanty', 'VPC / On-premise', 'Custom SLA', 'Dedykowany inżynier'],
       cta: 'Skontaktuj się',
       popular: false,
-      gradient: 'from-[#0D1118] to-[#141820]',
-      border: 'border-white/10',
-      buttonGradient: 'bg-white/5 hover:bg-white/10 border border-white/10 text-[#F5F1EA]',
     },
   ]
 
   return (
-    <section id="pricing" className="py-32 px-6 max-w-7xl mx-auto bg-[#080B10]">
-      <div className="text-center mb-20">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#D9A86C]/10 border border-[#D9A86C]/25 mb-6">
-          <Star className="w-4 h-4 text-[#D9A86C]" />
-          <span className="text-xs font-bold tracking-[0.2em] text-[#D9A86C] uppercase">Cennik platformy</span>
-        </motion.div>
-        <h2 className="text-4xl md:text-5xl font-bold text-[#F5F1EA] mb-6 tracking-tight">
-          Płacisz za platformę,<br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
-            nie za liczbę produktów.
-          </span>
-        </h2>
-        <p className="text-xl text-[#B8B1A7] max-w-2xl mx-auto">
-          Wszystkie plany zawierają dostęp do Marketplace, Studio, Runtime Engine, HTML Export.
-          Różnią się skalą: liczba tenantów, wsparcie, SLA, możliwości Enterprise.
-        </p>
-      </div>
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {tiers.map((tier, i) => (
-          <motion.div key={tier.name} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-            className={`relative rounded-3xl p-8 bg-gradient-to-br ${tier.gradient} border ${tier.border} flex flex-col ${tier.popular ? 'scale-105 z-10' : ''}`}>
-            {tier.popular && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#080B10] text-xs font-bold rounded-full shadow-md">
-                Najpopularniejszy
-              </div>
-            )}
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-lg font-bold text-[#F5F1EA]">{tier.name}</h3>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-white/10 text-[#F2C27F]">{tier.subtitle}</span>
-              </div>
-              <p className="text-sm text-[#77736D]">{tier.description}</p>
-            </div>
-            <div className="mb-6">
-              <div className="flex items-baseline gap-1">
-                <span className="text-5xl font-black text-[#F5F1EA]">{tier.price}</span>
-                <span className="text-[#77736D]">{tier.period}</span>
-              </div>
-            </div>
-            <ul className="space-y-3 mb-8 flex-1">
-              {tier.capabilities.map((c) => (
-                <li key={c} className="flex items-start gap-3 text-sm text-[#B8B1A7]">
-                  <CheckCircle className="w-5 h-5 text-[#D9A86C] flex-shrink-0 mt-0.5" />
-                  <span>{c}</span>
-                </li>
-              ))}
-            </ul>
-            <Link href="/register" className={`group flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold transition-all ${tier.buttonGradient}`}>
-              {tier.cta} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
+    <section id="pricing" className="relative py-20 lg:py-28 px-6 sm:px-8 lg:px-12 max-w-7xl mx-auto bg-transparent">
+      <div className="max-w-2xl">
+        <div className="mb-8">
+          <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#D9A86C]/10 border border-[#D9A86C]/25 mb-4">
+            <Star className="w-3.5 h-3.5 text-[#D9A86C]" />
+            <span className="text-[11px] font-bold tracking-[0.2em] text-[#D9A86C] uppercase">Cennik platformy</span>
           </motion.div>
-        ))}
-      </div>
-      <div className="mt-16 text-center">
-        <p className="text-[#77736D] mb-4">Wszystkie ceny netto. Faktura VAT 23%. Anuluj w dowolnej chwili. Bez ukrytych opłat.</p>
-        <Link href="/register" className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#D9A86C]/30 rounded-full text-sm font-medium text-[#F5F1EA] transition-all">
-          Szczegółowe porównanie planów <ArrowRight className="w-4 h-4 text-[#D9A86C]" />
-        </Link>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F5F1EA] tracking-tight mb-3">
+            Płacisz za platformę,<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
+              nie za liczbę produktów.
+            </span>
+          </h2>
+          <p className="text-sm sm:text-base text-[#B8B1A7] leading-relaxed">
+            Wszystkie plany zawierają dostęp do Marketplace, Studio, Runtime Engine i HTML Export. 0% prowizji od transakcji.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          {tiers.map((tier, i) => (
+            <motion.div
+              key={tier.name}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.05 }}
+              className={`relative rounded-2xl p-5 backdrop-blur-md flex flex-col justify-between transition-all ${
+                tier.popular
+                  ? 'bg-[#0D1118]/95 border-2 border-[#D9A86C] shadow-lg shadow-[#D9A86C]/10'
+                  : 'bg-[#0D1118]/85 border border-white/10 hover:border-white/20'
+              }`}
+            >
+              {tier.popular && (
+                <span className="absolute -top-2.5 right-4 px-2.5 py-0.5 bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#080B10] text-[10px] font-bold rounded-full uppercase tracking-wider">
+                  Polecany
+                </span>
+              )}
+              <div>
+                <div className="flex items-baseline justify-between gap-2 mb-1">
+                  <h3 className="text-base font-bold text-[#F5F1EA]">{tier.name}</h3>
+                  <span className="text-[10px] text-[#D9A86C] font-mono">{tier.subtitle}</span>
+                </div>
+                <div className="flex items-baseline gap-1 mb-2">
+                  <span className="text-2xl sm:text-3xl font-black text-[#F5F1EA]">{tier.price}</span>
+                  {tier.period && <span className="text-xs text-[#77736D]">{tier.period}</span>}
+                </div>
+                <p className="text-[11px] text-[#77736D] mb-3">{tier.description}</p>
+                <ul className="space-y-1.5 mb-4 text-xs text-[#B8B1A7]">
+                  {tier.capabilities.map((c) => (
+                    <li key={c} className="flex items-center gap-2">
+                      <CheckCircle className="w-3.5 h-3.5 text-[#D9A86C] flex-shrink-0" />
+                      <span className="text-[11px]">{c}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <Link
+                href="/register"
+                className={`flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl text-xs font-bold transition-all ${
+                  tier.popular
+                    ? 'bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#080B10] shadow-md shadow-[#D9A86C]/20 hover:scale-[1.02]'
+                    : 'bg-white/5 hover:bg-white/10 border border-white/10 text-[#F5F1EA]'
+                }`}
+              >
+                <span>{tier.cta}</span>
+                <ArrowRight className="w-3 h-3" />
+              </Link>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   )
@@ -1326,64 +1187,71 @@ function PricingSection() {
 
 function FAQSection() {
   const faqs = [
-    { q: 'Czy SoloSpot to kolejny SaaS do sklepów (jak Shopify/Wix)?', a: 'Nie. SaaS zamyka Cię w ich ekosystemie. SoloSpot to Commerce Operating System: masz platformę wielodostępową do uruchamiania własnych produktów e-commerce, ale eksportujesz je jako statyczne pliki HTML i hostujesz gdzie chcesz. Zero vendor lock-in.' },
-    { q: 'Jak wygląda migracja z Shopify / WooCommerce / Shoper?', a: 'Zapewniamy narzędzia do migracji produktów, zamówień, klientów. Dla planów Business+ dedykowany inżynier przeprowadza migrację end-to-end. Dane zostają Twoje — eksportujesz je w dowolnej chwili.' },
-    { q: 'Czy muszę hostować u Was?', a: 'Nie. Dzięki HTML Export wyeksportujesz sklep jako statyczne pliki i postawisz na Vercel, Netlify, Cloudflare Pages, AWS S3+CloudFront, własnym serwerze, on-premise. Masz pełną kontrolę nad hostingiem i danymi.' },
-    { q: 'Jak działa model wielodostępny (multi-tenant)?', a: 'Jedna instancja platformy obsługuje tysiące sklepów. Każdy tenant ma izolowaną bazę danych (PostgreSQL schema lub oddzielna DB), pliki, klucze API, konfigurację. Zmiany w jednym sklepie nie wpływają na inne. To architektura Enterprise, nie shared hosting.' },
-    { q: 'Jak wygląda obsługa płatności?', a: 'Platforma ma wbudowany Payment Engine z adapterami: Stripe, 1Koszyk, Przelewy24, PayPal, BLIK. Konfigurujesz klucze API w panelu — resztę obsługujemy my (webhooki, statusy, zwroty, rozliczenia, split payments).' },
-    { q: 'Czy mogę tworzyć i sprzedawać własne szablony?', a: 'Tak. System szablonów jest otwarty. Tworzysz pakiet JSON z definicją stron, sekcji, motywu, produktów, brandingu. Możesz sprzedawać w Marketplace SoloSpot (revenue share 70/30) lub dystrybuować prywatnie.' },
-    { q: 'Jak wygląda skalowalność na Black Friday?', a: 'Runtime Engine działa na Edge (Vercel Edge, Cloudflare Workers, V8 Isolates). Skaluje się automatycznie do milionów requestów. Baza danych (Supabase/PostgreSQL) skaluje pionowo i poziomo. Platforma obsługuje Black Friday bez konfiguracji.' },
-    { q: 'Jakie są koszty transakcyjne?', a: 'SoloSpot nie pobiera prowizji od transakcji. Płacisz tylko stały abonament za platformę + prowizje providera płatności (Stripe: ~2.9% + 1.20 PLN, 1Koszyk: wedle cennika). Żadnych % od obrotu.' },
-    { q: 'Czy platforma obsługuje B2B / hurtownię?', a: 'Tak. Silnik handlowy obsługuje: grupy cenowe, ceny hurtowe, minimalne ilości zamówienia (MOQ), faktury VAT, limity kredytowe, zapytania ofertowe, cykle rozliczeniowe. Konfigurujesz to w Studio bez kodu.' },
-    { q: 'Jak wygląda wsparcie techniczne?', a: 'Starter: email (48h). Pro: priorytetowe email + czat (4h). Business: dedykowany Success Manager, Slack Connect, telefon. Enterprise: dedykowany inżynier, code review, SLA 99.9%, audyt bezpieczeństwa, code escrow.' },
+    { q: 'Czy SoloSpot to kolejny SaaS do sklepów (jak Shopify/Wix)?', a: 'Nie. SoloSpot to Commerce Operating System: masz platformę wielodostępową do uruchamiania produktów e-commerce, ale możesz je też wyeksportować jako statyczny HTML i postawić na własnym hostingu. Zero vendor lock-in.' },
+    { q: 'Jak wygląda migracja ze starych sklepów?', a: 'Zapewniamy narzędzia do importu produktów, zamówień i klientów. Dane zostają w 100% Twoje.' },
+    { q: 'Czy muszę hostować u Was?', a: 'Nie. Dzięki HTML Export wyeksportujesz sklep jako statyczne pliki i uruchomisz na Vercel, Netlify, Cloudflare Pages, AWS czy własnym serwerze.' },
+    { q: 'Jak działa model wielodostępny (multi-tenant)?', a: 'Jedna instancja obsługuje wiele sklepów. Każdy tenant posiada pełną izolację danych, kluczy API i konfiguracji.' },
+    { q: 'Jakie są koszty transakcyjne?', a: 'SoloSpot nie pobiera procentu od obrotu. Płacisz wyłącznie stały abonament platformy + prowizje wybranego providera płatności.' },
   ]
   const [openIndex, setOpenIndex] = useState<number | null>(0)
+
   return (
-    <section id="faq" className="py-32 px-6 max-w-4xl mx-auto bg-[#080B10]">
-      <div className="text-center mb-20">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#D9A86C]/10 border border-[#D9A86C]/25 mb-6">
-          <HelpCircle className="w-4 h-4 text-[#D9A86C]" />
-          <span className="text-xs font-bold tracking-[0.2em] text-[#D9A86C] uppercase">FAQ</span>
-        </motion.div>
-        <h2 className="text-4xl md:text-5xl font-bold text-[#F5F1EA] mb-6 tracking-tight">
-          Pytania o platformę?<br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
-            Mamy odpowiedzi.
-          </span>
-        </h2>
-        <p className="text-xl text-[#B8B1A7]">
-          Nie znalazłeś odpowiedzi? <Link href="/contact" className="text-[#F2C27F] hover:text-[#F6D7AA] underline">Napisz do nas</Link>
-        </p>
-      </div>
-      <div className="space-y-4">
-        {faqs.map((faq, i) => (
-          <motion.div key={i} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
-            className="bg-[#0D1118]/90 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
-            <button
-              onClick={() => setOpenIndex(openIndex === i ? null : i)}
-              className="w-full px-6 py-5 flex items-center justify-between text-left"
-              aria-expanded={openIndex === i}
-            >
-              <span className="text-lg font-medium text-[#F5F1EA] pr-10">{faq.q}</span>
-              <motion.div
-                animate={{ rotate: openIndex === i ? 180 : 0 }}
-                className="flex-shrink-0 w-8 h-8 flex items-center justify-center text-[#77736D]"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </motion.div>
-            </button>
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: openIndex === i ? 'auto' : 0, opacity: openIndex === i ? 1 : 0 }}
-              className="overflow-hidden"
-            >
-              <div className="px-6 pb-6 border-t border-white/5">
-                <p className="text-[#B8B1A7] leading-relaxed">{faq.a}</p>
-              </div>
-            </motion.div>
+    <section id="faq" className="relative py-20 lg:py-28 px-6 sm:px-8 lg:px-12 max-w-7xl mx-auto bg-transparent">
+      <div className="max-w-2xl">
+        <div className="mb-8">
+          <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#D9A86C]/10 border border-[#D9A86C]/25 mb-4">
+            <HelpCircle className="w-3.5 h-3.5 text-[#D9A86C]" />
+            <span className="text-[11px] font-bold tracking-[0.2em] text-[#D9A86C] uppercase">FAQ</span>
           </motion.div>
-        ))}
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F5F1EA] tracking-tight mb-3">
+            Pytania o platformę?<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
+              Mamy odpowiedzi.
+            </span>
+          </h2>
+          <p className="text-sm sm:text-base text-[#B8B1A7] leading-relaxed">
+            Nie znalazłeś odpowiedzi? <Link href="/contact" className="text-[#F2C27F] hover:underline">Napisz do nas</Link>
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          {faqs.map((faq, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.04 }}
+              className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden"
+            >
+              <button
+                onClick={() => setOpenIndex(openIndex === i ? null : i)}
+                className="w-full px-5 py-4 flex items-center justify-between text-left"
+                aria-expanded={openIndex === i}
+              >
+                <span className="text-xs sm:text-sm font-medium text-[#F5F1EA] pr-4">{faq.q}</span>
+                <motion.div animate={{ rotate: openIndex === i ? 90 : 0 }} className="text-[#77736D] flex-shrink-0">
+                  <ChevronRight className="w-4 h-4" />
+                </motion.div>
+              </button>
+              <AnimatePresence>
+                {openIndex === i && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-5 pb-4 pt-1 border-t border-white/5 text-xs text-[#B8B1A7] leading-relaxed">
+                      {faq.a}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   )
@@ -1391,26 +1259,32 @@ function FAQSection() {
 
 function CTASection() {
   return (
-    <section id="cta" className="py-32 px-6 bg-[#080B10]">
-      <div className="max-w-4xl mx-auto text-center relative">
-        <div className="absolute -inset-1 bg-gradient-to-r from-[#D9A86C]/20 via-[#F2C27F]/20 to-transparent rounded-3xl blur-xl" />
-        <div className="relative bg-[#0D1118] border border-white/10 rounded-3xl p-16 overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-40 bg-gradient-to-r from-[#D9A86C]/15 to-[#F2C27F]/15 blur-[60px]" />
-          <h2 className="text-4xl md:text-5xl font-bold text-[#F5F1EA] mb-6 relative z-10">
+    <section id="cta" className="relative py-20 lg:py-28 px-6 sm:px-8 lg:px-12 max-w-7xl mx-auto bg-transparent">
+      <div className="max-w-2xl">
+        <div className="relative bg-[#0D1118]/90 backdrop-blur-md border border-white/10 rounded-3xl p-8 sm:p-10 overflow-hidden">
+          <div className="absolute top-0 left-0 w-48 h-48 bg-gradient-to-br from-[#D9A86C]/20 to-transparent rounded-full blur-3xl pointer-events-none" />
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F5F1EA] mb-3 relative z-10">
             Gotowy wdrożyć<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#F6D7AA]">
               Commerce Operating System?
             </span>
           </h2>
-          <p className="text-xl text-[#B8B1A7] mb-10 relative z-10 max-w-lg mx-auto">
+          <p className="text-sm sm:text-base text-[#B8B1A7] mb-6 relative z-10 leading-relaxed">
             Stwórz sklep w minutach. Wdróż natychmiast. Skaluj bez ograniczeń. Eksportuj gdzie chcesz.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
-            <Link href="/register" className="group flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#080B10] font-bold rounded-full shadow-xl shadow-[#D9A86C]/25 hover:shadow-2xl hover:shadow-[#D9A86C]/40 transition-all hover:scale-105">
-              Zbuduj swój system <ArrowRight className="w-5 h-5 text-[#080B10] group-hover:translate-x-1 transition-transform" />
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 relative z-10">
+            <Link
+              href="/register"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#080B10] font-bold text-xs sm:text-sm rounded-full shadow-lg shadow-[#D9A86C]/20 hover:scale-[1.02] transition-all"
+            >
+              <span>Zbuduj swój system</span>
+              <ArrowRight className="w-4 h-4 text-[#080B10]" />
             </Link>
-            <Link href="/dashboard" className="flex items-center gap-2 px-8 py-4 border border-white/10 hover:border-[#D9A86C]/30 text-[#F5F1EA] hover:bg-white/5 font-medium rounded-full transition-all">
-              Otwórz Mission Control
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 border border-white/10 hover:border-white/20 text-[#F5F1EA] hover:bg-white/5 text-xs sm:text-sm font-medium rounded-full transition-all"
+            >
+              <span>Mission Control</span>
             </Link>
           </div>
         </div>
@@ -1421,10 +1295,13 @@ function CTASection() {
 
 function Footer() {
   return (
-    <footer className="border-t border-white/[0.08] py-12 px-6 bg-[#080B10]">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-        <Logo size="sm" />
-        <div className="flex flex-wrap justify-center gap-6 text-xs font-medium text-[#77736D]">
+    <footer className="relative border-t border-white/[0.08] py-12 px-6 sm:px-8 lg:px-12 max-w-7xl mx-auto bg-transparent">
+      <div className="max-w-2xl flex flex-col gap-6">
+        <div className="flex items-center justify-between">
+          <Logo size="sm" />
+          <p className="text-xs text-[#77736D]">© {new Date().getFullYear()} SoloSpot.</p>
+        </div>
+        <div className="flex flex-wrap gap-4 text-xs text-[#77736D]">
           {[['Architektura','#architecture'],['Marketplace','#marketplace'],['Studio','#studio'],['Runtime','#runtime'],['Export','#export'],['Mission Control','#mission-control'],['Cennik','#pricing'],['Rejestracja','/register']].map(([label,href])=>(
             href.startsWith('#') ? (
               <a key={label} href={href} className="hover:text-[#F5F1EA] transition-colors">{label}</a>
@@ -1433,7 +1310,6 @@ function Footer() {
             )
           ))}
         </div>
-        <p className="text-xs text-[#77736D]">© {new Date().getFullYear()} SoloSpot. Wszelkie prawa zastrzeżone.</p>
       </div>
     </footer>
   )
