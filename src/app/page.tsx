@@ -77,17 +77,17 @@ function Nav() {
             : 'bg-[#080B10]/60 backdrop-blur-md border-b border-white/[0.04]'
         }`}
       >
-        <div className="relative w-full px-6 sm:px-12 md:px-16 lg:px-28 xl:px-40 2xl:px-52 h-20 flex items-center justify-between">
+        <div className="relative max-w-6xl mx-auto px-6 sm:px-8 h-20 flex items-center justify-between">
           {/* Logo Area */}
           <Logo size="md" />
 
           {/* Centered Minimalist Navigation */}
-          <nav className="hidden lg:flex items-center gap-7">
+          <nav className="hidden lg:flex items-center gap-5 xl:gap-7">
             {links.map((l) => (
               <a
                 key={l.label}
                 href={l.href}
-                className="text-xs sm:text-sm font-medium text-[#B8B1A7] hover:text-[#F5F1EA] transition-colors"
+                className="text-xs xl:text-sm font-medium text-[#B8B1A7] hover:text-[#F5F1EA] transition-colors whitespace-nowrap"
               >
                 {l.label}
               </a>
@@ -95,12 +95,12 @@ function Nav() {
           </nav>
 
           {/* Right Area: Search, Auth, CTA & Menu */}
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-2.5 sm:gap-3.5">
             {/* Search Icon Trigger */}
             <button
               type="button"
               onClick={() => setDrawerOpen(true)}
-              className="w-10 h-10 rounded-full flex items-center justify-center text-[#B8B1A7] hover:text-[#F5F1EA] hover:bg-white/[0.04] transition-colors"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-[#B8B1A7] hover:text-[#F5F1EA] hover:bg-white/[0.04] transition-colors"
               title="Szukaj w SoloSpot"
             >
               <Search className="w-4 h-4" />
@@ -110,14 +110,14 @@ function Nav() {
             {user ? (
               <Link
                 href="/dashboard"
-                className="text-xs sm:text-sm font-medium text-[#F5F1EA] hover:text-[#F2C27F] px-4 py-2 transition-colors flex items-center gap-1.5 bg-white/[0.04] hover:bg-white/[0.08] rounded-full border border-white/[0.08]"
+                className="text-xs sm:text-sm font-medium text-[#F5F1EA] hover:text-[#F2C27F] px-3.5 py-2 transition-colors flex items-center gap-1.5 bg-white/[0.04] hover:bg-white/[0.08] rounded-full border border-white/[0.08]"
               >
-                <User className="w-4 h-4 text-[#D9A86C]" /> Panel
+                <User className="w-3.5 h-3.5 text-[#D9A86C]" /> Panel
               </Link>
             ) : (
               <Link
                 href="/login"
-                className="hidden sm:inline-flex text-xs sm:text-sm font-medium text-[#F5F1EA] hover:text-white px-4 py-2 rounded-full border border-white/10 hover:border-white/20 bg-white/[0.02] hover:bg-white/[0.06] transition-all"
+                className="hidden sm:inline-flex text-xs sm:text-sm font-medium text-[#F5F1EA] hover:text-white px-3.5 py-2 rounded-full border border-white/10 hover:border-white/20 bg-white/[0.02] hover:bg-white/[0.06] transition-all"
               >
                 Zaloguj się
               </Link>
@@ -126,7 +126,7 @@ function Nav() {
             {/* Primary Champagne Gold CTA */}
             <Link
               href="/register"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#080B10] font-bold text-xs sm:text-sm rounded-full shadow-md shadow-[#D9A86C]/20 hover:shadow-lg hover:shadow-[#D9A86C]/30 hover:scale-[1.02] active:scale-[0.98] transition-all"
+              className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#080B10] font-bold text-xs sm:text-sm rounded-full shadow-md shadow-[#D9A86C]/20 hover:shadow-lg hover:shadow-[#D9A86C]/30 hover:scale-[1.02] active:scale-[0.98] transition-all"
             >
               <span>Rozpocznij</span>
               <ArrowRight className="w-3.5 h-3.5 text-[#080B10]" />
@@ -136,7 +136,7 @@ function Nav() {
             <button
               type="button"
               onClick={() => setDrawerOpen(true)}
-              className="w-10 h-10 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/20 flex items-center justify-center text-[#B8B1A7] hover:text-white transition-all cursor-pointer"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/20 flex items-center justify-center text-[#B8B1A7] hover:text-white transition-all cursor-pointer"
               title="Menu platformy"
             >
               <Menu className="w-4 h-4" />
