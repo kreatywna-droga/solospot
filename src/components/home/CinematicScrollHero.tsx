@@ -132,19 +132,19 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
             poster={SUPABASE_HERO_POSTER_URL}
             onLoadedMetadata={handleLoadedMetadata}
             className="w-full h-full object-cover will-change-[currentTime]"
-            style={{ filter: 'brightness(0.85) contrast(1.05)' }}
+            style={{ filter: 'brightness(0.96) contrast(1.02)' }}
           >
             <source src={SUPABASE_HERO_VIDEO_URL} type="video/mp4" />
             <source src={SUPABASE_HERO_VIDEO_URL} type="video/quicktime" />
           </video>
         </div>
 
-        {/* Overlay gradient scrims: left 58% is darkened for content readability */}
+        {/* Overlay gradient scrim: reduced width (left ~35-40%) to keep 3D video completely clear */}
         <div
-          className="absolute inset-y-0 left-0 w-[58%] pointer-events-none"
+          className="absolute inset-y-0 left-0 w-[44%] lg:w-[38%] xl:w-[33%] pointer-events-none"
           style={{
             background:
-              'linear-gradient(to right, rgba(8,11,16,0.98) 0%, rgba(8,11,16,0.92) 50%, rgba(8,11,16,0.35) 85%, transparent 100%)',
+              'linear-gradient(to right, rgba(8,11,16,0.92) 0%, rgba(8,11,16,0.72) 45%, rgba(8,11,16,0.15) 80%, transparent 100%)',
           }}
         />
         {/* Top scrim: nav readability */}
@@ -178,18 +178,18 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
       </div>
 
       {/* ── 2. HERO FOREGROUND SECTION (Normal Document Flow) ──────────────── */}
-      {/* min-h-screen flex items-center: text is symmetrically on the LEFT   */}
+      {/* min-h-screen flex items-center: text is shifted to the far LEFT      */}
       <section
         id="hero"
         ref={heroSectionRef}
         className="relative z-10 w-full min-h-screen flex items-center select-none"
       >
-        {/* HERO TEXT CONTENT — Left column */}
+        {/* HERO TEXT CONTENT — Left column, hugging left edge for max video showcase */}
         <div
-          className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 flex items-center"
+          className="relative z-10 w-full px-6 sm:px-10 lg:px-16 xl:px-20 2xl:px-24 flex items-center justify-start"
           style={{ paddingTop: '5.5rem', paddingBottom: '2.5rem' }}
         >
-          <div className="max-w-xl">
+          <div className="max-w-lg xl:max-w-xl">
             {/* Overline badge */}
             <motion.div
               initial={{ opacity: 0, y: 12 }}
@@ -207,7 +207,7 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.08, ease: 'easeOut' }}
-              className="text-4xl sm:text-5xl lg:text-[68px] font-bold text-[#F5F1EA] tracking-[-0.04em] leading-[1.06]"
+              className="text-4xl sm:text-5xl lg:text-[56px] xl:text-[64px] font-bold text-[#F5F1EA] tracking-[-0.04em] leading-[1.06]"
             >
               Twój pomysł.<br />
               <span className="text-[#F5F1EA]">Prawdziwy biznes.</span>
@@ -218,7 +218,7 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.16, ease: 'easeOut' }}
-              className="mt-5 text-base sm:text-lg text-[#B8B1A7] leading-relaxed max-w-lg"
+              className="mt-5 text-base sm:text-lg text-[#B8B1A7] leading-relaxed max-w-md"
             >
               SoloSpot to kompletny ekosystem do tworzenia, hostowania i skalowania
               produktów e-commerce. Od pomysłu do globalnej sprzedaży.
