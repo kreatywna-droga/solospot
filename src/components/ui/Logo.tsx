@@ -8,17 +8,17 @@ interface LogoProps {
 
 export function Logo({ link = true, size = 'sm', className = '' }: LogoProps) {
   const sizeClasses = {
-    sm: 'h-9 sm:h-10',
-    md: 'h-13 sm:h-15',
-    lg: 'h-16 sm:h-18',
-    xl: 'h-20 sm:h-24'
+    sm: 'h-7 sm:h-8',
+    md: 'h-8 sm:h-9',
+    lg: 'h-11 sm:h-12',
+    xl: 'h-14 sm:h-16'
   }
 
   const content = (
     <div className={`flex items-center ${className}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/logo-solospot.png?v=20260920"
+        src="/logo-solospot.png?v=20260920-v4"
         alt="SOLOSPOT Logo"
         className={`${sizeClasses[size]} w-auto object-contain transition-all duration-300 group-hover:scale-105`}
       />
