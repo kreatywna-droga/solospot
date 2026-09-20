@@ -21,6 +21,7 @@ import {
 import { Logo } from '@/components/ui/Logo'
 import { supabase } from '@/lib/supabase'
 import { CinematicScrollHero } from '@/components/home/CinematicScrollHero'
+import { SectionProgressIndicator } from '@/components/home/SectionProgressIndicator'
 
 function Nav() {
   const [mounted, setMounted] = useState(false)
@@ -316,7 +317,7 @@ function FlowStepsSection() {
   ]
 
   return (
-    <section className="relative py-24 px-6 max-w-7xl mx-auto overflow-hidden bg-[#080B10]">
+    <section id="features" className="relative py-24 px-6 max-w-7xl mx-auto overflow-hidden bg-[#080B10]">
       <div className="relative">
         <div className="absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#D9A86C]/30 to-transparent -translate-y-1/2 hidden md:block" />
         <div className="relative flex flex-wrap md:flex-nowrap items-start justify-center gap-8 lg:gap-12">
@@ -355,7 +356,7 @@ function StackPanel() {
   ]
 
   return (
-    <section className="px-6 pt-10 pb-24 lg:pb-32 bg-[#080B10]">
+    <section id="stack" className="px-6 pt-10 pb-24 lg:pb-32 bg-[#080B10]">
       <div className="max-w-5xl mx-auto">
         <div className="relative">
           <div className="absolute -inset-6 bg-gradient-to-r from-[#D9A86C]/10 via-[#F2C27F]/10 to-transparent rounded-3xl blur-3xl" />
@@ -1386,7 +1387,7 @@ function FAQSection() {
 
 function CTASection() {
   return (
-    <section className="py-32 px-6 bg-[#080B10]">
+    <section id="cta" className="py-32 px-6 bg-[#080B10]">
       <div className="max-w-4xl mx-auto text-center relative">
         <div className="absolute -inset-1 bg-gradient-to-r from-[#D9A86C]/20 via-[#F2C27F]/20 to-transparent rounded-3xl blur-xl" />
         <div className="relative bg-[#0D1118] border border-white/10 rounded-3xl p-16 overflow-hidden">
@@ -1438,6 +1439,7 @@ export default function SoloSpotLanding() {
   return (
     <div className="min-h-screen bg-[#080B10] text-[#F5F1EA] selection:bg-[#D9A86C]/30">
       <Nav />
+      <SectionProgressIndicator />
       <CinematicScrollHero />
       <FlowStepsSection />
       <StackPanel />
