@@ -79,9 +79,7 @@ function Nav() {
       >
         <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 h-20 flex items-center justify-between">
           {/* Logo Area */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <Logo size="md" />
-          </Link>
+          <Logo size="md" />
 
           {/* Centered Minimalist Navigation */}
           <nav className="hidden lg:flex items-center gap-7">
