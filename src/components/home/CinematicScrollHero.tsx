@@ -6,9 +6,9 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { ArrowRight, Play } from 'lucide-react'
 
 const SUPABASE_HERO_VIDEO_URL =
-  'https://regjgitqkyfhaaogijhu.supabase.co/storage/v1/object/public/store-assets/hero/hero-clip.mov'
+  'https://regjgitqkyfhaaogijhu.supabase.co/storage/v1/object/public/store-assets/hero/hero-clip-nowy.mp4'
 const SUPABASE_HERO_POSTER_URL =
-  'https://regjgitqkyfhaaogijhu.supabase.co/storage/v1/object/public/store-assets/hero/hero-poster.png'
+  'https://regjgitqkyfhaaogijhu.supabase.co/storage/v1/object/public/store-assets/hero/hero-poster-nowy.jpg'
 
 interface CinematicScrollHeroProps {
   onExploreClick?: () => void
@@ -134,8 +134,8 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
             className="w-full h-full object-cover will-change-[currentTime]"
             style={{ filter: 'brightness(0.85) contrast(1.05)' }}
           >
-            <source src={SUPABASE_HERO_VIDEO_URL} type="video/quicktime" />
             <source src={SUPABASE_HERO_VIDEO_URL} type="video/mp4" />
+            <source src={SUPABASE_HERO_VIDEO_URL} type="video/quicktime" />
           </video>
         </div>
 
