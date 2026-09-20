@@ -17,7 +17,7 @@ export function Logo({ link = true, size = 'sm', className = '' }: LogoProps) {
     <div className={`flex items-center ${className}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/logo-solo-spot.png"
+        src="/logo-solo-spot-new.png"
         alt="SOLOSPOT Logo"
         className={`${sizeClasses[size]} w-auto object-contain transition-all duration-300 group-hover:scale-105`}
       />
