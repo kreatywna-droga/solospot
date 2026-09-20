@@ -77,7 +77,7 @@ function Nav() {
             : 'bg-[#080B10]/60 backdrop-blur-md border-b border-white/[0.04]'
         }`}
       >
-        <div className="relative w-full px-6 sm:px-10 md:px-14 lg:px-20 xl:px-28 2xl:px-36 h-20 flex items-center justify-between">
+        <div className="relative w-full px-6 sm:px-12 md:px-16 lg:px-28 xl:px-40 2xl:px-52 h-20 flex items-center justify-between">
           {/* Logo Area */}
           <Logo size="md" />
 
@@ -315,7 +315,7 @@ function FlowStepsSection() {
   ]
 
   return (
-    <section id="features" className="relative py-20 px-6 sm:px-10 md:px-14 lg:px-20 xl:px-28 2xl:px-36 w-full bg-transparent">
+    <section id="features" className="relative py-20 px-6 sm:px-12 md:px-16 lg:px-28 xl:px-40 2xl:px-52 w-full bg-transparent">
       <div className="max-w-2xl">
         <div className="mb-8">
           <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D9A86C] block mb-2">
@@ -363,7 +363,7 @@ function StackPanel() {
   ]
 
   return (
-    <section id="stack" className="relative py-20 px-6 sm:px-10 md:px-14 lg:px-20 xl:px-28 2xl:px-36 w-full bg-transparent">
+    <section id="stack" className="relative py-20 px-6 sm:px-12 md:px-16 lg:px-28 xl:px-40 2xl:px-52 w-full bg-transparent">
       <div className="max-w-2xl">
         <div className="mb-8">
           <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D9A86C] block mb-2">
@@ -436,7 +436,7 @@ function PlatformArchitecture() {
     },
   ]
   return (
-    <section id="architecture" className="relative py-20 px-6 sm:px-10 md:px-14 lg:px-20 xl:px-28 2xl:px-36 w-full bg-transparent">
+    <section id="architecture" className="relative py-20 px-6 sm:px-12 md:px-16 lg:px-28 xl:px-40 2xl:px-52 w-full bg-transparent">
       <div className="max-w-2xl">
         <div className="mb-8">
           <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
@@ -491,7 +491,7 @@ function MarketplaceSection() {
   ]
 
   return (
-    <section id="marketplace" className="relative py-20 lg:py-28 px-6 sm:px-10 md:px-14 lg:px-20 xl:px-28 2xl:px-36 w-full bg-transparent">
+    <section id="marketplace" className="relative py-20 lg:py-28 px-6 sm:px-12 md:px-16 lg:px-28 xl:px-40 2xl:px-52 w-full bg-transparent">
       <div className="max-w-2xl">
         <div className="mb-8">
           <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
@@ -567,7 +567,7 @@ function StudioSection() {
   const tabs = ['Strony', 'Sekcje', 'Motyw', 'Produkty', 'SEO', 'Publikuj']
 
   return (
-    <section id="studio" className="relative py-20 lg:py-28 px-6 sm:px-10 md:px-14 lg:px-20 xl:px-28 2xl:px-36 w-full bg-transparent">
+    <section id="studio" className="relative py-20 lg:py-28 px-6 sm:px-12 md:px-16 lg:px-28 xl:px-40 2xl:px-52 w-full bg-transparent">
       <div className="max-w-2xl">
         <div className="mb-8">
           <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
@@ -659,7 +659,7 @@ function RuntimeEngineSection() {
   ]
 
   return (
-    <section id="runtime" className="relative py-20 lg:py-28 px-6 sm:px-10 md:px-14 lg:px-20 xl:px-28 2xl:px-36 w-full bg-transparent">
+    <section id="runtime" className="relative py-20 lg:py-28 px-6 sm:px-12 md:px-16 lg:px-28 xl:px-40 2xl:px-52 w-full bg-transparent">
       <div className="max-w-2xl">
         <div className="mb-8">
           <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
@@ -733,7 +733,7 @@ function HTMLExportSection() {
   ]
 
   return (
-    <section id="export" className="relative py-20 lg:py-28 px-6 sm:px-10 md:px-14 lg:px-20 xl:px-28 2xl:px-36 w-full bg-transparent">
+    <section id="export" className="relative py-20 lg:py-28 px-6 sm:px-12 md:px-16 lg:px-28 xl:px-40 2xl:px-52 w-full bg-transparent">
       <div className="max-w-2xl">
         <div className="mb-8">
           <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
@@ -862,7 +862,7 @@ function MissionControlSection() {
   ]
 
   return (
-    <section id="mission-control" className="relative py-20 lg:py-28 px-6 sm:px-10 md:px-14 lg:px-20 xl:px-28 2xl:px-36 w-full bg-transparent">
+    <section id="mission-control" className="relative py-20 lg:py-28 px-6 sm:px-12 md:px-16 lg:px-28 xl:px-40 2xl:px-52 w-full bg-transparent">
       <div className="max-w-2xl">
         <div className="mb-8">
           <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
@@ -953,7 +953,7 @@ function WhySoloSpotSection() {
   ]
 
   return (
-    <section id="why" className="relative py-20 lg:py-28 px-6 sm:px-10 md:px-14 lg:px-20 xl:px-28 2xl:px-36 w-full bg-transparent">
+    <section id="why" className="relative py-20 lg:py-28 px-6 sm:px-12 md:px-16 lg:px-28 xl:px-40 2xl:px-52 w-full bg-transparent">
       <div className="max-w-2xl">
         <div className="mb-8">
           <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
@@ -1009,7 +1009,7 @@ function IntegrationsSection() {
   ]
 
   return (
-    <section id="integrations" className="relative py-20 lg:py-28 px-6 sm:px-10 md:px-14 lg:px-20 xl:px-28 2xl:px-36 w-full bg-transparent">
+    <section id="integrations" className="relative py-20 lg:py-28 px-6 sm:px-12 md:px-16 lg:px-28 xl:px-40 2xl:px-52 w-full bg-transparent">
       <div className="max-w-2xl">
         <div className="mb-8">
           <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
@@ -1118,7 +1118,7 @@ function PricingSection() {
   ]
 
   return (
-    <section id="pricing" className="relative py-20 lg:py-28 px-6 sm:px-10 md:px-14 lg:px-20 xl:px-28 2xl:px-36 w-full bg-transparent">
+    <section id="pricing" className="relative py-20 lg:py-28 px-6 sm:px-12 md:px-16 lg:px-28 xl:px-40 2xl:px-52 w-full bg-transparent">
       <div className="max-w-2xl">
         <div className="mb-8">
           <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
@@ -1205,7 +1205,7 @@ function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0)
 
   return (
-    <section id="faq" className="relative py-20 lg:py-28 px-6 sm:px-10 md:px-14 lg:px-20 xl:px-28 2xl:px-36 w-full bg-transparent">
+    <section id="faq" className="relative py-20 lg:py-28 px-6 sm:px-12 md:px-16 lg:px-28 xl:px-40 2xl:px-52 w-full bg-transparent">
       <div className="max-w-2xl">
         <div className="mb-8">
           <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
@@ -1268,7 +1268,7 @@ function FAQSection() {
 
 function CTASection() {
   return (
-    <section id="cta" className="relative py-20 lg:py-28 px-6 sm:px-10 md:px-14 lg:px-20 xl:px-28 2xl:px-36 w-full bg-transparent">
+    <section id="cta" className="relative py-20 lg:py-28 px-6 sm:px-12 md:px-16 lg:px-28 xl:px-40 2xl:px-52 w-full bg-transparent">
       <div className="max-w-2xl">
         <div className="relative bg-[#0D1118]/90 backdrop-blur-md border border-white/10 rounded-3xl p-8 sm:p-10 overflow-hidden">
           <div className="absolute top-0 left-0 w-48 h-48 bg-gradient-to-br from-[#D9A86C]/20 to-transparent rounded-full blur-3xl pointer-events-none" />
@@ -1304,7 +1304,7 @@ function CTASection() {
 
 function Footer() {
   return (
-    <footer className="relative border-t border-white/[0.08] py-12 px-6 sm:px-10 md:px-14 lg:px-20 xl:px-28 2xl:px-36 w-full bg-transparent">
+    <footer className="relative border-t border-white/[0.08] py-12 px-6 sm:px-12 md:px-16 lg:px-28 xl:px-40 2xl:px-52 w-full bg-transparent">
       <div className="max-w-2xl flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <Logo size="sm" />
