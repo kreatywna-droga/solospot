@@ -142,6 +142,25 @@ class AlignmentCalculator implements GuideCalculator {
           distance: dist,
         });
       }
+
+      // Bottom Canvas Edge
+      if (container.height > 0 && Math.abs(dragBottom - container.height) < threshold) {
+        const dist = Math.abs(dragBottom - container.height);
+        guides.push({
+          type: 'ALIGNMENT',
+          source: 'CONTAINER',
+          orientation: 'HORIZONTAL',
+          priority: GUIDE_PRIORITY.CONTAINER,
+          position: container.height,
+          start: 0,
+          end: container.width,
+          label: 'Bottom Edge',
+          color: GUIDE_COLORS.ALIGNMENT,
+          opacity: 1 - (dist / threshold) * 0.3,
+          threshold,
+          distance: dist,
+        });
+      }
     }
 
     // --- Element-to-Element Alignments ---

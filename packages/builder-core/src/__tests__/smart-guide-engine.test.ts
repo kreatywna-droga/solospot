@@ -407,16 +407,169 @@ describe('SmartGuideEngine (E2E)', () => {
       { id: 'drag', x: 150, y: 100 },
       [{ id: 'target', x: 100, y: 100, width: 50 }]
     );
-    // Drag left (150) vs target right (150) → aligned
-    // Drag right (350) vs target right (150) → not aligned
-    // Let's test: drag left aligns with target right
     const input2 = makeInput(
       { id: 'drag', x: 150, y: 100, width: 100 },
       [{ id: 'target', x: 100, y: 100, width: 50 }]
     );
-    // target right = 150, drag left = 150 → aligned!
     const engine = new SmartGuideEngine();
     const result = engine.computeAll(input2);
     expect(result.alignmentCount).toBeGreaterThanOrEqual(1);
+  });
+
+  describe('12 Smart Guide Alignment Types Matrix (UX Correction v1.0)', () => {
+    const engine = new SmartGuideEngine();
+
+    // A. Canvas Center X
+    it('Type A: Canvas Center X', () => {
+      const res = engine.computeAll(makeInput(
+        { x: 540, y: 100, width: 200, height: 100 }, // centerX = 640 = 1280/2
+        [],
+        { width: 1280, height: 800 }
+      ));
+      expect(res.guides.some(g => g.type === 'CENTER' && g.orientation === 'VERTICAL' && g.position === 640)).toBe(true);
+      expect(res.snapGuidance.snapped).toBe(true);
+    });
+
+    // B. Canvas Center Y
+    it('Type B: Canvas Center Y', () => {
+      const res = engine.computeAll(makeInput(
+        { x: 100, y: 350, width: 200, height: 100 }, // centerY = 400 = 800/2
+        [],
+        { width: 1280, height: 800 }
+      ));
+      expect(res.guides.some(g => g.type === 'CENTER' && g.orientation === 'HORIZONTAL' && g.position === 400)).toBe(true);
+      expect(res.snapGuidance.snapped).toBe(true);
+    });
+
+    // C. Canvas Left Edge
+    it('Type C: Canvas Left Edge', () => {
+      const res = engine.computeAll(makeInput(
+        { x: 2, y: 100, width: 200, height: 100 },
+        [],
+        { width: 1280, height: 800 }
+      ));
+      expect(res.guides.some(g => g.source === 'CONTAINER' && g.orientation === 'VERTICAL' && g.position === 0)).toBe(true);
+      expect(res.snapGuidance.snapped).toBe(true);
+      expect(res.snapGuidance.x).toBe(0);
+    });
+
+    // D. Canvas Right Edge
+    it('Type D: Canvas Right Edge', () => {
+      const res = engine.computeAll(makeInput(
+        { x: 1078, y: 100, width: 200, height: 100 }, // right = 1278 (within 8px of 1280)
+        [],
+        { width: 1280, height: 800 }
+      ));
+      expect(res.guides.some(g => g.source === 'CONTAINER' && g.orientation === 'VERTICAL' && g.position === 1280)).toBe(true);
+      expect(res.snapGuidance.snapped).toBe(true);
+      expect(res.snapGuidance.x).toBe(1080);
+    });
+
+    // E. Canvas Top Edge
+    it('Type E: Canvas Top Edge', () => {
+      const res = engine.computeAll(makeInput(
+        { x: 100, y: 3, width: 200, height: 100 },
+        [],
+        { width: 1280, height: 800 }
+      ));
+      expect(res.guides.some(g => g.source === 'CONTAINER' && g.orientation === 'HORIZONTAL' && g.position === 0)).toBe(true);
+      expect(res.snapGuidance.snapped).toBe(true);
+      expect(res.snapGuidance.y).toBe(0);
+    });
+
+    // F. Canvas Bottom Edge
+    it('Type F: Canvas Bottom Edge', () => {
+      const res = engine.computeAll(makeInput(
+        { x: 100, y: 698, width: 200, height: 100 }, // bottom = 798 (within 8px of 800)
+        [],
+        { width: 1280, height: 800 }
+      ));
+      expect(res.guides.some(g => g.source === 'CONTAINER' && g.orientation === 'HORIZONTAL' && g.position === 800)).toBe(true);
+      expect(res.snapGuidance.snapped).toBe(true);
+      expect(res.snapGuidance.y).toBe(700);
+    });
+
+    // G. Element Center X
+    it('Type G: Element Center X', () => {
+      const res = engine.computeAll(makeInput(
+        { id: 'drag', x: 202, y: 300, width: 200, height: 100 }, // center = 302
+        [{ id: 'target', x: 250, y: 50, width: 100, height: 100 }] // target center = 300
+      ));
+      expect(res.guides.some(g => g.source === 'ELEMENT' && g.orientation === 'VERTICAL' && g.position === 300)).toBe(true);
+      expect(res.snapGuidance.snapped).toBe(true);
+    });
+
+    // H. Element Center Y
+    it('Type H: Element Center Y', () => {
+      const res = engine.computeAll(makeInput(
+        { id: 'drag', x: 500, y: 148, width: 200, height: 100 }, // center = 198
+        [{ id: 'target', x: 50, y: 150, width: 100, height: 100 }] // target center = 200
+      ));
+      expect(res.guides.some(g => g.source === 'ELEMENT' && g.orientation === 'HORIZONTAL' && g.position === 200)).toBe(true);
+      expect(res.snapGuidance.snapped).toBe(true);
+    });
+
+    // I. Element Left Edge
+    it('Type I: Element Left Edge', () => {
+      const res = engine.computeAll(makeInput(
+        { id: 'drag', x: 103, y: 300, width: 200, height: 100 },
+        [{ id: 'target', x: 100, y: 50, width: 150, height: 100 }]
+      ));
+      expect(res.guides.some(g => g.source === 'ELEMENT' && g.orientation === 'VERTICAL' && g.position === 100)).toBe(true);
+      expect(res.snapGuidance.snapped).toBe(true);
+      expect(res.snapGuidance.x).toBe(100);
+    });
+
+    // J. Element Right Edge
+    it('Type J: Element Right Edge', () => {
+      const res = engine.computeAll(makeInput(
+        { id: 'drag', x: 248, y: 300, width: 100, height: 100 }, // right = 348
+        [{ id: 'target', x: 200, y: 50, width: 150, height: 100 }] // target right = 350
+      ));
+      expect(res.guides.some(g => g.source === 'ELEMENT' && g.orientation === 'VERTICAL' && g.position === 350)).toBe(true);
+      expect(res.snapGuidance.snapped).toBe(true);
+      expect(res.snapGuidance.x).toBe(250);
+    });
+
+    // K. Element Top Edge
+    it('Type K: Element Top Edge', () => {
+      const res = engine.computeAll(makeInput(
+        { id: 'drag', x: 400, y: 102, width: 100, height: 100 },
+        [{ id: 'target', x: 100, y: 100, width: 100, height: 100 }]
+      ));
+      expect(res.guides.some(g => g.source === 'ELEMENT' && g.orientation === 'HORIZONTAL' && g.position === 100)).toBe(true);
+      expect(res.snapGuidance.snapped).toBe(true);
+      expect(res.snapGuidance.y).toBe(100);
+    });
+
+    // L. Element Bottom Edge
+    it('Type L: Element Bottom Edge', () => {
+      const res = engine.computeAll(makeInput(
+        { id: 'drag', x: 400, y: 198, width: 100, height: 100 }, // bottom = 298
+        [{ id: 'target', x: 100, y: 100, width: 100, height: 200 }] // target bottom = 300
+      ));
+      expect(res.guides.some(g => g.source === 'ELEMENT' && g.orientation === 'HORIZONTAL' && g.position === 300)).toBe(true);
+      expect(res.snapGuidance.snapped).toBe(true);
+      expect(res.snapGuidance.y).toBe(200);
+    });
+
+    // Zoom aware threshold test
+    it('Zoom Aware Threshold (50%, 100%, 150%, 200%)', () => {
+      // At zoom 50%, screen threshold 12px -> canvas threshold 24px
+      const zoom50Threshold = Math.max(8, 12 / 0.5); // 24px
+      const res50 = engine.computeAll({
+        ...makeInput({ id: 'drag', x: 120, y: 300 }, [{ id: 'target', x: 100, y: 50 }]),
+        config: { ...defaultConfig, threshold: zoom50Threshold }
+      });
+      expect(res50.snapGuidance.snapped).toBe(true);
+
+      // At zoom 200%, screen threshold 12px -> canvas threshold 8px (Math.max(8, 6) = 8px)
+      const zoom200Threshold = Math.max(8, 12 / 2.0); // 8px
+      const res200 = engine.computeAll({
+        ...makeInput({ id: 'drag', x: 105, y: 300 }, [{ id: 'target', x: 100, y: 50 }]),
+        config: { ...defaultConfig, threshold: zoom200Threshold }
+      });
+      expect(res200.snapGuidance.snapped).toBe(true);
+    });
   });
 });
