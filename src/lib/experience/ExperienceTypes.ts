@@ -30,7 +30,10 @@ export type ExperienceMood =
   | 'futuristic'
   | 'playful'
   | 'corporate'
-  | 'luxury';
+  | 'luxury'
+  | 'creative'
+  | 'vibrant'
+  | 'modern';
 
 export type ExperienceMotionLevel =
   | 'static'
@@ -68,11 +71,14 @@ export interface AssetSlotDefinition {
 
 export interface ExperienceCapabilityRequirements {
   backgroundVideo?: boolean;
+  videoBackground?: boolean;
   scrollAnimation?: boolean;
   sticky?: boolean;
   gradient?: boolean;
   perspective3d?: boolean;
   assetSlots?: boolean;
+  glassmorphism?: boolean;
+  customLayout?: boolean;
 }
 
 export interface ExperienceItem {

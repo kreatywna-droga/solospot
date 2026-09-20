@@ -5,6 +5,7 @@ import {
   X, Monitor, Tablet, Smartphone, Play, Pause, RotateCcw,
   Sparkles, Layers, ArrowRight, ArrowUp, ArrowDown, Replace,
   Globe, Check, Image as ImageIcon, Video, Eye,
+  MousePointerClick, Sliders, Box, Film, ShieldCheck,
 } from 'lucide-react';
 import type { ExperienceItem } from '@/lib/experience/ExperienceTypes';
 import { SectionPreviewRenderer, ScaleToFitContainer } from '../library/SectionPreviewRenderer';
@@ -29,6 +30,8 @@ export function ExperienceDetailModal({
   const { document, canvas, dispatch } = useBuilder();
   const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [isPlayingMotion, setIsPlayingMotion] = useState(true);
+  const [isInteractive, setIsInteractive] = useState(true);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const [showInsertionMenu, setShowInsertionMenu] = useState(false);
   const [insertedSuccess, setInsertedSuccess] = useState(false);
 
@@ -141,27 +144,55 @@ export function ExperienceDetailModal({
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
           {/* Main Live Preview Area */}
           <div className="flex-1 bg-[#090912] p-4 md:p-8 flex flex-col items-center justify-center overflow-y-auto relative">
-            {/* Motion Controls Floating Bar */}
-            <div className="absolute top-4 left-6 z-20 flex items-center gap-2 bg-[#161622]/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 text-xs text-zinc-300">
-              <button
-                onClick={() => setIsPlayingMotion(!isPlayingMotion)}
-                className="flex items-center gap-1.5 hover:text-white transition-colors"
-              >
-                {isPlayingMotion ? <Pause className="w-3 h-3 text-amber-400" /> : <Play className="w-3 h-3 text-emerald-400" />}
-                <span>{isPlayingMotion ? 'Pause Motion' : 'Play Motion'}</span>
-              </button>
-              <div className="w-px h-3 bg-white/20" />
-              <button
-                onClick={() => {
-                  setIsPlayingMotion(false);
-                  setTimeout(() => setIsPlayingMotion(true), 50);
-                }}
-                className="flex items-center gap-1 hover:text-white transition-colors"
-                title="Restart Motion"
-              >
-                <RotateCcw className="w-3 h-3" />
-                <span>Replay</span>
-              </button>
+            {/* Live Preview Controls Floating Header */}
+            <div className="absolute top-4 left-6 right-6 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+              <div className="flex items-center gap-2 bg-[#161622]/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10 text-xs text-zinc-300 pointer-events-auto shadow-lg">
+                <button
+                  onClick={() => setIsPlayingMotion(!isPlayingMotion)}
+                  className="flex items-center gap-1.5 hover:text-white transition-colors"
+                >
+                  {isPlayingMotion ? <Pause className="w-3 h-3 text-amber-400" /> : <Play className="w-3 h-3 text-emerald-400" />}
+                  <span>{isPlayingMotion ? 'Pause' : 'Play'}</span>
+                </button>
+                <div className="w-px h-3 bg-white/20" />
+                <button
+                  onClick={() => {
+                    setIsPlayingMotion(false);
+                    setScrollProgress(0);
+                    setTimeout(() => setIsPlayingMotion(true), 50);
+                  }}
+                  className="flex items-center gap-1 hover:text-white transition-colors"
+                  title="Reset Motion & Scroll"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>Reset</span>
+                </button>
+                <div className="w-px h-3 bg-white/20" />
+                <button
+                  onClick={() => setIsInteractive(!isInteractive)}
+                  className={`flex items-center gap-1.5 transition-colors ${isInteractive ? 'text-violet-300 font-semibold' : 'text-zinc-400 hover:text-white'}`}
+                  title="Toggle interactive mode (hover, click, drag)"
+                >
+                  <MousePointerClick className="w-3 h-3 text-violet-400" />
+                  <span>{isInteractive ? 'Interactive: ON' : 'Interactive: OFF'}</span>
+                </button>
+              </div>
+
+              {/* Scroll Simulation Slider */}
+              <div className="flex items-center gap-2 bg-[#161622]/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10 text-xs text-zinc-300 pointer-events-auto shadow-lg">
+                <Sliders className="w-3 h-3 text-violet-400" />
+                <span className="text-[11px] text-zinc-400 font-medium hidden sm:inline">Scroll Sim:</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={scrollProgress}
+                  onChange={(e) => setScrollProgress(Number(e.target.value))}
+                  className="w-20 md:w-28 accent-violet-500 cursor-pointer h-1.5 bg-[#252535] rounded-lg"
+                  title={`Simulated scroll progress: ${scrollProgress}%`}
+                />
+                <span className="font-mono text-[11px] text-violet-300 w-8 text-right">{scrollProgress}%</span>
+              </div>
             </div>
 
             {/* Scale To Fit Live Canvas Preview */}
@@ -170,8 +201,14 @@ export function ExperienceDetailModal({
                 viewport === 'mobile' ? 'max-w-[420px]' : viewport === 'tablet' ? 'max-w-[820px]' : 'max-w-[1120px]'
               }`}
             >
-              <ScaleToFitContainer targetWidth={targetWidth} maxHeight={520}>
-                <div style={{ opacity: isPlayingMotion ? 1 : 0.95 }}>
+              <ScaleToFitContainer targetWidth={targetWidth} maxHeight={520} interactive={isInteractive}>
+                <div
+                  style={{
+                    opacity: isPlayingMotion ? 1 : 0.95,
+                    transform: scrollProgress > 0 ? `translateY(-${Math.round(scrollProgress * 0.4)}px)` : undefined,
+                    transition: 'transform 0.1s ease-out',
+                  }}
+                >
                   <SectionPreviewRenderer sectionNode={previewNode} />
                 </div>
               </ScaleToFitContainer>
@@ -187,6 +224,48 @@ export function ExperienceDetailModal({
                 <p className="text-xs text-zinc-300 leading-relaxed">
                   {experience.description}
                 </p>
+              </div>
+
+              {/* Capabilities Checklist */}
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2 flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-violet-400" />
+                  <span>Runtime Capabilities</span>
+                </h4>
+                <div className="grid grid-cols-2 gap-1.5 text-[11px]">
+                  <div className="bg-[#11111a] px-2.5 py-1.5 rounded-lg border border-[#252535] flex items-center gap-1.5 text-zinc-300">
+                    <Check className="w-3 h-3 text-emerald-400" />
+                    <span>Live Preview</span>
+                  </div>
+                  <div className="bg-[#11111a] px-2.5 py-1.5 rounded-lg border border-[#252535] flex items-center gap-1.5 text-zinc-300">
+                    <Check className="w-3 h-3 text-emerald-400" />
+                    <span>Responsive</span>
+                  </div>
+                  {experience.capabilities?.perspective3d && (
+                    <div className="bg-[#11111a] px-2.5 py-1.5 rounded-lg border border-[#252535] flex items-center gap-1.5 text-violet-300 font-semibold">
+                      <Box className="w-3 h-3 text-violet-400" />
+                      <span>CSS 3D Depth</span>
+                    </div>
+                  )}
+                  {experience.capabilities?.backgroundVideo && (
+                    <div className="bg-[#11111a] px-2.5 py-1.5 rounded-lg border border-[#252535] flex items-center gap-1.5 text-violet-300 font-semibold">
+                      <Film className="w-3 h-3 text-violet-400" />
+                      <span>Video Ready</span>
+                    </div>
+                  )}
+                  {experience.capabilities?.scrollAnimation && (
+                    <div className="bg-[#11111a] px-2.5 py-1.5 rounded-lg border border-[#252535] flex items-center gap-1.5 text-violet-300 font-semibold">
+                      <Sliders className="w-3 h-3 text-violet-400" />
+                      <span>Scroll Motion</span>
+                    </div>
+                  )}
+                  {experience.capabilities?.gradient && (
+                    <div className="bg-[#11111a] px-2.5 py-1.5 rounded-lg border border-[#252535] flex items-center gap-1.5 text-violet-300 font-semibold">
+                      <Sparkles className="w-3 h-3 text-violet-400" />
+                      <span>Mesh Glow</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Taxonomy Metadata */}

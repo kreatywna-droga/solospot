@@ -283,49 +283,49 @@ export function ExperienceLibraryModal({
                       key={exp.id}
                       className="group relative rounded-2xl bg-[#14141d] border border-[#232332] hover:border-violet-500/60 hover:shadow-2xl hover:shadow-violet-950/30 transition-all duration-200 flex flex-col justify-between overflow-hidden"
                     >
-                      {/* Card Header */}
-                      <div className="p-4 pb-3 flex items-start justify-between gap-3 border-b border-[#1f1f2c] bg-[#181822]">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h3 className="text-sm font-extrabold text-white group-hover:text-violet-300 transition-colors truncate">
-                              {exp.name}
-                            </h3>
+                      {/* Visual-First Live Scale-To-Fit Preview */}
+                      <div
+                        className="relative w-full cursor-pointer overflow-hidden bg-[#07070e] p-2 group/preview"
+                        onClick={() => setDetailExperience(exp)}
+                      >
+                        {/* Floating Top Badges */}
+                        <div className="absolute top-3 left-3 right-3 z-10 flex items-center justify-between pointer-events-none">
+                          <div className="flex items-center gap-1.5 pointer-events-auto">
+                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-violet-300 bg-black/70 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10 shadow-sm">
+                              {exp.type}
+                            </span>
+                            {exp.badge && (
+                              <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-violet-600/90 text-white shadow-sm">
+                                {exp.badge}
+                              </span>
+                            )}
+                            {exp.motionLevel && exp.motionLevel !== 'static' && (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 backdrop-blur-md flex items-center gap-1">
+                                <Sparkles className="w-2.5 h-2.5" />
+                                <span className="capitalize">{exp.motionLevel}</span>
+                              </span>
+                            )}
                           </div>
-                          <p className="text-[11px] text-zinc-400 mt-0.5 line-clamp-2">
-                            {exp.description}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
+
                           <button
                             onClick={(e) => handleToggleFav(e, exp.id)}
-                            className={`p-1.5 rounded-lg border transition-colors ${
+                            className={`p-1.5 rounded-lg border transition-colors pointer-events-auto shadow-sm backdrop-blur-md ${
                               isFav
-                                ? 'bg-amber-400/20 border-amber-400/40 text-amber-300'
-                                : 'bg-white/5 border-white/10 text-zinc-500 hover:text-white'
+                                ? 'bg-amber-400/30 border-amber-400/50 text-amber-300'
+                                : 'bg-black/60 border-white/10 text-zinc-400 hover:text-white'
                             }`}
                             title={isFav ? 'Remove from favorites' : 'Add to favorites'}
                           >
                             <Star className={`w-3.5 h-3.5 ${isFav ? 'fill-current' : ''}`} />
                           </button>
-                          {exp.badge && (
-                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/40">
-                              {exp.badge}
-                            </span>
-                          )}
                         </div>
-                      </div>
 
-                      {/* Live Scale-To-Fit Preview */}
-                      <div
-                        className="relative w-full cursor-pointer overflow-hidden bg-[#07070e] p-2.5 group/preview"
-                        onClick={() => setDetailExperience(exp)}
-                      >
-                        <ScaleToFitContainer targetWidth={960} maxHeight={280}>
+                        <ScaleToFitContainer targetWidth={960} maxHeight={290} interactive={false}>
                           <SectionPreviewRenderer sectionNode={node} />
                         </ScaleToFitContainer>
 
                         {/* Hover Overlay with Action Buttons */}
-                        <div className="absolute inset-0 bg-black/75 backdrop-blur-[3px] opacity-0 group-hover/preview:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2.5 p-4">
+                        <div className="absolute inset-0 bg-black/80 backdrop-blur-[3px] opacity-0 group-hover/preview:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2.5 p-4 z-20">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -349,52 +349,72 @@ export function ExperienceLibraryModal({
                         </div>
                       </div>
 
-                      {/* Card Footer */}
-                      <div className="px-4 py-3 bg-[#161620] border-t border-[#1f1f2c] flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <span className="text-[10px] font-mono font-bold text-violet-400 uppercase tracking-wider bg-violet-500/10 px-2 py-0.5 rounded border border-violet-500/20 truncate">
-                            {exp.type}
-                          </span>
+                      {/* Card Meta Footer */}
+                      <div className="p-4 bg-[#161622] border-t border-[#202030] flex flex-col gap-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <h3
+                              onClick={() => setDetailExperience(exp)}
+                              className="text-sm font-bold text-white group-hover:text-violet-300 transition-colors truncate cursor-pointer"
+                            >
+                              {exp.name}
+                            </h3>
+                            <p className="text-[11px] text-zinc-400 mt-0.5 line-clamp-1">
+                              {exp.tagline || exp.description}
+                            </p>
+                          </div>
                           {exp.mood && (
-                            <span className="text-[10px] text-zinc-400 capitalize truncate">
+                            <span className="text-[10px] text-zinc-400 capitalize bg-white/5 px-2 py-0.5 rounded border border-white/5 flex-shrink-0">
                               {exp.mood}
                             </span>
                           )}
                         </div>
 
-                        {/* Actions */}
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
-                          {isUser && (
-                            <>
-                              <button
-                                onClick={(e) => handleDuplicateUserExp(e, exp.id)}
-                                className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10"
-                                title="Duplicate custom experience"
-                              >
-                                <Copy className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                onClick={(e) => handleDeleteUserExp(e, exp.id)}
-                                className="p-1.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                title="Delete custom experience"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </>
-                          )}
-                          <button
-                            onClick={() => setDetailExperience(exp)}
-                            className="text-xs text-zinc-300 hover:text-white font-semibold flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-white/10 border border-white/10 transition-colors"
-                          >
-                            <Eye className="w-3 h-3" />
-                            <span>Details</span>
-                          </button>
-                          <button
-                            onClick={() => handleQuickInsert(exp)}
-                            className="text-xs font-extrabold text-white flex items-center gap-1 bg-violet-600 hover:bg-violet-500 px-3 py-1 rounded-lg shadow-sm shadow-violet-600/30 transition-all active:scale-95"
-                          >
-                            <span>Insert</span>
-                          </button>
+                        {/* Action Buttons Row */}
+                        <div className="pt-2 border-t border-white/5 flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-1 text-[10px] text-zinc-500 font-medium">
+                            <span className="capitalize">{exp.category}</span>
+                            {exp.assetSlots && exp.assetSlots.length > 0 && (
+                              <>
+                                <span>•</span>
+                                <span>{exp.assetSlots.length} assets</span>
+                              </>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            {isUser && (
+                              <>
+                                <button
+                                  onClick={(e) => handleDuplicateUserExp(e, exp.id)}
+                                  className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10"
+                                  title="Duplicate custom experience"
+                                >
+                                  <Copy className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={(e) => handleDeleteUserExp(e, exp.id)}
+                                  className="p-1.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                  title="Delete custom experience"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </>
+                            )}
+                            <button
+                              onClick={() => setDetailExperience(exp)}
+                              className="text-xs text-zinc-300 hover:text-white font-semibold flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-white/10 border border-white/10 transition-colors"
+                            >
+                              <Eye className="w-3 h-3" />
+                              <span>Details</span>
+                            </button>
+                            <button
+                              onClick={() => handleQuickInsert(exp)}
+                              className="text-xs font-extrabold text-white flex items-center gap-1 bg-violet-600 hover:bg-violet-500 px-3 py-1 rounded-lg shadow-sm shadow-violet-600/30 transition-all active:scale-95"
+                            >
+                              <span>Use</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>

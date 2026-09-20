@@ -14,6 +14,7 @@ import type {
 } from './ExperienceTypes';
 import { ALL_SECTION_TEMPLATES } from '../../components/builder/library/sections';
 import { WEBSITE_TEMPLATES } from '../../components/builder/templates/WebsiteTemplatesData';
+import { FLAGSHIP_EXPERIENCES } from './ExperienceDefinitions/flagship-experiences';
 import { interactiveExperiences } from './ExperienceDefinitions/interactive-experiences';
 import { backgroundExperiences } from './ExperienceDefinitions/background-experiences';
 import { effectExperiences } from './ExperienceDefinitions/effect-experiences';
@@ -122,6 +123,7 @@ const adaptedWebsiteExperiences: ExperienceItem[] = WEBSITE_TEMPLATES.map(tmpl =
 
 // Master Builtin Catalog
 export const BUILTIN_EXPERIENCES: ExperienceItem[] = [
+  ...FLAGSHIP_EXPERIENCES,
   ...adaptedWebsiteExperiences,
   ...expandedHeroExperiences,
   ...adaptedSectionExperiences,

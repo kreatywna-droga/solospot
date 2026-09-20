@@ -41,12 +41,14 @@ export function ScaleToFitContainer({
   maxHeight = 360,
   className = '',
   interactiveVideo = false,
+  interactive = false,
 }: {
   children: React.ReactNode
   targetWidth?: number
   maxHeight?: number
   className?: string
   interactiveVideo?: boolean
+  interactive?: boolean
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState<number>(0.45)
@@ -80,13 +82,31 @@ export function ScaleToFitContainer({
           width: `${targetWidth}px`,
           transform: `scale(${scale})`,
           transformOrigin: 'top left',
-          pointerEvents: interactiveVideo ? 'auto' : 'none',
+          pointerEvents: (interactive || interactiveVideo) ? 'auto' : 'none',
         }}
       >
         {children}
       </div>
     </div>
   )
+}
+
+function formatTransform(styles: Record<string, any>): string | undefined {
+  if (!styles) return undefined
+  const parts: string[] = []
+  if (styles.translateX || styles.translateY) {
+    parts.push(`translate(${styles.translateX || '0px'}, ${styles.translateY || '0px'})`)
+  }
+  if (styles.rotate !== undefined && styles.rotate !== 0) {
+    parts.push(`rotate(${styles.rotate}deg)`)
+  }
+  if (styles.scale !== undefined && styles.scale !== 1) {
+    parts.push(`scale(${styles.scale})`)
+  }
+  if (styles.transform) {
+    parts.push(styles.transform)
+  }
+  return parts.length > 0 ? parts.join(' ') : undefined
 }
 
 /**
@@ -126,6 +146,9 @@ function ReadOnlyNodeRenderer({ node }: { node: BuilderNode }) {
           margin: formatSides(styles.margin, '0 0 12px 0'),
           padding: formatSides(styles.padding, '0'),
           maxWidth: '100%',
+          transform: formatTransform(styles),
+          zIndex: styles.zIndex,
+          position: styles.position as any,
         }}
       >
         {text}
@@ -156,6 +179,9 @@ function ReadOnlyNodeRenderer({ node }: { node: BuilderNode }) {
           borderRadius: styles.borderRadius || props.borderRadius,
           letterSpacing: styles.letterSpacing,
           maxWidth: styles.maxWidth || '100%',
+          transform: formatTransform(styles),
+          zIndex: styles.zIndex,
+          position: styles.position as any,
         }}
       >
         {text}
@@ -179,6 +205,9 @@ function ReadOnlyNodeRenderer({ node }: { node: BuilderNode }) {
         style={{
           display: 'inline-flex',
           margin,
+          transform: formatTransform(styles),
+          zIndex: styles.zIndex,
+          position: styles.position as any,
         }}
       >
         <span
@@ -197,6 +226,7 @@ function ReadOnlyNodeRenderer({ node }: { node: BuilderNode }) {
             alignItems: 'center',
             justifyContent: 'center',
             whiteSpace: 'nowrap',
+            cursor: 'pointer',
           }}
         >
           {text}
@@ -221,19 +251,69 @@ function ReadOnlyNodeRenderer({ node }: { node: BuilderNode }) {
         style={{
           width,
           height,
-          maxHeight: '340px',
+          maxHeight: styles.maxHeight || '380px',
           borderRadius,
           objectFit,
           margin: formatSides(styles.margin),
           padding: formatSides(styles.padding),
+          transform: formatTransform(styles),
+          boxShadow: styles.boxShadow,
+          zIndex: styles.zIndex,
+          position: styles.position as any,
         }}
       />
     )
   }
 
+  // Video Element
+  if (node.type === 'video') {
+    const videoSrc = (props.src as string) || (props.videoUrl as string) || (styles.videoSrc as string) || ''
+    const poster = (props.poster as string) || (styles.poster as string)
+    return (
+      <div
+        style={{
+          width: styles.width || '100%',
+          height: styles.height || 'auto',
+          maxHeight: styles.maxHeight || '420px',
+          borderRadius: styles.borderRadius || '16px',
+          overflow: 'hidden',
+          position: (styles.position as any) || 'relative',
+          transform: formatTransform(styles),
+          boxShadow: styles.boxShadow,
+          zIndex: styles.zIndex,
+          margin: formatSides(styles.margin),
+          padding: formatSides(styles.padding),
+        }}
+      >
+        <video
+          src={videoSrc}
+          poster={poster}
+          autoPlay={props.autoplay !== false}
+          loop={props.loop !== false}
+          muted={props.muted !== false}
+          playsInline
+          controls={Boolean(props.controls)}
+          style={{
+            width: '100%',
+            height: styles.height || '100%',
+            objectFit: (styles.objectFit as any) || 'cover',
+            display: 'block',
+            borderRadius: styles.borderRadius || '16px',
+          }}
+        />
+      </div>
+    )
+  }
+
   // Container / Card / Grid / Section
-  const display = styles.display || 'flex'
-  const flexDirection = styles.flexDirection || 'column'
+  const display = styles.display || (
+    props.display === 'grid-2' ? 'grid' :
+    props.display === 'grid-3' ? 'grid' :
+    props.display === 'grid-4' ? 'grid' :
+    props.display === 'flex-row' ? 'flex' :
+    'flex'
+  )
+  const flexDirection = styles.flexDirection || (props.display === 'flex-row' ? 'row' : 'column')
   const alignItems = styles.alignItems || 'stretch'
   const justifyContent = styles.justifyContent || 'flex-start'
   const gap = styles.gap || '16px'
@@ -242,12 +322,14 @@ function ReadOnlyNodeRenderer({ node }: { node: BuilderNode }) {
   const bg = styles.backgroundColor || props.background || 'transparent'
   const bgImage = styles.backgroundImage || props.backgroundImage
   const maxWidth = styles.maxWidth || '100%'
+  const bgVideo = (props.backgroundVideo as string) || (props.backgroundVideoUrl as string) || (styles.videoSrc as string)
+  const overlayOpacity = parseFloat(String(styles.overlayOpacity ?? props.overlayOpacity ?? '0'))
 
   return (
     <div
       style={{
         display,
-        flexDirection,
+        flexDirection: display === 'flex' ? flexDirection : undefined,
         alignItems,
         justifyContent,
         gap,
@@ -265,13 +347,89 @@ function ReadOnlyNodeRenderer({ node }: { node: BuilderNode }) {
         width: styles.width || '100%',
         maxWidth,
         boxSizing: 'border-box',
-        position: 'relative',
+        position: (styles.position as any) || 'relative',
+        zIndex: styles.zIndex,
+        transform: formatTransform(styles),
+        perspective: styles.perspective || (styles.perspective3d ? '1000px' : undefined),
+        transformStyle: (styles.transformStyle as any) || (styles.perspective || styles.transform ? 'preserve-3d' : undefined),
+        backdropFilter: styles.backdropFilter || props.backdropFilter,
+        WebkitBackdropFilter: styles.backdropFilter || props.backdropFilter,
+        gridTemplateColumns: styles.gridTemplateColumns || (
+          props.display === 'grid-2' ? 'repeat(2, 1fr)' :
+          props.display === 'grid-3' ? 'repeat(3, 1fr)' :
+          props.display === 'grid-4' ? 'repeat(4, 1fr)' : undefined
+        ),
+        gridTemplateRows: styles.gridTemplateRows,
+        flexWrap: (styles as any).flexWrap || (flexDirection === 'row' ? 'wrap' : undefined),
+        overflow: styles.overflow || styles.overflowX,
+        top: styles.top,
+        bottom: styles.bottom,
+        left: styles.left,
+        right: styles.right,
       }}
     >
-      {node.children && node.children.length > 0 && (
-        node.children.map(child => (
-          <ReadOnlyNodeRenderer key={child.id} node={child} />
-        ))
+      {/* Background Video Layer */}
+      {bgVideo && (
+        <>
+          <video
+            src={String(bgVideo)}
+            autoPlay
+            muted
+            loop
+            playsInline
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              pointerEvents: 'none',
+              zIndex: 0,
+              borderRadius: styles.borderRadius || props.borderRadius || 'inherit',
+            }}
+          />
+          {overlayOpacity > 0 && (
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                pointerEvents: 'none',
+                backgroundColor: String(styles.overlayColor || props.overlayColor || '#000000'),
+                opacity: overlayOpacity,
+                zIndex: 1,
+                borderRadius: styles.borderRadius || props.borderRadius || 'inherit',
+              }}
+            />
+          )}
+        </>
+      )}
+
+      {/* Children Node Content (Elevated above background video if active) */}
+      {bgVideo ? (
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 2,
+            width: '100%',
+            display,
+            flexDirection: display === 'flex' ? flexDirection : undefined,
+            alignItems,
+            justifyContent,
+            gap,
+          }}
+        >
+          {node.children && node.children.length > 0 && (
+            node.children.map(child => (
+              <ReadOnlyNodeRenderer key={child.id} node={child} />
+            ))
+          )}
+        </div>
+      ) : (
+        node.children && node.children.length > 0 && (
+          node.children.map(child => (
+            <ReadOnlyNodeRenderer key={child.id} node={child} />
+          ))
+        )
       )}
     </div>
   )

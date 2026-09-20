@@ -173,6 +173,11 @@ export interface NodeStyles {
   scale?: number;
   rotate?: number;
   transform?: string;
+  borderBottomColor?: string;
+  backdropFilter?: string;
+  WebkitBackdropFilter?: string;
+  perspective?: string;
+  transformStyle?: string;
   overflow?: string;
   overflowX?: string;
   whiteSpace?: string;
