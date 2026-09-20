@@ -19,11 +19,11 @@ interface CinematicScrollHeroProps {
  *
  * Architecture:
  * - Single Source of Truth: window.scrollY (Real document scroll position)
- * - Normal Document Flow: Hero is min-h-screen, immediately scrolls into next sections
- *   (Zero scroll locks, zero artificial sticky pauses, zero wheel hijacking)
- * - Fixed Cinematic Backdrop: Video stays visible in the background from Hero (0%)
- *   through FlowSteps (features) and Stack (stack) up to Architecture (architecture, 100%).
- *   Beyond Architecture, the video gracefully fades out and the rest of the page continues.
+ * - Normal Document Flow: Hero is min-h-screen, immediately scrolls into next sections.
+ * - Left Content Stage: All descriptions, cards, and titles are aligned symmetrically on the LEFT
+ *   so the cinematic 3D clip on the right is 100% uncovered and visible.
+ * - Slowed-down Scrubbing: Video scrubs smoothly through >50% of the entire page (~9000px),
+ *   pacing leisurely through Hero, Steps, Stack, Architecture, and Marketplace.
  */
 export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -39,14 +39,13 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
   const handleScroll = useCallback(() => {
     const scrollY = window.scrollY
     const viewportHeight = window.innerHeight
+    const docHeight = document.documentElement.scrollHeight
 
-    // Measure active range: video completes at end of #architecture section
-    const archEl = document.getElementById('architecture')
-    const videoEndScroll = archEl
-      ? Math.max(archEl.offsetTop + archEl.offsetHeight * 0.7 - viewportHeight, 1200)
-      : Math.max(viewportHeight * 2.5, 1200)
+    // SLOW DOWN SCROLL: video scrubs leisurely through >50% of page (55% of document scroll)
+    const maxScroll = Math.max(docHeight - viewportHeight, 1)
+    const videoEndScroll = Math.max(maxScroll * 0.55, 8000)
 
-    // Global timeline progress for video: 0.0 (top) → 1.0 (end of architecture)
+    // Global timeline progress for video: 0.0 (top) → 1.0 (55% of page)
     const rawProgress = scrollY / videoEndScroll
     const videoProgress = Math.min(Math.max(rawProgress, 0), 1)
 
@@ -60,14 +59,13 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
     }
 
     // 2. ── Backdrop Opacity & Visibility Modulation ─────────────────────────
-    // Stays 100% visible throughout Hero → Features → Stack → Architecture.
-    // Fades to 0 over 400px past architecture, then hidden for zero GPU overhead.
+    // Stays 100% visible through first half of page. Fades out smoothly past 55%.
     if (videoBackdropRef.current) {
       if (scrollY <= videoEndScroll) {
         videoBackdropRef.current.style.opacity = '1'
         videoBackdropRef.current.style.visibility = 'visible'
       } else {
-        const fadeOut = Math.min(Math.max((scrollY - videoEndScroll) / 400, 0), 1)
+        const fadeOut = Math.min(Math.max((scrollY - videoEndScroll) / 500, 0), 1)
         const opacity = 1 - fadeOut
         videoBackdropRef.current.style.opacity = opacity.toString()
         videoBackdropRef.current.style.visibility = opacity <= 0.01 ? 'hidden' : 'visible'
@@ -148,13 +146,12 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
           </video>
         </div>
 
-        {/* Overlay gradient scrims */}
-        {/* Left scrim: ensures text readability on Hero and subsequent sections */}
+        {/* Overlay gradient scrims: left 58% is darkened for content readability */}
         <div
-          className="absolute inset-y-0 left-0 w-[55%] pointer-events-none"
+          className="absolute inset-y-0 left-0 w-[58%] pointer-events-none"
           style={{
             background:
-              'linear-gradient(to right, rgba(8,11,16,0.97) 0%, rgba(8,11,16,0.85) 50%, transparent 100%)',
+              'linear-gradient(to right, rgba(8,11,16,0.98) 0%, rgba(8,11,16,0.92) 50%, rgba(8,11,16,0.35) 85%, transparent 100%)',
           }}
         />
         {/* Top scrim: nav readability */}
@@ -188,7 +185,7 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
       </div>
 
       {/* ── 2. HERO FOREGROUND SECTION (Normal Document Flow) ──────────────── */}
-      {/* min-h-screen flex items-center: perfectly vertically centers hero content */}
+      {/* min-h-screen flex items-center: text is symmetrically on the LEFT   */}
       <section
         id="hero"
         ref={heroSectionRef}
