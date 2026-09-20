@@ -17,6 +17,9 @@ export type HacpStatus = 'OFFLINE' | 'CONNECTING' | 'ONLINE' | 'BUSY' | 'ERROR';
 
 export type HacpStepStatus = 'WAITING' | 'RUNNING' | 'SUCCESS' | 'FAILED' | 'BLOCKED';
 
+/** Honest execution status — NEVER return EXECUTED if no mutation occurred */
+export type HacpExecutionStatus = 'EXECUTED' | 'CLARIFY' | 'FAILED' | 'UNSUPPORTED';
+
 export type HacpMessageType = 'user' | 'ai' | 'system' | 'hacp_activity';
 
 export interface HacpExecutionStep {
@@ -64,6 +67,7 @@ export type HacpIntentType =
   | 'EXECUTE'
   | 'CLARIFY'
   | 'UNDO'
+  | 'REDO'
   | 'PLATFORM_ENGINEERING'
   | 'AUDIT'
   | 'DEBUG';
@@ -175,4 +179,50 @@ export interface HacpExecutionResult {
   errorReason?: string;
   updatedConversationContext?: Partial<HacpConversationContext>;
   shouldTriggerUndo?: boolean;
+  /** Honest status: EXECUTED only if BuilderDocument actually changed */
+  executionStatus?: HacpExecutionStatus;
+  /** Structured before/after evidence */
+  executionEvidence?: {
+    operation: string;
+    target: string;
+    before: unknown;
+    after: unknown;
+    changed: boolean;
+    property?: string;
+  };
 }
+
+/** Color name → hex mapping for deterministic color resolution */
+export const COLOR_MAP: Record<string, string> = {
+  'czerwony': '#FF0000',
+  'czerwone': '#FF0000',
+  'red': '#FF0000',
+  'zielony': '#00FF00',
+  'green': '#00FF00',
+  'niebieski': '#0000FF',
+  'blue': '#0000FF',
+  'żółty': '#FFFF00',
+  'zolty': '#FFFF00',
+  'yellow': '#FFFF00',
+  'biały': '#FFFFFF',
+  'białe': '#FFFFFF',
+  'white': '#FFFFFF',
+  'czarny': '#000000',
+  'czarne': '#000000',
+  'black': '#000000',
+  'pomarańczowy': '#FFA500',
+  'orange': '#FFA500',
+  'fioletowy': '#800080',
+  'purple': '#800080',
+  'violet': '#800080',
+  'różowy': '#FFC0CB',
+  'pink': '#FFC0CB',
+  'szary': '#808080',
+  'gray': '#808080',
+  'grey': '#808080',
+  'złoty': '#D9A86C',
+  'zloty': '#D9A86C',
+  'gold': '#D9A86C',
+  'srebrny': '#C0C0C0',
+  'silver': '#C0C0C0',
+};

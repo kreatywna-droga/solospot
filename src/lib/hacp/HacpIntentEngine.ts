@@ -1,16 +1,19 @@
 /**
- * HacpIntentEngine.ts — Conversational AI Copilot Intent Engine v1.0
+ * HacpIntentEngine.ts — Deterministic HACP Command Parser v2.0
  *
- * Implements deterministic multi-mode intent classification:
- * - CHAT:                 Casual dialogue, questions, guidance (NO mutation, NO HACP card)
- * - INSPECT:              Query current builder/visual state (READ context, NO mutation)
- * - PROPOSE:              Advisory recommendations & design ideas (NO mutation, stores lastProposal)
- * - CLARIFY:              Ambiguous / underspecified requests (NO mutation, prompts for details)
- * - EXECUTE:              Explicit mutation command or confirmation of proposal (HACP mutation)
- * - UNDO:                 Natural revert command ("Cofnij", "Wycofaj to", "Nie podoba mi się, cofnij")
- * - PLATFORM_ENGINEERING: SoloSpot Builder platform tasks (Smart Guides, tools, inspect, capabilities)
- * - AUDIT:                Systematic audit of page structure, tokens, or runtime
- * - DEBUG:                Root cause analysis of issues or anomalies
+ * Parses natural language commands into structured intents WITH extracted parameters.
+ * NO LLM, NO NLP framework — pure deterministic keyword + regex extraction.
+ *
+ * Supported command types:
+ * - ADD_SECTION:    "Dodaj sekcję hero", "Dodaj nową sekcję CTA"
+ * - UPDATE_TITLE:   "Zmień nagłówek na X", "Ustaw tytuł na X"
+ * - ADD_CTA:        "Dodaj przycisk CTA", "Dodaj przycisk Kup teraz"
+ * - UPDATE_CTA:     "Zmień tekst przycisku na X", "Zmień kolor CTA na czerwony"
+ * - UPDATE_COLOR:   "Zmień kolor tła na #FF0000", "Ustaw kolor na czerwony"
+ * - MOVE_SECTION:   "Przesuń sekcję niżej", "Przenieś sekcję wyżej"
+ * - DELETE_SECTION: "Usuń tę sekcję", "Usuń zaznaczony element"
+ * - UNDO:           "Cofnij", "Wycofaj"
+ * - REDO:           "Ponów", "Przywróć"
  */
 
 import type {
@@ -19,8 +22,8 @@ import type {
   HacpConversationContext,
   HacpBuilderContext,
   HacpProposal,
-  AppliedChangeItem,
 } from './HacpTypes';
+import { COLOR_MAP } from './HacpTypes';
 import type { BuilderDocument, BuilderNode } from '../../../packages/builder-core/src';
 
 export interface IntentClassificationResult {
@@ -37,6 +40,7 @@ export interface IntentClassificationResult {
 export class HacpIntentEngine {
   /**
    * Classify user prompt against conversation and builder contexts.
+   * Returns structured intent with extracted parameters.
    */
   public static classify(
     rawPrompt: string,
@@ -48,8 +52,7 @@ export class HacpIntentEngine {
     const lower = prompt.toLowerCase();
 
     // ------------------------------------------------------------------------
-    // Rule 0: UNDO Intent (Natural revert commands)
-    // "Cofnij", "Cofnij to", "Wycofaj", "Nie podoba mi się. Cofnij", "Undo"
+    // Rule 0: UNDO / REDO Intent
     // ------------------------------------------------------------------------
     const isUndo =
       lower === 'cofnij' ||
@@ -78,10 +81,27 @@ export class HacpIntentEngine {
       };
     }
 
+    const isRedo =
+      lower === 'ponów' ||
+      lower === 'ponow' ||
+      lower === 'ponów to' ||
+      lower === 'zrób ponownie' ||
+      lower === 'zrob ponownie' ||
+      lower === 'przywróć' ||
+      lower === 'przywroc' ||
+      lower === 'redo';
+
+    if (isRedo) {
+      return {
+        intent: 'REDO',
+        scope: 'PAGE_DESIGN',
+        confidence: 0.99,
+        reason: 'User explicitly requested to redo',
+      };
+    }
+
     // ------------------------------------------------------------------------
     // Rule 1: PLATFORM_ENGINEERING Intent
-    // Distinguish developing client page from developing SoloSpot Builder itself:
-    // "prowadnice", "smart guides", "wix", "inspector", "zmień prowadnice", "narzędzia buildera"
     // ------------------------------------------------------------------------
     const isPlatformTask =
       lower.includes('prowadnice') ||
@@ -107,13 +127,12 @@ export class HacpIntentEngine {
         intent: 'PLATFORM_ENGINEERING',
         scope: 'PLATFORM_ENGINEERING',
         confidence: 0.96,
-        reason: 'User requested SoloSpot Builder platform development / engineering task',
+        reason: 'User requested SoloSpot Builder platform development task',
       };
     }
 
     // ------------------------------------------------------------------------
     // Rule 2: AUDIT & DEBUG Intents
-    // "Zrób audyt", "Audyt strony", "Dlaczego to nie działa?", "Zdiagnozuj"
     // ------------------------------------------------------------------------
     const isAudit =
       lower === 'zrób audyt' ||
@@ -131,7 +150,7 @@ export class HacpIntentEngine {
         intent: 'AUDIT',
         scope: 'PAGE_DESIGN',
         confidence: 0.95,
-        reason: 'User requested a systematic audit of active page structure and tokens',
+        reason: 'User requested a systematic audit',
         targetNodeId: builderContext.selectedNodeId,
       };
     }
@@ -149,14 +168,13 @@ export class HacpIntentEngine {
         intent: 'DEBUG',
         scope: 'PAGE_DESIGN',
         confidence: 0.94,
-        reason: 'User requested root cause debugging / diagnostics',
+        reason: 'User requested debugging / diagnostics',
         targetNodeId: builderContext.selectedNodeId,
       };
     }
 
     // ------------------------------------------------------------------------
     // Rule 3: Contextual Confirmation of previous PROPOSE
-    // "Tak", "Zrób to", "Zrób wszystko", "Zrób", "Zastosuj", "Wykonaj", "Zgoda"
     // ------------------------------------------------------------------------
     const isAffirmative =
       lower === 'tak' ||
@@ -186,14 +204,14 @@ export class HacpIntentEngine {
         intent: 'EXECUTE',
         scope: 'PAGE_DESIGN',
         confidence: 0.98,
-        reason: 'User explicitly confirmed the previous proposal',
+        reason: 'User confirmed previous proposal',
         targetNodeId: conversation.lastProposal.targetNodeId,
         confirmedProposal: conversation.lastProposal,
       };
     }
 
     // ------------------------------------------------------------------------
-    // Rule 4: Explicit CHAT Intents (Greetings, general questions)
+    // Rule 4: CHAT Intents
     // ------------------------------------------------------------------------
     const isPureGreeting =
       lower === 'cześć' ||
@@ -227,13 +245,12 @@ export class HacpIntentEngine {
         intent: 'CHAT',
         scope: 'PAGE_DESIGN',
         confidence: 0.99,
-        reason: 'General conversational inquiry, greeting, or capabilities overview',
+        reason: 'General conversational inquiry',
       };
     }
 
     // ------------------------------------------------------------------------
-    // Rule 5: INSPECT Intents ("Co widzisz?", "Zobacz ten Hero", "Jak wygląda strona")
-    // READ ONLY — NO MUTATION
+    // Rule 5: INSPECT Intents
     // ------------------------------------------------------------------------
     const isInspectQuestion =
       lower === 'co widzisz?' ||
@@ -259,7 +276,6 @@ export class HacpIntentEngine {
       lower.startsWith('co jest') ||
       lower.startsWith('pokaż sekcje');
 
-    // Make sure it doesn't contain direct write imperative verbs
     const hasWriteImperative =
       lower.includes('zmień') ||
       lower.includes('zmien') ||
@@ -270,65 +286,393 @@ export class HacpIntentEngine {
       lower.includes('wstaw') ||
       lower.includes('stwórz') ||
       lower.includes('stworz') ||
-      lower.includes('zastosuj');
+      lower.includes('zastosuj') ||
+      lower.includes('przesuń') ||
+      lower.includes('przesun') ||
+      lower.includes('przenieś') ||
+      lower.includes('przenies');
 
     if (isInspectQuestion && !hasWriteImperative) {
       return {
         intent: 'INSPECT',
         scope: 'PAGE_DESIGN',
         confidence: 0.95,
-        reason: 'User asks to inspect or read existing builder/visual structure',
+        reason: 'User asks to inspect existing structure',
         targetNodeId: this.resolveTargetNodeId(lower, conversation, builderContext, document),
       };
     }
 
     // ------------------------------------------------------------------------
-    // Rule 6: Explicit EXECUTE Intents (Direct commands with clear actionable parameters)
+    // Rule 6: EXECUTE — DELETE Section
+    // "Usuń tę sekcję", "Usuń zaznaczoną sekcję", "Usuń ten element"
     // ------------------------------------------------------------------------
-    const isExplicitExecute =
-      // Change background / color
-      lower.includes('zmień tło') ||
-      lower.includes('zmien tlo') ||
-      lower.includes('ustaw tło') ||
-      lower.includes('ustaw tlo') ||
-      lower.includes('czarne tło') ||
-      lower.includes('czarne tlo') ||
-      // Add Experience / gold gradient + cursor
-      (lower.includes('użyj złotego gradientu') && lower.includes('kursor')) ||
-      lower.includes('złoty gradient i delikatnej reakcji') ||
-      lower.includes('dodaj złoty gradient') ||
-      lower.includes('dodaj zloty gradient') ||
-      // Motion modulation
-      lower.includes('zwiększ delikatnie ruch') ||
-      lower.includes('zwieksz delikatnie ruch') ||
-      (lower.includes('ruch') && (lower.includes('zwiększ') || lower.includes('zmniejsz'))) ||
-      // Section creation
-      (lower.includes('hero') && (lower.includes('stwórz') || lower.includes('dodaj') || lower.includes('wstaw'))) ||
-      lower.includes('dodaj sekcję') ||
-      lower.includes('dodaj sekcje') ||
-      lower.includes('dodaj sekcję z korzyściami') ||
-      lower.includes('dodaj korzyści') ||
-      // Direct prop changes
-      lower.includes('zwiększ nagłówek') ||
-      lower.includes('zmniejsz nagłówek') ||
-      lower.includes('usuń przycisk') ||
-      lower.includes('usun przycisk') ||
-      lower.includes('usuń sekcję') ||
-      lower.includes('usun sekcje');
+    const isDelete =
+      lower.includes('usuń') ||
+      lower.includes('usun') ||
+      lower.includes('wykasuj') ||
+      lower.includes('skasuj');
 
-    if (isExplicitExecute) {
+    if (isDelete) {
+      const target = this.resolveTargetNodeId(lower, conversation, builderContext, document);
+      if (!target) {
+        return {
+          intent: 'CLARIFY',
+          scope: 'PAGE_DESIGN',
+          confidence: 0.90,
+          reason: 'DELETE requested but no target identified — cannot delete without knowing which element',
+        };
+      }
       return {
         intent: 'EXECUTE',
         scope: 'PAGE_DESIGN',
         confidence: 0.95,
-        reason: 'Explicit actionable builder mutation command',
+        reason: 'Explicit delete command with identified target',
+        targetNodeId: target,
+        extractedParameters: {
+          operation: 'DELETE_SECTION',
+          sectionId: target,
+        },
+      };
+    }
+
+    // ------------------------------------------------------------------------
+    // Rule 7: EXECUTE — MOVE Section
+    // "Przesuń sekcję niżej", "Przenieś tę sekcję wyżej"
+    // ------------------------------------------------------------------------
+    const isMove =
+      lower.includes('przesuń') ||
+      lower.includes('przesun') ||
+      lower.includes('przenieś') ||
+      lower.includes('przenies') ||
+      lower.includes('przesuń ją') ||
+      lower.includes('przesun ja');
+
+    if (isMove) {
+      const target = this.resolveTargetNodeId(lower, conversation, builderContext, document);
+      if (!target) {
+        return {
+          intent: 'CLARIFY',
+          scope: 'PAGE_DESIGN',
+          confidence: 0.90,
+          reason: 'MOVE requested but no target section identified',
+        };
+      }
+
+      let direction: 'up' | 'down' | undefined;
+      if (
+        lower.includes('niżej') || lower.includes('nizej') ||
+        lower.includes('w dół') || lower.includes('w dol') ||
+        lower.includes('na dół') || lower.includes('na dol') ||
+        lower.includes('dół') || lower.includes('dol') ||
+        lower.includes('pod') || lower.includes('next')
+      ) {
+        direction = 'down';
+      } else if (
+        lower.includes('wyżej') || lower.includes('wyzej') ||
+        lower.includes('w górę') || lower.includes('w gore') ||
+        lower.includes('w gore') || lower.includes('na górę') ||
+        lower.includes('na gore') || lower.includes('góra') ||
+        lower.includes('gora') || lower.includes('nad') ||
+        lower.includes('previous')
+      ) {
+        direction = 'up';
+      }
+
+      if (!direction) {
+        return {
+          intent: 'CLARIFY',
+          scope: 'PAGE_DESIGN',
+          confidence: 0.85,
+          reason: 'MOVE requested but direction unclear — specify "niżej" or "wyżej"',
+          targetNodeId: target,
+        };
+      }
+
+      return {
+        intent: 'EXECUTE',
+        scope: 'PAGE_DESIGN',
+        confidence: 0.94,
+        reason: `Explicit move command: direction=${direction}`,
+        targetNodeId: target,
+        extractedParameters: {
+          operation: 'MOVE_SECTION',
+          sectionId: target,
+          direction,
+        },
+      };
+    }
+
+    // ------------------------------------------------------------------------
+    // Rule 8: EXECUTE — UPDATE TITLE / HEADER
+    // "Zmień nagłówek na X", "Ustaw tytuł na X", "Zmień tekst nagłówka na X"
+    // ------------------------------------------------------------------------
+    const isTitleChange =
+      lower.includes('nagłówek') ||
+      lower.includes('naglowek') ||
+      lower.includes('tytuł') ||
+      lower.includes('tytul') ||
+      lower.includes('header') ||
+      lower.includes('title') ||
+      lower.includes('heading');
+
+    if (isTitleChange && (lower.includes('zmień') || lower.includes('zmien') || lower.includes('ustaw'))) {
+      const extractedText = this.extractQuotedOrAfterNa(lower, prompt);
+      if (!extractedText) {
+        return {
+          intent: 'CLARIFY',
+          scope: 'PAGE_DESIGN',
+          confidence: 0.88,
+          reason: 'Title change requested but new value not extracted',
+          targetNodeId: this.resolveTargetNodeId(lower, conversation, builderContext, document),
+        };
+      }
+      return {
+        intent: 'EXECUTE',
+        scope: 'PAGE_DESIGN',
+        confidence: 0.95,
+        reason: `Explicit title update: "${extractedText}"`,
+        targetNodeId: this.resolveTargetNodeId(lower, conversation, builderContext, document),
+        extractedParameters: {
+          operation: 'UPDATE_TITLE',
+          title: extractedText,
+        },
+      };
+    }
+
+    // ------------------------------------------------------------------------
+    // Rule 9: EXECUTE — ADD CTA / BUTTON
+    // "Dodaj przycisk CTA", "Dodaj przycisk Kup teraz"
+    // ------------------------------------------------------------------------
+    const isAddButton =
+      lower.includes('dodaj przycisk') ||
+      lower.includes('dodaj cta') ||
+      lower.includes('wstaw przycisk') ||
+      lower.includes('stwórz przycisk') ||
+      lower.includes('stworz przycisk');
+
+    if (isAddButton) {
+      const buttonText = this.extractQuotedOrAfterKeyword(lower, prompt, ['przycisk', 'cta']) || undefined;
+      return {
+        intent: 'EXECUTE',
+        scope: 'PAGE_DESIGN',
+        confidence: 0.94,
+        reason: 'Explicit add CTA command',
+        targetNodeId: this.resolveTargetNodeId(lower, conversation, builderContext, document),
+        extractedParameters: {
+          operation: 'ADD_CTA',
+          buttonText,
+        },
+      };
+    }
+
+    // ------------------------------------------------------------------------
+    // Rule 10: EXECUTE — UPDATE CTA TEXT / COLOR
+    // "Zmień tekst przycisku na X", "Zmień kolor przycisku na czerwony"
+    // ------------------------------------------------------------------------
+    const isUpdateButton =
+      (lower.includes('tekst') && (lower.includes('przycisk') || lower.includes('cta'))) ||
+      (lower.includes('kolor') && (lower.includes('przycisk') || lower.includes('cta'))) ||
+      (lower.includes('zmień') && lower.includes('przycisk')) ||
+      (lower.includes('zmien') && lower.includes('przycisk')) ||
+      (lower.includes('ustaw') && lower.includes('przycisk'));
+
+    if (isUpdateButton) {
+      const target = this.resolveTargetNodeId(lower, conversation, builderContext, document);
+      if (!target) {
+        return {
+          intent: 'CLARIFY',
+          scope: 'PAGE_DESIGN',
+          confidence: 0.88,
+          reason: 'Button update requested but no target section identified',
+        };
+      }
+
+      // Check if it's a text change or color change
+      if (lower.includes('tekst') || lower.includes('text') || lower.includes('napis')) {
+        const extractedText = this.extractQuotedOrAfterNa(lower, prompt);
+        if (!extractedText) {
+          return {
+            intent: 'CLARIFY',
+            scope: 'PAGE_DESIGN',
+            confidence: 0.85,
+            reason: 'Button text change requested but new text not extracted',
+            targetNodeId: target,
+          };
+        }
+        return {
+          intent: 'EXECUTE',
+          scope: 'PAGE_DESIGN',
+          confidence: 0.93,
+          reason: `Explicit button text update: "${extractedText}"`,
+          targetNodeId: target,
+          extractedParameters: {
+            operation: 'UPDATE_CTA_TEXT',
+            text: extractedText,
+          },
+        };
+      }
+
+      if (lower.includes('kolor') || lower.includes('color')) {
+        const color = this.extractColor(lower, prompt);
+        if (!color) {
+          return {
+            intent: 'CLARIFY',
+            scope: 'PAGE_DESIGN',
+            confidence: 0.85,
+            reason: 'Button color change requested but color not recognized',
+            targetNodeId: target,
+          };
+        }
+        return {
+          intent: 'EXECUTE',
+          scope: 'PAGE_DESIGN',
+          confidence: 0.93,
+          reason: `Explicit button color update: ${color}`,
+          targetNodeId: target,
+          extractedParameters: {
+            operation: 'UPDATE_CTA_COLOR',
+            color,
+          },
+        };
+      }
+    }
+
+    // ------------------------------------------------------------------------
+    // Rule 11: EXECUTE — UPDATE COLOR (generic)
+    // "Zmień kolor tła na #FF0000", "Ustaw kolor na czerwony"
+    // ------------------------------------------------------------------------
+    const isColorChange =
+      (lower.includes('kolor') || lower.includes('color') || lower.includes('barwa')) &&
+      (lower.includes('zmień') || lower.includes('zmien') || lower.includes('ustaw') || lower.includes('na'));
+
+    if (isColorChange) {
+      const color = this.extractColor(lower, prompt);
+      if (!color) {
+        return {
+          intent: 'CLARIFY',
+          scope: 'PAGE_DESIGN',
+          confidence: 0.85,
+          reason: 'Color change requested but color not recognized. Use hex (#RRGGBB) or name (czerwony, niebieski, etc.)',
+          targetNodeId: this.resolveTargetNodeId(lower, conversation, builderContext, document),
+        };
+      }
+
+      // Determine what property to change
+      let property = 'color';
+      if (lower.includes('tło') || lower.includes('tła') || lower.includes('tlo') || lower.includes('tla') || lower.includes('background')) {
+        property = 'backgroundColor';
+      } else if (lower.includes('tekst') || lower.includes('text') || lower.includes('nagłówek') || lower.includes('naglowek')) {
+        property = 'textColor';
+      } else if (lower.includes('przycisk') || lower.includes('cta') || lower.includes('button')) {
+        property = 'buttonColor';
+      }
+
+      return {
+        intent: 'EXECUTE',
+        scope: 'PAGE_DESIGN',
+        confidence: 0.93,
+        reason: `Explicit color update: ${color} on ${property}`,
+        targetNodeId: this.resolveTargetNodeId(lower, conversation, builderContext, document),
+        extractedParameters: {
+          operation: 'UPDATE_COLOR',
+          color,
+          property,
+        },
+      };
+    }
+
+    // ------------------------------------------------------------------------
+    // Rule 12: EXECUTE — ADD SECTION (generic)
+    // "Dodaj sekcję hero", "Dodaj nową sekcję", "Dodaj sekcję CTA"
+    // ------------------------------------------------------------------------
+    const isAddSection =
+      lower.includes('dodaj sekcję') ||
+      lower.includes('dodaj sekcje') ||
+      lower.includes('dodaj nową sekcję') ||
+      lower.includes('dodaj nowa sekcje') ||
+      lower.includes('wstaw sekcję') ||
+      lower.includes('wstaw sekcje') ||
+      lower.includes('stwórz sekcję') ||
+      lower.includes('stworz sekcje') ||
+      lower.includes('utwórz sekcję') ||
+      lower.includes('utworz sekcje');
+
+    if (isAddSection) {
+      let sectionType = 'hero'; // default
+      if (lower.includes('cta') || lower.includes('call to action')) {
+        sectionType = 'cta';
+      } else if (lower.includes('hero') || lower.includes('banner')) {
+        sectionType = 'hero';
+      } else if (lower.includes('feature') || lower.includes('korzyś') || lower.includes('korzys')) {
+        sectionType = 'feature-grid';
+      } else if (lower.includes('kontakt') || lower.includes('contact')) {
+        sectionType = 'contact';
+      } else if (lower.includes('footer') || lower.includes('stopka')) {
+        sectionType = 'footer';
+      } else if (lower.includes('galeria') || lower.includes('gallery')) {
+        sectionType = 'gallery';
+      } else if (lower.includes('testimonial') || lower.includes('opinie')) {
+        sectionType = 'testimonials';
+      } else if (lower.includes('pricing') || lower.includes('cennik')) {
+        sectionType = 'pricing';
+      }
+
+      // Determine insertion position
+      let position: 'start' | 'end' | undefined;
+      if (lower.includes('na górę') || lower.includes('na gore') || lower.includes('na początku') || lower.includes('pierwsza')) {
+        position = 'start';
+      } else if (lower.includes('na koniec') || lower.includes('na dole') || lower.includes('ostatnia')) {
+        position = 'end';
+      }
+
+      return {
+        intent: 'EXECUTE',
+        scope: 'PAGE_DESIGN',
+        confidence: 0.94,
+        reason: `Explicit add section: type=${sectionType}`,
+        targetNodeId: this.resolveTargetNodeId(lower, conversation, builderContext, document),
+        extractedParameters: {
+          operation: 'ADD_SECTION',
+          sectionType,
+          position,
+        },
+      };
+    }
+
+    // ------------------------------------------------------------------------
+    // Rule 13: PROPOSE (Advisory / Brainstorming)
+    // ------------------------------------------------------------------------
+    const isProposeQuestion =
+      lower.includes('jak poprawić') ||
+      lower.includes('jak poprawic') ||
+      lower.includes('jak można poprawić') ||
+      lower.includes('jak mozna poprawic') ||
+      lower.includes('co tutaj możemy poprawić') ||
+      lower.includes('co tutaj mozemy poprawic') ||
+      lower.includes('co możemy poprawić') ||
+      lower.includes('co mozemy poprawic') ||
+      lower.includes('co jeszcze możemy zrobić') ||
+      lower.includes('co jeszcze mozemy zrobic') ||
+      lower.includes('pokaż propozycję') ||
+      lower.includes('pokaz propozycje') ||
+      lower.includes('co proponujesz') ||
+      lower.includes('co sądzisz o tym układzie') ||
+      lower.includes('co sadzisz') ||
+      lower.includes('masz jakiś pomysł') ||
+      lower.includes('masz jakis pomysl');
+
+    if (isProposeQuestion && !hasWriteImperative) {
+      return {
+        intent: 'PROPOSE',
+        scope: 'PAGE_DESIGN',
+        confidence: 0.95,
+        reason: 'User asks for advice or design proposal',
         targetNodeId: this.resolveTargetNodeId(lower, conversation, builderContext, document),
       };
     }
 
     // ------------------------------------------------------------------------
-    // Rule 7: CLARIFY Intents (Vague / Underspecified requests)
-    // "Zrób to bardziej premium", "Zrób to lepiej", "Zrób coś z tym", "Popraw to"
+    // Rule 14: CLARIFY (Vague requests)
     // ------------------------------------------------------------------------
     const isVagueGeneralRequest =
       lower === 'zrób to bardziej premium' ||
@@ -345,62 +689,13 @@ export class HacpIntentEngine {
         intent: 'CLARIFY',
         scope: 'PAGE_DESIGN',
         confidence: 0.92,
-        reason: 'Ambiguous request lacking specific target property or design parameter',
+        reason: 'Ambiguous request lacking specific target or parameter',
         targetNodeId: this.resolveTargetNodeId(lower, conversation, builderContext, document),
       };
     }
 
     // ------------------------------------------------------------------------
-    // Rule 8: PROPOSE Intents (Advisory / Brainstorming / "Pokaż propozycję")
-    // "Co tutaj możemy poprawić?", "Co możemy poprawić w tej sekcji?", "Jak poprawić ten Hero?", "A gdybyśmy zrobili bardziej premium?"
-    // ------------------------------------------------------------------------
-    const isProposeQuestion =
-      lower.includes('jak poprawić') ||
-      lower.includes('jak poprawic') ||
-      lower.includes('jak można poprawić') ||
-      lower.includes('jak mozna poprawic') ||
-      lower.includes('jak poprawiłbyś') ||
-      lower.includes('jak poprawilbys') ||
-      lower.includes('co tutaj możemy poprawić') ||
-      lower.includes('co tutaj mozemy poprawic') ||
-      lower.includes('co możemy poprawić w tej sekcji') ||
-      lower.includes('co mozemy poprawic w tej sekcji') ||
-      lower.includes('co możemy poprawić') ||
-      lower.includes('co mozemy poprawic') ||
-      lower.includes('co jeszcze możemy zrobić') ||
-      lower.includes('co jeszcze mozemy zrobic') ||
-      lower.includes('a gdybyśmy zrobili bardziej premium') ||
-      lower.includes('a gdybysmy zrobili bardziej premium') ||
-      lower.includes('jak zrobić bardziej premium') ||
-      lower.includes('pokaż propozycję') ||
-      lower.includes('pokaz propozycje') ||
-      lower.includes('pokaż mi') ||
-      lower.includes('pokaz mi') ||
-      lower.includes('pokaż pierwszą') ||
-      lower.includes('pokaz pierwsza') ||
-      lower.includes('co proponujesz') ||
-      lower.includes('co byś zmienił') ||
-      lower.includes('co bys zmienil') ||
-      lower.includes('co sądzisz o tym układzie') ||
-      lower.includes('co sadzisz') ||
-      lower.includes('ten hero jest trochę pusty') ||
-      lower.includes('ten hero jest troche pusty') ||
-      lower.includes('masz jakiś pomysł') ||
-      lower.includes('masz jakis pomysl');
-
-    if (isProposeQuestion && !hasWriteImperative) {
-      return {
-        intent: 'PROPOSE',
-        scope: 'PAGE_DESIGN',
-        confidence: 0.95,
-        reason: 'User asks for advice, critique, or a design proposal before modifying',
-        targetNodeId: this.resolveTargetNodeId(lower, conversation, builderContext, document),
-      };
-    }
-
-    // ------------------------------------------------------------------------
-    // Fallback: If user asked a question (ends with '?') -> CHAT
-    // Otherwise, if still ambiguous -> CLARIFY (Never blind mutation!)
+    // Fallback: question → CHAT, unknown → CLARIFY (NEVER mutate!)
     // ------------------------------------------------------------------------
     if (lower.endsWith('?')) {
       return {
@@ -415,13 +710,92 @@ export class HacpIntentEngine {
       intent: 'CLARIFY',
       scope: 'PAGE_DESIGN',
       confidence: 0.75,
-      reason: 'Unrecognized intent treated safely as CLARIFY without mutating builder',
+      reason: 'Unrecognized intent — no mutation without clear parameters',
     };
   }
 
+  // ---------------------------------------------------------------------------
+  // Parameter Extraction Helpers
+  // ---------------------------------------------------------------------------
+
   /**
-   * Resolve contextual pronouns ("to", "ten", "ten Hero", "ta sekcja")
-   * to a concrete Builder node ID.
+   * Extract text after "na " or inside quotes.
+   * "Zmień nagłówek na Premium Digital Experience" → "Premium Digital Experience"
+   * "Zmień nagłówek na 'Premium Digital Experience'" → "Premium Digital Experience"
+   */
+  private static extractQuotedOrAfterNa(lower: string, prompt: string): string | null {
+    // Try quoted text first: "na 'X'" or "na \"X\""
+    const quoteMatch = prompt.match(/na\s+['""](.+?)['""]/i);
+    if (quoteMatch) return quoteMatch[1].trim();
+
+    // Try after "na " until end of string or next clause
+    const naMatch = prompt.match(/na\s+(.+?)$/i);
+    if (naMatch) {
+      const value = naMatch[1].trim();
+      // Don't return if it's just a word like "na przykład"
+      if (value.length > 0 && !value.startsWith('przykład') && !value.startsWith('przyklad')) {
+        return value;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Extract text after a keyword like "przycisk" or "cta".
+   * "Dodaj przycisk Kup teraz" → "Kup teraz"
+   * "Dodaj przycisk CTA Kup teraz" → "Kup teraz"
+   */
+  private static extractQuotedOrAfterKeyword(lower: string, prompt: string, keywords: string[]): string | null {
+    for (const keyword of keywords) {
+      // Match keyword followed by optional whitespace and then the value
+      // Use word boundary to avoid partial matches
+      const regex = new RegExp(`\\b${keyword}\\b\\s+(.+?)$`, 'i');
+      const match = prompt.match(regex);
+      if (match) {
+        let value = match[1].trim();
+        // If value starts with another keyword (like "CTA"), skip it
+        for (const skipKw of keywords) {
+          if (value.toLowerCase().startsWith(skipKw + ' ')) {
+            value = value.slice(skipKw.length).trim();
+          }
+        }
+        if (value.length > 0) return value;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Extract color from prompt.
+   * Supports: named colors (czerwony, blue), hex (#FF0000, #fff)
+   */
+  private static extractColor(lower: string, prompt: string): string | null {
+    // Try hex color first
+    const hexMatch = prompt.match(/#([0-9a-fA-F]{3,8})\b/);
+    if (hexMatch) {
+      let hex = hexMatch[1];
+      // Expand 3-char hex to 6-char
+      if (hex.length === 3) {
+        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+      }
+      if (hex.length === 6) {
+        return `#${hex}`;
+      }
+    }
+
+    // Try named colors
+    for (const [name, hex] of Object.entries(COLOR_MAP)) {
+      if (lower.includes(name)) {
+        return hex;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Resolve contextual pronouns to a concrete Builder node ID.
    */
   public static resolveTargetNodeId(
     promptLower: string,
@@ -447,7 +821,7 @@ export class HacpIntentEngine {
       return conversation.lastTargetNodeId;
     }
 
-    // 4. Default to first section of active page
-    return document.pages[0]?.sections[0]?.id;
+    // 4. No explicit target — return undefined (callers decide fallback)
+    return undefined;
   }
 }
