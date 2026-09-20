@@ -371,8 +371,6 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
         rafId = null
       }
 
-      setActiveSnap(null)
-
       // Clear smart guides on canvas overlay
       window.dispatchEvent(new CustomEvent('solospot:smart-guides-update', {
         detail: { guides: [] }
