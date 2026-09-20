@@ -57,7 +57,35 @@ export interface HacpActivityEvent {
   status?: 'INFO' | 'SUCCESS' | 'WARN' | 'ERROR';
 }
 
-export type HacpIntentType = 'CHAT' | 'INSPECT' | 'PROPOSE' | 'EXECUTE' | 'CLARIFY';
+export type HacpIntentType =
+  | 'CHAT'
+  | 'INSPECT'
+  | 'PROPOSE'
+  | 'EXECUTE'
+  | 'CLARIFY'
+  | 'UNDO'
+  | 'PLATFORM_ENGINEERING'
+  | 'AUDIT'
+  | 'DEBUG';
+
+export type HacpEngineeringScope = 'PAGE_DESIGN' | 'PLATFORM_ENGINEERING';
+
+export interface HacpVisualMetrics {
+  width: number;
+  height: number;
+  top: number;
+  left: number;
+  aspectRatio: number;
+  isOutOfBounds?: boolean;
+  computedStylesSummary?: string;
+}
+
+export interface HacpLayoutDiagnostics {
+  whitespaceBalance: 'BALANCED' | 'LEFT_HEAVY' | 'RIGHT_HEAVY' | 'SPARSE';
+  contentDensity: 'OPTIMAL' | 'OVERCROWDED' | 'EMPTY';
+  contrastAssessment: 'PASS' | 'WARN' | 'FAIL';
+  alignmentNotes?: string;
+}
 
 export interface HacpProposal {
   id: string;
@@ -78,10 +106,12 @@ export interface HacpConversationContext {
   lastProposal?: HacpProposal;
   lastTargetNodeId?: string;
   lastActionSummary?: string;
+  lastModifiedNodeId?: string;
   history: Array<{
     role: 'user' | 'ai';
     text: string;
     intent?: HacpIntentType;
+    scope?: HacpEngineeringScope;
     timestamp: string;
   }>;
 }
@@ -92,11 +122,18 @@ export interface HacpMessage {
   text: string;
   timestamp: string;
   intent?: HacpIntentType;
+  scope?: HacpEngineeringScope;
   card?: HacpExecutionCard;
   suggestedActions?: string[];
+  visualMetrics?: HacpVisualMetrics;
 }
 
-export type CapabilityCategory = 'READ' | 'BUILD' | 'EDIT' | 'VALIDATION';
+export type CapabilityCategory =
+  | 'READ'
+  | 'BUILD'
+  | 'EDIT'
+  | 'VALIDATION'
+  | 'ENGINEERING';
 
 export interface HacpCapability {
   id: string;
@@ -120,15 +157,22 @@ export interface HacpBuilderContext {
   viewport: 'DESKTOP' | 'TABLET' | 'MOBILE';
   documentNodeCount: number;
   availableCapabilitiesCount: number;
+  visualMetrics?: HacpVisualMetrics;
+  layoutDiagnostics?: HacpLayoutDiagnostics;
+  recentMutation?: string;
+  activeTool?: string;
+  engineeringScope?: HacpEngineeringScope;
 }
 
 export interface HacpExecutionResult {
   success: boolean;
   intent: HacpIntentType;
+  scope?: HacpEngineeringScope;
   message: string;
   executionCard?: HacpExecutionCard;
   commandsToDispatch: BuilderCommand[];
   eventsToEmit: HacpActivityEvent[];
   errorReason?: string;
   updatedConversationContext?: Partial<HacpConversationContext>;
+  shouldTriggerUndo?: boolean;
 }

@@ -27,6 +27,7 @@ import type {
   HacpCapability,
   HacpStatus,
   HacpConversationContext,
+  HacpVisualMetrics,
 } from '@/lib/hacp/HacpTypes'
 import { findNode } from '../../../../packages/builder-core/src'
 
@@ -41,6 +42,8 @@ export function AiCopilotWorkspace() {
   const [conversationContext, setConversationContext] = useState<HacpConversationContext>({
     history: [],
   })
+  const [visualMetrics, setVisualMetrics] = useState<HacpVisualMetrics | undefined>(undefined)
+  const [recentMutation, setRecentMutation] = useState<string | undefined>(undefined)
 
   // Collapsible panels state
   const [contextOpen, setContextOpen] = useState(true)
@@ -54,6 +57,34 @@ export function AiCopilotWorkspace() {
   const bridge = useMemo(() => HacpBridge.getInstance(), [])
   const hacpStatus: HacpStatus = isExecuting ? 'BUSY' : bridge.getStatus()
   const capabilities = useMemo(() => bridge.getCapabilities(), [bridge])
+
+  // Measure active canvas element geometry for Live Visual Context
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const updateMetrics = () => {
+      const targetId = canvas.selectedSectionId || builderDoc.pages[0]?.sections[0]?.id
+      if (!targetId) {
+        setVisualMetrics(undefined)
+        return
+      }
+      const el = document.querySelector(`[data-section-id="${targetId}"]`) as HTMLElement | null
+      if (el) {
+        const rect = el.getBoundingClientRect()
+        setVisualMetrics({
+          width: Math.round(rect.width),
+          height: Math.round(rect.height),
+          top: Math.round(rect.top),
+          left: Math.round(rect.left),
+          aspectRatio: parseFloat((rect.width / (rect.height || 1)).toFixed(2)),
+          computedStylesSummary: `display: ${getComputedStyle(el).display}`,
+        })
+      }
+    }
+
+    updateMetrics()
+    const timer = setTimeout(updateMetrics, 100)
+    return () => clearTimeout(timer)
+  }, [canvas.selectedSectionId, canvas.viewport, builderDoc])
 
   // Subscribe to HACP activity stream
   useEffect(() => {
@@ -101,8 +132,11 @@ export function AiCopilotWorkspace() {
       viewport: (canvas.viewport?.label as any) || 'DESKTOP',
       documentNodeCount: activePage?.sections?.length || 0,
       availableCapabilitiesCount: capabilities.filter((c) => c.available).length,
+      visualMetrics,
+      recentMutation,
+      activeTool: (canvas as any).activeTool || 'SELECT',
     }
-  }, [activePage, selectedNodeInfo, canvas.viewport, builderDoc, capabilities])
+  }, [activePage, selectedNodeInfo, canvas.viewport, builderDoc, capabilities, visualMetrics, recentMutation, canvas])
 
   // Contextual suggestions when conversation is empty
   const suggestions = useMemo(() => {
@@ -110,7 +144,7 @@ export function AiCopilotWorkspace() {
       'Jak poprawiłbyś ten Hero?',
       'Zmień tło Hero na czarne.',
       'Nadaj tej sekcji bardziej premium charakter. Użyj złotego gradientu i delikatnej reakcji na kursor.',
-      'Co możesz zrobić w SoloSpot?',
+      'Chciałbym, żeby prowadnice w Builderze były bardziej podobne do Wix.',
     ]
   }, [])
 
@@ -145,10 +179,19 @@ export function AiCopilotWorkspace() {
               role: 'ai' as const,
               text: result.message,
               intent: result.intent,
+              scope: result.scope,
               timestamp: new Date().toLocaleTimeString('pl-PL'),
             },
           ].slice(-25),
         }))
+      }
+
+      // If action requested natural UNDO
+      if (result.shouldTriggerUndo || result.intent === 'UNDO') {
+        if (canUndo) {
+          undo()
+          setRecentMutation('Cofnięto poprzednią modyfikację')
+        }
       }
 
       // ONLY dispatch mutations if intent is EXECUTE and commands are present
@@ -156,6 +199,9 @@ export function AiCopilotWorkspace() {
         result.commandsToDispatch.forEach((cmd) => {
           dispatch(cmd)
         })
+        if (result.executionCard?.appliedChanges?.[0]?.summary) {
+          setRecentMutation(result.executionCard.appliedChanges[0].summary)
+        }
       }
 
       const aiMessage: HacpMessage = {
@@ -164,7 +210,8 @@ export function AiCopilotWorkspace() {
         text: result.message,
         timestamp: new Date().toLocaleTimeString('pl-PL'),
         intent: result.intent,
-        card: result.intent === 'EXECUTE' ? result.executionCard : undefined,
+        scope: result.scope,
+        card: (result.intent === 'EXECUTE' || result.intent === 'AUDIT') ? result.executionCard : undefined,
       }
 
       setMessages((prev) => [...prev, aiMessage])
@@ -180,7 +227,6 @@ export function AiCopilotWorkspace() {
       setIsExecuting(false)
     }
   }
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -228,7 +274,7 @@ export function AiCopilotWorkspace() {
         </div>
       </div>
 
-      {/* ── 2. COLLAPSIBLE CONTEXT PANEL ───────────────────────────────────── */}
+      {/* ── 2. LIVE BUILDER OBSERVATION PANEL ──────────────────────────────── */}
       <div className="border-b border-white/[0.06] bg-[#0A0E15] flex-shrink-0">
         <button
           onClick={() => setContextOpen((v) => !v)}
@@ -236,7 +282,7 @@ export function AiCopilotWorkspace() {
         >
           <div className="flex items-center gap-1.5">
             <Layers className="w-3 h-3 text-[#D9A86C]" />
-            <span>Kontekst Buildera</span>
+            <span>Live Builder Context</span>
             {selectedNodeInfo && (
               <span className="text-[#F2C27F] font-bold">● {selectedNodeInfo.label}</span>
             )}
@@ -251,20 +297,38 @@ export function AiCopilotWorkspace() {
               <span className="text-zinc-200 truncate block font-medium">{currentContext.pageName}</span>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-1.5">
-              <span className="text-zinc-500 block text-[9px]">ZAZNACZENIE</span>
+              <span className="text-zinc-500 block text-[9px]">VIEWPORT</span>
+              <span className="text-zinc-300 truncate block font-medium">
+                {currentContext.viewport} {visualMetrics ? `(${visualMetrics.width}px)` : ''}
+              </span>
+            </div>
+            <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-1.5">
+              <span className="text-zinc-500 block text-[9px]">SELEKCJA</span>
               <span className="text-[#F2C27F] truncate block font-medium">
                 {selectedNodeInfo?.label || '(Brak zaznaczenia)'}
               </span>
+              {visualMetrics && (
+                <span className="text-[8px] text-zinc-400 block mt-0.5">
+                  {visualMetrics.width} × {visualMetrics.height}px
+                </span>
+              )}
             </div>
             <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-1.5">
               <span className="text-zinc-500 block text-[9px]">EXPERIENCE</span>
               <span className="text-zinc-300 truncate block">
-                {selectedNodeInfo?.experienceConfig?.background?.type || 'Standard'}
+                {selectedNodeInfo?.experienceConfig?.background?.type ? `Exp: ${selectedNodeInfo.experienceConfig.background.type}` : 'Standard'}
               </span>
             </div>
-            <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-1.5">
-              <span className="text-zinc-500 block text-[9px]">VIEWPORT</span>
-              <span className="text-zinc-300 truncate block">{currentContext.viewport}</span>
+            <div className="col-span-2 bg-white/[0.02] border border-white/[0.05] rounded-lg p-1.5 flex items-center justify-between">
+              <div className="min-w-0 pr-2">
+                <span className="text-zinc-500 block text-[9px]">OSTATNIA ZMIANA</span>
+                <span className="text-emerald-400 truncate block text-[10px] font-medium">
+                  {recentMutation || 'Brak aktywnych zmian'}
+                </span>
+              </div>
+              <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 whitespace-nowrap">
+                LIVE SYNC
+              </span>
             </div>
           </div>
         )}
@@ -351,6 +415,21 @@ export function AiCopilotWorkspace() {
                 <span>{msg.type === 'user' ? 'Ty' : msg.type === 'ai' ? 'SoloSpot AI' : 'System'}</span>
                 <span>•</span>
                 <span>{msg.timestamp}</span>
+                {msg.scope === 'PLATFORM_ENGINEERING' && (
+                  <span className="px-1.5 py-0.2 rounded bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 font-bold text-[8px]">
+                    PLATFORM ENGINEERING
+                  </span>
+                )}
+                {msg.intent === 'AUDIT' && (
+                  <span className="px-1.5 py-0.2 rounded bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold text-[8px]">
+                    SYSTEM AUDIT
+                  </span>
+                )}
+                {msg.intent === 'UNDO' && (
+                  <span className="px-1.5 py-0.2 rounded bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-bold text-[8px]">
+                    HISTORY REVERT
+                  </span>
+                )}
               </div>
 
               {/* Message bubble */}
@@ -482,11 +561,21 @@ export function AiCopilotWorkspace() {
         </button>
 
         <button
-          onClick={() => handleSendMessage('Dodaj sekcję Korzyści (Feature Grid) z trzema filarami oferty.')}
+          onClick={() => handleSendMessage('Zrób audyt.')}
           disabled={isExecuting}
-          className="px-2.5 py-1 rounded-lg text-[10px] font-medium bg-white/[0.03] border border-white/10 text-zinc-300 hover:text-white hover:bg-white/[0.07] whitespace-nowrap transition-colors flex items-center gap-1 flex-shrink-0 disabled:opacity-40"
+          className="px-2.5 py-1 rounded-lg text-[10px] font-medium bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20 whitespace-nowrap transition-colors flex items-center gap-1 flex-shrink-0 disabled:opacity-40"
         >
-          <span>+ Korzyści</span>
+          <Shield className="w-3 h-3 text-amber-400" />
+          <span>+ Zrób Audyt</span>
+        </button>
+
+        <button
+          onClick={() => handleSendMessage('Chciałbym, żeby prowadnice w Builderze były bardziej podobne do Wix.')}
+          disabled={isExecuting}
+          className="px-2.5 py-1 rounded-lg text-[10px] font-medium bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 whitespace-nowrap transition-colors flex items-center gap-1 flex-shrink-0 disabled:opacity-40"
+        >
+          <Cpu className="w-3 h-3 text-cyan-400" />
+          <span>+ Prowadnice Wix (Platform)</span>
         </button>
       </div>
 

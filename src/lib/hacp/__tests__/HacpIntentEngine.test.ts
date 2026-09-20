@@ -160,4 +160,62 @@ describe('HacpIntentEngine & Conversational AI Copilot (v1.0)', () => {
     expect(updateCmd.sectionId).toBe('sec-hero-1');
     expect(updateCmd.props.backgroundColor).toBe('#050505');
   });
+
+  it('T9 — UNDO: "Cofnij." -> triggers natural history revert with ZERO mutations', async () => {
+    const result = await bridge.executePlan('Cofnij.', mockContext, mockDoc, conversation);
+
+    expect(result.success).toBe(true);
+    expect(result.intent).toBe('UNDO');
+    expect(result.shouldTriggerUndo).toBe(true);
+    expect(result.commandsToDispatch.length).toBe(0);
+    expect(result.message).toContain('Cofnąłem ostatnią zmianę');
+  });
+
+  it('T10 — PLATFORM_ENGINEERING: "Chciałbym, żeby prowadnice w Builderze były bardziej podobne do Wix." -> classifies as PLATFORM_ENGINEERING with architectural plan', async () => {
+    const result = await bridge.executePlan(
+      'Chciałbym, żeby prowadnice w Builderze były bardziej podobne do Wix.',
+      mockContext,
+      mockDoc,
+      conversation
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.intent).toBe('PLATFORM_ENGINEERING');
+    expect(result.scope).toBe('PLATFORM_ENGINEERING');
+    expect(result.commandsToDispatch.length).toBe(0);
+    expect(result.message).toContain('Smart Guides');
+    expect(result.message).toContain('SmartGuidesEngine.ts');
+  });
+
+  it('T11 — AUDIT: "Zrób audyt." -> conducts systematic audit and returns PASS card', async () => {
+    const result = await bridge.executePlan('Zrób audyt.', mockContext, mockDoc, conversation);
+
+    expect(result.success).toBe(true);
+    expect(result.intent).toBe('AUDIT');
+    expect(result.executionCard).toBeDefined();
+    expect(result.executionCard?.validationResult).toBe('PASS');
+    expect(result.executionCard?.steps.length).toBe(4);
+    expect(result.commandsToDispatch.length).toBe(0);
+  });
+
+  it('T12 — INSPECT with Visual Metrics: "Co widzisz?" -> describes active section with canvas dimensions', async () => {
+    const contextWithVisuals: HacpBuilderContext = {
+      ...mockContext,
+      visualMetrics: {
+        width: 1440,
+        height: 680,
+        top: 0,
+        left: 240,
+        aspectRatio: 2.12,
+      },
+    };
+
+    const result = await bridge.executePlan('Co widzisz?', contextWithVisuals, mockDoc, conversation);
+
+    expect(result.success).toBe(true);
+    expect(result.intent).toBe('INSPECT');
+    expect(result.message).toContain('1440 × 680px');
+    expect(result.message).toContain('Hero Section');
+  });
 });
+
