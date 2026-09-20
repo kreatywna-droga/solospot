@@ -22,11 +22,11 @@ import type { SmartGuide } from '../../../../../packages/builder-core/src/SmartG
 
 const GUIDE_STYLES: Record<string, { stroke: string; strokeWidth: number; glowColor: string; dasharray?: string }> = {
   ALIGNMENT: { stroke: '#00FF66', strokeWidth: 1.5, glowColor: 'rgba(0, 255, 102, 0.85)' },       // Bright Neon Green — edge alignment
-  CENTER:    { stroke: '#00FF66', strokeWidth: 1.5, glowColor: 'rgba(0, 255, 102, 0.85)', dasharray: '6,3' }, // Bright Neon Green — center axis
+  CENTER:    { stroke: '#00FF66', strokeWidth: 1.5, glowColor: 'rgba(0, 255, 102, 0.85)' },       // Bright Neon Green — center axis
   CONTAINER: { stroke: '#00FF66', strokeWidth: 1.5, glowColor: 'rgba(0, 255, 102, 0.85)' },       // Bright Neon Green — canvas edge
-  DISTANCE:  { stroke: '#00FF66', strokeWidth: 1, glowColor: 'rgba(0, 255, 102, 0.7)', dasharray: '4,3' },   // Bright Neon Green — distance
-  SPACING:   { stroke: '#00FF66', strokeWidth: 1.5, glowColor: 'rgba(0, 255, 102, 0.8)', dasharray: '6,3' }, // Bright Neon Green — spacing
-  MARGIN:    { stroke: '#00FF66', strokeWidth: 1.2, glowColor: 'rgba(0, 255, 102, 0.8)', dasharray: '4,4' },
+  DISTANCE:  { stroke: '#00FF66', strokeWidth: 1, glowColor: 'rgba(0, 255, 102, 0.7)' },
+  SPACING:   { stroke: '#00FF66', strokeWidth: 1.5, glowColor: 'rgba(0, 255, 102, 0.8)' },
+  MARGIN:    { stroke: '#00FF66', strokeWidth: 1.2, glowColor: 'rgba(0, 255, 102, 0.8)' },
   ANCHOR:    { stroke: '#00FF66', strokeWidth: 1.5, glowColor: 'rgba(0, 255, 102, 0.85)' },
   RULE:      { stroke: '#00FF66', strokeWidth: 1, glowColor: 'rgba(0, 255, 102, 0.6)' },
 }

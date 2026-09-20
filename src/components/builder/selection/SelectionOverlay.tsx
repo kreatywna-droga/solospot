@@ -86,8 +86,6 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     deltaY: number
   } | null>(null)
 
-  const [activeSnap, setActiveSnap] = useState<SectionSnapResult | null>(null)
-
   // Refs for hot-path drag tracking (zero re-renders during pointermove)
   const dragRef = useMemo(() => ({ deltaX: 0, deltaY: 0 }), [])
   const resizeRef = useMemo(() => ({
@@ -302,8 +300,8 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
               threshold: Math.max(8, 12 / zoom),
               showAlignmentGuides: true,
               showCenterGuides: true,
-              showDistanceGuides: true,
-              showSpacingGuides: true,
+              showDistanceGuides: false,
+              showSpacingGuides: false,
               snapToGuides: true,
             },
           })
@@ -317,9 +315,12 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
             }
           }
 
-          // Broadcast live smart guides to SmartGuidesOverlay
+          // Broadcast live smart guides to SmartGuidesOverlay — strictly single crisp snapped lines
+          const activeGuidesToRender = guideRes.snapGuidance.snapped
+            ? guideRes.snapGuidance.guides
+            : []
           window.dispatchEvent(new CustomEvent('solospot:smart-guides-update', {
-            detail: { guides: guideRes.guides }
+            detail: { guides: activeGuidesToRender }
           }))
 
           if (isSection && overlay.boundingRect) {
@@ -340,9 +341,6 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
             if (snapRes.snapped) {
               if (snapRes.snappedX) curTx = snapRes.curTx
               if (snapRes.snappedY) curTy = snapRes.curTy
-              setActiveSnap(snapRes)
-            } else {
-              setActiveSnap(null)
             }
           }
 
@@ -989,61 +987,6 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
                     hidden={toolbarData.hidden}
                     index={toolbarData.index}
                     total={toolbarData.total}
-                  />
-                </div>
-              )}
-
-              {/* Magnetic Section Snap Visual Indicator & Active Glow */}
-              {activeSnap && (
-                <div className="absolute inset-0 pointer-events-none z-[160]">
-                  {/* Glowing horizontal snap line */}
-                  {activeSnap.guideY !== undefined && (
-                    <div
-                      style={{
-                        top: activeSnap.guideY,
-                        left: 0,
-                        right: 0,
-                      }}
-                      className="absolute h-0.5 bg-emerald-400 shadow-[0_0_16px_4px_rgba(16,185,129,0.95)] animate-pulse"
-                    >
-                      <div className="absolute left-1/2 -top-8 -translate-x-1/2 flex items-center gap-2 px-3.5 py-1.5 bg-[#0a0a14]/95 border-2 border-emerald-400 text-emerald-300 font-extrabold text-[11px] rounded-full shadow-2xl uppercase tracking-wider whitespace-nowrap backdrop-blur-md">
-                        <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-                        <span>TAK — JESTEŚ NA WŁAŚCIWYM MIEJSCU 🧲</span>
-                        {activeSnap.label && (
-                          <span className="text-emerald-100 font-mono text-[10px] normal-case bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                            {activeSnap.label}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Glowing vertical snap line */}
-                  {activeSnap.guideX !== undefined && (
-                    <div
-                      style={{
-                        left: activeSnap.guideX,
-                        top: 0,
-                        bottom: 0,
-                      }}
-                      className="absolute w-0.5 bg-emerald-400 shadow-[0_0_16px_4px_rgba(16,185,129,0.95)] animate-pulse"
-                    >
-                      <div className="absolute top-10 left-3 flex items-center gap-1.5 px-3 py-1 bg-[#0a0a14]/95 border-2 border-emerald-400 text-emerald-300 font-extrabold text-[11px] rounded-full shadow-2xl uppercase tracking-wider whitespace-nowrap backdrop-blur-md">
-                        <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                        <span>TAK — KRAWĘDŹ STRONY 🧲</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Magnetic edge glow on the dragged section box */}
-                  <div
-                    style={{
-                      left: displayRect.x,
-                      top: displayRect.y,
-                      width: displayRect.width,
-                      height: displayRect.height,
-                    }}
-                    className="absolute border-2 border-emerald-400 shadow-[0_0_24px_rgba(16,185,129,0.8)] pointer-events-none transition-all duration-75"
                   />
                 </div>
               )}

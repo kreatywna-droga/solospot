@@ -2055,7 +2055,6 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
   const [isTemplatePickerOpen, setIsTemplatePickerOpen] = useState(false)
   const [isSaveExperienceOpen, setIsSaveExperienceOpen] = useState(false)
   const [saveExperienceTargetNode, setSaveExperienceTargetNode] = useState<BuilderNode | null>(null)
-  const [activeCanvasSectionSnap, setActiveCanvasSectionSnap] = useState<SectionSnapResult | null>(null)
 
   // Smart Guide state hooks (useElementBounds and useSmartGuides must be called
   // after zoom is computed — see the block below the zoom calculation)
@@ -2411,8 +2410,8 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                   threshold: Math.max(8, 12 / zoomVal),
                   showAlignmentGuides: true,
                   showCenterGuides: true,
-                  showDistanceGuides: true,
-                  showSpacingGuides: true,
+                  showDistanceGuides: false,
+                  showSpacingGuides: false,
                   snapToGuides: true,
                 },
               })
@@ -2426,7 +2425,8 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                 }
               }
 
-              setLiveSmartGuides(guideRes.guides)
+              // Set live smart guides strictly to single active snapped guides
+              setLiveSmartGuides(guideRes.snapGuidance.snapped ? guideRes.snapGuidance.guides : [])
             }
 
             if (isSection && domEl) {
@@ -2447,9 +2447,6 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
               if (snapRes.snapped) {
                 if (snapRes.snappedX) curTx = snapRes.curTx
                 if (snapRes.snappedY) curTy = snapRes.curTy
-                setActiveCanvasSectionSnap(snapRes)
-              } else {
-                setActiveCanvasSectionSnap(null)
               }
             }
 
@@ -2488,7 +2485,6 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
         detail: { nodeId: node.id },
       }))
 
-      setActiveCanvasSectionSnap(null)
       setLiveSmartGuides([])
 
       if (domEl) {
@@ -3016,47 +3012,6 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
               </div>
             )}
           </>
-        )}
-
-        {/* Magnetic Section Snap Visual Glow Overlay */}
-        {activeCanvasSectionSnap && (
-          <div className="absolute inset-0 pointer-events-none z-[160]">
-            {activeCanvasSectionSnap.guideY !== undefined && (
-              <div
-                style={{
-                  top: activeCanvasSectionSnap.guideY,
-                  left: 0,
-                  right: 0,
-                }}
-                className="absolute h-0.5 bg-emerald-400 shadow-[0_0_18px_5px_rgba(16,185,129,0.95)] animate-pulse"
-              >
-                <div className="absolute left-1/2 -top-8 -translate-x-1/2 flex items-center gap-2 px-3.5 py-1.5 bg-[#0a0a14]/95 border-2 border-emerald-400 text-emerald-300 font-extrabold text-[11px] rounded-full shadow-2xl uppercase tracking-wider whitespace-nowrap backdrop-blur-md">
-                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-                  <span>TAK — JESTEŚ NA WŁAŚCIWYM MIEJSCU 🧲</span>
-                  {activeCanvasSectionSnap.label && (
-                    <span className="text-emerald-100 font-mono text-[10px] normal-case bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                      {activeCanvasSectionSnap.label}
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
-            {activeCanvasSectionSnap.guideX !== undefined && (
-              <div
-                style={{
-                  left: activeCanvasSectionSnap.guideX,
-                  top: 0,
-                  bottom: 0,
-                }}
-                className="absolute w-0.5 bg-emerald-400 shadow-[0_0_18px_5px_rgba(16,185,129,0.95)] animate-pulse"
-              >
-                <div className="absolute top-10 left-3 flex items-center gap-1.5 px-3 py-1 bg-[#0a0a14]/95 border-2 border-emerald-400 text-emerald-300 font-extrabold text-[11px] rounded-full shadow-2xl uppercase tracking-wider whitespace-nowrap backdrop-blur-md">
-                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-                  <span>TAK — KRAWĘDŹ STRONY 🧲</span>
-                </div>
-              </div>
-            )}
-          </div>
         )}
 
         {/* Selection Overlay — renders on top of sections with external rects support */}
