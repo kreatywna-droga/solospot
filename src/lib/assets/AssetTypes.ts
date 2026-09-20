@@ -17,6 +17,60 @@ export interface AssetLicenseInfo {
   nodeId?: string;
 }
 
+export type VisualAssetCategory =
+  | 'people'
+  | 'business'
+  | 'tech'
+  | 'product'
+  | 'architecture'
+  | 'nature'
+  | 'creative'
+  | 'travel'
+  | 'food'
+  | 'background'
+  | 'video'
+  | '3d';
+
+export type VisualAssetMood =
+  | 'calm'
+  | 'energetic'
+  | 'dramatic'
+  | 'mysterious'
+  | 'optimistic'
+  | 'elegant'
+  | 'futuristic'
+  | 'warm'
+  | 'cold'
+  | 'immersive';
+
+export type VisualAssetStyle =
+  | 'cinematic'
+  | 'editorial'
+  | 'minimal'
+  | 'luxury'
+  | 'futuristic'
+  | 'brutalist'
+  | 'glass'
+  | 'soft'
+  | 'colorful'
+  | 'monochrome'
+  | 'dark'
+  | 'light'
+  | 'organic'
+  | 'technological'
+  | 'premium'
+  | 'playful'
+  | 'elegant'
+  | 'atmospheric'
+  | 'experimental'
+  | 'creative'
+  | 'modern'
+  | 'bold'
+  | 'corporate'
+  | 'vintage';
+
+export type AssetOrientation = 'landscape' | 'portrait' | 'square';
+
 export interface UniversalAsset {
   id: string;
   provider: AssetProviderId;
@@ -25,12 +79,21 @@ export interface UniversalAsset {
   previewUrl: string;
   sourceUrl: string;
   downloadUrl?: string;
+  thumbnailUrl?: string;
   title?: string;
+  altText?: string;
   author?: string;
   width?: number;
   height?: number;
   duration?: number;
   aspectRatio?: string;
+  orientation?: AssetOrientation;
+  category?: VisualAssetCategory | string;
+  subcategory?: string;
+  mood?: VisualAssetMood | string;
+  style?: VisualAssetStyle | string;
+  industry?: string[];
+  tags?: string[];
   license?: AssetLicenseInfo;
   metadata?: Record<string, unknown>;
 }
@@ -85,8 +148,15 @@ export interface CreateAssetInput {
 }
 
 export interface AssetFilterOptions {
-  type?: AssetCategory;
+  type?: AssetCategory | 'all';
   provider?: AssetProviderId;
+  category?: VisualAssetCategory | string;
+  visualCategory?: VisualAssetCategory | string;
+  mood?: VisualAssetMood | string;
+  style?: VisualAssetStyle | string;
+  industry?: string;
+  orientation?: AssetOrientation;
+  tags?: string[];
   query?: string;
   limit?: number;
   offset?: number;

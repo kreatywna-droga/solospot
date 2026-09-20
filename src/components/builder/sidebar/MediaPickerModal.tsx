@@ -7,7 +7,7 @@
  * property is selected for insertion or replacement.
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import {
   X, Upload, Search, Image as ImageIcon,
   Check, Loader2, Sparkles, Filter, AlertCircle,
@@ -27,16 +27,23 @@ interface AssetItem {
   createdAt: string
 }
 
-// Built-in SoloSpot Curated Stock Assets (High-Res CDN demos)
-const CURATED_LIBRARY: Array<{ id: string; name: string; url: string; category: string }> = [
-  { id: 'lib_1', name: 'Nowoczesny E-commerce Studio', url: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80', category: 'fashion' },
-  { id: 'lib_2', name: 'Minimalistyczny Produkt', url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200&q=80', category: 'products' },
-  { id: 'lib_3', name: 'Kolekcja Odzieży', url: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80', category: 'fashion' },
-  { id: 'lib_4', name: 'Eleganckie Wnętrze & Design', url: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80', category: 'interiors' },
-  { id: 'lib_5', name: 'Technologia & Gadżety', url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80', category: 'tech' },
-  { id: 'lib_6', name: 'Kosmetyki & Pielęgnacja', url: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1200&q=80', category: 'beauty' },
-  { id: 'lib_7', name: 'Kawa & Kawiarnia', url: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1200&q=80', category: 'food' },
-  { id: 'lib_8', name: 'Abstrakcyjne Tło Gradient', url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80', category: 'abstract' },
+import { ALL_CURATED_ASSETS, queryAssets } from '../../../lib/assets/UniversalAssetLibrary'
+import type { UniversalAsset, VisualAssetCategory } from '../../../lib/assets/AssetTypes'
+
+const LIBRARY_CATEGORIES: Array<{ id: string; label: string }> = [
+  { id: 'all', label: 'Wszystkie' },
+  { id: 'people', label: 'Ludzie' },
+  { id: 'business', label: 'Biznes' },
+  { id: 'tech', label: 'Technologia' },
+  { id: 'product', label: 'Produkty' },
+  { id: 'architecture', label: 'Architektura' },
+  { id: 'nature', label: 'Natura' },
+  { id: 'creative', label: 'Kreatywne' },
+  { id: 'travel', label: 'Podróże' },
+  { id: 'food', label: 'Kulinaria' },
+  { id: 'background', label: 'Tła' },
+  { id: 'video', label: 'Wideo' },
+  { id: '3d', label: '3D' },
 ]
 
 interface MediaPickerModalProps {
@@ -65,6 +72,7 @@ export function MediaPickerModal({
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [libraryCategory, setLibraryCategory] = useState<string>('all')
   const [customUrl, setCustomUrl] = useState(currentValue)
   const [selectedUrl, setSelectedUrl] = useState<string>(currentValue)
   const [selectedAsset, setSelectedAsset] = useState<any | null>(null)
@@ -105,12 +113,17 @@ export function MediaPickerModal({
   }, [slotType])
 
   useEffect(() => {
-    loadAssets()
-  }, [loadAssets])
+    if (activeTab === 'my_files') {
+      loadAssets()
+    }
+  }, [activeTab, loadAssets])
 
   useEffect(() => {
-    if (activeTab === 'shutterstock') {
-      searchShutterstock(searchQuery || 'luxury')
+    if (activeTab === 'shutterstock' && searchQuery.trim().length >= 2) {
+      const timer = setTimeout(() => {
+        searchShutterstock(searchQuery.trim())
+      }, 500)
+      return () => clearTimeout(timer)
     }
   }, [activeTab, searchQuery, searchShutterstock])
 
@@ -281,11 +294,15 @@ export function MediaPickerModal({
     return a.originalName.toLowerCase().includes(q) || a.filename.toLowerCase().includes(q)
   })
 
-  const filteredLibrary = CURATED_LIBRARY.filter(item => {
-    if (!searchQuery) return true
-    const q = searchQuery.toLowerCase()
-    return item.name.toLowerCase().includes(q) || item.category.toLowerCase().includes(q)
-  })
+  const filteredLibrary = useMemo(() => {
+    const isVideoSlot = slotType === 'VIDEO' || slotType === 'BACKGROUND_VIDEO'
+    return queryAssets({
+      query: searchQuery,
+      visualCategory: libraryCategory !== 'all' ? (libraryCategory as VisualAssetCategory) : undefined,
+      type: isVideoSlot ? 'video' : undefined,
+      limit: 120,
+    })
+  }, [searchQuery, libraryCategory, slotType])
 
   return (
     <div
@@ -327,7 +344,7 @@ export function MediaPickerModal({
           <div className="flex items-center gap-1 bg-white/[0.04] p-1 rounded-xl border border-white/5">
             {[
               { id: 'my_files', label: 'Moje pliki', count: assets.length },
-              { id: 'library', label: 'SoloSpot Library', count: CURATED_LIBRARY.length },
+              { id: 'library', label: 'SoloSpot Library', count: ALL_CURATED_ASSETS.length },
               { id: 'shutterstock', label: 'Shutterstock (Sandbox)', badge: 'PREMIUM' },
               { id: 'upload', label: 'Wgraj z dysku' },
               { id: 'url', label: 'Link URL' },
@@ -446,50 +463,86 @@ export function MediaPickerModal({
             )
           )}
 
-          {/* Tab: Curated SoloSpot Library */}
+          {/* Tab: Curated SoloSpot Library (534+ Universal Assets) */}
           {activeTab === 'library' && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {filteredLibrary.map(item => {
-                const isSelected = selectedUrl === item.url
-
-                return (
-                  <div
-                    key={item.id}
-                    onClick={() => {
-                      setSelectedUrl(item.url)
-                      setSelectedAsset({
-                        id: item.id,
-                        provider: 'solospot',
-                        providerAssetId: item.id,
-                        type: 'image',
-                        previewUrl: item.url,
-                        sourceUrl: item.url,
-                        title: item.name,
-                      })
-                    }}
-                    className={`group relative aspect-video rounded-xl border overflow-hidden cursor-pointer transition-all ${
-                      isSelected
-                        ? 'border-violet-500 ring-2 ring-violet-500/50 shadow-lg shadow-violet-500/20'
-                        : 'border-white/[0.08] hover:border-white/25 bg-white/[0.04]'
+            <div className="space-y-4">
+              {/* Category Filter Pills */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+                {LIBRARY_CATEGORIES.map(cat => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setLibraryCategory(cat.id)}
+                    className={`px-3 py-1 rounded-full text-xs whitespace-nowrap transition-all ${
+                      libraryCategory === cat.id
+                        ? 'bg-violet-600 text-white font-bold shadow-sm'
+                        : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08] border border-white/5'
                     }`}
                   >
-                    <img
-                      src={item.url}
-                      alt={item.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                    />
-                    {isSelected && (
-                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-violet-600 text-white flex items-center justify-center shadow-md">
-                        <Check className="w-3 h-3" />
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+
+              {filteredLibrary.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-zinc-500">
+                  <AlertCircle className="w-8 h-8 text-zinc-600 mb-2" />
+                  <p className="text-xs">Brak zasobów spełniających wybrane kryteria.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {filteredLibrary.map((item: UniversalAsset) => {
+                    const itemUrl = item.sourceUrl || item.previewUrl
+                    const isSelected = selectedUrl === itemUrl
+
+                    return (
+                      <div
+                        key={item.id}
+                        onClick={() => {
+                          setSelectedUrl(itemUrl)
+                          setSelectedAsset(item)
+                        }}
+                        className={`group relative aspect-video rounded-xl border overflow-hidden cursor-pointer transition-all ${
+                          isSelected
+                            ? 'border-violet-500 ring-2 ring-violet-500/50 shadow-lg shadow-violet-500/20'
+                            : 'border-white/[0.08] hover:border-white/25 bg-white/[0.04]'
+                        }`}
+                      >
+                        {item.type === 'video' ? (
+                          <div className="w-full h-full relative bg-black">
+                            <img
+                              src={item.thumbnailUrl || item.previewUrl}
+                              alt={item.title || 'Video'}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                            />
+                            <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-sm text-[9px] font-bold text-violet-300 border border-violet-500/30">
+                              VIDEO
+                            </div>
+                          </div>
+                        ) : (
+                          <img
+                            src={item.thumbnailUrl || item.previewUrl}
+                            alt={item.title || 'Image'}
+                            loading="lazy"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                          />
+                        )}
+                        {isSelected && (
+                          <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-violet-600 text-white flex items-center justify-center shadow-md z-10">
+                            <Check className="w-3 h-3" />
+                          </div>
+                        )}
+                        <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
+                          <p className="text-xs text-white font-semibold truncate">{item.title}</p>
+                          <div className="flex items-center justify-between text-[10px] text-zinc-400 mt-0.5">
+                            <span className="capitalize">{item.category}</span>
+                            <span className="truncate max-w-[90px] opacity-75">{item.author}</span>
+                          </div>
+                        </div>
                       </div>
-                    )}
-                    <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/90 to-transparent">
-                      <p className="text-xs text-white font-semibold truncate">{item.name}</p>
-                      <p className="text-[10px] text-zinc-400 capitalize">{item.category}</p>
-                    </div>
-                  </div>
-                )
-              })}
+                    )
+                  })}
+                </div>
+              )}
             </div>
           )}
 

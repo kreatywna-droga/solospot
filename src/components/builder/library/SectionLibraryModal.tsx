@@ -18,6 +18,7 @@ import {
 
 import type { SectionCategory, SectionTemplateItem } from './SectionTemplatesData';
 import { SECTION_TEMPLATES } from './SectionTemplatesData';
+import { autoFillTemplateNodes } from '../../../lib/assets/DeterministicAssetMatcher';
 export type { SectionCategory, SectionTemplateItem };
 export { SECTION_TEMPLATES };
 
@@ -93,7 +94,8 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
   }, []);
 
   const getTemplateNode = (template: SectionTemplateItem): BuilderNode => {
-    return templateNodes.get(template.id) || template.createNode();
+    const raw = templateNodes.get(template.id) || template.createNode();
+    return autoFillTemplateNodes([raw], template.id).nodes[0] || raw;
   };
 
   const filteredTemplates = useMemo(() => {
@@ -104,9 +106,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
         !q ||
         item.name.toLowerCase().includes(q) ||
         item.description.toLowerCase().includes(q) ||
-        item.category.toLowerCase().includes(q) ||
-        (item.badge && item.badge.toLowerCase().includes(q)) ||
-        (item.tags && item.tags.some(t => t.toLowerCase().includes(q))) ||
+        (item.tags && item.tags.some(tag => tag.toLowerCase().includes(q))) ||
         (item.industry && item.industry.some(i => i.toLowerCase().includes(q)));
       const matchStyle = selectedStyle === 'All' || item.style?.toLowerCase() === selectedStyle.toLowerCase();
       return matchCat && matchQuery && matchStyle;
@@ -147,7 +147,8 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
     const targetPageId = canvas.selectedPageId || builderDoc.pages[0]?.id;
     if (!targetPageId) return;
 
-    const newSectionNode = template.createNode();
+    const rawNode = template.createNode();
+    const newSectionNode = (autoFillTemplateNodes([rawNode], template.id).nodes[0] || rawNode) as SectionNode;
     const navInfo = NAVIGABLE_CATEGORY_MAP[template.category];
 
     if (navInfo) {

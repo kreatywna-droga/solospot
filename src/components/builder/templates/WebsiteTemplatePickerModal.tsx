@@ -11,6 +11,7 @@ import { SectionPreviewRenderer, ScaleToFitContainer } from '../library/SectionP
 import { SectionNode } from '../../../../packages/builder-core/src/BuilderDocument';
 
 import { WEBSITE_TEMPLATES as WEBSITE_TEMPLATES_DATA, WebsiteTemplate as WebsiteTemplateDataType } from './WebsiteTemplatesData';
+import { autoFillTemplateNodes } from '../../../lib/assets/DeterministicAssetMatcher';
 
 export type WebsiteTemplate = WebsiteTemplateDataType;
 
@@ -51,9 +52,11 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
   }, []);
 
   const getSectionNodes = (template: WebsiteTemplate) => {
-    return template.sectionTemplateIds
+    const raw = template.sectionTemplateIds
       .map(id => sectionNodeCache.get(id))
       .filter(Boolean);
+    if (template.id === 'blank' || raw.length === 0) return [];
+    return autoFillTemplateNodes(raw, template.id).nodes;
   };
 
   const filteredTemplates = useMemo(() => {
@@ -85,13 +88,16 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
       return;
     }
 
-    const sectionsToInsert: SectionNode[] = [];
+    const rawSections: SectionNode[] = [];
     template.sectionTemplateIds.forEach((templateId) => {
       const found = SECTION_TEMPLATES.find((t) => t.id === templateId);
       if (found) {
-        sectionsToInsert.push(found.createNode() as SectionNode);
+        rawSections.push(found.createNode() as SectionNode);
       }
     });
+
+    // Auto-fill template sections with curated, license-cleared visual assets
+    const sectionsToInsert = autoFillTemplateNodes(rawSections, template.id).nodes as SectionNode[];
 
     const activePage = builderDoc.pages.find((p) => p.id === targetPageId);
     if (activePage) {
@@ -324,9 +330,13 @@ function FullTemplatePreview({
   onClose: () => void;
   onUse: () => void;
 }) {
-  const sectionNodes = template.sectionTemplateIds
-    .map(id => sectionNodeCache.get(id))
-    .filter(Boolean);
+  const sectionNodes = useMemo(() => {
+    const raw = template.sectionTemplateIds
+      .map(id => sectionNodeCache.get(id))
+      .filter(Boolean);
+    if (template.id === 'blank' || raw.length === 0) return [];
+    return autoFillTemplateNodes(raw, template.id).nodes;
+  }, [template, sectionNodeCache]);
 
   const targetWidth = viewport === 'desktop' ? 1280 : viewport === 'tablet' ? 768 : 375;
 
