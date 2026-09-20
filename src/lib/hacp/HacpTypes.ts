@@ -57,11 +57,41 @@ export interface HacpActivityEvent {
   status?: 'INFO' | 'SUCCESS' | 'WARN' | 'ERROR';
 }
 
+export type HacpIntentType = 'CHAT' | 'INSPECT' | 'PROPOSE' | 'EXECUTE' | 'CLARIFY';
+
+export interface HacpProposal {
+  id: string;
+  title: string;
+  description: string;
+  targetNodeId?: string;
+  targetNodeType?: string;
+  proposedCapability: string;
+  proposedChanges: AppliedChangeItem[];
+  executePayload?: {
+    type: 'UPDATE_PROPS' | 'ADD_SECTION' | 'REMOVE_NODE';
+    props?: Record<string, unknown>;
+  };
+}
+
+export interface HacpConversationContext {
+  lastIntent?: HacpIntentType;
+  lastProposal?: HacpProposal;
+  lastTargetNodeId?: string;
+  lastActionSummary?: string;
+  history: Array<{
+    role: 'user' | 'ai';
+    text: string;
+    intent?: HacpIntentType;
+    timestamp: string;
+  }>;
+}
+
 export interface HacpMessage {
   id: string;
   type: HacpMessageType;
   text: string;
   timestamp: string;
+  intent?: HacpIntentType;
   card?: HacpExecutionCard;
   suggestedActions?: string[];
 }
@@ -94,9 +124,11 @@ export interface HacpBuilderContext {
 
 export interface HacpExecutionResult {
   success: boolean;
+  intent: HacpIntentType;
   message: string;
-  executionCard: HacpExecutionCard;
+  executionCard?: HacpExecutionCard;
   commandsToDispatch: BuilderCommand[];
   eventsToEmit: HacpActivityEvent[];
   errorReason?: string;
+  updatedConversationContext?: Partial<HacpConversationContext>;
 }

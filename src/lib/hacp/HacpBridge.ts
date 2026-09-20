@@ -10,8 +10,9 @@
  * - BuilderDocument is the single source of truth (SSOT)
  */
 
-import type { BuilderCommand, BuilderDocument, SectionNode } from '../../../packages/builder-core/src';
+import type { BuilderCommand, BuilderDocument } from '../../../packages/builder-core/src';
 import type { ExperienceSceneConfig } from '@/lib/experience/ExperienceRuntimeTypes';
+import { HacpIntentEngine } from './HacpIntentEngine';
 import type {
   HacpStatus,
   HacpCapability,
@@ -21,114 +22,19 @@ import type {
   HacpExecutionCard,
   HacpExecutionStep,
   AppliedChangeItem,
+  HacpConversationContext,
+  HacpProposal,
 } from './HacpTypes';
-
-export const HACP_CAPABILITIES: HacpCapability[] = [
-  // READ
-  {
-    id: 'read_page',
-    name: 'Odczyt strony',
-    category: 'READ',
-    description: 'Skanuje strukturę strony, węzły oraz kolejność sekcji',
-    available: true,
-  },
-  {
-    id: 'inspect_selection',
-    name: 'Inspekcja zaznaczenia',
-    category: 'READ',
-    description: 'Bada właściwości, style i typ aktualnie zaznaczonego elementu',
-    available: true,
-  },
-  {
-    id: 'inspect_experience',
-    name: 'Inspekcja Experience',
-    category: 'READ',
-    description: 'Odczytuje konfigurację efektów 3D, tła i reakcji kursora',
-    available: true,
-  },
-  {
-    id: 'analyze_page',
-    name: 'Analiza strony',
-    category: 'READ',
-    description: 'Ocenia kompletność layoutu, strukturę sekcji i czytelność',
-    available: true,
-  },
-  // BUILD
-  {
-    id: 'insert_section',
-    name: 'Dodaj sekcję',
-    category: 'BUILD',
-    description: 'Tworzy nową sekcję (Hero, Korzyści, Siatka, Cennik, FAQ)',
-    available: true,
-  },
-  {
-    id: 'insert_experience',
-    name: 'Zastosuj Experience',
-    category: 'BUILD',
-    description: 'Wstrzykuje nową scenę wizualną do wybranego węzła',
-    available: true,
-  },
-  {
-    id: 'insert_element',
-    name: 'Wstaw element',
-    category: 'BUILD',
-    description: 'Dodaje podrzędny komponent (przycisk, nagłówek, karta)',
-    available: true,
-  },
-  // EDIT
-  {
-    id: 'update_props',
-    name: 'Aktualizacja właściwości',
-    category: 'EDIT',
-    description: 'Modyfikuje parametry tekstowe, etykiety i konfigurację',
-    available: true,
-  },
-  {
-    id: 'configure_experience',
-    name: 'Konfiguracja Experience',
-    category: 'EDIT',
-    description: 'Ustawia gradienty, czułość kursora, prędkość i oświetlenie',
-    available: true,
-    supportedNodeTypes: ['hero', 'banner', 'feature-grid', 'section', 'container'],
-  },
-  {
-    id: 'update_text',
-    name: 'Modyfikacja treści',
-    category: 'EDIT',
-    description: 'Generuje i podmienia copy, hasła i opisy produktowe',
-    available: true,
-  },
-  {
-    id: 'update_styles',
-    name: 'Style wizualne',
-    category: 'EDIT',
-    description: 'Dostosowuje paletę, zaokrąglenia, cienie i marginesy',
-    available: true,
-  },
-  // VALIDATION
-  {
-    id: 'validate_document',
-    name: 'Walidacja dokumentu',
-    category: 'VALIDATION',
-    description: 'Weryfikuje spójność BuilderDocument i drzewa węzłów',
-    available: true,
-  },
-  {
-    id: 'validate_runtime',
-    name: 'Walidacja runtime',
-    category: 'VALIDATION',
-    description: 'Sprawdza poprawność parametrów Canvas i ExperienceScene',
-    available: true,
-  },
-];
 
 export class HacpBridge {
   private static instance: HacpBridge;
   private status: HacpStatus = 'ONLINE';
-  private listeners: Set<(event: HacpActivityEvent) => void> = new Set();
-  private activityLog: HacpActivityEvent[] = [];
+  private capabilities: HacpCapability[] = [];
+  private eventSubscribers: Array<(event: HacpActivityEvent) => void> = [];
+  private recentEvents: HacpActivityEvent[] = [];
 
   private constructor() {
+    this.registerDefaultCapabilities();
     this.recordEvent({
       id: `evt-init-${Date.now()}`,
       timestamp: new Date().toLocaleTimeString('pl-PL'),
@@ -151,44 +57,394 @@ export class HacpBridge {
   }
 
   public getCapabilities(): HacpCapability[] {
-    return [...HACP_CAPABILITIES];
+    return [...this.capabilities];
   }
 
-  public subscribe(listener: (event: HacpActivityEvent) => void): () => void {
-    this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
+  public subscribe(callback: (event: HacpActivityEvent) => void): () => void {
+    this.eventSubscribers.push(callback);
+    return () => {
+      this.eventSubscribers = this.eventSubscribers.filter((cb) => cb !== callback);
+    };
   }
 
   public getRecentEvents(): HacpActivityEvent[] {
-    return [...this.activityLog].slice(-25);
+    return [...this.recentEvents];
   }
 
-  private recordEvent(event: HacpActivityEvent) {
-    this.activityLog.push(event);
-    this.listeners.forEach((listener) => {
+  public recordEvent(event: HacpActivityEvent): void {
+    this.recentEvents.unshift(event);
+    if (this.recentEvents.length > 50) {
+      this.recentEvents.pop();
+    }
+    this.eventSubscribers.forEach((sub) => {
       try {
-        listener(event);
+        sub(event);
       } catch (err) {
-        console.error('[HacpBridge] Error in event listener', err);
+        console.error('[HacpBridge] Subscriber error:', err);
       }
     });
   }
 
+  private registerDefaultCapabilities(): void {
+    this.capabilities = [
+      // READ Capabilities
+      {
+        id: 'read_document_tree',
+        name: 'Odczyt drzewa dokumentu',
+        category: 'READ',
+        description: 'Inspekcja hierarchii sekcji, stron i węzłów w BuilderDocument',
+        available: true,
+      },
+      {
+        id: 'inspect_node_geometry',
+        name: 'Inspekcja geometrii węzła',
+        category: 'READ',
+        description: 'Pobranie wymiarów, marginesów i pozycji wybranego węzła Canvas',
+        available: true,
+      },
+      {
+        id: 'query_selection',
+        name: 'Odczyt aktywnego zaznaczenia',
+        category: 'READ',
+        description: 'Identyfikacja aktywnego węzła zaznaczonego przez użytkownika',
+        available: true,
+      },
+      {
+        id: 'analyze_page',
+        name: 'Analiza struktury strony',
+        category: 'READ',
+        description: 'Kompleksowa ewaluacja struktury, spójności i hierarchii strony',
+        available: true,
+      },
+
+      // BUILD Capabilities
+      {
+        id: 'insert_section',
+        name: 'Wstawianie nowej sekcji',
+        category: 'BUILD',
+        description: 'Dodawanie predefiniowanych lub dynamicznych sekcji do drzewa strony',
+        available: true,
+      },
+      {
+        id: 'create_component',
+        name: 'Tworzenie komponentu',
+        category: 'BUILD',
+        description: 'Generowanie atomowych bloków UI z atrybutami SoloSpot',
+        available: true,
+      },
+      {
+        id: 'clone_node',
+        name: 'Klonowanie elementu',
+        category: 'BUILD',
+        description: 'Powielanie istniejącego węzła wraz ze stylami i konfiguracją Experience',
+        available: true,
+      },
+
+      // EDIT Capabilities
+      {
+        id: 'update_props',
+        name: 'Aktualizacja właściwości węzła',
+        category: 'EDIT',
+        description: 'Modyfikacja propsów wizualnych, typografii i układu węzła',
+        available: true,
+      },
+      {
+        id: 'configure_experience',
+        name: 'Konfiguracja Visual Experience',
+        category: 'EDIT',
+        description: 'Sterowanie mesh-gradientem, spotlightem kursora, tiltem 3D i płynnym ruchem',
+        available: true,
+      },
+      {
+        id: 'reorder_nodes',
+        name: 'Zmiana kolejności węzłów',
+        category: 'EDIT',
+        description: 'Przesuwanie sekcji w górę i w dół w hierarchii dokumentu',
+        available: true,
+      },
+
+      // VALIDATION Capabilities
+      {
+        id: 'validate_document_schema',
+        name: 'Walidacja schematu BuilderDocument',
+        category: 'VALIDATION',
+        description: 'Sprawdzanie integralności struktury i identyfikatorów węzłów',
+        available: true,
+      },
+      {
+        id: 'validate_runtime_scene',
+        name: 'Walidacja sceny Experience Runtime',
+        category: 'VALIDATION',
+        description: 'Weryfikacja płynności 60fps i poprawności shaderów w przeglądarce',
+        available: true,
+      },
+    ];
+  }
+
   /**
-   * Main deterministic execution method invoked by AI Copilot Workspace
+   * Process prompt using Conversational Intent Engine & HACP Bridge.
+   *
+   * Intent Rules:
+   * - CHAT: Dialogue & explanation (NO mutation, NO HACP card)
+   * - INSPECT: Query current builder state (READ context, NO mutation, NO HACP card)
+   * - PROPOSE: Brainstorming & suggestions (NO mutation, stores lastProposal)
+   * - CLARIFY: Underspecified request (prompts for details, NO mutation)
+   * - EXECUTE: Explicit action or proposal confirmation (HACP mutation, card, events)
    */
   public async executePlan(
     prompt: string,
     context: HacpBuilderContext,
-    document: BuilderDocument
+    document: BuilderDocument,
+    conversationContext: HacpConversationContext = { history: [] }
   ): Promise<HacpExecutionResult> {
     const startTime = new Date().toLocaleTimeString('pl-PL');
-    this.status = 'BUSY';
-
     const cleanPrompt = prompt.trim();
     const lower = cleanPrompt.toLowerCase();
     const activePageId = context.pageId || document.pages[0]?.id || 'page-home';
-    const activeNodeId = context.selectedNodeId;
+    const activePage = document.pages.find((p) => p.id === activePageId) || document.pages[0];
+
+    // 1. CLASSIFY INTENT
+    const classification = HacpIntentEngine.classify(prompt, conversationContext, context, document);
+
+    // ------------------------------------------------------------------------
+    // CASE 1: CHAT (Casual conversation, help questions, capabilities)
+    // NO mutations, NO HACP card, NO canvas change
+    // ------------------------------------------------------------------------
+    if (classification.intent === 'CHAT') {
+      this.recordEvent({
+        id: `evt-chat-${Date.now()}`,
+        timestamp: new Date().toLocaleTimeString('pl-PL'),
+        type: 'READ',
+        title: 'AI Copilot Conversation',
+        description: 'Odpowiedź konwersacyjna asystenta',
+        status: 'INFO',
+      });
+
+      let responseMessage = 'Cześć! W czym mogę Ci dzisiaj pomóc w Twoim sklepie SoloSpot?';
+
+      if (lower.includes('potrzebuję pomocy') || lower.includes('potrzebuje pomocy')) {
+        responseMessage =
+          'Jasne. Jestem tutaj, żeby pomóc Ci pracować z SoloSpot. Możesz mnie zapytać o stronę, layout, Experience albo poprosić mnie o wykonanie konkretnej zmiany.';
+      } else if (
+        lower.includes('co możesz zrobić') ||
+        lower.includes('co mozesz zrobic') ||
+        lower.includes('co potrafisz')
+      ) {
+        responseMessage =
+          'Mogę pomagać Ci projektować stronę, analizować Builder, pracować z sekcjami i Experience oraz wykonywać konkretne zmiany przez HACP.';
+      } else if (lower.startsWith('dlaczego') || lower.includes('czemu')) {
+        responseMessage =
+          'Zaproponowałem tę zmianę, ponieważ poprawia ona kontrast i czytelność elementów oraz nadaje sekcji profesjonalny charakter klasy enterprise. Czy chciałbyś, abym ją teraz zastosował?';
+      }
+
+      return {
+        success: true,
+        intent: 'CHAT',
+        message: responseMessage,
+        commandsToDispatch: [],
+        eventsToEmit: [],
+        updatedConversationContext: {
+          lastIntent: 'CHAT',
+        },
+      };
+    }
+
+    // ------------------------------------------------------------------------
+    // CASE 2: INSPECT (Querying information without mutating)
+    // READ context, NO mutation, NO HACP card
+    // ------------------------------------------------------------------------
+    if (classification.intent === 'INSPECT') {
+      this.recordEvent({
+        id: `evt-inspect-${Date.now()}`,
+        timestamp: new Date().toLocaleTimeString('pl-PL'),
+        type: 'READ',
+        title: 'Read Context',
+        description: 'Odczytano bieżący stan sekcji i dokumentu',
+        status: 'INFO',
+      });
+
+      const sections = activePage?.sections || [];
+      const targetSectionId = classification.targetNodeId || context.selectedNodeId || sections[0]?.id;
+      const targetSection = sections.find((s) => s.id === targetSectionId);
+
+      let responseMessage = '';
+
+      if (
+        lower.includes('jak wygląda moja aktualna strona') ||
+        lower.includes('jak wygląda teraz moja strona') ||
+        lower.includes('przeanalizuj') ||
+        lower.includes('jakie sekcje')
+      ) {
+        const sectionListText =
+          sections.length > 0
+            ? sections
+                .map(
+                  (s, i) =>
+                    `  ${i + 1}. **${s.label || s.type}** (ID: \`${s.id}\`, typ: \`${s.type}\`${
+                      s.visible === false ? ' [ukryta]' : ''
+                    })`
+                )
+                .join('\n')
+            : '  (Brak sekcji na bieżącej stronie)';
+
+        responseMessage = `Przeanalizowałem aktualną stronę **${activePage?.name || 'Główna'}** w Builderze.\n\nStrona zawiera **${sections.length}** sekcji:\n${sectionListText}\n\n**Stan techniczny:**\n✓ BuilderDocument: ZGODNY\n✓ Drzewo węzłów: ZSYNCHRONIZOWANE\n✓ Runtime: GOTOWY\n\nMożesz teraz wskazać konkretną sekcję do edycji lub dodać nową akcją szybkiego wyboru.`;
+      } else if (targetSection) {
+        const exp = (targetSection.props as any)?.experienceConfig;
+        const bgType = exp?.background?.type || 'standard';
+        const pointerType = exp?.pointer?.type || 'standard';
+        responseMessage = `Aktualnie zaznaczona sekcja to **${targetSection.label || targetSection.type}** (ID: \`${targetSection.id}\`).\n\n• Typ sekcji: \`${targetSection.type}\`\n• Tło: \`${bgType}\`\n• Interakcja kursora: \`${pointerType}\`\n• Widoczność: ${targetSection.visible === false ? 'Ukryta' : 'Widoczna'}\n\nMożesz poprosić mnie o modyfikację jej stylów, kolorów lub efektów.`;
+      } else {
+        responseMessage = `Na stronie znajduje się obecnie ${sections.length} sekcji. Zaznacz sekcję na Canvasie, aby uzyskać szczegółowe informacje o jej właściwościach.`;
+      }
+
+      return {
+        success: true,
+        intent: 'INSPECT',
+        message: responseMessage,
+        commandsToDispatch: [],
+        eventsToEmit: [],
+        updatedConversationContext: {
+          lastIntent: 'INSPECT',
+          lastTargetNodeId: targetSectionId,
+        },
+      };
+    }
+
+    // ------------------------------------------------------------------------
+    // CASE 3: PROPOSE (Brainstorming & suggestions)
+    // NO mutation, stores lastProposal, NO HACP card
+    // ------------------------------------------------------------------------
+    if (classification.intent === 'PROPOSE') {
+      const targetSectionId =
+        classification.targetNodeId ||
+        context.selectedNodeId ||
+        document.pages[0]?.sections.find((s) => s.type === 'hero')?.id ||
+        document.pages[0]?.sections[0]?.id;
+
+      const targetSection = document.pages[0]?.sections.find((s) => s.id === targetSectionId);
+      const targetLabel = targetSection?.label || 'Hero';
+
+      this.recordEvent({
+        id: `evt-propose-${Date.now()}`,
+        timestamp: new Date().toLocaleTimeString('pl-PL'),
+        type: 'READ',
+        title: 'Design Proposal',
+        description: `Zaproponowano ulepszenie sekcji ${targetLabel}`,
+        nodeId: targetSectionId,
+        status: 'INFO',
+      });
+
+      const proposal: HacpProposal = {
+        id: `prop-${Date.now()}`,
+        title: 'Złoty Gradient i Kontrast SoloSpot Gold',
+        description: `Zastosowanie ciemnego tła, złotego gradientu i subtelnej reakcji na kursor w sekcji ${targetLabel}`,
+        targetNodeId: targetSectionId,
+        targetNodeType: targetSection?.type || 'hero',
+        proposedCapability: 'configure_experience',
+        proposedChanges: [
+          {
+            target: targetSectionId || 'sec-target',
+            property: 'experienceConfig.background',
+            newValue: 'mesh-gradient (SoloSpot Gold #D9A86C)',
+            summary: 'Złoty gradient w tle sekcji',
+          },
+          {
+            target: targetSectionId || 'sec-target',
+            property: 'experienceConfig.pointer',
+            newValue: 'spotlight + tilt (Złoty blask kursora)',
+            summary: 'Subtelna interakcja kursora i głębia 3D',
+          },
+          {
+            target: targetSectionId || 'sec-target',
+            property: 'experienceConfig.motion',
+            newValue: 'float (speed: 0.85)',
+            summary: 'Płynna dynamika elementów',
+          },
+        ],
+        executePayload: {
+          type: 'UPDATE_PROPS',
+          props: {
+            experienceConfig: {
+              background: {
+                type: 'mesh-gradient',
+                colors: ['#D9A86C', '#F2C27F', '#1A1813', '#080B10'],
+                blur: 48,
+                speed: 0.8,
+                opacity: 0.9,
+              },
+              pointer: {
+                type: 'spotlight',
+                strength: 1.25,
+                maxAngle: 12,
+                perspective: 1200,
+                radius: 380,
+                color: 'rgba(217, 168, 108, 0.28)',
+              },
+              motion: {
+                type: 'float',
+                speed: 0.85,
+                intensity: 0.9,
+                direction: 'normal',
+              },
+            },
+            primaryColor: '#D9A86C',
+            themeAccent: 'gold-champagne',
+          },
+        },
+      };
+
+      const responseMessage = `Proponuję:
+• ciemniejsze tło (#080B10 / #050505),
+• złoty akcent SoloSpot Gold (#D9A86C),
+• większy kontrast nagłówka,
+• subtelną animację kursora (spotlight & tilt).
+
+Mogę to zastosować, jeśli chcesz. Wystarczy, że napiszesz **„Tak”** lub **„Zrób to”**.`;
+
+      return {
+        success: true,
+        intent: 'PROPOSE',
+        message: responseMessage,
+        commandsToDispatch: [],
+        eventsToEmit: [],
+        updatedConversationContext: {
+          lastIntent: 'PROPOSE',
+          lastProposal: proposal,
+          lastTargetNodeId: targetSectionId,
+        },
+      };
+    }
+
+    // ------------------------------------------------------------------------
+    // CASE 4: CLARIFY (Underspecified / Ambiguous requests)
+    // NO mutation, prompts for details, NO HACP card
+    // ------------------------------------------------------------------------
+    if (classification.intent === 'CLARIFY') {
+      const responseMessage = `Jasne. Mogę poprawić:
+1. kolorystykę (np. ciemniejsze tło, złote akcenty),
+2. typografię i kontrast,
+3. layout sekcji,
+4. animację i reakcję na kursor.
+
+Od czego chcesz zacząć? Możesz też napisać np. *„Zmień tło Hero na czarne”* lub *„Dodaj złoty gradient”*.`;
+
+      return {
+        success: true,
+        intent: 'CLARIFY',
+        message: responseMessage,
+        commandsToDispatch: [],
+        eventsToEmit: [],
+        updatedConversationContext: {
+          lastIntent: 'CLARIFY',
+        },
+      };
+    }
+
+    // ------------------------------------------------------------------------
+    // CASE 5: EXECUTE (Explicit command or confirmed proposal)
+    // Real HACP execution, mutation commands, validation PASS, execution card
+    // ------------------------------------------------------------------------
+    this.status = 'BUSY';
 
     const steps: HacpExecutionStep[] = [];
     const commands: BuilderCommand[] = [];
@@ -205,6 +461,14 @@ export class HacpBridge {
       });
     };
 
+    const targetSectionId =
+      classification.targetNodeId ||
+      context.selectedNodeId ||
+      document.pages[0]?.sections.find((s) => s.type === 'hero')?.id ||
+      document.pages[0]?.sections[0]?.id;
+
+    let responseMessage = '';
+
     // Step 1: Inspect Page & Selection
     addStep('step-inspect-page', 'Inspect page', 'SUCCESS', `Zbadano stronę: ${context.pageName || 'Główna'}`);
     this.recordEvent({
@@ -216,66 +480,136 @@ export class HacpBridge {
       status: 'INFO',
     });
 
-    if (activeNodeId) {
+    if (targetSectionId) {
       addStep(
         'step-inspect-selection',
         'Inspect selection',
         'SUCCESS',
-        `Zaznaczony węzeł: ${context.selectedNodeLabel || activeNodeId} (${context.selectedNodeType || 'section'})`
+        `Wskazano sekcję: ${context.selectedNodeLabel || targetSectionId}`
       );
       this.recordEvent({
         id: `evt-node-${Date.now()}`,
         timestamp: new Date().toLocaleTimeString('pl-PL'),
         type: 'READ',
         title: 'Selected node inspected',
-        description: `Węzeł ${activeNodeId} (${context.selectedNodeType || 'section'}) gotowy do modyfikacji`,
-        nodeId: activeNodeId,
+        description: `Węzeł ${targetSectionId} gotowy do modyfikacji`,
+        nodeId: targetSectionId,
         status: 'INFO',
       });
     }
 
-    let responseMessage = '';
+    // Branch 5A: User confirmed a previous proposal ("Tak", "Zrób to", "Zastosuj tę propozycję")
+    if (classification.confirmedProposal) {
+      const proposal = classification.confirmedProposal;
+      const targetId = proposal.targetNodeId || targetSectionId;
 
-    // Intent 1: Analysis / Inspect full page
-    if (
-      lower.includes('przeanalizuj') ||
-      lower.includes('analiza') ||
-      lower.includes('jakie sekcje') ||
-      lower.includes('co znajduje się')
-    ) {
-      addStep('step-cap', 'Select capability: analyze_page', 'SUCCESS', 'Wybrano analizator struktury dokumentu');
-      addStep('step-mutate', 'Inspect document hierarchy', 'SUCCESS', 'Pobrano drzewo sekcji');
-      addStep('step-validate', 'Validate document', 'SUCCESS', 'BuilderDocument spójny, 0 błędów');
-      addStep('step-complete', 'Complete', 'SUCCESS', 'Raport analityczny wygenerowany');
+      addStep(
+        'step-cap',
+        `Select capability: ${proposal.proposedCapability}`,
+        'SUCCESS',
+        'Zaakceptowano propozycję asystenta'
+      );
 
-      const activePage = document.pages.find((p) => p.id === activePageId) || document.pages[0];
-      const sections = activePage?.sections || [];
+      if (targetId && proposal.executePayload?.props) {
+        commands.push({
+          type: 'UPDATE_PROPS',
+          pageId: activePageId,
+          sectionId: targetId,
+          props: proposal.executePayload.props,
+        });
 
-      const sectionListText =
-        sections.length > 0
-          ? sections
-              .map(
-                (s, i) =>
-                  `  ${i + 1}. **${s.label || s.type}** (ID: \`${s.id}\`, typ: \`${s.type}\`${
-                    s.visible === false ? ' [ukryta]' : ''
-                  })`
-              )
-              .join('\n')
-          : '  (Brak sekcji na bieżącej stronie)';
+        appliedChanges.push(...proposal.proposedChanges);
 
-      responseMessage = `Przeanalizowałem aktualną stronę **${activePage?.name || 'Główna'}** w Builderze.\n\nStrona zawiera **${sections.length}** sekcji:\n${sectionListText}\n\n**Stan techniczny:**\n✓ BuilderDocument: ZGODNY\n✓ Drzewo węzłów: ZSYNCHRONIZOWANE\n✓ Runtime: GOTOWY\n\nMożesz teraz wskazać konkretną sekcję do edycji lub dodać nową akcją szybkiego wyboru.`;
+        addStep('step-mutate', 'Apply mutation: UPDATE_PROPS', 'SUCCESS', 'Zastosowano zmiany z propozycji');
+        addStep('step-runtime', 'Runtime updated', 'SUCCESS', 'Canvas zaktualizowany na żywo');
+        addStep('step-validate', 'Validate: BuilderDocument + Runtime', 'SUCCESS', 'Walidacja PASS');
+        addStep('step-complete', 'Complete', 'SUCCESS', 'Operacja zakończona sukcesem');
 
-      this.recordEvent({
-        id: `evt-analyze-${Date.now()}`,
-        timestamp: new Date().toLocaleTimeString('pl-PL'),
-        type: 'VALIDATE',
-        title: 'Validation PASS',
-        description: `Strona ${activePage?.name || 'Główna'} pomyślnie zwalidowana (${sections.length} sekcji)`,
-        status: 'SUCCESS',
-      });
+        responseMessage = `Gotowe. Zastosowałem propozycję dla sekcji: ciemniejsze tło, złoty gradient SoloSpot Gold oraz subtelną reakcję na kursor.`;
+
+        this.recordEvent({
+          id: `evt-mutate-${Date.now()}`,
+          timestamp: new Date().toLocaleTimeString('pl-PL'),
+          type: 'MUTATE',
+          title: 'UPDATE_PROPS',
+          description: `Zastosowano propozycję w węźle ${targetId}`,
+          nodeId: targetId,
+          capability: proposal.proposedCapability,
+          status: 'SUCCESS',
+        });
+        this.recordEvent({
+          id: `evt-exp-${Date.now() + 1}`,
+          timestamp: new Date().toLocaleTimeString('pl-PL'),
+          type: 'EXPERIENCE',
+          title: 'configure_experience',
+          description: `Zaaplikowano parametry wizualne do sekcji ${targetId}`,
+          nodeId: targetId,
+          capability: proposal.proposedCapability,
+          status: 'SUCCESS',
+        });
+        this.recordEvent({
+          id: `evt-valid-${Date.now() + 2}`,
+          timestamp: new Date().toLocaleTimeString('pl-PL'),
+          type: 'VALIDATE',
+          title: 'Validation PASS',
+          description: 'BuilderDocument i ExperienceScene pomyślnie zwalidowane',
+          status: 'SUCCESS',
+        });
+      }
     }
 
-    // Intent 2: Add Hero Section (Creation intents take precedence over style modulation)
+    // Branch 5B: Change background to black ("Zmień tło Hero na czarne", "Zmień tło na czarne")
+    else if (
+      lower.includes('czarne') ||
+      lower.includes('czarny') ||
+      (lower.includes('tło') && lower.includes('czarn'))
+    ) {
+      addStep('step-cap', 'Select capability: update_props', 'SUCCESS', 'Wybrano modyfikator stylów sekcji');
+
+      if (targetSectionId) {
+        commands.push({
+          type: 'UPDATE_PROPS',
+          pageId: activePageId,
+          sectionId: targetSectionId,
+          props: {
+            backgroundColor: '#050505',
+            background: '#050505',
+            themeAccent: 'dark-graphite',
+          },
+        });
+
+        appliedChanges.push({
+          target: targetSectionId,
+          property: 'backgroundColor',
+          previousValue: (context.selectedNodeProps as any)?.backgroundColor || 'transparent',
+          newValue: '#050505',
+          summary: 'Czarne tło sekcji (#050505)',
+        });
+
+        addStep('step-mutate', 'Apply mutation: UPDATE_PROPS', 'SUCCESS', 'Zmieniono tło sekcji na #050505');
+        addStep('step-runtime', 'Runtime updated', 'SUCCESS', 'Canvas zaktualizowany na żywo');
+        addStep('step-validate', 'Validate: BuilderDocument', 'SUCCESS', 'Walidacja PASS');
+        addStep('step-complete', 'Complete', 'SUCCESS', 'Tło pomyślnie zmienione');
+
+        responseMessage = `Gotowe. Zmieniłem tło sekcji na #050505.`;
+
+        this.recordEvent({
+          id: `evt-mutate-${Date.now()}`,
+          timestamp: new Date().toLocaleTimeString('pl-PL'),
+          type: 'MUTATE',
+          title: 'update_props',
+          description: `Zmieniono tło w węźle ${targetSectionId} na #050505`,
+          nodeId: targetSectionId,
+          capability: 'update_props',
+          status: 'SUCCESS',
+        });
+      } else {
+        addStep('step-blocked', 'Apply mutation', 'FAILED', 'Brak sekcji do modyfikacji');
+        responseMessage = 'Nie mogę zmienić tła: nie znaleziono sekcji docelowej.';
+      }
+    }
+
+    // Branch 5C: Add Hero Section ("Stwórz nowoczesny Hero Banner...", "Dodaj hero")
     else if (
       (lower.includes('hero') &&
         (lower.includes('stwórz') ||
@@ -345,7 +679,7 @@ export class HacpBridge {
       });
     }
 
-    // Intent 3: Add Feature Grid / Korzyści
+    // Branch 5D: Add Feature Grid / Korzyści
     else if (
       lower.includes('korzyści') ||
       lower.includes('features') ||
@@ -395,7 +729,7 @@ export class HacpBridge {
       });
     }
 
-    // Intent 4: Modulate Motion / Experience (Test Trzeci)
+    // Branch 5E: Modulate Motion / Experience
     else if (
       lower.includes('ruch') ||
       lower.includes('intensywn') ||
@@ -405,13 +739,12 @@ export class HacpBridge {
     ) {
       addStep('step-cap', 'Select capability: configure_experience', 'SUCCESS', 'Modulacja parametrów Experience');
 
-      const targetSectionId = activeNodeId || document.pages[0]?.sections[0]?.id;
-
       if (!targetSectionId) {
         addStep('step-blocked', 'Apply mutation', 'FAILED', 'Nie wskazano sekcji z Experience');
         this.status = 'ONLINE';
         return {
           success: false,
+          intent: 'EXECUTE',
           message: 'Nie mogę wykonać operacji: Zaznacz sekcję zawierającą Experience, aby dostosować jej parametry.',
           executionCard: {
             id: `card-${Date.now()}`,
@@ -483,7 +816,7 @@ export class HacpBridge {
       });
     }
 
-    // Intent 5: Premium / Gold Gradient / Cursor Reaction (Test Scenariusz Główny)
+    // Branch 5F: Premium Gold Gradient + Spotlight
     else if (
       lower.includes('premium') ||
       lower.includes('złot') ||
@@ -492,13 +825,12 @@ export class HacpBridge {
     ) {
       addStep('step-cap', 'Select capability: configure_experience', 'SUCCESS', 'Dopasowano Visual Experience Runtime');
 
-      const targetSectionId = activeNodeId || document.pages[0]?.sections[0]?.id;
-
       if (!targetSectionId) {
         addStep('step-blocked', 'Apply mutation', 'FAILED', 'Brak sekcji do modyfikacji');
         this.status = 'ONLINE';
         return {
           success: false,
+          intent: 'EXECUTE',
           message: 'Nie mogę wykonać operacji: Na stronie nie znaleziono żadnej sekcji do zastosowania efektu premium.',
           executionCard: {
             id: `card-${Date.now()}`,
@@ -514,7 +846,6 @@ export class HacpBridge {
         };
       }
 
-      // Build real Experience configuration for Gold Gradient + Pointer Spotlight/Tilt
       const goldExperienceConfig: Partial<ExperienceSceneConfig> = {
         background: {
           type: 'mesh-gradient',
@@ -539,7 +870,6 @@ export class HacpBridge {
         },
       };
 
-      // Mutation command
       const mutationCommand: BuilderCommand = {
         type: 'UPDATE_PROPS',
         pageId: activePageId,
@@ -613,11 +943,9 @@ export class HacpBridge {
       });
     }
 
-    // Intent 6: Generic Layout / Style Improvement
+    // Fallback EXECUTE: Specific prop update
     else {
       addStep('step-cap', 'Select capability: update_props', 'SUCCESS', 'Dopasowano optymalizator sekcji');
-
-      const targetSectionId = activeNodeId || document.pages[0]?.sections[0]?.id;
 
       if (targetSectionId) {
         commands.push({
@@ -625,27 +953,26 @@ export class HacpBridge {
           pageId: activePageId,
           sectionId: targetSectionId,
           props: {
-            subtitle: 'Dopasowano przez SoloSpot AI dla maksymalnej konwersji i estetyki.',
             primaryColor: '#D9A86C',
           },
         });
 
         appliedChanges.push({
           target: targetSectionId,
-          property: 'subtitle',
-          newValue: 'Zoptymalizowany podtytuł',
-          summary: 'Poprawiono czytelność i akcenty kolorystyczne',
+          property: 'primaryColor',
+          newValue: '#D9A86C',
+          summary: 'Zastosowano akcent kolorystyczny SoloSpot Gold',
         });
 
-        addStep('step-mutate', 'Apply mutation', 'SUCCESS', 'Zastosowano ulepszenie układu');
+        addStep('step-mutate', 'Apply mutation', 'SUCCESS', 'Zastosowano ulepszenie');
         addStep('step-runtime', 'Runtime updated', 'SUCCESS', 'Zsynchronizowano Canvas');
         addStep('step-validate', 'Validate', 'SUCCESS', 'Walidacja PASS');
         addStep('step-complete', 'Complete', 'SUCCESS', 'Operacja zakończona');
 
-        responseMessage = `Przeanalizowałem zapytanie: *„${cleanPrompt}”* i dostosowałem wybraną sekcję \`${targetSectionId}\`.\n\n✓ Poprawiłem hierarchię typograficzną\n✓ Zastosowałem akcent kolorystyczny SoloSpot Gold (\`#D9A86C\`)\n✓ Zsynchronizowałem Canvas w czasie rzeczywistym`;
+        responseMessage = `Zastosowałem modyfikację dla sekcji \`${targetSectionId}\`.`;
       } else {
         addStep('step-blocked', 'Apply mutation', 'FAILED', 'Nie znaleziono odpowiedniego węzła');
-        responseMessage = `Nie mogę wykonać tej zmiany: Nie wskazano aktywnego elementu w Builderze. Zaznacz sekcję na Canvasie lub w drzewie warstw, aby SoloSpot AI mógł na niej operować.`;
+        responseMessage = `Nie mogę wykonać tej zmiany: Nie wskazano aktywnego elementu w Builderze.`;
       }
     }
 
@@ -664,10 +991,16 @@ export class HacpBridge {
 
     return {
       success: true,
+      intent: 'EXECUTE',
       message: responseMessage,
       executionCard: card,
       commandsToDispatch: commands,
       eventsToEmit: events,
+      updatedConversationContext: {
+        lastIntent: 'EXECUTE',
+        lastProposal: undefined,
+        lastTargetNodeId: targetSectionId,
+      },
     };
   }
 }

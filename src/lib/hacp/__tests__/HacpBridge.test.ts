@@ -69,7 +69,7 @@ describe('HacpBridge & AI Copilot Workspace Engine', () => {
     expect(capabilities.some((c) => c.id === 'insert_section')).toBe(true);
   });
 
-  it('D3 — executes analysis query and returns real section structure without mocking', async () => {
+  it('D3 — executes analysis query and returns real section structure without mutating', async () => {
     const result = await bridge.executePlan(
       'Przeanalizuj aktualną stronę i powiedz mi, jakie sekcje się na niej znajdują.',
       mockContext,
@@ -77,11 +77,11 @@ describe('HacpBridge & AI Copilot Workspace Engine', () => {
     );
 
     expect(result.success).toBe(true);
+    expect(result.intent).toBe('INSPECT');
     expect(result.message).toContain('Hero Section');
     expect(result.message).toContain('sec-hero-1');
-    expect(result.executionCard.status).toBe('SUCCESS');
-    expect(result.executionCard.validationResult).toBe('PASS');
-    expect(result.executionCard.steps.some((s) => s.name.includes('analyze_page'))).toBe(true);
+    expect(result.commandsToDispatch.length).toBe(0); // READ ONLY - NO MUTATION!
+    expect(result.executionCard).toBeUndefined(); // NO execution card for inspect!
   });
 
   it('D4 — executes Premium Gold Experience workflow (Test Scenariusz Główny)', async () => {
@@ -105,8 +105,8 @@ describe('HacpBridge & AI Copilot Workspace Engine', () => {
     expect(exp.background.colors).toContain('#D9A86C');
     expect(exp.pointer.type).toBe('spotlight');
 
-    expect(result.executionCard.status).toBe('SUCCESS');
-    expect(result.executionCard.appliedChanges?.length).toBe(3);
+    expect(result.executionCard?.status).toBe('SUCCESS');
+    expect(result.executionCard?.appliedChanges?.length).toBe(3);
   });
 
   it('D5 — modulates Experience motion and speed parameters (Test Trzeci)', async () => {

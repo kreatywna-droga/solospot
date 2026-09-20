@@ -26,6 +26,7 @@ import type {
   HacpBuilderContext,
   HacpCapability,
   HacpStatus,
+  HacpConversationContext,
 } from '@/lib/hacp/HacpTypes'
 import { findNode } from '../../../../packages/builder-core/src'
 
@@ -37,6 +38,9 @@ export function AiCopilotWorkspace() {
   const [inputValue, setInputValue] = useState('')
   const [isExecuting, setIsExecuting] = useState(false)
   const [activityEvents, setActivityEvents] = useState<HacpActivityEvent[]>([])
+  const [conversationContext, setConversationContext] = useState<HacpConversationContext>({
+    history: [],
+  })
 
   // Collapsible panels state
   const [contextOpen, setContextOpen] = useState(true)
@@ -44,8 +48,8 @@ export function AiCopilotWorkspace() {
   const [showStatusModal, setShowStatusModal] = useState(false)
   const [showCapabilitiesModal, setShowCapabilitiesModal] = useState(false)
 
-  const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const bridge = useMemo(() => HacpBridge.getInstance(), [])
   const hacpStatus: HacpStatus = isExecuting ? 'BUSY' : bridge.getStatus()
@@ -102,26 +106,13 @@ export function AiCopilotWorkspace() {
 
   // Contextual suggestions when conversation is empty
   const suggestions = useMemo(() => {
-    if (selectedNodeInfo?.type === 'hero' || selectedNodeInfo?.label?.toLowerCase().includes('hero')) {
-      return [
-        'Nadaj tej sekcji bardziej premium charakter. Użyj złotego gradientu i delikatnej reakcji na kursor.',
-        'Zwiększ delikatnie ruch tego efektu i zmniejsz jego intensywność.',
-        'Przeanalizuj aktualną stronę i powiedz mi, jakie sekcje się na niej znajdują.',
-      ]
-    }
-    if (selectedNodeInfo) {
-      return [
-        `Nadaj sekcji "${selectedNodeInfo.label}" złoty gradient i efekt głębi kursora.`,
-        'Zwiększ delikatnie ruch tego efektu i zmniejsz jego intensywność.',
-        'Przeanalizuj aktualną stronę i powiedz mi, jakie sekcje się na niej znajdują.',
-      ]
-    }
     return [
+      'Jak poprawiłbyś ten Hero?',
+      'Zmień tło Hero na czarne.',
       'Nadaj tej sekcji bardziej premium charakter. Użyj złotego gradientu i delikatnej reakcji na kursor.',
-      'Przeanalizuj aktualną stronę i powiedz mi, jakie sekcje się na niej znajdują.',
-      'Stwórz nowoczesny Hero Banner z wbudowanym gradientem SoloSpot Gold.',
+      'Co możesz zrobić w SoloSpot?',
     ]
-  }, [selectedNodeInfo])
+  }, [])
 
   const handleSendMessage = async (promptToSend?: string) => {
     const text = (promptToSend || inputValue).trim()
@@ -139,11 +130,29 @@ export function AiCopilotWorkspace() {
     setIsExecuting(true)
 
     try {
-      // Execute plan through HACP Bridge
-      const result = await bridge.executePlan(text, currentContext, builderDoc)
+      // Execute through Conversational Intent Engine & HACP Bridge
+      const result = await bridge.executePlan(text, currentContext, builderDoc, conversationContext)
 
-      // Dispatch real mutations to Builder State
-      if (result.commandsToDispatch.length > 0) {
+      // Update conversation memory
+      if (result.updatedConversationContext) {
+        setConversationContext((prev) => ({
+          ...prev,
+          ...result.updatedConversationContext,
+          history: [
+            ...prev.history,
+            { role: 'user' as const, text, timestamp: new Date().toLocaleTimeString('pl-PL') },
+            {
+              role: 'ai' as const,
+              text: result.message,
+              intent: result.intent,
+              timestamp: new Date().toLocaleTimeString('pl-PL'),
+            },
+          ].slice(-25),
+        }))
+      }
+
+      // ONLY dispatch mutations if intent is EXECUTE and commands are present
+      if (result.intent === 'EXECUTE' && result.commandsToDispatch.length > 0) {
         result.commandsToDispatch.forEach((cmd) => {
           dispatch(cmd)
         })
@@ -154,7 +163,8 @@ export function AiCopilotWorkspace() {
         type: 'ai',
         text: result.message,
         timestamp: new Date().toLocaleTimeString('pl-PL'),
-        card: result.executionCard,
+        intent: result.intent,
+        card: result.intent === 'EXECUTE' ? result.executionCard : undefined,
       }
 
       setMessages((prev) => [...prev, aiMessage])
@@ -162,7 +172,7 @@ export function AiCopilotWorkspace() {
       const errorMessage: HacpMessage = {
         id: `msg-err-${Date.now()}`,
         type: 'system',
-        text: `Nie mogę wykonać tej zmiany.\nPowód: ${err?.message || 'Błąd wykonania w HACP Bridge.'}`,
+        text: `Nie mogę wykonać tej operacji.\nPowód: ${err?.message || 'Błąd wykonania w HACP Bridge.'}`,
         timestamp: new Date().toLocaleTimeString('pl-PL'),
       }
       setMessages((prev) => [...prev, errorMessage])
