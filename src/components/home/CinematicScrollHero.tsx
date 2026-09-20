@@ -3,7 +3,7 @@
 import React, { useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { motion, useReducedMotion } from 'framer-motion'
-import { ArrowRight, Play, Sparkles } from 'lucide-react'
+import { ArrowRight, Play } from 'lucide-react'
 
 const SUPABASE_HERO_VIDEO_URL =
   'https://regjgitqkyfhaaogijhu.supabase.co/storage/v1/object/public/store-assets/hero/hero-clip.mov'
@@ -188,16 +188,16 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
       </div>
 
       {/* ── 2. HERO FOREGROUND SECTION (Normal Document Flow) ──────────────── */}
-      {/* min-h-screen: perfectly fills viewport initially, scrolls naturally  */}
+      {/* min-h-screen flex items-center: perfectly vertically centers hero content */}
       <section
         id="hero"
         ref={heroSectionRef}
-        className="relative z-10 w-full min-h-screen flex flex-col justify-between select-none"
+        className="relative z-10 w-full min-h-screen flex items-center select-none"
       >
         {/* HERO TEXT CONTENT — Left column */}
         <div
-          className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 flex-1 flex flex-col justify-center"
-          style={{ paddingTop: '6.5rem', paddingBottom: '3rem' }}
+          className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 flex items-center"
+          style={{ paddingTop: '5.5rem', paddingBottom: '2.5rem' }}
         >
           <div className="max-w-xl">
             {/* Overline badge */}
@@ -286,18 +286,10 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
           </div>
         </div>
 
-        {/* FLOATING BADGE (right side) */}
-        <div className="hidden xl:block absolute right-20 bottom-28 pointer-events-none z-20">
-          <div className="flex items-center gap-2 text-[#D9A86C]/70 font-serif italic text-lg tracking-wide">
-            <span>Więcej niż sklep</span>
-            <Sparkles className="w-4 h-4 text-[#F2C27F]" />
-          </div>
-        </div>
-
         {/* SCROLL HELPER BADGE (bottom right) */}
         <div
           ref={scrollBadgeRef}
-          className="absolute right-6 sm:right-10 bottom-20 z-30 flex flex-col items-center gap-2 pointer-events-none transition-opacity duration-300"
+          className="absolute right-6 sm:right-10 bottom-8 z-30 flex flex-col items-center gap-2 pointer-events-none transition-opacity duration-300"
         >
           <span
             className="text-[9px] tracking-[0.28em] text-[#B8B1A7]/70 uppercase font-semibold"
@@ -313,27 +305,6 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
             />
           </div>
           <div className="w-1.5 h-1.5 rounded-full bg-[#D9A86C]/80 shadow-[0_0_6px_rgba(217,168,108,0.9)] animate-pulse" />
-        </div>
-
-        {/* BRAND LOGOS BAR */}
-        <div className="relative z-20 border-t border-white/[0.05] bg-[#080B10]/75 backdrop-blur-sm py-3.5">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 flex flex-col md:flex-row items-center justify-between gap-4">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#77736D]">
-              ZAUFAŁY NAM INNOWACYJNE MARKI
-            </span>
-            <div className="flex items-center flex-wrap justify-center gap-6 sm:gap-10 text-white/35">
-              <span className="text-sm font-bold tracking-wider font-mono">
-                NEXT<span className="text-[#D9A86C]">RA</span>
-              </span>
-              <span className="text-sm font-semibold tracking-wide">pixelwear</span>
-              <span className="text-sm font-medium tracking-tight">foodly</span>
-              <span className="text-sm font-bold tracking-widest font-mono">mindcraft</span>
-              <span className="text-sm font-semibold tracking-wider">wave</span>
-              <span className="text-sm font-bold tracking-tight">wban</span>
-              <span className="text-sm font-medium tracking-wide">urban</span>
-              <span className="text-sm font-semibold tracking-normal">greenway</span>
-            </div>
-          </div>
         </div>
       </section>
     </>
