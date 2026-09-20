@@ -72,7 +72,7 @@ export function BuilderBottomBar({ onSave, onPublish, saving, onTabChange }: Bui
                   key={p.label}
                   onClick={() => setZoom(p.value)}
                   className={`px-2 py-1 rounded-md text-[10px] font-mono transition-all ${
-                      ? 'bg-[#D9A86C]/15 text-[#F2C27F]'
+                      zoom === p.value ? 'bg-[#D9A86C]/15 text-[#F2C27F]'
                       : 'text-zinc-400 hover:text-white hover:bg-white/[0.05]'
                   }`}
                 >
