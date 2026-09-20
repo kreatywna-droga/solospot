@@ -3,18 +3,19 @@
 /**
  * SmartGuidesOverlay — Real Smart Guides / Alignment Lines (UX Correction v1.0)
  *
- * Renders true, continuous smart alignment lines (Figma / Framer / Webflow style)
- * across the entire canvas during element drag and snap interactions.
+ * Renders true, continuous smart alignment lines across the entire canvas
+ * during element drag and snap interactions.
  *
- * 120 FPS PERFORMANCE & ISOLATION:
- *   - Autonomous event subscription to 'solospot:smart-guides-update'
- *   - Zero parent component (BuilderCanvas) re-renders during drag
- *   - Pure 60/120 FPS hardware accelerated SVG rendering
- *
- * COLOR REQUIREMENT:
- *   - Bright / Neon Green (#00FF66) for all alignment and center lines
- *   - High contrast dark backing halo (rgba(0,0,0,0.9)) for readability on any canvas
+ * COLOR:
+ *   - 100% PURE BRIGHT / NEON GREEN (#00FF66)
+ *   - No black under-strokes or filters that could render as dark/black lines
+ *   - Vibrant 2px core laser line with a 6px neon green glow aura
+ *   - Visible instantly with maximum contrast on both pitch-black and pure-white backgrounds
  *   - z-[150] pointer-events-none overlay above all canvas elements
+ *
+ * PERFORMANCE:
+ *   - Autonomous event subscription to 'solospot:smart-guides-update'
+ *   - 0 parent component re-renders during dragging for 120 FPS buttery smooth drag
  */
 
 import React, { useState, useEffect } from 'react'
@@ -55,9 +56,9 @@ export function SmartGuidesOverlay({
 
   if (!visible || activeGuides.length === 0) return null
 
-  // Ensure canvas dimensions are robust even during page resizing/scrolling
-  const canvasW = Math.max(width || 1400, 3000)
-  const canvasH = Math.max(height || 1000, 6000)
+  // Ensure canvas dimensions cover the entire viewport and scrollable canvas
+  const canvasW = Math.max(width || 1400, 3200)
+  const canvasH = Math.max(height || 1000, 8000)
 
   return (
     <svg
@@ -73,40 +74,43 @@ export function SmartGuidesOverlay({
         overflow: 'visible',
       }}
     >
-      <defs>
-        {/* Glowing aura filter for bright green alignment lines */}
-        <filter id="solospot-green-glow" x="-50%" y="-50%" width="200%" height="200%">
-          <feDropShadow dx="0" dy="0" stdDeviation="2" floodColor="#00FF66" floodOpacity="0.95" />
-          <feDropShadow dx="0" dy="0" stdDeviation="5" floodColor="#00FF66" floodOpacity="0.6" />
-        </filter>
-        <filter id="badge-shadow" x="-30%" y="-30%" width="160%" height="160%">
-          <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="rgba(0,0,0,0.85)" />
-        </filter>
-      </defs>
-
       {activeGuides.map((guide, index) => {
         const isHorizontal = guide.orientation === 'HORIZONTAL'
         const key = `guide-${guide.type}-${guide.orientation}-${Math.round(guide.position)}-${index}`
 
         // True Smart Guides span across the entire canvas
-        const x1 = isHorizontal ? -3000 : guide.position
-        const y1 = isHorizontal ? guide.position : -3000
-        const x2 = isHorizontal ? canvasW + 3000 : guide.position
-        const y2 = isHorizontal ? guide.position : canvasH + 5000
+        const x1 = isHorizontal ? -4000 : guide.position
+        const y1 = isHorizontal ? guide.position : -4000
+        const x2 = isHorizontal ? canvasW + 4000 : guide.position
+        const y2 = isHorizontal ? guide.position : canvasH + 6000
 
         return (
           <g key={key}>
-            {/* Background halo stroke for high contrast against light or dark canvas background */}
+            {/* Neon Green Glow Aura (6px wide with 35% opacity) */}
             <line
               x1={x1}
               y1={y1}
               x2={x2}
               y2={y2}
-              stroke="rgba(0, 0, 0, 0.9)"
-              strokeWidth={4.5}
+              stroke="#00FF66"
+              strokeWidth={7}
+              strokeOpacity={0.4}
+              strokeLinecap="round"
             />
 
-            {/* Glowing Main Bright Neon Green Guide Line (#00FF66) */}
+            {/* Neon Green Mid Glow (4px wide with 65% opacity) */}
+            <line
+              x1={x1}
+              y1={y1}
+              x2={x2}
+              y2={y2}
+              stroke="#00FF66"
+              strokeWidth={4}
+              strokeOpacity={0.7}
+              strokeLinecap="round"
+            />
+
+            {/* Main Laser Sharp Bright Green Core Line (2px wide with 100% solid opacity) */}
             <line
               x1={x1}
               y1={y1}
@@ -114,28 +118,28 @@ export function SmartGuidesOverlay({
               y2={y2}
               stroke="#00FF66"
               strokeWidth={2}
-              filter="url(#solospot-green-glow)"
+              strokeOpacity={1}
             />
 
-            {/* Minimal Badge at Canvas Edge */}
+            {/* Clean Badge Pill at Canvas Edge */}
             {guide.label && (
-              <g filter="url(#badge-shadow)">
+              <g>
                 <rect
-                  x={isHorizontal ? 24 : guide.position - 32}
-                  y={isHorizontal ? guide.position - 10 : 20}
-                  width={isHorizontal ? Math.max(64, guide.label.length * 8 + 16) : 64}
-                  height={20}
+                  x={isHorizontal ? 24 : guide.position - 36}
+                  y={isHorizontal ? guide.position - 11 : 18}
+                  width={isHorizontal ? Math.max(70, guide.label.length * 8 + 18) : 72}
+                  height={22}
                   rx={5}
-                  fill="#050508"
+                  fill="#002b11"
                   stroke="#00FF66"
                   strokeWidth={1.5}
                 />
                 <text
-                  x={isHorizontal ? 24 + Math.max(64, guide.label.length * 8 + 16) / 2 : guide.position}
-                  y={isHorizontal ? guide.position + 4 : 33.5}
+                  x={isHorizontal ? 24 + Math.max(70, guide.label.length * 8 + 18) / 2 : guide.position}
+                  y={isHorizontal ? guide.position + 4.5 : 32.5}
                   textAnchor="middle"
                   fill="#00FF66"
-                  fontSize={10}
+                  fontSize={10.5}
                   fontWeight="bold"
                   fontFamily="sans-serif"
                   letterSpacing="0.04em"

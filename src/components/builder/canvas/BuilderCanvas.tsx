@@ -2348,6 +2348,15 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
     }
     const myBounds = sectionsBounds.find(s => s.id === node.id)
 
+    // Disable all CSS transitions instantly on element and all descendants for 120fps direct hardware drag
+    if (domEl) {
+      domEl.style.setProperty('transition', 'none', 'important')
+      domEl.style.setProperty('will-change', 'transform', 'important')
+      domEl.querySelectorAll('*').forEach(c => {
+        (c as HTMLElement).style?.setProperty('transition', 'none', 'important')
+      })
+    }
+
     let hasDragged = false
     let rafId: number | null = null
     let latestClientX = startX
@@ -2356,24 +2365,13 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
     const onMove = (moveEvt: MouseEvent | PointerEvent) => {
       latestClientX = moveEvt.clientX
       latestClientY = moveEvt.clientY
+      hasDragged = true
 
-      const deltaX = (latestClientX - startX) / zoomVal
-      const deltaY = (latestClientY - startY) / zoomVal
-
-      if (!hasDragged && Math.hypot(deltaX, deltaY) > 3) {
-        hasDragged = true
-        if (domEl) {
-          domEl.style.transition = 'none'
-          domEl.style.willChange = 'transform'
-        }
-      }
-
-      if (hasDragged) {
-        if (rafId === null) {
-          rafId = requestAnimationFrame(() => {
-            rafId = null
-            let curTx = startTx + Math.round((latestClientX - startX) / zoomVal)
-            let curTy = startTy + Math.round((latestClientY - startY) / zoomVal)
+      if (rafId === null) {
+        rafId = requestAnimationFrame(() => {
+          rafId = null
+          let curTx = startTx + Math.round((latestClientX - startX) / zoomVal)
+          let curTy = startTy + Math.round((latestClientY - startY) / zoomVal)
 
             const currentLeft = naturalLeft + curTx
             const currentTop = naturalTop + curTy
@@ -2439,7 +2437,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
             }
 
             if (domEl) {
-              domEl.style.transform = `translate(${curTx}px, ${curTy}px) rotate(${baseRotate}) scale(${baseScale})`
+              domEl.style.transform = `translate3d(${curTx}px, ${curTy}px, 0px) rotate(${baseRotate}) scale(${baseScale})`
             }
 
             // Broadcast real-time drag position so SelectionOverlay tracks element with zero lag
@@ -2455,7 +2453,6 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
           })
         }
       }
-    }
 
     const onUp = (upEvt: MouseEvent | PointerEvent) => {
       window.removeEventListener('pointermove', onMove)
@@ -2796,20 +2793,6 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
             }}
           />
         ))}
-
-        {/* Alignment Guides */}
-        {isDragging && (
-          <div className="absolute inset-0 pointer-events-none z-20">
-            <div
-              className="absolute left-0 right-0 h-px bg-violet-400/40"
-              style={{ top: '0' }}
-            />
-            <div
-              className="absolute top-0 bottom-0 w-px bg-violet-400/40"
-              style={{ left: '0' }}
-            />
-          </div>
-        )}
 
         {/* Locked/Hidden element guides */}
         {canvas.selection.lockedIds.length > 0 && (

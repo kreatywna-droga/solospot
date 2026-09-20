@@ -255,8 +255,15 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     // Disable CSS transitions during hot drag path for instant 120fps tracking
     const prevTransition = domEl?.style.transition || ''
     if (domEl) {
-      domEl.style.transition = 'none'
-      domEl.style.willChange = 'transform'
+      domEl.style.setProperty('transition', 'none', 'important')
+      domEl.style.setProperty('will-change', 'transform', 'important')
+      domEl.querySelectorAll('*').forEach(c => {
+        (c as HTMLElement).style?.setProperty('transition', 'none', 'important')
+      })
+    }
+    if (overlayGroupRef.current) {
+      overlayGroupRef.current.style.setProperty('transition', 'none', 'important')
+      overlayGroupRef.current.style.setProperty('will-change', 'transform', 'important')
     }
 
     // Show badge once at start (no per-frame re-render)
@@ -346,7 +353,7 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
 
           // Direct 60/120fps hardware-accelerated DOM transform
           if (domEl) {
-            domEl.style.transform = `translate(${curTx}px, ${curTy}px) rotate(${baseRotate}) scale(${baseScale})`
+            domEl.style.transform = `translate3d(${curTx}px, ${curTy}px, 0px) rotate(${baseRotate}) scale(${baseScale})`
           }
           // Synchronously move the overlay box and grip with zero lag
           if (overlayGroupRef.current) {
