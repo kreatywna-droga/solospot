@@ -8,14 +8,19 @@
 }
 
 :root {
-  /* Tenant theme colors — overridden per-store via style prop in /store/[slug]/page.tsx */
-  --color-primary: #8b5cf6;
-  --color-secondary: #d946ef;
-  --color-accent: #f59e0b;
-  --color-background: #050508;
-  --color-surface: #080a12;
-  --color-text: #e2e8f0;
+  /* Tenant theme colors & SoloSpot Brand Palette */
+  --color-primary: #D9A86C;
+  --color-secondary: #F2C27F;
+  --color-accent: #F6D7AA;
+  --color-background: #080B10;
+  --color-surface: #0D1118;
+  --color-surface-hover: #141820;
+  --color-text: #F5F1EA;
+  --color-text-secondary: #B8B1A7;
+  --color-text-muted: #77736D;
   --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-gold: rgba(217, 168, 108, 0.25);
+  --color-glow-gold: rgba(242, 194, 127, 0.25);
   --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
