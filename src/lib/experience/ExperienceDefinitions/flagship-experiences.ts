@@ -23,6 +23,8 @@ import {
   generateNodeId,
 } from '../../../../packages/builder-core/src';
 import type { ExperienceItem } from '../ExperienceTypes';
+import type { ExperienceSceneConfig } from '../ExperienceRuntimeTypes';
+
 
 export const FLAGSHIP_EXPERIENCES: ExperienceItem[] = [
   // 1. Cinematic Product Hero
@@ -42,6 +44,27 @@ export const FLAGSHIP_EXPERIENCES: ExperienceItem[] = [
     industry: ['technology', 'product', 'saas', 'creative'],
     tags: ['flagship', 'hero', 'video', 'cinematic', '3d', 'product'],
     capabilities: { backgroundVideo: true, videoBackground: true, perspective3d: true, assetSlots: true },
+    runtimeConfig: {
+      version: '1.0.0',
+      background: {
+        type: 'video',
+        videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-code-screen-close-up-1728-large.mp4',
+        opacity: 0.7,
+      },
+      pointer: {
+        type: 'spotlight',
+        radius: 420,
+        color: 'rgba(139, 92, 246, 0.22)',
+      },
+      scene3d: {
+        perspective: 1200,
+        transformStyle: 'preserve-3d',
+      },
+      motion: {
+        type: 'float',
+        speed: 1.0,
+      },
+    },
     assetSlots: [
       { id: 'heroVideo', label: 'Background Video', slotType: 'BACKGROUND_VIDEO' },
       { id: 'productImage', label: 'Product Card Visual', slotType: 'IMAGE', recommendedDimensions: { width: 800, height: 600 } },
@@ -52,6 +75,27 @@ export const FLAGSHIP_EXPERIENCES: ExperienceItem[] = [
         type: 'section',
         label: 'Flagship: Cinematic Product Hero',
         props: {
+          experienceConfig: {
+      version: '1.0.0',
+      background: {
+        type: 'video',
+        videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-code-screen-close-up-1728-large.mp4',
+        opacity: 0.7,
+      },
+      pointer: {
+        type: 'spotlight',
+        radius: 420,
+        color: 'rgba(139, 92, 246, 0.22)',
+      },
+      scene3d: {
+        perspective: 1200,
+        transformStyle: 'preserve-3d',
+      },
+      motion: {
+        type: 'float',
+        speed: 1.0,
+      },
+    },
           backgroundVideo: 'https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-code-screen-close-up-1728-large.mp4',
           backgroundVideoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-code-screen-close-up-1728-large.mp4',
           overlayColor: '#05050a',
@@ -224,11 +268,69 @@ export const FLAGSHIP_EXPERIENCES: ExperienceItem[] = [
     industry: ['creative', 'agency', 'luxury', 'technology'],
     tags: ['flagship', 'reflection', 'mirror', '3d', 'depth', 'spatial'],
     capabilities: { perspective3d: true, gradient: true },
+    runtimeConfig: {
+      version: '1.0.0',
+      background: {
+        type: 'ambient-blobs',
+        colors: ['#3b82f6', '#8b5cf6', '#06b6d4'],
+        blur: 80,
+        opacity: 0.65,
+      },
+      pointer: {
+        type: 'tilt',
+        maxAngle: 14,
+        strength: 1.2,
+      },
+      carousel: {
+        itemCount: 3,
+        initialIndex: 1,
+        autoplay: false,
+        loop: true,
+        gap: 24,
+      },
+      scene3d: {
+        perspective: 1400,
+        transformStyle: 'preserve-3d',
+        reflection: true,
+        reflectionOpacity: 0.35,
+      },
+      effects: ['reflection', 'glass'],
+    },
     createNode: () => {
       return createSectionNode({
         id: generateNodeId('section'),
         type: 'section',
         label: 'Flagship: Mirror Hall',
+        props: {
+          experienceConfig: {
+      version: '1.0.0',
+      background: {
+        type: 'ambient-blobs',
+        colors: ['#3b82f6', '#8b5cf6', '#06b6d4'],
+        blur: 80,
+        opacity: 0.65,
+      },
+      pointer: {
+        type: 'tilt',
+        maxAngle: 14,
+        strength: 1.2,
+      },
+      carousel: {
+        itemCount: 3,
+        initialIndex: 1,
+        autoplay: false,
+        loop: true,
+        gap: 24,
+      },
+      scene3d: {
+        perspective: 1400,
+        transformStyle: 'preserve-3d',
+        reflection: true,
+        reflectionOpacity: 0.35,
+      },
+      effects: ['reflection', 'glass'],
+    },
+        },
         styles: {
           backgroundColor: '#030308',
           backgroundImage: 'radial-gradient(circle at 50% 10%, rgba(99, 102, 241, 0.18) 0%, transparent 60%)',
@@ -357,11 +459,49 @@ export const FLAGSHIP_EXPERIENCES: ExperienceItem[] = [
     industry: ['creative', 'luxury', 'saas', 'agency'],
     tags: ['flagship', 'glass', 'wave', 'refraction', 'blur', 'minimal'],
     capabilities: { glassmorphism: true, gradient: true },
+    runtimeConfig: {
+      version: '1.0.0',
+      background: {
+        type: 'mesh-gradient',
+        colors: ['#06b6d4', '#8b5cf6', '#ec4899', '#3b82f6'],
+        speed: 1.2,
+        blur: 50,
+      },
+      pointer: {
+        type: 'tilt',
+        maxAngle: 10,
+      },
+      motion: {
+        type: 'wave',
+        speed: 0.9,
+      },
+      effects: ['glass', 'liquid-morph'],
+    },
     createNode: () => {
       return createSectionNode({
         id: generateNodeId('section'),
         type: 'section',
         label: 'Flagship: Glass Wave',
+        props: {
+          experienceConfig: {
+      version: '1.0.0',
+      background: {
+        type: 'mesh-gradient',
+        colors: ['#06b6d4', '#8b5cf6', '#ec4899', '#3b82f6'],
+        speed: 1.2,
+        blur: 50,
+      },
+      pointer: {
+        type: 'tilt',
+        maxAngle: 10,
+      },
+      motion: {
+        type: 'wave',
+        speed: 0.9,
+      },
+      effects: ['glass', 'liquid-morph'],
+    },
+        },
         styles: {
           backgroundColor: '#070914',
           backgroundImage: 'radial-gradient(ellipse at 80% 20%, rgba(59, 130, 246, 0.22) 0%, transparent 50%), radial-gradient(ellipse at 20% 80%, rgba(168, 85, 247, 0.2) 0%, transparent 50%)',
@@ -483,11 +623,53 @@ export const FLAGSHIP_EXPERIENCES: ExperienceItem[] = [
     industry: ['saas', 'creative', 'technology', 'events'],
     tags: ['flagship', 'gradient', 'mesh', 'chromatic', 'atmosphere', 'bold'],
     capabilities: { gradient: true },
+    runtimeConfig: {
+      version: '1.0.0',
+      background: {
+        type: 'aurora',
+        colors: ['#a855f7', '#3b82f6', '#ec4899', '#14b8a6'],
+        speed: 1.4,
+        blur: 70,
+        opacity: 0.85,
+      },
+      pointer: {
+        type: 'spotlight',
+        radius: 400,
+        color: 'rgba(236, 72, 153, 0.22)',
+      },
+      motion: {
+        type: 'breathe',
+        speed: 0.8,
+      },
+      effects: ['vignette'],
+    },
     createNode: () => {
       return createSectionNode({
         id: generateNodeId('section'),
         type: 'section',
         label: 'Flagship: Gradient World',
+        props: {
+          experienceConfig: {
+      version: '1.0.0',
+      background: {
+        type: 'aurora',
+        colors: ['#a855f7', '#3b82f6', '#ec4899', '#14b8a6'],
+        speed: 1.4,
+        blur: 70,
+        opacity: 0.85,
+      },
+      pointer: {
+        type: 'spotlight',
+        radius: 400,
+        color: 'rgba(236, 72, 153, 0.22)',
+      },
+      motion: {
+        type: 'breathe',
+        speed: 0.8,
+      },
+      effects: ['vignette'],
+    },
+        },
         styles: {
           backgroundColor: '#05050c',
           backgroundImage: 'radial-gradient(circle at 15% 20%, rgba(236, 72, 153, 0.35) 0%, transparent 45%), radial-gradient(circle at 85% 30%, rgba(124, 58, 237, 0.4) 0%, transparent 50%), radial-gradient(circle at 50% 85%, rgba(6, 182, 212, 0.3) 0%, transparent 55%)',
@@ -529,11 +711,49 @@ export const FLAGSHIP_EXPERIENCES: ExperienceItem[] = [
     industry: ['agency', 'portfolio', 'saas', 'product'],
     tags: ['flagship', 'sticky', 'story', 'scrollytelling', 'editorial', 'interactive'],
     capabilities: { scrollAnimation: true, sticky: true },
+    runtimeConfig: {
+      version: '1.0.0',
+      scroll: {
+        type: 'sticky-story',
+        steps: 3,
+        pinDuration: 1200,
+      },
+      pointer: {
+        type: 'parallax',
+        strength: 0.8,
+      },
+      background: {
+        type: 'ambient-blobs',
+        colors: ['#1e1b4b', '#312e81', '#4338ca'],
+        blur: 90,
+        opacity: 0.7,
+      },
+    },
     createNode: () => {
       return createSectionNode({
         id: generateNodeId('section'),
         type: 'section',
         label: 'Flagship: Sticky Story',
+        props: {
+          experienceConfig: {
+      version: '1.0.0',
+      scroll: {
+        type: 'sticky-story',
+        steps: 3,
+        pinDuration: 1200,
+      },
+      pointer: {
+        type: 'parallax',
+        strength: 0.8,
+      },
+      background: {
+        type: 'ambient-blobs',
+        colors: ['#1e1b4b', '#312e81', '#4338ca'],
+        blur: 90,
+        opacity: 0.7,
+      },
+    },
+        },
         styles: {
           backgroundColor: '#080811',
           padding: { top: '100px', right: '32px', bottom: '100px', left: '32px' },
@@ -631,6 +851,22 @@ export const FLAGSHIP_EXPERIENCES: ExperienceItem[] = [
     industry: ['ecommerce', 'portfolio', 'saas', 'product'],
     tags: ['flagship', 'horizontal', 'showcase', 'carousel', 'runway', 'interactive'],
     capabilities: { scrollAnimation: true },
+    runtimeConfig: {
+      version: '1.0.0',
+      scroll: {
+        type: 'horizontal-showcase',
+        steps: 4,
+        horizontalFactor: 1.0,
+      },
+      pointer: {
+        type: 'tilt',
+        maxAngle: 8,
+      },
+      background: {
+        type: 'static-gradient',
+        colors: ['#090912', '#121124', '#07070d'],
+      },
+    },
     assetSlots: [
       { id: 'slide1', label: 'Slide 1 Image', slotType: 'IMAGE' },
       { id: 'slide2', label: 'Slide 2 Image', slotType: 'IMAGE' },
@@ -641,6 +877,24 @@ export const FLAGSHIP_EXPERIENCES: ExperienceItem[] = [
         id: generateNodeId('section'),
         type: 'section',
         label: 'Flagship: Horizontal Showcase',
+        props: {
+          experienceConfig: {
+      version: '1.0.0',
+      scroll: {
+        type: 'horizontal-showcase',
+        steps: 4,
+        horizontalFactor: 1.0,
+      },
+      pointer: {
+        type: 'tilt',
+        maxAngle: 8,
+      },
+      background: {
+        type: 'static-gradient',
+        colors: ['#090912', '#121124', '#07070d'],
+      },
+    },
+        },
         styles: {
           backgroundColor: '#07070f',
           padding: { top: '90px', right: '28px', bottom: '90px', left: '28px' },
@@ -745,11 +999,55 @@ export const FLAGSHIP_EXPERIENCES: ExperienceItem[] = [
     industry: ['creative', 'agency', 'luxury', 'portfolio'],
     tags: ['flagship', 'parallax', 'depth', 'multi-plane', 'spatial', 'scroll'],
     capabilities: { scrollAnimation: true, perspective3d: true },
+    runtimeConfig: {
+      version: '1.0.0',
+      pointer: {
+        type: 'parallax',
+        strength: 1.5,
+        maxAngle: 18,
+      },
+      scene3d: {
+        perspective: 1000,
+        transformStyle: 'preserve-3d',
+      },
+      background: {
+        type: 'aurora',
+        colors: ['#6366f1', '#a855f7', '#3b82f6'],
+        speed: 1.0,
+      },
+      motion: {
+        type: 'float',
+        speed: 1.1,
+      },
+    },
     createNode: () => {
       return createSectionNode({
         id: generateNodeId('section'),
         type: 'section',
         label: 'Flagship: Parallax Depth',
+        props: {
+          experienceConfig: {
+      version: '1.0.0',
+      pointer: {
+        type: 'parallax',
+        strength: 1.5,
+        maxAngle: 18,
+      },
+      scene3d: {
+        perspective: 1000,
+        transformStyle: 'preserve-3d',
+      },
+      background: {
+        type: 'aurora',
+        colors: ['#6366f1', '#a855f7', '#3b82f6'],
+        speed: 1.0,
+      },
+      motion: {
+        type: 'float',
+        speed: 1.1,
+      },
+    },
+        },
         styles: {
           backgroundColor: '#06060c',
           backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.15) 0%, transparent 70%)',
@@ -828,11 +1126,47 @@ export const FLAGSHIP_EXPERIENCES: ExperienceItem[] = [
     industry: ['saas', 'product', 'technology', 'creative'],
     tags: ['flagship', 'bento', 'grid', 'interactive', 'metrics', 'spotlight'],
     capabilities: { backgroundVideo: true, customLayout: true },
+    runtimeConfig: {
+      version: '1.0.0',
+      pointer: {
+        type: 'spotlight',
+        radius: 450,
+        color: 'rgba(99, 102, 241, 0.25)',
+      },
+      background: {
+        type: 'mesh-gradient',
+        colors: ['#1e1035', '#0f172a', '#1e1b4b'],
+        blur: 60,
+      },
+      motion: {
+        type: 'none',
+      },
+      effects: ['glass', 'glow-border'],
+    },
     createNode: () => {
       return createSectionNode({
         id: generateNodeId('section'),
         type: 'section',
         label: 'Flagship: Interactive Bento',
+        props: {
+          experienceConfig: {
+      version: '1.0.0',
+      pointer: {
+        type: 'spotlight',
+        radius: 450,
+        color: 'rgba(99, 102, 241, 0.25)',
+      },
+      background: {
+        type: 'mesh-gradient',
+        colors: ['#1e1035', '#0f172a', '#1e1b4b'],
+        blur: 60,
+      },
+      motion: {
+        type: 'none',
+      },
+      effects: ['glass', 'glow-border'],
+    },
+        },
         styles: {
           backgroundColor: '#07070d',
           padding: { top: '90px', right: '32px', bottom: '90px', left: '32px' },
@@ -978,6 +1312,29 @@ export const FLAGSHIP_EXPERIENCES: ExperienceItem[] = [
     industry: ['ecommerce', 'product', 'luxury', 'creative'],
     tags: ['flagship', 'product', 'reveal', 'luxury', 'ecommerce', '3d'],
     capabilities: { perspective3d: true, assetSlots: true },
+    runtimeConfig: {
+      version: '1.0.0',
+      pointer: {
+        type: 'spotlight',
+        radius: 380,
+        color: 'rgba(245, 158, 11, 0.28)',
+      },
+      scene3d: {
+        perspective: 1200,
+        transformStyle: 'preserve-3d',
+        reflection: true,
+        reflectionOpacity: 0.2,
+      },
+      motion: {
+        type: 'float',
+        speed: 0.9,
+      },
+      background: {
+        type: 'glowing-orb',
+        colors: ['#f59e0b', '#78350f', '#000000'],
+        blur: 80,
+      },
+    },
     assetSlots: [
       { id: 'productHeroImg', label: 'Main Product Image', slotType: 'IMAGE', recommendedDimensions: { width: 900, height: 700 } },
     ],
@@ -986,6 +1343,31 @@ export const FLAGSHIP_EXPERIENCES: ExperienceItem[] = [
         id: generateNodeId('section'),
         type: 'section',
         label: 'Flagship: Product Reveal',
+        props: {
+          experienceConfig: {
+      version: '1.0.0',
+      pointer: {
+        type: 'spotlight',
+        radius: 380,
+        color: 'rgba(245, 158, 11, 0.28)',
+      },
+      scene3d: {
+        perspective: 1200,
+        transformStyle: 'preserve-3d',
+        reflection: true,
+        reflectionOpacity: 0.2,
+      },
+      motion: {
+        type: 'float',
+        speed: 0.9,
+      },
+      background: {
+        type: 'glowing-orb',
+        colors: ['#f59e0b', '#78350f', '#000000'],
+        blur: 80,
+      },
+    },
+        },
         styles: {
           backgroundColor: '#09090f',
           padding: { top: '100px', right: '32px', bottom: '100px', left: '32px' },
@@ -1080,11 +1462,55 @@ export const FLAGSHIP_EXPERIENCES: ExperienceItem[] = [
     industry: ['technology', 'creative', 'saas', 'agency'],
     tags: ['flagship', '3d', 'perspective', 'scene', 'spatial', 'motion'],
     capabilities: { perspective3d: true },
+    runtimeConfig: {
+      version: '1.0.0',
+      pointer: {
+        type: 'tilt',
+        maxAngle: 20,
+        strength: 1.4,
+      },
+      scene3d: {
+        perspective: 1400,
+        transformStyle: 'preserve-3d',
+      },
+      background: {
+        type: 'aurora',
+        colors: ['#8b5cf6', '#ec4899', '#3b82f6'],
+        speed: 1.2,
+      },
+      motion: {
+        type: 'orbit',
+        speed: 0.7,
+      },
+    },
     createNode: () => {
       return createSectionNode({
         id: generateNodeId('section'),
         type: 'section',
         label: 'Flagship: Perspective 3D Scene',
+        props: {
+          experienceConfig: {
+      version: '1.0.0',
+      pointer: {
+        type: 'tilt',
+        maxAngle: 20,
+        strength: 1.4,
+      },
+      scene3d: {
+        perspective: 1400,
+        transformStyle: 'preserve-3d',
+      },
+      background: {
+        type: 'aurora',
+        colors: ['#8b5cf6', '#ec4899', '#3b82f6'],
+        speed: 1.2,
+      },
+      motion: {
+        type: 'orbit',
+        speed: 0.7,
+      },
+    },
+        },
         styles: {
           backgroundColor: '#05050b',
           backgroundImage: 'radial-gradient(circle at 50% 30%, rgba(139, 92, 246, 0.2) 0%, transparent 65%)',

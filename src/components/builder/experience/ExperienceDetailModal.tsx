@@ -202,15 +202,13 @@ export function ExperienceDetailModal({
               }`}
             >
               <ScaleToFitContainer targetWidth={targetWidth} maxHeight={520} interactive={isInteractive}>
-                <div
-                  style={{
-                    opacity: isPlayingMotion ? 1 : 0.95,
-                    transform: scrollProgress > 0 ? `translateY(-${Math.round(scrollProgress * 0.4)}px)` : undefined,
-                    transition: 'transform 0.1s ease-out',
-                  }}
-                >
-                  <SectionPreviewRenderer sectionNode={previewNode} />
-                </div>
+                <SectionPreviewRenderer
+                  sectionNode={previewNode}
+                  isPlaying={isPlayingMotion}
+                  isInteractive={isInteractive}
+                  scrollProgress={scrollProgress}
+                  runtimeConfig={experience.runtimeConfig}
+                />
               </ScaleToFitContainer>
             </div>
           </div>

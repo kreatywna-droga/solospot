@@ -47,7 +47,7 @@ import { useRuntimePreview } from './useRuntimePreview'
 import { SectionRenderer } from '@/components/runtime/SectionRenderer'
 import { CartProvider } from '@/lib/cart/CartStore'
 import { loadGoogleFont } from '../../../../packages/builder-core/src/fonts/FontCatalog'
-import { ExperienceLibraryModal, SaveExperienceModal } from '../experience'
+import { ExperienceLibraryModal, SaveExperienceModal, ExperienceRuntimeScene } from '../experience'
 import { WebsiteTemplatePickerModal } from '../templates/WebsiteTemplatePickerModal'
 
 // ---------------------------------------------------------------------------
@@ -1738,21 +1738,46 @@ function SectionBlock({
             }}
           >
             {node.children && node.children.length > 0 ? (
-              node.children.map(child => (
-                <CanvasNode
-                  key={child.id}
-                  node={child}
-                  pageId={pageId}
-                  depth={1}
-                  selectedId={canvas.selectedSectionId}
-                  hoveredId={canvas.hoveredSectionId}
-                  viewport={canvas.viewport.label}
-                  onSelectNode={handleSelectChildNode}
-                  onHoverNode={onHover}
-                  onDoubleClickNode={handleDoubleClickChildNode}
-                  onStartDragNode={onStartDragNode}
-                />
-              ))
+              (node.props as any)?.experienceConfig || (node.metadata as any)?.experienceConfig ? (
+                <ExperienceRuntimeScene
+                  config={(node.props as any)?.experienceConfig || (node.metadata as any)?.experienceConfig}
+                  isPlaying={true}
+                  isInteractive={true}
+                  className="w-full"
+                >
+                  {node.children.map(child => (
+                    <CanvasNode
+                      key={child.id}
+                      node={child}
+                      pageId={pageId}
+                      depth={1}
+                      selectedId={canvas.selectedSectionId}
+                      hoveredId={canvas.hoveredSectionId}
+                      viewport={canvas.viewport.label}
+                      onSelectNode={handleSelectChildNode}
+                      onHoverNode={onHover}
+                      onDoubleClickNode={handleDoubleClickChildNode}
+                      onStartDragNode={onStartDragNode}
+                    />
+                  ))}
+                </ExperienceRuntimeScene>
+              ) : (
+                node.children.map(child => (
+                  <CanvasNode
+                    key={child.id}
+                    node={child}
+                    pageId={pageId}
+                    depth={1}
+                    selectedId={canvas.selectedSectionId}
+                    hoveredId={canvas.hoveredSectionId}
+                    viewport={canvas.viewport.label}
+                    onSelectNode={handleSelectChildNode}
+                    onHoverNode={onHover}
+                    onDoubleClickNode={handleDoubleClickChildNode}
+                    onStartDragNode={onStartDragNode}
+                  />
+                ))
+              )
             ) : (
               <div className="p-8 border border-dashed border-white/20 rounded-xl text-center text-xs text-slate-400 w-full select-none">
                 {node.type === 'section' ? 'Pusta sekcja — przeciągnij komponenty tutaj lub dodaj z panelu' : 'Pusty kontener — dodaj elementy lub przeciągnij komponent'}

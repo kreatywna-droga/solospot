@@ -321,7 +321,12 @@ export function ExperienceLibraryModal({
                         </div>
 
                         <ScaleToFitContainer targetWidth={960} maxHeight={290} interactive={false}>
-                          <SectionPreviewRenderer sectionNode={node} />
+                          <SectionPreviewRenderer
+                            sectionNode={node}
+                            isPlaying={true}
+                            isInteractive={false}
+                            runtimeConfig={exp.runtimeConfig}
+                          />
                         </ScaleToFitContainer>
 
                         {/* Hover Overlay with Action Buttons */}

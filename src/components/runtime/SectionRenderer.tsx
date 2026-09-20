@@ -13,6 +13,7 @@ import { ContentSection } from './ContentSection'
 import { FeatureGridSection } from './FeatureGridSection'
 import { StatsSection } from './StatsSection'
 import { ContainerSection } from './ContainerSection'
+import { ExperienceRuntimeScene } from '@/components/builder/experience/ExperienceRuntimeScene'
 
 export function BaseSection({ section, children }: SectionComponentProps & { children?: React.ReactNode }) {
   const config = ((section?.config || (section as any)?.props) ?? {}) as {
@@ -123,36 +124,48 @@ export function SectionRenderer(props: SectionComponentProps) {
   const videoSrc = rawConfig.backgroundVideo || rawConfig.backgroundVideoUrl || rawConfig.videoSrc || ''
   const overlayOpacity = parseFloat(String(rawConfig.overlayOpacity ?? '0'))
 
+  const content = videoSrc ? (
+    <div className="relative w-full">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <video
+          src={String(videoSrc)}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover"
+        />
+        {overlayOpacity > 0 && (
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundColor: String(rawConfig.overlayColor || '#000000'),
+              opacity: overlayOpacity,
+            }}
+          />
+        )}
+      </div>
+      <div className="relative z-10">
+        <Component {...normalizedProps} />
+      </div>
+    </div>
+  ) : (
+    <Component {...normalizedProps} />
+  );
+
   return (
     <SectionErrorBoundary type={props.section.type}>
-      {videoSrc ? (
-        <div className="relative w-full">
-          <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-            <video
-              src={String(videoSrc)}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover"
-            />
-            {overlayOpacity > 0 && (
-              <div
-                className="absolute inset-0"
-                style={{
-                  backgroundColor: String(rawConfig.overlayColor || '#000000'),
-                  opacity: overlayOpacity,
-                }}
-              />
-            )}
-          </div>
-          <div className="relative z-10">
-            <Component {...normalizedProps} />
-          </div>
-        </div>
+      {rawConfig.experienceConfig ? (
+        <ExperienceRuntimeScene
+          config={rawConfig.experienceConfig}
+          isPlaying={true}
+          isInteractive={true}
+        >
+          {content}
+        </ExperienceRuntimeScene>
       ) : (
-        <Component {...normalizedProps} />
+        content
       )}
     </SectionErrorBoundary>
-  )
+  );
 }

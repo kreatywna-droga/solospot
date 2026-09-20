@@ -101,6 +101,7 @@ export interface ExperienceItem {
   tags: string[];
   previewClass?: string;
   capabilities?: ExperienceCapabilityRequirements;
+  runtimeConfig?: import('./ExperienceRuntimeTypes').ExperienceSceneConfig;
   assetSlots?: AssetSlotDefinition[];
   createNode: () => BuilderNode;
   nodes?: BuilderNode[];

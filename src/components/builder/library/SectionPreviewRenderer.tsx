@@ -5,6 +5,8 @@ import { BuilderNode, SectionNode } from '../../../../packages/builder-core/src/
 import { SectionRenderer } from '@/components/runtime/SectionRenderer'
 import { CartProvider } from '@/lib/cart/CartStore'
 import { loadGoogleFont } from '../../../../packages/builder-core/src/fonts/FontCatalog'
+import { ExperienceRuntimeScene } from '../experience/ExperienceRuntimeScene'
+import type { ExperienceSceneConfig } from '@/lib/experience/ExperienceRuntimeTypes'
 
 // Helper to format four-side padding/margin objects or strings
 function formatSides(val: any, defaultVal?: string): string | undefined {
@@ -441,13 +443,25 @@ function ReadOnlyNodeRenderer({ node }: { node: BuilderNode }) {
 export function SectionPreviewRenderer({
   sectionNode,
   className = '',
+  isPlaying = true,
+  isInteractive = true,
+  scrollProgress,
+  runtimeConfig: explicitConfig,
 }: {
   sectionNode: SectionNode | BuilderNode
   className?: string
+  isPlaying?: boolean
+  isInteractive?: boolean
+  scrollProgress?: number
+  runtimeConfig?: ExperienceSceneConfig
 }) {
   const isPredefinedRuntimeSection =
     ['hero', 'product-grid', 'gallery', 'testimonials', 'newsletter', 'footer', 'navbar', 'contact', 'category-grid', 'content', 'feature-grid', 'stats'].includes(sectionNode.type) &&
     (!sectionNode.children || sectionNode.children.length === 0)
+
+  const experienceConfig = explicitConfig ||
+    (sectionNode.props as any)?.experienceConfig ||
+    (sectionNode.metadata as any)?.experienceConfig;
 
   if (isPredefinedRuntimeSection) {
     return (
@@ -477,9 +491,25 @@ export function SectionPreviewRenderer({
     )
   }
 
-  return (
+  const content = (
     <div className={`w-full ${className}`}>
       <ReadOnlyNodeRenderer node={sectionNode} />
     </div>
-  )
+  );
+
+  if (experienceConfig) {
+    return (
+      <ExperienceRuntimeScene
+        config={experienceConfig}
+        isPlaying={isPlaying}
+        isInteractive={isInteractive}
+        scrollProgress={scrollProgress}
+        className={className}
+      >
+        <ReadOnlyNodeRenderer node={sectionNode} />
+      </ExperienceRuntimeScene>
+    );
+  }
+
+  return content;
 }
