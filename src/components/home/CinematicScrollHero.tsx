@@ -15,88 +15,76 @@ interface CinematicScrollHeroProps {
 }
 
 /**
- * STICKY / PINNED SCROLL-SCRUBBED VIDEO HERO
+ * TRUE SCROLL-SYNCHRONIZED CINEMATIC HERO
  *
  * Architecture:
- * - Outer track div: height 150vh (scroll distance = 150vh - 100vh = 50vh)
- *   User must scroll ~50vh past the hero before the next section appears.
- *   This is short enough that page feels immediately responsive.
- *
- * - Inner sticky div: height 100vh, sticky top-0
- *   Stays pinned in viewport while track is in view.
- *
- * - Scroll progress: (-rect.top / scrollDistance), clamped 0..1
- *   Drives video.currentTime frame-by-frame.
- *   No wheel interception. No preventDefault. Pure document scroll.
- *
- * - Video: absolute inset-0, object-cover — fills entire sticky viewport.
- *   Left gradient scrim ensures text readability.
+ * - Single Source of Truth: window.scrollY (Real document scroll position)
+ * - Normal Document Flow: Hero is min-h-screen, immediately scrolls into next sections
+ *   (Zero scroll locks, zero artificial sticky pauses, zero wheel hijacking)
+ * - Fixed Cinematic Backdrop: Video stays visible in the background from Hero (0%)
+ *   through FlowSteps (features) and Stack (stack) up to Architecture (architecture, 100%).
+ *   Beyond Architecture, the video gracefully fades out and the rest of the page continues.
  */
 export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps) {
-  const trackRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
-  const contentRef = useRef<HTMLDivElement>(null)
-  const logosRef = useRef<HTMLDivElement>(null)
+  const videoBackdropRef = useRef<HTMLDivElement>(null)
+  const heroSectionRef = useRef<HTMLElement>(null)
   const progressBarRef = useRef<HTMLDivElement>(null)
   const progressLabelRef = useRef<HTMLSpanElement>(null)
   const scrollBadgeRef = useRef<HTMLDivElement>(null)
 
   const prefersReducedMotion = useReducedMotion()
 
-  // ─── High-performance scroll-scrubbing loop ──────────────────────────────
-  // Uses real document scroll. No wheel/touch interception. No preventDefault.
-  // requestAnimationFrame ensures 60-120 FPS with zero React state overhead.
+  // ── High-Performance Unified Scroll Handler ──────────────────────────────
   const handleScroll = useCallback(() => {
-    if (!trackRef.current) return
+    const scrollY = window.scrollY
+    const viewportHeight = window.innerHeight
 
-    const track = trackRef.current
-    const rect = track.getBoundingClientRect()
-    // scrollDistance = how many pixels user must scroll for hero to fully exit
-    const scrollDistance = track.offsetHeight - window.innerHeight
+    // Measure active range: video completes at end of #architecture section
+    const archEl = document.getElementById('architecture')
+    const videoEndScroll = archEl
+      ? Math.max(archEl.offsetTop + archEl.offsetHeight * 0.7 - viewportHeight, 1200)
+      : Math.max(viewportHeight * 2.5, 1200)
 
-    if (scrollDistance <= 0) return
+    // Global timeline progress for video: 0.0 (top) → 1.0 (end of architecture)
+    const rawProgress = scrollY / videoEndScroll
+    const videoProgress = Math.min(Math.max(rawProgress, 0), 1)
 
-    // Normalized progress: 0.0 (hero at top) → 1.0 (hero fully scrolled past)
-    const rawProgress = -rect.top / scrollDistance
-    const progress = Math.min(Math.max(rawProgress, 0), 1)
-
-    // 1. ── Frame-by-frame video scrubbing (Scroll-Scrubbed Video) ──────────
-    //    video.currentTime is set directly — no autoplay, no play().
-    //    Forward on scroll down, rewind on scroll up, pause on stop.
+    // 1. ── Scrub Video frame-by-frame ───────────────────────────────────────
     const vid = videoRef.current
     if (vid && isFinite(vid.duration) && vid.duration > 0 && !prefersReducedMotion) {
-      const targetTime = progress * vid.duration
-      // 15ms threshold: instant response without micro-jitter
+      const targetTime = videoProgress * vid.duration
       if (Math.abs(vid.currentTime - targetTime) > 0.015) {
         vid.currentTime = targetTime
       }
     }
 
-    // 2. ── Scrollytelling content layer ──────────────────────────────────────
-    //    Subtle opacity fade — NO transform Y (prevents "page not scrolling" feel)
-    if (contentRef.current) {
-      const opacity = progress < 0.3 ? 1 : Math.max(1 - (progress - 0.3) * 1.8, 0.15)
-      contentRef.current.style.opacity = opacity.toString()
+    // 2. ── Backdrop Opacity & Visibility Modulation ─────────────────────────
+    // Stays 100% visible throughout Hero → Features → Stack → Architecture.
+    // Fades to 0 over 400px past architecture, then hidden for zero GPU overhead.
+    if (videoBackdropRef.current) {
+      if (scrollY <= videoEndScroll) {
+        videoBackdropRef.current.style.opacity = '1'
+        videoBackdropRef.current.style.visibility = 'visible'
+      } else {
+        const fadeOut = Math.min(Math.max((scrollY - videoEndScroll) / 400, 0), 1)
+        const opacity = 1 - fadeOut
+        videoBackdropRef.current.style.opacity = opacity.toString()
+        videoBackdropRef.current.style.visibility = opacity <= 0.01 ? 'hidden' : 'visible'
+      }
     }
 
-    // 3. ── Logos bar fade ────────────────────────────────────────────────────
-    if (logosRef.current) {
-      const logosOpacity = progress < 0.15 ? 1 : Math.max(1 - (progress - 0.15) * 5, 0)
-      logosRef.current.style.opacity = logosOpacity.toString()
-      logosRef.current.style.pointerEvents = logosOpacity < 0.05 ? 'none' : 'auto'
-    }
-
-    // 4. ── Progress bar indicator ────────────────────────────────────────────
+    // 3. ── Hero Micro-indicators ────────────────────────────────────────────
     if (progressBarRef.current) {
-      progressBarRef.current.style.transform = `scaleY(${Math.max(progress, 0.06)})`
+      progressBarRef.current.style.transform = `scaleY(${Math.max(videoProgress, 0.06)})`
     }
     if (progressLabelRef.current) {
-      progressLabelRef.current.textContent = `${Math.round(progress * 100)}%`
+      progressLabelRef.current.textContent = `${Math.round(videoProgress * 100)}%`
     }
 
-    // 5. ── Scroll helper badge fade ──────────────────────────────────────────
+    // Fade out scroll helper as soon as user starts scrolling past hero
     if (scrollBadgeRef.current) {
-      const badgeOpacity = progress < 0.04 ? 1 : Math.max(1 - progress * 5, 0)
+      const badgeOpacity = scrollY < 40 ? 1 : Math.max(1 - (scrollY - 40) / 120, 0)
       scrollBadgeRef.current.style.opacity = badgeOpacity.toString()
     }
   }, [prefersReducedMotion])
@@ -109,11 +97,9 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
       animId = requestAnimationFrame(handleScroll)
     }
 
-    // passive: true — never blocks scroll
     window.addEventListener('scroll', onScrollOrResize, { passive: true })
     window.addEventListener('resize', onScrollOrResize, { passive: true })
 
-    // Initial pass at mount
     onScrollOrResize()
 
     return () => {
@@ -130,32 +116,22 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
   }
 
   const scrollToNext = () => {
-    if (trackRef.current) {
-      const nextPos = trackRef.current.offsetTop + trackRef.current.offsetHeight
-      window.scrollTo({ top: nextPos, behavior: 'smooth' })
+    const el = document.getElementById('features')
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' })
     }
   }
 
   return (
-    /*
-     * OUTER TRACK: height 150vh
-     * Defines total scroll distance for the hero sequence.
-     * scroll distance = 150vh - 100vh = 50vh
-     * After scrolling 50vh past hero top, the sticky container is released
-     * and the page flows naturally into FlowStepsSection.
-     */
-    <div
-      id="hero"
-      ref={trackRef}
-      className="relative w-full bg-[#080B10]"
-      style={{ height: '150vh' }}
-    >
-      {/* STICKY PINNED VIEWPORT — stays in view during entire hero scroll track */}
+    <>
+      {/* ── 1. FIXED BACKGROUND VIDEO LAYER ────────────────────────────────── */}
+      {/* Covers viewport behind Hero and first sections. Never locks page.   */}
       <div
-        className="sticky top-0 h-screen w-full overflow-hidden bg-[#080B10] select-none"
+        ref={videoBackdropRef}
+        className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none bg-[#080B10] will-change-[opacity]"
+        style={{ opacity: 1 }}
+        aria-hidden="true"
       >
-        {/* ── FULL-WIDTH CINEMATIC VIDEO LAYER ─────────────────────────────── */}
-        {/*    Covers the entire sticky container. No walled-off sub-container. */}
         <div className="absolute inset-0">
           <video
             ref={videoRef}
@@ -166,20 +142,19 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
             onLoadedMetadata={handleLoadedMetadata}
             className="w-full h-full object-cover will-change-[currentTime]"
             style={{ filter: 'brightness(0.85) contrast(1.05)' }}
-            aria-hidden="true"
           >
-            {/* .mov first for Safari; .mp4 fallback for all others */}
             <source src={SUPABASE_HERO_VIDEO_URL} type="video/quicktime" />
             <source src={SUPABASE_HERO_VIDEO_URL} type="video/mp4" />
           </video>
         </div>
 
-        {/* ── OVERLAY GRADIENT SCRIMS ─────────────────────────────────────── */}
-        {/* Left scrim: text readability */}
+        {/* Overlay gradient scrims */}
+        {/* Left scrim: ensures text readability on Hero and subsequent sections */}
         <div
           className="absolute inset-y-0 left-0 w-[55%] pointer-events-none"
           style={{
-            background: 'linear-gradient(to right, rgba(8,11,16,0.97) 0%, rgba(8,11,16,0.85) 50%, transparent 100%)',
+            background:
+              'linear-gradient(to right, rgba(8,11,16,0.97) 0%, rgba(8,11,16,0.85) 50%, transparent 100%)',
           }}
         />
         {/* Top scrim: nav readability */}
@@ -189,7 +164,7 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
             background: 'linear-gradient(to bottom, rgba(8,11,16,0.9) 0%, transparent 100%)',
           }}
         />
-        {/* Bottom scrim: logos bar transition */}
+        {/* Bottom scrim */}
         <div
           className="absolute bottom-0 inset-x-0 h-36 pointer-events-none"
           style={{
@@ -197,25 +172,32 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
           }}
         />
 
-        {/* ── WARM AMBIENT GLOW (behind video center-right) ──────────────── */}
+        {/* Warm ambient glow (behind video center-right) */}
         <div
           className="absolute right-[10%] top-[50%] -translate-y-1/2 pointer-events-none"
           style={{
             width: '50vw',
             height: '50vw',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(217,168,108,0.18) 0%, rgba(242,194,127,0.08) 45%, transparent 70%)',
+            background:
+              'radial-gradient(circle, rgba(217,168,108,0.18) 0%, rgba(242,194,127,0.08) 45%, transparent 70%)',
             filter: 'blur(80px)',
             opacity: 0.6,
           }}
         />
+      </div>
 
-        {/* ── HERO TEXT CONTENT — Left column ─────────────────────────────── */}
-        {/* Only opacity is modulated (no translateY) — page already scrolls visually */}
+      {/* ── 2. HERO FOREGROUND SECTION (Normal Document Flow) ──────────────── */}
+      {/* min-h-screen: perfectly fills viewport initially, scrolls naturally  */}
+      <section
+        id="hero"
+        ref={heroSectionRef}
+        className="relative z-10 w-full min-h-screen flex flex-col justify-between select-none"
+      >
+        {/* HERO TEXT CONTENT — Left column */}
         <div
-          ref={contentRef}
-          className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 h-full flex flex-col justify-center will-change-[opacity]"
-          style={{ paddingTop: '5rem' }}
+          className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 flex-1 flex flex-col justify-center"
+          style={{ paddingTop: '6.5rem', paddingBottom: '3rem' }}
         >
           <div className="max-w-xl">
             {/* Overline badge */}
@@ -304,7 +286,7 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
           </div>
         </div>
 
-        {/* ── FLOATING BADGE (right side) ─────────────────────────────────── */}
+        {/* FLOATING BADGE (right side) */}
         <div className="hidden xl:block absolute right-20 bottom-28 pointer-events-none z-20">
           <div className="flex items-center gap-2 text-[#D9A86C]/70 font-serif italic text-lg tracking-wide">
             <span>Więcej niż sklep</span>
@@ -312,13 +294,15 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
           </div>
         </div>
 
-        {/* ── SCROLL PROGRESS INDICATOR (bottom right) ────────────────────── */}
+        {/* SCROLL HELPER BADGE (bottom right) */}
         <div
           ref={scrollBadgeRef}
-          className="absolute right-6 sm:right-10 bottom-7 z-30 flex flex-col items-center gap-2 pointer-events-none"
+          className="absolute right-6 sm:right-10 bottom-20 z-30 flex flex-col items-center gap-2 pointer-events-none transition-opacity duration-300"
         >
-          <span className="text-[9px] tracking-[0.28em] text-[#B8B1A7]/70 uppercase font-semibold"
-            style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+          <span
+            className="text-[9px] tracking-[0.28em] text-[#B8B1A7]/70 uppercase font-semibold"
+            style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+          >
             SCROLL
           </span>
           <div className="relative w-[1px] h-12 bg-white/[0.08] rounded-full overflow-hidden">
@@ -331,17 +315,16 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
           <div className="w-1.5 h-1.5 rounded-full bg-[#D9A86C]/80 shadow-[0_0_6px_rgba(217,168,108,0.9)] animate-pulse" />
         </div>
 
-        {/* ── BRAND LOGOS BAR ──────────────────────────────────────────────── */}
-        <div
-          ref={logosRef}
-          className="absolute bottom-0 inset-x-0 z-10 border-t border-white/[0.05] bg-[#080B10]/75 backdrop-blur-sm py-3.5 will-change-[opacity]"
-        >
+        {/* BRAND LOGOS BAR */}
+        <div className="relative z-20 border-t border-white/[0.05] bg-[#080B10]/75 backdrop-blur-sm py-3.5">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 flex flex-col md:flex-row items-center justify-between gap-4">
             <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#77736D]">
               ZAUFAŁY NAM INNOWACYJNE MARKI
             </span>
             <div className="flex items-center flex-wrap justify-center gap-6 sm:gap-10 text-white/35">
-              <span className="text-sm font-bold tracking-wider font-mono">NEXT<span className="text-[#D9A86C]">RA</span></span>
+              <span className="text-sm font-bold tracking-wider font-mono">
+                NEXT<span className="text-[#D9A86C]">RA</span>
+              </span>
               <span className="text-sm font-semibold tracking-wide">pixelwear</span>
               <span className="text-sm font-medium tracking-tight">foodly</span>
               <span className="text-sm font-bold tracking-widest font-mono">mindcraft</span>
@@ -352,7 +335,7 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </>
   )
 }

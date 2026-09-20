@@ -317,7 +317,7 @@ function FlowStepsSection() {
   ]
 
   return (
-    <section id="features" className="relative py-24 px-6 max-w-7xl mx-auto overflow-hidden bg-[#080B10]">
+    <section id="features" className="relative py-24 px-6 max-w-7xl mx-auto overflow-hidden bg-transparent">
       <div className="relative">
         <div className="absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#D9A86C]/30 to-transparent -translate-y-1/2 hidden md:block" />
         <div className="relative flex flex-wrap md:flex-nowrap items-start justify-center gap-8 lg:gap-12">
@@ -356,7 +356,7 @@ function StackPanel() {
   ]
 
   return (
-    <section id="stack" className="px-6 pt-10 pb-24 lg:pb-32 bg-[#080B10]">
+    <section id="stack" className="relative px-6 pt-10 pb-24 lg:pb-32 bg-transparent">
       <div className="max-w-5xl mx-auto">
         <div className="relative">
           <div className="absolute -inset-6 bg-gradient-to-r from-[#D9A86C]/10 via-[#F2C27F]/10 to-transparent rounded-3xl blur-3xl" />
@@ -424,7 +424,7 @@ function PlatformArchitecture() {
     },
   ]
   return (
-    <section id="architecture" className="pt-24 pb-32 px-6 max-w-7xl mx-auto bg-[#080B10]">
+    <section id="architecture" className="relative pt-24 pb-32 px-6 max-w-7xl mx-auto bg-transparent">
       <div className="text-center mb-20">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#D9A86C]/10 border border-[#D9A86C]/25 mb-6">

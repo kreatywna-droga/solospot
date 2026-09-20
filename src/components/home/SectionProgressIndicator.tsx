@@ -1,12 +1,12 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 
 /**
  * SECTION PROGRESS INDICATOR
  *
  * A fixed, right-side vertical bar showing which page section is active.
- * Uses IntersectionObserver — no separate scroll engine.
+ * Synchronized with the single Global Scroll Timeline (window.scrollY).
  * Each tick = one horizontal dash representing one section.
  * Active section = brighter, wider dash with gold glow.
  *
@@ -34,51 +34,59 @@ const SECTIONS: Section[] = [
 
 export function SectionProgressIndicator() {
   const [activeId, setActiveId] = useState<string>('hero')
-  const observerRef = useRef<IntersectionObserver | null>(null)
+
+  const updateActiveSection = useCallback(() => {
+    const scrollY = window.scrollY
+    const viewportHeight = window.innerHeight
+    const docHeight = document.documentElement.scrollHeight
+
+    // 1. Top of page: always Hero
+    if (scrollY < 80) {
+      setActiveId('hero')
+      return
+    }
+
+    // 2. Bottom of page: always CTA
+    if (scrollY + viewportHeight >= docHeight - 80) {
+      setActiveId('cta')
+      return
+    }
+
+    // 3. Inspection line: 35% from the top of the viewport
+    const inspectLine = scrollY + viewportHeight * 0.35
+
+    let current = SECTIONS[0].id
+    for (const section of SECTIONS) {
+      const el = document.getElementById(section.id)
+      if (el) {
+        const top = el.offsetTop
+        if (top <= inspectLine) {
+          current = section.id
+        }
+      }
+    }
+    setActiveId(current)
+  }, [])
 
   useEffect(() => {
-    // Map of sectionId → timestamp when it entered viewport (most recent wins)
-    const visibleMap = new Map<string, number>()
+    let animId: number
 
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        const now = Date.now()
-        entries.forEach((entry) => {
-          const id = entry.target.id
-          if (!id) return
-          if (entry.isIntersecting) {
-            visibleMap.set(id, now)
-          } else {
-            visibleMap.delete(id)
-          }
-        })
+    const onScroll = () => {
+      cancelAnimationFrame(animId)
+      animId = requestAnimationFrame(updateActiveSection)
+    }
 
-        // Pick the section closest to viewport top (most recently visible wins
-        // among tied timestamps; fallback to SECTIONS order)
-        if (visibleMap.size > 0) {
-          // Sort by SECTIONS order and pick first visible
-          const ordered = SECTIONS.filter((s) => visibleMap.has(s.id))
-          if (ordered.length > 0) {
-            setActiveId(ordered[0].id)
-          }
-        }
-      },
-      {
-        // Consider section active when >=30% visible
-        threshold: [0.3],
-        rootMargin: '0px 0px -20% 0px',
-      }
-    )
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll, { passive: true })
 
-    const observer = observerRef.current
+    updateActiveSection()
 
-    SECTIONS.forEach(({ id }) => {
-      const el = document.getElementById(id)
-      if (el) observer.observe(el)
-    })
-
-    return () => observer.disconnect()
-  }, [])
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      cancelAnimationFrame(animId)
+    }
+  }, [updateActiveSection])
 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id)
@@ -119,7 +127,8 @@ export function SectionProgressIndicator() {
                 display: 'block',
                 height: '2px',
                 borderRadius: '2px',
-                transition: 'width 250ms ease, opacity 250ms ease, box-shadow 250ms ease, background-color 250ms ease',
+                transition:
+                  'width 250ms ease, opacity 250ms ease, box-shadow 250ms ease, background-color 250ms ease',
                 width: isActive ? '28px' : '12px',
                 opacity: isActive ? 1 : 0.3,
                 backgroundColor: isActive ? '#D9A86C' : '#B8B1A7',
