@@ -86,26 +86,16 @@ export function SmartGuidesOverlay({
 
         return (
           <g key={key}>
-            {/* Subtle soft green aura (2.5px with 25% opacity) */}
+            {/* Ultra-fine razor-sharp hairline (0.75px) Bright Neon Green (#00FF66) line */}
             <line
               x1={x1}
               y1={y1}
               x2={x2}
               y2={y2}
               stroke="#00FF66"
-              strokeWidth={2.5}
-              strokeOpacity={0.25}
-            />
-
-            {/* Ultra-thin crisp hairline 1px Bright Neon Green (#00FF66) line */}
-            <line
-              x1={x1}
-              y1={y1}
-              x2={x2}
-              y2={y2}
-              stroke="#00FF66"
-              strokeWidth={1}
+              strokeWidth={0.75}
               strokeOpacity={1}
+              shapeRendering="crispEdges"
             />
 
             {/* Clean Badge Pill at Canvas Edge */}
