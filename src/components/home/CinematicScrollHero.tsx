@@ -139,9 +139,9 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
           </video>
         </div>
 
-        {/* Overlay gradient scrim: reduced width (left ~35-40%) to keep 3D video completely clear */}
+        {/* Overlay gradient scrim: adjusted width to match slightly shifted text */}
         <div
-          className="absolute inset-y-0 left-0 w-[44%] lg:w-[38%] xl:w-[33%] pointer-events-none"
+          className="absolute inset-y-0 left-0 w-[48%] lg:w-[42%] xl:w-[38%] 2xl:w-[36%] pointer-events-none"
           style={{
             background:
               'linear-gradient(to right, rgba(8,11,16,0.92) 0%, rgba(8,11,16,0.72) 45%, rgba(8,11,16,0.15) 80%, transparent 100%)',
@@ -178,15 +178,15 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
       </div>
 
       {/* ── 2. HERO FOREGROUND SECTION (Normal Document Flow) ──────────────── */}
-      {/* min-h-screen flex items-center: text is shifted to the far LEFT      */}
+      {/* min-h-screen flex items-center: text is shifted to the left with comfortable breathing margin */}
       <section
         id="hero"
         ref={heroSectionRef}
         className="relative z-10 w-full min-h-screen flex items-center select-none"
       >
-        {/* HERO TEXT CONTENT — Left column, hugging left edge for max video showcase */}
+        {/* HERO TEXT CONTENT — Left column, balanced margin for max video showcase */}
         <div
-          className="relative z-10 w-full px-6 sm:px-10 lg:px-16 xl:px-20 2xl:px-24 flex items-center justify-start"
+          className="relative z-10 w-full px-6 sm:px-10 md:px-14 lg:px-20 xl:px-28 2xl:px-36 flex items-center justify-start"
           style={{ paddingTop: '5.5rem', paddingBottom: '2.5rem' }}
         >
           <div className="max-w-lg xl:max-w-xl">
