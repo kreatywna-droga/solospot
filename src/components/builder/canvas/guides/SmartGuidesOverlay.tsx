@@ -86,38 +86,25 @@ export function SmartGuidesOverlay({
 
         return (
           <g key={key}>
-            {/* Neon Green Glow Aura (6px wide with 35% opacity) */}
+            {/* Subtle soft green aura (2.5px with 25% opacity) */}
             <line
               x1={x1}
               y1={y1}
               x2={x2}
               y2={y2}
               stroke="#00FF66"
-              strokeWidth={7}
-              strokeOpacity={0.4}
-              strokeLinecap="round"
+              strokeWidth={2.5}
+              strokeOpacity={0.25}
             />
 
-            {/* Neon Green Mid Glow (4px wide with 65% opacity) */}
+            {/* Ultra-thin crisp hairline 1px Bright Neon Green (#00FF66) line */}
             <line
               x1={x1}
               y1={y1}
               x2={x2}
               y2={y2}
               stroke="#00FF66"
-              strokeWidth={4}
-              strokeOpacity={0.7}
-              strokeLinecap="round"
-            />
-
-            {/* Main Laser Sharp Bright Green Core Line (2px wide with 100% solid opacity) */}
-            <line
-              x1={x1}
-              y1={y1}
-              x2={x2}
-              y2={y2}
-              stroke="#00FF66"
-              strokeWidth={2}
+              strokeWidth={1}
               strokeOpacity={1}
             />
 
