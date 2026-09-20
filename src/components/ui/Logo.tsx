@@ -19,7 +19,16 @@ export function Logo({ link = true, size = 'sm', className = '' }: LogoProps) {
       <img
         src="/logo-solo-spot-new.png"
         alt="SOLOSPOT Logo"
-        className={`${sizeClasses[size]} w-auto object-contain transition-all duration-300 group-hover:scale-105 mix-blend-screen`}
+        className={`${sizeClasses[size]} w-auto object-contain transition-all duration-300 group-hover:scale-105`}
+        style={{
+          WebkitMaskImage: 'url(/logo-solo-spot-new.png)',
+          WebkitMaskSize: 'contain',
+          WebkitMaskRepeat: 'no-repeat',
+          maskImage: 'url(/logo-solo-spot-new.png)',
+          maskSize: 'contain',
+          maskRepeat: 'no-repeat',
+          maskType: 'luminance',
+        } as React.CSSProperties}
       />
     </div>
   )
