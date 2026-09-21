@@ -128,6 +128,8 @@ export interface HacpMessage {
   intent?: HacpIntentType;
   scope?: HacpEngineeringScope;
   card?: HacpExecutionCard;
+  appliedChangeSummary?: string;
+  isError?: boolean;
   suggestedActions?: string[];
   visualMetrics?: HacpVisualMetrics;
 }

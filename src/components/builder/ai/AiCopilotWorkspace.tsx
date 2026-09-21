@@ -16,7 +16,8 @@ import React, { useState, useEffect, useRef, useMemo } from 'react'
 import {
   Bot, Sparkles, Activity, CheckCircle2, AlertCircle, Clock,
   ChevronDown, ChevronUp, RotateCcw, RotateCw, Send, Layers,
-  Eye, Zap, X, Shield, Cpu, RefreshCw, Sliders, Info, CornerDownLeft
+  Eye, Zap, X, Shield, Cpu, RefreshCw, Sliders, Info, CornerDownLeft,
+  Copy, Check, Square
 } from 'lucide-react'
 import { useBuilder, useBuilderHistory } from '../state/BuilderProvider'
 import { HacpBridge } from '@/lib/hacp/HacpBridge'
@@ -38,6 +39,10 @@ export function AiCopilotWorkspace() {
   const [messages, setMessages] = useState<HacpMessage[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isExecuting, setIsExecuting] = useState(false)
+  const [secondsWaiting, setSecondsWaiting] = useState(0)
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null)
+  const [lastUserPrompt, setLastUserPrompt] = useState<string>('')
+  const abortControllerRef = useRef<AbortController | null>(null)
   const [activityEvents, setActivityEvents] = useState<HacpActivityEvent[]>([])
   const [conversationContext, setConversationContext] = useState<HacpConversationContext>({
     history: [],
@@ -207,6 +212,20 @@ export function AiCopilotWorkspace() {
     }
   }, [activePage, selectedNodeInfo, canvas.viewport, builderDoc, capabilities, visualMetrics, recentMutation, canvas])
 
+  // Timer effect for progressive loading feedback
+  useEffect(() => {
+    let interval: any
+    if (isExecuting) {
+      setSecondsWaiting(0)
+      interval = setInterval(() => {
+        setSecondsWaiting((s) => s + 1)
+      }, 1000)
+    } else {
+      setSecondsWaiting(0)
+    }
+    return () => clearInterval(interval)
+  }, [isExecuting])
+
   // Contextual suggestions when conversation is empty
   const suggestions = useMemo(() => {
     return [
@@ -217,10 +236,42 @@ export function AiCopilotWorkspace() {
     ]
   }, [])
 
+  const handleStopGeneration = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+      abortControllerRef.current = null
+    }
+    setIsExecuting(false)
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `msg-stopped-${Date.now()}`,
+        type: 'system',
+        text: 'Generowanie zostało przerwane na Twoją prośbę.',
+        timestamp: new Date().toLocaleTimeString('pl-PL'),
+      },
+    ])
+  }
+
+  const handleCopyText = (id: string, text: string) => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text)
+      setCopiedMessageId(id)
+      setTimeout(() => setCopiedMessageId(null), 2000)
+    }
+  }
+
+  const handleRegenerate = () => {
+    if (lastUserPrompt && !isExecuting) {
+      handleSendMessage(lastUserPrompt)
+    }
+  }
+
   const handleSendMessage = async (promptToSend?: string) => {
     const text = (promptToSend || inputValue).trim()
     if (!text || isExecuting) return
 
+    setLastUserPrompt(text)
     const userMessage: HacpMessage = {
       id: `msg-user-${Date.now()}`,
       type: 'user',
@@ -232,6 +283,9 @@ export function AiCopilotWorkspace() {
     setInputValue('')
     setIsExecuting(true)
 
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+
     try {
       // Execute through Conversational Intent Engine & HACP Bridge with active router configuration
       const result = await bridge.executePlan(
@@ -242,6 +296,8 @@ export function AiCopilotWorkspace() {
         routerMode,
         routerMode === 'MANUAL' ? selectedModelId : undefined
       )
+
+      if (controller.signal.aborted) return
 
       // Update AI provider status from result
       if (result.aiProviderStatus) {
@@ -297,13 +353,30 @@ export function AiCopilotWorkspace() {
       }
 
       // ONLY dispatch mutations if intent is EXECUTE and commands are present
+      let mutationSummary: string | undefined = undefined
       if (result.intent === 'EXECUTE' && result.commandsToDispatch.length > 0) {
         result.commandsToDispatch.forEach((cmd) => {
           dispatch(cmd)
         })
-        if (result.executionCard?.appliedChanges?.[0]?.summary) {
-          setRecentMutation(result.executionCard.appliedChanges[0].summary)
+        mutationSummary = result.executionCard?.appliedChanges?.[0]?.summary
+        if (mutationSummary) {
+          setRecentMutation(mutationSummary)
         }
+      }
+
+      // Log execution card to dedicated Activity Stream (separate from conversation bubble)
+      if (result.executionCard) {
+        setActivityEvents((prev) => [
+          ...prev,
+          {
+            id: `evt-${Date.now()}`,
+            timestamp: new Date().toLocaleTimeString('pl-PL'),
+            type: 'MUTATE' as const,
+            title: `Wykonanie HACP: ${result.selectedModel || 'OpenCode'}`,
+            description: mutationSummary || result.message.slice(0, 60),
+            status: result.success ? ('SUCCESS' as const) : ('WARN' as const),
+          },
+        ].slice(-30))
       }
 
       const aiMessage: HacpMessage = {
@@ -313,22 +386,26 @@ export function AiCopilotWorkspace() {
         timestamp: new Date().toLocaleTimeString('pl-PL'),
         intent: result.intent,
         scope: result.scope,
-        card: (result.intent === 'EXECUTE' || result.intent === 'AUDIT') ? result.executionCard : undefined,
+        appliedChangeSummary: mutationSummary,
       }
 
       setMessages((prev) => [...prev, aiMessage])
     } catch (err: any) {
+      if (controller.signal.aborted) return
       const errorMessage: HacpMessage = {
         id: `msg-err-${Date.now()}`,
         type: 'system',
-        text: `Nie mogę wykonać tej operacji.\nPowód: ${err?.message || 'Błąd wykonania w HACP Bridge.'}`,
+        text: `Nie udało się zrealizować zapytania: ${err?.message || 'Błąd wykonania w HACP Bridge.'}`,
         timestamp: new Date().toLocaleTimeString('pl-PL'),
+        isError: true,
       }
       setMessages((prev) => [...prev, errorMessage])
     } finally {
+      abortControllerRef.current = null
       setIsExecuting(false)
     }
   }
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -717,72 +794,78 @@ export function AiCopilotWorkspace() {
 
               {/* Message bubble */}
               <div
-                className={`max-w-[94%] rounded-2xl p-3.5 text-xs leading-relaxed ${
+                className={`max-w-[94%] rounded-2xl p-3.5 text-xs leading-relaxed transition-all shadow-sm ${
                   msg.type === 'user'
-                    ? 'bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#080B10] font-medium shadow-md shadow-[#D9A86C]/10'
+                    ? 'bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#080B10] font-medium shadow-[#D9A86C]/10 ml-auto'
                     : msg.type === 'ai'
                     ? 'bg-[#0D1118] border border-white/10 text-zinc-200'
                     : 'bg-red-950/20 border border-red-500/30 text-red-300'
                 }`}
               >
-                <div className="whitespace-pre-line">{msg.text}</div>
+                {/* User-facing conversational text */}
+                <div className="whitespace-pre-line text-xs font-sans leading-relaxed selection:bg-[#D9A86C]/30">
+                  {msg.text}
+                </div>
 
-                {/* HACP Execution Card */}
-                {msg.card && (
-                  <div className="mt-3 pt-3 border-t border-white/[0.08] space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#D9A86C]">
-                        {msg.card.title}
-                      </span>
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-                        {msg.card.status}
-                      </span>
+                {/* Subtle, elegant mutation pill if Canvas was modified */}
+                {msg.appliedChangeSummary && (
+                  <div className="mt-2.5 pt-2 border-t border-white/[0.08] flex items-center justify-between text-[10px] font-mono text-emerald-400">
+                    <div className="flex items-center gap-1.5 min-w-0 pr-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                      <span className="truncate">Zastosowano: {msg.appliedChangeSummary}</span>
                     </div>
+                    <button
+                      onClick={undo}
+                      disabled={!canUndo}
+                      className="flex items-center gap-1 text-[10px] text-[#D9A86C] hover:text-[#F2C27F] transition-colors flex-shrink-0 cursor-pointer disabled:opacity-40"
+                      title="Cofnij tę modyfikację"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      <span>Cofnij</span>
+                    </button>
+                  </div>
+                )}
 
-                    <div className="space-y-1 font-mono text-[10px]">
-                      {msg.card.steps.map((step) => (
-                        <div key={step.id} className="flex items-center gap-1.5 text-zinc-400">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-                          <span className="text-zinc-300">{step.name}</span>
-                          {step.detail && <span className="text-zinc-500 truncate">— {step.detail}</span>}
-                        </div>
-                      ))}
-                    </div>
+                {/* Error retry button */}
+                {msg.isError && lastUserPrompt && (
+                  <div className="mt-2.5 pt-2 border-t border-red-500/20 flex items-center justify-end">
+                    <button
+                      onClick={() => handleSendMessage(lastUserPrompt)}
+                      disabled={isExecuting}
+                      className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-red-500/20 text-red-300 border border-red-500/30 hover:bg-red-500/30 flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition-colors"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      <span>Spróbuj ponownie</span>
+                    </button>
+                  </div>
+                )}
 
-                    {/* Applied changes summary */}
-                    {msg.card.appliedChanges && msg.card.appliedChanges.length > 0 && (
-                      <div className="mt-2.5 p-2 rounded-lg bg-white/[0.02] border border-white/[0.04] space-y-1">
-                        <div className="flex items-center justify-between text-[9px] font-mono text-zinc-400 uppercase tracking-wider">
-                          <span>Wprowadzone zmiany ({msg.card.appliedChanges.length})</span>
-                          <span className="text-emerald-400 font-bold">LIVE ON CANVAS</span>
-                        </div>
-                        {msg.card.appliedChanges.map((chg, i) => (
-                          <div key={i} className="text-[10px] font-mono flex items-center justify-between gap-1 text-zinc-300">
-                            <span className="truncate">{chg.summary}</span>
-                            <span className="text-[#F2C27F] flex-shrink-0 text-[9px]">{chg.property}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Undo AI change button */}
-                    <div className="pt-1.5 flex items-center justify-between">
+                {/* Assistant footer toolbar: copy & regenerate */}
+                {msg.type === 'ai' && (
+                  <div className="mt-2.5 pt-2 border-t border-white/[0.04] flex items-center justify-between text-[10px] text-zinc-500">
+                    <span className="text-[9px] font-mono text-zinc-600">{currentModelName}</span>
+                    <div className="flex items-center gap-1">
                       <button
-                        onClick={undo}
-                        disabled={!canUndo}
-                        className="inline-flex items-center gap-1 text-[10px] font-mono text-[#D9A86C] hover:text-[#F2C27F] disabled:opacity-30 transition-colors"
+                        onClick={() => handleCopyText(msg.id, msg.text)}
+                        className="p-1 rounded hover:bg-white/5 hover:text-zinc-300 transition-colors cursor-pointer"
+                        title="Kopiuj odpowiedź"
                       >
-                        <RotateCcw className="w-3 h-3" />
-                        <span>Cofnij zmianę AI</span>
+                        {copiedMessageId === msg.id ? (
+                          <Check className="w-3 h-3 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3 h-3" />
+                        )}
                       </button>
-                      <button
-                        onClick={redo}
-                        disabled={!canRedo}
-                        className="inline-flex items-center gap-1 text-[10px] font-mono text-zinc-400 hover:text-zinc-200 disabled:opacity-30 transition-colors"
-                      >
-                        <RotateCw className="w-3 h-3" />
-                        <span>Ponów</span>
-                      </button>
+                      {msg.id === messages[messages.length - 1]?.id && (
+                        <button
+                          onClick={handleRegenerate}
+                          disabled={isExecuting}
+                          className="p-1 rounded hover:bg-white/5 hover:text-zinc-300 transition-colors cursor-pointer disabled:opacity-30"
+                          title="Odśwież odpowiedź"
+                        >
+                          <RotateCcw className="w-3 h-3" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}
@@ -791,16 +874,41 @@ export function AiCopilotWorkspace() {
           ))
         )}
 
-        {/* Live Thinking / Executing indicator */}
+        {/* Progressive Loading & Timeout UX with STOP button */}
         {isExecuting && (
-          <div className="flex flex-col items-start space-y-1">
-            <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#D9A86C]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#D9A86C] animate-ping" />
-              <span>HACP ● Executing workflow...</span>
+          <div className="flex flex-col items-start space-y-1.5 max-w-[94%]">
+            <div className="flex items-center gap-2 text-[10px] font-mono text-[#D9A86C]">
+              <span className="w-2 h-2 rounded-full bg-[#D9A86C] animate-ping" />
+              <span>
+                {secondsWaiting < 2
+                  ? 'Przygotowuję odpowiedź…'
+                  : secondsWaiting < 10
+                  ? 'Analizuję aktualny kontekst strony…'
+                  : `Przetwarzanie zapytania… (${secondsWaiting}s)`}
+              </span>
             </div>
-            <div className="p-3 rounded-2xl bg-[#0D1118] border border-[#D9A86C]/30 text-xs text-zinc-300 flex items-center gap-2">
-              <RefreshCw className="w-3.5 h-3.5 text-[#D9A86C] animate-spin" />
-              <span>Analiza strony i wstrzykiwanie konfiguracji Experience...</span>
+
+            <div className="w-full p-3 rounded-2xl bg-[#0D1118] border border-[#D9A86C]/30 text-xs text-zinc-300 flex items-center justify-between gap-3 shadow-lg">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <RefreshCw className="w-3.5 h-3.5 text-[#D9A86C] animate-spin flex-shrink-0" />
+                <span className="text-[11px] truncate">
+                  {secondsWaiting < 2
+                    ? 'Inicjalizacja modelu SoloSpot AI…'
+                    : secondsWaiting < 10
+                    ? 'Ocena sekcji i generowanie propozycji…'
+                    : 'To zajmuje trochę dłużej niż zwykle…'}
+                </span>
+              </div>
+
+              {/* Real STOP generation button */}
+              <button
+                onClick={handleStopGeneration}
+                className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 active:scale-95 transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer"
+                title="Zatrzymaj generowanie odpowiedzi"
+              >
+                <Square className="w-2.5 h-2.5 fill-current" />
+                <span>Zatrzymaj</span>
+              </button>
             </div>
           </div>
         )}

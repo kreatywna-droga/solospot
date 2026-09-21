@@ -62,6 +62,7 @@ export interface AICopilotResponse {
   isFreeModel?: boolean;
   finishReason?: string;
   routerMode?: string;
+  durationMs?: number;
   rawUsage?: {
     promptTokens?: number;
     completionTokens?: number;

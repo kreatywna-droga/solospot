@@ -35,6 +35,7 @@ import type {
   ExecutionVerification,
 } from './HacpTypes';
 import type { HacpToolCall } from '../ai/AIProviderTypes';
+import { UserFacingResponseNormalizer } from '../ai/UserFacingResponseNormalizer';
 
 export class HacpBridge {
   private static instance: HacpBridge;
@@ -566,14 +567,19 @@ export class HacpBridge {
           appliedChanges,
         };
 
+        const rawToolMsg =
+          aiProviderResponse.message && aiProviderResponse.message.trim().length > 0
+            ? aiProviderResponse.message.trim()
+            : finalMessage || 'Operacja została pomyślnie wykonana w HACP.';
+        const cleanToolMsg = UserFacingResponseNormalizer.normalize(rawToolMsg, {
+          toolExecuted: toolCalls[0]?.name,
+        });
+
         return {
           success: allPassed,
           intent: 'EXECUTE',
           scope: 'PAGE_DESIGN',
-          message:
-            aiProviderResponse.message && aiProviderResponse.message.trim().length > 0
-              ? aiProviderResponse.message.trim()
-              : finalMessage || 'Operacja została pomyślnie wykonana w HACP.',
+          message: cleanToolMsg,
           executionCard: card,
           commandsToDispatch: commands,
           eventsToEmit: [],
@@ -592,14 +598,17 @@ export class HacpBridge {
       }
 
       // Real AI conversational turn (zero tools)
+      const rawChatMsg =
+        aiProviderResponse.message && aiProviderResponse.message.trim().length > 0
+          ? aiProviderResponse.message.trim()
+          : 'Przeanalizowałem bieżący stan strony w Builderze. W czym mogę Ci pomóc?';
+      const cleanChatMsg = UserFacingResponseNormalizer.normalize(rawChatMsg);
+
       return {
         success: true,
         intent: 'CHAT',
         scope: 'PAGE_DESIGN',
-        message:
-          aiProviderResponse.message && aiProviderResponse.message.trim().length > 0
-            ? aiProviderResponse.message.trim()
-            : 'Przeanalizowałem bieżący stan strony w Builderze. W czym mogę Ci pomóc?',
+        message: cleanChatMsg,
         commandsToDispatch: [],
         eventsToEmit: [],
         executionStatus: 'EXECUTED',

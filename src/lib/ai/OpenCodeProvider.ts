@@ -10,6 +10,7 @@
 
 import type { AIProvider, AICopilotRequest, AICopilotResponse, HacpToolCall, ChatMessage } from './AIProviderTypes';
 import { OpenCodeModelRouter } from './OpenCodeModelRouter';
+import { UserFacingResponseNormalizer } from './UserFacingResponseNormalizer';
 
 export class OpenCodeProvider implements AIProvider {
   public readonly id = 'opencode';
@@ -99,6 +100,7 @@ export class OpenCodeProvider implements AIProvider {
         },
       }));
 
+      const startTime = Date.now();
       const endpoint = `${cleanBaseUrl}/chat/completions`;
       const bodyPayload: Record<string, unknown> = {
         model: selectedModelId,
@@ -114,6 +116,7 @@ export class OpenCodeProvider implements AIProvider {
 
       let response = await fetch(endpoint, {
         method: 'POST',
+        signal: AbortSignal.timeout(15000),
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${cleanApiKey}`,
@@ -132,6 +135,7 @@ export class OpenCodeProvider implements AIProvider {
           bodyPayload.max_tokens = 500;
           response = await fetch(endpoint, {
             method: 'POST',
+            signal: AbortSignal.timeout(15000),
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${cleanApiKey}`,
@@ -275,6 +279,7 @@ export class OpenCodeProvider implements AIProvider {
         try {
           const secondResponse = await fetch(endpoint, {
             method: 'POST',
+            signal: AbortSignal.timeout(15000),
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${cleanApiKey}`,
@@ -295,41 +300,31 @@ export class OpenCodeProvider implements AIProvider {
             }
           }
         } catch (secondErr) {
-          console.warn('[OpenCodeProvider] Second turn model completion error:', secondErr);
+          console.warn('[OpenCodeProvider] Second turn model completion error or timeout:', secondErr);
         }
 
         // If messageContent is still empty, synthesize an honest, helpful natural language statement
         if (!messageContent || messageContent.trim().length === 0) {
           const firstTc = toolCalls[0];
-          if (firstTc.name === 'test_echo') {
-            messageContent = `Wywołałem test diagnostyczny test_echo: "${firstTc.arguments?.message || 'hello'}". Narzędzie działa prawidłowo.`;
-          } else if (firstTc.name === 'update_node_props') {
-            const propKeys = Object.keys(firstTc.arguments?.props || {}).join(', ');
-            messageContent = `Zaktualizowałem właściwości sekcji (${propKeys || 'props'}). Zmiana jest widoczna na Canvas.`;
-          } else if (firstTc.name === 'insert_section') {
-            messageContent = `Dodałem nową sekcję typu ${firstTc.arguments?.sectionType || 'hero'} do strony.`;
-          } else if (firstTc.name === 'read_builder_document' || firstTc.name === 'inspect_page_structure') {
-            messageContent = `Przeanalizowałem strukturę strony „${request.builderContext?.pageName || 'Główna'}”. Liczba sekcji: ${request.builderContext?.documentNodeCount ?? 0}.`;
-          } else {
-            messageContent = `Zrealizowałem polecenie za pomocą narzędzia ${firstTc.name}.`;
-          }
+          messageContent = UserFacingResponseNormalizer.getFriendlyToolCompletionMessage(firstTc.name);
         }
       }
 
-      // If text response is still empty without tools (e.g. reasoning model edge case)
-      if ((!messageContent || messageContent.trim().length === 0) && choice?.message?.reasoning) {
-        messageContent = choice.message.reasoning.slice(0, 300);
-      }
+      // Strictly normalize user-facing output: scrub any reasoning tags (<think>), English leaks, or raw JSON
+      const cleanUserFacingMessage = UserFacingResponseNormalizer.normalize(messageContent, {
+        toolExecuted: toolCalls[0]?.name,
+      });
 
       return {
         status: 'SUCCESS',
         provider: this.name,
         model: data.model || selectedModelId,
-        message: messageContent,
+        message: cleanUserFacingMessage,
         toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
         isFreeModel: resolution.selectedModel.isFree,
         finishReason,
         routerMode: resolution.mode,
+        durationMs: Date.now() - startTime,
         rawUsage: data.usage
           ? {
               promptTokens: data.usage.prompt_tokens,
@@ -339,12 +334,22 @@ export class OpenCodeProvider implements AIProvider {
           : undefined,
       };
     } catch (err: any) {
+      const isTimeout =
+        err?.name === 'TimeoutError' ||
+        err?.name === 'AbortError' ||
+        String(err?.message || '').toLowerCase().includes('aborted') ||
+        String(err?.message || '').toLowerCase().includes('timeout');
+
+      const friendlyMessage = isTimeout
+        ? 'Upłynął limit czasu oczekiwania na odpowiedź wybranego modelu (15s). Spróbuj ponownie lub wybierz szybszy model w menu u góry.'
+        : `Wystąpił problem podczas komunikacji z modelem AI: ${err?.message || 'Nieznany błąd'}`;
+
       return {
         status: 'ERROR',
         provider: this.name,
         model: 'UNKNOWN',
-        message: `Wyjątek podczas wywołania OpenCode API: ${err?.message || 'Nieznany błąd'}`,
-        error: String(err?.message || err),
+        message: friendlyMessage,
+        error: isTimeout ? 'TIMEOUT_EXCEEDED' : String(err?.message || err),
       };
     }
   }
