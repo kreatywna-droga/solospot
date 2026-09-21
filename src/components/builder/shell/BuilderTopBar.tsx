@@ -12,8 +12,7 @@ import { useState, useCallback } from 'react'
 import {
   ChevronLeft, Monitor, Tablet, Smartphone,
   Undo2, Redo2, Save, Zap, AlertCircle, CheckCircle2,
-  PanelLeft, PanelRight, Layers, ImageIcon, Bot, History,
-  Search, Command, Plus, Palette, Eye, Sparkles, Power,
+  PanelRight, Search, Command, Eye, Sparkles, Power,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useBuilder, useBuilderHistory } from '../state/BuilderProvider'
@@ -31,25 +30,13 @@ interface BuilderTopBarProps {
   onSave: () => void
   onPublish: () => void
   saving: boolean
-  activeTab: StudioTab
-  onTabChange: (tab: StudioTab) => void
   onToggleLeftSidebar: () => void
   inspectorVisible?: boolean
   onToggleInspector?: () => void
 }
 
-const TABS: { id: StudioTab; label: string; icon: React.ElementType; shortcut: string }[] = [
-  { id: 'pages',      label: 'Strony',     icon: PanelLeft,   shortcut: 'Ctrl+1' },
-  { id: 'layers',     label: 'Warstwy',    icon: Layers,      shortcut: 'Ctrl+2' },
-  { id: 'components', label: 'Komponenty', icon: Plus,        shortcut: 'Ctrl+3' },
-  { id: 'assets',     label: 'Media',      icon: ImageIcon,   shortcut: 'Ctrl+4' },
-  { id: 'style',      label: 'Styl',       icon: Palette,     shortcut: 'Ctrl+5' },
-  { id: 'ai',         label: 'AI',         icon: Bot,         shortcut: 'Ctrl+6' },
-  { id: 'history',    label: 'Historia',   icon: History,     shortcut: 'Ctrl+7' },
-]
-
 export function BuilderTopBar({
-  storeId, onSave, onPublish, saving, activeTab, onTabChange, onToggleLeftSidebar,
+  storeId, onSave, onPublish, saving, onToggleLeftSidebar,
   inspectorVisible = true, onToggleInspector,
 }: BuilderTopBarProps) {
   const { document, canvas, isDirty, dispatch } = useBuilder()
@@ -118,25 +105,6 @@ export function BuilderTopBar({
               </button>
             </div>
           </div>
-        </div>
-
-        {/* Center: Navigation Tabs */}
-        <div className="flex items-center gap-0.5 bg-[#0D1118] rounded-xl p-0.5 border border-[#1A1F2E]">
-          {TABS.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => onTabChange(tab.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all
-                ${activeTab === tab.id
-                  ? 'bg-[#D9A86C]/15 text-[#F2C27F] border border-[#D9A86C]/30 shadow-lg shadow-[#D9A86C]/10'
-                  : 'text-zinc-400 hover:text-white hover:bg-white/[0.05] border border-transparent'
-                }`}
-              title={`${tab.label} (${tab.shortcut})`}
-            >
-              <tab.icon className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">{tab.label}</span>
-            </button>
-          ))}
         </div>
 
         {/* Right: viewport + templates / preview + undo/redo + save/publish */}

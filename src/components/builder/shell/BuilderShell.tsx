@@ -277,8 +277,6 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
         onSave={onSave}
         onPublish={onPublish}
         saving={saving}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
         onToggleLeftSidebar={() => setLeftSidebarVisible(v => !v)}
         inspectorVisible={inspectorVisible}
         onToggleInspector={toggleInspector}
@@ -370,7 +368,7 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
       </div>
 
       {/* Bottom Bar */}
-      <BuilderBottomBar />
+      <BuilderBottomBar activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   )
 }
