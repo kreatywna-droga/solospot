@@ -52,8 +52,8 @@ export class OpenCodeModelRouter {
       catalog.models.find((m) => m.supportsTools) ||
       catalog.models[0];
 
-    // MANUAL MODE
-    if (mode === 'MANUAL' && requestedModelId) {
+    // If a specific model was requested by the user or UI, ALWAYS honor it!
+    if (requestedModelId) {
       const found = catalog.models.find(
         (m) => m.id === requestedModelId || m.id.endsWith(requestedModelId) || requestedModelId.endsWith(m.id)
       );
@@ -74,7 +74,7 @@ export class OpenCodeModelRouter {
 
       return {
         selectedModel: targetModel,
-        mode: 'MANUAL',
+        mode: mode,
         fallbackUsed: false,
         requiresTools,
         toolSupported,
@@ -82,7 +82,7 @@ export class OpenCodeModelRouter {
       };
     }
 
-    // FREE MODE
+    // FREE MODE (auto-selection within free tier when no specific model is selected)
     if (mode === 'FREE') {
       const freeCandidates = catalog.freeModels;
       if (freeCandidates.length === 0) {

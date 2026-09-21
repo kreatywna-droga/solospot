@@ -39,6 +39,9 @@ export function AiCopilotWorkspace() {
   const [messages, setMessages] = useState<HacpMessage[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isExecuting, setIsExecuting] = useState(false)
+  const [currentPhase, setCurrentPhase] = useState<
+    'IDLE' | 'REQUESTING_MODEL' | 'EXECUTING_TOOL' | 'WAITING_FOR_TOOL_RESULT' | 'GENERATING_FINAL_RESPONSE' | 'COMPLETED' | 'ERROR'
+  >('IDLE')
   const [secondsWaiting, setSecondsWaiting] = useState(0)
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null)
   const [lastUserPrompt, setLastUserPrompt] = useState<string>('')
@@ -294,7 +297,8 @@ export function AiCopilotWorkspace() {
         builderDoc,
         conversationContext,
         routerMode,
-        routerMode === 'MANUAL' ? selectedModelId : undefined
+        selectedModelId,
+        (phase) => setCurrentPhase(phase)
       )
 
       if (controller.signal.aborted) return
@@ -379,19 +383,27 @@ export function AiCopilotWorkspace() {
         ].slice(-30))
       }
 
+      // Empty response prevention (Section 26)
+      const hasContent = result.message && result.message.trim().length > 0
+      const finalMsgText = hasContent
+        ? result.message.trim()
+        : 'Model nie zwrócił odpowiedzi. Spróbuj ponownie lub wybierz inny model.'
+
       const aiMessage: HacpMessage = {
         id: `msg-ai-${Date.now()}`,
         type: 'ai',
-        text: result.message,
+        text: finalMsgText,
         timestamp: new Date().toLocaleTimeString('pl-PL'),
         intent: result.intent,
         scope: result.scope,
         appliedChangeSummary: mutationSummary,
+        isError: !hasContent,
       }
 
       setMessages((prev) => [...prev, aiMessage])
     } catch (err: any) {
       if (controller.signal.aborted) return
+      setCurrentPhase('ERROR')
       const errorMessage: HacpMessage = {
         id: `msg-err-${Date.now()}`,
         type: 'system',
@@ -403,6 +415,7 @@ export function AiCopilotWorkspace() {
     } finally {
       abortControllerRef.current = null
       setIsExecuting(false)
+      setCurrentPhase('IDLE')
     }
   }
 
@@ -432,20 +445,36 @@ export function AiCopilotWorkspace() {
           </div>
         </div>
 
-        {/* Real-time Status Badges (Section 17) */}
+        {/* Real-time Status Badges (Section 17 & Section 38) */}
         <div className="flex items-center gap-1.5">
           {/* AI Provider Status */}
           <button
             onClick={() => setShowStatusModal(true)}
             className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-mono font-semibold border transition-all cursor-pointer ${
-              aiProviderStatus === 'ONLINE'
+              isExecuting && currentPhase === 'REQUESTING_MODEL'
+                ? 'bg-amber-500/15 border-amber-500/40 text-amber-300 animate-pulse'
+                : aiProviderStatus === 'ONLINE'
                 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
                 : 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20'
             }`}
-            title={aiProviderStatus === 'ONLINE' ? `Połączono z modelem AI: ${aiProviderName}` : 'Brak zewnętrznego modelu LLM w środowisku (wymaga OPENAI_API_KEY lub GEMINI_API_KEY)'}
+            title={aiProviderStatus === 'ONLINE' ? `Połączono z modelem AI: ${aiProviderName}` : 'Brak zewnętrznego modelu LLM'}
           >
-            <span className={`w-1.5 h-1.5 rounded-full ${aiProviderStatus === 'ONLINE' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
-            <span>{aiProviderStatus === 'ONLINE' ? `AI: ${aiProviderName}` : 'AI: OFFLINE'}</span>
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                isExecuting && currentPhase === 'REQUESTING_MODEL'
+                  ? 'bg-amber-400 animate-ping'
+                  : aiProviderStatus === 'ONLINE'
+                  ? 'bg-emerald-400'
+                  : 'bg-amber-400'
+              }`}
+            />
+            <span>
+              {isExecuting && currentPhase === 'REQUESTING_MODEL'
+                ? 'AI: THINKING'
+                : aiProviderStatus === 'ONLINE'
+                ? `AI: READY`
+                : 'AI: OFFLINE'}
+            </span>
           </button>
 
           {/* HACP Status */}
@@ -454,14 +483,24 @@ export function AiCopilotWorkspace() {
             className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-mono font-semibold bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/20 transition-all cursor-pointer"
             title="Kliknij, aby otworzyć stan połączenia HACP"
           >
-            <span className={`w-1.5 h-1.5 rounded-full ${isExecuting ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
-            <span>{isExecuting ? 'HACP BUSY' : 'HACP ONLINE'}</span>
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                currentPhase === 'EXECUTING_TOOL' || currentPhase === 'WAITING_FOR_TOOL_RESULT'
+                  ? 'bg-amber-400 animate-pulse'
+                  : 'bg-emerald-400'
+              }`}
+            />
+            <span>
+              {currentPhase === 'EXECUTING_TOOL' || currentPhase === 'WAITING_FOR_TOOL_RESULT'
+                ? 'HACP: EXECUTING'
+                : 'HACP: IDLE'}
+            </span>
           </button>
 
           {/* Execution Status */}
           <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono font-semibold bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-            <span>EXEC: READY</span>
+            <span className={`w-1.5 h-1.5 rounded-full ${isExecuting ? 'bg-cyan-400 animate-pulse' : 'bg-cyan-400'}`} />
+            <span>{isExecuting ? 'EXEC: RUNNING' : 'EXEC: READY'}</span>
           </div>
 
           <button
@@ -874,29 +913,38 @@ export function AiCopilotWorkspace() {
           ))
         )}
 
-        {/* Progressive Loading & Timeout UX with STOP button */}
+        {/* Truthful Real-Time Execution Status UX with STOP button (Section 10, 22, 40) */}
         {isExecuting && (
           <div className="flex flex-col items-start space-y-1.5 max-w-[94%]">
             <div className="flex items-center gap-2 text-[10px] font-mono text-[#D9A86C]">
               <span className="w-2 h-2 rounded-full bg-[#D9A86C] animate-ping" />
-              <span>
-                {secondsWaiting < 2
-                  ? 'Przygotowuję odpowiedź…'
-                  : secondsWaiting < 10
-                  ? 'Analizuję aktualny kontekst strony…'
-                  : `Przetwarzanie zapytania… (${secondsWaiting}s)`}
+              <span className="font-bold tracking-wider">
+                {currentPhase === 'REQUESTING_MODEL'
+                  ? 'REQUESTING MODEL'
+                  : currentPhase === 'EXECUTING_TOOL'
+                  ? 'EXECUTING TOOL'
+                  : currentPhase === 'WAITING_FOR_TOOL_RESULT'
+                  ? 'WAITING FOR TOOL RESULT'
+                  : currentPhase === 'GENERATING_FINAL_RESPONSE'
+                  ? 'GENERATING FINAL RESPONSE'
+                  : 'PROCESSING'}
               </span>
+              <span className="text-zinc-500 font-mono text-[9px]">({secondsWaiting}s)</span>
             </div>
 
             <div className="w-full p-3 rounded-2xl bg-[#0D1118] border border-[#D9A86C]/30 text-xs text-zinc-300 flex items-center justify-between gap-3 shadow-lg">
               <div className="flex items-center gap-2.5 min-w-0">
                 <RefreshCw className="w-3.5 h-3.5 text-[#D9A86C] animate-spin flex-shrink-0" />
                 <span className="text-[11px] truncate">
-                  {secondsWaiting < 2
-                    ? 'Inicjalizacja modelu SoloSpot AI…'
-                    : secondsWaiting < 10
-                    ? 'Ocena sekcji i generowanie propozycji…'
-                    : 'To zajmuje trochę dłużej niż zwykle…'}
+                  {currentPhase === 'REQUESTING_MODEL'
+                    ? `Model analizuje zapytanie i stan strony…`
+                    : currentPhase === 'EXECUTING_TOOL'
+                    ? 'Wprowadzam zaplanowaną modyfikację na Canvasie…'
+                    : currentPhase === 'WAITING_FOR_TOOL_RESULT'
+                    ? 'Weryfikuję integralność i rezultat operacji…'
+                    : currentPhase === 'GENERATING_FINAL_RESPONSE'
+                    ? 'Formułuję naturalną odpowiedź…'
+                    : 'Komunikacja z silnikiem SoloSpot AI…'}
                 </span>
               </div>
 
@@ -980,7 +1028,7 @@ export function AiCopilotWorkspace() {
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={isExecuting}
-            placeholder="Powiedz SoloSpot AI, co chcesz zmienić..."
+            placeholder="Napisz do SoloSpot AI..."
             className="flex-1 bg-transparent text-xs text-white placeholder-zinc-500 focus:outline-none resize-none min-h-[38px] max-h-[120px] py-1 px-1 leading-relaxed"
           />
 

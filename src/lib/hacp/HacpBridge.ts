@@ -465,12 +465,15 @@ export class HacpBridge {
     document: BuilderDocument,
     conversationContext: HacpConversationContext = { history: [] },
     routerMode: 'AUTO' | 'FREE' | 'PAID' | 'MANUAL' = 'AUTO',
-    selectedModelId?: string
+    selectedModelId?: string,
+    onProgress?: (phase: 'REQUESTING_MODEL' | 'EXECUTING_TOOL' | 'WAITING_FOR_TOOL_RESULT' | 'GENERATING_FINAL_RESPONSE' | 'COMPLETED' | 'ERROR') => void
   ): Promise<HacpExecutionResult> {
     const startTime = new Date().toLocaleTimeString('pl-PL');
     const cleanPrompt = prompt.trim();
     const activePageId = context.pageId || document.pages[0]?.id || 'page-home';
     const activePage = document.pages.find((p) => p.id === activePageId) || document.pages[0];
+
+    onProgress?.('REQUESTING_MODEL');
 
     // ========================================================================
     // 1. ATTEMPT REAL AI PROVIDER REQUEST
@@ -517,6 +520,7 @@ export class HacpBridge {
 
       if (toolCalls.length > 0) {
         this.status = 'BUSY';
+        onProgress?.('EXECUTING_TOOL');
         const steps: HacpExecutionStep[] = [];
         const commands: BuilderCommand[] = [];
         const appliedChanges: AppliedChangeItem[] = [];
@@ -554,6 +558,7 @@ export class HacpBridge {
           finalMessage = exec.message;
         }
 
+        onProgress?.('WAITING_FOR_TOOL_RESULT');
         this.status = 'ONLINE';
 
         const card: HacpExecutionCard = {
@@ -574,6 +579,8 @@ export class HacpBridge {
         const cleanToolMsg = UserFacingResponseNormalizer.normalize(rawToolMsg, {
           toolExecuted: toolCalls[0]?.name,
         });
+
+        onProgress?.('COMPLETED');
 
         return {
           success: allPassed,
@@ -603,6 +610,8 @@ export class HacpBridge {
           ? aiProviderResponse.message.trim()
           : 'Przeanalizowałem bieżący stan strony w Builderze. W czym mogę Ci pomóc?';
       const cleanChatMsg = UserFacingResponseNormalizer.normalize(rawChatMsg);
+
+      onProgress?.('COMPLETED');
 
       return {
         success: true,
