@@ -16,6 +16,7 @@
 import { useState } from 'react'
 import {
   History, Bot, RotateCcw, RotateCw,
+  PanelLeft, Layers, Plus, ImageIcon, Palette,
 } from 'lucide-react'
 import { useBuilder, useBuilderHistory } from '../state/BuilderProvider'
 import type { StudioTab } from './BuilderTopBar'
@@ -29,6 +30,16 @@ import { AiCopilotWorkspace } from '../ai/AiCopilotWorkspace'
 // ---------------------------------------------------------------------------
 // Left Sidebar Root
 // ---------------------------------------------------------------------------
+
+const TABS: { id: StudioTab; label: string; icon: React.ElementType; shortcut: string }[] = [
+  { id: 'pages',      label: 'Strony',     icon: PanelLeft, shortcut: 'Ctrl+1' },
+  { id: 'layers',     label: 'Warstwy',    icon: Layers,    shortcut: 'Ctrl+2' },
+  { id: 'components', label: 'Komponenty', icon: Plus,      shortcut: 'Ctrl+3' },
+  { id: 'assets',     label: 'Media',      icon: ImageIcon, shortcut: 'Ctrl+4' },
+  { id: 'style',      label: 'Styl',       icon: Palette,   shortcut: 'Ctrl+5' },
+  { id: 'ai',         label: 'AI',         icon: Bot,       shortcut: 'Ctrl+6' },
+  { id: 'history',    label: 'Historia',   icon: History,   shortcut: 'Ctrl+7' },
+]
 
 interface BuilderLeftSidebarProps {
   activeTab: StudioTab
@@ -47,8 +58,27 @@ export function BuilderLeftSidebar({ activeTab, onTabChange, width = 320 }: Buil
   return (
     <aside
       style={{ width: `${actualWidth}px` }}
-      className="border-r border-[#1A1F2E] bg-[#0D1118] flex flex-col overflow-hidden flex-shrink-0 h-full select-none"
+      className="border-r border-[#1A1F2E] bg-[#0D1118] flex flex-row overflow-hidden flex-shrink-0 h-full select-none"
     >
+      {/* Vertical tab strip — moves together with the resizable sidebar */}
+      <div className="w-[52px] bg-[#080B10] border-r border-[#1A1F2E] flex flex-col items-center py-2 gap-1 flex-shrink-0">
+        {TABS.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => onTabChange(tab.id)}
+            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all
+              ${currentTab === tab.id
+                ? 'bg-[#D9A86C]/15 text-[#F2C27F] border border-[#D9A86C]/30 shadow-lg shadow-[#D9A86C]/10'
+                : 'text-zinc-400 hover:text-white hover:bg-white/[0.05] border border-transparent'
+              }`}
+            title={`${tab.label} (${tab.shortcut})`}
+          >
+            <tab.icon className="w-4 h-4" />
+          </button>
+        ))}
+      </div>
+
+      {/* Tab content */}
       <div className="flex-1 overflow-hidden">
         {currentTab === 'pages' && <PagesPanel />}
         {currentTab === 'layers' && <LayerTree />}

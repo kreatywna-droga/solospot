@@ -3,35 +3,19 @@
 /**
  * BuilderBottomBar — C16.2 Bottom Bar
  *
- *   [🔍 100% ▼]    [Strony][Warstwy][Komponenty][Media][Styl][AI][Historia]
+ *   [🔍 100% ▼]
  *
- * Zoom controls on the left, centered navigation tabs, and the removed
- * Preview/History/AI/Publish actions now live in the top bar.
+ * Zoom controls only. Preview, History, AI and Publish actions live in the top bar.
+ * Navigation tabs were moved to the vertical strip inside BuilderLeftSidebar.
  */
 
 import { useCallback } from 'react'
 import {
-  ZoomIn, ZoomOut, PanelLeft, Layers, Plus, ImageIcon, Palette, Bot, History,
+  ZoomIn, ZoomOut,
 } from 'lucide-react'
 import { useBuilder } from '../state/BuilderProvider'
-import type { StudioTab } from './BuilderTopBar'
 
-interface BuilderBottomBarProps {
-  activeTab: StudioTab
-  onTabChange: (tab: StudioTab) => void
-}
-
-const TABS: { id: StudioTab; label: string; icon: React.ElementType; shortcut: string }[] = [
-  { id: 'pages',      label: 'Strony',     icon: PanelLeft,   shortcut: 'Ctrl+1' },
-  { id: 'layers',     label: 'Warstwy',    icon: Layers,      shortcut: 'Ctrl+2' },
-  { id: 'components', label: 'Komponenty', icon: Plus,        shortcut: 'Ctrl+3' },
-  { id: 'assets',     label: 'Media',      icon: ImageIcon,   shortcut: 'Ctrl+4' },
-  { id: 'style',      label: 'Styl',       icon: Palette,     shortcut: 'Ctrl+5' },
-  { id: 'ai',         label: 'AI',         icon: Bot,         shortcut: 'Ctrl+6' },
-  { id: 'history',    label: 'Historia',   icon: History,     shortcut: 'Ctrl+7' },
-]
-
-export function BuilderBottomBar({ activeTab, onTabChange }: BuilderBottomBarProps) {
+export function BuilderBottomBar() {
   const { canvas, dispatch } = useBuilder()
   const zoom = canvas.zoom
 
@@ -49,10 +33,10 @@ export function BuilderBottomBar({ activeTab, onTabChange }: BuilderBottomBarPro
   ]
 
   return (
-    <div className="h-10 flex items-center px-4 border-t border-[#1A1F2E]
+    <div className="h-10 flex items-center justify-between px-4 border-t border-[#1A1F2E]
                     bg-[#080B10] backdrop-blur-sm flex-shrink-0 z-20 select-none">
       {/* Left: Zoom */}
-      <div className="flex items-center gap-1 flex-1">
+      <div className="flex items-center gap-1">
         <button
           onClick={() => setZoom(Math.max(0.25, Math.round((zoom - 0.25) * 100) / 100))}
           className="p-1 rounded-md text-zinc-500 hover:text-white hover:bg-white/[0.05] transition-all"
@@ -90,27 +74,8 @@ export function BuilderBottomBar({ activeTab, onTabChange }: BuilderBottomBarPro
         </button>
       </div>
 
-      {/* Center: Navigation Tabs */}
-      <div className="flex items-center gap-0.5 bg-[#0D1118] rounded-xl p-0.5 border border-[#1A1F2E]">
-        {TABS.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => onTabChange(tab.id)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all
-              ${activeTab === tab.id
-                ? 'bg-[#D9A86C]/15 text-[#F2C27F] border border-[#D9A86C]/30 shadow-lg shadow-[#D9A86C]/10'
-                : 'text-zinc-400 hover:text-white hover:bg-white/[0.05] border border-transparent'
-              }`}
-            title={`${tab.label} (${tab.shortcut})`}
-          >
-            <tab.icon className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">{tab.label}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Right: spacer */}
-      <div className="flex items-center justify-end flex-1" />
+      {/* Right: Actions removed — available in top bar */}
+      <div className="flex items-center gap-2" />
     </div>
   )
 }
