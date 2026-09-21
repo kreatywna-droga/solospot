@@ -19,6 +19,7 @@ import type {
   DesignSystem,
   GenerationPhase,
   GenerationSession,
+  ExperienceStrategy,
 } from './SitePlanTypes';
 import { SECTION_TEMPLATES } from './SitePlanTypes';
 
@@ -114,14 +115,24 @@ export class SiteGenerationOrchestrator {
       }
 
       // Phase 2: Sections
-      await this.executeSections(plan.sections, executeTool, document);
+      await this.executeSections(plan.sections, executeTool, document, plan.assetStrategy);
 
       if (this.abortController.signal.aborted) {
         this.session.error = 'Generation aborted by user.';
         return this.session;
       }
 
-      // Phase 3: Complete
+      // Phase 3: Apply experience strategy globally
+      if (plan.experienceStrategy) {
+        await this.executeExperienceStrategy(plan, executeTool, document);
+      }
+
+      if (this.abortController.signal.aborted) {
+        this.session.error = 'Generation aborted by user.';
+        return this.session;
+      }
+
+      // Phase 4: Complete
       this.setPhase('complete', 'Generacja strony zakończona pomyślnie.');
       this.session.completedAt = new Date().toISOString();
       this.session.progress = 100;
@@ -162,7 +173,8 @@ export class SiteGenerationOrchestrator {
   private async executeSections(
     sections: SectionPlan[],
     executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string }>,
-    document: BuilderDocument
+    document: BuilderDocument,
+    assetStrategy?: { heroImageQuery?: string }
   ): Promise<void> {
     this.setPhase('sections', `Generowanie ${sections.length} sekcji...`);
 
@@ -176,16 +188,22 @@ export class SiteGenerationOrchestrator {
       this.session.progress = progress;
       this.callbacks.onProgress(progress, `Sekcja ${i + 1}/${totalSections}: ${section.label}`);
 
-      await this.executeSection(section, i, executeTool);
+      // Pass hero image query for hero sections
+      const assetQuery = section.role === 'hero' ? assetStrategy?.heroImageQuery : undefined;
+      await this.executeSection(section, i, executeTool, assetQuery);
     }
   }
 
   private async executeSection(
     section: SectionPlan,
     index: number,
-    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string }>
+    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string }>,
+    assetQuery?: string
   ): Promise<void> {
     const templateType = SECTION_TEMPLATES[section.role] || section.templateType;
+
+    // Use asset strategy query if available and section has no specific image query
+    const imageQuery = assetQuery || section.images?.[0]?.query;
 
     // Step 1: Insert section
     const insertCall: HacpToolCall = {
@@ -203,6 +221,7 @@ export class SiteGenerationOrchestrator {
           cta: section.content.cta || '',
           ctaText: section.content.cta || '',
           ...section.content.items ? { items: section.content.items } : {},
+          ...imageQuery ? { imageQuery } : {},
         },
       },
     };
@@ -272,6 +291,62 @@ export class SiteGenerationOrchestrator {
       // Recurse for nested children
       if (node.children && node.children.length > 0) {
         await this.executeNodes(node.id, node.children, executeTool);
+      }
+    }
+  }
+
+  // ── Experience Strategy ───────────────────────────────────────────
+
+  private async executeExperienceStrategy(
+    plan: SitePlan,
+    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string }>,
+    document: BuilderDocument
+  ): Promise<void> {
+    const exp = plan.experienceStrategy;
+    if (!exp || exp.intensity === 'none') return;
+
+    this.setPhase('content', 'Konfigurowanie efektów wizualnych...');
+    this.session.progress = 85;
+
+    // Apply experience config to hero section if it exists
+    const heroSection = plan.sections.find((s) => s.role === 'hero');
+    if (heroSection && exp.useMeshGradient) {
+      const expCall: HacpToolCall = {
+        id: this.toolId(),
+        name: 'configure_experience',
+        arguments: {
+          pageId: 'page-home',
+          sectionId: heroSection.id,
+          experienceConfig: {
+            background: {
+              type: 'mesh-gradient',
+              intensity: exp.intensity === 'bold' ? 1.0 : exp.intensity === 'moderate' ? 0.6 : 0.3,
+            },
+          },
+        },
+      };
+      await this.execTool(expCall, executeTool);
+    }
+
+    // Apply scroll reveal to all sections if enabled
+    if (exp.useScrollReveal) {
+      for (const section of plan.sections) {
+        if (this.abortController?.signal.aborted) break;
+        const revealCall: HacpToolCall = {
+          id: this.toolId(),
+          name: 'configure_experience',
+          arguments: {
+            pageId: 'page-home',
+            sectionId: section.id,
+            experienceConfig: {
+              motion: {
+                type: 'reveal',
+                intensity: exp.intensity === 'bold' ? 0.8 : exp.intensity === 'moderate' ? 0.5 : 0.3,
+              },
+            },
+          },
+        };
+        await this.execTool(revealCall, executeTool);
       }
     }
   }

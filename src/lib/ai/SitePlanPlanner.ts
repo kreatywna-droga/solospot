@@ -15,6 +15,12 @@ import type {
   Industry,
   SitePurpose,
   SectionRole,
+  VisualDirection,
+  ContentStrategy,
+  AssetStrategy,
+  ExperienceStrategy,
+  ResponsiveStrategy,
+  ConversionStrategy,
 } from './SitePlanTypes';
 import { DEFAULT_DESIGN_SYSTEM, INDUSTRY_DEFAULTS } from './SitePlanTypes';
 
@@ -478,10 +484,58 @@ export function generateSitePlan(brief: string): SitePlan {
   // Generate sections
   const sections = generateSections(analysis);
 
+  // Default strategies for deterministic fallback
+  const defaultContentStrategy: ContentStrategy = {
+    toneOfVoice: 'professional',
+    headlineStyle: 'bold',
+    contentDensity: 'moderate',
+    language: 'pl',
+    useEmojis: false,
+    ctaStrategy: 'primary-action',
+  };
+
+  const defaultAssetStrategy: AssetStrategy = {
+    imageStyle: 'photography',
+    imageMood: 'professional',
+    iconStyle: 'outlined',
+    useVideo: false,
+  };
+
+  const defaultExperienceStrategy: ExperienceStrategy = {
+    useParallax: false,
+    useScrollReveal: true,
+    useMotion: true,
+    useMeshGradient: false,
+    useParticles: false,
+    use3D: false,
+    intensity: 'subtle',
+  };
+
+  const defaultResponsiveStrategy: ResponsiveStrategy = {
+    mobileNavStyle: 'hamburger',
+    mobileHeroLayout: 'stacked',
+    mobileTypographyScale: 0.85,
+    tabletBreakpoint: 768,
+    mobileBreakpoint: 480,
+  };
+
+  const defaultConversionStrategy: ConversionStrategy = {
+    primaryCTA: 'Dowiedz się więcej',
+    primaryCTALocation: ['hero', 'footer'],
+    trustSignals: ['Opinie klientów', 'Gwarancja jakości'],
+    urgencyLevel: 'none',
+  };
+
   return {
     purpose: detectedPurpose,
     industry: detectedIndustry,
+    visualDirection: 'professional',
     designSystem,
+    contentStrategy: defaultContentStrategy,
+    assetStrategy: defaultAssetStrategy,
+    experienceStrategy: defaultExperienceStrategy,
+    responsiveStrategy: defaultResponsiveStrategy,
+    conversionStrategy: defaultConversionStrategy,
     sections,
     pages: [{
       id: 'page-home',
@@ -494,6 +548,7 @@ export function generateSitePlan(brief: string): SitePlan {
       description: brief.slice(0, 160),
       language: 'pl',
       generatedAt: new Date().toISOString(),
+      plannerType: 'deterministic',
     },
   };
 }

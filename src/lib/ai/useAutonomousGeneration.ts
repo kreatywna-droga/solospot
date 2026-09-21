@@ -1,8 +1,10 @@
 /**
  * useAutonomousGeneration.ts — React Hook for Autonomous Website Generation
  *
- * Connects SitePlanPlanner + Orchestrator + HacpBridge + BuilderDocument
+ * Connects LLM SitePlanner + Orchestrator + HacpBridge + BuilderDocument
  * into a single UI-driven flow.
+ *
+ * Planning is LLM-driven with deterministic fallback.
  */
 
 'use client';
@@ -15,7 +17,7 @@ import type {
   GenerationPhase,
   GenerationSession,
 } from './SitePlanTypes';
-import { generateSitePlan } from './SitePlanPlanner';
+import { generateLLMSitePlan, type LLMPlannerResult } from './LLMSitePlanner';
 import {
   SiteGenerationOrchestrator,
   type ToolResult,
@@ -30,6 +32,7 @@ interface GenerationState {
   toolResults: ToolResult[];
   isRunning: boolean;
   error: string | null;
+  plannerResult: LLMPlannerResult | null;
 }
 
 interface UseAutonomousGenerationReturn {
@@ -51,23 +54,49 @@ export function useAutonomousGeneration(
     toolResults: [],
     isRunning: false,
     error: null,
+    plannerResult: null,
   });
 
   const orchestratorRef = useRef<SiteGenerationOrchestrator | null>(null);
 
   const startGeneration = useCallback(async (brief: string) => {
-    // Generate plan
-    const plan = generateSitePlan(brief);
-
+    // Phase: Planning via LLM
     setState((prev) => ({
       ...prev,
       phase: 'planning',
       progress: 0,
-      message: `Plan wygenerowany: ${plan.sections.length} sekcji, motyw ${plan.designSystem.primaryColor}`,
-      plan,
+      message: 'Analiza briefu i projektowanie strony...',
       isRunning: true,
       error: null,
       toolResults: [],
+      plannerResult: null,
+    }));
+
+    let plannerResult: LLMPlannerResult;
+    try {
+      plannerResult = await generateLLMSitePlan(brief);
+    } catch (error) {
+      setState((prev) => ({
+        ...prev,
+        isRunning: false,
+        phase: 'error',
+        error: `Błąd planowania: ${error instanceof Error ? error.message : String(error)}`,
+      }));
+      return;
+    }
+
+    const plan = plannerResult.plan;
+    const plannerLabel = plannerResult.plannerType === 'llm'
+      ? `LLM (${plannerResult.modelUsed})`
+      : 'Deterministyczny';
+
+    setState((prev) => ({
+      ...prev,
+      phase: 'planning',
+      progress: 5,
+      message: `Plan wygenerowany (${plannerLabel}): ${plan.sections.length} sekcji, kierunek ${plan.visualDirection}`,
+      plan,
+      plannerResult,
     }));
 
     // Create orchestrator
@@ -101,7 +130,7 @@ export function useAutonomousGeneration(
         progress: session.error ? prev.progress : 100,
         message: session.error
           ? `Błąd: ${session.error}`
-          : `Generacja zakończona! Wykonano ${session.toolsExecuted} operacji.`,
+          : `Generacja zakończona! Wykonano ${session.toolsExecuted} operacji. Plan: ${plannerLabel}.`,
       }));
     } catch (error) {
       setState((prev) => ({

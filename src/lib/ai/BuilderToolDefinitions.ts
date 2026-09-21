@@ -332,4 +332,145 @@ export const BUILDER_TOOL_DEFINITIONS: HacpToolDefinition[] = [
       },
     },
   },
+
+  // =====================================================================
+  // INSPECTOR PARITY TOOLS — Full Builder Access for AI
+  // =====================================================================
+
+  {
+    name: 'inspect_node',
+    description: 'Pobierz pełne dane węzła: typ, właściwości, style, serta listę dostępnych capabilities. KLUCZOWE NARZĘDZIE do zrozumienia elementu przed edycją.',
+    parameters: {
+      type: 'object',
+      properties: {
+        nodeId: {
+          type: 'string',
+          description: 'ID węzła do zinspectowania.',
+        },
+      },
+      required: ['nodeId'],
+    },
+  },
+  {
+    name: 'inspect_children',
+    description: 'Pobierz listę bezpośrednich dzieci węzła (typ, label, id, liczba dzieci). Użyj aby zrozumieć strukturę sekcji.',
+    parameters: {
+      type: 'object',
+      properties: {
+        nodeId: {
+          type: 'string',
+          description: 'ID węzła-rodzica.',
+        },
+      },
+      required: ['nodeId'],
+    },
+  },
+  {
+    name: 'inspect_parent',
+    description: 'Pobierz informacje o rodzicu węzła (typ, label, id). Użyj aby zrozumieć kontekst hierarchiczny.',
+    parameters: {
+      type: 'object',
+      properties: {
+        nodeId: {
+          type: 'string',
+          description: 'ID węzła-rodzica.',
+        },
+      },
+      required: ['nodeId'],
+    },
+  },
+  {
+    name: 'find_nodes',
+    description: 'Wyszukaj węzły po kryteriach: typ, label, treść tekstu, sekcja. Zwraca listę pasujących węzłów z ich ID.',
+    parameters: {
+      type: 'object',
+      properties: {
+        type: {
+          type: 'string',
+          description: 'Typ węzła do wyszukania (np. heading, image, button).',
+        },
+        labelContains: {
+          type: 'string',
+          description: 'Szukaj węzłów których label zawiera ten tekst.',
+        },
+        textContains: {
+          type: 'string',
+          description: 'Szukaj węzłów których treść tekstowa zawiera ten tekst.',
+        },
+        sectionId: {
+          type: 'string',
+          description: 'Ogranicz wyszukiwanie do konkretnej sekcji.',
+        },
+        pageId: {
+          type: 'string',
+          description: 'Ogranicz wyszukiwanie do konkretnej strony.',
+        },
+      },
+    },
+  },
+  {
+    name: 'inspect_responsive',
+    description: 'Pobierz wartości responsywne węzła (desktop, tablet, mobile) oraz listę ukrytych breakpointów.',
+    parameters: {
+      type: 'object',
+      properties: {
+        nodeId: {
+          type: 'string',
+          description: 'ID węzła.',
+        },
+      },
+      required: ['nodeId'],
+    },
+  },
+  {
+    name: 'inspect_experience',
+    description: 'Pobierz konfigurację Experience (efekty wizualne, motion, tło, particles) węzła.',
+    parameters: {
+      type: 'object',
+      properties: {
+        nodeId: {
+          type: 'string',
+          description: 'ID węzła (sekcji).',
+        },
+      },
+      required: ['nodeId'],
+    },
+  },
+  {
+    name: 'inspect_asset',
+    description: 'Pobierz informacje o assetcie (obraz/wideo): URL, alt text, rozmiar, dopasowanie. Dla węzłów image i video.',
+    parameters: {
+      type: 'object',
+      properties: {
+        nodeId: {
+          type: 'string',
+          description: 'ID węzła obrazu lub wideo.',
+        },
+      },
+      required: ['nodeId'],
+    },
+  },
+  {
+    name: 'inspect_available_capabilities',
+    description: 'Pobierz listę dostępnych capabilities (operacji) dla podanego typu węzła. Użyj aby wiedzieć CO możesz zrobić z danym elementem.',
+    parameters: {
+      type: 'object',
+      properties: {
+        nodeType: {
+          type: 'string',
+          description: 'Typ węzła (np. heading, image, button, section, container).',
+          enum: ['section', 'container', 'heading', 'text', 'button', 'image', 'video', 'icon', 'divider', 'spacer', 'grid'],
+        },
+      },
+      required: ['nodeType'],
+    },
+  },
+  {
+    name: 'inspect_document_summary',
+    description: 'Pobierz zwięzły przegląd dokumentu: nazwa, strony, sekcje, motyw, łączna liczba węzłów.',
+    parameters: {
+      type: 'object',
+      properties: {},
+    },
+  },
 ];

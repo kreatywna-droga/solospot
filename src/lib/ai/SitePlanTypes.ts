@@ -117,13 +117,90 @@ export interface NodePlan {
   children?: NodePlan[];
 }
 
+// ── Visual Direction ────────────────────────────────────────────────
+
+export type VisualDirection =
+  | 'premium'
+  | 'minimal'
+  | 'luxury'
+  | 'friendly'
+  | 'playful'
+  | 'editorial'
+  | 'technical'
+  | 'corporate'
+  | 'bold'
+  | 'futuristic'
+  | 'warm'
+  | 'elegant'
+  | 'creative'
+  | 'professional';
+
+// ── Content Strategy ───────────────────────────────────────────────
+
+export interface ContentStrategy {
+  toneOfVoice: string;
+  headlineStyle: string;
+  contentDensity: 'lean' | 'moderate' | 'rich';
+  language: string;
+  useEmojis: boolean;
+  ctaStrategy: string;
+}
+
+// ── Asset Strategy ─────────────────────────────────────────────────
+
+export interface AssetStrategy {
+  heroImageQuery?: string;
+  imageStyle: 'photography' | 'illustration' | 'abstract' | 'none';
+  imageMood: string;
+  iconStyle: 'outlined' | 'filled' | 'gradient';
+  useVideo: boolean;
+}
+
+// ── Experience Strategy ────────────────────────────────────────────
+
+export interface ExperienceStrategy {
+  useParallax: boolean;
+  useScrollReveal: boolean;
+  useMotion: boolean;
+  useMeshGradient: boolean;
+  useParticles: boolean;
+  use3D: boolean;
+  intensity: 'none' | 'subtle' | 'moderate' | 'bold';
+}
+
+// ── Responsive Strategy ────────────────────────────────────────────
+
+export interface ResponsiveStrategy {
+  mobileNavStyle: 'hamburger' | 'stacked' | 'hidden';
+  mobileHeroLayout: 'stacked' | 'split' | 'minimal';
+  mobileTypographyScale: number;
+  tabletBreakpoint: number;
+  mobileBreakpoint: number;
+}
+
+// ── Conversion Strategy ────────────────────────────────────────────
+
+export interface ConversionStrategy {
+  primaryCTA: string;
+  primaryCTALocation: string[];
+  secondaryCTA?: string;
+  trustSignals: string[];
+  urgencyLevel: 'none' | 'subtle' | 'moderate';
+}
+
 // ── Site Plan ───────────────────────────────────────────────────────
 
 export interface SitePlan {
   purpose: SitePurpose;
   industry: Industry;
+  visualDirection: VisualDirection;
   sections: SectionPlan[];
   designSystem: DesignSystem;
+  contentStrategy: ContentStrategy;
+  assetStrategy: AssetStrategy;
+  experienceStrategy: ExperienceStrategy;
+  responsiveStrategy: ResponsiveStrategy;
+  conversionStrategy: ConversionStrategy;
   pages: Array<{
     id: string;
     name: string;
@@ -135,6 +212,7 @@ export interface SitePlan {
     description: string;
     language: string;
     generatedAt: string;
+    plannerType: 'llm' | 'deterministic';
   };
 }
 

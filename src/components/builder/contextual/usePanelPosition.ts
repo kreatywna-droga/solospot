@@ -102,29 +102,43 @@ export function usePanelPosition(
       y = elTop
       maxHeight = Math.min(spaceBelow + elementRect.height, viewportH - opts.viewportMargin * 2)
     }
-    // Try below
-    else if (spaceBelow >= opts.panelMinHeight) {
-      placement = 'below'
-      x = Math.max(opts.viewportMargin, Math.min(elLeft, viewportW - opts.panelWidth - opts.viewportMargin))
-      y = elBottom + opts.gap
-      maxHeight = spaceBelow
+    // Neither side fits fully — prefer the larger horizontal side and clamp to viewport edge
+    else if (spaceRight >= spaceLeft) {
+      placement = 'right'
+      x = Math.min(elRight + opts.gap, viewportW - opts.panelWidth - opts.viewportMargin)
+      y = elTop
+      maxHeight = Math.min(spaceBelow + elementRect.height, viewportH - opts.viewportMargin * 2)
     }
-    // Fallback: above
     else {
-      placement = 'above'
-      x = Math.max(opts.viewportMargin, Math.min(elLeft, viewportW - opts.panelWidth - opts.viewportMargin))
-      y = Math.max(opts.viewportMargin, elTop - opts.gap - opts.panelMinHeight)
-      maxHeight = spaceAbove
+      placement = 'left'
+      x = Math.max(opts.viewportMargin, elLeft - opts.panelWidth - opts.gap)
+      y = elTop
+      maxHeight = Math.min(spaceBelow + elementRect.height, viewportH - opts.viewportMargin * 2)
     }
 
-    // Clamp X to viewport
+    // If vertical room on the side is too small, fall back to below/above
+    if (maxHeight < opts.panelMinHeight) {
+      if (spaceBelow >= opts.panelMinHeight) {
+        placement = 'below'
+        x = Math.max(opts.viewportMargin, Math.min(elLeft, viewportW - opts.panelWidth - opts.viewportMargin))
+        y = elBottom + opts.gap
+        maxHeight = spaceBelow
+      }
+      // Fallback: above
+      else {
+        placement = 'above'
+        x = Math.max(opts.viewportMargin, Math.min(elLeft, viewportW - opts.panelWidth - opts.viewportMargin))
+        y = Math.max(opts.viewportMargin, elTop - opts.gap - opts.panelMinHeight)
+        maxHeight = spaceAbove
+      }
+    }
+
+    // Final clamp to viewport so the panel is never rendered off-screen
     x = Math.max(opts.viewportMargin, Math.min(x, viewportW - opts.panelWidth - opts.viewportMargin))
+    y = Math.max(opts.viewportMargin, Math.min(y, viewportH - opts.viewportMargin))
 
-    // Clamp Y to viewport
-    y = Math.max(opts.viewportMargin, y)
-
-    // Max height with scrolling
-    maxHeight = Math.min(maxHeight, viewportH - opts.viewportMargin * 2)
+    // Max height with scrolling — keep a usable minimum when possible
+    maxHeight = Math.max(opts.panelMinHeight, Math.min(maxHeight, viewportH - opts.viewportMargin * 2))
 
     setPosition({ x, y, placement, maxHeight })
   }, [elementRect, isOpen, opts.panelWidth, opts.panelMinHeight, opts.gap, opts.viewportMargin])

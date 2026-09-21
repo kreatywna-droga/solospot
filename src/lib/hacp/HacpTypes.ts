@@ -178,7 +178,7 @@ export interface ExecutionVerification {
   property?: string;
   beforeValue?: unknown;
   afterValue?: unknown;
-  diffSummary: string;
+  diffSummary?: string;
 }
 
 export interface HacpExecutionResult {

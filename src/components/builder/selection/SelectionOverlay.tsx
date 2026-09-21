@@ -1004,17 +1004,23 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
                     index={toolbarData.index}
                     total={toolbarData.total}
                     onSettingsOpen={() => {
-                      // Compute element rect from overlay bounding rect
+                      // Convert canvas-local overlay rect to viewport coordinates
+                      // because ContextualSettingsPanel renders with position:fixed.
                       const rect = overlay.boundingRect
-                      if (rect) {
-                        setSettingsPanelRect({
-                          x: rect.x,
-                          y: rect.y,
-                          width: rect.width,
-                          height: rect.height,
-                        })
-                        setSettingsPanelOpen(true)
-                      }
+                      const container = containerRef.current
+                      if (!rect || !container) return
+
+                      const zoomWrapper = container.parentElement
+                      const actualScale = zoomWrapper ? readCurrentScale(zoomWrapper) : 1
+                      const containerRect = container.getBoundingClientRect()
+
+                      setSettingsPanelRect({
+                        x: containerRect.left + rect.x * actualScale,
+                        y: containerRect.top + rect.y * actualScale,
+                        width: rect.width * actualScale,
+                        height: rect.height * actualScale,
+                      })
+                      setSettingsPanelOpen(true)
                     }}
                   />
                 </div>
