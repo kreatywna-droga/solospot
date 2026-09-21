@@ -60,18 +60,6 @@ export class OpenCodeProvider implements AIProvider {
         requiresTools
       );
 
-      // If limitation message exists (e.g. Free model selected but cannot execute tools)
-      if (resolution.limitationMessage && requiresTools && !resolution.toolSupported) {
-        return {
-          status: 'SUCCESS',
-          provider: this.name,
-          model: resolution.selectedModel.id,
-          message: resolution.limitationMessage,
-          isFreeModel: resolution.selectedModel.isFree,
-          routerMode: resolution.mode,
-        };
-      }
-
       const selectedModelId = resolution.selectedModel.id;
       const cleanBaseUrl = (this.baseURL || 'https://openrouter.ai/api/v1')
         .replace(/[^\x20-\x7E]/g, '')
@@ -114,86 +102,79 @@ export class OpenCodeProvider implements AIProvider {
         bodyPayload.tool_choice = 'auto';
       }
 
-      let response = await fetch(endpoint, {
-        method: 'POST',
-        signal: AbortSignal.timeout(15000),
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${cleanApiKey}`,
-        },
-        body: JSON.stringify(bodyPayload),
-      });
-
+      let activeModelId = selectedModelId;
+      let response: Response | null = null;
       let data: any = null;
 
-      if (!response.ok) {
-        // Check for 402, 429, or 500+ and attempt fallback
-        const fallback = await this.router.getFallbackModel(selectedModelId, resolution.mode);
-        if (fallback && fallback.id !== selectedModelId) {
-          console.warn(`[OpenCodeProvider] Upstream ${response.status} on ${selectedModelId}, falling back to ${fallback.id}`);
-          bodyPayload.model = fallback.id;
-          bodyPayload.max_tokens = 500;
-          response = await fetch(endpoint, {
-            method: 'POST',
-            signal: AbortSignal.timeout(15000),
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${cleanApiKey}`,
-            },
-            body: JSON.stringify(bodyPayload),
-          });
+      try {
+        response = await fetch(endpoint, {
+          method: 'POST',
+          signal: AbortSignal.timeout(15000),
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${cleanApiKey}`,
+          },
+          body: JSON.stringify(bodyPayload),
+        });
+        if (response.ok) {
+          data = await response.json();
         }
+      } catch (fetchErr: any) {
+        console.warn(`[OpenCodeProvider] Primary fetch failed on ${activeModelId}:`, fetchErr?.message);
       }
 
-      if (!response.ok) {
-        const errText = await response.text();
-        return {
-          status: 'ERROR',
-          provider: this.name,
-          model: selectedModelId,
-          message: `Błąd komunikacji z OpenCode API (${response.status}): ${errText}`,
-          error: `HTTP_${response.status}`,
-          isFreeModel: resolution.selectedModel.isFree,
-          routerMode: resolution.mode,
-        };
-      }
+      // If initial request failed (HTTP error e.g. 429 rate limit or JSON error payload)
+      if (!response || !response.ok || data?.error) {
+        console.warn(`[OpenCodeProvider] Upstream error/status ${response?.status} on ${activeModelId}, attempting fallback`);
+        const fallbackCandidates = [
+          'nvidia/nemotron-3.5-lightning:free',
+          'mimo-v2.5-free',
+          'deepseek-v4-flash-free',
+          'openai/gpt-4o-mini',
+        ].filter((id) => id !== activeModelId);
 
-      data = await response.json();
-
-      // Check for upstream error payload embedded in JSON (e.g. code 502 ResourceExhausted)
-      if (data.error) {
-        console.warn(`[OpenCodeProvider] Upstream error on ${selectedModelId}:`, data.error);
-        const fallback = await this.router.getFallbackModel(selectedModelId, resolution.mode);
-        if (fallback && fallback.id !== selectedModelId) {
-          console.warn(`[OpenCodeProvider] Retrying with fallback model ${fallback.id}`);
-          bodyPayload.model = fallback.id;
-          bodyPayload.max_tokens = 500;
-          const retryRes = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${cleanApiKey}`,
-            },
-            body: JSON.stringify(bodyPayload),
-          });
-          if (retryRes.ok) {
-            const retryData = await retryRes.json();
-            if (!retryData.error && retryData.choices?.length > 0) {
-              data = retryData;
+        for (const candidateId of fallbackCandidates) {
+          try {
+            console.log(`[OpenCodeProvider] Retrying with fallback candidate: ${candidateId}`);
+            bodyPayload.model = candidateId;
+            bodyPayload.max_tokens = 600;
+            if (candidateId === 'openai/gpt-4o-mini' && toolsPayload.length > 0) {
+              bodyPayload.tools = toolsPayload;
+              bodyPayload.tool_choice = 'auto';
             }
+            const retryRes = await fetch(endpoint, {
+              method: 'POST',
+              signal: AbortSignal.timeout(15000),
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${cleanApiKey}`,
+              },
+              body: JSON.stringify(bodyPayload),
+            });
+            if (retryRes.ok) {
+              const retryData = await retryRes.json();
+              if (!retryData.error && retryData.choices?.length > 0) {
+                response = retryRes;
+                data = retryData;
+                activeModelId = candidateId;
+                break;
+              }
+            }
+          } catch (retryErr: any) {
+            console.warn(`[OpenCodeProvider] Candidate ${candidateId} failed:`, retryErr?.message);
           }
         }
       }
 
-      if (data.error || !data.choices || data.choices.length === 0) {
-        const errDetail = data.error?.message || 'Brak odpowiedzi od modelu (puste choices).';
+      if (!response || !response.ok || !data || data.error || !data.choices || data.choices.length === 0) {
+        const errDetail = data?.error?.message || (response ? `HTTP_${response.status}` : 'Brak odpowiedzi');
         return {
           status: 'ERROR',
           provider: this.name,
-          model: selectedModelId,
-          message: `OpenCode Provider zgłasza błąd: ${errDetail}`,
-          error: data.error?.message || 'EMPTY_CHOICES',
-          isFreeModel: resolution.selectedModel.isFree,
+          model: activeModelId,
+          message: `Nie udało się uzyskać odpowiedzi z wybranego modelu (${activeModelId}). Serwer modelu jest chwilowo niedostępny lub przeciążony. Spróbuj ponownie lub wybierz inny model w menu powyżej.`,
+          error: String(errDetail),
+          isFreeModel: activeModelId.includes('free'),
           routerMode: resolution.mode,
         };
       }

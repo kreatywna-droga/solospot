@@ -67,10 +67,6 @@ export class OpenCodeModelRouter {
       };
 
       const toolSupported = targetModel.supportsTools;
-      const limitationMessage =
-        requiresTools && !toolSupported
-          ? `Wybrany model „${targetModel.name}” nie obsługuje wywoływania narzędzi HACP. Przełącz na model z obsługą narzędzi, aby modyfikować stronę.`
-          : undefined;
 
       return {
         selectedModel: targetModel,
@@ -78,7 +74,6 @@ export class OpenCodeModelRouter {
         fallbackUsed: false,
         requiresTools,
         toolSupported,
-        limitationMessage,
       };
     }
 
@@ -92,41 +87,16 @@ export class OpenCodeModelRouter {
           fallbackUsed: true,
           requiresTools,
           toolSupported: defaultPaidModel.supportsTools,
-          limitationMessage: 'Brak obecnie dostępnych darmowych modeli w katalogu OpenCode.',
         };
       }
 
-      // If tools are required, check for tool-capable free model
-      if (requiresTools) {
-        const toolFree = freeCandidates.find((m) => m.supportsTools);
-        if (toolFree) {
-          return {
-            selectedModel: toolFree,
-            mode: 'FREE',
-            fallbackUsed: false,
-            requiresTools,
-            toolSupported: true,
-          };
-        }
-
-        // Free models available but none support tools -> honest limitation!
-        const firstFree = freeCandidates[0];
-        return {
-          selectedModel: firstFree,
-          mode: 'FREE',
-          fallbackUsed: false,
-          requiresTools,
-          toolSupported: false,
-          limitationMessage:
-            'Aktualnie dostępne darmowe modele OpenCode nie zapewniają wymaganego tool calling dla tej operacji. Wybierz tryb AUTO lub model PAID, aby wprowadzać zmiany na Canvas.',
-        };
-      }
-
-      // Chat only
+      // Preferred working free models
       const preferredFree =
         freeCandidates.find((m) => m.id === 'nvidia/nemotron-3.5-lightning:free') ||
-        freeCandidates.find((m) => m.id.includes('nemotron') && m.id.includes(':free')) ||
-        freeCandidates.find((m) => m.id.includes(':free')) ||
+        freeCandidates.find((m) => m.id === 'nemotron-3.5-lightning-free') ||
+        freeCandidates.find((m) => m.id === 'mimo-v2.5-free') ||
+        freeCandidates.find((m) => m.id === 'deepseek-v4-flash-free') ||
+        freeCandidates.find((m) => m.supportsTools) ||
         freeCandidates[0];
 
       return {

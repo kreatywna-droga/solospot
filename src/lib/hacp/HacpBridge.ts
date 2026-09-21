@@ -505,6 +505,25 @@ export class HacpBridge {
           if (aiProviderResponse.status === 'SUCCESS') {
             aiProviderStatus = 'ONLINE';
             aiProviderName = aiProviderResponse.provider || 'AI';
+          } else if (aiProviderResponse.status === 'ERROR') {
+            onProgress?.('COMPLETED');
+            return {
+              success: false,
+              intent: 'CHAT',
+              scope: 'PAGE_DESIGN',
+              message:
+                aiProviderResponse.message ||
+                'Nie udało się uzyskać odpowiedzi z wybranego modelu. Serwer modelu jest chwilowo niedostępny. Spróbuj ponownie lub wybierz inny model w menu powyżej.',
+              commandsToDispatch: [],
+              eventsToEmit: [],
+              executionStatus: 'FAILED',
+              aiProviderStatus: 'ONLINE',
+              aiProviderName: aiProviderResponse.provider || 'OpenCode',
+              selectedModel: aiProviderResponse.model || selectedModelId,
+              isFreeModel: aiProviderResponse.isFreeModel,
+              routerMode: aiProviderResponse.routerMode,
+              updatedConversationContext: { lastIntent: 'CHAT' },
+            };
           }
         }
       } catch (err) {
@@ -748,7 +767,7 @@ export class HacpBridge {
       let responseMessage = 'Cześć! Mogę pomóc z sekcjami, kolorami, nagłówkami, CTA i Experience. Co chciałbyś zmienić?';
       if (aiProviderStatus === 'OFFLINE') {
         responseMessage =
-          'AI PROVIDER: NOT CONFIGURED\n\nAby prowadzić naturalną rozmowę z SoloSpot AI i uzyskać inteligentną analizę strony, podłącz model OpenCode API:\n• Zmienna: OPENCODE_API_KEY\n• Konfiguracja: plik .env.local lub Vercel Project Settings';
+          'SoloSpot AI jest gotowy do pracy, jednak nie udało się połączyć z wybranym modelem. Wybierz inny model w menu u góry lub spróbuj ponownie za chwilę.';
       } else {
         const lower = cleanPrompt.toLowerCase();
         if (lower.includes('potrzebuję pomocy') || lower.includes('potrzebuje pomocy')) {
