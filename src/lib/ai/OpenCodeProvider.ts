@@ -127,9 +127,11 @@ export class OpenCodeProvider implements AIProvider {
       if (!response || !response.ok || data?.error) {
         console.warn(`[OpenCodeProvider] Upstream error/status ${response?.status} on ${activeModelId}, attempting fallback`);
         const fallbackCandidates = [
+          'nex-agi/nex-n2.5-pro:free',
+          'nex-agi/nex-n2.5-mini:free',
+          'dots-studio/dots-3-note-preview:free',
+          'liquid/lfm-2.5-2.6b:free',
           'nvidia/nemotron-3.5-lightning:free',
-          'mimo-v2.5-free',
-          'deepseek-v4-flash-free',
           'openai/gpt-4o-mini',
         ].filter((id) => id !== activeModelId);
 

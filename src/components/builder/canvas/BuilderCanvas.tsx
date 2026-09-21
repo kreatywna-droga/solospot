@@ -1880,7 +1880,8 @@ function SectionBlock({
                   label: node.label,
                   config: {
                     ...node.props,
-                    background: resolvedStyles.backgroundColor || (node.props as any)?.background,
+                    backgroundColor: (node.props as any)?.backgroundColor || resolvedStyles.backgroundColor,
+                    background: (node.props as any)?.backgroundColor || resolvedStyles.backgroundColor || (node.props as any)?.background,
                     // Pass the background image URL to the runtime renderer so
                     // hero-style sections render it natively (gradient overlay)
                     // instead of covering the section background with a solid gradient.

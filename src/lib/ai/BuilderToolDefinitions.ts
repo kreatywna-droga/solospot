@@ -149,10 +149,28 @@ export const BUILDER_TOOL_DEFINITIONS: HacpToolDefinition[] = [
         },
         props: {
           type: 'object',
-          description: 'Obiekt z nowymi wartościami właściwości, np. { title: "Nowy Nagłówek", buttonColor: "#FF0000" }.',
+          description: 'Obiekt z nowymi wartościami właściwości, np. { title: "Nowy Nagłówek", buttonColor: "#FF0000", backgroundColor: "#0F172A" }.',
         },
       },
       required: ['pageId', 'sectionId', 'props'],
+    },
+  },
+  {
+    name: 'set_background_color',
+    description: 'Ustaw lub zmień kolor tła sekcji (np. na kolor hex #0F172A, #080B10, #FFFFFF, granatowy, czarny, beżowy itp.).',
+    parameters: {
+      type: 'object',
+      properties: {
+        sectionId: {
+          type: 'string',
+          description: 'Opcjonalne ID sekcji (jeśli pominięte, modyfikuje aktualnie zaznaczoną sekcję lub pierwszą na stronie).',
+        },
+        color: {
+          type: 'string',
+          description: 'Docelowy kolor tła (kod HEX np. #0F172A, #1F3A5F, #FFFFFF, #000000 lub nazwa).',
+        },
+      },
+      required: ['color'],
     },
   },
   {

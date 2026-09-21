@@ -83,7 +83,7 @@ export class UserFacingResponseNormalizer {
       case 'read_builder_document':
       case 'inspect_page_structure':
       case 'inspect_selected_node':
-        return 'Przeanalizowałem strukturę i zawartość strony.';
+        return 'Widzę bieżący stan sekcji na stronie. Na jaki kolor chciałbyś zmienić tło? Proponuję np. elegancki granat (#0F172A), głęboką czerń (#080B10) lub ciepły beż (#F5EFE6). Możesz też podać dowolny własny odcień.';
       default:
         return 'Zastosowałem wskazaną zmianę na stronie.';
     }

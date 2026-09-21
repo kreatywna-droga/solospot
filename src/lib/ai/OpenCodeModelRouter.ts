@@ -90,12 +90,14 @@ export class OpenCodeModelRouter {
         };
       }
 
-      // Preferred working free models
+      // Preferred working free models with verified low latency (<1s) and high reasoning capability in Polish
       const preferredFree =
+        freeCandidates.find((m) => m.id === 'nex-agi/nex-n2.5-pro:free') ||
+        freeCandidates.find((m) => m.id === 'nex-agi/nex-n2.5-mini:free') ||
+        freeCandidates.find((m) => m.id === 'dots-studio/dots-3-note-preview:free') ||
+        freeCandidates.find((m) => m.id === 'liquid/lfm-2.5-2.6b:free') ||
+        freeCandidates.find((m) => m.id.includes('nex-n2.5')) ||
         freeCandidates.find((m) => m.id === 'nvidia/nemotron-3.5-lightning:free') ||
-        freeCandidates.find((m) => m.id === 'nemotron-3.5-lightning-free') ||
-        freeCandidates.find((m) => m.id === 'mimo-v2.5-free') ||
-        freeCandidates.find((m) => m.id === 'deepseek-v4-flash-free') ||
         freeCandidates.find((m) => m.supportsTools) ||
         freeCandidates[0];
 

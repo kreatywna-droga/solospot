@@ -3,18 +3,27 @@
 import type { SectionComponentProps } from '@/lib/store-runtime/types'
 
 export function HeroSection({ section, theme, storeName }: SectionComponentProps) {
-  const config = ((section?.config || (section as any)?.props) ?? {}) as { title?: string; subtitle?: string; cta?: string; image?: string }
+  const config = ((section?.config || (section as any)?.props) ?? {}) as {
+    title?: string;
+    subtitle?: string;
+    cta?: string;
+    image?: string;
+    backgroundColor?: string;
+    background?: string;
+  }
   const title = config.title || storeName
+  const explicitBg = config.backgroundColor || config.background
+  const backgroundStyle = explicitBg || `linear-gradient(135deg, ${theme.primaryColor}, ${theme.secondaryColor})`
 
   return (
     <section
-      className="relative overflow-hidden py-24 lg:py-32 px-4 text-center"
+      className="relative overflow-hidden py-24 lg:py-32 px-4 text-center transition-colors duration-300"
       style={{
-        background: `linear-gradient(135deg, ${theme.primaryColor}, ${theme.secondaryColor})`,
+        background: backgroundStyle,
         fontFamily: theme.font,
       }}
     >
-      <div className="absolute inset-0 bg-black/20" />
+      {!explicitBg && <div className="absolute inset-0 bg-black/20" />}
       <div className="relative max-w-3xl mx-auto">
         <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
           {title}

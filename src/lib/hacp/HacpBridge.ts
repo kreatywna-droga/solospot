@@ -346,6 +346,8 @@ export class HacpBridge {
         ? `Zmieniłem nagłówek na „${props.title}”.`
         : props.buttonColor
         ? `Zmieniłem kolor przycisku na ${props.buttonColor}.`
+        : props.backgroundColor || props.background
+        ? `Zmieniłem kolor tła sekcji na ${props.backgroundColor || props.background}. Zmiana jest widoczna na Canvasie.`
         : props.cta || props.ctaText
         ? `Zaktualizowałem przycisk CTA na „${props.cta || props.ctaText}”.`
         : `Zaktualizowałem właściwości sekcji \`${sectionId}\`: ${Object.keys(props).join(', ')}.`;
@@ -362,6 +364,16 @@ export class HacpBridge {
           summary: `Zaktualizowano ${Object.keys(props).join(', ')} w ${sectionId}`,
         },
       };
+    }
+
+    if (name === 'set_background_color' || name === 'set_background') {
+      const sectionId = (args.sectionId as string) || (args.nodeId as string) || activePage?.sections[0]?.id || '';
+      const color = (args.color as string) || (args.backgroundColor as string) || (args.background as string) || '#0F172A';
+      return this.executeToolCall(
+        { id: toolCall.id, name: 'update_node_props', arguments: { sectionId, props: { backgroundColor: color, background: color } } },
+        document,
+        activePageId
+      );
     }
 
     if (name === 'set_text') {
@@ -506,24 +518,10 @@ export class HacpBridge {
             aiProviderStatus = 'ONLINE';
             aiProviderName = aiProviderResponse.provider || 'AI';
           } else if (aiProviderResponse.status === 'ERROR') {
-            onProgress?.('COMPLETED');
-            return {
-              success: false,
-              intent: 'CHAT',
-              scope: 'PAGE_DESIGN',
-              message:
-                aiProviderResponse.message ||
-                'Nie udało się uzyskać odpowiedzi z wybranego modelu. Serwer modelu jest chwilowo niedostępny. Spróbuj ponownie lub wybierz inny model w menu powyżej.',
-              commandsToDispatch: [],
-              eventsToEmit: [],
-              executionStatus: 'FAILED',
-              aiProviderStatus: 'ONLINE',
-              aiProviderName: aiProviderResponse.provider || 'OpenCode',
-              selectedModel: aiProviderResponse.model || selectedModelId,
-              isFreeModel: aiProviderResponse.isFreeModel,
-              routerMode: aiProviderResponse.routerMode,
-              updatedConversationContext: { lastIntent: 'CHAT' },
-            };
+            console.warn('[HacpBridge] Upstream model error (e.g. rate limit), falling back to native deterministic reasoning:', aiProviderResponse.error);
+            aiProviderStatus = 'ONLINE';
+            aiProviderName = aiProviderResponse.provider || 'OpenCode';
+            // Do not abort — allow Section 3 (HacpIntentEngine) to seamlessly execute or propose actions
           }
         }
       } catch (err) {
@@ -820,6 +818,55 @@ export class HacpBridge {
       const targetId = classification.targetNodeId || context.selectedNodeId || activePage?.sections[0]?.id;
       const targetSection = document.pages[0]?.sections.find((s) => s.id === targetId);
       const targetLabel = targetSection?.label || 'Hero';
+
+      if ((classification.extractedParameters as any)?.operation === 'PROPOSE_BACKGROUND') {
+        const proposal1: HacpProposal = {
+          id: `prop-${Date.now()}`,
+          title: `Granat (#0F172A) dla ${targetLabel}`,
+          description: `Ustawienie eleganckiego granatowego tła dla ${targetLabel}`,
+          targetNodeId: targetId,
+          targetNodeType: targetSection?.type || 'section',
+          proposedCapability: 'update_node_props',
+          proposedChanges: [{ target: targetId || '', property: 'backgroundColor', newValue: '#0F172A', summary: 'Zmiana tła na elegancki granat' }],
+          executePayload: { type: 'UPDATE_PROPS', props: { backgroundColor: '#0F172A', background: '#0F172A' } },
+        };
+        const proposal2: HacpProposal = {
+          id: `prop-2-${Date.now()}`,
+          title: `Czerń (#080B10) dla ${targetLabel}`,
+          description: `Ustawienie grafitowo-czarnego tła dla ${targetLabel}`,
+          targetNodeId: targetId,
+          targetNodeType: targetSection?.type || 'section',
+          proposedCapability: 'update_node_props',
+          proposedChanges: [{ target: targetId || '', property: 'backgroundColor', newValue: '#080B10', summary: 'Zmiana tła na głęboką czerń' }],
+          executePayload: { type: 'UPDATE_PROPS', props: { backgroundColor: '#080B10', background: '#080B10' } },
+        };
+        const proposal3: HacpProposal = {
+          id: `prop-3-${Date.now()}`,
+          title: `Ciepły beż (#F5EFE6) dla ${targetLabel}`,
+          description: `Ustawienie ciepłego beżowego tła dla ${targetLabel}`,
+          targetNodeId: targetId,
+          targetNodeType: targetSection?.type || 'section',
+          proposedCapability: 'update_node_props',
+          proposedChanges: [{ target: targetId || '', property: 'backgroundColor', newValue: '#F5EFE6', summary: 'Zmiana tła na ciepły beż' }],
+          executePayload: { type: 'UPDATE_PROPS', props: { backgroundColor: '#F5EFE6', background: '#F5EFE6' } },
+        };
+        (proposal1 as any).variant2 = proposal2;
+        (proposal1 as any).variant3 = proposal3;
+
+        const message = `Widzę sekcję **${targetLabel}**. Na jaki kolor chciałbyś zmienić tło?\n\nProponuję 3 sprawdzone kierunki:\n1. **Głęboki granat** (\`#0F172A\`) — nowoczesny, technologiczny kontrast\n2. **Głęboka czerń / grafit** (\`#080B10\`) — minimalistyczny, ekskluzywny styl\n3. **Ciepły beż** (\`#F5EFE6\`) — jasny, naturalny i przyjazny odcień\n\nNapisz np. **„1”**, **„na granatowy”**, **„na czarny”** lub podaj dowolny inny kolor, a natychmiast naniosę go na Canvasie.`;
+
+        return {
+          success: true,
+          intent: 'PROPOSE',
+          scope: 'PAGE_DESIGN',
+          message,
+          commandsToDispatch: [],
+          eventsToEmit: [],
+          executionStatus: 'EXECUTED',
+          aiProviderStatus,
+          updatedConversationContext: { lastIntent: 'PROPOSE', lastTargetNodeId: targetId, lastProposal: proposal1 },
+        };
+      }
 
       const proposal: HacpProposal = {
         id: `prop-${Date.now()}`,

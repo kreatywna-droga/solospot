@@ -20,17 +20,22 @@ export function HeroSection({ section, theme, storeName }: SectionComponentProps
   const titleAlign = alignMap[config.titleAlign ?? 'center'] ?? 'text-center'
   const titleColor = config.titleColor || 'white'
 
+  const explicitBg = (config as any).backgroundColor || (config as any).background
+  const backgroundStyle = explicitBg
+    ? (explicitBg.startsWith('#') || explicitBg.startsWith('rgb') ? explicitBg : explicitBg)
+    : hasImage
+      ? `linear-gradient(135deg, rgba(0,0,0,0.5), rgba(0,0,0,0.3)), url("${imageUrl}") center/cover no-repeat`
+      : `linear-gradient(135deg, ${theme.primaryColor}, ${theme.secondaryColor})`
+
   return (
     <section
-      className="relative overflow-hidden py-24 lg:py-32 px-4 text-center"
+      className="relative overflow-hidden py-24 lg:py-32 px-4 text-center transition-colors duration-300"
       style={{
-        background: hasImage
-          ? `linear-gradient(135deg, rgba(0,0,0,0.5), rgba(0,0,0,0.3)), url("${imageUrl}") center/cover no-repeat`
-          : `linear-gradient(135deg, ${theme.primaryColor}, ${theme.secondaryColor})`,
+        background: backgroundStyle,
         fontFamily: theme.font,
       }}
     >
-      {!hasImage && <div className="absolute inset-0 bg-black/20" />}
+      {!hasImage && !explicitBg && <div className="absolute inset-0 bg-black/20" />}
       <div className="relative max-w-3xl mx-auto">
         <h1 className={`${titleSize} ${titleWeight} ${titleAlign} mb-6 leading-tight`} style={{ color: titleColor }}>{title}</h1>
         {config.subtitle && <p className="text-lg lg:text-xl text-white/80 mb-8 max-w-xl mx-auto">{config.subtitle}</p>}

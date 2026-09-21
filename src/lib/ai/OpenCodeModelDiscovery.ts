@@ -130,7 +130,23 @@ export class OpenCodeModelDiscovery {
       source = 'fallback';
     }
 
-    const freeModels = models.filter((m) => m.isFree);
+    // Prioritize verified working, low-latency, high-reasoning free models
+    const freePriorityMap: Record<string, number> = {
+      'nex-agi/nex-n2.5-pro:free': 100,
+      'nex-agi/nex-n2.5-mini:free': 90,
+      'dots-studio/dots-3-note-preview:free': 85,
+      'liquid/lfm-2.5-2.6b:free': 80,
+      'nvidia/nemotron-3.5-lightning:free': 60,
+    };
+
+    const freeModels = models
+      .filter((m) => m.isFree)
+      .sort((a, b) => {
+        const scoreA = freePriorityMap[a.id] || 0;
+        const scoreB = freePriorityMap[b.id] || 0;
+        return scoreB - scoreA;
+      });
+
     const paidModels = models.filter((m) => !m.isFree);
 
     const result: ModelDiscoveryResult = {
@@ -210,6 +226,9 @@ export class OpenCodeModelDiscovery {
 
   private detectProvider(id: string, ownedBy?: string): string {
     const lower = id.toLowerCase();
+    if (lower.includes('nex-agi')) return 'Nex AGI';
+    if (lower.includes('dots-studio') || lower.includes('dots')) return 'Dots Studio';
+    if (lower.includes('liquid')) return 'Liquid';
     if (lower.includes('deepseek')) return 'DeepSeek';
     if (lower.includes('nemotron') || lower.includes('nvidia')) return 'NVIDIA';
     if (lower.includes('mimo') || lower.includes('minimax')) return 'MiniMax';

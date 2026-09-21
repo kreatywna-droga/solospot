@@ -197,16 +197,38 @@ export class HacpIntentEngine {
       lower === 'zgoda' ||
       lower === 'dobra' ||
       lower === 'ok' ||
-      lower === 'okej';
+      lower === 'okej' ||
+      lower === '1' ||
+      lower === 'opcja 1' ||
+      lower === 'pierwszy' ||
+      lower === 'pierwsza' ||
+      lower === '2' ||
+      lower === 'opcja 2' ||
+      lower === 'drugi' ||
+      lower === 'druga' ||
+      lower === '3' ||
+      lower === 'opcja 3' ||
+      lower === 'trzeci' ||
+      lower === 'trzecia';
 
     if (isAffirmative && conversation.lastProposal) {
+      let finalProposal = conversation.lastProposal;
+      // If proposal had variant options, pick matching variant
+      if (lower === '2' || lower === 'drugi' || lower === 'druga') {
+        const p2 = (conversation.lastProposal as any).variant2;
+        if (p2) finalProposal = p2;
+      } else if (lower === '3' || lower === 'trzeci' || lower === 'trzecia') {
+        const p3 = (conversation.lastProposal as any).variant3;
+        if (p3) finalProposal = p3;
+      }
+
       return {
         intent: 'EXECUTE',
         scope: 'PAGE_DESIGN',
         confidence: 0.98,
         reason: 'User confirmed previous proposal',
-        targetNodeId: conversation.lastProposal.targetNodeId,
-        confirmedProposal: conversation.lastProposal,
+        targetNodeId: finalProposal.targetNodeId,
+        confirmedProposal: finalProposal,
       };
     }
 
@@ -548,6 +570,20 @@ export class HacpIntentEngine {
     if (isColorChange) {
       const color = this.extractColor(lower, prompt);
       if (!color) {
+        const hasSpecificTargetColor = lower.includes(' na ') || lower.includes(' to ');
+        if (!hasSpecificTargetColor && (lower.includes('tło') || lower.includes('tła') || lower.includes('tlo') || lower.includes('tla') || lower.includes('background'))) {
+          return {
+            intent: 'PROPOSE',
+            scope: 'PAGE_DESIGN',
+            confidence: 0.95,
+            reason: 'User wants to change background color but did not specify color — propose curated palettes',
+            targetNodeId: this.resolveTargetNodeId(lower, conversation, builderContext, document),
+            extractedParameters: {
+              operation: 'PROPOSE_BACKGROUND',
+            },
+          };
+        }
+
         return {
           intent: 'CLARIFY',
           scope: 'PAGE_DESIGN',
