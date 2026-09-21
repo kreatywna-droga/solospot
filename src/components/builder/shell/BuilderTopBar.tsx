@@ -108,25 +108,25 @@ export function BuilderTopBar({
         </div>
 
         {/* Right: viewport + templates / preview + undo/redo + save/publish */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-3 flex-shrink-0">
           {/* Templates, Experiences & Preview Mode Buttons */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setShowExperienceLibrary(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#B8893A] to-[#D9A86C] hover:from-[#C99A4A] hover:to-[#F2C27F] text-[#080B10] font-semibold text-xs transition-all shadow-md shadow-[#D9A86C]/20 active:scale-95"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-[#B8893A] to-[#D9A86C] hover:from-[#C99A4A] hover:to-[#F2C27F] text-[#080B10] font-semibold text-xs transition-all shadow-md shadow-[#D9A86C]/20 active:scale-95"
               title="Biblioteka gotowych doświadczeń, sekcji i interakcji (Experience Library v2.0)"
             >
               <Sparkles className="w-3.5 h-3.5 text-[#080B10]/80" />
-              <span className="hidden sm:inline">Experiences</span>
+              <span className="hidden xl:inline">Experiences</span>
             </button>
 
             <button
               onClick={() => setShowTemplatePicker(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#D9A86C]/12 hover:bg-[#D9A86C]/20 text-[#F2C27F] border border-[#D9A86C]/25 text-xs font-semibold transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#D9A86C]/12 hover:bg-[#D9A86C]/20 text-[#F2C27F] border border-[#D9A86C]/25 text-xs font-semibold transition-all shadow-sm"
               title="Wybierz gotowy szablon strony"
             >
               <Sparkles className="w-3.5 h-3.5 text-[#D9A86C]" />
-              <span className="hidden sm:inline">Szablony</span>
+              <span className="hidden lg:inline">Szablony</span>
             </button>
 
             <button
@@ -134,7 +134,7 @@ export function BuilderTopBar({
                 const nextMode = canvas.runtimeMode === 'PREVIEW' ? 'LIVE' : 'PREVIEW'
                 setRuntimeMode(nextMode)
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
                 canvas.runtimeMode === 'PREVIEW'
                   ? 'bg-amber-500/15 text-amber-300 border-amber-500/30 shadow-sm'
                   : 'bg-[#202024] text-zinc-300 border-[#2D2D32] hover:bg-[#27272A] hover:text-white'
@@ -142,13 +142,13 @@ export function BuilderTopBar({
               title="Przełącz tryb podglądu"
             >
               <Eye className="w-3.5 h-3.5" />
-              <span>{canvas.runtimeMode === 'PREVIEW' ? 'Edytuj' : 'Podgląd'}</span>
+              <span className="hidden lg:inline">{canvas.runtimeMode === 'PREVIEW' ? 'Edytuj' : 'Podgląd'}</span>
             </button>
 
             {onToggleInspector && (
               <button
                 onClick={onToggleInspector}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
                   inspectorVisible
                     ? 'bg-[#D9A86C]/15 text-[#F2C27F] border-[#D9A86C]/30 shadow-sm shadow-[#D9A86C]/10'
                     : 'bg-[#202024] text-zinc-400 border-[#2D2D32] hover:bg-[#27272A] hover:text-white'
@@ -156,7 +156,7 @@ export function BuilderTopBar({
                 title={inspectorVisible ? 'Schowaj inspektor właściwości (Alt+I)' : 'Otwórz inspektor właściwości (Alt+I)'}
               >
                 <PanelRight className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Inspektor</span>
+                <span className="hidden lg:inline">Inspektor</span>
               </button>
             )}
           </div>
@@ -213,25 +213,25 @@ export function BuilderTopBar({
           <button
             onClick={onSave}
             disabled={saving}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0D1118] border border-[#252B3A]
+            className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-[#0D1118] border border-[#252B3A]
                        text-xs font-medium text-zinc-300 hover:bg-[#1A1F2E] hover:text-[#D9A86C]
                        transition-all disabled:opacity-50"
           >
             <Save className="w-3.5 h-3.5" />
-            {saving ? 'Saving...' : 'Save'}
+            <span className="hidden lg:inline">{saving ? 'Saving...' : 'Save'}</span>
           </button>
 
           {/* Publish */}
           <button
             onClick={onPublish}
             disabled={saving}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-xl font-bold text-xs
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl font-bold text-xs
                        bg-gradient-to-r from-[#B8893A] to-[#D9A86C] text-[#080B10]
                        hover:shadow-lg hover:shadow-[#D9A86C]/30 hover:scale-105 active:scale-95
                        disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             <Zap className="w-3.5 h-3.5" />
-            {saving ? 'Publikowanie...' : 'Publish'}
+            <span className="hidden xl:inline">{saving ? 'Publikowanie...' : 'Publish'}</span>
           </button>
 
           {/* Command Palette */}
