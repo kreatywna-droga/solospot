@@ -2616,7 +2616,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
   return (
     <div
       ref={containerRef}
-      className="flex-1 flex flex-col items-center justify-start overflow-y-auto overflow-x-hidden bg-[#09090B] p-0 relative w-full h-full select-none"
+      className="flex-1 flex flex-col items-center justify-start overflow-y-auto overflow-x-hidden bg-[#09090B] p-0 relative w-full h-full select-none builder-canvas-scrollbar"
       onClick={handleCanvasClick}
     >
       {/* Scalable Canvas Frame Container */}
