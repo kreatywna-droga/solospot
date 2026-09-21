@@ -104,7 +104,7 @@ export class OpenCodeProvider implements AIProvider {
         model: selectedModelId,
         messages: normalizedMessages,
         temperature: 0.2,
-        max_tokens: 2048,
+        max_tokens: 1000,
       };
 
       if (toolsPayload.length > 0 && resolution.toolSupported) {
@@ -121,12 +121,13 @@ export class OpenCodeProvider implements AIProvider {
         body: JSON.stringify(bodyPayload),
       });
 
-      // Attempt fallback if 429 or 500
-      if (!response.ok && (response.status === 429 || response.status >= 500)) {
+      // Attempt fallback if 402, 429 or 500
+      if (!response.ok && (response.status === 402 || response.status === 429 || response.status >= 500)) {
         const fallback = await this.router.getFallbackModel(selectedModelId, resolution.mode);
         if (fallback) {
           console.warn(`[OpenCodeProvider] Upstream ${response.status} on ${selectedModelId}, falling back to ${fallback.id}`);
           bodyPayload.model = fallback.id;
+          bodyPayload.max_tokens = 500;
           response = await fetch(endpoint, {
             method: 'POST',
             headers: {

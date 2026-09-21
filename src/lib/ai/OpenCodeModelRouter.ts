@@ -45,29 +45,41 @@ export class OpenCodeModelRouter {
   ): Promise<RouteResolution> {
     const catalog = await this.discovery.discoverModels();
     const defaultPaidModel =
-      catalog.paidModels.find((m) => m.id === 'openai/gpt-4o-mini' || m.supportsTools) ||
+      catalog.models.find((m) => m.id === 'openai/gpt-4o-mini') ||
+      catalog.models.find((m) => m.id === 'gpt-4o-mini') ||
+      catalog.models.find((m) => m.id.includes('mini') && m.supportsTools) ||
+      catalog.models.find((m) => m.id.includes('flash') && m.supportsTools) ||
       catalog.models.find((m) => m.supportsTools) ||
       catalog.models[0];
 
     // MANUAL MODE
     if (mode === 'MANUAL' && requestedModelId) {
-      const found = catalog.models.find((m) => m.id === requestedModelId);
-      if (found) {
-        const toolSupported = found.supportsTools;
-        const limitationMessage =
-          requiresTools && !toolSupported
-            ? `Wybrany model „${found.name}” nie obsługuje wywoływania narzędzi HACP. Przełącz na model z obsługą narzędzi, aby modyfikować stronę.`
-            : undefined;
+      const found = catalog.models.find(
+        (m) => m.id === requestedModelId || m.id.endsWith(requestedModelId) || requestedModelId.endsWith(m.id)
+      );
+      const targetModel = found || {
+        id: requestedModelId,
+        name: requestedModelId.split('/').pop() || requestedModelId,
+        provider: 'OpenCode',
+        isFree: requestedModelId.includes('free'),
+        supportsTools: true,
+        status: 'AVAILABLE' as const,
+      };
 
-        return {
-          selectedModel: found,
-          mode: 'MANUAL',
-          fallbackUsed: false,
-          requiresTools,
-          toolSupported,
-          limitationMessage,
-        };
-      }
+      const toolSupported = targetModel.supportsTools;
+      const limitationMessage =
+        requiresTools && !toolSupported
+          ? `Wybrany model „${targetModel.name}” nie obsługuje wywoływania narzędzi HACP. Przełącz na model z obsługą narzędzi, aby modyfikować stronę.`
+          : undefined;
+
+      return {
+        selectedModel: targetModel,
+        mode: 'MANUAL',
+        fallbackUsed: false,
+        requiresTools,
+        toolSupported,
+        limitationMessage,
+      };
     }
 
     // FREE MODE
@@ -123,7 +135,8 @@ export class OpenCodeModelRouter {
     // PAID MODE
     if (mode === 'PAID') {
       const paidModel =
-        catalog.paidModels.find((m) => m.id === 'openai/gpt-4o-mini') ||
+        catalog.models.find((m) => m.id === 'openai/gpt-4o-mini') ||
+        catalog.paidModels.find((m) => m.id.includes('mini') || m.id.includes('flash')) ||
         catalog.paidModels.find((m) => m.supportsTools) ||
         defaultPaidModel;
 
@@ -136,22 +149,19 @@ export class OpenCodeModelRouter {
       };
     }
 
-    // AUTO MODE: Choose first capable model
-    let target = defaultPaidModel;
-    if (requiresTools) {
-      target =
-        catalog.models.find((m) => m.supportsTools && m.status === 'AVAILABLE') ||
-        defaultPaidModel;
-    } else {
-      target = catalog.models[0] || defaultPaidModel;
-    }
+    // AUTO MODE: Choose first capable cost-effective model
+    const autoModel =
+      catalog.models.find((m) => m.id === 'openai/gpt-4o-mini') ||
+      catalog.models.find((m) => m.id === 'gpt-4o-mini') ||
+      catalog.models.find((m) => (m.id.includes('mini') || m.id.includes('flash')) && m.supportsTools) ||
+      defaultPaidModel;
 
     return {
-      selectedModel: target,
+      selectedModel: autoModel,
       mode: 'AUTO',
       fallbackUsed: false,
       requiresTools,
-      toolSupported: target.supportsTools,
+      toolSupported: autoModel.supportsTools,
     };
   }
 
