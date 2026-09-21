@@ -168,6 +168,16 @@ export interface HacpBuilderContext {
   engineeringScope?: HacpEngineeringScope;
 }
 
+export interface ExecutionVerification {
+  passed: boolean;
+  operation: string;
+  target: string;
+  property?: string;
+  beforeValue?: unknown;
+  afterValue?: unknown;
+  diffSummary: string;
+}
+
 export interface HacpExecutionResult {
   success: boolean;
   intent: HacpIntentType;
@@ -179,6 +189,7 @@ export interface HacpExecutionResult {
   errorReason?: string;
   updatedConversationContext?: Partial<HacpConversationContext>;
   shouldTriggerUndo?: boolean;
+  shouldTriggerRedo?: boolean;
   /** Honest status: EXECUTED only if BuilderDocument actually changed */
   executionStatus?: HacpExecutionStatus;
   /** Structured before/after evidence */
@@ -190,6 +201,9 @@ export interface HacpExecutionResult {
     changed: boolean;
     property?: string;
   };
+  verification?: ExecutionVerification;
+  aiProviderStatus?: 'ONLINE' | 'OFFLINE';
+  aiProviderName?: string;
 }
 
 /** Color name → hex mapping for deterministic color resolution */

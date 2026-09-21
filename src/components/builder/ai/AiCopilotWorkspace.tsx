@@ -44,6 +44,9 @@ export function AiCopilotWorkspace() {
   })
   const [visualMetrics, setVisualMetrics] = useState<HacpVisualMetrics | undefined>(undefined)
   const [recentMutation, setRecentMutation] = useState<string | undefined>(undefined)
+  const [aiProviderStatus, setAiProviderStatus] = useState<'ONLINE' | 'OFFLINE'>('OFFLINE')
+  const [aiProviderName, setAiProviderName] = useState<string>('NONE')
+  const [missingKeys, setMissingKeys] = useState<string[]>([])
 
   // Collapsible panels state
   const [contextOpen, setContextOpen] = useState(true)
@@ -57,6 +60,31 @@ export function AiCopilotWorkspace() {
   const bridge = useMemo(() => HacpBridge.getInstance(), [])
   const hacpStatus: HacpStatus = isExecuting ? 'BUSY' : bridge.getStatus()
   const capabilities = useMemo(() => bridge.getCapabilities(), [bridge])
+
+  // Check real AI Provider status on mount
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    fetch('/api/builder/copilot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: '', messages: [] }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === 'SUCCESS') {
+          setAiProviderStatus('ONLINE')
+          setAiProviderName(data.provider || 'AI')
+        } else {
+          setAiProviderStatus('OFFLINE')
+          setAiProviderName('NOT CONFIGURED')
+          if (data.missingKeys) setMissingKeys(data.missingKeys)
+        }
+      })
+      .catch(() => {
+        setAiProviderStatus('OFFLINE')
+        setAiProviderName('NOT CONFIGURED')
+      })
+  }, [])
 
   // Measure active canvas element geometry for Live Visual Context
   useEffect(() => {
@@ -167,6 +195,14 @@ export function AiCopilotWorkspace() {
       // Execute through Conversational Intent Engine & HACP Bridge
       const result = await bridge.executePlan(text, currentContext, builderDoc, conversationContext)
 
+      // Update AI provider status from result
+      if (result.aiProviderStatus) {
+        setAiProviderStatus(result.aiProviderStatus)
+        if (result.aiProviderName) {
+          setAiProviderName(result.aiProviderName)
+        }
+      }
+
       // Update conversation memory
       if (result.updatedConversationContext) {
         setConversationContext((prev) => ({
@@ -191,6 +227,14 @@ export function AiCopilotWorkspace() {
         if (canUndo) {
           undo()
           setRecentMutation('Cofnięto poprzednią modyfikację')
+        }
+      }
+
+      // If action requested natural REDO
+      if (result.shouldTriggerRedo || result.intent === 'REDO') {
+        if (canRedo) {
+          redo()
+          setRecentMutation('Przywrócono poprzednią modyfikację')
         }
       }
 
@@ -253,16 +297,37 @@ export function AiCopilotWorkspace() {
           </div>
         </div>
 
-        {/* HACP Status Interactive Badge */}
+        {/* Real-time Status Badges (Section 17) */}
         <div className="flex items-center gap-1.5">
+          {/* AI Provider Status */}
           <button
             onClick={() => setShowStatusModal(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/20 transition-all cursor-pointer"
+            className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-mono font-semibold border transition-all cursor-pointer ${
+              aiProviderStatus === 'ONLINE'
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
+                : 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20'
+            }`}
+            title={aiProviderStatus === 'ONLINE' ? `Połączono z modelem AI: ${aiProviderName}` : 'Brak zewnętrznego modelu LLM w środowisku (wymaga OPENAI_API_KEY lub GEMINI_API_KEY)'}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${aiProviderStatus === 'ONLINE' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+            <span>{aiProviderStatus === 'ONLINE' ? `AI: ${aiProviderName}` : 'AI: OFFLINE'}</span>
+          </button>
+
+          {/* HACP Status */}
+          <button
+            onClick={() => setShowStatusModal(true)}
+            className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-mono font-semibold bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/20 transition-all cursor-pointer"
             title="Kliknij, aby otworzyć stan połączenia HACP"
           >
             <span className={`w-1.5 h-1.5 rounded-full ${isExecuting ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
             <span>{isExecuting ? 'HACP BUSY' : 'HACP ONLINE'}</span>
           </button>
+
+          {/* Execution Status */}
+          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono font-semibold bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+            <span>EXEC: READY</span>
+          </div>
 
           <button
             onClick={() => setShowCapabilitiesModal(true)}
@@ -628,12 +693,27 @@ export function AiCopilotWorkspace() {
 
             <div className="space-y-2 text-xs font-mono">
               <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
-                <span className="text-zinc-400">Runtime:</span>
-                <span className="text-emerald-400 font-bold">ONLINE</span>
+                <span className="text-zinc-400">AI Provider:</span>
+                <span className={`font-bold ${aiProviderStatus === 'ONLINE' ? 'text-emerald-400' : 'text-amber-400'}`}>
+                  {aiProviderStatus === 'ONLINE' ? aiProviderName : 'OFFLINE'}
+                </span>
+              </div>
+              {aiProviderStatus === 'OFFLINE' && (
+                <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-300">
+                  <span>Wymagany klucz API: </span>
+                  <span className="font-bold">{missingKeys.length > 0 ? missingKeys.join(' lub ') : 'OPENAI_API_KEY / GEMINI_API_KEY'}</span>
+                  <p className="text-zinc-400 mt-1">
+                    Brak konfiguracji w .env — system nie symuluje AI, wykonuje operacje HACP w trybie kontrolowanym.
+                  </p>
+                </div>
+              )}
+              <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+                <span className="text-zinc-400">HACP Protocol:</span>
+                <span className="text-emerald-400 font-bold">ONLINE (v3.0)</span>
               </div>
               <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
-                <span className="text-zinc-400">Connection:</span>
-                <span className="text-emerald-400 font-bold">CONNECTED</span>
+                <span className="text-zinc-400">Execution Mode:</span>
+                <span className="text-cyan-400 font-bold">STRICT BEFORE/AFTER</span>
               </div>
               <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
                 <span className="text-zinc-400">Capabilities:</span>
@@ -644,8 +724,8 @@ export function AiCopilotWorkspace() {
                 <span className="text-zinc-200 font-bold">{isExecuting ? 'BUSY' : 'IDLE'}</span>
               </div>
               <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
-                <span className="text-zinc-400">Last validation:</span>
-                <span className="text-emerald-400 font-bold">PASS</span>
+                <span className="text-zinc-400">Verification Engine:</span>
+                <span className="text-emerald-400 font-bold">ACTIVE (SSOT)</span>
               </div>
             </div>
 

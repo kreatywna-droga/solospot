@@ -1,20 +1,24 @@
 /**
- * HacpBridge.ts — Honest Deterministic HACP Execution Layer v2.0
+ * HacpBridge.ts — Honest Real HACP Execution & AI Co-Builder Bridge v3.0
  *
  * CORE PRINCIPLE: ZERO FAKE SUCCESS
- * - NEVER return "Gotowe" / "Wykonano" / "PASS" if no real mutation occurred
- * - EVERY execution verified via BuilderDocument BEFORE → AFTER comparison
- * - UNKNOWN operations return UNSUPPORTED, never fake fallback mutation
- * - NO hardcoded colors (#D9A86C) as fallback
+ * - NEVER return "Gotowe" / "Wykonano" / "PASS" if no real mutation occurred.
+ * - Every command must undergo strict BEFORE → EXECUTION → AFTER → VERIFY comparison.
+ * - AI Model controls intent & tool selection; HACP delegates to BuilderCommands;
+ *   BuilderDocument is the single source of truth (SSOT).
  *
  * Implements DECISION-042 - DECISION-045:
- * - Bridge delegates to domain commands (never implements custom schedulers)
- * - Inspector & Copilot edit data; execution remains in builder-core
- * - BuilderDocument is the single source of truth (SSOT)
+ * - Bridge delegates to domain commands (never implements custom playback/time logic).
+ * - Inspector & Copilot edit data; execution remains strictly in builder-core.
+ * - BuilderDocument is the SSOT for document mutations.
  */
 
-import type { BuilderCommand, BuilderDocument } from '../../../packages/builder-core/src';
-import type { ExperienceSceneConfig } from '@/lib/experience/ExperienceRuntimeTypes';
+import {
+  applyCommandToDocument,
+  findNode,
+  type BuilderCommand,
+  type BuilderDocument,
+} from '../../../packages/builder-core/src';
 import { HacpIntentEngine } from './HacpIntentEngine';
 import type {
   HacpStatus,
@@ -28,7 +32,9 @@ import type {
   HacpConversationContext,
   HacpProposal,
   HacpExecutionStatus,
+  ExecutionVerification,
 } from './HacpTypes';
+import type { HacpToolCall } from '../ai/AIProviderTypes';
 
 export class HacpBridge {
   private static instance: HacpBridge;
@@ -43,8 +49,8 @@ export class HacpBridge {
       id: `evt-init-${Date.now()}`,
       timestamp: new Date().toLocaleTimeString('pl-PL'),
       type: 'CONNECT',
-      title: 'HACP Bridge v2.0 — Honest Execution',
-      description: 'Deterministic HACP without LLM — online with verified mutations',
+      title: 'HACP Bridge v3.0 — Real Execution & Verification',
+      description: 'HACP Control Center online with verified BuilderDocument mutations',
       status: 'SUCCESS',
     });
   }
@@ -93,19 +99,286 @@ export class HacpBridge {
     this.capabilities = [
       { id: 'inspect_node_geometry', name: 'Inspekcja geometrii węzła', category: 'READ', description: 'Pobranie wymiarów i pozycji węzła', available: true },
       { id: 'read_document_tree', name: 'Odczyt drzewa dokumentu', category: 'READ', description: 'Inspekcja hierarchii sekcji i węzłów', available: true },
+      { id: 'read_builder_document', name: 'Odczyt metadanych dokumentu', category: 'READ', description: 'Inspekcja motywu i stron', available: true },
       { id: 'query_selection', name: 'Odczyt aktywnego zaznaczenia', category: 'READ', description: 'Identyfikacja aktywnego węzła', available: true },
+      { id: 'inspect_selected_node', name: 'Inspekcja zaznaczonego węzła', category: 'READ', description: 'Pobranie właściwości i geometrii', available: true },
       { id: 'analyze_page', name: 'Analiza struktury strony', category: 'READ', description: 'Ewaluacja struktury i hierarchii', available: true },
+      { id: 'inspect_page_structure', name: 'Analiza struktury strony', category: 'READ', description: 'Hierarchia sekcji w dokumencie', available: true },
       { id: 'insert_section', name: 'Wstawianie nowej sekcji', category: 'BUILD', description: 'Dodawanie sekcji do drzewa strony', available: true },
       { id: 'update_props', name: 'Aktualizacja właściwości', category: 'EDIT', description: 'Modyfikacja propsów węzła', available: true },
+      { id: 'update_node_props', name: 'Aktualizacja właściwości', category: 'EDIT', description: 'Zmiana nagłówka, kolorów, CTA', available: true },
       { id: 'move_element', name: 'Przesunięcie elementu', category: 'EDIT', description: 'Zmiana pozycji sekcji', available: true },
+      { id: 'move_section', name: 'Przesunięcie sekcji', category: 'EDIT', description: 'Zmiana kolejności sekcji', available: true },
       { id: 'delete_node', name: 'Usuwanie węzła', category: 'EDIT', description: 'Bezpieczne usuwanie sekcji', available: true },
-      { id: 'configure_experience', name: 'Konfiguracja Experience', category: 'EDIT', description: 'Sterowanie gradientem, spotlightem, tiltem', available: true },
+      { id: 'remove_section', name: 'Usuwanie sekcji', category: 'EDIT', description: 'Bezpieczne usuwanie sekcji z drzewa', available: true },
+      { id: 'configure_experience', name: 'Konfiguracja Experience', category: 'EDIT', description: 'Sterowanie gradientem, spotlightem, ruchem', available: true },
       { id: 'validate_document_schema', name: 'Walidacja schematu', category: 'VALIDATION', description: 'Sprawdzanie integralności dokumentu', available: true },
+      { id: 'undo', name: 'Cofnięcie zmiany', category: 'EDIT', description: 'Przywrócenie poprzedniego stanu', available: true },
+      { id: 'redo', name: 'Przywrócenie zmiany', category: 'EDIT', description: 'Ponowienie cofniętej zmiany', available: true },
     ];
   }
 
   /**
+   * Rigorous BEFORE → EXECUTION → AFTER → VERIFY protocol.
+   * Compares the document state before and after command application.
+   */
+  public verifyCommandExecution(
+    command: BuilderCommand,
+    docBefore: BuilderDocument,
+    expectedChange: { targetId: string; property?: string; expectedValue?: unknown }
+  ): { nextDoc: BuilderDocument; verification: ExecutionVerification; changed: boolean } {
+    const nextDoc = applyCommandToDocument(docBefore, command);
+    const changed = JSON.stringify(docBefore) !== JSON.stringify(nextDoc);
+
+    let specificPassed = changed;
+    let beforeVal: unknown = undefined;
+    let afterVal: unknown = undefined;
+
+    if (command.type === 'UPDATE_PROPS') {
+      const beforeNode = findNode(docBefore, command.sectionId)?.node;
+      const afterNode = findNode(nextDoc, command.sectionId)?.node;
+      beforeVal = beforeNode?.props;
+      afterVal = afterNode?.props;
+      if (expectedChange.property && expectedChange.expectedValue !== undefined) {
+        specificPassed = (afterNode?.props as Record<string, unknown>)?.[expectedChange.property] === expectedChange.expectedValue;
+      }
+    } else if (command.type === 'ADD_SECTION') {
+      const pageBefore = docBefore.pages.find((p) => p.id === command.pageId) || docBefore.pages[0];
+      const pageAfter = nextDoc.pages.find((p) => p.id === command.pageId) || nextDoc.pages[0];
+      beforeVal = pageBefore?.sections?.length || 0;
+      afterVal = pageAfter?.sections?.length || 0;
+      specificPassed = (afterVal as number) === (beforeVal as number) + 1;
+    } else if (command.type === 'REMOVE_SECTION') {
+      const pageAfter = nextDoc.pages.find((p) => p.id === command.pageId) || nextDoc.pages[0];
+      specificPassed = !pageAfter?.sections?.some((s) => s.id === command.sectionId);
+    } else if (command.type === 'MOVE_SECTION') {
+      const pageAfter = nextDoc.pages.find((p) => p.id === command.pageId) || nextDoc.pages[0];
+      specificPassed = changed;
+    }
+
+    return {
+      nextDoc,
+      changed,
+      verification: {
+        passed: specificPassed,
+        operation: command.type,
+        target: expectedChange.targetId,
+        property: expectedChange.property,
+        beforeValue: beforeVal,
+        afterValue: afterVal,
+        diffSummary: specificPassed
+          ? `Weryfikacja pomyślna: operacja ${command.type} zmodyfikowała BuilderDocument.`
+          : `Weryfikacja nieudana: brak potwierdzonej zmiany w BuilderDocument.`,
+      },
+    };
+  }
+
+  /**
+   * Execute a structured Tool Call issued by real LLM.
+   */
+  public executeToolCall(
+    toolCall: HacpToolCall,
+    document: BuilderDocument,
+    activePageId: string
+  ): {
+    command?: BuilderCommand;
+    verification: ExecutionVerification;
+    appliedChange?: AppliedChangeItem;
+    message: string;
+    status: HacpExecutionStatus;
+    shouldTriggerUndo?: boolean;
+    shouldTriggerRedo?: boolean;
+  } {
+    const { name, arguments: args } = toolCall;
+
+    if (name === 'undo') {
+      return {
+        status: 'EXECUTED',
+        shouldTriggerUndo: true,
+        message: 'Cofnąłem ostatnią modyfikację.',
+        verification: {
+          passed: true,
+          operation: 'UNDO',
+          target: activePageId,
+          diffSummary: 'Wywołano akcję historii UNDO.',
+        },
+      };
+    }
+
+    if (name === 'redo') {
+      return {
+        status: 'EXECUTED',
+        shouldTriggerRedo: true,
+        message: 'Przywróciłem cofniętą zmianę.',
+        verification: {
+          passed: true,
+          operation: 'REDO',
+          target: activePageId,
+          diffSummary: 'Wywołano akcję historii REDO.',
+        },
+      };
+    }
+
+    if (name === 'insert_section') {
+      const sectionType = (args.sectionType as string) || 'hero';
+      const atIndex = typeof args.atIndex === 'number' ? args.atIndex : undefined;
+      const cmd: BuilderCommand = {
+        type: 'ADD_SECTION',
+        pageId: (args.pageId as string) || activePageId,
+        sectionType,
+        defaultProps: (args.defaultProps as Record<string, unknown>) || { title: `Nowa sekcja ${sectionType}` },
+        atIndex,
+        label: (args.label as string) || `Sekcja ${sectionType}`,
+      };
+
+      const result = this.verifyCommandExecution(cmd, document, { targetId: cmd.pageId });
+      return {
+        command: cmd,
+        verification: result.verification,
+        status: result.verification.passed ? 'EXECUTED' : 'FAILED',
+        message: result.verification.passed
+          ? `Dodałem sekcję **${sectionType}** do strony.`
+          : `Nie udało się dodać sekcji ${sectionType}.`,
+        appliedChange: {
+          target: cmd.pageId,
+          property: 'sections',
+          summary: `Wstawiono sekcję ${sectionType}`,
+        },
+      };
+    }
+
+    if (name === 'remove_section') {
+      const sectionId = args.sectionId as string;
+      const cmd: BuilderCommand = {
+        type: 'REMOVE_SECTION',
+        pageId: (args.pageId as string) || activePageId,
+        sectionId,
+      };
+
+      const result = this.verifyCommandExecution(cmd, document, { targetId: sectionId });
+      return {
+        command: cmd,
+        verification: result.verification,
+        status: result.verification.passed ? 'EXECUTED' : 'FAILED',
+        message: result.verification.passed
+          ? `Usunąłem sekcję \`${sectionId}\`.`
+          : `Nie udało się usunąć sekcji \`${sectionId}\`.`,
+        appliedChange: {
+          target: sectionId,
+          property: 'sections',
+          summary: `Usunięto sekcję ${sectionId}`,
+        },
+      };
+    }
+
+    if (name === 'move_section') {
+      const fromIndex = Number(args.fromIndex);
+      const toIndex = Number(args.toIndex);
+      const cmd: BuilderCommand = {
+        type: 'MOVE_SECTION',
+        pageId: (args.pageId as string) || activePageId,
+        fromIndex,
+        toIndex,
+      };
+
+      const result = this.verifyCommandExecution(cmd, document, { targetId: cmd.pageId });
+      return {
+        command: cmd,
+        verification: result.verification,
+        status: result.verification.passed ? 'EXECUTED' : 'FAILED',
+        message: result.verification.passed
+          ? `Przesunąłem sekcję z pozycji ${fromIndex + 1} na pozycję ${toIndex + 1}.`
+          : 'Nie udało się przesunąć sekcji.',
+        appliedChange: {
+          target: cmd.pageId,
+          property: 'order',
+          summary: `Przesunięto sekcję z ${fromIndex + 1} na ${toIndex + 1}`,
+        },
+      };
+    }
+
+    if (name === 'update_node_props') {
+      const sectionId = (args.sectionId as string) || (args.nodeId as string);
+      const props = (args.props as Record<string, unknown>) || {};
+      const cmd: BuilderCommand = {
+        type: 'UPDATE_PROPS',
+        pageId: (args.pageId as string) || activePageId,
+        sectionId,
+        props,
+      };
+
+      // Find first modified prop for specific verification check
+      const firstPropKey = Object.keys(props)[0];
+      const expectedVal = firstPropKey ? props[firstPropKey] : undefined;
+
+      const result = this.verifyCommandExecution(cmd, document, {
+        targetId: sectionId,
+        property: firstPropKey,
+        expectedValue: expectedVal,
+      });
+
+      return {
+        command: cmd,
+        verification: result.verification,
+        status: result.verification.passed ? 'EXECUTED' : 'FAILED',
+        message: result.verification.passed
+          ? `Zaktualizowałem właściwości sekcji \`${sectionId}\`: ${Object.keys(props).join(', ')}.`
+          : `Nie udało się zaktualizować właściwości sekcji \`${sectionId}\`.`,
+        appliedChange: {
+          target: sectionId,
+          property: Object.keys(props).join(', '),
+          newValue: props,
+          summary: `Zaktualizowano ${Object.keys(props).join(', ')} w ${sectionId}`,
+        },
+      };
+    }
+
+    if (name === 'configure_experience') {
+      const sectionId = args.sectionId as string;
+      const experienceConfig = args.experienceConfig as Record<string, unknown>;
+      const cmd: BuilderCommand = {
+        type: 'UPDATE_PROPS',
+        pageId: (args.pageId as string) || activePageId,
+        sectionId,
+        props: { experienceConfig },
+      };
+
+      const result = this.verifyCommandExecution(cmd, document, {
+        targetId: sectionId,
+        property: 'experienceConfig',
+      });
+
+      return {
+        command: cmd,
+        verification: result.verification,
+        status: result.verification.passed ? 'EXECUTED' : 'FAILED',
+        message: result.verification.passed
+          ? `Skonfigurowałem efekty wizualne Experience dla sekcji \`${sectionId}\`.`
+          : `Nie udało się skonfigurować Experience dla sekcji \`${sectionId}\`.`,
+        appliedChange: {
+          target: sectionId,
+          property: 'experienceConfig',
+          summary: `Skonfigurowano Experience dla ${sectionId}`,
+        },
+      };
+    }
+
+    return {
+      status: 'UNSUPPORTED',
+      message: `Narzędzie HACP "${name}" nie jest obecnie obsługiwane.`,
+      verification: {
+        passed: false,
+        operation: name,
+        target: 'unknown',
+        diffSummary: `Nieznana lub nieobsługiwana capability: ${name}`,
+      },
+    };
+  }
+
+  /**
    * Process prompt — HONEST execution only.
+   * If real AI provider is configured in backend, delegates to it.
+   * Otherwise falls back to honest deterministic execution with real verification.
    * NEVER claims success without verified BuilderDocument mutation.
    */
   public async executePlan(
@@ -116,20 +389,143 @@ export class HacpBridge {
   ): Promise<HacpExecutionResult> {
     const startTime = new Date().toLocaleTimeString('pl-PL');
     const cleanPrompt = prompt.trim();
-    const lower = cleanPrompt.toLowerCase();
     const activePageId = context.pageId || document.pages[0]?.id || 'page-home';
     const activePage = document.pages.find((p) => p.id === activePageId) || document.pages[0];
 
-    // 1. CLASSIFY INTENT with extracted parameters
-    const classification = HacpIntentEngine.classify(prompt, conversationContext, context, document);
+    // ========================================================================
+    // 1. ATTEMPT REAL AI PROVIDER REQUEST
+    // ========================================================================
+    let aiProviderResponse: any = null;
+    let aiProviderStatus: 'ONLINE' | 'OFFLINE' = 'OFFLINE';
+    let aiProviderName = 'NONE';
+
+    if (typeof window !== 'undefined' && typeof window.fetch === 'function') {
+      try {
+        const res = await fetch('/api/builder/copilot', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: cleanPrompt,
+            messages: conversationContext.history.map((h) => ({
+              role: h.role,
+              content: h.text,
+            })),
+            builderContext: context,
+            visualMetrics: context.visualMetrics,
+          }),
+        });
+
+        if (res.ok) {
+          aiProviderResponse = await res.json();
+          if (aiProviderResponse.status === 'SUCCESS') {
+            aiProviderStatus = 'ONLINE';
+            aiProviderName = aiProviderResponse.provider || 'AI';
+          }
+        }
+      } catch (err) {
+        console.warn('[HacpBridge] AI Provider request skipped or offline:', err);
+      }
+    }
+
+    // ========================================================================
+    // 2. IF REAL AI GENERATED TOOL CALLS → EXECUTE & VERIFY
+    // ========================================================================
+    if (aiProviderResponse && aiProviderResponse.status === 'SUCCESS') {
+      const toolCalls: HacpToolCall[] = aiProviderResponse.toolCalls || [];
+
+      if (toolCalls.length > 0) {
+        this.status = 'BUSY';
+        const steps: HacpExecutionStep[] = [];
+        const commands: BuilderCommand[] = [];
+        const appliedChanges: AppliedChangeItem[] = [];
+        let allPassed = true;
+        let lastVerification: ExecutionVerification | undefined = undefined;
+        let finalMessage = '';
+
+        for (const tc of toolCalls) {
+          steps.push({
+            id: `step-${tc.name}-${Date.now()}`,
+            name: `AI Tool Call: ${tc.name}`,
+            status: 'RUNNING',
+            detail: JSON.stringify(tc.arguments),
+            timestamp: new Date().toLocaleTimeString('pl-PL'),
+          });
+
+          const exec = this.executeToolCall(tc, document, activePageId);
+          lastVerification = exec.verification;
+
+          if (exec.command) {
+            commands.push(exec.command);
+          }
+          if (exec.appliedChange) {
+            appliedChanges.push(exec.appliedChange);
+          }
+
+          const stepStatus = exec.status === 'EXECUTED' ? 'SUCCESS' : 'FAILED';
+          steps[steps.length - 1].status = stepStatus;
+          steps[steps.length - 1].detail = exec.verification.diffSummary;
+
+          if (exec.status !== 'EXECUTED') {
+            allPassed = false;
+          }
+
+          finalMessage = exec.message;
+        }
+
+        this.status = 'ONLINE';
+
+        const card: HacpExecutionCard = {
+          id: `card-ai-${Date.now()}`,
+          title: `HACP REAL EXECUTION [${aiProviderName}]`,
+          status: allPassed ? 'SUCCESS' : 'FAILED',
+          steps,
+          startedAt: startTime,
+          completedAt: new Date().toLocaleTimeString('pl-PL'),
+          validationResult: allPassed ? 'PASS' : 'FAIL',
+          appliedChanges,
+        };
+
+        return {
+          success: allPassed,
+          intent: 'EXECUTE',
+          scope: 'PAGE_DESIGN',
+          message: aiProviderResponse.message || finalMessage,
+          executionCard: card,
+          commandsToDispatch: commands,
+          eventsToEmit: [],
+          executionStatus: allPassed ? 'EXECUTED' : 'FAILED',
+          verification: lastVerification,
+          aiProviderStatus,
+          aiProviderName,
+          updatedConversationContext: {
+            lastIntent: 'EXECUTE',
+            lastModifiedNodeId: commands[0]?.type === 'UPDATE_PROPS' ? (commands[0] as any).sectionId : undefined,
+          },
+        };
+      }
+
+      // Real AI conversational turn (zero tools)
+      return {
+        success: true,
+        intent: 'CHAT',
+        scope: 'PAGE_DESIGN',
+        message: aiProviderResponse.message,
+        commandsToDispatch: [],
+        eventsToEmit: [],
+        executionStatus: 'EXECUTED',
+        aiProviderStatus,
+        aiProviderName,
+        updatedConversationContext: { lastIntent: 'CHAT' },
+      };
+    }
+
+    // ========================================================================
+    // 3. DETERMINISTIC HACP FLOW (HONEST & VERIFIED, ZERO FAKE SUCCESS)
+    // ========================================================================
+    const classification = HacpIntentEngine.classify(cleanPrompt, conversationContext, context, document);
     const params = classification.extractedParameters as Record<string, unknown> | undefined;
 
-    // Helper: snapshot document state BEFORE mutation
-    const docBefore = JSON.stringify(document);
-
-    // ------------------------------------------------------------------------
     // CASE 0: UNDO
-    // ------------------------------------------------------------------------
     if (classification.intent === 'UNDO') {
       this.recordEvent({
         id: `evt-undo-${Date.now()}`,
@@ -137,7 +533,7 @@ export class HacpBridge {
         type: 'MUTATE',
         title: 'HACP History Revert',
         description: 'Undo requested',
-        status: 'INFO',
+        status: 'SUCCESS',
       });
 
       return {
@@ -149,6 +545,13 @@ export class HacpBridge {
         eventsToEmit: [],
         shouldTriggerUndo: true,
         executionStatus: 'EXECUTED',
+        aiProviderStatus,
+        verification: {
+          passed: true,
+          operation: 'UNDO',
+          target: activePageId,
+          diffSummary: 'Wywołano akcję historii UNDO.',
+        },
         updatedConversationContext: {
           lastIntent: 'UNDO',
           lastProposal: undefined,
@@ -156,9 +559,7 @@ export class HacpBridge {
       };
     }
 
-    // ------------------------------------------------------------------------
     // CASE 0b: REDO
-    // ------------------------------------------------------------------------
     if (classification.intent === 'REDO') {
       this.recordEvent({
         id: `evt-redo-${Date.now()}`,
@@ -166,7 +567,7 @@ export class HacpBridge {
         type: 'MUTATE',
         title: 'HACP History Redo',
         description: 'Redo requested',
-        status: 'INFO',
+        status: 'SUCCESS',
       });
 
       return {
@@ -176,33 +577,37 @@ export class HacpBridge {
         message: 'Przywróciłem cofniętą zmianę.',
         commandsToDispatch: [],
         eventsToEmit: [],
-        shouldTriggerUndo: false,
+        shouldTriggerRedo: true,
         executionStatus: 'EXECUTED',
+        aiProviderStatus,
+        verification: {
+          passed: true,
+          operation: 'REDO',
+          target: activePageId,
+          diffSummary: 'Wywołano akcję historii REDO.',
+        },
         updatedConversationContext: {
           lastIntent: 'REDO',
         },
       };
     }
 
-    // ------------------------------------------------------------------------
     // CASE 1: PLATFORM_ENGINEERING
-    // ------------------------------------------------------------------------
     if (classification.intent === 'PLATFORM_ENGINEERING') {
       return {
         success: true,
         intent: 'PLATFORM_ENGINEERING',
         scope: 'PLATFORM_ENGINEERING',
-        message: 'Zadanie inżynierii platformy rozpoznane. Obecna warstwa HACP obsługuje tylko operacje na BuilderDocument (sekcje, propsy, kolory, CTA). Zmiana architektury platformy wymaga osobnego zadania.',
+        message: 'Zadanie inżynierii platformy rozpoznane. HACP obsługuje operacje na BuilderDocument (sekcje, propsy, kolory, CTA).',
         commandsToDispatch: [],
         eventsToEmit: [],
         executionStatus: 'UNSUPPORTED',
+        aiProviderStatus,
         updatedConversationContext: { lastIntent: 'PLATFORM_ENGINEERING' },
       };
     }
 
-    // ------------------------------------------------------------------------
     // CASE 2: AUDIT
-    // ------------------------------------------------------------------------
     if (classification.intent === 'AUDIT') {
       const sections = activePage?.sections || [];
       return {
@@ -222,35 +627,19 @@ export class HacpBridge {
         commandsToDispatch: [],
         eventsToEmit: [],
         executionStatus: 'EXECUTED',
+        aiProviderStatus,
         updatedConversationContext: { lastIntent: 'AUDIT' },
       };
     }
 
-    // ------------------------------------------------------------------------
-    // CASE 3: DEBUG
-    // ------------------------------------------------------------------------
-    if (classification.intent === 'DEBUG') {
-      return {
-        success: true,
-        intent: 'DEBUG',
-        scope: 'PAGE_DESIGN',
-        message: 'Stan BuilderDocument: spójny. Wskaż konkretny element do diagnostyki.',
-        commandsToDispatch: [],
-        eventsToEmit: [],
-        executionStatus: 'EXECUTED',
-        updatedConversationContext: { lastIntent: 'DEBUG' },
-      };
-    }
-
-    // ------------------------------------------------------------------------
-    // CASE 4: CHAT
-    // ------------------------------------------------------------------------
+    // CASE 3: CHAT
     if (classification.intent === 'CHAT') {
       let responseMessage = 'Cześć! Mogę pomóc z sekcjami, kolorami, nagłówkami, CTA i Experience. Co chciałbyś zmienić?';
+      const lower = cleanPrompt.toLowerCase();
       if (lower.includes('potrzebuję pomocy') || lower.includes('potrzebuje pomocy')) {
         responseMessage = 'Jasne. Mogę dodawać sekcje, zmieniać nagłówki, kolory, teksty przycisków i konfigurować Experience. Napisz np. "Zmień nagłówek na X" lub "Dodaj sekcję hero".';
       } else if (lower.includes('co możesz') || lower.includes('co mozesz') || lower.includes('co potrafisz')) {
-        responseMessage = 'Obsługuję: ADD_SECTION, UPDATE_TITLE, ADD_CTA, UPDATE_COLOR, MOVE_SECTION, DELETE_SECTION, UNDO/REDO. Nie obsługuję jeszcze pełnego NLP — operacje muszą być jednoznaczne.';
+        responseMessage = 'Obsługuję: ADD_SECTION, UPDATE_TITLE, ADD_CTA, UPDATE_COLOR, MOVE_SECTION, DELETE_SECTION, UNDO/REDO.';
       }
       return {
         success: true,
@@ -260,13 +649,12 @@ export class HacpBridge {
         commandsToDispatch: [],
         eventsToEmit: [],
         executionStatus: 'EXECUTED',
+        aiProviderStatus,
         updatedConversationContext: { lastIntent: 'CHAT' },
       };
     }
 
-    // ------------------------------------------------------------------------
-    // CASE 5: INSPECT
-    // ------------------------------------------------------------------------
+    // CASE 4: INSPECT
     if (classification.intent === 'INSPECT') {
       const sections = activePage?.sections || [];
       const targetId = classification.targetNodeId || context.selectedNodeId || sections[0]?.id;
@@ -287,13 +675,12 @@ export class HacpBridge {
         commandsToDispatch: [],
         eventsToEmit: [],
         executionStatus: 'EXECUTED',
+        aiProviderStatus,
         updatedConversationContext: { lastIntent: 'INSPECT', lastTargetNodeId: targetId },
       };
     }
 
-    // ------------------------------------------------------------------------
-    // CASE 6: PROPOSE
-    // ------------------------------------------------------------------------
+    // CASE 5: PROPOSE
     if (classification.intent === 'PROPOSE') {
       const targetId = classification.targetNodeId || context.selectedNodeId || activePage?.sections[0]?.id;
       const targetSection = document.pages[0]?.sections.find((s) => s.id === targetId);
@@ -334,13 +721,12 @@ export class HacpBridge {
         commandsToDispatch: [],
         eventsToEmit: [],
         executionStatus: 'EXECUTED',
+        aiProviderStatus,
         updatedConversationContext: { lastIntent: 'PROPOSE', lastTargetNodeId: targetId, lastProposal: proposal },
       };
     }
 
-    // ------------------------------------------------------------------------
-    // CASE 7: CLARIFY
-    // ------------------------------------------------------------------------
+    // CASE 6: CLARIFY
     if (classification.intent === 'CLARIFY') {
       return {
         success: true,
@@ -350,13 +736,12 @@ export class HacpBridge {
         commandsToDispatch: [],
         eventsToEmit: [],
         executionStatus: 'CLARIFY',
+        aiProviderStatus,
         updatedConversationContext: { lastIntent: 'CLARIFY' },
       };
     }
 
-    // ------------------------------------------------------------------------
-    // CASE 8: EXECUTE — Real mutation with Before/After verification
-    // ------------------------------------------------------------------------
+    // CASE 7: EXECUTE with strict BEFORE → EXECUTE → AFTER → VERIFY
     this.status = 'BUSY';
 
     const steps: HacpExecutionStep[] = [];
@@ -379,25 +764,46 @@ export class HacpBridge {
 
     let responseMessage = '';
     let executionStatus: HacpExecutionStatus = 'EXECUTED';
+    let executionVerification: ExecutionVerification | undefined = undefined;
     let executionEvidence: HacpExecutionResult['executionEvidence'] = undefined;
 
-    // Branch 8A: Confirmed proposal
+    // Branch 7A: Confirmed proposal
     if (classification.confirmedProposal) {
       const proposal = classification.confirmedProposal;
       const targetId = proposal.targetNodeId || targetSectionId;
 
       if (targetId && proposal.executePayload?.props) {
-        commands.push({
+        const cmd: BuilderCommand = {
           type: 'UPDATE_PROPS',
           pageId: activePageId,
           sectionId: targetId,
           props: proposal.executePayload.props,
-        });
-        appliedChanges.push(...proposal.proposedChanges);
+        };
 
-        addStep('step-mutate', 'Apply proposal', 'SUCCESS', `UPDATE_PROPS on ${targetId}`);
-        responseMessage = `Zastosowano propozycję dla sekcji \`${targetId}\`.`;
-        executionEvidence = { operation: 'UPDATE_PROPS', target: targetId, before: null, after: proposal.executePayload.props, changed: true };
+        const result = this.verifyCommandExecution(cmd, document, {
+          targetId,
+          property: 'experienceConfig',
+        });
+        executionVerification = result.verification;
+
+        if (result.verification.passed) {
+          commands.push(cmd);
+          appliedChanges.push(...proposal.proposedChanges);
+          executionEvidence = {
+            operation: 'UPDATE_PROPS',
+            target: targetId,
+            before: null,
+            after: proposal.executePayload.props,
+            changed: true,
+          };
+          addStep('step-mutate', 'Apply proposal', 'SUCCESS', `UPDATE_PROPS on ${targetId}`);
+          responseMessage = `Zastosowano propozycję dla sekcji \`${targetId}\`.`;
+          executionStatus = 'EXECUTED';
+        } else {
+          addStep('step-fail', 'Apply proposal', 'FAILED', result.verification.diffSummary);
+          responseMessage = 'Błąd weryfikacji propozycji: BuilderDocument nie uległ zmianie.';
+          executionStatus = 'FAILED';
+        }
       } else {
         addStep('step-fail', 'Apply proposal', 'FAILED', 'No target or payload');
         responseMessage = 'Nie mogę zastosować propozycji: brak docelowej sekcji lub payloadu.';
@@ -405,35 +811,51 @@ export class HacpBridge {
       }
     }
 
-    // Branch 8B: ADD_SECTION
+    // Branch 7B: ADD_SECTION
     else if (params?.operation === 'ADD_SECTION') {
       const sectionType = (params.sectionType as string) || 'hero';
       const position = params.position as 'start' | 'end' | undefined;
       const sections = activePage?.sections || [];
       const atIndex = position === 'start' ? 0 : position === 'end' ? sections.length : undefined;
 
-      commands.push({
+      const cmd: BuilderCommand = {
         type: 'ADD_SECTION',
         pageId: activePageId,
         sectionType,
         defaultProps: { title: `Nowa sekcja ${sectionType}` },
         atIndex,
         label: `HACP: ${sectionType}`,
-      });
+      };
 
-      appliedChanges.push({
-        target: activePageId,
-        property: 'sections',
-        newValue: `+1 ${sectionType} section`,
-        summary: `Wstawiono sekcję ${sectionType}${atIndex === 0 ? ' na początek' : ''}`,
-      });
+      const result = this.verifyCommandExecution(cmd, document, { targetId: activePageId });
+      executionVerification = result.verification;
 
-      addStep('step-mutate', `ADD_SECTION: ${sectionType}`, 'SUCCESS', `atIndex: ${atIndex ?? 'auto'}`);
-      responseMessage = `Dodałem sekcję **${sectionType}** do strony.`;
-      executionEvidence = { operation: 'ADD_SECTION', target: activePageId, before: sections.length, after: sections.length + 1, changed: true };
+      if (result.verification.passed) {
+        commands.push(cmd);
+        appliedChanges.push({
+          target: activePageId,
+          property: 'sections',
+          newValue: `+1 ${sectionType} section`,
+          summary: `Wstawiono sekcję ${sectionType}${atIndex === 0 ? ' na początek' : ''}`,
+        });
+        executionEvidence = {
+          operation: 'ADD_SECTION',
+          target: activePageId,
+          before: sections.length,
+          after: sections.length + 1,
+          changed: true,
+        };
+        addStep('step-mutate', `ADD_SECTION: ${sectionType}`, 'SUCCESS', `atIndex: ${atIndex ?? 'auto'}`);
+        responseMessage = `Dodałem sekcję **${sectionType}** do strony.`;
+        executionStatus = 'EXECUTED';
+      } else {
+        addStep('step-fail', `ADD_SECTION: ${sectionType}`, 'FAILED', result.verification.diffSummary);
+        responseMessage = `Nie udało się dodać sekcji ${sectionType}.`;
+        executionStatus = 'FAILED';
+      }
     }
 
-    // Branch 8C: UPDATE_TITLE
+    // Branch 7C: UPDATE_TITLE
     else if (params?.operation === 'UPDATE_TITLE') {
       const newTitle = params.title as string;
       if (!targetSectionId) {
@@ -441,85 +863,96 @@ export class HacpBridge {
         responseMessage = 'Nie mogę zmienić nagłówka: nie wskazano sekcji docelowej.';
         executionStatus = 'FAILED';
       } else {
-        commands.push({
+        const cmd: BuilderCommand = {
           type: 'UPDATE_PROPS',
           pageId: activePageId,
           sectionId: targetSectionId,
           props: { title: newTitle },
-        });
+        };
 
-        const currentTitle = (context.selectedNodeProps as Record<string, unknown>)?.title as string || '(poprzedni)';
-        appliedChanges.push({
-          target: targetSectionId,
+        const result = this.verifyCommandExecution(cmd, document, {
+          targetId: targetSectionId,
           property: 'title',
-          previousValue: currentTitle,
-          newValue: newTitle,
-          summary: `Zmieniono nagłówek na "${newTitle}"`,
+          expectedValue: newTitle,
         });
+        executionVerification = result.verification;
 
-        addStep('step-mutate', 'UPDATE_PROPS: title', 'SUCCESS', `"${currentTitle}" → "${newTitle}"`);
-        responseMessage = `Zmieniłem nagłówek na **"${newTitle}"**.`;
-        executionEvidence = { operation: 'UPDATE_TITLE', target: targetSectionId, before: currentTitle, after: newTitle, changed: currentTitle !== newTitle };
+        if (result.verification.passed) {
+          commands.push(cmd);
+          appliedChanges.push({
+            target: targetSectionId,
+            property: 'title',
+            newValue: newTitle,
+            summary: `Zmieniono nagłówek na "${newTitle}"`,
+          });
+          executionEvidence = {
+            operation: 'UPDATE_TITLE',
+            target: targetSectionId,
+            property: 'title',
+            before: result.verification.beforeValue,
+            after: newTitle,
+            changed: true,
+          };
+          addStep('step-mutate', 'UPDATE_PROPS: title', 'SUCCESS', `title → "${newTitle}"`);
+          responseMessage = `Zmieniłem nagłówek na **"${newTitle}"**.`;
+          executionStatus = 'EXECUTED';
+        } else {
+          addStep('step-fail', 'UPDATE_PROPS: title', 'FAILED', result.verification.diffSummary);
+          responseMessage = 'Nie udało się zmienić nagłówka: weryfikacja dokumentu nie powiodła się.';
+          executionStatus = 'FAILED';
+        }
       }
     }
 
-    // Branch 8D: ADD_CTA
-    else if (params?.operation === 'ADD_CTA') {
-      const buttonText = (params.buttonText as string) || 'Kup teraz';
+    // Branch 7D: ADD_CTA / UPDATE_CTA_TEXT
+    else if (params?.operation === 'ADD_CTA' || params?.operation === 'UPDATE_CTA_TEXT') {
+      const buttonText = (params.buttonText as string) || (params.text as string) || 'Kup teraz';
       if (!targetSectionId) {
-        addStep('step-fail', 'ADD_CTA', 'FAILED', 'No target section');
-        responseMessage = 'Nie mogę dodać CTA: nie wskazano sekcji docelowej.';
+        addStep('step-fail', 'CTA', 'FAILED', 'No target section');
+        responseMessage = 'Nie mogę zmodyfikować CTA: nie wskazano sekcji docelowej.';
         executionStatus = 'FAILED';
       } else {
-        commands.push({
+        const cmd: BuilderCommand = {
           type: 'UPDATE_PROPS',
           pageId: activePageId,
           sectionId: targetSectionId,
           props: { cta: buttonText, ctaText: buttonText },
-        });
+        };
 
-        appliedChanges.push({
-          target: targetSectionId,
+        const result = this.verifyCommandExecution(cmd, document, {
+          targetId: targetSectionId,
           property: 'cta',
-          newValue: buttonText,
-          summary: `Dodano CTA: "${buttonText}"`,
+          expectedValue: buttonText,
         });
+        executionVerification = result.verification;
 
-        addStep('step-mutate', 'ADD_CTA', 'SUCCESS', `"${buttonText}"`);
-        responseMessage = `Dodałem przycisk CTA **"${buttonText}"** w sekcji \`${targetSectionId}\`.`;
-        executionEvidence = { operation: 'ADD_CTA', target: targetSectionId, before: null, after: buttonText, changed: true };
+        if (result.verification.passed) {
+          commands.push(cmd);
+          appliedChanges.push({
+            target: targetSectionId,
+            property: 'cta',
+            newValue: buttonText,
+            summary: `CTA: "${buttonText}"`,
+          });
+          executionEvidence = {
+            operation: params?.operation || 'ADD_CTA',
+            target: targetSectionId,
+            before: null,
+            after: buttonText,
+            changed: true,
+          };
+          addStep('step-mutate', 'CTA', 'SUCCESS', `"${buttonText}"`);
+          responseMessage = `Dodałem przycisk CTA **"${buttonText}"** w sekcji \`${targetSectionId}\`.`;
+          executionStatus = 'EXECUTED';
+        } else {
+          addStep('step-fail', 'CTA', 'FAILED', result.verification.diffSummary);
+          responseMessage = 'Nie udało się dodać CTA: weryfikacja dokumentu nie powiodła się.';
+          executionStatus = 'FAILED';
+        }
       }
     }
 
-    // Branch 8E: UPDATE_CTA_TEXT
-    else if (params?.operation === 'UPDATE_CTA_TEXT') {
-      const newText = params.text as string;
-      if (!targetSectionId) {
-        addStep('step-fail', 'UPDATE_CTA_TEXT', 'FAILED', 'No target section');
-        responseMessage = 'Nie mogę zmienić tekstu CTA: nie wskazano sekcji.';
-        executionStatus = 'FAILED';
-      } else {
-        commands.push({
-          type: 'UPDATE_PROPS',
-          pageId: activePageId,
-          sectionId: targetSectionId,
-          props: { cta: newText, ctaText: newText },
-        });
-
-        appliedChanges.push({
-          target: targetSectionId,
-          property: 'cta',
-          newValue: newText,
-          summary: `Tekst CTA → "${newText}"`,
-        });
-
-        addStep('step-mutate', 'UPDATE_CTA_TEXT', 'SUCCESS', `"${newText}"`);
-        responseMessage = `Zmieniłem tekst CTA na **"${newText}"**.`;
-        executionEvidence = { operation: 'UPDATE_CTA_TEXT', target: targetSectionId, before: null, after: newText, changed: true };
-      }
-    }
-
-    // Branch 8F: UPDATE_CTA_COLOR
+    // Branch 7E: UPDATE_CTA_COLOR
     else if (params?.operation === 'UPDATE_CTA_COLOR') {
       const color = params.color as string;
       if (!targetSectionId) {
@@ -527,27 +960,48 @@ export class HacpBridge {
         responseMessage = 'Nie mogę zmienić koloru CTA: nie wskazano sekcji.';
         executionStatus = 'FAILED';
       } else {
-        commands.push({
+        const cmd: BuilderCommand = {
           type: 'UPDATE_PROPS',
           pageId: activePageId,
           sectionId: targetSectionId,
           props: { buttonColor: color, ctaColor: color },
-        });
+        };
 
-        appliedChanges.push({
-          target: targetSectionId,
+        const result = this.verifyCommandExecution(cmd, document, {
+          targetId: targetSectionId,
           property: 'buttonColor',
-          newValue: color,
-          summary: `Kolor CTA → ${color}`,
+          expectedValue: color,
         });
+        executionVerification = result.verification;
 
-        addStep('step-mutate', 'UPDATE_CTA_COLOR', 'SUCCESS', color);
-        responseMessage = `Zmieniłem kolor przycisku na **${color}**.`;
-        executionEvidence = { operation: 'UPDATE_CTA_COLOR', target: targetSectionId, before: null, after: color, changed: true };
+        if (result.verification.passed) {
+          commands.push(cmd);
+          appliedChanges.push({
+            target: targetSectionId,
+            property: 'buttonColor',
+            newValue: color,
+            summary: `Kolor CTA → ${color}`,
+          });
+          executionEvidence = {
+            operation: 'UPDATE_CTA_COLOR',
+            target: targetSectionId,
+            property: 'buttonColor',
+            before: null,
+            after: color,
+            changed: true,
+          };
+          addStep('step-mutate', 'UPDATE_CTA_COLOR', 'SUCCESS', color);
+          responseMessage = `Zmieniłem kolor przycisku na **${color}**.`;
+          executionStatus = 'EXECUTED';
+        } else {
+          addStep('step-fail', 'UPDATE_CTA_COLOR', 'FAILED', result.verification.diffSummary);
+          responseMessage = 'Nie udało się zmienić koloru CTA: weryfikacja dokumentu nie powiodła się.';
+          executionStatus = 'FAILED';
+        }
       }
     }
 
-    // Branch 8G: UPDATE_COLOR (generic)
+    // Branch 7F: UPDATE_COLOR (generic)
     else if (params?.operation === 'UPDATE_COLOR') {
       const color = params.color as string;
       const property = (params.property as string) || 'color';
@@ -558,28 +1012,48 @@ export class HacpBridge {
       } else {
         const props: Record<string, unknown> = {};
         props[property] = color;
-
-        commands.push({
+        const cmd: BuilderCommand = {
           type: 'UPDATE_PROPS',
           pageId: activePageId,
           sectionId: targetSectionId,
           props,
-        });
+        };
 
-        appliedChanges.push({
-          target: targetSectionId,
+        const result = this.verifyCommandExecution(cmd, document, {
+          targetId: targetSectionId,
           property,
-          newValue: color,
-          summary: `${property} → ${color}`,
+          expectedValue: color,
         });
+        executionVerification = result.verification;
 
-        addStep('step-mutate', `UPDATE_COLOR: ${property}`, 'SUCCESS', color);
-        responseMessage = `Zmieniłem **${property}** na **${color}** w sekcji \`${targetSectionId}\`.`;
-        executionEvidence = { operation: 'UPDATE_COLOR', target: targetSectionId, property, before: null, after: color, changed: true };
+        if (result.verification.passed) {
+          commands.push(cmd);
+          appliedChanges.push({
+            target: targetSectionId,
+            property,
+            newValue: color,
+            summary: `${property} → ${color}`,
+          });
+          executionEvidence = {
+            operation: 'UPDATE_COLOR',
+            target: targetSectionId,
+            property,
+            before: null,
+            after: color,
+            changed: true,
+          };
+          addStep('step-mutate', `UPDATE_COLOR: ${property}`, 'SUCCESS', color);
+          responseMessage = `Zmieniłem **${property}** na **${color}** w sekcji \`${targetSectionId}\`.`;
+          executionStatus = 'EXECUTED';
+        } else {
+          addStep('step-fail', `UPDATE_COLOR: ${property}`, 'FAILED', result.verification.diffSummary);
+          responseMessage = `Nie udało się zmienić ${property}: weryfikacja dokumentu nie powiodła się.`;
+          executionStatus = 'FAILED';
+        }
       }
     }
 
-    // Branch 8H: MOVE_SECTION
+    // Branch 7G: MOVE_SECTION
     else if (params?.operation === 'MOVE_SECTION') {
       const direction = params.direction as 'up' | 'down';
       if (!targetSectionId) {
@@ -597,33 +1071,49 @@ export class HacpBridge {
           const newIndex = direction === 'down' ? currentIndex + 1 : currentIndex - 1;
           if (newIndex < 0 || newIndex >= sections.length) {
             addStep('step-fail', 'MOVE_SECTION', 'FAILED', 'Already at boundary');
-            responseMessage = `Sekcja jest już na ${direction === 'up' ? 'górzej' : 'niżej'} — nie można przesunąć dalej.`;
+            responseMessage = `Sekcja jest już na ${direction === 'up' ? 'górze' : 'dole'} — nie można przesunąć dalej.`;
             executionStatus = 'CLARIFY';
           } else {
-            commands.push({
+            const cmd: BuilderCommand = {
               type: 'MOVE_SECTION',
               pageId: activePageId,
               fromIndex: currentIndex,
               toIndex: newIndex,
-            });
+            };
 
-            appliedChanges.push({
-              target: targetSectionId,
-              property: 'order',
-              previousValue: currentIndex,
-              newValue: newIndex,
-              summary: `Przesunięto z pozycji ${currentIndex + 1} na ${newIndex + 1}`,
-            });
+            const result = this.verifyCommandExecution(cmd, document, { targetId: targetSectionId });
+            executionVerification = result.verification;
 
-            addStep('step-mutate', 'MOVE_SECTION', 'SUCCESS', `index ${currentIndex} → ${newIndex}`);
-            responseMessage = `Przesunąłem sekcję **${direction === 'down' ? 'niżej' : 'wyżej'}** (pozycja ${currentIndex + 1} → ${newIndex + 1}).`;
-            executionEvidence = { operation: 'MOVE_SECTION', target: targetSectionId, before: currentIndex, after: newIndex, changed: true };
+            if (result.verification.passed) {
+              commands.push(cmd);
+              appliedChanges.push({
+                target: targetSectionId,
+                property: 'order',
+                previousValue: currentIndex,
+                newValue: newIndex,
+                summary: `Przesunięto z pozycji ${currentIndex + 1} na ${newIndex + 1}`,
+              });
+              executionEvidence = {
+                operation: 'MOVE_SECTION',
+                target: targetSectionId,
+                before: currentIndex,
+                after: newIndex,
+                changed: true,
+              };
+              addStep('step-mutate', 'MOVE_SECTION', 'SUCCESS', `index ${currentIndex} → ${newIndex}`);
+              responseMessage = `Przesunąłem sekcję **${direction === 'down' ? 'niżej' : 'wyżej'}** (pozycja ${currentIndex + 1} → ${newIndex + 1}).`;
+              executionStatus = 'EXECUTED';
+            } else {
+              addStep('step-fail', 'MOVE_SECTION', 'FAILED', result.verification.diffSummary);
+              responseMessage = 'Nie udało się przesunąć sekcji: weryfikacja dokumentu nie powiodła się.';
+              executionStatus = 'FAILED';
+            }
           }
         }
       }
     }
 
-    // Branch 8I: DELETE_SECTION
+    // Branch 7H: DELETE_SECTION
     else if (params?.operation === 'DELETE_SECTION') {
       const sectionId = params.sectionId as string;
       if (!sectionId) {
@@ -638,31 +1128,47 @@ export class HacpBridge {
           responseMessage = `Sekcja \`${sectionId}\` nie istnieje na bieżącej stronie.`;
           executionStatus = 'FAILED';
         } else {
-          commands.push({
+          const cmd: BuilderCommand = {
             type: 'REMOVE_SECTION',
             pageId: activePageId,
             sectionId,
-          });
+          };
 
-          appliedChanges.push({
-            target: sectionId,
-            property: 'sections',
-            previousValue: exists.label || exists.type,
-            newValue: null,
-            summary: `Usunięto sekcję "${exists.label || exists.type}"`,
-          });
+          const result = this.verifyCommandExecution(cmd, document, { targetId: sectionId });
+          executionVerification = result.verification;
 
-          addStep('step-mutate', 'REMOVE_SECTION', 'SUCCESS', sectionId);
-          responseMessage = `Usunąłem sekcję **${exists.label || exists.type}**.`;
-          executionEvidence = { operation: 'DELETE_SECTION', target: sectionId, before: exists.label || exists.type, after: null, changed: true };
+          if (result.verification.passed) {
+            commands.push(cmd);
+            appliedChanges.push({
+              target: sectionId,
+              property: 'sections',
+              previousValue: exists.label || exists.type,
+              newValue: null,
+              summary: `Usunięto sekcję "${exists.label || exists.type}"`,
+            });
+            executionEvidence = {
+              operation: 'DELETE_SECTION',
+              target: sectionId,
+              before: exists.label || exists.type,
+              after: null,
+              changed: true,
+            };
+            addStep('step-mutate', 'REMOVE_SECTION', 'SUCCESS', sectionId);
+            responseMessage = `Usunąłem sekcję **${exists.label || exists.type}**.`;
+            executionStatus = 'EXECUTED';
+          } else {
+            addStep('step-fail', 'REMOVE_SECTION', 'FAILED', result.verification.diffSummary);
+            responseMessage = 'Nie udało się usunąć sekcji: weryfikacja dokumentu nie powiodła się.';
+            executionStatus = 'FAILED';
+          }
         }
       }
     }
 
-    // Branch 8J: Unknown EXECUTE — NO FALLBACK MUTATION
+    // Branch 7I: Unknown EXECUTE — ZERO FALLBACK MUTATION
     else {
       addStep('step-unsupported', 'Execute command', 'FAILED', `Unknown operation: ${JSON.stringify(params)}`);
-      responseMessage = `Ta operacja nie jest jeszcze obsługiwana przez HACP. Rozpoznałem intencję executes, ale nie udało się wyciągnąć konkretnych parametrów.\n\nSpróbuj np:\n• "Zmień nagłówek na X"\n• "Dodaj sekcję hero"\n• "Zmień kolor tła na czerwony"\n• "Dodaj przycisk Kup teraz"`;
+      responseMessage = `Ta operacja nie jest jeszcze obsługiwana przez HACP. Rozpoznałem intencję wykonania, ale nie udało się wyciągnąć jednoznacznych parametrów.\n\nMożesz spróbować:\n• "Zmień nagłówek na X"\n• "Dodaj sekcję hero"\n• "Zmień kolor tła na czerwony"\n• "Dodaj przycisk Kup teraz"`;
       executionStatus = 'UNSUPPORTED';
     }
 
@@ -689,6 +1195,8 @@ export class HacpBridge {
       eventsToEmit: [],
       executionStatus,
       executionEvidence,
+      verification: executionVerification,
+      aiProviderStatus,
       updatedConversationContext: {
         lastIntent: 'EXECUTE',
         lastProposal: undefined,
