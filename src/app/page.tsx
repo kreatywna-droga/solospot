@@ -77,12 +77,14 @@ function Nav() {
             : 'bg-[#080B10]/60 backdrop-blur-md border-b border-white/[0.04]'
         }`}
       >
-        <div className="relative max-w-6xl mx-auto px-6 sm:px-8 h-20 flex items-center justify-between">
+        <div className="relative w-full max-w-7xl 2xl:max-w-[1440px] mx-auto px-6 sm:px-8 xl:px-12 h-20 flex items-center justify-between">
           {/* Logo Area */}
-          <Logo size="md" />
+          <div className="flex-shrink-0 flex items-center">
+            <Logo size="md" />
+          </div>
 
           {/* Centered Minimalist Navigation */}
-          <nav className="hidden lg:flex items-center gap-5 xl:gap-7">
+          <nav className="hidden lg:flex items-center justify-center gap-5 xl:gap-7 2xl:gap-8 flex-shrink-0">
             {links.map((l) => (
               <a
                 key={l.label}
@@ -95,7 +97,7 @@ function Nav() {
           </nav>
 
           {/* Right Area: Search, Auth, CTA & Menu */}
-          <div className="flex items-center gap-2.5 sm:gap-3.5">
+          <div className="flex-shrink-0 flex items-center gap-2.5 sm:gap-3.5">
             {/* Search Icon Trigger */}
             <button
               type="button"
