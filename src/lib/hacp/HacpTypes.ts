@@ -161,6 +161,7 @@ export interface HacpBuilderContext {
   viewport: 'DESKTOP' | 'TABLET' | 'MOBILE';
   documentNodeCount: number;
   availableCapabilitiesCount: number;
+  sectionsSummary?: Array<{ id: string; type: string; label?: string }>;
   visualMetrics?: HacpVisualMetrics;
   layoutDiagnostics?: HacpLayoutDiagnostics;
   recentMutation?: string;

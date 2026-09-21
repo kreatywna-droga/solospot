@@ -46,6 +46,13 @@ export async function POST(req: NextRequest) {
       ? `Wymiary zaznaczonego elementu: szerokość ${visualMetrics.width}px, wysokość ${visualMetrics.height}px, pozycja top: ${visualMetrics.top}px, left: ${visualMetrics.left}px. Aspect ratio: ${visualMetrics.aspectRatio}.`
       : 'Brak dokładnych współrzędnych wizualnych DOM.';
 
+    const sectionsList =
+      Array.isArray(builderContext.sectionsSummary) && builderContext.sectionsSummary.length > 0
+        ? `Sekcje na bieżącej stronie w dokumencie: ${builderContext.sectionsSummary
+            .map((s: any) => `ID="${s.id}" (typ: ${s.type}${s.label ? `, nazwa: "${s.label}"` : ''})`)
+            .join(', ')}.`
+        : '';
+
     const systemPrompt = `Jesteś SoloSpot AI Co-Builder — zaawansowanym partnerem projektowym i inżynieryjnym działającym wewnątrz SoloSpot Visual Builder.
 
 KONTEKST BUILDERA NA ŻYWO (LIVE BUILDER CONTEXT):
@@ -54,6 +61,7 @@ KONTEKST BUILDERA NA ŻYWO (LIVE BUILDER CONTEXT):
 - Viewport: ${builderContext.viewport || 'DESKTOP'}
 - Narzędzie aktywne: ${builderContext.activeTool || 'SELECT'}
 - ${selectedInfo}
+- ${sectionsList}
 - ${visualInfo}
 
 ZASADY POSTĘPOWANIA:

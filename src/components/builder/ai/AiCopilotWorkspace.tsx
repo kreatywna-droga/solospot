@@ -199,6 +199,7 @@ export function AiCopilotWorkspace() {
       experienceConfig: selectedNodeInfo?.experienceConfig,
       viewport: (canvas.viewport?.label as any) || 'DESKTOP',
       documentNodeCount: activePage?.sections?.length || 0,
+      sectionsSummary: (activePage?.sections || []).map((s) => ({ id: s.id, type: s.type, label: s.label })),
       availableCapabilitiesCount: capabilities.filter((c) => c.available).length,
       visualMetrics,
       recentMutation,

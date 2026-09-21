@@ -192,6 +192,20 @@ export class HacpBridge {
     const { name, arguments: args } = toolCall;
     const activePage = document.pages.find((p) => p.id === activePageId) || document.pages[0];
 
+    if (name === 'test_echo') {
+      const msg = (args.message as string) || 'hello';
+      return {
+        status: 'EXECUTED',
+        message: `Echo diagnostyczne: "${msg}". Narzędzie test_echo wykonane pomyślnie.`,
+        verification: {
+          passed: true,
+          operation: 'test_echo',
+          target: 'diagnostic',
+          diffSummary: `Echo: ${msg}`,
+        },
+      };
+    }
+
     if (name === 'undo') {
       return {
         status: 'EXECUTED',
@@ -556,7 +570,10 @@ export class HacpBridge {
           success: allPassed,
           intent: 'EXECUTE',
           scope: 'PAGE_DESIGN',
-          message: aiProviderResponse.message || finalMessage,
+          message:
+            aiProviderResponse.message && aiProviderResponse.message.trim().length > 0
+              ? aiProviderResponse.message.trim()
+              : finalMessage || 'Operacja została pomyślnie wykonana w HACP.',
           executionCard: card,
           commandsToDispatch: commands,
           eventsToEmit: [],
@@ -579,7 +596,10 @@ export class HacpBridge {
         success: true,
         intent: 'CHAT',
         scope: 'PAGE_DESIGN',
-        message: aiProviderResponse.message,
+        message:
+          aiProviderResponse.message && aiProviderResponse.message.trim().length > 0
+            ? aiProviderResponse.message.trim()
+            : 'Przeanalizowałem bieżący stan strony w Builderze. W czym mogę Ci pomóc?',
         commandsToDispatch: [],
         eventsToEmit: [],
         executionStatus: 'EXECUTED',

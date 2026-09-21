@@ -9,6 +9,20 @@ import type { HacpToolDefinition } from './AIProviderTypes';
 
 export const BUILDER_TOOL_DEFINITIONS: HacpToolDefinition[] = [
   {
+    name: 'test_echo',
+    description: 'Narzędzie diagnostyczne. Zwraca echo przekazanej wiadomości tekstowej.',
+    parameters: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+          description: 'Wiadomość testowa.',
+        },
+      },
+      required: ['message'],
+    },
+  },
+  {
     name: 'read_builder_document',
     description: 'Odczytaj aktualne metadane dokumentu, listę stron oraz globalny motyw sklepu.',
     parameters: {

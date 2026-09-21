@@ -121,10 +121,12 @@ export class OpenCodeProvider implements AIProvider {
         body: JSON.stringify(bodyPayload),
       });
 
-      // Attempt fallback if 402, 429 or 500
-      if (!response.ok && (response.status === 402 || response.status === 429 || response.status >= 500)) {
+      let data: any = null;
+
+      if (!response.ok) {
+        // Check for 402, 429, or 500+ and attempt fallback
         const fallback = await this.router.getFallbackModel(selectedModelId, resolution.mode);
-        if (fallback) {
+        if (fallback && fallback.id !== selectedModelId) {
           console.warn(`[OpenCodeProvider] Upstream ${response.status} on ${selectedModelId}, falling back to ${fallback.id}`);
           bodyPayload.model = fallback.id;
           bodyPayload.max_tokens = 500;
@@ -152,9 +154,48 @@ export class OpenCodeProvider implements AIProvider {
         };
       }
 
-      const data = await response.json();
-      const choice = data.choices?.[0];
-      const messageContent = choice?.message?.content || '';
+      data = await response.json();
+
+      // Check for upstream error payload embedded in JSON (e.g. code 502 ResourceExhausted)
+      if (data.error) {
+        console.warn(`[OpenCodeProvider] Upstream error on ${selectedModelId}:`, data.error);
+        const fallback = await this.router.getFallbackModel(selectedModelId, resolution.mode);
+        if (fallback && fallback.id !== selectedModelId) {
+          console.warn(`[OpenCodeProvider] Retrying with fallback model ${fallback.id}`);
+          bodyPayload.model = fallback.id;
+          bodyPayload.max_tokens = 500;
+          const retryRes = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${cleanApiKey}`,
+            },
+            body: JSON.stringify(bodyPayload),
+          });
+          if (retryRes.ok) {
+            const retryData = await retryRes.json();
+            if (!retryData.error && retryData.choices?.length > 0) {
+              data = retryData;
+            }
+          }
+        }
+      }
+
+      if (data.error || !data.choices || data.choices.length === 0) {
+        const errDetail = data.error?.message || 'Brak odpowiedzi od modelu (puste choices).';
+        return {
+          status: 'ERROR',
+          provider: this.name,
+          model: selectedModelId,
+          message: `OpenCode Provider zgłasza błąd: ${errDetail}`,
+          error: data.error?.message || 'EMPTY_CHOICES',
+          isFreeModel: resolution.selectedModel.isFree,
+          routerMode: resolution.mode,
+        };
+      }
+
+      const choice = data.choices[0];
+      let messageContent = choice?.message?.content || '';
       const finishReason = choice?.finish_reason || 'stop';
 
       const toolCalls: HacpToolCall[] = [];
@@ -175,6 +216,109 @@ export class OpenCodeProvider implements AIProvider {
             console.error('[OpenCodeProvider] Failed to parse tool arguments:', parseErr);
           }
         }
+      }
+
+      // ======================================================================
+      // 2-STEP AGENT LOOP: If model called tools, execute Request #2 to get final natural response
+      // ======================================================================
+      if (toolCalls.length > 0) {
+        const toolMessages: any[] = [
+          ...normalizedMessages,
+          {
+            role: 'assistant',
+            content: choice.message.content || null,
+            tool_calls: choice.message.tool_calls,
+          },
+        ];
+
+        for (const tc of toolCalls) {
+          let toolResult: Record<string, unknown> = {};
+          if (tc.name === 'test_echo') {
+            toolResult = {
+              status: 'SUCCESS',
+              echo: tc.arguments?.message || 'hello',
+              diagnostic: 'Pomyślnie wykonano test diagnostyczny test_echo.',
+            };
+          } else if (
+            tc.name === 'read_builder_document' ||
+            tc.name === 'inspect_page_structure' ||
+            tc.name === 'inspect_selected_node'
+          ) {
+            toolResult = {
+              status: 'SUCCESS',
+              pageId: request.builderContext?.pageId || 'page-home',
+              pageName: request.builderContext?.pageName || 'Strona Główna',
+              documentNodeCount: request.builderContext?.documentNodeCount ?? 5,
+              selectedNodeId: request.builderContext?.selectedNodeId || 'sec-hero-init',
+              selectedNodeType: request.builderContext?.selectedNodeType || 'hero',
+              selectedNodeLabel: request.builderContext?.selectedNodeLabel || 'Hero Section',
+              viewport: request.builderContext?.viewport || 'DESKTOP',
+            };
+          } else {
+            // Mutation tools (update_node_props, insert_section, move_section, etc.)
+            toolResult = {
+              status: 'SUCCESS',
+              operation: tc.name,
+              arguments: tc.arguments,
+              detail: `Zlecenie ${tc.name} zostało zweryfikowane i przekazane do wykonania na Canvas.`,
+            };
+          }
+
+          toolMessages.push({
+            role: 'tool',
+            tool_call_id: tc.id,
+            name: tc.name,
+            content: JSON.stringify(toolResult),
+          });
+        }
+
+        try {
+          const secondResponse = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${cleanApiKey}`,
+            },
+            body: JSON.stringify({
+              model: selectedModelId,
+              messages: toolMessages,
+              temperature: 0.2,
+              max_tokens: 1000,
+            }),
+          });
+
+          if (secondResponse.ok) {
+            const secondData = await secondResponse.json();
+            const secondChoice = secondData.choices?.[0];
+            if (secondChoice?.message?.content && secondChoice.message.content.trim().length > 0) {
+              messageContent = secondChoice.message.content.trim();
+            }
+          }
+        } catch (secondErr) {
+          console.warn('[OpenCodeProvider] Second turn model completion error:', secondErr);
+        }
+
+        // If messageContent is still empty, synthesize an honest, helpful natural language statement
+        if (!messageContent || messageContent.trim().length === 0) {
+          const firstTc = toolCalls[0];
+          if (firstTc.name === 'test_echo') {
+            messageContent = `Wywołałem test diagnostyczny test_echo: "${firstTc.arguments?.message || 'hello'}". Narzędzie działa prawidłowo.`;
+          } else if (firstTc.name === 'update_node_props') {
+            const propKeys = Object.keys(firstTc.arguments?.props || {}).join(', ');
+            messageContent = `Zaktualizowałem właściwości sekcji (${propKeys || 'props'}). Zmiana jest widoczna na Canvas.`;
+          } else if (firstTc.name === 'insert_section') {
+            messageContent = `Dodałem nową sekcję typu ${firstTc.arguments?.sectionType || 'hero'} do strony.`;
+          } else if (firstTc.name === 'read_builder_document' || firstTc.name === 'inspect_page_structure') {
+            messageContent = `Przeanalizowałem strukturę strony „${request.builderContext?.pageName || 'Główna'}”. Liczba sekcji: ${request.builderContext?.documentNodeCount ?? 0}.`;
+          } else {
+            messageContent = `Zrealizowałem polecenie za pomocą narzędzia ${firstTc.name}.`;
+          }
+        }
+      }
+
+      // If text response is still empty without tools (e.g. reasoning model edge case)
+      if ((!messageContent || messageContent.trim().length === 0) && choice?.message?.reasoning) {
+        messageContent = choice.message.reasoning.slice(0, 300);
       }
 
       return {

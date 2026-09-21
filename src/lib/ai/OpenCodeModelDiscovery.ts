@@ -234,11 +234,15 @@ export class OpenCodeModelDiscovery {
 
   private detectToolSupport(id: string): boolean {
     const lower = id.toLowerCase();
+    // Experimental reasoning / nano models on free tiers exhaust local workers and should not be advertised as tool capable
+    if (lower.includes('reasoning') || lower.includes('nano-omni')) return false;
+
     // Known tool calling compatible families
     if (lower.includes('gpt-4') || lower.includes('gpt-5') || lower.includes('gpt-3.5')) return true;
     if (lower.includes('claude-3') || lower.includes('claude-sonnet') || lower.includes('claude-opus')) return true;
-    if (lower.includes('deepseek-v4') || lower.includes('deepseek-r1') || lower.includes('deepseek-v3')) return true;
-    if (lower.includes('nemotron') || lower.includes('qwen2.5') || lower.includes('qwen3')) return true;
+    if (lower.includes('deepseek-v4') || lower.includes('deepseek-v3')) return true;
+    if (lower.includes('nemotron-3.5-lightning') || lower.includes('nemotron-3-ultra')) return true;
+    if (lower.includes('qwen2.5') || lower.includes('qwen3')) return true;
     if (lower.includes('mimo-v2.5')) return true;
     return false;
   }
