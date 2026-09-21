@@ -479,6 +479,134 @@ export class HacpBridge {
     }
 
     // =================================================================
+    // LIBRARY INTELLIGENCE TOOLS — Experience, Section, Template Discovery
+    // =================================================================
+
+    if (name === 'search_experiences') {
+      const { searchExperienceLibrary } = await import('../ai/LibraryIntelligence');
+      const results = searchExperienceLibrary({
+        query: args.query as string,
+        type: args.type as any,
+        category: args.category as string,
+        mood: args.mood as any,
+        industry: args.industry as string,
+        limit: (args.limit as number) || 20,
+      });
+      return {
+        status: 'EXECUTED',
+        verification: { passed: true, operation: name, target: 'experience-library' },
+        message: JSON.stringify({ count: results.length, experiences: results }, null, 2),
+      };
+    }
+
+    if (name === 'inspect_experience') {
+      const { inspectExperience } = await import('../ai/LibraryIntelligence');
+      const result = inspectExperience(args.experienceId as string);
+      if (!result) {
+        return {
+          status: 'EXECUTED',
+          verification: { passed: true, operation: name, target: args.experienceId as string },
+          message: `Nie znaleziono Experience o ID \`${args.experienceId}\`.`,
+        };
+      }
+      return {
+        status: 'EXECUTED',
+        verification: { passed: true, operation: name, target: args.experienceId as string },
+        message: JSON.stringify(result, null, 2),
+      };
+    }
+
+    if (name === 'get_experience_categories') {
+      const { getExperienceCategories, getExperienceMoods, getExperienceIndustries } = await import('../ai/LibraryIntelligence');
+      const categories = getExperienceCategories();
+      const moods = getExperienceMoods();
+      const industries = getExperienceIndustries();
+      return {
+        status: 'EXECUTED',
+        verification: { passed: true, operation: name, target: 'experience-library' },
+        message: JSON.stringify({ categories, moods, industries }, null, 2),
+      };
+    }
+
+    if (name === 'search_sections') {
+      const { searchSectionLibrary } = await import('../ai/LibraryIntelligence');
+      const results = searchSectionLibrary({
+        query: args.query as string,
+        category: args.category as string,
+        limit: (args.limit as number) || 20,
+      });
+      return {
+        status: 'EXECUTED',
+        verification: { passed: true, operation: name, target: 'section-library' },
+        message: JSON.stringify({ count: results.length, sections: results }, null, 2),
+      };
+    }
+
+    if (name === 'search_website_templates') {
+      const { searchWebsiteTemplates } = await import('../ai/LibraryIntelligence');
+      const results = searchWebsiteTemplates({
+        query: args.query as string,
+        industry: args.industry as string,
+        limit: (args.limit as number) || 10,
+      });
+      return {
+        status: 'EXECUTED',
+        verification: { passed: true, operation: name, target: 'website-templates' },
+        message: JSON.stringify({ count: results.length, templates: results }, null, 2),
+      };
+    }
+
+    if (name === 'get_typography_presets') {
+      const { getTypographyPresets } = await import('../ai/LibraryIntelligence');
+      const presets = getTypographyPresets();
+      return {
+        status: 'EXECUTED',
+        verification: { passed: true, operation: name, target: 'typography-presets' },
+        message: JSON.stringify(presets, null, 2),
+      };
+    }
+
+    if (name === 'get_design_presets') {
+      const { getDesignPresets } = await import('../ai/LibraryIntelligence');
+      const presets = getDesignPresets();
+      return {
+        status: 'EXECUTED',
+        verification: { passed: true, operation: name, target: 'design-presets' },
+        message: JSON.stringify(presets, null, 2),
+      };
+    }
+
+    if (name === 'resolve_target') {
+      const { resolveTarget } = await import('../ai/SemanticTargetingEngine');
+      const resolved = resolveTarget(
+        args.prompt as string,
+        document,
+        {
+          selectedNodeId: null,
+          selectedNodeType: null,
+          selectedNodeLabel: null,
+          selectedSectionId: null,
+          lastModifiedNodeId: null,
+          lastReferencedNodeId: null,
+          conversationHistory: [],
+        },
+        activePageId
+      );
+      if (!resolved) {
+        return {
+          status: 'EXECUTED',
+          verification: { passed: true, operation: name, target: 'none' },
+          message: 'Nie udało się jednoznacznie zidentyfikować elementu. Użyj inspect_node lub find_nodes aby znaleźć właściwy element.',
+        };
+      }
+      return {
+        status: 'EXECUTED',
+        verification: { passed: true, operation: name, target: resolved.nodeId },
+        message: JSON.stringify(resolved, null, 2),
+      };
+    }
+
+    // =================================================================
     // INSPECTOR PARITY TOOLS — Full Builder Access for AI
     // =================================================================
 

@@ -231,22 +231,82 @@ export function AiCopilotWorkspace() {
   }, [builderDoc, canvas.selectedSectionId])
 
   const currentContext: HacpBuilderContext = useMemo(() => {
+    // Build comprehensive live context for AI
+    const selectedNode = selectedNodeInfo;
+    const parentInfo = selectedNode ? (() => {
+      try {
+        const found = findNode(builderDoc, selectedNode.id)
+        if (!found) return null
+        const parent = found.node.parentId ? findNode(builderDoc, found.node.parentId) : null
+        return parent ? { id: parent.node.id, type: parent.node.type, label: parent.node.label } : null
+      } catch { return null }
+    })() : null
+
+    // Get children info for selected node
+    const childrenInfo = selectedNode ? (() => {
+      try {
+        const found = findNode(builderDoc, selectedNode.id)
+        if (!found || !found.node.children) return []
+        return found.node.children.map(c => ({ id: c.id, type: c.type, label: c.label || c.type }))
+      } catch { return [] }
+    })() : []
+
+    // Get responsive state
+    const responsiveState = selectedNode ? (() => {
+      try {
+        const found = findNode(builderDoc, selectedNode.id)
+        if (!found) return null
+        return {
+          desktop: found.node.responsive?.desktop || null,
+          tablet: found.node.responsive?.tablet || null,
+          mobile: found.node.responsive?.mobile || null,
+        }
+      } catch { return null }
+    })() : null
+
+    // Get experience config
+    const experienceConfig = selectedNode?.experienceConfig || null
+
     return {
       storeId: builderDoc.metadata?.storeSlug || 'store',
       pageId: activePage?.id || 'page-home',
       pageName: activePage?.name || 'Strona Główna',
-      selectedNodeId: selectedNodeInfo?.id,
-      selectedNodeType: selectedNodeInfo?.type,
-      selectedNodeLabel: selectedNodeInfo?.label,
-      selectedNodeProps: selectedNodeInfo?.props,
-      experienceConfig: selectedNodeInfo?.experienceConfig,
+      selectedNodeId: selectedNode?.id,
+      selectedNodeType: selectedNode?.type,
+      selectedNodeLabel: selectedNode?.label,
+      selectedNodeProps: selectedNode?.props,
+      selectedNodeStyles: selectedNode ? (() => {
+        try {
+          const found = findNode(builderDoc, selectedNode.id)
+          return found?.node?.styles || {}
+        } catch { return {} }
+      })() : {},
+      experienceConfig,
       viewport: (canvas.viewport?.label as any) || 'DESKTOP',
       documentNodeCount: activePage?.sections?.length || 0,
-      sectionsSummary: (activePage?.sections || []).map((s) => ({ id: s.id, type: s.type, label: s.label })),
+      sectionsSummary: (activePage?.sections || []).map((s, i) => ({
+        id: s.id,
+        type: s.type,
+        label: s.label,
+        order: i,
+        childCount: s.children?.length || 0,
+      })),
       availableCapabilitiesCount: capabilities.filter((c) => c.available).length,
       visualMetrics,
       recentMutation,
       activeTool: (canvas as any).activeTool || 'SELECT',
+      // Enhanced live context
+      parentInfo,
+      childrenInfo,
+      responsiveState,
+      theme: {
+        primaryColor: builderDoc.theme?.primaryColor || '#D9A86C',
+        secondaryColor: builderDoc.theme?.secondaryColor || '#F2C27F',
+        font: builderDoc.theme?.font || 'Inter',
+      },
+      totalNodes: activePage?.sections?.length || 0,
+      breakpoint: (canvas.viewport?.label || 'DESKTOP').includes('MOBILE') ? 'mobile' : (canvas.viewport?.label || 'DESKTOP').includes('TABLET') ? 'tablet' : 'desktop',
+      zoom: (canvas as any).zoom || 1,
     }
   }, [activePage, selectedNodeInfo, canvas.viewport, builderDoc, capabilities, visualMetrics, recentMutation, canvas])
 

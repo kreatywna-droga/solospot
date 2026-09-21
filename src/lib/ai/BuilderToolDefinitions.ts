@@ -356,6 +356,139 @@ export const BUILDER_TOOL_DEFINITIONS: HacpToolDefinition[] = [
   },
 
   // =====================================================================
+  // LIBRARY INTELLIGENCE TOOLS — Experience, Section, Template Discovery
+  // =====================================================================
+
+  {
+    name: 'search_experiences',
+    description: 'Przeszukaj bibliotekę Experience (270+ efektów wizualnych). Zwraca listę pasujących Experience z ich typami, kategoriami, nastrojami i poziomami motion.',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: {
+          type: 'string',
+          description: 'Zapytanie tekstowe (np. "premium hero", "particles technology", "luxury product").',
+        },
+        type: {
+          type: 'string',
+          description: 'Typ Experience: hero, section, interactive, background, effect, motion, website.',
+          enum: ['hero', 'section', 'interactive', 'background', 'effect', 'motion', 'website', 'all'],
+        },
+        category: {
+          type: 'string',
+          description: 'Kategoria (np. "bento", "glass", "particles", "gradient").',
+        },
+        mood: {
+          type: 'string',
+          description: 'Nastrój: dark, light, minimal, editorial, cinematic, bold, elegant, futuristic, playful, corporate, luxury, creative, vibrant, modern.',
+        },
+        industry: {
+          type: 'string',
+          description: 'Branża docelowa (np. "technology", "luxury", "creative", "education").',
+        },
+        limit: {
+          type: 'number',
+          description: 'Maksymalna liczba wyników (domyślnie 20).',
+        },
+      },
+    },
+  },
+  {
+    name: 'inspect_experience',
+    description: 'Pobierz szczegółowe informacje o konkretnym Experience: opis, nastrój, motion, przypadki użycia, sloty na assety.',
+    parameters: {
+      type: 'object',
+      properties: {
+        experienceId: {
+          type: 'string',
+          description: 'ID Experience do zinspectowania.',
+        },
+      },
+      required: ['experienceId'],
+    },
+  },
+  {
+    name: 'get_experience_categories',
+    description: 'Pobierz listę dostępnych kategorii Experience z liczbą elementów w każdej kategorii.',
+    parameters: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
+    name: 'search_sections',
+    description: 'Przeszukaj bibliotekę sekcji (20+ kategorii: hero, features, testimonials, pricing, FAQ, contact, itp.).',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: {
+          type: 'string',
+          description: 'Zapytanie tekstowe (np. "hero dark", "testimonial grid").',
+        },
+        category: {
+          type: 'string',
+          description: 'Kategoria sekcji (hero, features, about, testimonials, cta, pricing, faq, contact, footer, gallery, team, stats, logos, newsletter, services, portfolio, products, blog, content).',
+        },
+        limit: {
+          type: 'number',
+          description: 'Maksymalna liczba wyników.',
+        },
+      },
+    },
+  },
+  {
+    name: 'search_website_templates',
+    description: 'Przeszukaj bibliotekę gotowych szablonów stron (website templates).',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: {
+          type: 'string',
+          description: 'Zapytanie tekstowe (np. "agency", "portfolio", "restaurant").',
+        },
+        industry: {
+          type: 'string',
+          description: 'Branża docelowa.',
+        },
+        limit: {
+          type: 'number',
+          description: 'Maksymalna liczba wyników.',
+        },
+      },
+    },
+  },
+  {
+    name: 'get_typography_presets',
+    description: 'Pobierz listę dostępnych presetów typografii z rekomendacjami użycia.',
+    parameters: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
+    name: 'get_design_presets',
+    description: 'Pobierz listę dostępnych presetów designu (kolorów, czcionek, motywów).',
+    parameters: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
+    name: 'resolve_target',
+    description: 'Rozwiąż naturalne odniesienie do elementu (np. "ten nagłówek", "ta sekcja", "pierwsza sekcja"). Zwraca ID i typ znalezionego elementu.',
+    parameters: {
+      type: 'object',
+      properties: {
+        prompt: {
+          type: 'string',
+          description: 'Tekst z odniesieniem do rozwiązania.',
+        },
+      },
+      required: ['prompt'],
+    },
+  },
+
+  // =====================================================================
   // INSPECTOR PARITY TOOLS — Full Builder Access for AI
   // =====================================================================
 
