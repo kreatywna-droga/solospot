@@ -18,9 +18,15 @@ export class OpenCodeProvider implements AIProvider {
   private model: string;
 
   constructor() {
-    this.apiKey = process.env.OPENCODE_API_KEY || null;
-    this.baseURL = process.env.OPENCODE_BASE_URL || 'https://opencode.ai/inference/openai/v1';
-    this.model = process.env.OPENCODE_MODEL || 'openai/gpt-4o-mini';
+    this.apiKey = process.env.OPENCODE_API_KEY
+      ? process.env.OPENCODE_API_KEY.replace(/[^\x20-\x7E]/g, '').trim()
+      : null;
+    this.baseURL = (process.env.OPENCODE_BASE_URL || 'https://openrouter.ai/api/v1')
+      .replace(/[^\x20-\x7E]/g, '')
+      .trim();
+    this.model = (process.env.OPENCODE_MODEL || 'openai/gpt-4o-mini')
+      .replace(/[^\x20-\x7E]/g, '')
+      .trim();
   }
 
   public isConfigured(): boolean {
@@ -56,9 +62,16 @@ export class OpenCodeProvider implements AIProvider {
         },
       }));
 
-      const endpoint = `${this.baseURL.replace(/\/$/, '')}/chat/completions`;
+      const cleanBaseUrl = (this.baseURL || 'https://openrouter.ai/api/v1')
+        .replace(/[^\x20-\x7E]/g, '')
+        .trim()
+        .replace(/\/$/, '');
+      const cleanApiKey = (this.apiKey || '').replace(/[^\x20-\x7E]/g, '').trim();
+      const cleanModel = (this.model || 'openai/gpt-4o-mini').replace(/[^\x20-\x7E]/g, '').trim();
+
+      const endpoint = `${cleanBaseUrl}/chat/completions`;
       const bodyPayload: Record<string, unknown> = {
-        model: this.model,
+        model: cleanModel,
         messages: request.messages.map((m) => ({
           role: m.role,
           content: m.content,
@@ -77,7 +90,7 @@ export class OpenCodeProvider implements AIProvider {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.apiKey}`,
+          Authorization: `Bearer ${cleanApiKey}`,
         },
         body: JSON.stringify(bodyPayload),
       });
