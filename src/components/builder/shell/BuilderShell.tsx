@@ -370,12 +370,7 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
       </div>
 
       {/* Bottom Bar */}
-      <BuilderBottomBar
-        onSave={onSave}
-        onPublish={onPublish}
-        saving={saving}
-        onTabChange={setActiveTab}
-      />
+      <BuilderBottomBar />
     </div>
   )
 }

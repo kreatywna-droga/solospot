@@ -3,38 +3,20 @@
 /**
  * BuilderBottomBar — C16.2 Bottom Bar
  *
- *   [● Desktop] [● Tablet] [● Mobile] | [🔍 100% ▼] |
- *   [👁 Preview] [📋 History] [🤖 AI] | [⚡ Publish]
+ *   [🔍 100% ▼]
+ *
+ * Preview, History, AI and Publish actions were moved to the top bar.
  */
 
 import { useCallback } from 'react'
 import {
-  ZoomIn, ZoomOut, Eye, History, Bot, Zap,
+  ZoomIn, ZoomOut,
 } from 'lucide-react'
 import { useBuilder } from '../state/BuilderProvider'
-import type { StudioTab } from './BuilderTopBar'
 
-interface BuilderBottomBarProps {
-  onSave?: () => void
-  onPublish?: () => void
-  saving?: boolean
-  onTabChange?: (tab: StudioTab) => void
-}
-
-export function BuilderBottomBar({ onSave, onPublish, saving, onTabChange }: BuilderBottomBarProps = {}) {
+export function BuilderBottomBar() {
   const { canvas, dispatch } = useBuilder()
   const zoom = canvas.zoom
-  const isPreview = canvas.mode === 'PREVIEW' || canvas.runtimeMode === 'PREVIEW'
-
-  const togglePreview = () => {
-    dispatch({
-      type: 'CANVAS',
-      action: {
-        type: 'SET_MODE',
-        mode: isPreview ? 'SELECT' : 'PREVIEW',
-      },
-    })
-  }
 
   const setZoom = useCallback((z: number) => {
     dispatch({ type: 'CANVAS', action: { type: 'SET_ZOOM', zoom: z } })
@@ -91,48 +73,8 @@ export function BuilderBottomBar({ onSave, onPublish, saving, onTabChange }: Bui
         </button>
       </div>
 
-      {/* Right: Actions */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={togglePreview}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] transition-all
-            ${isPreview
-              ? 'bg-[#D9A86C] text-[#080B10] font-semibold shadow-lg shadow-[#D9A86C]/25'
-              : 'text-zinc-400 hover:text-white hover:bg-white/[0.05]'
-            }`}
-          title={isPreview ? 'Przełącz do trybu edycji' : 'Podgląd na żywo'}
-        >
-          <Eye className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">{isPreview ? 'Tryb Edycji' : 'Podgląd'}</span>
-        </button>
-        <button
-          onClick={() => onTabChange?.('history')}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-all"
-          title="Historia zmian"
-        >
-          <History className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Historia</span>
-        </button>
-        <button
-          onClick={() => onTabChange?.('ai')}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-all"
-          title="Asystent AI"
-        >
-          <Bot className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">AI</span>
-        </button>
-        <div className="w-px h-4 bg-white/[0.08]" />
-        <button
-          onClick={onPublish}
-          disabled={saving}
-          className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[11px] font-bold
-                     bg-gradient-to-r from-[#B8893A] to-[#D9A86C] text-[#080B10]
-                     hover:shadow-lg hover:shadow-[#D9A86C]/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-        >
-          <Zap className="w-3.5 h-3.5" />
-          {saving ? 'Publikowanie...' : 'Publish'}
-        </button>
-      </div>
+      {/* Right: Actions removed — available in top bar */}
+      <div className="flex items-center gap-2" />
     </div>
   )
 }
