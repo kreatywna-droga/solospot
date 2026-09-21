@@ -24,7 +24,7 @@ import {
   ArrowUp, ArrowDown, Copy, Trash2, Lock, Eye,
   Type, AlignLeft, AlignCenter, AlignRight, Image as ImageIcon,
   Palette, ExternalLink, Plus, Check, ChevronDown, Sparkles,
-  Video, Upload, MousePointer,
+  Video, Upload, MousePointer, Settings,
 } from 'lucide-react'
 import { findNode, type ToolbarPositionResult, type ToolbarActionType } from '../../../../packages/builder-core/src'
 import { useBuilder } from '../state/BuilderProvider'
@@ -41,6 +41,8 @@ interface QuickToolbarProps {
   hidden?: boolean
   index: number
   total: number
+  /** Called when the Settings (gear) button is clicked */
+  onSettingsOpen?: () => void
 }
 
 export function QuickToolbar({
@@ -51,6 +53,7 @@ export function QuickToolbar({
   hidden = false,
   index,
   total,
+  onSettingsOpen,
 }: QuickToolbarProps) {
   const { dispatch, document, canvas } = useBuilder()
   const [showColorPicker, setShowColorPicker] = useState(false)
@@ -879,6 +882,17 @@ export function QuickToolbar({
               title="Zapisz jako Experience (Save as Experience)"
             >
               <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+            </button>
+          )}
+
+          {/* Settings button — opens Contextual Settings Panel */}
+          {onSettingsOpen && (
+            <button
+              onClick={onSettingsOpen}
+              className="p-1 rounded-lg text-zinc-400 hover:text-[#D9A86C] hover:bg-[#D9A86C]/10 transition-colors"
+              title="Ustawienia elementu (Settings)"
+            >
+              <Settings className="w-3.5 h-3.5" />
             </button>
           )}
 

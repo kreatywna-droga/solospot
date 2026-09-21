@@ -32,6 +32,7 @@ import { BoundingBox } from './BoundingBox'
 import { ResizeHandles } from './ResizeHandles'
 import { HoverHighlight } from './HoverHighlight'
 import { QuickToolbar } from './QuickToolbar'
+import { ContextualSettingsPanel } from '../contextual/ContextualSettingsPanel'
 
 import {
   findNode,
@@ -86,6 +87,10 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
     deltaY: number
   } | null>(null)
 
+  // Contextual Settings Panel state
+  const [settingsPanelOpen, setSettingsPanelOpen] = useState(false)
+  const [settingsPanelRect, setSettingsPanelRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null)
+
   // Refs for hot-path drag tracking (zero re-renders during pointermove)
   const dragRef = useMemo(() => ({ deltaX: 0, deltaY: 0 }), [])
   const resizeRef = useMemo(() => ({
@@ -123,6 +128,12 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
       window.document.removeEventListener('focusout', handleFocus)
     }
   }, [])
+
+  // Close contextual settings panel when selection changes
+  useEffect(() => {
+    setSettingsPanelOpen(false)
+    setSettingsPanelRect(null)
+  }, [canvas.selectedSectionId])
 
   // Synchronize overlay frame position with direct canvas node dragging in real-time
   useEffect(() => {
@@ -992,12 +1003,38 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
                     hidden={toolbarData.hidden}
                     index={toolbarData.index}
                     total={toolbarData.total}
+                    onSettingsOpen={() => {
+                      // Compute element rect from overlay bounding rect
+                      const rect = overlay.boundingRect
+                      if (rect) {
+                        setSettingsPanelRect({
+                          x: rect.x,
+                          y: rect.y,
+                          width: rect.width,
+                          height: rect.height,
+                        })
+                        setSettingsPanelOpen(true)
+                      }
+                    }}
                   />
                 </div>
               )}
             </div>
           )}
         </motion.div>
+      )}
+
+      {/* Contextual Settings Panel */}
+      {settingsPanelOpen && settingsPanelRect && toolbarData && (
+        <ContextualSettingsPanel
+          sectionId={toolbarData.sectionId}
+          pageId={toolbarData.pageId}
+          elementRect={settingsPanelRect}
+          onClose={() => {
+            setSettingsPanelOpen(false)
+            setSettingsPanelRect(null)
+          }}
+        />
       )}
     </AnimatePresence>
   )
