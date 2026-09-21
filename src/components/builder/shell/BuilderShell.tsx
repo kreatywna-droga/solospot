@@ -322,7 +322,7 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
           {!inspectorVisible && (
             <button
               onClick={toggleInspector}
-              className="absolute right-4 top-3 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0D1118]/90 hover:bg-[#1A1F2E] border border-[#252B3A] hover:border-[#D9A86C]/50 text-zinc-300 hover:text-[#F2C27F] text-xs font-medium shadow-xl backdrop-blur-md transition-all group active:scale-95"
+              className="absolute right-4 bottom-4 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0D1118]/90 hover:bg-[#1A1F2E] border border-[#252B3A] hover:border-[#D9A86C]/50 text-zinc-300 hover:text-[#F2C27F] text-xs font-medium shadow-xl backdrop-blur-md transition-all group active:scale-95"
               title="Otwórz inspektor właściwości (Alt+I)"
             >
               <PanelRightOpen className="w-3.5 h-3.5 text-[#D9A86C] transition-transform group-hover:scale-110" />
