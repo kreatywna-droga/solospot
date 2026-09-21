@@ -211,4 +211,125 @@ export const BUILDER_TOOL_DEFINITIONS: HacpToolDefinition[] = [
       properties: {},
     },
   },
+
+  // =====================================================================
+  // AUTONOMOUS GENERATION TOOLS — Phase 1
+  // =====================================================================
+
+  {
+    name: 'insert_node',
+    description: 'Wstaw nowy węzeł (element) do kontenera/sekcji. Obsługiwane typy: text, heading, image, button, video, icon, svg, divider, spacer, container, grid. Każdy węzeł ma unikalne ID.',
+    parameters: {
+      type: 'object',
+      properties: {
+        parentId: {
+          type: 'string',
+          description: 'ID rodzica (sekcji lub kontenera) do którego wstawić element.',
+        },
+        nodeType: {
+          type: 'string',
+          description: 'Typ węzła: text, heading, image, button, video, icon, svg, divider, spacer, container, grid.',
+          enum: ['text', 'heading', 'image', 'button', 'video', 'icon', 'svg', 'divider', 'spacer', 'container', 'grid'],
+        },
+        props: {
+          type: 'object',
+          description: 'Właściwości węzła, np. { text: "Tekst", src: "url", href: "#" }.',
+        },
+        styles: {
+          type: 'object',
+          description: 'Style CSS węzła, np. { fontSize: "16px", color: "#ffffff", padding: "12px" }.',
+        },
+        label: {
+          type: 'string',
+          description: 'Czytelna etykieta węzła.',
+        },
+        index: {
+          type: 'number',
+          description: 'Indeks wstawienia (0-based).',
+        },
+      },
+      required: ['parentId', 'nodeType'],
+    },
+  },
+  {
+    name: 'set_node_styles',
+    description: 'Ustaw style CSS na węźle (sekcji lub elemencie). Akceptuje dowolne właściwości CSS.',
+    parameters: {
+      type: 'object',
+      properties: {
+        nodeId: {
+          type: 'string',
+          description: 'ID węzła do modyfikacji.',
+        },
+        styles: {
+          type: 'object',
+          description: 'Obiekt ze stylami CSS, np. { backgroundColor: "#0F172A", padding: "80px 0", borderRadius: "12px" }.',
+        },
+      },
+      required: ['nodeId', 'styles'],
+    },
+  },
+  {
+    name: 'update_theme',
+    description: 'Zaktualizuj globalny motyw strony (kolory, czcionki).',
+    parameters: {
+      type: 'object',
+      properties: {
+        primaryColor: {
+          type: 'string',
+          description: 'Główny kolor motywu (HEX).',
+        },
+        secondaryColor: {
+          type: 'string',
+          description: 'Drugi kolor motywu (HEX).',
+        },
+        font: {
+          type: 'string',
+          description: 'Nazwa czcionki głównej (Google Fonts).',
+        },
+      },
+    },
+  },
+  {
+    name: 'batch_execute',
+    description: 'Wykonaj wiele operacji Builder w jednym kroku. Każda operacja to { tool, args }. Wykonuje sekwencyjnie.',
+    parameters: {
+      type: 'object',
+      properties: {
+        operations: {
+          type: 'array',
+          description: 'Lista operacji do wykonania. Każda operacja = { tool: "nazwa_narzędzia", args: { parametry } }.',
+          items: { type: 'object' },
+        },
+      },
+      required: ['operations'],
+    },
+  },
+  {
+    name: 'remove_node',
+    description: 'Usuń węzeł (element) z dokumentu na podstawie ID.',
+    parameters: {
+      type: 'object',
+      properties: {
+        nodeId: {
+          type: 'string',
+          description: 'ID węzła do usunięcia.',
+        },
+      },
+      required: ['nodeId'],
+    },
+  },
+  {
+    name: 'read_page_full',
+    description: 'Odczytaj pełną strukturę strony ze wszystkimi węzłami, właściwościami i stylami. Przydatne do weryfikacji po generowaniu.',
+    parameters: {
+      type: 'object',
+      properties: {
+        pageId: {
+          type: 'string',
+          description: 'ID strony.',
+        },
+      },
+    },
+  },
 ];

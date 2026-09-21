@@ -453,6 +453,184 @@ export class HacpBridge {
       };
     }
 
+    // =================================================================
+    // AUTONOMOUS GENERATION TOOLS — Phase 1
+    // =================================================================
+
+    if (name === 'insert_node') {
+      const parentId = args.parentId as string;
+      const nodeType = (args.nodeType as string) || 'text';
+      const cmd: BuilderCommand = {
+        type: 'INSERT_NODE',
+        pageId: (args.pageId as string) || activePageId,
+        parentId,
+        node: {
+          id: `node_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+          type: nodeType,
+          label: (args.label as string) || nodeType,
+          props: (args.props as Record<string, unknown>) || { text: 'Element' },
+          styles: (args.styles as any) || {},
+          children: [],
+          visible: true,
+          locked: false,
+          order: typeof args.index === 'number' ? args.index : 0,
+        },
+        index: typeof args.index === 'number' ? args.index : undefined,
+      };
+
+      const result = this.verifyCommandExecution(cmd, document, { targetId: parentId });
+      return {
+        command: cmd,
+        verification: result.verification,
+        status: result.verification.passed ? 'EXECUTED' : 'FAILED',
+        message: result.verification.passed
+          ? `Wstawiłem element **${nodeType}** do \`${parentId}\`.`
+          : `Nie udało się wstawić elementu ${nodeType} do \`${parentId}\`.`,
+        appliedChange: {
+          target: parentId,
+          property: 'nodes',
+          summary: `Wstawiono ${nodeType} do ${parentId}`,
+        },
+      };
+    }
+
+    if (name === 'set_node_styles') {
+      const nodeId = args.nodeId as string;
+      const styles = (args.styles as Record<string, unknown>) || {};
+      const cmd: BuilderCommand = {
+        type: 'SET_NODE_STYLES',
+        pageId: (args.pageId as string) || activePageId,
+        nodeId,
+        styles: styles as any,
+      };
+
+      const result = this.verifyCommandExecution(cmd, document, { targetId: nodeId });
+      return {
+        command: cmd,
+        verification: result.verification,
+        status: result.verification.passed ? 'EXECUTED' : 'FAILED',
+        message: result.verification.passed
+          ? `Zaktualizowałem style węzła \`${nodeId}\`: ${Object.keys(styles).join(', ')}.`
+          : `Nie udało się zaktualizować stylów węzła \`${nodeId}\`.`,
+        appliedChange: {
+          target: nodeId,
+          property: 'styles',
+          summary: `Zmieniono style: ${Object.keys(styles).join(', ')}`,
+        },
+      };
+    }
+
+    if (name === 'update_theme') {
+      const themeProps: Record<string, unknown> = {};
+      if (args.primaryColor) themeProps.primaryColor = args.primaryColor;
+      if (args.secondaryColor) themeProps.secondaryColor = args.secondaryColor;
+      if (args.font) themeProps.font = args.font;
+
+      const cmd: BuilderCommand = {
+        type: 'UPDATE_THEME',
+        theme: themeProps as any,
+      };
+
+      const result = this.verifyCommandExecution(cmd, document, { targetId: 'theme' });
+      return {
+        command: cmd,
+        verification: result.verification,
+        status: result.verification.passed ? 'EXECUTED' : 'FAILED',
+        message: result.verification.passed
+          ? `Zaktualizowałem motyw: ${Object.keys(themeProps).join(', ')}.`
+          : `Nie udało się zaktualizować motywu.`,
+        appliedChange: {
+          target: 'theme',
+          property: Object.keys(themeProps).join(', '),
+          summary: `Zaktualizowano motyw: ${Object.keys(themeProps).join(', ')}`,
+        },
+      };
+    }
+
+    if (name === 'batch_execute') {
+      const operations = (args.operations as Array<{ tool: string; args: Record<string, unknown> }>) || [];
+      const results: string[] = [];
+      let allPassed = true;
+
+      for (const op of operations) {
+        const toolCall: HacpToolCall = {
+          id: `batch_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+          name: op.tool,
+          arguments: op.args,
+        };
+        const res = this.executeToolCall(toolCall, document, activePageId);
+        results.push(`- ${op.tool}: ${res.message}`);
+        if (!res.verification.passed) allPassed = false;
+      }
+
+      return {
+        status: allPassed ? 'EXECUTED' : 'FAILED',
+        verification: {
+          passed: allPassed,
+          operation: 'batch_execute',
+          target: activePageId,
+          diffSummary: `Wykonano ${operations.length} operacji.`,
+        },
+        message: allPassed
+          ? `Wykonano ${operations.length} operacji pomyślnie.`
+          : `Część operacji nie powiodła się.`,
+        appliedChange: {
+          target: activePageId,
+          property: 'batch',
+          summary: results.join('\n'),
+        },
+      };
+    }
+
+    if (name === 'remove_node') {
+      const nodeId = args.nodeId as string;
+      const cmd: BuilderCommand = {
+        type: 'REMOVE_NODE',
+        nodeId,
+        pageId: (args.pageId as string) || activePageId,
+      };
+
+      const result = this.verifyCommandExecution(cmd, document, { targetId: nodeId });
+      return {
+        command: cmd,
+        verification: result.verification,
+        status: result.verification.passed ? 'EXECUTED' : 'FAILED',
+        message: result.verification.passed
+          ? `Usunąłem węzeł \`${nodeId}\`.`
+          : `Nie udało się usunąć węzła \`${nodeId}\`.`,
+        appliedChange: {
+          target: nodeId,
+          property: 'nodes',
+          summary: `Usunięto węzeł ${nodeId}`,
+        },
+      };
+    }
+
+    if (name === 'read_page_full') {
+      const pageId = (args.pageId as string) || activePageId;
+      const page = document.pages.find((p) => p.id === pageId) || document.pages[0];
+      const sections = page?.sections || [];
+      const sectionSummary = sections.map((s: any) => ({
+        id: s.id,
+        type: s.type,
+        label: s.label,
+        props: s.props,
+        style: s.style,
+        nodeCount: s.nodes?.length || 0,
+      }));
+
+      return {
+        status: 'EXECUTED',
+        verification: {
+          passed: true,
+          operation: 'read_page_full',
+          target: pageId,
+          diffSummary: `Odczytano pełną strukturę: ${sections.length} sekcji.`,
+        },
+        message: `Strona "${page?.name || 'Główna'}": ${sections.length} sekcji. ${JSON.stringify(sectionSummary, null, 2)}`,
+      };
+    }
+
     return {
       status: 'UNSUPPORTED',
       message: `Narzędzie HACP "${name}" nie jest obecnie obsługiwane.`,

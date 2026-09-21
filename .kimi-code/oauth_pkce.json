@@ -1,0 +1,8 @@
+{
+  "client_id": "mcp-kimi-code-mcp-client-loc-DQ9tv3Loe8Pt6eafbxVOW1",
+  "code_verifier": "rcto_H16-Nis8oSQkEYFH7u2Xz18IVlC_GcDvrfKbSK8XH-z8dZXzWbszcJDmc5I9Hja6GSroUBxt6_ptFKxUQ",
+  "code_challenge": "neBTRd2iY7v5q49d7mhXGGGxY6KBScOA3jblTwY0Ma0",
+  "state": "tgJlAFN7VO_QJkTA7cAYaUK0M-joJvO-R5QH-D_XJro",
+  "redirect_uri": "http://localhost:3456/oauth/callback",
+  "authorization_url": "https://www.klingai.com/auth/authorize?response_type=code&client_id=mcp-kimi-code-mcp-client-loc-DQ9tv3Loe8Pt6eafbxVOW1&redirect_uri=http%3A%2F%2Flocalhost%3A3456%2Foauth%2Fcallback&scope=generation.create+generation.read+account.credit.read&state=tgJlAFN7VO_QJkTA7cAYaUK0M-joJvO-R5QH-D_XJro&code_challenge=neBTRd2iY7v5q49d7mhXGGGxY6KBScOA3jblTwY0Ma0&code_challenge_method=S256"
+}

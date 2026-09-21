@@ -12,12 +12,12 @@
  * - Experience Runtime Compositor
  */
 
-import React, { useState, useEffect, useRef, useMemo } from 'react'
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import {
   Bot, Sparkles, Activity, CheckCircle2, AlertCircle, Clock,
   ChevronDown, ChevronUp, RotateCcw, RotateCw, Send, Layers,
   Eye, Zap, X, Shield, Cpu, RefreshCw, Sliders, Info, CornerDownLeft,
-  Copy, Check, Square
+  Copy, Check, Square, Wand2
 } from 'lucide-react'
 import { useBuilder, useBuilderHistory } from '../state/BuilderProvider'
 import { HacpBridge } from '@/lib/hacp/HacpBridge'
@@ -31,6 +31,8 @@ import type {
   HacpVisualMetrics,
 } from '@/lib/hacp/HacpTypes'
 import { findNode } from '../../../../packages/builder-core/src'
+import { useAutonomousGeneration } from '@/lib/ai/useAutonomousGeneration'
+import type { GenerationPhase } from '@/lib/ai/SitePlanTypes'
 
 export function AiCopilotWorkspace() {
   const { document: builderDoc, canvas, dispatch } = useBuilder()
@@ -68,6 +70,18 @@ export function AiCopilotWorkspace() {
   const bridge = useMemo(() => HacpBridge.getInstance(), [])
   const hacpStatus: HacpStatus = isExecuting ? 'BUSY' : bridge.getStatus()
   const capabilities = useMemo(() => bridge.getCapabilities(), [bridge])
+
+  // Autonomous Website Generation
+  const executeToolCallForGeneration = useCallback(async (call: any) => {
+    const result = bridge.executeToolCall(call, builderDoc, builderDoc.pages[0]?.id || 'page-home')
+    dispatch(result.command!)
+    return { success: result.verification.passed, message: result.message }
+  }, [bridge, builderDoc, dispatch])
+
+  const { state: genState, startGeneration, abortGeneration } = useAutonomousGeneration(
+    builderDoc,
+    executeToolCallForGeneration
+  )
 
   // Model Router & Picker state
   const [routerMode, setRouterMode] = useState<'AUTO' | 'FREE' | 'PAID' | 'MANUAL'>('AUTO')
@@ -133,6 +147,27 @@ export function AiCopilotWorkspace() {
       })
       .catch((err) => console.warn('[AiCopilotWorkspace] Models discovery fetch failed:', err))
   }, [])
+
+  // Handle autonomous generation completion
+  useEffect(() => {
+    if (genState.phase === 'complete' && genState.session) {
+      const completeMsg: HacpMessage = {
+        id: `msg-gen-complete-${Date.now()}`,
+        type: 'system',
+        text: `Strona wygenerowana pomyślnie! Wykonano ${genState.session.toolsExecuted} operacji. Strona jest gotowa do podglądu.`,
+        timestamp: new Date().toLocaleTimeString('pl-PL'),
+      }
+      setMessages((prev) => [...prev, completeMsg])
+    } else if (genState.phase === 'error' && genState.error) {
+      const errorMsg: HacpMessage = {
+        id: `msg-gen-error-${Date.now()}`,
+        type: 'system',
+        text: `Błąd generacji: ${genState.error}`,
+        timestamp: new Date().toLocaleTimeString('pl-PL'),
+      }
+      setMessages((prev) => [...prev, errorMsg])
+    }
+  }, [genState.phase, genState.session, genState.error])
 
   // Measure active canvas element geometry for Live Visual Context
   useEffect(() => {
@@ -273,6 +308,44 @@ export function AiCopilotWorkspace() {
   const handleSendMessage = async (promptToSend?: string) => {
     const text = (promptToSend || inputValue).trim()
     if (!text || isExecuting) return
+
+    // ── Autonomous Generation Detection ──
+    const lowerText = text.toLowerCase()
+    const isGenerationRequest = lowerText.includes('generuj stronę') ||
+      lowerText.includes('generate website') ||
+      lowerText.includes('stwórz stronę') ||
+      lowerText.includes('stwórz stronę internetową') ||
+      lowerText.includes('zrób stronę') ||
+      lowerText.includes('zbuduj stronę') ||
+      lowerText.includes('build website') ||
+      lowerText.includes('create website') ||
+      (lowerText.includes('stron') && lowerText.includes('internetow'))
+
+    if (isGenerationRequest && !isExecuting) {
+      // Trigger autonomous generation
+      setLastUserPrompt(text)
+      const userMessage: HacpMessage = {
+        id: `msg-user-${Date.now()}`,
+        type: 'user',
+        text,
+        timestamp: new Date().toLocaleTimeString('pl-PL'),
+      }
+      setMessages((prev) => [...prev, userMessage])
+      setInputValue('')
+
+      // Add system message about generation starting
+      const genMsg: HacpMessage = {
+        id: `msg-gen-${Date.now()}`,
+        type: 'system',
+        text: `Generuję stronę na podstawie briefu...`,
+        timestamp: new Date().toLocaleTimeString('pl-PL'),
+      }
+      setMessages((prev) => [...prev, genMsg])
+
+      // Start autonomous generation
+      startGeneration(text)
+      return
+    }
 
     setLastUserPrompt(text)
     const userMessage: HacpMessage = {
@@ -961,6 +1034,42 @@ export function AiCopilotWorkspace() {
           </div>
         )}
 
+        {/* Autonomous Generation Progress */}
+        {genState.isRunning && (
+          <div className="flex flex-col items-start space-y-1.5 max-w-[94%]">
+            <div className="flex items-center gap-2 text-[10px] font-mono text-[#D9A86C]">
+              <span className="w-2 h-2 rounded-full bg-[#D9A86C] animate-ping" />
+              <span className="font-bold tracking-wider">AUTONOMIC GENERATION</span>
+              <span className="text-zinc-500 font-mono text-[9px]">{genState.progress}%</span>
+            </div>
+
+            <div className="w-full p-3 rounded-2xl bg-[#0D1118] border border-[#D9A86C]/30 text-xs text-zinc-300 shadow-lg">
+              <div className="flex items-center justify-between gap-3 mb-2">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Wand2 className="w-3.5 h-3.5 text-[#D9A86C] animate-pulse flex-shrink-0" />
+                  <span className="text-[11px] truncate">{genState.message}</span>
+                </div>
+                <button
+                  onClick={abortGeneration}
+                  className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 active:scale-95 transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer"
+                >
+                  <Square className="w-2.5 h-2.5 fill-current" />
+                  <span>Anuluj</span>
+                </button>
+              </div>
+              <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] rounded-full transition-all duration-300"
+                  style={{ width: `${genState.progress}%` }}
+                />
+              </div>
+              <div className="mt-1.5 text-[9px] text-zinc-500 font-mono">
+                {genState.toolResults.length} operacji wykonano • {genState.plan?.sections.length || 0} sekcji w planie
+              </div>
+            </div>
+          </div>
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -1015,6 +1124,17 @@ export function AiCopilotWorkspace() {
         >
           <Cpu className="w-3 h-3 text-cyan-400" />
           <span>+ Prowadnice Wix (Platform)</span>
+        </button>
+
+        <div className="w-px h-4 bg-white/10 flex-shrink-0 mx-0.5" />
+
+        <button
+          onClick={() => handleSendMessage('Stwórz stronę internetową dla szkoły językowej')}
+          disabled={isExecuting}
+          className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#080B10] hover:shadow-lg hover:shadow-[#D9A86C]/20 whitespace-nowrap transition-all flex items-center gap-1 flex-shrink-0 disabled:opacity-40"
+        >
+          <Wand2 className="w-3 h-3" />
+          <span>Generuj Stronę</span>
         </button>
       </div>
 
