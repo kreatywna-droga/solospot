@@ -12,7 +12,7 @@ import { useState, useCallback } from 'react'
 import {
   ChevronLeft, Monitor, Tablet, Smartphone,
   Undo2, Redo2, Save, Zap, AlertCircle, CheckCircle2,
-  PanelLeft, Layers, ImageIcon, Bot, History,
+  PanelLeft, PanelRight, Layers, ImageIcon, Bot, History,
   Search, Command, Plus, Palette, Eye, Sparkles, Power,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -34,6 +34,8 @@ interface BuilderTopBarProps {
   activeTab: StudioTab
   onTabChange: (tab: StudioTab) => void
   onToggleLeftSidebar: () => void
+  inspectorVisible?: boolean
+  onToggleInspector?: () => void
 }
 
 const TABS: { id: StudioTab; label: string; icon: React.ElementType; shortcut: string }[] = [
@@ -48,6 +50,7 @@ const TABS: { id: StudioTab; label: string; icon: React.ElementType; shortcut: s
 
 export function BuilderTopBar({
   storeId, onSave, onPublish, saving, activeTab, onTabChange, onToggleLeftSidebar,
+  inspectorVisible = true, onToggleInspector,
 }: BuilderTopBarProps) {
   const { document, canvas, isDirty, dispatch } = useBuilder()
   const { canUndo, canRedo, undo, redo } = useBuilderHistory()
@@ -173,6 +176,21 @@ export function BuilderTopBar({
               <Eye className="w-3.5 h-3.5" />
               <span>{canvas.runtimeMode === 'PREVIEW' ? 'Edytuj' : 'Podgląd'}</span>
             </button>
+
+            {onToggleInspector && (
+              <button
+                onClick={onToggleInspector}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                  inspectorVisible
+                    ? 'bg-[#D9A86C]/15 text-[#F2C27F] border-[#D9A86C]/30 shadow-sm shadow-[#D9A86C]/10'
+                    : 'bg-[#202024] text-zinc-400 border-[#2D2D32] hover:bg-[#27272A] hover:text-white'
+                }`}
+                title={inspectorVisible ? 'Schowaj inspektor właściwości (Alt+I)' : 'Otwórz inspektor właściwości (Alt+I)'}
+              >
+                <PanelRight className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Inspektor</span>
+              </button>
+            )}
           </div>
 
           <div className="w-px h-6 bg-[#1A1F2E] mx-1" />

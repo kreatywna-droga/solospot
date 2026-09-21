@@ -26,7 +26,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import {
   Type, Image as ImageIcon, Sparkles, Sliders, ChevronDown, ChevronUp,
   FileText, AlignLeft, AlignCenter, AlignRight, ExternalLink,
-  Layers, Palette, Video, Upload, Check, Move,
+  Layers, Palette, Video, Upload, Check, Move, PanelRightClose,
 } from 'lucide-react';
 import { useBuilder, useSelectedSection } from '../state/BuilderProvider';
 import { DesignInspector } from '../../../../packages/authoring-studio/src/inspector/DesignInspector';
@@ -46,6 +46,7 @@ export interface PhaseThreeInspectorProps {
   sectionId: string | null;
   onPropChange: (key: string, value: unknown) => void;
   onStyleChange: (patch: Partial<NodeStyles>) => void;
+  onClose?: () => void;
 }
 
 function viewportToBreakpoint(label: string): 'desktop' | 'tablet' | 'mobile' {
@@ -58,6 +59,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
   sectionId,
   onPropChange,
   onStyleChange,
+  onClose,
 }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showMediaPicker, setShowMediaPicker] = useState(false);
@@ -107,7 +109,28 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
   }, [sectionId]);
 
   if (!sectionId || !selectedNode) {
-    return <EmptyInspectorState />;
+    return (
+      <div className="flex flex-col h-full overflow-hidden bg-[#0D1118] text-white select-none">
+        <div className="px-4 py-3 border-b border-white/[0.08] bg-[#1A1F2E] flex items-center justify-between">
+          <div>
+            <span className="text-xs font-bold text-white">Inspektor</span>
+            <p className="text-[11px] text-zinc-500 mt-0.5">Właściwości elementu</p>
+          </div>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-all ml-2 flex-shrink-0"
+              title="Schowaj inspektor (Alt+I)"
+            >
+              <PanelRightClose className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <EmptyInspectorState />
+        </div>
+      </div>
+    );
   }
 
   const activeBreakpoint = viewportToBreakpoint(canvas.viewport.label);
@@ -136,6 +159,15 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
           </div>
           <p className="text-[11px] text-zinc-500 mt-0.5">Szybka edycja wizualna</p>
         </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-all ml-2 flex-shrink-0"
+            title="Schowaj inspektor (Alt+I)"
+          >
+            <PanelRightClose className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* Main Scrollable Inspector Body */}

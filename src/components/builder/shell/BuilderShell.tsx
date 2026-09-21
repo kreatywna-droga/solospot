@@ -23,6 +23,7 @@
  */
 
 import { useState, useCallback, useEffect } from 'react'
+import { PanelRightOpen } from 'lucide-react'
 import { BuilderProvider, useBuilder, useBuilderHistory } from '../state/BuilderProvider'
 import { BuilderCanvas } from '../canvas/BuilderCanvas'
 import { PhaseThreeInspector } from '../inspector/PhaseThreeInspector'
@@ -94,6 +95,43 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
     }
     return 288
   })
+
+  // Inspector visibility with localStorage persistence
+  const [inspectorVisible, setInspectorVisible] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('solospot_builder_inspector_visible')
+      if (saved !== null) {
+        return saved === 'true'
+      }
+    }
+    return true
+  })
+
+  const toggleInspector = useCallback(() => {
+    setInspectorVisible(prev => {
+      const next = !prev
+      try {
+        localStorage.setItem('solospot_builder_inspector_visible', next.toString())
+      } catch {}
+      return next
+    })
+  }, [])
+
+  // Keyboard shortcut: Alt+I or Ctrl+\ to toggle inspector
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+        return
+      }
+      if ((e.altKey && (e.key === 'i' || e.key === 'I')) || (e.ctrlKey && e.key === '\\')) {
+        e.preventDefault()
+        toggleInspector()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [toggleInspector])
 
   const [isResizingLeft, setIsResizingLeft] = useState(false)
   const [isResizingRight, setIsResizingRight] = useState(false)
@@ -242,6 +280,8 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onToggleLeftSidebar={() => setLeftSidebarVisible(v => !v)}
+        inspectorVisible={inspectorVisible}
+        onToggleInspector={toggleInspector}
       />
 
       {/* Breadcrumbs */}
@@ -277,38 +317,56 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
         )}
 
         {/* Canvas */}
-        <main className="flex-1 flex flex-col overflow-hidden min-w-0">
+        <main className="flex-1 flex flex-col overflow-hidden min-w-0 relative">
           <BuilderCanvas onAddSection={() => setActiveTab('components')} />
+          {!inspectorVisible && (
+            <button
+              onClick={toggleInspector}
+              className="absolute right-4 top-3 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0D1118]/90 hover:bg-[#1A1F2E] border border-[#252B3A] hover:border-[#D9A86C]/50 text-zinc-300 hover:text-[#F2C27F] text-xs font-medium shadow-xl backdrop-blur-md transition-all group active:scale-95"
+              title="Otwórz inspektor właściwości (Alt+I)"
+            >
+              <PanelRightOpen className="w-3.5 h-3.5 text-[#D9A86C] transition-transform group-hover:scale-110" />
+              <span className="hidden sm:inline">Otwórz Inspektor</span>
+            </button>
+          )}
         </main>
 
         {/* Right Resizer Handle */}
-        <div
-          onPointerDown={handleRightPointerDown}
-          onDoubleClick={() => {
-            setRightWidth(288)
-            try { localStorage.setItem('solospot_builder_right_width', '288') } catch {}
-          }}
-          title="Przeciągnij, aby zmienić szerokość inspektora (kliknij 2x, aby zresetować do 288px)"
-          className={`w-2 hover:w-2.5 -ml-1 z-30 cursor-ew-resize transition-all flex items-center justify-center group flex-shrink-0 relative ${
-            isResizingRight ? 'bg-[#D9A86C] shadow-lg shadow-[#D9A86C]/50' : 'bg-transparent hover:bg-[#D9A86C]/30'
-          }`}
-        >
-          <div className={`w-[2px] h-10 rounded-full transition-colors ${
-            isResizingRight ? 'bg-white' : 'bg-white/10 group-hover:bg-[#F2C27F]'
-          }`} />
-        </div>
+        {inspectorVisible && (
+          <div
+            onPointerDown={handleRightPointerDown}
+            onDoubleClick={() => {
+              setRightWidth(288)
+              try { localStorage.setItem('solospot_builder_right_width', '288') } catch {}
+            }}
+            title="Przeciągnij, aby zmienić szerokość inspektora (kliknij 2x, aby zresetować do 288px)"
+            className={`w-2 hover:w-2.5 -ml-1 z-30 cursor-ew-resize transition-all flex items-center justify-center group flex-shrink-0 relative ${
+              isResizingRight ? 'bg-[#D9A86C] shadow-lg shadow-[#D9A86C]/50' : 'bg-transparent hover:bg-[#D9A86C]/30'
+            }`}
+          >
+            <div className={`w-[2px] h-10 rounded-full transition-colors ${
+              isResizingRight ? 'bg-white' : 'bg-white/10 group-hover:bg-[#F2C27F]'
+            }`} />
+          </div>
+        )}
 
         {/* Inspector (Right Panel) — Phase 3 Inspector (Design + Content tabs) */}
-        <aside
-          style={{ width: `${rightWidth}px` }}
-          className="border-l border-[#1A1F2E] bg-[#0D1118] flex flex-col overflow-hidden flex-shrink-0 h-full select-none"
-        >
-          <PhaseThreeInspector
-            sectionId={canvas.selectedSectionId}
-            onPropChange={handleInspectorPropChange}
-            onStyleChange={handleInspectorStyleChange}
-          />
-        </aside>
+        {inspectorVisible && (
+          <aside
+            style={{ width: `${rightWidth}px` }}
+            className="border-l border-[#1A1F2E] bg-[#0D1118] flex flex-col overflow-hidden flex-shrink-0 h-full select-none"
+          >
+            <PhaseThreeInspector
+              sectionId={canvas.selectedSectionId}
+              onPropChange={handleInspectorPropChange}
+              onStyleChange={handleInspectorStyleChange}
+              onClose={() => {
+                setInspectorVisible(false)
+                try { localStorage.setItem('solospot_builder_inspector_visible', 'false') } catch {}
+              }}
+            />
+          </aside>
+        )}
       </div>
 
       {/* Bottom Bar */}
