@@ -204,6 +204,9 @@ export interface HacpExecutionResult {
   verification?: ExecutionVerification;
   aiProviderStatus?: 'ONLINE' | 'OFFLINE';
   aiProviderName?: string;
+  selectedModel?: string;
+  isFreeModel?: boolean;
+  routerMode?: string;
 }
 
 /** Color name → hex mapping for deterministic color resolution */

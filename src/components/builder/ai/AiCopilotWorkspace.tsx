@@ -61,9 +61,28 @@ export function AiCopilotWorkspace() {
   const hacpStatus: HacpStatus = isExecuting ? 'BUSY' : bridge.getStatus()
   const capabilities = useMemo(() => bridge.getCapabilities(), [bridge])
 
-  // Check real AI Provider status on mount
+  // Model Router & Picker state
+  const [routerMode, setRouterMode] = useState<'AUTO' | 'FREE' | 'PAID' | 'MANUAL'>('AUTO')
+  const [selectedModelId, setSelectedModelId] = useState<string>('openai/gpt-4o-mini')
+  const [currentModelName, setCurrentModelName] = useState<string>('GPT-4o Mini')
+  const [isFreeModel, setIsFreeModel] = useState<boolean>(false)
+  const [supportsTools, setSupportsTools] = useState<boolean>(true)
+  const [availableModels, setAvailableModels] = useState<any[]>([])
+  const [freeModels, setFreeModels] = useState<any[]>([])
+  const [paidModels, setPaidModels] = useState<any[]>([])
+  const [isPickerOpen, setIsPickerOpen] = useState(false)
+  const [searchFilter, setSearchFilter] = useState('')
+
+  // Check real AI Provider status on mount & discover models
   useEffect(() => {
     if (typeof window === 'undefined') return
+
+    // Restore session preferences
+    const savedMode = sessionStorage.getItem('solospot_ai_mode') as any
+    const savedModel = sessionStorage.getItem('solospot_ai_model')
+    if (savedMode) setRouterMode(savedMode)
+    if (savedModel) setSelectedModelId(savedModel)
+
     fetch('/api/builder/copilot')
       .then((res) => res.json())
       .then((data) => {
@@ -80,6 +99,31 @@ export function AiCopilotWorkspace() {
         setAiProviderStatus('OFFLINE')
         setAiProviderName('NOT CONFIGURED')
       })
+
+    // Discover models dynamically from OpenCode
+    fetch('/api/ai/models')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === 'SUCCESS') {
+          setAvailableModels(data.models || [])
+          setFreeModels(data.freeModels || [])
+          setPaidModels(data.paidModels || [])
+          if (data.currentModel && !savedModel) {
+            setSelectedModelId(data.currentModel.id)
+            setCurrentModelName(data.currentModel.name)
+            setIsFreeModel(data.currentModel.isFree)
+            setSupportsTools(data.currentModel.supportsTools)
+          } else if (savedModel && data.models) {
+            const matched = data.models.find((m: any) => m.id === savedModel)
+            if (matched) {
+              setCurrentModelName(matched.name)
+              setIsFreeModel(matched.isFree)
+              setSupportsTools(matched.supportsTools)
+            }
+          }
+        }
+      })
+      .catch((err) => console.warn('[AiCopilotWorkspace] Models discovery fetch failed:', err))
   }, [])
 
   // Measure active canvas element geometry for Live Visual Context
@@ -188,14 +232,31 @@ export function AiCopilotWorkspace() {
     setIsExecuting(true)
 
     try {
-      // Execute through Conversational Intent Engine & HACP Bridge
-      const result = await bridge.executePlan(text, currentContext, builderDoc, conversationContext)
+      // Execute through Conversational Intent Engine & HACP Bridge with active router configuration
+      const result = await bridge.executePlan(
+        text,
+        currentContext,
+        builderDoc,
+        conversationContext,
+        routerMode,
+        routerMode === 'MANUAL' ? selectedModelId : undefined
+      )
 
       // Update AI provider status from result
       if (result.aiProviderStatus) {
         setAiProviderStatus(result.aiProviderStatus)
         if (result.aiProviderName) {
           setAiProviderName(result.aiProviderName)
+        }
+      }
+
+      if (result.selectedModel) {
+        setSelectedModelId(result.selectedModel)
+        setIsFreeModel(Boolean(result.isFreeModel))
+        const matched = availableModels.find((m) => m.id === result.selectedModel)
+        if (matched) {
+          setCurrentModelName(matched.name)
+          setSupportsTools(matched.supportsTools)
         }
       }
 
@@ -332,6 +393,166 @@ export function AiCopilotWorkspace() {
           >
             <Sliders className="w-3.5 h-3.5" />
           </button>
+        </div>
+      </div>
+
+      {/* ── 1.5 OPENCODE MODEL PICKER & ROUTER (IN CHAT) ───────────────────── */}
+      <div className="px-3 py-2 bg-[#080D14] border-b border-white/[0.08] flex flex-col gap-1.5 flex-shrink-0">
+        <div className="flex items-center justify-between gap-2">
+          {/* Router Mode Switcher */}
+          <div className="flex items-center gap-1 bg-white/[0.04] p-0.5 rounded-lg border border-white/[0.06]">
+            {(['AUTO', 'FREE', 'PAID'] as const).map((mode) => (
+              <button
+                key={mode}
+                onClick={() => {
+                  setRouterMode(mode)
+                  sessionStorage.setItem('solospot_ai_mode', mode)
+                }}
+                className={`px-2 py-0.5 rounded-md text-[9px] font-mono font-bold transition-all ${
+                  routerMode === mode
+                    ? 'bg-[#D9A86C] text-[#080B10] shadow-xs'
+                    : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'
+                }`}
+                title={mode === 'AUTO' ? 'Automatyczny wybór najlepszego modelu' : mode === 'FREE' ? 'Używaj tylko modeli darmowych' : 'Używaj modeli płatnych / Pro'}
+              >
+                {mode}
+              </button>
+            ))}
+          </div>
+
+          {/* Model Dropdown Trigger */}
+          <div className="relative flex-1">
+            <button
+              onClick={() => setIsPickerOpen((v) => !v)}
+              className="w-full flex items-center justify-between px-2.5 py-1 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 text-[10px] font-mono text-zinc-200 transition-all cursor-pointer"
+              title="Wybierz model OpenCode"
+            >
+              <div className="flex items-center gap-1.5 truncate">
+                <span className={`w-1.5 h-1.5 rounded-full ${isFreeModel ? 'bg-emerald-400' : 'bg-cyan-400'}`} />
+                <span className="truncate font-semibold">{currentModelName}</span>
+                <span className={`text-[8px] font-bold px-1 py-0.2 rounded border ${
+                  isFreeModel
+                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                    : 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
+                }`}>
+                  {isFreeModel ? 'FREE' : 'PAID'}
+                </span>
+              </div>
+              <ChevronDown className="w-3 h-3 text-zinc-400 flex-shrink-0 ml-1" />
+            </button>
+
+            {/* Model Picker Popup Menu */}
+            {isPickerOpen && (
+              <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-[#0D1118] border border-white/15 rounded-xl shadow-2xl p-2 max-h-72 flex flex-col gap-1.5">
+                {/* Search input */}
+                <input
+                  type="text"
+                  placeholder="Filtruj modele..."
+                  value={searchFilter}
+                  onChange={(e) => setSearchFilter(e.target.value)}
+                  className="w-full bg-white/[0.04] border border-white/10 rounded-lg px-2 py-1 text-[10px] text-white placeholder-zinc-500 focus:outline-none"
+                />
+
+                <div className="overflow-y-auto space-y-2 pr-1 flex-1">
+                  {/* FREE MODELS */}
+                  {freeModels.length > 0 && (
+                    <div className="space-y-1">
+                      <span className="text-[9px] font-mono font-bold text-emerald-400 px-1 uppercase tracking-wider block">
+                        Darmowe (Free) • {freeModels.length}
+                      </span>
+                      {freeModels
+                        .filter((m) => !searchFilter || m.name.toLowerCase().includes(searchFilter.toLowerCase()) || m.id.toLowerCase().includes(searchFilter.toLowerCase()))
+                        .map((m) => (
+                          <button
+                            key={m.id}
+                            onClick={() => {
+                              setSelectedModelId(m.id)
+                              setCurrentModelName(m.name)
+                              setIsFreeModel(true)
+                              setSupportsTools(m.supportsTools)
+                              setRouterMode('MANUAL')
+                              setIsPickerOpen(false)
+                              sessionStorage.setItem('solospot_ai_model', m.id)
+                              sessionStorage.setItem('solospot_ai_mode', 'MANUAL')
+                            }}
+                            className={`w-full text-left p-1.5 rounded-lg flex items-center justify-between text-[10px] font-mono transition-colors cursor-pointer ${
+                              selectedModelId === m.id
+                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                : 'hover:bg-white/[0.05] text-zinc-300'
+                            }`}
+                          >
+                            <span className="truncate">{m.name}</span>
+                            <div className="flex items-center gap-1 flex-shrink-0 text-[8px]">
+                              {m.supportsTools ? (
+                                <span className="text-emerald-400">✓ Tools</span>
+                              ) : (
+                                <span className="text-zinc-500">Chat Only</span>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                    </div>
+                  )}
+
+                  {/* PAID MODELS */}
+                  {paidModels.length > 0 && (
+                    <div className="space-y-1 pt-1 border-t border-white/[0.06]">
+                      <span className="text-[9px] font-mono font-bold text-cyan-400 px-1 uppercase tracking-wider block">
+                        Płatne / Pro • {paidModels.length}
+                      </span>
+                      {paidModels
+                        .filter((m) => !searchFilter || m.name.toLowerCase().includes(searchFilter.toLowerCase()) || m.id.toLowerCase().includes(searchFilter.toLowerCase()))
+                        .slice(0, 30)
+                        .map((m) => (
+                          <button
+                            key={m.id}
+                            onClick={() => {
+                              setSelectedModelId(m.id)
+                              setCurrentModelName(m.name)
+                              setIsFreeModel(false)
+                              setSupportsTools(m.supportsTools)
+                              setRouterMode('MANUAL')
+                              setIsPickerOpen(false)
+                              sessionStorage.setItem('solospot_ai_model', m.id)
+                              sessionStorage.setItem('solospot_ai_mode', 'MANUAL')
+                            }}
+                            className={`w-full text-left p-1.5 rounded-lg flex items-center justify-between text-[10px] font-mono transition-colors cursor-pointer ${
+                              selectedModelId === m.id
+                                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                                : 'hover:bg-white/[0.05] text-zinc-300'
+                            }`}
+                          >
+                            <span className="truncate">{m.name}</span>
+                            <div className="flex items-center gap-1 flex-shrink-0 text-[8px]">
+                              {m.supportsTools ? (
+                                <span className="text-cyan-400">✓ Tools</span>
+                              ) : (
+                                <span className="text-zinc-500">Chat Only</span>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Real-time Capability Indicator Bar */}
+        <div className="flex items-center justify-between text-[9px] font-mono text-zinc-400 px-1 pt-0.5">
+          <div className="flex items-center gap-2">
+            <span className="text-emerald-400">✓ Chat</span>
+            <span className="text-emerald-400">✓ Multi-turn</span>
+            <span className={supportsTools ? 'text-emerald-400' : 'text-amber-400'}>
+              {supportsTools ? '✓ Tools' : '✕ No Tools'}
+            </span>
+            <span className={supportsTools ? 'text-emerald-400' : 'text-zinc-500'}>
+              {supportsTools ? '✓ HACP' : '○ HACP'}
+            </span>
+          </div>
+          <span className="text-zinc-500 text-[8px] font-mono uppercase">OpenCode</span>
         </div>
       </div>
 

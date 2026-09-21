@@ -17,7 +17,7 @@ import type { ChatMessage, AICopilotRequest } from '@/lib/ai/AIProviderTypes';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { prompt, messages = [], builderContext = {}, visualMetrics } = body;
+    const { prompt, messages = [], builderContext = {}, visualMetrics, routerMode, selectedModelId } = body;
 
     const registry = AIProviderRegistry.getInstance();
 
@@ -68,10 +68,14 @@ ZASADY POSTĘPOWANIA:
 
     const chatMessages: ChatMessage[] = [
       { role: 'system', content: systemPrompt },
-      ...messages.map((m: any) => ({
-        role: m.role || (m.type === 'user' ? 'user' : 'assistant'),
-        content: m.content || m.text || '',
-      })),
+      ...messages.map((m: any) => {
+        let role = m.role || (m.type === 'user' ? 'user' : 'assistant');
+        if (role === 'ai') role = 'assistant';
+        return {
+          role,
+          content: m.content || m.text || '',
+        };
+      }),
     ];
 
     // If current prompt is not yet at the end of messages, append it
@@ -86,6 +90,8 @@ ZASADY POSTĘPOWANIA:
       builderContext,
       visualMetrics,
       tools: BUILDER_TOOL_DEFINITIONS,
+      routerMode: routerMode || 'AUTO',
+      modelId: selectedModelId,
     };
 
     const result = await registry.execute(aiRequest);

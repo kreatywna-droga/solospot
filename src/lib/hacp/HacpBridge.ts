@@ -448,7 +448,9 @@ export class HacpBridge {
     prompt: string,
     context: HacpBuilderContext,
     document: BuilderDocument,
-    conversationContext: HacpConversationContext = { history: [] }
+    conversationContext: HacpConversationContext = { history: [] },
+    routerMode: 'AUTO' | 'FREE' | 'PAID' | 'MANUAL' = 'AUTO',
+    selectedModelId?: string
   ): Promise<HacpExecutionResult> {
     const startTime = new Date().toLocaleTimeString('pl-PL');
     const cleanPrompt = prompt.trim();
@@ -470,11 +472,13 @@ export class HacpBridge {
           body: JSON.stringify({
             prompt: cleanPrompt,
             messages: conversationContext.history.map((h) => ({
-              role: h.role,
+              role: (h.role as string) === 'ai' ? 'assistant' : h.role,
               content: h.text,
             })),
             builderContext: context,
             visualMetrics: context.visualMetrics,
+            routerMode,
+            selectedModelId,
           }),
         });
 
@@ -560,6 +564,9 @@ export class HacpBridge {
           verification: lastVerification,
           aiProviderStatus,
           aiProviderName,
+          selectedModel: aiProviderResponse.model,
+          isFreeModel: aiProviderResponse.isFreeModel,
+          routerMode: aiProviderResponse.routerMode,
           updatedConversationContext: {
             lastIntent: 'EXECUTE',
             lastModifiedNodeId: commands[0]?.type === 'UPDATE_PROPS' ? (commands[0] as any).sectionId : undefined,
@@ -578,6 +585,9 @@ export class HacpBridge {
         executionStatus: 'EXECUTED',
         aiProviderStatus,
         aiProviderName,
+        selectedModel: aiProviderResponse.model,
+        isFreeModel: aiProviderResponse.isFreeModel,
+        routerMode: aiProviderResponse.routerMode,
         updatedConversationContext: { lastIntent: 'CHAT' },
       };
     }

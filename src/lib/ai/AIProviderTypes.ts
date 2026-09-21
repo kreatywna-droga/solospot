@@ -47,6 +47,8 @@ export interface AICopilotRequest {
   builderContext: HacpBuilderContext;
   visualMetrics?: HacpVisualMetrics;
   tools?: HacpToolDefinition[];
+  routerMode?: 'AUTO' | 'FREE' | 'PAID' | 'MANUAL';
+  modelId?: string;
 }
 
 export interface AICopilotResponse {
@@ -57,6 +59,9 @@ export interface AICopilotResponse {
   toolCalls?: HacpToolCall[];
   missingKeys?: string[];
   error?: string;
+  isFreeModel?: boolean;
+  finishReason?: string;
+  routerMode?: string;
   rawUsage?: {
     promptTokens?: number;
     completionTokens?: number;
