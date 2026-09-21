@@ -98,11 +98,11 @@ export function StoreLifecycleModal({
   return (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-150">
       <div
-        className="w-full max-w-lg bg-[#0D1118] border border-[#252B3A] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
+        className="w-full max-w-lg bg-[#202024] border border-[#252B3A] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#1A1F2E] bg-[#080B10]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#2E2E33] bg-[#18181B]">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-violet-500/10 border border-[#D9A86C]/20 flex items-center justify-center">
               <StoreIcon className="w-4 h-4 text-violet-400" />
@@ -121,7 +121,7 @@ export function StoreLifecycleModal({
         </div>
 
         {/* Body */}
-        <div className="p-6 space-y-6 bg-[#0D1118]">
+        <div className="p-6 space-y-6 bg-[#202024]">
           {error && (
             <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-start gap-2.5 text-xs text-rose-300">
               <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-rose-400" />
@@ -137,7 +137,7 @@ export function StoreLifecycleModal({
           )}
 
           {/* Section 1: Store Lifecycle Status (Deactivate / Activate) */}
-          <div className="p-4 rounded-xl bg-[#1A1F2E] border border-[#252B3A] space-y-4">
+          <div className="p-4 rounded-xl bg-[#2E2E33] border border-[#252B3A] space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-xs font-semibold text-zinc-300">Bieżący stan sklepu:</span>
@@ -250,7 +250,7 @@ export function StoreLifecycleModal({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-[#1A1F2E] bg-[#080B10] flex justify-end">
+        <div className="px-6 py-3 border-t border-[#2E2E33] bg-[#18181B] flex justify-end">
           <button
             onClick={onClose}
             className="px-4 py-1.5 rounded-xl text-xs font-medium bg-[#2D2D32] hover:bg-zinc-700 text-zinc-300 hover:text-white transition-all"

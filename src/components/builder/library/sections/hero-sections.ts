@@ -88,7 +88,7 @@ export const heroSections: HeroSection[] = [
     createNode: () => {
       return createSectionNode({
         id: generateNodeId('section'), type: 'section', label: 'Hero: Video Ambient',
-        styles: { padding: { top: '110px', right: '24px', bottom: '110px', left: '24px' }, backgroundColor: '#000000', videoSrc: 'https://assets.mixkit.co/videos/preview/mixkit-stars-in-space-1610-large.mp4', videoAutoplay: true, videoLoop: true, videoMuted: true, overlayColor: '#050508', overlayOpacity: 0.6, textAlign: 'center' },
+        styles: { padding: { top: '110px', right: '24px', bottom: '110px', left: '24px' }, backgroundColor: '#000000', videoSrc: 'https://assets.mixkit.co/videos/preview/mixkit-stars-in-space-1610-large.mp4', videoAutoplay: true, videoLoop: true, videoMuted: true, overlayColor: '#121214', overlayOpacity: 0.6, textAlign: 'center' },
         children: [
           createBuilderNode({ id: generateNodeId('container'), type: 'container', label: 'Video Hero Content', styles: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', maxWidth: '860px', margin: { top: '0px', right: 'auto', bottom: '0px', left: 'auto' } },
             children: [

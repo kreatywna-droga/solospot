@@ -58,10 +58,10 @@ export function BuilderLeftSidebar({ activeTab, onTabChange, width = 320 }: Buil
   return (
     <aside
       style={{ width: `${actualWidth}px` }}
-      className="border-r border-[#1A1F2E] bg-[#0D1118] flex flex-row overflow-hidden flex-shrink-0 h-full select-none"
+      className="border-r border-[#2E2E33] bg-[#202024] flex flex-row overflow-hidden flex-shrink-0 h-full select-none"
     >
       {/* Vertical tab strip — moves together with the resizable sidebar */}
-      <div className="w-[52px] bg-[#080B10] border-r border-[#1A1F2E] flex flex-col items-center py-2 gap-1 flex-shrink-0">
+      <div className="w-[52px] bg-[#18181B] border-r border-[#2E2E33] flex flex-col items-center py-2 gap-1 flex-shrink-0">
         {TABS.map(tab => (
           <button
             key={tab.id}
@@ -102,7 +102,7 @@ function HistoryPanel() {
   const entries = history.entries
 
   return (
-    <div className="flex flex-col h-full bg-[#0D1118] text-white">
+    <div className="flex flex-col h-full bg-[#202024] text-white">
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08]">
         <div className="flex items-center gap-2">
           <History className="w-4 h-4 text-[#D9A86C]" />
@@ -167,7 +167,7 @@ function HistoryPanel() {
         )}
       </div>
 
-      <div className="p-3 border-t border-white/[0.08] bg-[#080B10] text-[11px] text-zinc-500 text-center">
+      <div className="p-3 border-t border-white/[0.08] bg-[#18181B] text-[11px] text-zinc-500 text-center">
         Zarejestrowano {entries.length} krok{entries.length === 1 ? '' : entries.length < 5 ? 'i' : 'ów'}
       </div>
     </div>

@@ -49,7 +49,7 @@ export default function StudioIndexPage() {
 
   if (loading) {
     return (
-      <div className="h-screen bg-[#050508] flex flex-col items-center justify-center gap-4 text-white">
+      <div className="h-screen bg-[#121214] flex flex-col items-center justify-center gap-4 text-white">
         <Loader2 className="w-12 h-12 text-violet-500 animate-spin" />
         <p className="text-sm text-slate-400">Ładowanie Authoring Studio...</p>
       </div>
@@ -58,7 +58,7 @@ export default function StudioIndexPage() {
 
   if (error) {
     return (
-      <div className="h-screen bg-[#050508] flex items-center justify-center p-6">
+      <div className="h-screen bg-[#121214] flex items-center justify-center p-6">
         <div className="text-center max-w-md bg-[#0c0d16] border border-white/10 p-8 rounded-3xl shadow-2xl">
           <AlertTriangle className="w-12 h-12 text-amber-400 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-white mb-2">Authoring Studio</h2>
@@ -83,7 +83,7 @@ export default function StudioIndexPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050508] p-8 text-white">
+    <div className="min-h-screen bg-[#121214] p-8 text-white">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-black mb-2">Authoring Studio</h1>

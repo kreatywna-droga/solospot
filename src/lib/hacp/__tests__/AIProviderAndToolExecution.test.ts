@@ -105,7 +105,7 @@ describe('Real AI Provider & HACP Tool Calling Verification', () => {
   // --------------------------------------------------------------------------
   // 3. Real Tool Execution: insert_section
   // --------------------------------------------------------------------------
-  it('T3 — tool call insert_section adds section and passes BEFORE/AFTER verification', () => {
+  it('T3 — tool call insert_section adds section and passes BEFORE/AFTER verification', async () => {
     const toolCall: HacpToolCall = {
       id: 'tc-1',
       name: 'insert_section',
@@ -118,7 +118,7 @@ describe('Real AI Provider & HACP Tool Calling Verification', () => {
     };
 
     const initialCount = mockDoc.pages[0].sections.length;
-    const result = bridge.executeToolCall(toolCall, mockDoc, mockDoc.pages[0].id);
+    const result = await bridge.executeToolCall(toolCall, mockDoc, mockDoc.pages[0].id);
 
     expect(result.status).toBe('EXECUTED');
     expect(result.verification.passed).toBe(true);
@@ -130,7 +130,7 @@ describe('Real AI Provider & HACP Tool Calling Verification', () => {
   // --------------------------------------------------------------------------
   // 4. Real Tool Execution: update_node_props
   // --------------------------------------------------------------------------
-  it('T4 — tool call update_node_props changes title and passes verification', () => {
+  it('T4 — tool call update_node_props changes title and passes verification', async () => {
     const toolCall: HacpToolCall = {
       id: 'tc-2',
       name: 'update_node_props',
@@ -144,7 +144,7 @@ describe('Real AI Provider & HACP Tool Calling Verification', () => {
       },
     };
 
-    const result = bridge.executeToolCall(toolCall, mockDoc, mockDoc.pages[0].id);
+    const result = await bridge.executeToolCall(toolCall, mockDoc, mockDoc.pages[0].id);
 
     expect(result.status).toBe('EXECUTED');
     expect(result.verification.passed).toBe(true);
@@ -155,7 +155,7 @@ describe('Real AI Provider & HACP Tool Calling Verification', () => {
   // --------------------------------------------------------------------------
   // 5. Real Tool Execution: move_section
   // --------------------------------------------------------------------------
-  it('T5 — tool call move_section reorders sections and passes verification', () => {
+  it('T5 — tool call move_section reorders sections and passes verification', async () => {
     const toolCall: HacpToolCall = {
       id: 'tc-3',
       name: 'move_section',
@@ -166,7 +166,7 @@ describe('Real AI Provider & HACP Tool Calling Verification', () => {
       },
     };
 
-    const result = bridge.executeToolCall(toolCall, mockDoc, mockDoc.pages[0].id);
+    const result = await bridge.executeToolCall(toolCall, mockDoc, mockDoc.pages[0].id);
 
     expect(result.status).toBe('EXECUTED');
     expect(result.verification.passed).toBe(true);
@@ -176,7 +176,7 @@ describe('Real AI Provider & HACP Tool Calling Verification', () => {
   // --------------------------------------------------------------------------
   // 6. Real Tool Execution: remove_section
   // --------------------------------------------------------------------------
-  it('T6 — tool call remove_section deletes section and passes verification', () => {
+  it('T6 — tool call remove_section deletes section and passes verification', async () => {
     const toolCall: HacpToolCall = {
       id: 'tc-4',
       name: 'remove_section',
@@ -186,7 +186,7 @@ describe('Real AI Provider & HACP Tool Calling Verification', () => {
       },
     };
 
-    const result = bridge.executeToolCall(toolCall, mockDoc, mockDoc.pages[0].id);
+    const result = await bridge.executeToolCall(toolCall, mockDoc, mockDoc.pages[0].id);
 
     expect(result.status).toBe('EXECUTED');
     expect(result.verification.passed).toBe(true);
@@ -196,7 +196,7 @@ describe('Real AI Provider & HACP Tool Calling Verification', () => {
   // --------------------------------------------------------------------------
   // 7. Negative Test: Non-existent target section
   // --------------------------------------------------------------------------
-  it('T7 — tool call on non-existent section yields FAILED, never EXECUTED', () => {
+  it('T7 — tool call on non-existent section yields FAILED, never EXECUTED', async () => {
     const toolCall: HacpToolCall = {
       id: 'tc-fail',
       name: 'update_node_props',
@@ -207,7 +207,7 @@ describe('Real AI Provider & HACP Tool Calling Verification', () => {
       },
     };
 
-    const result = bridge.executeToolCall(toolCall, mockDoc, mockDoc.pages[0].id);
+    const result = await bridge.executeToolCall(toolCall, mockDoc, mockDoc.pages[0].id);
 
     expect(result.status).toBe('FAILED');
     expect(result.verification.passed).toBe(false);
@@ -216,14 +216,14 @@ describe('Real AI Provider & HACP Tool Calling Verification', () => {
   // --------------------------------------------------------------------------
   // 8. Negative Test: Unsupported Capability
   // --------------------------------------------------------------------------
-  it('T8 — unsupported capability yields UNSUPPORTED, never fake success', () => {
+  it('T8 — unsupported capability yields UNSUPPORTED, never fake success', async () => {
     const toolCall: HacpToolCall = {
       id: 'tc-unknown',
       name: 'execute_arbitrary_shell_script',
       arguments: { command: 'rm -rf /' },
     };
 
-    const result = bridge.executeToolCall(toolCall, mockDoc, mockDoc.pages[0].id);
+    const result = await bridge.executeToolCall(toolCall, mockDoc, mockDoc.pages[0].id);
 
     expect(result.status).toBe('UNSUPPORTED');
     expect(result.verification.passed).toBe(false);
@@ -233,14 +233,14 @@ describe('Real AI Provider & HACP Tool Calling Verification', () => {
   // --------------------------------------------------------------------------
   // 9. Tool Call: Undo and Redo
   // --------------------------------------------------------------------------
-  it('T9 — tool calls undo and redo set corresponding flags', () => {
+  it('T9 — tool calls undo and redo set corresponding flags', async () => {
     const undoCall: HacpToolCall = { id: 'tc-u', name: 'undo', arguments: {} };
-    const undoRes = bridge.executeToolCall(undoCall, mockDoc, mockDoc.pages[0].id);
+    const undoRes = await bridge.executeToolCall(undoCall, mockDoc, mockDoc.pages[0].id);
     expect(undoRes.status).toBe('EXECUTED');
     expect(undoRes.shouldTriggerUndo).toBe(true);
 
     const redoCall: HacpToolCall = { id: 'tc-r', name: 'redo', arguments: {} };
-    const redoRes = bridge.executeToolCall(redoCall, mockDoc, mockDoc.pages[0].id);
+    const redoRes = await bridge.executeToolCall(redoCall, mockDoc, mockDoc.pages[0].id);
     expect(redoRes.status).toBe('EXECUTED');
     expect(redoRes.shouldTriggerRedo).toBe(true);
   });

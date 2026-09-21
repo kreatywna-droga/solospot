@@ -170,7 +170,7 @@ export default function MissionControlPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050508] text-white">
+    <div className="min-h-screen bg-[#121214] text-white">
       {/* Header */}
       <header className="fixed top-0 inset-x-0 z-50 bg-[#000000]/80 backdrop-blur-md border-b border-white/5">
         <div className="max-w-full mx-auto px-6 h-16 flex items-center justify-between">

@@ -279,8 +279,8 @@ export function ExperienceInspectorControls({
   );
 
   return (
-    <div className="flex flex-col h-full bg-[#0D1118] text-white select-none">
-      <div className="px-4 py-3 border-b border-white/[0.08] bg-[#1A1F2E]">
+    <div className="flex flex-col h-full bg-[#202024] text-white select-none">
+      <div className="px-4 py-3 border-b border-white/[0.08] bg-[#2E2E33]">
         <div className="text-xs font-bold text-white">Experience Controls</div>
         <p className="text-[11px] text-zinc-500 mt-0.5">Scene configuration</p>
       </div>

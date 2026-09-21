@@ -177,11 +177,11 @@ export class HacpBridge {
   /**
    * Execute a structured Tool Call issued by real LLM.
    */
-  public executeToolCall(
+  public async executeToolCall(
     toolCall: HacpToolCall,
     document: BuilderDocument,
     activePageId: string
-  ): {
+  ): Promise<{
     command?: BuilderCommand;
     verification: ExecutionVerification;
     appliedChange?: AppliedChangeItem;
@@ -189,7 +189,7 @@ export class HacpBridge {
     status: HacpExecutionStatus;
     shouldTriggerUndo?: boolean;
     shouldTriggerRedo?: boolean;
-  } {
+  }> {
     const { name, arguments: args } = toolCall;
     const activePage = document.pages.find((p) => p.id === activePageId) || document.pages[0];
 
@@ -369,7 +369,7 @@ export class HacpBridge {
     if (name === 'set_background_color' || name === 'set_background') {
       const sectionId = (args.sectionId as string) || (args.nodeId as string) || activePage?.sections[0]?.id || '';
       const color = (args.color as string) || (args.backgroundColor as string) || (args.background as string) || '#0F172A';
-      return this.executeToolCall(
+      return await this.executeToolCall(
         { id: toolCall.id, name: 'update_node_props', arguments: { sectionId, props: { backgroundColor: color, background: color } } },
         document,
         activePageId
@@ -379,7 +379,7 @@ export class HacpBridge {
     if (name === 'set_text') {
       const sectionId = (args.sectionId as string) || (args.nodeId as string) || activePage?.sections[0]?.id || '';
       const text = (args.text as string) || (args.title as string) || '';
-      return this.executeToolCall(
+      return await this.executeToolCall(
         { id: toolCall.id, name: 'update_node_props', arguments: { sectionId, props: { title: text } } },
         document,
         activePageId
@@ -389,7 +389,7 @@ export class HacpBridge {
     if (name === 'set_button_text') {
       const sectionId = (args.sectionId as string) || (args.nodeId as string) || activePage?.sections[0]?.id || '';
       const text = (args.text as string) || (args.cta as string) || '';
-      return this.executeToolCall(
+      return await this.executeToolCall(
         { id: toolCall.id, name: 'update_node_props', arguments: { sectionId, props: { cta: text, ctaText: text } } },
         document,
         activePageId
@@ -399,7 +399,7 @@ export class HacpBridge {
     if (name === 'set_button_color') {
       const sectionId = (args.sectionId as string) || (args.nodeId as string) || activePage?.sections[0]?.id || '';
       const color = (args.color as string) || (args.buttonColor as string) || '#FF0000';
-      return this.executeToolCall(
+      return await this.executeToolCall(
         { id: toolCall.id, name: 'update_node_props', arguments: { sectionId, props: { buttonColor: color } } },
         document,
         activePageId
@@ -439,7 +439,7 @@ export class HacpBridge {
       };
     }
 
-    if (name === 'read_builder_document' || name === 'inspect_page_structure' || name === 'inspect_selected_node') {
+    if (name === 'read_builder_document' || name === 'inspect_page_structure') {
       const sections = activePage?.sections || [];
       return {
         status: 'EXECUTED',
@@ -450,6 +450,248 @@ export class HacpBridge {
           diffSummary: `Odczytano strukturę strony (${sections.length} sekcji).`,
         },
         message: `Strona „${activePage?.name || 'Główna'}” posiada ${sections.length} sekcji: ${sections.map((s: any) => s.label || s.type).join(', ')}.`,
+      };
+    }
+
+    if (name === 'inspect_selected_node') {
+      const nodeId = (args.nodeId as string);
+      if (!nodeId) {
+        return {
+          status: 'EXECUTED',
+          verification: { passed: true, operation: name, target: 'none' },
+          message: 'Nie zaznaczono żadnego węzła. Wybierz element na Canvasie i użyj inspect_node z ID.',
+        };
+      }
+      const { inspectNode } = await import('../ai/BuilderInspectionTools');
+      const result = inspectNode(document, nodeId);
+      if (!result) {
+        return {
+          status: 'EXECUTED',
+          verification: { passed: true, operation: name, target: nodeId },
+          message: `Nie znaleziono węzła o ID \`${nodeId}\`.`,
+        };
+      }
+      return {
+        status: 'EXECUTED',
+        verification: { passed: true, operation: name, target: nodeId },
+        message: JSON.stringify(result, null, 2),
+      };
+    }
+
+    // =================================================================
+    // INSPECTOR PARITY TOOLS — Full Builder Access for AI
+    // =================================================================
+
+    if (name === 'inspect_node') {
+      const nodeId = args.nodeId as string;
+      if (!nodeId) {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: 'none' },
+          message: 'inspect_node wymaga parametru nodeId.',
+        };
+      }
+      const { inspectNode } = await import('../ai/BuilderInspectionTools');
+      const result = inspectNode(document, nodeId);
+      if (!result) {
+        return {
+          status: 'EXECUTED',
+          verification: { passed: true, operation: name, target: nodeId },
+          message: `Nie znaleziono węzła o ID \`${nodeId}\`.`,
+        };
+      }
+      return {
+        status: 'EXECUTED',
+        verification: { passed: true, operation: name, target: nodeId },
+        message: JSON.stringify(result, null, 2),
+      };
+    }
+
+    if (name === 'inspect_children') {
+      const nodeId = args.nodeId as string;
+      if (!nodeId) {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: 'none' },
+          message: 'inspect_children wymaga parametru nodeId.',
+        };
+      }
+      const { inspectChildren } = await import('../ai/BuilderInspectionTools');
+      const result = inspectChildren(document, nodeId);
+      if (result === null) {
+        return {
+          status: 'EXECUTED',
+          verification: { passed: true, operation: name, target: nodeId },
+          message: `Nie znaleziono węzła o ID \`${nodeId}\`.`,
+        };
+      }
+      if (result.length === 0) {
+        return {
+          status: 'EXECUTED',
+          verification: { passed: true, operation: name, target: nodeId },
+          message: `Węzeł \`${nodeId}\` nie posiada dzieci.`,
+        };
+      }
+      return {
+        status: 'EXECUTED',
+        verification: { passed: true, operation: name, target: nodeId },
+        message: JSON.stringify(result, null, 2),
+      };
+    }
+
+    if (name === 'inspect_parent') {
+      const nodeId = args.nodeId as string;
+      if (!nodeId) {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: 'none' },
+          message: 'inspect_parent wymaga parametru nodeId.',
+        };
+      }
+      const { inspectParent } = await import('../ai/BuilderInspectionTools');
+      const result = inspectParent(document, nodeId);
+      if (!result) {
+        return {
+          status: 'EXECUTED',
+          verification: { passed: true, operation: name, target: nodeId },
+          message: `Węzeł \`${nodeId}\` nie posiada rodzica (lub nie istnieje).`,
+        };
+      }
+      return {
+        status: 'EXECUTED',
+        verification: { passed: true, operation: name, target: nodeId },
+        message: JSON.stringify(result, null, 2),
+      };
+    }
+
+    if (name === 'find_nodes') {
+      const { findNodes } = await import('../ai/BuilderInspectionTools');
+      const criteria: Parameters<typeof findNodes>[1] = {};
+      if (args.type) criteria.type = args.type as any;
+      if (args.labelContains) criteria.labelContains = args.labelContains as string;
+      if (args.textContains) criteria.textContains = args.textContains as string;
+      if (args.sectionId) criteria.sectionId = args.sectionId as string;
+      if (args.pageId) criteria.pageId = args.pageId as string;
+
+      const result = findNodes(document, criteria);
+      return {
+        status: 'EXECUTED',
+        verification: { passed: true, operation: name, target: 'document' },
+        message: JSON.stringify(result, null, 2),
+      };
+    }
+
+    if (name === 'inspect_responsive') {
+      const nodeId = args.nodeId as string;
+      if (!nodeId) {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: 'none' },
+          message: 'inspect_responsive wymaga parametru nodeId.',
+        };
+      }
+      const { inspectResponsive } = await import('../ai/BuilderInspectionTools');
+      const result = inspectResponsive(document, nodeId);
+      if (!result) {
+        return {
+          status: 'EXECUTED',
+          verification: { passed: true, operation: name, target: nodeId },
+          message: `Nie znaleziono węzła o ID \`${nodeId}\`.`,
+        };
+      }
+      return {
+        status: 'EXECUTED',
+        verification: { passed: true, operation: name, target: nodeId },
+        message: JSON.stringify(result, null, 2),
+      };
+    }
+
+    if (name === 'inspect_experience') {
+      const nodeId = args.nodeId as string;
+      if (!nodeId) {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: 'none' },
+          message: 'inspect_experience wymaga parametru nodeId.',
+        };
+      }
+      const { inspectExperience } = await import('../ai/BuilderInspectionTools');
+      const result = inspectExperience(document, nodeId);
+      return {
+        status: 'EXECUTED',
+        verification: { passed: true, operation: name, target: nodeId },
+        message: result ? JSON.stringify(result, null, 2) : `Węzeł \`${nodeId}\` nie posiada konfiguracji Experience.`,
+      };
+    }
+
+    if (name === 'inspect_asset') {
+      const nodeId = args.nodeId as string;
+      if (!nodeId) {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: 'none' },
+          message: 'inspect_asset wymaga parametru nodeId.',
+        };
+      }
+      const { inspectAsset } = await import('../ai/BuilderInspectionTools');
+      const result = inspectAsset(document, nodeId);
+      if (!result) {
+        return {
+          status: 'EXECUTED',
+          verification: { passed: true, operation: name, target: nodeId },
+          message: `Węzeł \`${nodeId}\` nie jest węzłem media (image/video).`,
+        };
+      }
+      return {
+        status: 'EXECUTED',
+        verification: { passed: true, operation: name, target: nodeId },
+        message: JSON.stringify(result, null, 2),
+      };
+    }
+
+    if (name === 'inspect_available_capabilities') {
+      const nodeType = args.nodeType as string;
+      if (!nodeType) {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: 'none' },
+          message: 'inspect_available_capabilities wymaga parametru nodeType.',
+        };
+      }
+      const { inspectCapabilities } = await import('../ai/BuilderInspectionTools');
+      const result = inspectCapabilities(nodeType as any);
+      return {
+        status: 'EXECUTED',
+        verification: { passed: true, operation: name, target: nodeType },
+        message: JSON.stringify(result, null, 2),
+      };
+    }
+
+    if (name === 'inspect_document_summary') {
+      const { inspectDocumentSummary } = await import('../ai/BuilderInspectionTools');
+      const result = inspectDocumentSummary(document);
+      return {
+        status: 'EXECUTED',
+        verification: { passed: true, operation: name, target: 'document' },
+        message: JSON.stringify(result, null, 2),
+      };
+    }
+
+    if (name === 'read_page_full') {
+      const { readPageFull } = await import('../ai/BuilderInspectionTools');
+      const pageId = (args.pageId as string) || activePageId;
+      const result = readPageFull(document, pageId);
+      if (!result) {
+        return {
+          status: 'EXECUTED',
+          verification: { passed: true, operation: name, target: pageId || 'none' },
+          message: `Nie znaleziono strony o ID \`${pageId}\`.`,
+        };
+      }
+      return {
+        status: 'EXECUTED',
+        verification: { passed: true, operation: name, target: pageId },
+        message: JSON.stringify(result, null, 2),
       };
     }
 
@@ -558,7 +800,7 @@ export class HacpBridge {
           name: op.tool,
           arguments: op.args,
         };
-        const res = this.executeToolCall(toolCall, document, activePageId);
+        const res = await this.executeToolCall(toolCall, document, activePageId);
         results.push(`- ${op.tool}: ${res.message}`);
         if (!res.verification.passed) allPassed = false;
       }
@@ -732,7 +974,7 @@ export class HacpBridge {
             timestamp: new Date().toLocaleTimeString('pl-PL'),
           });
 
-          const exec = this.executeToolCall(tc, document, activePageId);
+          const exec = await this.executeToolCall(tc, document, activePageId);
           lastVerification = exec.verification;
 
           if (exec.command) {

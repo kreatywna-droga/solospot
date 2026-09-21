@@ -14,7 +14,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
       <div className="relative">
         <select
           ref={ref}
-          className={`w-full rounded-xl border bg-[#080B10] text-[#F5F1EA] placeholder:text-[#77736D]
+          className={`w-full rounded-xl border bg-[#18181B] text-[#F5F1EA] placeholder:text-[#77736D]
             transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#D9A86C]/50
             px-4 py-2.5 text-sm appearance-none cursor-pointer
             ${error ? 'border-red-500/50 focus:ring-red-500/50' : 'border-white/10 focus:border-[#D9A86C]/50'}
@@ -25,7 +25,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             <option value="" disabled>{placeholder}</option>
           )}
           {options.map((opt) => (
-            <option key={opt.value} value={opt.value} className="bg-[#080B10] text-[#F5F1EA]">
+            <option key={opt.value} value={opt.value} className="bg-[#18181B] text-[#F5F1EA]">
               {opt.label}
             </option>
           ))}

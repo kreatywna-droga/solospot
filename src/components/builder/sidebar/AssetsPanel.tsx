@@ -327,7 +327,7 @@ export function AssetsPanel() {
 
   return (
     <div
-      className="flex flex-col h-full bg-[#0D1118] text-white"
+      className="flex flex-col h-full bg-[#202024] text-white"
       onDragOver={e => { e.preventDefault(); setIsDragging(true) }}
       onDragLeave={() => setIsDragging(false)}
       onDrop={e => {

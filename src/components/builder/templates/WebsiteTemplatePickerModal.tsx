@@ -136,7 +136,7 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[#1A1F2E] bg-[#141418]">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[#2E2E33] bg-[#141418]">
             <div>
               <h2 className="text-base md:text-lg font-extrabold text-white flex items-center gap-2.5">
                 <Sparkles className="w-5 h-5 text-[#F2C27F]" />
@@ -158,7 +158,7 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
           </div>
 
           {/* Filters Bar */}
-          <div className="p-4 border-b border-[#1A1F2E] bg-[#18181e] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <div className="p-4 border-b border-[#2E2E33] bg-[#18181e] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             <div className="relative flex-1">
               <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
               <input
@@ -342,9 +342,9 @@ function FullTemplatePreview({
 
   return (
     <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-150">
-      <div className="w-full max-w-6xl max-h-[92vh] bg-[#141418] border border-[#1A1F2E] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white">
+      <div className="w-full max-w-6xl max-h-[92vh] bg-[#141418] border border-[#2E2E33] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#1A1F2E] bg-[#1a1a20]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#2E2E33] bg-[#1a1a20]">
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-base font-bold text-white">{template.name}</h2>
@@ -403,7 +403,7 @@ function FullTemplatePreview({
         </div>
 
         {/* Modal Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-[#1A1F2E] bg-[#1a1a20]">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-[#2E2E33] bg-[#1a1a20]">
           <div className="flex items-center gap-2 text-xs text-zinc-400">
             <span className="font-mono text-violet-400 uppercase font-semibold">{template.sectionTemplateIds.length} sections</span>
             {template.style && (

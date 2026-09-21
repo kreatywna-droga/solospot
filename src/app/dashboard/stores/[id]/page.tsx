@@ -411,7 +411,7 @@ export default function StoreManagementPage({ params }: { params: Promise<{ id: 
   return (
     <PageContainer>
       {/* Premium Header */}
-      <div className="relative mb-8 p-8 rounded-3xl border border-white/10 bg-[#0D1118]/85 backdrop-blur-xl overflow-hidden">
+      <div className="relative mb-8 p-8 rounded-3xl border border-white/10 bg-[#202024]/85 backdrop-blur-xl overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-[#D9A86C]/10 rounded-full blur-[80px] pointer-events-none" />
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div>
@@ -439,7 +439,7 @@ export default function StoreManagementPage({ params }: { params: Promise<{ id: 
           <div className="flex items-center gap-3">
             <Link
               href={`/studio/${store.id}`}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] border border-[#D9A86C]/50 rounded-full text-xs font-bold text-[#080B10] shadow-lg shadow-[#D9A86C]/20 hover:opacity-90 transition-all"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] border border-[#D9A86C]/50 rounded-full text-xs font-bold text-[#18181B] shadow-lg shadow-[#D9A86C]/20 hover:opacity-90 transition-all"
             >
               <Palette className="w-3.5 h-3.5" />
               Otwórz Studio
@@ -484,7 +484,7 @@ export default function StoreManagementPage({ params }: { params: Promise<{ id: 
                 <>
                   {/* KPI Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="p-6 rounded-2xl border border-white/10 bg-[#0D1118]/60">
+                    <div className="p-6 rounded-2xl border border-white/10 bg-[#202024]/60">
                       <div className="flex items-center justify-between mb-4">
                         <span className="text-xs font-bold uppercase tracking-wider text-[#77736D]">Produkty w sklepie</span>
                         <Package className="w-4 h-4 text-[#F2C27F]" />
@@ -817,7 +817,7 @@ export default function StoreManagementPage({ params }: { params: Promise<{ id: 
                 </div>
 
                 <div className="pt-4 border-t border-white/5">
-                  <Button onClick={handleTriggerPublish} loading={saving} className="w-full bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] hover:shadow-lg transition-all text-[#080B10] font-bold rounded-xl py-3 text-sm">
+                  <Button onClick={handleTriggerPublish} loading={saving} className="w-full bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] hover:shadow-lg transition-all text-[#18181B] font-bold rounded-xl py-3 text-sm">
                     {saving ? 'Wdrażanie na serwery...' : 'Wdróż i Publikuj Nową Wersję'}
                   </Button>
                 </div>
@@ -958,7 +958,7 @@ export default function StoreManagementPage({ params }: { params: Promise<{ id: 
               <Button variant="outline" onClick={() => { setShowProductModal(false); setEditingProduct(null); setNewProduct({ name: '', description: '', price: 0, images: [] }) }} className="flex-1">
                 Anuluj
               </Button>
-              <Button type="submit" loading={saving} className="flex-1 bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#080B10] font-bold">
+              <Button type="submit" loading={saving} className="flex-1 bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#18181B] font-bold">
                 {editingProduct ? 'Zapisz zmiany' : 'Dodaj produkt'}
               </Button>
             </div>

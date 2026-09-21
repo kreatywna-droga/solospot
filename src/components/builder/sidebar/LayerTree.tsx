@@ -197,7 +197,7 @@ function LayerRow({ node, depth, pageId, selectedId, onSelect }: LayerRowProps) 
               }
             }}
             onClick={e => e.stopPropagation()}
-            className="flex-1 text-xs bg-[#0D1118] border border-[#D9A86C] rounded px-1.5 py-0.5 text-white outline-none"
+            className="flex-1 text-xs bg-[#202024] border border-[#D9A86C] rounded px-1.5 py-0.5 text-white outline-none"
           />
         ) : (
           <span

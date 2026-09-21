@@ -70,7 +70,7 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-[#1A1F2E]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-[#2E2E33]">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-[#D9A86C]/20 border border-[#D9A86C]/25 flex items-center justify-center text-violet-400">
               <LayoutGrid className="w-5 h-5" />
@@ -101,7 +101,7 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
         </div>
 
         {/* Content: Visual Page Cards Grid */}
-        <div className="flex-1 overflow-y-auto p-6 bg-[#0D1118]">
+        <div className="flex-1 overflow-y-auto p-6 bg-[#202024]">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {document.pages.map(page => {
               const isActive = page.id === activePageId

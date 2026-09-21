@@ -25,9 +25,9 @@ export default function MissionControlLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#080B10] text-[#F5F1EA] flex">
+    <div className="min-h-screen bg-[#18181B] text-[#F5F1EA] flex">
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-[#0D1118] border-r border-white/10 transform transition-transform duration-200 ease-in-out
+        fixed inset-y-0 left-0 z-50 w-64 bg-[#202024] border-r border-white/10 transform transition-transform duration-200 ease-in-out
         lg:relative lg:translate-x-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
@@ -68,7 +68,7 @@ export default function MissionControlLayout({
       )}
 
       <div className="flex-1 min-w-0">
-        <header className="h-16 border-b border-white/10 flex items-center px-4 lg:px-8 bg-[#080B10]/80 backdrop-blur-sm sticky top-0 z-30">
+        <header className="h-16 border-b border-white/10 flex items-center px-4 lg:px-8 bg-[#18181B]/80 backdrop-blur-sm sticky top-0 z-30">
           <button
             onClick={() => setSidebarOpen(true)}
             className="lg:hidden p-2 text-[#B8B1A7] hover:text-[#F5F1EA] mr-3"

@@ -1951,7 +1951,7 @@ function SectionBlock({
           </div>
 
           {/* Action toolbar */}
-          <div className="flex items-center gap-1 bg-[#0D1118]/95 backdrop-blur rounded-xl p-1
+          <div className="flex items-center gap-1 bg-[#202024]/95 backdrop-blur rounded-xl p-1
                           border border-white/[0.10] shadow-xl pointer-events-auto">
             {/* Dedicated Move Window Button with Hand / Grip */}
             <button
@@ -2616,7 +2616,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
   return (
     <div
       ref={containerRef}
-      className="flex-1 flex flex-col items-center justify-start overflow-y-auto overflow-x-hidden bg-[#09090B] p-0 relative w-full h-full select-none builder-canvas-scrollbar"
+      className="flex-1 flex flex-col items-center justify-start overflow-y-auto overflow-x-hidden bg-[#141416] p-0 relative w-full h-full select-none builder-canvas-scrollbar"
       onClick={handleCanvasClick}
     >
       {/* Scalable Canvas Frame Container */}
@@ -2625,8 +2625,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
           transform: `scale(${zoom})`,
           transformOrigin: 'top center',
           transition: 'transform 0.12s cubic-bezier(0.2, 0, 0, 1)',
-          width: viewportWidth,
-          maxWidth: zoom <= 1 ? '100%' : undefined,
+          width: '100%',
           marginBottom: zoom > 1 ? `${(zoom - 1) * 800}px` : undefined,
         }}
         className="flex justify-center flex-shrink-0 min-h-full"
@@ -2836,7 +2835,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
           <>
             {sections.length === 0 && (
               <div className="flex flex-col items-center justify-center h-full min-h-[550px] text-center p-8 z-10 w-full">
-                <div className="flex flex-col items-center justify-center p-10 max-w-xl w-full rounded-2xl bg-[#080B10] border border-[#1A1F2E] shadow-2xl shadow-black/50 text-center">
+                <div className="flex flex-col items-center justify-center p-10 max-w-xl w-full rounded-2xl bg-[#18181B] border border-[#2E2E33] shadow-2xl shadow-black/50 text-center">
                   <div className="w-16 h-16 rounded-2xl bg-violet-500/10 border border-[#D9A86C]/25 flex items-center justify-center mb-5 shadow-inner">
                     <Sparkles className="w-8 h-8 text-violet-400" />
                   </div>

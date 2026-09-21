@@ -73,7 +73,7 @@ export function AiCopilotWorkspace() {
 
   // Autonomous Website Generation
   const executeToolCallForGeneration = useCallback(async (call: any) => {
-    const result = bridge.executeToolCall(call, builderDoc, builderDoc.pages[0]?.id || 'page-home')
+    const result = await bridge.executeToolCall(call, builderDoc, builderDoc.pages[0]?.id || 'page-home')
     dispatch(result.command!)
     return { success: result.verification.passed, message: result.message }
   }, [bridge, builderDoc, dispatch])
@@ -500,12 +500,12 @@ export function AiCopilotWorkspace() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#080B10] text-[#F5F1EA] select-none font-sans overflow-hidden">
+    <div className="flex flex-col h-full bg-[#18181B] text-[#F5F1EA] select-none font-sans overflow-hidden">
       {/* ── 1. HEADER ──────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-3.5 py-2.5 bg-[#0D1118] border-b border-white/[0.08] flex-shrink-0">
+      <div className="flex items-center justify-between px-3.5 py-2.5 bg-[#202024] border-b border-white/[0.08] flex-shrink-0">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#D9A86C] to-[#F2C27F] flex items-center justify-center shadow-md shadow-[#D9A86C]/20">
-            <Bot className="w-4 h-4 text-[#080B10]" />
+            <Bot className="w-4 h-4 text-[#18181B]" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
@@ -600,7 +600,7 @@ export function AiCopilotWorkspace() {
                 }}
                 className={`px-2 py-0.5 rounded-md text-[9px] font-mono font-bold transition-all ${
                   routerMode === mode
-                    ? 'bg-[#D9A86C] text-[#080B10] shadow-xs'
+                    ? 'bg-[#D9A86C] text-[#18181B] shadow-xs'
                     : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'
                 }`}
                 title={mode === 'AUTO' ? 'Automatyczny wybór najlepszego modelu' : mode === 'FREE' ? 'Używaj tylko modeli darmowych' : 'Używaj modeli płatnych / Pro'}
@@ -633,7 +633,7 @@ export function AiCopilotWorkspace() {
 
             {/* Model Picker Popup Menu */}
             {isPickerOpen && (
-              <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-[#0D1118] border border-white/15 rounded-xl shadow-2xl p-2 max-h-72 flex flex-col gap-1.5">
+              <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-[#202024] border border-white/15 rounded-xl shadow-2xl p-2 max-h-72 flex flex-col gap-1.5">
                 {/* Search input */}
                 <input
                   type="text"
@@ -643,7 +643,7 @@ export function AiCopilotWorkspace() {
                   className="w-full bg-white/[0.04] border border-white/10 rounded-lg px-2 py-1 text-[10px] text-white placeholder-zinc-500 focus:outline-none"
                 />
 
-                <div className="overflow-y-auto space-y-2 pr-1 flex-1">
+                <div className="overflow-y-auto space-y-2 pr-1 flex-1 builder-canvas-scrollbar">
                   {/* FREE MODELS */}
                   {freeModels.length > 0 && (
                     <div className="space-y-1">
@@ -821,7 +821,7 @@ export function AiCopilotWorkspace() {
         </button>
 
         {activityOpen && (
-          <div className="px-3.5 pb-2.5 max-h-36 overflow-y-auto space-y-1 text-[10px] font-mono">
+          <div className="px-3.5 pb-2.5 max-h-36 overflow-y-auto space-y-1 text-[10px] font-mono builder-canvas-scrollbar">
             {activityEvents.length === 0 ? (
               <p className="text-zinc-500 text-[10px] italic">Brak zarejestrowanych zdarzeń HACP.</p>
             ) : (
@@ -847,10 +847,10 @@ export function AiCopilotWorkspace() {
       </div>
 
       {/* ── 4. CONVERSATION AREA ────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto p-3.5 space-y-3.5 min-h-0">
+      <div className="flex-1 overflow-y-auto p-3.5 space-y-3.5 min-h-0 builder-canvas-scrollbar">
         {messages.length === 0 ? (
           <div className="h-full flex flex-col justify-center space-y-3 p-1">
-            <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#D9A86C]/10 via-[#0D1118] to-transparent border border-[#D9A86C]/20 space-y-2">
+            <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#D9A86C]/10 via-[#202024] to-transparent border border-[#D9A86C]/20 space-y-2">
               <div className="flex items-center gap-2 text-[#F2C27F] font-bold text-xs">
                 <Sparkles className="w-4 h-4 text-[#D9A86C]" />
                 <span>Twój inteligentny Copilot Buildera</span>
@@ -908,9 +908,9 @@ export function AiCopilotWorkspace() {
               <div
                 className={`max-w-[94%] rounded-2xl p-3.5 text-xs leading-relaxed transition-all shadow-sm ${
                   msg.type === 'user'
-                    ? 'bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#080B10] font-medium shadow-[#D9A86C]/10 ml-auto'
+                    ? 'bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#18181B] font-medium shadow-[#D9A86C]/10 ml-auto'
                     : msg.type === 'ai'
-                    ? 'bg-[#0D1118] border border-white/10 text-zinc-200'
+                    ? 'bg-[#202024] border border-white/10 text-zinc-200'
                     : 'bg-red-950/20 border border-red-500/30 text-red-300'
                 }`}
               >
@@ -1005,7 +1005,7 @@ export function AiCopilotWorkspace() {
               <span className="text-zinc-500 font-mono text-[9px]">({secondsWaiting}s)</span>
             </div>
 
-            <div className="w-full p-3 rounded-2xl bg-[#0D1118] border border-[#D9A86C]/30 text-xs text-zinc-300 flex items-center justify-between gap-3 shadow-lg">
+            <div className="w-full p-3 rounded-2xl bg-[#202024] border border-[#D9A86C]/30 text-xs text-zinc-300 flex items-center justify-between gap-3 shadow-lg">
               <div className="flex items-center gap-2.5 min-w-0">
                 <RefreshCw className="w-3.5 h-3.5 text-[#D9A86C] animate-spin flex-shrink-0" />
                 <span className="text-[11px] truncate">
@@ -1043,7 +1043,7 @@ export function AiCopilotWorkspace() {
               <span className="text-zinc-500 font-mono text-[9px]">{genState.progress}%</span>
             </div>
 
-            <div className="w-full p-3 rounded-2xl bg-[#0D1118] border border-[#D9A86C]/30 text-xs text-zinc-300 shadow-lg">
+            <div className="w-full p-3 rounded-2xl bg-[#202024] border border-[#D9A86C]/30 text-xs text-zinc-300 shadow-lg">
               <div className="flex items-center justify-between gap-3 mb-2">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <Wand2 className="w-3.5 h-3.5 text-[#D9A86C] animate-pulse flex-shrink-0" />
@@ -1131,7 +1131,7 @@ export function AiCopilotWorkspace() {
         <button
           onClick={() => handleSendMessage('Stwórz stronę internetową dla szkoły językowej')}
           disabled={isExecuting}
-          className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#080B10] hover:shadow-lg hover:shadow-[#D9A86C]/20 whitespace-nowrap transition-all flex items-center gap-1 flex-shrink-0 disabled:opacity-40"
+          className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#18181B] hover:shadow-lg hover:shadow-[#D9A86C]/20 whitespace-nowrap transition-all flex items-center gap-1 flex-shrink-0 disabled:opacity-40"
         >
           <Wand2 className="w-3 h-3" />
           <span>Generuj Stronę</span>
@@ -1139,8 +1139,8 @@ export function AiCopilotWorkspace() {
       </div>
 
       {/* ── 6. INPUT AREA ──────────────────────────────────────────────────── */}
-      <div className="p-3 bg-[#0D1118] border-t border-white/[0.08] flex-shrink-0">
-        <div className="relative flex items-end gap-2 bg-[#080B10] border border-white/10 focus-within:border-[#D9A86C]/50 rounded-2xl p-2 transition-all">
+      <div className="p-3 bg-[#202024] border-t border-white/[0.08] flex-shrink-0">
+        <div className="relative flex items-end gap-2 bg-[#18181B] border border-white/10 focus-within:border-[#D9A86C]/50 rounded-2xl p-2 transition-all">
           <textarea
             ref={textareaRef}
             rows={2}
@@ -1155,7 +1155,7 @@ export function AiCopilotWorkspace() {
           <button
             onClick={() => handleSendMessage()}
             disabled={!inputValue.trim() || isExecuting}
-            className="w-8 h-8 rounded-xl bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#080B10] flex items-center justify-center disabled:opacity-30 hover:scale-105 active:scale-95 transition-all shadow-md shadow-[#D9A86C]/20 flex-shrink-0"
+            className="w-8 h-8 rounded-xl bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#18181B] flex items-center justify-center disabled:opacity-30 hover:scale-105 active:scale-95 transition-all shadow-md shadow-[#D9A86C]/20 flex-shrink-0"
             title="Wyślij (Enter)"
           >
             <Send className="w-3.5 h-3.5" />
@@ -1171,7 +1171,7 @@ export function AiCopilotWorkspace() {
       {/* ── STATUS POPUP MODAL ─────────────────────────────────────────────── */}
       {showStatusModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-[#0D1118] border border-white/15 rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-4">
+          <div className="bg-[#202024] border border-white/15 rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 text-[#D9A86C]" />
@@ -1236,7 +1236,7 @@ export function AiCopilotWorkspace() {
       {/* ── CAPABILITIES POPUP MODAL ───────────────────────────────────────── */}
       {showCapabilitiesModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-[#0D1118] border border-white/15 rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+          <div className="bg-[#202024] border border-white/15 rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] flex-shrink-0">
               <div className="flex items-center gap-2">
                 <Cpu className="w-4 h-4 text-[#D9A86C]" />
@@ -1250,7 +1250,7 @@ export function AiCopilotWorkspace() {
               </button>
             </div>
 
-            <div className="overflow-y-auto space-y-2 pr-1 flex-1 text-xs">
+            <div className="overflow-y-auto space-y-2 pr-1 flex-1 text-xs builder-canvas-scrollbar">
               {(['READ', 'BUILD', 'EDIT', 'VALIDATION'] as const).map((cat) => (
                 <div key={cat} className="space-y-1">
                   <span className="text-[10px] font-mono font-bold text-[#D9A86C] uppercase tracking-wider block mt-2">

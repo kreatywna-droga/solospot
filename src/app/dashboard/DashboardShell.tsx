@@ -15,7 +15,7 @@ const navItems = [
 
 export function DashboardShell({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#080B10] text-[#F5F1EA]">
+    <div className="min-h-screen bg-[#18181B] text-[#F5F1EA]">
       <Sidebar items={navItems} />
       <div className="lg:pl-64 min-h-screen">
         {children}

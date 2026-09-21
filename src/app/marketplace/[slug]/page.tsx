@@ -161,7 +161,7 @@ export default function MarketplaceProductPage({ params }: { params: Promise<{ s
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050508] flex items-center justify-center">
+      <div className="min-h-screen bg-[#121214] flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-violet-500/30 border-t-violet-500 rounded-full animate-spin" />
       </div>
     )
@@ -169,7 +169,7 @@ export default function MarketplaceProductPage({ params }: { params: Promise<{ s
 
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-[#050508] flex items-center justify-center px-6">
+      <div className="min-h-screen bg-[#121214] flex items-center justify-center px-6">
         <div className="text-center max-w-md">
           <div className="w-12 h-12 text-red-400 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-white mb-2">Nie znaleziono produktu</h2>
@@ -581,7 +581,7 @@ export default function MarketplaceProductPage({ params }: { params: Promise<{ s
   }
 
   return (
-    <div className="min-h-screen bg-[#050508] text-white">
+    <div className="min-h-screen bg-[#121214] text-white">
       <Nav />
       <main className="pt-16 pb-24 px-6">
         <div className="max-w-7xl mx-auto">

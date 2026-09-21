@@ -324,7 +324,7 @@ export function MediaPickerModal({
         />
 
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-[#1A1F2E]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-[#2E2E33]">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-[#D9A86C]/20 border border-[#D9A86C]/25 flex items-center justify-center text-violet-400">
               <ImageIcon className="w-4 h-4" />
@@ -340,7 +340,7 @@ export function MediaPickerModal({
         </div>
 
         {/* Navigation Tabs & Search */}
-        <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-3 border-b border-white/[0.08] bg-[#0D1118]">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-3 border-b border-white/[0.08] bg-[#202024]">
           <div className="flex items-center gap-1 bg-white/[0.04] p-1 rounded-xl border border-white/5">
             {[
               { id: 'my_files', label: 'Moje pliki', count: assets.length },
@@ -691,7 +691,7 @@ export function MediaPickerModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-4 border-t border-white/[0.08] bg-[#1A1F2E] flex items-center justify-between">
+        <div className="px-6 py-4 border-t border-white/[0.08] bg-[#2E2E33] flex items-center justify-between">
           <div className="text-xs text-zinc-400 truncate max-w-sm">
             {selectedUrl ? (
               <span className="text-[#F2C27F] font-mono text-[11px] truncate">Wybrano: {selectedUrl.slice(0, 45)}...</span>

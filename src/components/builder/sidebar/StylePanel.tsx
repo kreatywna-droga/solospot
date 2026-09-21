@@ -112,7 +112,7 @@ export function StylePanel() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#0D1118] text-white">
+    <div className="flex flex-col h-full bg-[#202024] text-white">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08]">
         <div className="flex items-center gap-2">
@@ -234,7 +234,7 @@ export function StylePanel() {
               <select
                 value={theme.font || 'Inter'}
                 onChange={e => updateFont(e.target.value)}
-                className="w-full bg-[#1A1F2E] border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#D9A86C]"
+                className="w-full bg-[#2E2E33] border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#D9A86C]"
               >
                 {FONT_OPTIONS.map(font => (
                   <option key={font.value} value={font.value}>

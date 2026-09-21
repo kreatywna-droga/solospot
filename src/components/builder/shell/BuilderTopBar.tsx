@@ -64,14 +64,14 @@ export function BuilderTopBar({
 
   return (
     <>
-      <div className="h-14 flex items-center justify-between px-4 border-b border-[#1A1F2E]
-                      bg-[#080B10] backdrop-blur-md flex-shrink-0 z-30 select-none">
+      <div className="h-14 flex items-center justify-between px-4 border-b border-[#2E2E33]
+                      bg-[#18181B] backdrop-blur-md flex-shrink-0 z-30 select-none">
         {/* Left: back + store info */}
         <div className="flex items-center gap-3 min-w-0">
           <Link
             href={`/dashboard/stores/${storeId}`}
             className="flex items-center justify-center w-9 h-9 rounded-xl
-                       bg-[#0D1118] hover:bg-[#1A1F2E] border border-[#1A1F2E]
+                       bg-[#202024] hover:bg-[#2E2E33] border border-[#2E2E33]
                        text-zinc-400 hover:text-[#D9A86C] transition-all"
             title="Powrót do dashboardu"
           >
@@ -97,7 +97,7 @@ export function BuilderTopBar({
               <p className="text-[11px] text-zinc-500 font-mono truncate">{document.metadata.storeSlug}</p>
               <button
                 onClick={() => setShowLifecycleModal(true)}
-                className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#0D1118] hover:bg-[#1A1F2E] border border-[#252B3A] text-[10px] text-zinc-300 hover:text-[#D9A86C] transition-all"
+                className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#202024] hover:bg-[#2E2E33] border border-[#252B3A] text-[10px] text-zinc-300 hover:text-[#D9A86C] transition-all"
                 title="Zarządzaj cyklem życia sklepu (Aktywuj / Dezaktywuj / Usuń)"
               >
                 <Power className="w-2.5 h-2.5 text-emerald-400" />
@@ -113,10 +113,10 @@ export function BuilderTopBar({
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowExperienceLibrary(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-[#B8893A] to-[#D9A86C] hover:from-[#C99A4A] hover:to-[#F2C27F] text-[#080B10] font-semibold text-xs transition-all shadow-md shadow-[#D9A86C]/20 active:scale-95"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-[#B8893A] to-[#D9A86C] hover:from-[#C99A4A] hover:to-[#F2C27F] text-[#18181B] font-semibold text-xs transition-all shadow-md shadow-[#D9A86C]/20 active:scale-95"
               title="Biblioteka gotowych doświadczeń, sekcji i interakcji (Experience Library v2.0)"
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#080B10]/80" />
+              <Sparkles className="w-3.5 h-3.5 text-[#18181B]/80" />
               <span className="hidden xl:inline">Experiences</span>
             </button>
 
@@ -161,10 +161,10 @@ export function BuilderTopBar({
             )}
           </div>
 
-          <div className="w-px h-6 bg-[#1A1F2E] mx-1" />
+          <div className="w-px h-6 bg-[#2E2E33] mx-1" />
 
           {/* Viewport */}
-          <div className="flex items-center gap-0.5 bg-[#0D1118] rounded-xl p-0.5 border border-[#1A1F2E]">
+          <div className="flex items-center gap-0.5 bg-[#202024] rounded-xl p-0.5 border border-[#2E2E33]">
             {(['DESKTOP', 'TABLET', 'MOBILE'] as ViewportLabel[]).map(label => (
               <button
                 key={label}
@@ -183,10 +183,10 @@ export function BuilderTopBar({
             ))}
           </div>
 
-          <div className="w-px h-6 bg-[#1A1F2E] mx-1" />
+          <div className="w-px h-6 bg-[#2E2E33] mx-1" />
 
           {/* Undo/Redo */}
-          <div className="flex items-center gap-0.5 bg-[#0D1118] rounded-xl p-0.5 border border-[#1A1F2E]">
+          <div className="flex items-center gap-0.5 bg-[#202024] rounded-xl p-0.5 border border-[#2E2E33]">
             <button
               onClick={undo}
               disabled={!canUndo}
@@ -207,14 +207,14 @@ export function BuilderTopBar({
             </button>
           </div>
 
-          <div className="w-px h-6 bg-[#1A1F2E] mx-1" />
+          <div className="w-px h-6 bg-[#2E2E33] mx-1" />
 
           {/* Save */}
           <button
             onClick={onSave}
             disabled={saving}
-            className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-[#0D1118] border border-[#252B3A]
-                       text-xs font-medium text-zinc-300 hover:bg-[#1A1F2E] hover:text-[#D9A86C]
+            className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-[#202024] border border-[#252B3A]
+                       text-xs font-medium text-zinc-300 hover:bg-[#2E2E33] hover:text-[#D9A86C]
                        transition-all disabled:opacity-50"
           >
             <Save className="w-3.5 h-3.5" />
@@ -226,7 +226,7 @@ export function BuilderTopBar({
             onClick={onPublish}
             disabled={saving}
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl font-bold text-xs
-                       bg-gradient-to-r from-[#B8893A] to-[#D9A86C] text-[#080B10]
+                       bg-gradient-to-r from-[#B8893A] to-[#D9A86C] text-[#18181B]
                        hover:shadow-lg hover:shadow-[#D9A86C]/30 hover:scale-105 active:scale-95
                        disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
@@ -237,8 +237,8 @@ export function BuilderTopBar({
           {/* Command Palette */}
           <button
             onClick={() => setShowCommandPalette(true)}
-            className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-[#0D1118] border border-[#252B3A]
-                       text-[10px] text-zinc-400 hover:text-[#D9A86C] hover:bg-[#1A1F2E] transition-all"
+            className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-[#202024] border border-[#252B3A]
+                       text-[10px] text-zinc-400 hover:text-[#D9A86C] hover:bg-[#2E2E33] transition-all"
             title="Command Palette (Ctrl+K)"
           >
             <Command className="w-3 h-3" />
@@ -351,10 +351,10 @@ function CommandPaletteModal({ onClose }: { onClose: () => void }): React.ReactE
       onClick={onClose}
     >
       <div
-        className="w-full max-w-xl bg-[#0D1118] border border-[#1A1F2E] rounded-2xl shadow-2xl overflow-hidden"
+        className="w-full max-w-xl bg-[#202024] border border-[#2E2E33] rounded-2xl shadow-2xl overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-[#1A1F2E]">
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-[#2E2E33]">
           <Search className="w-4 h-4 text-zinc-500" />
           <input
             type="text"

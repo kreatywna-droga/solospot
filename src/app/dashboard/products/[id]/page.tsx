@@ -193,7 +193,7 @@ export default function ProductEditorPage({ params }: { params: Promise<{ id: st
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={5}
-                  className="w-full rounded-xl border border-white/10 bg-[#080B10] text-[#F5F1EA] placeholder:text-[#77736D] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D9A86C]/50"
+                  className="w-full rounded-xl border border-white/10 bg-[#18181B] text-[#F5F1EA] placeholder:text-[#77736D] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D9A86C]/50"
                 />
               </div>
             </CardBody>

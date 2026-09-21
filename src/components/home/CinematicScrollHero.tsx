@@ -119,7 +119,7 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
       {/* Covers viewport behind Hero and first sections. Never locks page.   */}
       <div
         ref={videoBackdropRef}
-        className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none bg-[#080B10] will-change-[opacity]"
+        className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none bg-[#18181B] will-change-[opacity]"
         style={{ opacity: 1 }}
         aria-hidden="true"
       >
@@ -233,10 +233,10 @@ export function CinematicScrollHero({ onExploreClick }: CinematicScrollHeroProps
             >
               <Link
                 href="/register"
-                className="group relative inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#080B10] font-bold text-sm tracking-tight shadow-lg shadow-[#D9A86C]/25 hover:shadow-xl hover:shadow-[#D9A86C]/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 pointer-events-auto"
+                className="group relative inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#18181B] font-bold text-sm tracking-tight shadow-lg shadow-[#D9A86C]/25 hover:shadow-xl hover:shadow-[#D9A86C]/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 pointer-events-auto"
               >
                 <span>Zacznij budować</span>
-                <ArrowRight className="w-4 h-4 text-[#080B10] group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 text-[#18181B] group-hover:translate-x-1 transition-transform" />
               </Link>
 
               <button

@@ -110,8 +110,8 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
 
   if (!sectionId || !selectedNode) {
     return (
-      <div className="flex flex-col h-full overflow-hidden bg-[#0D1118] text-white select-none">
-        <div className="px-4 py-3 border-b border-white/[0.08] bg-[#1A1F2E] flex items-center justify-between">
+      <div className="flex flex-col h-full overflow-hidden bg-[#202024] text-white select-none">
+        <div className="px-4 py-3 border-b border-white/[0.08] bg-[#2E2E33] flex items-center justify-between">
           <div>
             <span className="text-xs font-bold text-white">Inspektor</span>
             <p className="text-[11px] text-zinc-500 mt-0.5">Właściwości elementu</p>
@@ -147,9 +147,9 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
   const isRootSection = selectedNode.parentId == null;
 
   return (
-    <div className="flex flex-col h-full overflow-hidden bg-[#0D1118] text-white select-none">
+    <div className="flex flex-col h-full overflow-hidden bg-[#202024] text-white select-none">
       {/* Element Header */}
-      <div className="px-4 py-3 border-b border-white/[0.08] bg-[#1A1F2E] flex items-center justify-between">
+      <div className="px-4 py-3 border-b border-white/[0.08] bg-[#2E2E33] flex items-center justify-between">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-white truncate">{nodeLabel}</span>

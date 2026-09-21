@@ -90,7 +90,7 @@ export default function BusinessDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#080B10] flex items-center justify-center">
+      <div className="min-h-screen bg-[#18181B] flex items-center justify-center">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
@@ -102,12 +102,12 @@ export default function BusinessDashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#080B10] flex items-center justify-center">
+      <div className="min-h-screen bg-[#18181B] flex items-center justify-center">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-md px-6">
           <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-[#F5F1EA] mb-2">Brak dostępu</h2>
           <p className="text-[#B8B1A7] mb-6">{error}</p>
-          <Link href="/login" className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#080B10] font-bold rounded-full shadow-lg shadow-[#D9A86C]/20">
+          <Link href="/login" className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#18181B] font-bold rounded-full shadow-lg shadow-[#D9A86C]/20">
             Zaloguj się
           </Link>
         </motion.div>
@@ -168,14 +168,14 @@ export default function BusinessDashboard() {
   ]
 
   const quickActions = [
-    { label: 'Nowy sklep', icon: PlusCircle, href: '/dashboard/stores', color: 'from-[#D9A86C] to-[#F2C27F] text-[#080B10]', desc: 'Z marketplace lub od zera' },
+    { label: 'Nowy sklep', icon: PlusCircle, href: '/dashboard/stores', color: 'from-[#D9A86C] to-[#F2C27F] text-[#18181B]', desc: 'Z marketplace lub od zera' },
     { label: 'Marketplace', icon: LayoutTemplate, href: '/marketplace', color: 'from-emerald-600 to-teal-600 text-white', desc: 'Gotowe biznesy cyfrowe' },
     { label: 'Produkty', icon: Package, href: '/dashboard/products', color: 'from-amber-600 to-orange-600 text-white', desc: 'Zarządzaj katalogiem' },
     { label: 'Mission Control', icon: BarChart3, href: '/mission-control', color: 'from-rose-600 to-pink-600 text-white', desc: 'Centrum operacyjne' },
   ]
 
   return (
-    <div className="min-h-screen bg-[#080B10] text-[#F5F1EA]">
+    <div className="min-h-screen bg-[#18181B] text-[#F5F1EA]">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -258,7 +258,7 @@ export default function BusinessDashboard() {
           transition={{ delay: 0.2 }}
           className="grid lg:grid-cols-[2fr_1fr] gap-6 mb-10"
         >
-          <div className="rounded-2xl border border-white/10 bg-[#0D1118]/85 backdrop-blur-md p-6">
+          <div className="rounded-2xl border border-white/10 bg-[#202024]/85 backdrop-blur-md p-6">
             <motion.div
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
@@ -280,7 +280,7 @@ export default function BusinessDashboard() {
                 <p className="text-[#B8B1A7] mb-4">Nie masz jeszcze żadnego sklepu</p>
                 <Link
                   href="/marketplace"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#080B10] font-bold rounded-full shadow-lg shadow-[#D9A86C]/20"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#18181B] font-bold rounded-full shadow-lg shadow-[#D9A86C]/20"
                 >
                   Kup gotowy sklep w Marketplace
                 </Link>
@@ -333,7 +333,7 @@ export default function BusinessDashboard() {
             animate={{ opacity: 1, x: 0 }}
             className="space-y-6"
           >
-            <div className="rounded-2xl border border-white/10 bg-[#0D1118]/85 backdrop-blur-md p-6">
+            <div className="rounded-2xl border border-white/10 bg-[#202024]/85 backdrop-blur-md p-6">
               <h2 className="text-sm font-bold text-[#F5F1EA] uppercase tracking-wider mb-4 flex items-center gap-2">
                 <Activity className="w-4 h-4 text-[#F2C27F]" />
                 Ostatnia aktywność
@@ -378,7 +378,7 @@ export default function BusinessDashboard() {
               )}
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-[#0D1118]/85 backdrop-blur-md p-6">
+            <div className="rounded-2xl border border-white/10 bg-[#202024]/85 backdrop-blur-md p-6">
               <h2 className="text-sm font-bold text-[#F5F1EA] uppercase tracking-wider mb-4 flex items-center gap-2">
                 <Zap className="w-4 h-4 text-amber-400" />
                 Szybkie akcje
@@ -412,7 +412,7 @@ export default function BusinessDashboard() {
           transition={{ delay: 0.25 }}
           className="grid lg:grid-cols-3 gap-6"
         >
-          <div className="rounded-2xl border border-[#D9A86C]/25 bg-gradient-to-br from-[#D9A86C]/10 via-[#0D1118] to-[#080B10] p-8 text-center lg:col-span-2">
+          <div className="rounded-2xl border border-[#D9A86C]/25 bg-gradient-to-br from-[#D9A86C]/10 via-[#202024] to-[#18181B] p-8 text-center lg:col-span-2">
             <h2 className="text-xl font-bold text-[#F5F1EA] mb-2">
               {data?.tenant?.status === 'ACTIVE' ? 'Platforma aktywna' : 'Oczekuje na aktywację'}
             </h2>
@@ -441,7 +441,7 @@ export default function BusinessDashboard() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-[#0D1118]/85 backdrop-blur-md p-6">
+          <div className="rounded-2xl border border-white/10 bg-[#202024]/85 backdrop-blur-md p-6">
             <h2 className="text-sm font-bold text-[#F5F1EA] uppercase tracking-wider mb-4 flex items-center gap-2">
               <Shield className="w-4 h-4 text-emerald-400" />
               Status platformy

@@ -89,7 +89,7 @@ export function PagesPanel() {
   })
 
   return (
-    <div className="flex flex-col h-full bg-[#0D1118] text-white">
+    <div className="flex flex-col h-full bg-[#202024] text-white">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08]">
         <div className="flex items-center gap-2">
@@ -183,7 +183,7 @@ export function PagesPanel() {
 
                   {/* Context Menu */}
                   {isMenuOpen && (
-                    <div className="absolute right-0 top-6 z-40 w-40 bg-[#1A1F2E] border border-white/15 rounded-xl shadow-2xl p-1 space-y-0.5">
+                    <div className="absolute right-0 top-6 z-40 w-40 bg-[#2E2E33] border border-white/15 rounded-xl shadow-2xl p-1 space-y-0.5">
                       {!page.isHome && (
                         <button
                           onClick={() => handleSetHome(page.id)}

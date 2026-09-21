@@ -7,7 +7,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
   const groupedDocs = getDocsGroupedByCategory();
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#050508]">
+    <div className="flex flex-col min-h-screen bg-[#121214]">
       {/* Prosty header dla sekcji docs */}
       <header className="sticky top-0 z-40 w-full border-b border-violet-500/20 bg-[#0a0d1a]/80 backdrop-blur-xl">
         <div className="flex h-16 items-center px-6 gap-4">

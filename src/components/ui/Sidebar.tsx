@@ -26,7 +26,7 @@ export function Sidebar({ items, brand, className = '' }: SidebarProps) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed top-4 left-4 z-40 lg:hidden p-2 rounded-lg bg-[#0D1118] border border-white/10 text-[#B8B1A7]"
+        className="fixed top-4 left-4 z-40 lg:hidden p-2 rounded-lg bg-[#202024] border border-white/10 text-[#B8B1A7]"
         aria-label="Otwórz nawigację"
       >
         <Menu className="w-5 h-5" />
@@ -37,7 +37,7 @@ export function Sidebar({ items, brand, className = '' }: SidebarProps) {
       )}
 
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-64 bg-[#0D1118] border-r border-white/10
+        className={`fixed top-0 left-0 z-50 h-full w-64 bg-[#202024] border-r border-white/10
           transform transition-transform duration-200 lg:transform-none lg:translate-x-0
           ${open ? 'translate-x-0' : '-translate-x-full'}
           ${className} flex flex-col`}
@@ -75,7 +75,7 @@ export function Sidebar({ items, brand, className = '' }: SidebarProps) {
         </nav>
 
         {/* Exit back to homepage section */}
-        <div className="p-4 border-t border-white/10 mt-auto bg-[#080B10]/60">
+        <div className="p-4 border-t border-white/10 mt-auto bg-[#18181B]/60">
           <Link
             href="/"
             className="flex items-center justify-center gap-2 w-full py-2.5 bg-white/5 hover:bg-[#D9A86C]/15 border border-white/10 hover:border-[#D9A86C]/30 text-[#B8B1A7] hover:text-[#F5F1EA] text-xs font-semibold rounded-xl transition-all group"

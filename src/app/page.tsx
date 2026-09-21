@@ -73,8 +73,8 @@ function Nav() {
       <header
         className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
           scrolled
-            ? 'bg-[#080B10]/95 backdrop-blur-xl border-b border-white/[0.08] shadow-2xl shadow-black/40'
-            : 'bg-[#080B10]/60 backdrop-blur-md border-b border-white/[0.04]'
+            ? 'bg-[#18181B]/95 backdrop-blur-xl border-b border-white/[0.08] shadow-2xl shadow-black/40'
+            : 'bg-[#18181B]/60 backdrop-blur-md border-b border-white/[0.04]'
         }`}
       >
         <div className="relative w-full max-w-7xl 2xl:max-w-[1440px] mx-auto px-6 sm:px-8 xl:px-12 h-20 flex items-center justify-between">
@@ -128,10 +128,10 @@ function Nav() {
             {/* Primary Champagne Gold CTA */}
             <Link
               href="/register"
-              className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#080B10] font-bold text-xs sm:text-sm rounded-full shadow-md shadow-[#D9A86C]/20 hover:shadow-lg hover:shadow-[#D9A86C]/30 hover:scale-[1.02] active:scale-[0.98] transition-all"
+              className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#18181B] font-bold text-xs sm:text-sm rounded-full shadow-md shadow-[#D9A86C]/20 hover:shadow-lg hover:shadow-[#D9A86C]/30 hover:scale-[1.02] active:scale-[0.98] transition-all"
             >
               <span>Rozpocznij</span>
-              <ArrowRight className="w-3.5 h-3.5 text-[#080B10]" />
+              <ArrowRight className="w-3.5 h-3.5 text-[#18181B]" />
             </Link>
 
             {/* Drawer Menu Button */}
@@ -167,7 +167,7 @@ function Nav() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 h-full w-full max-w-sm bg-[#080B10] border-l border-white/10 z-50 shadow-2xl p-6 flex flex-col justify-between pointer-events-auto text-left"
+            className="fixed top-0 right-0 h-full w-full max-w-sm bg-[#18181B] border-l border-white/10 z-50 shadow-2xl p-6 flex flex-col justify-between pointer-events-auto text-left"
           >
             {/* Drawer Content */}
             <div className="overflow-y-auto flex-1 pr-1">
@@ -185,7 +185,7 @@ function Nav() {
               {/* User Session Info Card */}
               <div className="mt-8 mb-8">
                 {user ? (
-                  <div className="p-5 rounded-2xl bg-[#0D1118] border border-white/10">
+                  <div className="p-5 rounded-2xl bg-[#202024] border border-white/10">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="w-10 h-10 rounded-full bg-[#D9A86C]/20 flex items-center justify-center text-[#F2C27F] flex-shrink-0">
                         <User className="w-5 h-5" />
@@ -199,7 +199,7 @@ function Nav() {
                       <Link
                         href="/dashboard"
                         onClick={() => setDrawerOpen(false)}
-                        className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#080B10] font-bold text-sm rounded-xl transition-all shadow-lg shadow-[#D9A86C]/20 text-center"
+                        className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#18181B] font-bold text-sm rounded-xl transition-all shadow-lg shadow-[#D9A86C]/20 text-center"
                       >
                         <LayoutDashboard className="w-4 h-4" /> Przejdź do Panelu
                       </Link>
@@ -212,7 +212,7 @@ function Nav() {
                     </div>
                   </div>
                 ) : (
-                  <div className="p-5 rounded-2xl bg-[#0D1118] border border-white/10 text-center">
+                  <div className="p-5 rounded-2xl bg-[#202024] border border-white/10 text-center">
                     <p className="text-sm text-[#B8B1A7] mb-4">Uzyskaj dostęp do swojego panelu e-commerce</p>
                     <div className="flex gap-3">
                       <Link
@@ -225,7 +225,7 @@ function Nav() {
                       <Link
                         href="/register"
                         onClick={() => setDrawerOpen(false)}
-                        className="flex-1 py-3 bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#080B10] font-bold text-sm rounded-xl transition-all text-center shadow-md shadow-[#D9A86C]/20"
+                        className="flex-1 py-3 bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#18181B] font-bold text-sm rounded-xl transition-all text-center shadow-md shadow-[#D9A86C]/20"
                       >
                         Zarejestruj
                       </Link>
@@ -290,7 +290,7 @@ function Nav() {
             </div>
 
             {/* Footer */}
-            <div className="pt-6 border-t border-white/5 bg-[#080B10] flex items-center justify-between">
+            <div className="pt-6 border-t border-white/5 bg-[#18181B] flex items-center justify-between">
               <span className="text-[10px] text-[#77736D]">© {new Date().getFullYear()} SoloSpot</span>
               <a href="mailto:kreatywna.droga@gmail.com" className="text-xs text-[#B8B1A7] hover:text-[#F2C27F] transition-colors flex items-center gap-1">
                 <Mail className="w-3.5 h-3.5" /> Napisz do nas
@@ -339,10 +339,10 @@ function FlowStepsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.05, duration: 0.4 }}
-              className="flex flex-col p-4 rounded-2xl bg-[#0D1118]/85 border border-white/10 backdrop-blur-md hover:border-[#D9A86C]/30 transition-all group"
+              className="flex flex-col p-4 rounded-2xl bg-[#202024]/85 border border-white/10 backdrop-blur-md hover:border-[#D9A86C]/30 transition-all group"
             >
               <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${step.color} flex items-center justify-center shadow-md shadow-[#D9A86C]/10 mb-3 group-hover:scale-105 transition-transform`}>
-                <step.icon className="w-5 h-5 text-[#080B10]" />
+                <step.icon className="w-5 h-5 text-[#18181B]" />
               </div>
               <p className="font-bold text-[#F5F1EA] text-xs sm:text-sm">{step.label}</p>
               <p className="text-[#77736D] text-[11px] mt-1 leading-snug">{step.desc}</p>
@@ -378,7 +378,7 @@ function StackPanel() {
             </span>
           </h2>
         </div>
-        <div className="relative bg-[#0D1118]/85 backdrop-blur-md border border-white/10 rounded-3xl p-6 sm:p-8">
+        <div className="relative bg-[#202024]/85 backdrop-blur-md border border-white/10 rounded-3xl p-6 sm:p-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {stackLayers.map((layer, i) => (
               <motion.div
@@ -412,28 +412,28 @@ function PlatformArchitecture() {
       title: 'Podstawowa infrastruktura',
       description: 'Platforma wielodostępowa z identyfikacją, provisioningiem i orkiestracją zdarzeń.',
       items: ['Silnik wielodostępowy', 'Auth i tożsamość', 'System zdarzeń', 'Izolacja tenantów', 'Oś audytu'],
-      gradient: 'from-[#0D1118] to-[#141820]',
+      gradient: 'from-[#202024] to-[#141820]',
       border: 'border-white/10 hover:border-[#D9A86C]/30',
     },
     {
       title: 'Silnik handlowy',
       description: 'Pełne przetwarzanie płatności, zarządzanie zamówieniami i obliczanie podatków/wysyłki.',
       items: ['Silnik płatności', 'Przetwarzanie zamówień', 'Silnik podatkowy', 'Silnik wysyłki', 'Zapasy'],
-      gradient: 'from-[#0D1118] to-[#141820]',
+      gradient: 'from-[#202024] to-[#141820]',
       border: 'border-white/10 hover:border-[#D9A86C]/30',
     },
     {
       title: 'System szablonów',
       description: 'Instalowalne pakiety biznesowe. Moda, Uroda, Gastronomia, Cyfrowe — każdy z produktami i brandingiem.',
       items: ['Rejestr szablonów', 'Zasiewanie produktów', 'Silnik motywów', 'System brandingu', 'API Marketplace'],
-      gradient: 'from-[#0D1118] to-[#141820]',
+      gradient: 'from-[#202024] to-[#141820]',
       border: 'border-white/10 hover:border-[#D9A86C]/30',
     },
     {
       title: 'Silnik wykonawczy',
       description: 'Renderuje konfigurację sklepu w działające strony. JSON → komponenty React → HTML.',
       items: ['Resolver wykonawczy', 'Renderer sekcji', 'Środowisko sklepu', 'Tryb podglądu', 'API eksportu'],
-      gradient: 'from-[#0D1118] to-[#141820]',
+      gradient: 'from-[#202024] to-[#141820]',
       border: 'border-white/10 hover:border-[#D9A86C]/30',
     },
   ]
@@ -464,7 +464,7 @@ function PlatformArchitecture() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
-              className={`relative rounded-2xl border ${tier.border} bg-[#0D1118]/85 p-5 backdrop-blur-md transition-all`}
+              className={`relative rounded-2xl border ${tier.border} bg-[#202024]/85 p-5 backdrop-blur-md transition-all`}
             >
               <h3 className="text-sm sm:text-base font-bold text-[#F5F1EA] mb-1.5">{tier.title}</h3>
               <p className="text-xs text-[#B8B1A7] mb-4 leading-relaxed">{tier.description}</p>
@@ -520,7 +520,7 @@ function MarketplaceSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.05 }}
-              className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 hover:border-[#D9A86C]/30 rounded-2xl p-5 transition-all group"
+              className="bg-[#202024]/85 backdrop-blur-md border border-white/10 hover:border-[#D9A86C]/30 rounded-2xl p-5 transition-all group"
             >
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:border-[#D9A86C]/40 transition-colors">
@@ -586,7 +586,7 @@ function StudioSection() {
           </p>
         </div>
 
-        <div className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden p-4 sm:p-5">
+        <div className="bg-[#202024]/85 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden p-4 sm:p-5">
           <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/[0.08]">
             <div className="flex items-center gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
@@ -688,7 +688,7 @@ function RuntimeEngineSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.04 }}
-              className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 hover:border-[#D9A86C]/30 rounded-2xl p-4 transition-all"
+              className="bg-[#202024]/85 backdrop-blur-md border border-white/10 hover:border-[#D9A86C]/30 rounded-2xl p-4 transition-all"
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-mono font-bold text-[#77736D] uppercase tracking-wider">{step.stage}</span>
@@ -700,7 +700,7 @@ function RuntimeEngineSection() {
           ))}
         </div>
 
-        <div className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 rounded-2xl p-5">
+        <div className="bg-[#202024]/85 backdrop-blur-md border border-white/10 rounded-2xl p-5">
           <h3 className="text-xs font-bold text-[#D9A86C] uppercase tracking-[0.2em] mb-4">Specyfikacja techniczna</h3>
           <div className="grid grid-cols-3 gap-3 text-center">
             {techSpecs.map((spec) => (
@@ -762,7 +762,7 @@ function HTMLExportSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.04 }}
-              className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 hover:border-[#D9A86C]/30 rounded-2xl p-4 transition-all"
+              className="bg-[#202024]/85 backdrop-blur-md border border-white/10 hover:border-[#D9A86C]/30 rounded-2xl p-4 transition-all"
             >
               <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-3">
                 <f.icon className="w-4 h-4 text-[#F2C27F]" />
@@ -773,7 +773,7 @@ function HTMLExportSection() {
           ))}
         </div>
 
-        <div className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 rounded-2xl p-5 mb-6">
+        <div className="bg-[#202024]/85 backdrop-blur-md border border-white/10 rounded-2xl p-5 mb-6">
           <h3 className="text-xs font-bold text-[#D9A86C] uppercase tracking-[0.2em] mb-4">SaaS vs SoloSpot Export</h3>
           <div className="space-y-2 text-xs">
             {comparison.map((c) => (
@@ -788,12 +788,12 @@ function HTMLExportSection() {
           </div>
         </div>
 
-        <div className="bg-[#0D1118]/85 backdrop-blur-md rounded-2xl p-4 border border-white/10">
+        <div className="bg-[#202024]/85 backdrop-blur-md rounded-2xl p-4 border border-white/10">
           <div className="flex items-center gap-2 mb-2 text-xs font-mono text-[#D9A86C]">
             <Terminal className="w-3.5 h-3.5" />
             <span>CLI Native</span>
           </div>
-          <div className="bg-[#080B10] rounded-xl p-3 font-mono text-xs text-[#F2C27F] overflow-x-auto">
+          <div className="bg-[#18181B] rounded-xl p-3 font-mono text-xs text-[#F2C27F] overflow-x-auto">
             <span className="text-[#77736D]">$ </span>solospot export --store fashion-pro --cdn cloudflare
           </div>
         </div>
@@ -891,7 +891,7 @@ function MissionControlSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.04 }}
-              className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 rounded-2xl p-3.5"
+              className="bg-[#202024]/85 backdrop-blur-md border border-white/10 rounded-2xl p-3.5"
             >
               <div className="flex items-center gap-2 mb-1.5">
                 <m.icon className={`w-3.5 h-3.5 ${m.color}`} />
@@ -902,7 +902,7 @@ function MissionControlSection() {
           ))}
         </div>
 
-        <div className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 rounded-2xl p-5 mb-6">
+        <div className="bg-[#202024]/85 backdrop-blur-md border border-white/10 rounded-2xl p-5 mb-6">
           <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/[0.08]">
             <h3 className="text-xs font-bold text-[#D9A86C] uppercase tracking-[0.2em]">Dzierżawy na platformie</h3>
             <Link href="/mission-control/tenants" className="text-xs text-[#D9A86C] hover:text-[#F2C27F] font-medium">Wszystkie →</Link>
@@ -923,7 +923,7 @@ function MissionControlSection() {
           </div>
         </div>
 
-        <div className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 rounded-2xl p-4">
+        <div className="bg-[#202024]/85 backdrop-blur-md border border-white/10 rounded-2xl p-4">
           <div className="flex items-center justify-between mb-3 text-xs">
             <span className="font-bold text-[#F5F1EA]">Strumień zdarzeń</span>
             <span className="flex items-center gap-1 text-[11px] text-emerald-400">
@@ -982,7 +982,7 @@ function WhySoloSpotSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.04 }}
-              className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 hover:border-[#D9A86C]/30 rounded-2xl p-4 transition-all group"
+              className="bg-[#202024]/85 backdrop-blur-md border border-white/10 hover:border-[#D9A86C]/30 rounded-2xl p-4 transition-all group"
             >
               <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-3 group-hover:border-[#D9A86C]/40 transition-colors">
                 <p.icon className="w-4 h-4 text-[#F2C27F]" />
@@ -1038,7 +1038,7 @@ function IntegrationsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.04 }}
-              className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 hover:border-[#D9A86C]/30 rounded-2xl p-4 transition-all"
+              className="bg-[#202024]/85 backdrop-blur-md border border-white/10 hover:border-[#D9A86C]/30 rounded-2xl p-4 transition-all"
             >
               <div className="flex items-center gap-2.5 mb-3">
                 <div className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
@@ -1057,7 +1057,7 @@ function IntegrationsSection() {
           ))}
         </div>
 
-        <div className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+        <div className="bg-[#202024]/85 backdrop-blur-md border border-white/10 rounded-2xl p-4 flex items-center justify-between">
           <div>
             <span className="text-xs font-bold text-[#F5F1EA] block">Brakuje Ci integracji?</span>
             <span className="text-[11px] text-[#77736D] block">Mamy otwarte API i webhooki.</span>
@@ -1149,12 +1149,12 @@ function PricingSection() {
               transition={{ delay: i * 0.05 }}
               className={`relative rounded-2xl p-5 backdrop-blur-md flex flex-col justify-between transition-all ${
                 tier.popular
-                  ? 'bg-[#0D1118]/95 border-2 border-[#D9A86C] shadow-lg shadow-[#D9A86C]/10'
-                  : 'bg-[#0D1118]/85 border border-white/10 hover:border-white/20'
+                  ? 'bg-[#202024]/95 border-2 border-[#D9A86C] shadow-lg shadow-[#D9A86C]/10'
+                  : 'bg-[#202024]/85 border border-white/10 hover:border-white/20'
               }`}
             >
               {tier.popular && (
-                <span className="absolute -top-2.5 right-4 px-2.5 py-0.5 bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#080B10] text-[10px] font-bold rounded-full uppercase tracking-wider">
+                <span className="absolute -top-2.5 right-4 px-2.5 py-0.5 bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#18181B] text-[10px] font-bold rounded-full uppercase tracking-wider">
                   Polecany
                 </span>
               )}
@@ -1181,7 +1181,7 @@ function PricingSection() {
                 href="/register"
                 className={`flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl text-xs font-bold transition-all ${
                   tier.popular
-                    ? 'bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#080B10] shadow-md shadow-[#D9A86C]/20 hover:scale-[1.02]'
+                    ? 'bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#18181B] shadow-md shadow-[#D9A86C]/20 hover:scale-[1.02]'
                     : 'bg-white/5 hover:bg-white/10 border border-white/10 text-[#F5F1EA]'
                 }`}
               >
@@ -1234,7 +1234,7 @@ function FAQSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.04 }}
-              className="bg-[#0D1118]/85 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden"
+              className="bg-[#202024]/85 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden"
             >
               <button
                 onClick={() => setOpenIndex(openIndex === i ? null : i)}
@@ -1272,7 +1272,7 @@ function CTASection() {
   return (
     <section id="cta" className="relative py-20 lg:py-28 px-6 sm:px-12 md:px-16 lg:px-28 xl:px-40 2xl:px-52 w-full bg-transparent">
       <div className="max-w-2xl">
-        <div className="relative bg-[#0D1118]/90 backdrop-blur-md border border-white/10 rounded-3xl p-8 sm:p-10 overflow-hidden">
+        <div className="relative bg-[#202024]/90 backdrop-blur-md border border-white/10 rounded-3xl p-8 sm:p-10 overflow-hidden">
           <div className="absolute top-0 left-0 w-48 h-48 bg-gradient-to-br from-[#D9A86C]/20 to-transparent rounded-full blur-3xl pointer-events-none" />
           <h2 className="text-4xl sm:text-5xl lg:text-[62px] font-bold text-[#F5F1EA] tracking-[-0.03em] leading-[1.06] mb-4 relative z-10">
             Gotowy wdrożyć<br />
@@ -1286,10 +1286,10 @@ function CTASection() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 relative z-10">
             <Link
               href="/register"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#080B10] font-bold text-xs sm:text-sm rounded-full shadow-lg shadow-[#D9A86C]/20 hover:scale-[1.02] transition-all"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#18181B] font-bold text-xs sm:text-sm rounded-full shadow-lg shadow-[#D9A86C]/20 hover:scale-[1.02] transition-all"
             >
               <span>Zbuduj swój system</span>
-              <ArrowRight className="w-4 h-4 text-[#080B10]" />
+              <ArrowRight className="w-4 h-4 text-[#18181B]" />
             </Link>
             <Link
               href="/dashboard"
@@ -1328,7 +1328,7 @@ function Footer() {
 
 export default function SoloSpotLanding() {
   return (
-    <div className="min-h-screen bg-[#080B10] text-[#F5F1EA] selection:bg-[#D9A86C]/30">
+    <div className="min-h-screen bg-[#18181B] text-[#F5F1EA] selection:bg-[#D9A86C]/30">
       <Nav />
       <SectionProgressIndicator />
       <CinematicScrollHero />
@@ -1421,7 +1421,7 @@ function HelpCenterModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-lg bg-[#0D1118] border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl z-10"
+          className="relative w-full max-w-lg bg-[#202024] border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl z-10"
         >
           <button
             onClick={onClose}
@@ -1431,7 +1431,7 @@ function HelpCenterModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
           </button>
 
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#D9A86C] to-[#F2C27F] flex items-center justify-center text-[#080B10] shadow-lg shadow-[#D9A86C]/20">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#D9A86C] to-[#F2C27F] flex items-center justify-center text-[#18181B] shadow-lg shadow-[#D9A86C]/20">
               <HelpCircle className="w-5 h-5" />
             </div>
             <div>
@@ -1471,7 +1471,7 @@ function HelpCenterModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
                   placeholder="Jan Kowalski"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-[#080B10] border border-white/10 focus:border-[#D9A86C] rounded-xl px-4 py-3 text-sm text-white placeholder:text-[#77736D] outline-none transition-all"
+                  className="w-full bg-[#18181B] border border-white/10 focus:border-[#D9A86C] rounded-xl px-4 py-3 text-sm text-white placeholder:text-[#77736D] outline-none transition-all"
                 />
               </div>
 
@@ -1483,7 +1483,7 @@ function HelpCenterModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
                   placeholder="jan@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-[#080B10] border border-white/10 focus:border-[#D9A86C] rounded-xl px-4 py-3 text-sm text-white placeholder:text-[#77736D] outline-none transition-all"
+                  className="w-full bg-[#18181B] border border-white/10 focus:border-[#D9A86C] rounded-xl px-4 py-3 text-sm text-white placeholder:text-[#77736D] outline-none transition-all"
                 />
               </div>
 
@@ -1495,7 +1495,7 @@ function HelpCenterModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
                   placeholder="Wdrożenie platformy / Pomoc techniczna"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full bg-[#080B10] border border-white/10 focus:border-[#D9A86C] rounded-xl px-4 py-3 text-sm text-white placeholder:text-[#77736D] outline-none transition-all"
+                  className="w-full bg-[#18181B] border border-white/10 focus:border-[#D9A86C] rounded-xl px-4 py-3 text-sm text-white placeholder:text-[#77736D] outline-none transition-all"
                 />
               </div>
 
@@ -1507,7 +1507,7 @@ function HelpCenterModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
                   placeholder="Opisz swoje pytanie lub problem..."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="w-full bg-[#080B10] border border-white/10 focus:border-[#D9A86C] rounded-xl px-4 py-3 text-sm text-white placeholder:text-[#77736D] outline-none transition-all resize-none"
+                  className="w-full bg-[#18181B] border border-white/10 focus:border-[#D9A86C] rounded-xl px-4 py-3 text-sm text-white placeholder:text-[#77736D] outline-none transition-all resize-none"
                 />
               </div>
 
@@ -1520,13 +1520,13 @@ function HelpCenterModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
               <button
                 type="submit"
                 disabled={status === 'submitting'}
-                className="w-full py-3.5 bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#080B10] font-bold text-sm rounded-xl transition-all shadow-lg shadow-[#D9A86C]/20 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                className="w-full py-3.5 bg-gradient-to-r from-[#D9A86C] via-[#F2C27F] to-[#D9A86C] text-[#18181B] font-bold text-sm rounded-xl transition-all shadow-lg shadow-[#D9A86C]/20 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
               >
                 {status === 'submitting' ? (
                   <span>Wysyłanie do Centrum Pomocy...</span>
                 ) : (
                   <>
-                    <Mail className="w-4 h-4 text-[#080B10]" />
+                    <Mail className="w-4 h-4 text-[#18181B]" />
                     <span>Wyślij wiadomość do kreatywna.droga@gmail.com</span>
                   </>
                 )}
