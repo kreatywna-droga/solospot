@@ -8,6 +8,7 @@
  */
 
 import type { AIProvider, AICopilotRequest, AICopilotResponse } from './AIProviderTypes';
+import { OpenCodeProvider } from './OpenCodeProvider';
 import { OpenAIProvider } from './OpenAIProvider';
 import { GeminiProvider } from './GeminiProvider';
 
@@ -16,6 +17,7 @@ export class AIProviderRegistry {
   private providers: AIProvider[] = [];
 
   private constructor() {
+    this.registerProvider(new OpenCodeProvider());
     this.registerProvider(new OpenAIProvider());
     this.registerProvider(new GeminiProvider());
   }

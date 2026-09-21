@@ -190,6 +190,7 @@ export class HacpBridge {
     shouldTriggerRedo?: boolean;
   } {
     const { name, arguments: args } = toolCall;
+    const activePage = document.pages.find((p) => p.id === activePageId) || document.pages[0];
 
     if (name === 'undo') {
       return {
@@ -297,9 +298,19 @@ export class HacpBridge {
       };
     }
 
-    if (name === 'update_node_props') {
-      const sectionId = (args.sectionId as string) || (args.nodeId as string);
-      const props = (args.props as Record<string, unknown>) || {};
+    if (name === 'update_node_props' || name === 'update_section_props') {
+      const sectionId = (args.sectionId as string) || (args.nodeId as string) || activePage?.sections[0]?.id || '';
+      let props = (args.props as Record<string, unknown>) || {};
+      if (Object.keys(props).length === 0) {
+        const directProps: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(args)) {
+          if (!['sectionId', 'nodeId', 'pageId', 'props'].includes(k)) {
+            directProps[k] = v;
+          }
+        }
+        props = directProps;
+      }
+
       const cmd: BuilderCommand = {
         type: 'UPDATE_PROPS',
         pageId: (args.pageId as string) || activePageId,
@@ -307,7 +318,6 @@ export class HacpBridge {
         props,
       };
 
-      // Find first modified prop for specific verification check
       const firstPropKey = Object.keys(props)[0];
       const expectedVal = firstPropKey ? props[firstPropKey] : undefined;
 
@@ -317,13 +327,19 @@ export class HacpBridge {
         expectedValue: expectedVal,
       });
 
+      const propSummary = props.title
+        ? `Zmieniłem nagłówek na „${props.title}”.`
+        : props.buttonColor
+        ? `Zmieniłem kolor przycisku na ${props.buttonColor}.`
+        : props.cta || props.ctaText
+        ? `Zaktualizowałem przycisk CTA na „${props.cta || props.ctaText}”.`
+        : `Zaktualizowałem właściwości sekcji \`${sectionId}\`: ${Object.keys(props).join(', ')}.`;
+
       return {
         command: cmd,
         verification: result.verification,
         status: result.verification.passed ? 'EXECUTED' : 'FAILED',
-        message: result.verification.passed
-          ? `Zaktualizowałem właściwości sekcji \`${sectionId}\`: ${Object.keys(props).join(', ')}.`
-          : `Nie udało się zaktualizować właściwości sekcji \`${sectionId}\`.`,
+        message: result.verification.passed ? propSummary : `Nie udało się zaktualizować właściwości sekcji \`${sectionId}\`.`,
         appliedChange: {
           target: sectionId,
           property: Object.keys(props).join(', '),
@@ -333,9 +349,42 @@ export class HacpBridge {
       };
     }
 
-    if (name === 'configure_experience') {
-      const sectionId = args.sectionId as string;
-      const experienceConfig = args.experienceConfig as Record<string, unknown>;
+    if (name === 'set_text') {
+      const sectionId = (args.sectionId as string) || (args.nodeId as string) || activePage?.sections[0]?.id || '';
+      const text = (args.text as string) || (args.title as string) || '';
+      return this.executeToolCall(
+        { id: toolCall.id, name: 'update_node_props', arguments: { sectionId, props: { title: text } } },
+        document,
+        activePageId
+      );
+    }
+
+    if (name === 'set_button_text') {
+      const sectionId = (args.sectionId as string) || (args.nodeId as string) || activePage?.sections[0]?.id || '';
+      const text = (args.text as string) || (args.cta as string) || '';
+      return this.executeToolCall(
+        { id: toolCall.id, name: 'update_node_props', arguments: { sectionId, props: { cta: text, ctaText: text } } },
+        document,
+        activePageId
+      );
+    }
+
+    if (name === 'set_button_color') {
+      const sectionId = (args.sectionId as string) || (args.nodeId as string) || activePage?.sections[0]?.id || '';
+      const color = (args.color as string) || (args.buttonColor as string) || '#FF0000';
+      return this.executeToolCall(
+        { id: toolCall.id, name: 'update_node_props', arguments: { sectionId, props: { buttonColor: color } } },
+        document,
+        activePageId
+      );
+    }
+
+    if (name === 'configure_experience' || name === 'configure_background' || name === 'configure_animation') {
+      const sectionId = (args.sectionId as string) || activePage?.sections[0]?.id || '';
+      const experienceConfig = (args.experienceConfig as Record<string, unknown>) || {
+        background: args.background || { type: 'mesh-gradient', colors: ['#D9A86C', '#F2C27F', '#1A1813', '#080B10'] },
+        motion: args.motion || { type: 'float', speed: 0.85 },
+      };
       const cmd: BuilderCommand = {
         type: 'UPDATE_PROPS',
         pageId: (args.pageId as string) || activePageId,
@@ -360,6 +409,20 @@ export class HacpBridge {
           property: 'experienceConfig',
           summary: `Skonfigurowano Experience dla ${sectionId}`,
         },
+      };
+    }
+
+    if (name === 'read_builder_document' || name === 'inspect_page_structure' || name === 'inspect_selected_node') {
+      const sections = activePage?.sections || [];
+      return {
+        status: 'EXECUTED',
+        verification: {
+          passed: true,
+          operation: name,
+          target: activePageId,
+          diffSummary: `Odczytano strukturę strony (${sections.length} sekcji).`,
+        },
+        message: `Strona „${activePage?.name || 'Główna'}” posiada ${sections.length} sekcji: ${sections.map((s: any) => s.label || s.type).join(', ')}.`,
       };
     }
 
@@ -635,11 +698,16 @@ export class HacpBridge {
     // CASE 3: CHAT
     if (classification.intent === 'CHAT') {
       let responseMessage = 'Cześć! Mogę pomóc z sekcjami, kolorami, nagłówkami, CTA i Experience. Co chciałbyś zmienić?';
-      const lower = cleanPrompt.toLowerCase();
-      if (lower.includes('potrzebuję pomocy') || lower.includes('potrzebuje pomocy')) {
-        responseMessage = 'Jasne. Mogę dodawać sekcje, zmieniać nagłówki, kolory, teksty przycisków i konfigurować Experience. Napisz np. "Zmień nagłówek na X" lub "Dodaj sekcję hero".';
-      } else if (lower.includes('co możesz') || lower.includes('co mozesz') || lower.includes('co potrafisz')) {
-        responseMessage = 'Obsługuję: ADD_SECTION, UPDATE_TITLE, ADD_CTA, UPDATE_COLOR, MOVE_SECTION, DELETE_SECTION, UNDO/REDO.';
+      if (aiProviderStatus === 'OFFLINE') {
+        responseMessage =
+          'AI PROVIDER: NOT CONFIGURED\n\nAby prowadzić naturalną rozmowę z SoloSpot AI i uzyskać inteligentną analizę strony, podłącz model OpenCode API:\n• Zmienna: OPENCODE_API_KEY\n• Konfiguracja: plik .env.local lub Vercel Project Settings';
+      } else {
+        const lower = cleanPrompt.toLowerCase();
+        if (lower.includes('potrzebuję pomocy') || lower.includes('potrzebuje pomocy')) {
+          responseMessage = 'Jasne. Mogę dodawać sekcje, zmieniać nagłówki, kolory, teksty przycisków i konfigurować Experience. Napisz np. "Zmień nagłówek na X" lub "Dodaj sekcję hero".';
+        } else if (lower.includes('co możesz') || lower.includes('co mozesz') || lower.includes('co potrafisz')) {
+          responseMessage = 'Obsługuję: ADD_SECTION, UPDATE_TITLE, ADD_CTA, UPDATE_COLOR, MOVE_SECTION, DELETE_SECTION, UNDO/REDO.';
+        }
       }
       return {
         success: true,
@@ -648,7 +716,7 @@ export class HacpBridge {
         message: responseMessage,
         commandsToDispatch: [],
         eventsToEmit: [],
-        executionStatus: 'EXECUTED',
+        executionStatus: aiProviderStatus === 'OFFLINE' ? 'UNSUPPORTED' : 'EXECUTED',
         aiProviderStatus,
         updatedConversationContext: { lastIntent: 'CHAT' },
       };
@@ -728,11 +796,16 @@ export class HacpBridge {
 
     // CASE 6: CLARIFY
     if (classification.intent === 'CLARIFY') {
+      const message =
+        aiProviderStatus === 'OFFLINE'
+          ? `AI PROVIDER: NOT CONFIGURED\n\nModel językowy nie jest podłączony do SoloSpot.\nAby włączyć asystenta z rozumieniem naturalnego języka i kontekstu, skonfiguruj klucz:\n• OPENCODE_API_KEY (rekomendowany OpenCode Inference API)\n\nMożesz także wykonywać bezpośrednie polecenia HACP, np:\n• "Dodaj sekcję hero"\n• "Zmień nagłówek na X"\n• "Dodaj przycisk Kup teraz"\n• "Zmień kolor tła na czerwony"\n• "Cofnij" / "Ponów"`
+          : `Nie rozpoznałem jednoznacznego polecenia. Możesz spróbować:\n1. "Dodaj sekcję hero"\n2. "Zmień nagłówek na X"\n3. "Dodaj przycisk Kup teraz"\n4. "Zmień kolor tła na czerwony"\n5. "Cofnij" / "Ponów"`;
+
       return {
         success: true,
         intent: 'CLARIFY',
         scope: 'PAGE_DESIGN',
-        message: `Nie jestem pewien, co dokładnie chcesz zrobić. Mogę:\n1. Dodać sekcję ("Dodaj sekcję hero")\n2. Zmienić nagłówek ("Zmień nagłówek na X")\n3. Dodać przycisk CTA ("Dodaj przycisk Kup teraz")\n4. Zmienić kolor ("Zmień kolor tła na czerwony")\n5. Przesunąć sekcję ("Przesuń sekcję niżej")\n6. Usunąć sekcję ("Usuń tę sekcję")\n7. Cofnąć zmianę ("Cofnij")`,
+        message,
         commandsToDispatch: [],
         eventsToEmit: [],
         executionStatus: 'CLARIFY',

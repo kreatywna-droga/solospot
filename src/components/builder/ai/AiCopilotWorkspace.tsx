@@ -64,16 +64,12 @@ export function AiCopilotWorkspace() {
   // Check real AI Provider status on mount
   useEffect(() => {
     if (typeof window === 'undefined') return
-    fetch('/api/builder/copilot', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: '', messages: [] }),
-    })
+    fetch('/api/builder/copilot')
       .then((res) => res.json())
       .then((data) => {
-        if (data.status === 'SUCCESS') {
+        if (data.status === 'ONLINE' || data.configured) {
           setAiProviderStatus('ONLINE')
-          setAiProviderName(data.provider || 'AI')
+          setAiProviderName(data.provider || 'OpenCode')
         } else {
           setAiProviderStatus('OFFLINE')
           setAiProviderName('NOT CONFIGURED')
@@ -701,7 +697,7 @@ export function AiCopilotWorkspace() {
               {aiProviderStatus === 'OFFLINE' && (
                 <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-300">
                   <span>Wymagany klucz API: </span>
-                  <span className="font-bold">{missingKeys.length > 0 ? missingKeys.join(' lub ') : 'OPENAI_API_KEY / GEMINI_API_KEY'}</span>
+                  <span className="font-bold">{missingKeys.length > 0 ? missingKeys.join(' lub ') : 'OPENCODE_API_KEY / OPENAI_API_KEY / GEMINI_API_KEY'}</span>
                   <p className="text-zinc-400 mt-1">
                     Brak konfiguracji w .env — system nie symuluje AI, wykonuje operacje HACP w trybie kontrolowanym.
                   </p>

@@ -104,3 +104,14 @@ ZASADY POSTĘPOWANIA:
     );
   }
 }
+
+export async function GET() {
+  const registry = AIProviderRegistry.getInstance();
+  const active = registry.getActiveProvider();
+  return NextResponse.json({
+    status: active ? 'ONLINE' : 'OFFLINE',
+    provider: active ? active.name : 'NONE',
+    configured: Boolean(active),
+    missingKeys: registry.getMissingKeys(),
+  });
+}
