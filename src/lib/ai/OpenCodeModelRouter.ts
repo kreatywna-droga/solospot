@@ -123,12 +123,18 @@ export class OpenCodeModelRouter {
       }
 
       // Chat only
+      const preferredFree =
+        freeCandidates.find((m) => m.id === 'nvidia/nemotron-3.5-lightning:free') ||
+        freeCandidates.find((m) => m.id.includes('nemotron') && m.id.includes(':free')) ||
+        freeCandidates.find((m) => m.id.includes(':free')) ||
+        freeCandidates[0];
+
       return {
-        selectedModel: freeCandidates[0],
+        selectedModel: preferredFree,
         mode: 'FREE',
         fallbackUsed: false,
         requiresTools: false,
-        toolSupported: freeCandidates[0].supportsTools,
+        toolSupported: preferredFree.supportsTools,
       };
     }
 

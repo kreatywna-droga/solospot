@@ -85,38 +85,40 @@ export class OpenCodeModelDiscovery {
       console.warn('[OpenCodeModelDiscovery] Zen API models fetch failed, trying gateway:', err?.message);
     }
 
-    // 2. If Zen endpoint returned zero or failed, try Gateway models endpoint
-    if (models.length === 0) {
-      try {
-        const rawBase = (process.env.OPENCODE_BASE_URL || 'https://openrouter.ai/api/v1')
-          .replace(/[^\x20-\x7E]/g, '')
-          .trim()
-          .replace(/\/$/, '');
-        const apiKey = (process.env.OPENCODE_API_KEY || '').replace(/[^\x20-\x7E]/g, '').trim();
+    // 2. Query Gateway models to ensure exact gateway callable free models (like nvidia/nemotron-3.5-lightning:free)
+    try {
+      const rawBase = (process.env.OPENCODE_BASE_URL || 'https://openrouter.ai/api/v1')
+        .replace(/[^\x20-\x7E]/g, '')
+        .trim()
+        .replace(/\/$/, '');
+      const apiKey = (process.env.OPENCODE_API_KEY || '').replace(/[^\x20-\x7E]/g, '').trim();
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
 
-        const res = await fetch(`${rawBase}/models`, {
-          signal: controller.signal,
-          headers: {
-            Accept: 'application/json',
-            ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
-          },
-        });
-        clearTimeout(timeoutId);
+      const res = await fetch(`${rawBase}/models`, {
+        signal: controller.signal,
+        headers: {
+          Accept: 'application/json',
+          ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+        },
+      });
+      clearTimeout(timeoutId);
 
-        if (res.ok) {
-          const json = await res.json();
-          const rawList = Array.isArray(json.data) ? json.data : [];
-          if (rawList.length > 0) {
-            models = this.normalizeGatewayModels(rawList);
-            source = 'gateway_api';
-          }
+      if (res.ok) {
+        const json = await res.json();
+        const rawList = Array.isArray(json.data) ? json.data : [];
+        if (rawList.length > 0) {
+          const gatewayModels = this.normalizeGatewayModels(rawList);
+          const freeGateway = gatewayModels.filter((m) => m.isFree);
+          const existingIds = new Set(models.map((m) => m.id));
+          const newFree = freeGateway.filter((m) => !existingIds.has(m.id));
+          models = [...newFree, ...models];
+          source = 'gateway_api';
         }
-      } catch (err: any) {
-        console.warn('[OpenCodeModelDiscovery] Gateway models fetch failed:', err?.message);
       }
+    } catch (err: any) {
+      console.warn('[OpenCodeModelDiscovery] Gateway models fetch failed:', err?.message);
     }
 
     // 3. If remote fetch failed entirely, fallback to safe known model catalog
