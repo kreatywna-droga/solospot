@@ -115,6 +115,32 @@ ${availableTools.map(t => `- ${t}`).join('\n')}
 Supported section types: hero, product-grid, feature-grid, testimonials, newsletter, footer, navbar, content, container
 Supported node types: text, heading, image, button, video, icon, svg, divider, spacer, container, grid
 
+## DESIGN SYSTEM FIRST
+Before defining sections, define a complete design system. Every section will use these tokens. Do NOT generate random colors/fonts per section.
+
+Typography hierarchy (use these exact patterns):
+- H1: 48-72px, bold/900, lineHeight 1.05-1.15, letterSpacing -0.02em
+- H2: 36-48px, semibold/700, lineHeight 1.15-1.25
+- H3: 24-36px, medium/600, lineHeight 1.2-1.3
+- Body: 16-18px, regular/400, lineHeight 1.5-1.7
+- Small/Caption: 12-14px, regular/400
+- CTA: 14-18px, medium/600, uppercase, letterSpacing 0.05em
+
+Color system (5-7 colors max):
+- primary: brand main color
+- secondary: brand supporting color
+- accent: highlight/CTA color
+- background: page background
+- surface: card/section background
+- text: main text color
+- muted: secondary text color
+
+Spacing:
+- Section padding: 80-120px vertical (desktop), 40-60px (mobile)
+- Gap between sections: 0 (inline) or 80-120px (separate)
+- Card padding: 24-32px
+- Element gap: 16-24px
+
 ## DESIGN PRINCIPLES
 1. Every design decision must be grounded in the user's brief, industry, audience, and visual direction.
 2. Do NOT use generic templates. Design specifically for this brief.

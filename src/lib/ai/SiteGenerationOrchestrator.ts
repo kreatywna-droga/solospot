@@ -132,7 +132,20 @@ export class SiteGenerationOrchestrator {
         return this.session;
       }
 
-      // Phase 4: Complete
+      // Phase 4: Apply responsive configuration
+      if (plan.responsiveStrategy) {
+        await this.executeResponsiveStrategy(plan, executeTool, document);
+      }
+
+      if (this.abortController.signal.aborted) {
+        this.session.error = 'Generation aborted by user.';
+        return this.session;
+      }
+
+      // Phase 5: Verification pass — read document summary
+      await this.executeVerification(executeTool, document);
+
+      // Phase 6: Complete
       this.setPhase('complete', 'Generacja strony zakończona pomyślnie.');
       this.session.completedAt = new Date().toISOString();
       this.session.progress = 100;
@@ -349,6 +362,95 @@ export class SiteGenerationOrchestrator {
         await this.execTool(revealCall, executeTool);
       }
     }
+  }
+
+  // ── Responsive Strategy ──────────────────────────────────────────
+
+  private async executeResponsiveStrategy(
+    plan: SitePlan,
+    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string }>,
+    document: BuilderDocument
+  ): Promise<void> {
+    const resp = plan.responsiveStrategy;
+    if (!resp) return;
+
+    this.setPhase('responsive', 'Konfigurowanie responsywności...');
+    this.session.progress = 90;
+
+    // Apply responsive typography scaling to hero heading if it exists
+    const heroSection = plan.sections.find((s) => s.role === 'hero');
+    if (heroSection && resp.mobileTypographyScale && resp.mobileTypographyScale !== 1) {
+      // Set mobile font size override on the hero section
+      const responsiveCall: HacpToolCall = {
+        id: this.toolId(),
+        name: 'set_node_styles',
+        arguments: {
+          nodeId: heroSection.id,
+          styles: {
+            responsive: {
+              mobile: {
+                fontSize: `calc(48px * ${resp.mobileTypographyScale})`,
+                padding: '40px 16px',
+              },
+              tablet: {
+                fontSize: `calc(48px * ${(1 + resp.mobileTypographyScale) / 2})`,
+                padding: '60px 24px',
+              },
+            },
+          },
+        },
+      };
+      await this.execTool(responsiveCall, executeTool);
+    }
+
+    // Apply responsive layout adjustments to all sections
+    for (const section of plan.sections) {
+      if (this.abortController?.signal.aborted) break;
+      const mobileStyles: Record<string, unknown> = {};
+      const tabletStyles: Record<string, unknown> = {};
+
+      // Stack columns on mobile for grid/container sections
+      if (section.templateType === 'feature-grid' || section.templateType === 'content') {
+        mobileStyles.flexDirection = 'column';
+        mobileStyles.padding = '40px 16px';
+        tabletStyles.padding = '60px 24px';
+      }
+
+      if (Object.keys(mobileStyles).length > 0 || Object.keys(tabletStyles).length > 0) {
+        const responsiveSectionCall: HacpToolCall = {
+          id: this.toolId(),
+          name: 'set_node_styles',
+          arguments: {
+            nodeId: section.id,
+            styles: {
+              responsive: {
+                ...(Object.keys(mobileStyles).length > 0 ? { mobile: mobileStyles } : {}),
+                ...(Object.keys(tabletStyles).length > 0 ? { tablet: tabletStyles } : {}),
+              },
+            },
+          },
+        };
+        await this.execTool(responsiveSectionCall, executeTool);
+      }
+    }
+  }
+
+  // ── Verification ────────────────────────────────────────────────
+
+  private async executeVerification(
+    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string }>,
+    document: BuilderDocument
+  ): Promise<void> {
+    this.setPhase('verification', 'Weryfikacja wygenerowanej strony...');
+    this.session.progress = 95;
+
+    // Read document summary to verify
+    const summaryCall: HacpToolCall = {
+      id: this.toolId(),
+      name: 'inspect_document_summary',
+      arguments: {},
+    };
+    await this.execTool(summaryCall, executeTool);
   }
 
   // ── Helpers ──────────────────────────────────────────────────────
