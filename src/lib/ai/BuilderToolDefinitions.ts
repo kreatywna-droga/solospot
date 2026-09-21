@@ -320,6 +320,28 @@ export const BUILDER_TOOL_DEFINITIONS: HacpToolDefinition[] = [
     },
   },
   {
+    name: 'move_node',
+    description: 'Przenieś węzeł do innego kontenera lub zmień jego kolejność. Przenosi element z jednego rodzica do drugiego lub zmienia indeks w obrębie tego samego rodzica.',
+    parameters: {
+      type: 'object',
+      properties: {
+        nodeId: {
+          type: 'string',
+          description: 'ID węzła do przeniesienia.',
+        },
+        targetParentId: {
+          type: 'string',
+          description: 'ID docelowego rodzica. null oznacza przeniesienie do głównego poziomu strony.',
+        },
+        targetIndex: {
+          type: 'number',
+          description: 'Docelowy indeks (0-based) w obrębie rodzica.',
+        },
+      },
+      required: ['nodeId', 'targetParentId'],
+    },
+  },
+  {
     name: 'read_page_full',
     description: 'Odczytaj pełną strukturę strony ze wszystkimi węzłami, właściwościami i stylami. Przydatne do weryfikacji po generowaniu.',
     parameters: {

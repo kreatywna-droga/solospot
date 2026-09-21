@@ -81,16 +81,22 @@ DOSTEPNE NARZEDZIA INSPEKCJI:
 - inspect_asset(nodeId) → informacje o obrazie/wideo
 - inspect_available_capabilities(nodeType) → lista dostepnych operacji dla typu
 - inspect_document_summary → przeglad dokumentu
+- inspect_selected_node(nodeId) → szczegolowa inspekcja zaznaczonego elementu
+- inspect_page_structure(pageId?) → struktura sekcji na stronie
+- read_builder_document(pageId?) → metadane dokumentu, motyw, lista stron
+- read_page_full(pageId?) → pelna struktura strony ze wszystkimi wezlami
 
 DOSTEPNE NARZEDZIA MUTACJI:
 - update_node_props(pageId, sectionId, props) → zmiana wlasciwosci (text, title, src, href, itp.)
 - set_node_styles(nodeId, styles) → zmiana stylow CSS (fontSize, fontFamily, color, backgroundColor, width, height, padding, margin, borderRadius, boxShadow, itp.)
 - insert_node(parentId, nodeType, props, styles) → wstawienie nowego elementu
 - remove_node(nodeId) → usuniecie elementu
-- move_node(nodeId, targetParentId, targetIndex) → przeniesienie elementu
+- move_node(nodeId, targetParentId, targetIndex?) → przeniesienie elementu do innego kontenera
 - insert_section / remove_section / move_section → operacje na sekcjach
+- set_background_color(sectionId?, color) → ustawienie koloru tla sekcji
 - configure_experience(pageId, sectionId, config) → konfiguracja efektow wizualnych
 - update_theme(primaryColor, secondaryColor, font) → zmiana motywu
+- batch_execute(operations[]) → wykonanie wielu operacji w jednym kroku
 - undo/redo → cofnij/przywroc
 
 TYPY WEZLOW I ICH MOZLIWOSCI:

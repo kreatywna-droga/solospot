@@ -848,28 +848,31 @@ export class HacpBridge {
       };
     }
 
-    if (name === 'read_page_full') {
-      const pageId = (args.pageId as string) || activePageId;
-      const page = document.pages.find((p) => p.id === pageId) || document.pages[0];
-      const sections = page?.sections || [];
-      const sectionSummary = sections.map((s: any) => ({
-        id: s.id,
-        type: s.type,
-        label: s.label,
-        props: s.props,
-        style: s.style,
-        nodeCount: s.nodes?.length || 0,
-      }));
+    if (name === 'move_node') {
+      const nodeId = args.nodeId as string;
+      const targetParentId = (args.targetParentId as string) || null;
+      const targetIndex = args.targetIndex as number | undefined;
+      const cmd: BuilderCommand = {
+        type: 'MOVE_NODE',
+        nodeId,
+        targetParentId,
+        targetIndex,
+        pageId: (args.pageId as string) || activePageId,
+      };
 
+      const result = this.verifyCommandExecution(cmd, document, { targetId: nodeId });
       return {
-        status: 'EXECUTED',
-        verification: {
-          passed: true,
-          operation: 'read_page_full',
-          target: pageId,
-          diffSummary: `Odczytano pełną strukturę: ${sections.length} sekcji.`,
+        command: cmd,
+        verification: result.verification,
+        status: result.verification.passed ? 'EXECUTED' : 'FAILED',
+        message: result.verification.passed
+          ? `Przeniosłem węzeł \`${nodeId}\` do \`${targetParentId || 'root'}\`.`
+          : `Nie udało się przenieść węzła \`${nodeId}\`.`,
+        appliedChange: {
+          target: nodeId,
+          property: 'position',
+          summary: `Przeniesiono węzeł ${nodeId} → ${targetParentId || 'root'}[${targetIndex ?? 'end'}]`,
         },
-        message: `Strona "${page?.name || 'Główna'}": ${sections.length} sekcji. ${JSON.stringify(sectionSummary, null, 2)}`,
       };
     }
 
