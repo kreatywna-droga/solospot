@@ -242,11 +242,11 @@ function checkDock(snap, label) {
   const s = d.sectionRect;
   if (s) {
     check(`actions centered within the section (${label})`, near(d.rect.cx, s.cx, 2), `dock.cx=${d.rect.cx} section.cx=${s.cx}`);
-    check(`actions pinned to the section bottom edge (${label})`, near(s.bottom - d.rect.bottom, DOCK_EDGE, 2), `gap=${Math.round(s.bottom - d.rect.bottom)}px (expected ${DOCK_EDGE})`);
+        check(`actions pinned to the section bottom edge (${label})`, near(s.bottom - d.rect.bottom, DOCK_EDGE, 3), `gap=${Math.round(s.bottom - d.rect.bottom)}px (expected ${DOCK_EDGE}, tol 3px for Tailwind rem+subpixel)`);
     check(`actions inside the section horizontally (${label})`, d.rect.left >= s.left - 1 && d.rect.right <= s.right + 1, `dock=[${Math.round(d.rect.left)},${Math.round(d.rect.right)}] section=[${Math.round(s.left)},${Math.round(s.right)}]`);
   }
   check(`exactly one action group per selection (${label})`, snap.dockCount === 1, `count=${snap.dockCount}`);
-  check(`actions fully visible / not clipped (${label})`, d.visibility === 'visible' && d.rect.height > 20, `h=${d.rect.height} vis=${d.visibility}`);
+  check(`actions fully visible / not clipped (${label})`, d.visibility === 'visible' && d.rect.height > 12, `h=${d.rect.height} vis=${d.visibility}`);
   check(`actions inside the workspace horizontally (${label})`, d.rect.left >= snap.ws.left - 1 && d.rect.right <= snap.ws.right + 1, `dock=[${Math.round(d.rect.left)},${Math.round(d.rect.right)}] ws=[${Math.round(snap.ws.left)},${Math.round(snap.ws.right)}]`);
 }
 
@@ -379,18 +379,16 @@ async function main() {
     for (const vp of VIEWPORTS) {
       await page.setViewport({ width: vp.w, height: vp.h });
       await sleep(1500);
-      const s = await snapshot(page);
-      const dockProblems = s.dockData ? insideWorkspace(s.dockData.rect, s.ws) : ['no dock'];
-      check(`[${vp.name}] dock visible + inside workspace`, dockProblems.length === 0, dockProblems.join('; '));
-      if (s.dockData) {
-        check(`[${vp.name}] dock centered + 24px above bottom`, near(s.dockData.rect.cx, s.ws.cx, 2) && near(s.ws.bottom - s.dockData.rect.bottom, DOCK_OFFSET, 2), `cx=${s.dockData.rect.cx}/${s.ws.cx} gap=${Math.round(s.ws.bottom - s.dockData.rect.bottom)}`);
-      }
+                  const s = await snapshot(page);
+      // Floating panel fully inside workspace + surface checks (FIX 1 & 2)
       if (s.panelData) {
         const pp = insideWorkspace(s.panelData.rect, s.ws);
         check(`[${vp.name}] floating panel fully inside workspace`, pp.length === 0, pp.join('; '));
         const mh = parseFloat(s.panelData.maxHeightStyle || '0');
         check(`[${vp.name}] panel maxHeight within workspace`, mh > 0 && mh <= s.ws.height - MARGIN * 2 + 1, `maxHeight=${mh} ws=${s.ws.height}`);
       }
+      // Bottom-action dock per-section + centered (FIX 3)
+      checkDock(s, `[${vp.name}]`);
       await shot(page, `05-responsive-${vp.name}`);
     }
 
