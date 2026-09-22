@@ -16,6 +16,7 @@ import {
   RotateCcw, Layers, Layout, Paintbrush,
 } from 'lucide-react'
 import { useBuilder } from '../state/BuilderProvider'
+import { ColorControl } from '../../../../packages/authoring-studio/src/inspector/controls'
 
 const FONT_OPTIONS = [
   { label: 'Inter (Domyślny / Modern)', value: 'Inter' },
@@ -29,9 +30,9 @@ const FONT_OPTIONS = [
 
 const THEME_PRESETS = [
   {
-    name: 'SoloSpot Violet (Domyślny)',
-    primary: '#7c3aed',
-    secondary: '#d946ef',
+    name: 'SoloSpot Gold (Domyślny)',
+    primary: '#D9A86C',
+    secondary: '#F2C27F',
     background: '#090910',
     font: 'Inter',
     radius: '12px',
@@ -156,56 +157,29 @@ export function StylePanel() {
           <div className="space-y-4">
             <div>
               <label className="block text-zinc-400 font-semibold mb-1.5">Kolor Główny (Primary Brand)</label>
-              <div className="flex items-center gap-2.5">
-                <input
-                  type="color"
-                  value={theme.primaryColor || '#7c3aed'}
-                  onChange={e => updateColor('primaryColor', e.target.value)}
-                  className="w-8 h-8 rounded-lg border border-white/20 cursor-pointer bg-transparent"
-                />
-                <input
-                  type="text"
-                  value={theme.primaryColor || '#7c3aed'}
-                  onChange={e => updateColor('primaryColor', e.target.value)}
-                  className="flex-1 bg-white/[0.04] border border-[#15151A] rounded-lg px-3 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-[#D9A86C]"
-                />
-              </div>
+              <ColorControl
+                value={theme.primaryColor || '#D9A86C'}
+                onChange={v => updateColor('primaryColor', v)}
+                title="Kolor główny marki"
+              />
             </div>
 
             <div>
               <label className="block text-zinc-400 font-semibold mb-1.5">Kolor Akcentu (Secondary / Accent)</label>
-              <div className="flex items-center gap-2.5">
-                <input
-                  type="color"
-                  value={theme.secondaryColor || '#d946ef'}
-                  onChange={e => updateColor('secondaryColor', e.target.value)}
-                  className="w-8 h-8 rounded-lg border border-white/20 cursor-pointer bg-transparent"
-                />
-                <input
-                  type="text"
-                  value={theme.secondaryColor || '#d946ef'}
-                  onChange={e => updateColor('secondaryColor', e.target.value)}
-                  className="flex-1 bg-white/[0.04] border border-[#15151A] rounded-lg px-3 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-[#D9A86C]"
-                />
-              </div>
+              <ColorControl
+                value={theme.secondaryColor || '#F2C27F'}
+                onChange={v => updateColor('secondaryColor', v)}
+                title="Kolor akcentu"
+              />
             </div>
 
             <div>
               <label className="block text-zinc-400 font-semibold mb-1.5">Domyślne Tło Strony (Background)</label>
-              <div className="flex items-center gap-2.5">
-                <input
-                  type="color"
-                  value={theme.backgroundColor || '#090910'}
-                  onChange={e => updateColor('backgroundColor', e.target.value)}
-                  className="w-8 h-8 rounded-lg border border-white/20 cursor-pointer bg-transparent"
-                />
-                <input
-                  type="text"
-                  value={theme.backgroundColor || '#090910'}
-                  onChange={e => updateColor('backgroundColor', e.target.value)}
-                  className="flex-1 bg-white/[0.04] border border-[#15151A] rounded-lg px-3 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-[#D9A86C]"
-                />
-              </div>
+              <ColorControl
+                value={theme.backgroundColor || '#090910'}
+                onChange={v => updateColor('backgroundColor', v)}
+                title="Domyślne tło strony"
+              />
             </div>
 
             {/* Visual preview swatch */}
@@ -290,8 +264,8 @@ export function StylePanel() {
               <span className="text-[11px] font-bold text-zinc-300">Globalne Tokeny CSS:</span>
               <pre className="text-[10px] font-mono text-[#F2C27F] bg-black/60 p-2.5 rounded-lg overflow-x-auto">
 {`:root {
-  --primary: ${theme.primaryColor || '#7c3aed'};
-  --secondary: ${theme.secondaryColor || '#d946ef'};
+  --primary: ${theme.primaryColor || '#D9A86C'};
+  --secondary: ${theme.secondaryColor || '#F2C27F'};
   --font-sans: "${theme.font || 'Inter'}", sans-serif;
   --radius: ${theme.borderRadius || '8px'};
 }`}

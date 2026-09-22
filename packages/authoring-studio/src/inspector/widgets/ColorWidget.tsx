@@ -2,37 +2,24 @@
 
 import * as React from 'react';
 import type { WidgetProps } from '../registry/types';
-import { inputBaseClass, toDisplayString } from './WidgetShared';
+import { ColorControl } from '../controls';
 
 /**
  * ColorWidget — Sprint 7.1 Inspector 2.0 UI Layer
  *
- * Color picker widget. Renders a native color input + hex text field.
+ * Color picker widget — delegates to the canonical ColorControl (ONE system).
  * Pure presentation — no business logic.
  *
  * @agent Agent 3 — Supporting Implementation Engineer
  * @status READY FOR INTEGRATION BY AGENT 1
  */
-const ColorWidget: React.FC<WidgetProps<string>> = ({ value, onChange }) => {
-  const colorVal = toDisplayString(value) || '#6366f1';
-
-  return (
-    <div className="flex items-center gap-2">
-      <input
-        type="color"
-        value={colorVal}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-9 h-9 rounded-lg border border-white/10 cursor-pointer bg-transparent flex-shrink-0"
-      />
-      <input
-        type="text"
-        value={colorVal}
-        onChange={(e) => onChange(e.target.value)}
-        className={`${inputBaseClass} font-mono text-xs`}
-      />
-    </div>
-  );
-};
+const ColorWidget: React.FC<WidgetProps<string>> = ({ value, onChange }) => (
+  <ColorControl
+    value={value || '#D9A86C'}
+    onChange={onChange}
+    title="Próbnik kolorów"
+  />
+);
 
 export default React.memo(ColorWidget);
 

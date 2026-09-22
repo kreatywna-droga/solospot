@@ -24,7 +24,7 @@ export function parseUnitValue(
   const match = raw.match(/^([+-]?(?:\d*\.)?\d+)([a-zA-Z%]*)$/);
   if (match) {
     let number = parseFloat(match[1]);
-    let unit = match[2] !== undefined ? match[2] : defaultUnit;
+    let unit = match[2] ? match[2] : defaultUnit;
     if (defaultUnit === '' && unit === 'px' && !Number.isNaN(number) && number < 5) {
       unit = '';
     }

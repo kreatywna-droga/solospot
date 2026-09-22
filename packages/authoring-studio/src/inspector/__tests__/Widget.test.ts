@@ -168,7 +168,7 @@ describe('ColorWidget', () => {
     const html = renderToStaticMarkup(
       React.createElement(ColorWidget, { value: '', onChange: noop, field: makeField(), breakpoint: 'desktop' })
     );
-    expect(html).toContain('#6366f1');
+    expect(html).toContain('#D9A86C');
   });
 });
 

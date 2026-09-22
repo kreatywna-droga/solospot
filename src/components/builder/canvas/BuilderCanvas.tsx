@@ -640,6 +640,7 @@ function CanvasNode({
     const height = styles.height || (props.height as string)
     const padding = formatFourSide(styles.padding, (props.padding as string) || '10px 20px')
     const margin = formatFourSide(styles.margin)
+    const bgImageCss = resolveBackgroundImageCss(styles.backgroundImage)
 
     return (
       <div
@@ -670,12 +671,10 @@ function CanvasNode({
           type="button"
           style={{
             backgroundColor: variant === 'outline' ? 'transparent' : bg,
-            backgroundImage: styles.backgroundImage && styles.backgroundImage !== 'none'
-              ? (styles.backgroundImage.startsWith('url(') ? styles.backgroundImage : `url("${styles.backgroundImage}")`)
-              : undefined,
-            backgroundSize: styles.backgroundImage && styles.backgroundImage !== 'none' ? (styles.backgroundSize || 'cover') : undefined,
-            backgroundPosition: styles.backgroundImage && styles.backgroundImage !== 'none' ? (styles.backgroundPosition || 'center') : undefined,
-            backgroundRepeat: styles.backgroundImage && styles.backgroundImage !== 'none' ? (styles.backgroundRepeat || 'no-repeat') : undefined,
+            backgroundImage: bgImageCss,
+            backgroundSize: bgImageCss ? (styles.backgroundSize || 'cover') : undefined,
+            backgroundPosition: bgImageCss ? (styles.backgroundPosition || 'center') : undefined,
+            backgroundRepeat: bgImageCss ? (styles.backgroundRepeat || 'no-repeat') : undefined,
             color: textColor,
             borderRadius,
             borderWidth,
@@ -994,6 +993,7 @@ function CanvasNode({
   const borderColor = styles.borderColor || (props.borderColor as string) || 'rgba(255,255,255,0.1)'
   const borderStyle = styles.borderStyle || (borderWidth ? 'solid' : undefined)
   const border = borderWidth ? `${borderWidth} ${borderStyle || 'solid'} ${borderColor}` : '1px solid rgba(255,255,255,0.05)'
+  const bgImageCss = resolveBackgroundImageCss(styles.backgroundImage)
 
   const handleContainerDragOver = (e: React.DragEvent) => {
     e.preventDefault()
@@ -1146,12 +1146,10 @@ function CanvasNode({
       style={{
         boxSizing: 'border-box' as const,
         backgroundColor: bg,
-        backgroundImage: styles.backgroundImage && styles.backgroundImage !== 'none'
-          ? (styles.backgroundImage.startsWith('url(') ? styles.backgroundImage : `url("${styles.backgroundImage}")`)
-          : undefined,
-        backgroundSize: styles.backgroundImage && styles.backgroundImage !== 'none' ? (styles.backgroundSize || 'cover') : undefined,
-        backgroundPosition: styles.backgroundImage && styles.backgroundImage !== 'none' ? (styles.backgroundPosition || 'center') : undefined,
-        backgroundRepeat: styles.backgroundImage && styles.backgroundImage !== 'none' ? (styles.backgroundRepeat || 'no-repeat') : undefined,
+        backgroundImage: bgImageCss,
+        backgroundSize: bgImageCss ? (styles.backgroundSize || 'cover') : undefined,
+        backgroundPosition: bgImageCss ? (styles.backgroundPosition || 'center') : undefined,
+        backgroundRepeat: bgImageCss ? (styles.backgroundRepeat || 'no-repeat') : undefined,
         padding,
         margin,
         gap,

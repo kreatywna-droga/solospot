@@ -27,6 +27,7 @@ import { Monitor, Tablet, Smartphone } from 'lucide-react'
 import { AssetPicker } from '../../media/AssetPicker'
 import { MediaDocument } from '../../../../packages/asset-manager-core/src/AssetTypes'
 import { resolveImageUrl } from '@/lib/assets/resolveImageUrl'
+import { ColorControl } from '../../../../packages/authoring-studio/src/inspector/controls'
 
 // ---------------------------------------------------------------------------
 // Individual field renderers
@@ -117,27 +118,16 @@ function BooleanField({ schema, value, onChange }: FieldProps) {
 }
 
 function ColorField({ schema, value, onChange }: FieldProps) {
-  const colorVal = typeof value === 'string' ? value : '#6366f1'
   return (
     <div>
       <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
         {schema.label}
       </label>
-      <div className="flex items-center gap-2">
-        <input
-          type="color"
-          value={colorVal}
-          onChange={e => onChange(schema.key, e.target.value)}
-          className="w-9 h-9 rounded-lg border border-white/10 cursor-pointer bg-transparent flex-shrink-0"
-        />
-        <input
-          type="text"
-          value={colorVal}
-          onChange={e => onChange(schema.key, e.target.value)}
-          className="flex-1 bg-[#18181B] border border-white/10 rounded-lg px-3 py-2 text-sm text-white font-mono
-                     focus:outline-none focus:border-[#D9A86C]/50 focus:ring-1 focus:ring-[#D9A86C]/30 transition-all"
-        />
-      </div>
+      <ColorControl
+        value={typeof value === 'string' && value ? value : '#D9A86C'}
+        onChange={v => onChange(schema.key, v)}
+        title={schema.label}
+      />
     </div>
   )
 }

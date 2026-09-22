@@ -9,14 +9,14 @@
  */
 
 // ---------------------------------------------------------------------------
-// Shared Tailwind class fragments (dark theme, violet accent)
+// Shared Tailwind class fragments (dark theme, gold accent)
 // ---------------------------------------------------------------------------
 
 /** Base input styling for text-like inputs. */
 export const inputBaseClass =
   'w-full bg-white/5 border rounded-lg px-3 py-2 text-sm text-white ' +
   'placeholder-slate-600 focus:outline-none focus:ring-1 transition-all ' +
-  'border-white/10 focus:border-violet-500/50 focus:ring-violet-500/30';
+  'border-white/10 focus:border-[#D9A86C]/50 focus:ring-[#D9A86C]/30';
 
 /** Label styling for all widgets. */
 export const labelClass =
