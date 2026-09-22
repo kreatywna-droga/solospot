@@ -164,10 +164,15 @@ export class AgentOrchestrator {
     // 5. PROCESS MODEL RESPONSE
     const toolCalls = modelResponse.toolCalls || [];
 
-    // 6. If model generated tool calls → return them for HACP execution
+    // 6. If model generated tool calls → return them for HACP execution.
+    // FORENSIC GATE v1.0: SUCCESS requires a MUTATION tool call.
+    // Read-only calls (search_sections, inspect_*, ...) leave the document
+    // unchanged, so they are PARTIAL — HACP still executes them (real library
+    // results), but no SUCCESS is claimed without a mutation.
     if (toolCalls.length > 0) {
+      const hasMutation = ToolSurfaceSelector.hasMutationToolCall(toolCalls);
       return {
-        status: 'SUCCESS',
+        status: hasMutation ? 'SUCCESS' : 'PARTIAL',
         intent: classified.category,
         plan: ExecutionPlanManager.advancePlan(plan, { toolCalls }),
         toolCalls,

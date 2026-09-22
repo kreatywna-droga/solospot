@@ -32,10 +32,34 @@ import type {
   HacpConversationContext,
   HacpProposal,
   HacpExecutionStatus,
+  HacpIntentType,
   ExecutionVerification,
 } from './HacpTypes';
 import type { HacpToolCall, ChatMessageAttachment } from '../ai/AIProviderTypes';
 import { UserFacingResponseNormalizer } from '../ai/UserFacingResponseNormalizer';
+
+/**
+ * Resolve the honest outcome of a tool-execution batch.
+ *
+ * FORENSIC GATE v1.0 — NO FAKE SUCCESS:
+ * a batch that produced zero BuilderCommands (e.g. search_sections only)
+ * changed documentBefore === documentAfter, so it must NEVER be reported
+ * as EXECUTED/SUCCESS. It is an inspection turn (CHAT/CLARIFY), not
+ * a mutation.
+ */
+export function resolveToolExecutionOutcome(
+  allPassed: boolean,
+  commandCount: number
+): { success: boolean; intent: HacpIntentType; executionStatus: HacpExecutionStatus } {
+  if (commandCount === 0) {
+    return { success: true, intent: 'CHAT', executionStatus: 'CLARIFY' };
+  }
+  return {
+    success: allPassed,
+    intent: 'EXECUTE',
+    executionStatus: allPassed ? 'EXECUTED' : 'FAILED',
+  };
+}
 
 export class HacpBridge {
   private static instance: HacpBridge;
@@ -177,6 +201,18 @@ export class HacpBridge {
   }
 
   /**
+   * Pre-generate a section ID for an ADD_SECTION command (FORENSIC GATE v2.0,
+   * Phase 18). The ID is embedded in the command, so HACP VERIFY-time and
+   * Builder dispatch-time create the SAME node — previously each
+   * applyCommandToDocument() minted a fresh random ID, making the reported
+   * createdNodeId a phantom that follow-up calls could never target.
+   */
+  private generateSectionId(sectionType: string): string {
+    const safe = (sectionType || 'section').replace(/[^a-z0-9]+/gi, '_').toLowerCase();
+    return `${safe}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+  }
+
+  /**
    * Execute a structured Tool Call issued by real LLM.
    */
   public async executeToolCall(
@@ -242,6 +278,8 @@ export class HacpBridge {
     if (name === 'insert_section') {
       const sectionType = (args.sectionType as string) || 'hero';
       const atIndex = typeof args.atIndex === 'number' ? args.atIndex : undefined;
+      const sectionId =
+        (args.sectionId as string) || this.generateSectionId(sectionType);
       const cmd: BuilderCommand = {
         type: 'ADD_SECTION',
         pageId: (args.pageId as string) || activePageId,
@@ -249,9 +287,11 @@ export class HacpBridge {
         defaultProps: (args.defaultProps as Record<string, unknown>) || { title: `Nowa sekcja ${sectionType}` },
         atIndex,
         label: (args.label as string) || `Sekcja ${sectionType}`,
+        sectionId,
       };
 
       const result = this.verifyCommandExecution(cmd, document, { targetId: cmd.pageId });
+      const createdNodeId = result.verification.passed ? sectionId : undefined;
       return {
         command: cmd,
         verification: result.verification,
@@ -264,6 +304,7 @@ export class HacpBridge {
           property: 'sections',
           summary: `Wstawiono sekcję ${sectionType}`,
         },
+        createdNodeId,
       };
     }
 
@@ -571,6 +612,9 @@ export class HacpBridge {
         const sectionNode = template.createNode();
         const targetPageId = (args.pageId as string) || activePageId;
         const atIndex = typeof args.atIndex === 'number' ? args.atIndex : undefined;
+        const sectionId =
+          (args.sectionId as string) ||
+          this.generateSectionId(template.category || sectionTemplateId);
 
         const cmd: BuilderCommand = {
           type: 'ADD_SECTION',
@@ -579,14 +623,12 @@ export class HacpBridge {
           defaultProps: sectionNode.props || {},
           atIndex,
           label: (args.label as string) || template.name || `Library: ${sectionTemplateId}`,
+          sectionId,
         };
 
         const result = this.verifyCommandExecution(cmd, document, { targetId: targetPageId });
 
         if (result.verification.passed) {
-          const insertedPage = result.nextDoc.pages.find((p) => p.id === targetPageId) || result.nextDoc.pages[0];
-          const insertedSection = insertedPage?.sections?.[atIndex ?? insertedPage.sections.length - 1];
-
           return {
             command: cmd,
             verification: result.verification,
@@ -597,6 +639,9 @@ export class HacpBridge {
               property: 'sections',
               summary: `Wstawiono z biblioteki: ${template.name} (${sectionTemplateId})`,
             },
+            // Deterministic: sectionId is embedded in cmd, so dispatch-time
+            // creates this exact node (Phase 18 integrity).
+            createdNodeId: sectionId,
           };
         }
 
@@ -1285,7 +1330,7 @@ export class HacpBridge {
     // 2. IF REAL AI GENERATED TOOL CALLS → EXECUTE & VERIFY
     //    OR IF REAL AI RETURNED CHAT → RETURN MODEL MESSAGE (never discard)
     // ========================================================================
-    if (aiProviderResponse && (aiProviderResponse.status === 'SUCCESS' || aiProviderResponse.status === 'CHAT')) {
+    if (aiProviderResponse && (aiProviderResponse.status === 'SUCCESS' || aiProviderResponse.status === 'CHAT' || aiProviderResponse.status === 'PARTIAL')) {
       const toolCalls: HacpToolCall[] = aiProviderResponse.toolCalls || [];
 
       console.log('[HacpBridge] EXECUTION_TRACE:', {
@@ -1368,25 +1413,41 @@ export class HacpBridge {
           appliedChanges,
         };
 
-        const rawToolMsg =
-          aiProviderResponse.message && aiProviderResponse.message.trim().length > 0
-            ? aiProviderResponse.message.trim()
-            : finalMessage || 'Operacja została pomyślnie wykonana w HACP.';
-        const cleanToolMsg = UserFacingResponseNormalizer.normalize(rawToolMsg, {
-          toolExecuted: toolCalls[0]?.name,
-        });
+        // FORENSIC GATE v1.0 — NO FAKE SUCCESS: when the batch produced zero
+        // BuilderCommands (read-only tools only, e.g. search_sections without
+        // insert_section_from_library), the document is unchanged. Never echo
+        // the model's promise text ("wstawię...") as if it were done — return
+        // an honest inspection summary instead.
+        const outcome = resolveToolExecutionOutcome(allPassed, commands.length);
+
+        let cleanToolMsg: string;
+        if (commands.length === 0) {
+          const executedNames = toolCalls.map((tc) => tc.name).join(', ');
+          cleanToolMsg =
+            `Wykonałem narzędzia: ${executedNames}. ` +
+            `Nie wprowadziłem zmian w BuilderDocument — liczba sekcji bez zmian, brak nowego węzła. ` +
+            `Brakuje kroku mutacji (np. insert_section_from_library). Spróbuj ponownie lub wskaż konkretny szablon z wyników wyszukiwania.`;
+        } else {
+          const rawToolMsg =
+            aiProviderResponse.message && aiProviderResponse.message.trim().length > 0
+              ? aiProviderResponse.message.trim()
+              : finalMessage || 'Operacja została pomyślnie wykonana w HACP.';
+          cleanToolMsg = UserFacingResponseNormalizer.normalize(rawToolMsg, {
+            toolExecuted: toolCalls[0]?.name,
+          });
+        }
 
         onProgress?.('COMPLETED');
 
         return {
-          success: allPassed,
-          intent: 'EXECUTE',
+          success: outcome.success,
+          intent: outcome.intent,
           scope: 'PAGE_DESIGN',
           message: cleanToolMsg,
           executionCard: card,
           commandsToDispatch: commands,
           eventsToEmit: [],
-          executionStatus: allPassed ? 'EXECUTED' : 'FAILED',
+          executionStatus: outcome.executionStatus,
           verification: lastVerification,
           aiProviderStatus,
           aiProviderName,
@@ -1394,7 +1455,7 @@ export class HacpBridge {
           isFreeModel: aiProviderResponse.isFreeModel,
           routerMode: aiProviderResponse.routerMode,
           updatedConversationContext: {
-            lastIntent: 'EXECUTE',
+            lastIntent: outcome.intent,
             lastModifiedNodeId: commands[0]?.type === 'UPDATE_PROPS' ? (commands[0] as any).sectionId : undefined,
           },
         };

@@ -605,9 +605,14 @@ export class OpenCodeProvider implements AIProvider {
         toolExecuted: toolCalls[0]?.name,
       });
 
-      // TRUTHFULNESS: Only claim SUCCESS when mutation tool calls exist.
-      // Chat-only responses (no tool calls) are CHAT, not SUCCESS.
-      const hasMutations = toolCalls.length > 0;
+      // TRUTHFULNESS (FORENSIC GATE v1.0): Only claim SUCCESS when a MUTATION
+      // tool call exists. Read-only calls (search_sections, inspect_*, ...) are
+      // collected in `toolCalls` as fallback when the agent loop produced no
+      // mutation — that is PARTIAL (work started, document unchanged), never
+      // SUCCESS. Chat-only responses (no tool calls) are CHAT.
+      // NOTE: allToolCalls holds mutation calls only (see agent loop above).
+      const hasMutations = allToolCalls.length > 0;
+      const finalStatus = hasMutations ? 'SUCCESS' : toolCalls.length > 0 ? 'PARTIAL' : 'CHAT';
 
       console.log(
         JSON.stringify({
@@ -615,14 +620,14 @@ export class OpenCodeProvider implements AIProvider {
           requestId,
           provider: this.id,
           model: data.model || activeModelId,
-          status: hasMutations ? 'SUCCESS' : 'CHAT',
+          status: finalStatus,
           durationMs: Date.now() - requestStartedAt,
           fallbackUsed,
         })
       );
 
       return {
-        status: hasMutations ? 'SUCCESS' : 'CHAT',
+        status: finalStatus,
         provider: this.name,
         model: data.model || selectedModelId,
         message: cleanUserFacingMessage,

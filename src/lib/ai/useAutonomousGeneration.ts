@@ -43,7 +43,7 @@ interface UseAutonomousGenerationReturn {
 
 export function useAutonomousGeneration(
   document: BuilderDocument,
-  executeToolCall: (call: HacpToolCall) => Promise<{ success: boolean; message: string }>
+  executeToolCall: (call: HacpToolCall) => Promise<{ success: boolean; message: string; createdNodeId?: string }>
 ): UseAutonomousGenerationReturn {
   const [state, setState] = useState<GenerationState>({
     phase: 'idle',

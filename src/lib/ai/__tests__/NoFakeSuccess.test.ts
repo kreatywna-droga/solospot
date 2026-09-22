@@ -1,0 +1,437 @@
+/**
+ * NoFakeSuccess.test.ts — SOLOSPOT REAL AI EXECUTION FORENSIC GATE v1.0
+ *
+ * Regression tests for the "model responds but builder does not change" fault.
+ * Live forensic trace (requestId forensic-mud1ohho) proved:
+ *   model returned ONLY search_sections (read-only) with promise text
+ *   "a następnie wstawię..." → chain reported SUCCESS/EXECUTED with
+ *   commandsToDispatch: [] → Canvas unchanged, user saw a promise as done.
+ *
+ * Core rule under test: SEARCH ≠ INSERT.
+ * No mutation (documentBefore === documentAfter) ⇒ no SUCCESS/EXECUTED.
+ */
+import { describe, it, expect, vi } from 'vitest';
+import { ToolSurfaceSelector } from '../ToolSurfaceSelector';
+import { AgentOrchestrator } from '../AgentOrchestrator';
+import type { AICopilotRequest, AICopilotResponse } from '../AIProviderTypes';
+import {
+  HacpBridge,
+  resolveToolExecutionOutcome,
+} from '../../hacp/HacpBridge';
+import { createBuilderDocument } from '../../../../packages/builder-core/src/BuilderDocument';
+import {
+  applyCommandToDocument,
+  findNode,
+} from '../../../../packages/builder-core/src';
+import { SiteGenerationOrchestrator } from '../SiteGenerationOrchestrator';
+import type { SitePlan } from '../SitePlanTypes';
+import type { HacpToolCall } from '../AIProviderTypes';
+
+function createMockProvider(response: Partial<AICopilotResponse>) {
+  return {
+    generateWithTools: vi.fn().mockResolvedValue({
+      status: 'SUCCESS',
+      provider: 'mock',
+      model: 'mock-model',
+      message: '',
+      ...response,
+    } as AICopilotResponse),
+  };
+}
+
+function createTestRequest(prompt: string): AICopilotRequest {
+  return {
+    prompt,
+    messages: [{ role: 'user', content: prompt }],
+    builderContext: {
+      storeId: 'test',
+      pageId: 'page-home',
+      pageName: 'Test',
+      viewport: 'DESKTOP',
+      documentNodeCount: 2,
+      activeTool: 'SELECT',
+      availableCapabilitiesCount: 0,
+      sectionsSummary: [{ id: 's1', type: 'hero', label: 'Hero' }],
+    },
+  };
+}
+
+describe('NoFakeSuccess — mutation classification', () => {
+  it('insert/update/remove/move/configure/undo/redo are mutations', () => {
+    for (const name of [
+      'insert_section_from_library',
+      'insert_experience_from_library',
+      'insert_section',
+      'insert_node',
+      'update_node_props',
+      'update_theme',
+      'set_node_styles',
+      'set_background_color',
+      'remove_section',
+      'remove_node',
+      'move_section',
+      'move_node',
+      'configure_experience',
+      'batch_execute',
+      'undo',
+      'redo',
+    ]) {
+      expect(ToolSurfaceSelector.isMutationTool(name)).toBe(true);
+    }
+  });
+
+  it('search/inspect/read/resolve/get/find/echo are NOT mutations', () => {
+    for (const name of [
+      'search_sections',
+      'search_experiences',
+      'search_website_templates',
+      'inspect_page_structure',
+      'inspect_document_summary',
+      'inspect_node',
+      'inspect_experience',
+      'read_builder_document',
+      'read_page_full',
+      'resolve_target',
+      'find_nodes',
+      'get_typography_presets',
+      'get_design_presets',
+      'get_experience_categories',
+      'test_echo',
+    ]) {
+      expect(ToolSurfaceSelector.isMutationTool(name)).toBe(false);
+    }
+  });
+
+  it('search-only batch has no mutation tool', () => {
+    expect(
+      ToolSurfaceSelector.hasMutationToolCall([{ name: 'search_sections' }])
+    ).toBe(false);
+  });
+
+  it('search + insert batch has a mutation tool', () => {
+    expect(
+      ToolSurfaceSelector.hasMutationToolCall([
+        { name: 'search_sections' },
+        { name: 'insert_section_from_library' },
+      ])
+    ).toBe(true);
+  });
+});
+
+describe('NoFakeSuccess — orchestrator status', () => {
+  it('search-only tool calls → PARTIAL, never SUCCESS (toolCalls forwarded)', async () => {
+    const provider = createMockProvider({
+      message: 'Wyszukam dostępne szablony, a następnie wstawię najlepiej pasujący.',
+      toolCalls: [
+        {
+          id: 'call-search',
+          name: 'search_sections',
+          arguments: { query: 'testimonials', category: 'testimonials', limit: 5 },
+        },
+      ],
+    });
+    const orchestrator = new AgentOrchestrator(provider);
+    const result = await orchestrator.orchestrate(
+      createTestRequest('Dodaj sekcję testimonials'),
+      { documentNodeCount: 2, hasSelection: false }
+    );
+
+    expect(result.toolCalls.length).toBe(1);
+    expect(result.status).toBe('PARTIAL');
+    expect(result.status).not.toBe('SUCCESS');
+  });
+
+  it('insert tool call → SUCCESS', async () => {
+    const provider = createMockProvider({
+      toolCalls: [
+        {
+          id: 'call-insert',
+          name: 'insert_section_from_library',
+          arguments: { sectionTemplateId: 'testimonials-cards' },
+        },
+      ],
+    });
+    const orchestrator = new AgentOrchestrator(provider);
+    const result = await orchestrator.orchestrate(
+      createTestRequest('Dodaj sekcję testimonials'),
+      { documentNodeCount: 2, hasSelection: false }
+    );
+
+    expect(result.status).toBe('SUCCESS');
+  });
+
+  it('model text-only ("Dodałem...") without tool call → NOT SUCCESS', async () => {
+    const provider = createMockProvider({
+      message: 'Dodałem sekcję testimonials.',
+      toolCalls: [],
+    });
+    const orchestrator = new AgentOrchestrator(provider);
+    const result = await orchestrator.orchestrate(
+      createTestRequest('Dodaj sekcję testimonials'),
+      { documentNodeCount: 2, hasSelection: false }
+    );
+
+    expect(result.status).not.toBe('SUCCESS');
+    expect(result.toolCalls.length).toBe(0);
+  });
+});
+
+describe('NoFakeSuccess — HACP outcome', () => {
+  it('zero commands → CHAT/CLARIFY, never EXECUTED', () => {
+    const outcome = resolveToolExecutionOutcome(true, 0);
+    expect(outcome.executionStatus).not.toBe('EXECUTED');
+    expect(outcome.executionStatus).toBe('CLARIFY');
+    expect(outcome.intent).toBe('CHAT');
+  });
+
+  it('commands + all passed → EXECUTED', () => {
+    const outcome = resolveToolExecutionOutcome(true, 1);
+    expect(outcome.executionStatus).toBe('EXECUTED');
+    expect(outcome.intent).toBe('EXECUTE');
+    expect(outcome.success).toBe(true);
+  });
+
+  it('commands + failure → FAILED', () => {
+    const outcome = resolveToolExecutionOutcome(false, 1);
+    expect(outcome.executionStatus).toBe('FAILED');
+    expect(outcome.success).toBe(false);
+  });
+
+  it('search_sections executes with real results but NO command (SEARCH ≠ INSERT)', async () => {
+    const bridge = HacpBridge.getInstance();
+    const doc = createBuilderDocument({});
+    const exec = await bridge.executeToolCall(
+      {
+        id: 'call-search',
+        name: 'search_sections',
+        arguments: { query: 'testimonials', category: 'testimonials', limit: 5 },
+      },
+      doc,
+      doc.pages[0].id
+    );
+
+    expect(exec.status).toBe('EXECUTED');
+    expect(exec.command).toBeUndefined();
+    expect(exec.verification.passed).toBe(true);
+    const parsed = JSON.parse(exec.message);
+    expect(parsed.count).toBeGreaterThan(0);
+    expect(parsed.sections[0].id).toBe('testimonials-cards');
+  });
+
+  it('insert_section_from_library mutates document 0 → 1 with verification', async () => {
+    const bridge = HacpBridge.getInstance();
+    const doc = createBuilderDocument({});
+    const pageId = doc.pages[0].id;
+    const before = doc.pages[0].sections.length;
+    const exec = await bridge.executeToolCall(
+      {
+        id: 'call-insert',
+        name: 'insert_section_from_library',
+        arguments: { sectionTemplateId: 'testimonials-cards', pageId },
+      },
+      doc,
+      pageId
+    );
+
+    expect(exec.status).toBe('EXECUTED');
+    expect(exec.command?.type).toBe('ADD_SECTION');
+    expect(exec.verification.passed).toBe(true);
+    expect(exec.verification.beforeValue).toBe(before);
+    expect(exec.verification.afterValue).toBe(before + 1);
+  });
+
+  it('insert with unknown template → FAILED, never SUCCESS', async () => {
+    const bridge = HacpBridge.getInstance();
+    const doc = createBuilderDocument({});
+    const exec = await bridge.executeToolCall(
+      {
+        id: 'call-bad',
+        name: 'insert_section_from_library',
+        arguments: { sectionTemplateId: 'does-not-exist-xyz' },
+      },
+      doc,
+      doc.pages[0].id
+    );
+
+    expect(exec.status).toBe('FAILED');
+    expect(exec.verification.passed).toBe(false);
+  });
+
+  it('insert without templateId → FAILED (malformed args)', async () => {
+    const bridge = HacpBridge.getInstance();
+    const doc = createBuilderDocument({});
+    const exec = await bridge.executeToolCall(
+      { id: 'call-malformed', name: 'insert_section_from_library', arguments: {} },
+      doc,
+      doc.pages[0].id
+    );
+
+    expect(exec.status).toBe('FAILED');
+  });
+
+  it("insert_section with wrong pageId ('page-home' on API doc) → FAILED, never fake SUCCESS", async () => {
+    const bridge = HacpBridge.getInstance();
+    const doc = createBuilderDocument({});
+    expect(doc.pages[0].id).not.toBe('page-home');
+    const exec = await bridge.executeToolCall(
+      {
+        id: 'call-wrong-page',
+        name: 'insert_section',
+        arguments: { pageId: 'page-home', sectionType: 'hero', label: 'Hero' },
+      },
+      doc,
+      doc.pages[0].id
+    );
+
+    expect(exec.status).toBe('FAILED');
+    expect(exec.verification.passed).toBe(false);
+  });
+
+  it('insert_section_from_library returns createdNodeId existing in AFTER document', async () => {
+    const bridge = HacpBridge.getInstance();
+    const doc = createBuilderDocument({});
+    const pageId = doc.pages[0].id;
+    const exec = await bridge.executeToolCall(
+      {
+        id: 'call-lib',
+        name: 'insert_section_from_library',
+        arguments: { sectionTemplateId: 'testimonials-cards', pageId },
+      },
+      doc,
+      pageId
+    );
+
+    expect(exec.status).toBe('EXECUTED');
+    expect(exec.createdNodeId).toBeDefined();
+    const after = applyCommandToDocument(doc, exec.command!);
+    expect(findNode(after, exec.createdNodeId!)?.node).toBeDefined();
+  });
+});
+
+describe('NoFakeSuccess — autonomous generation (dentist path)', () => {
+  function dentistMiniPlan(): SitePlan {
+    return {
+      purpose: 'lead-generation',
+      industry: 'dentist',
+      visualDirection: 'friendly',
+      sections: [
+        {
+          id: 'plan-hero',
+          role: 'hero',
+          label: 'Hero dentysty',
+          templateType: 'hero',
+          content: { heading: 'Klinika dentystyczna', description: 'Zdrowe zęby' },
+          images: [],
+          styles: {},
+        },
+        {
+          id: 'plan-testimonials',
+          role: 'testimonials',
+          label: 'Opinie pacjentów',
+          templateType: 'testimonials',
+          content: { heading: 'Opinie' },
+          images: [],
+          styles: { backgroundColor: '#f5f5f5' },
+        },
+      ],
+      designSystem: {
+        primaryColor: '#0ea5e9',
+        secondaryColor: '#f0f9ff',
+        accentColor: '#0284c7',
+        backgroundColor: '#ffffff',
+        surfaceColor: '#f8fafc',
+        textColor: '#0f172a',
+        headingFont: 'Inter',
+        bodyFont: 'Inter',
+        borderRadius: '8px',
+      },
+      contentStrategy: {
+        toneOfVoice: 'friendly',
+        headlineStyle: 'direct',
+        contentDensity: 'lean',
+        language: 'pl',
+        useEmojis: false,
+        ctaStrategy: 'Umów wizytę',
+      },
+      assetStrategy: {
+        imageStyle: 'photography',
+        imageMood: 'calm',
+        iconStyle: 'outlined',
+        useVideo: false,
+      },
+      experienceStrategy: {
+        useParallax: false,
+        useScrollReveal: false,
+        useMotion: false,
+        useMeshGradient: false,
+        useParticles: false,
+        use3D: false,
+        intensity: 'none',
+      },
+      responsiveStrategy: {
+        mobileNavStyle: 'hamburger',
+        mobileHeroLayout: 'stacked',
+        mobileTypographyScale: 1,
+        tabletBreakpoint: 768,
+        mobileBreakpoint: 480,
+      },
+      conversionStrategy: {
+        primaryCTA: 'Umów wizytę',
+        primaryCTALocation: ['hero'],
+        trustSignals: ['Opinie'],
+        urgencyLevel: 'none',
+      },
+      pages: [{ id: 'p1', name: 'Home', purpose: 'main', sections: [] }],
+      metadata: {
+        title: 'Dentysta',
+        description: 'test',
+        language: 'pl',
+        generatedAt: new Date().toISOString(),
+        plannerType: 'deterministic',
+      },
+    };
+  }
+
+  it('generation on API-style doc (no page-home) inserts N sections with created IDs', async () => {
+    const bridge = HacpBridge.getInstance();
+    let doc = createBuilderDocument({});
+    const pageId = doc.pages[0].id;
+    expect(pageId).not.toBe('page-home');
+    const before = doc.pages[0].sections.length;
+    const createdIds: string[] = [];
+
+    const executeTool = async (call: HacpToolCall) => {
+      const exec = await bridge.executeToolCall(call, doc, pageId);
+      if (exec.command) {
+        doc = applyCommandToDocument(doc, exec.command);
+      }
+      if (exec.createdNodeId) createdIds.push(exec.createdNodeId);
+      return {
+        success: exec.verification.passed,
+        message: exec.message,
+        createdNodeId: exec.createdNodeId,
+      };
+    };
+
+    const orch = new SiteGenerationOrchestrator(
+      'Zbuduj stronę kliniki dentystycznej',
+      {
+        onPhaseChange: () => {},
+        onProgress: () => {},
+        onToolExecuted: () => {},
+        onError: () => {},
+      },
+      { toolDelayMs: 0, failFast: true }
+    );
+
+    const session = await orch.execute(dentistMiniPlan(), executeTool, doc);
+
+    expect(session.error).toBeUndefined();
+    expect(doc.pages[0].sections.length).toBe(before + 2);
+    // Both sections reported created IDs that exist in the AFTER document
+    expect(createdIds.length).toBeGreaterThanOrEqual(2);
+    for (const id of createdIds) {
+      expect(findNode(doc, id)?.node).toBeDefined();
+    }
+  });
+});

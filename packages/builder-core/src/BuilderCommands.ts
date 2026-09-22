@@ -97,6 +97,12 @@ export type BuilderCommand =
       readonly defaultProps: Record<string, unknown>;
       readonly atIndex?: number;
       readonly label?: string;
+      /**
+       * Pre-generated section ID (FORENSIC GATE v2.0). When present,
+       * applyCommandToDocument reuses it instead of generating a fresh ID,
+       * so HACP VERIFY-time and Builder dispatch-time agree on createdNodeId.
+       */
+      readonly sectionId?: string;
     }
   | {
       readonly type: 'ADD_CHILD_SECTION';
@@ -395,7 +401,8 @@ export function applyCommandToDocument(
           command.sectionType,
           command.defaultProps,
           command.atIndex,
-          command.label
+          command.label,
+          command.sectionId
         );
         return { ...page, sections };
       });

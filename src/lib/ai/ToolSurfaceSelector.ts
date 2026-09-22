@@ -214,6 +214,28 @@ export class ToolSurfaceSelector {
   }
 
   /**
+   * Check if a tool call can mutate BuilderDocument.
+   *
+   * Read-only tools (search_*, inspect_*, read_*, resolve_*, get_*,
+   * find_nodes, test_echo) never change the document: SEARCH ≠ INSERT.
+   * Only mutation tools may ground a SUCCESS status.
+   *
+   * FORENSIC GATE v1.0: search-only result must never be reported
+   * as EXECUTED/SUCCESS with an empty commandsToDispatch.
+   */
+  static isMutationTool(toolName: string): boolean {
+    if (toolName === 'undo' || toolName === 'redo') return true;
+    return /^(insert_|update_|set_|remove_|move_|delete_|batch_|configure_)/.test(toolName);
+  }
+
+  /**
+   * True when at least one tool call in the list can mutate the document.
+   */
+  static hasMutationToolCall(toolCalls: Array<{ name: string }>): boolean {
+    return toolCalls.some((tc) => ToolSurfaceSelector.isMutationTool(tc.name));
+  }
+
+  /**
    * Get all available intents and their tool counts.
    */
   static getSummary(): Array<{ intent: IntentCategory; toolCount: number; description: string }> {

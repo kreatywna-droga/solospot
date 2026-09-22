@@ -93,6 +93,19 @@ export class SiteGenerationOrchestrator {
     return { ...this.session };
   }
 
+  /**
+   * Resolve the real target page ID from the live document.
+   * FORENSIC GATE v2.0: the previous hardcoded 'page-home' literal matched
+   * no page on real store documents (API page IDs), so every ADD_SECTION
+   * verified 0 → 0, FAILED, and fail-fast aborted generation with zero
+   * visible mutations (classification D).
+   */
+  private resolvePageId(document: BuilderDocument): string {
+    const pages = document.pages || [];
+    const home = pages.find((p) => (p as { isHome?: boolean }).isHome);
+    return home?.id || pages[0]?.id || 'page-home';
+  }
+
   abort(): void {
     this.abortController?.abort();
   }
@@ -119,7 +132,7 @@ export class SiteGenerationOrchestrator {
       }
 
       // Phase 2: Sections
-      await this.executeSections(plan.sections, executeTool, document, plan.assetStrategy);
+      await this.executeSections(plan.sections, executeTool, this.resolvePageId(document), plan.assetStrategy);
 
       if (this.abortController.signal.aborted) {
         this.session.error = 'Generation aborted by user.';
@@ -190,7 +203,7 @@ export class SiteGenerationOrchestrator {
   private async executeSections(
     sections: SectionPlan[],
     executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string; createdNodeId?: string }>,
-    document: BuilderDocument,
+    pageId: string,
     assetStrategy?: { heroImageQuery?: string }
   ): Promise<void> {
     this.setPhase('sections', `Generowanie ${sections.length} sekcji...`);
@@ -207,7 +220,7 @@ export class SiteGenerationOrchestrator {
 
       // Pass hero image query for hero sections
       const assetQuery = section.role === 'hero' ? assetStrategy?.heroImageQuery : undefined;
-      await this.executeSection(section, i, executeTool, assetQuery);
+      await this.executeSection(section, i, executeTool, pageId, assetQuery);
     }
   }
 
@@ -215,6 +228,7 @@ export class SiteGenerationOrchestrator {
     section: SectionPlan,
     index: number,
     executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string; createdNodeId?: string }>,
+    pageId: string,
     assetQuery?: string
   ): Promise<void> {
     const templateType = SECTION_TEMPLATES[section.role] || section.templateType;
@@ -227,7 +241,7 @@ export class SiteGenerationOrchestrator {
       id: this.toolId(),
       name: 'insert_section',
       arguments: {
-        pageId: 'page-home',
+        pageId,
         sectionType: templateType,
         atIndex: index,
         label: section.label,
@@ -246,15 +260,20 @@ export class SiteGenerationOrchestrator {
     const insertResult = await this.execTool(insertCall, executeTool);
     if (!insertResult) return;
 
+    // Phase 18 node ID integrity: follow-up calls must target the ACTUAL
+    // created section ID, never the LLM-plan ID (the bridge generates IDs).
+    const actualSectionId = insertResult.createdNodeId || section.id;
+    if (insertResult.createdNodeId) {
+      this.nodeIdMap.set(section.id, insertResult.createdNodeId);
+    }
+
     // Step 2: Apply styles if any
     if (section.styles && Object.keys(section.styles).length > 0) {
-      // We need to get the section ID from the document after insertion
-      // For now, use the section plan ID as reference
       const styleCall: HacpToolCall = {
         id: this.toolId(),
         name: 'set_node_styles',
         arguments: {
-          nodeId: section.id,
+          nodeId: actualSectionId,
           styles: section.styles,
         },
       };
@@ -267,8 +286,8 @@ export class SiteGenerationOrchestrator {
         id: this.toolId(),
         name: 'configure_experience',
         arguments: {
-          pageId: 'page-home',
-          sectionId: section.id,
+          pageId,
+          sectionId: actualSectionId,
           experienceConfig: section.experienceConfig,
         },
       };
@@ -277,7 +296,7 @@ export class SiteGenerationOrchestrator {
 
     // Step 4: Insert child nodes if any
     if (section.nodes && section.nodes.length > 0) {
-      await this.executeNodes(section.id, section.nodes, executeTool);
+      await this.executeNodes(actualSectionId, section.nodes, executeTool);
     }
   }
 
@@ -332,14 +351,15 @@ export class SiteGenerationOrchestrator {
     this.session.progress = 85;
 
     // Apply experience config to hero section if it exists
+    const pageId = this.resolvePageId(document);
     const heroSection = plan.sections.find((s) => s.role === 'hero');
     if (heroSection && exp.useMeshGradient) {
       const expCall: HacpToolCall = {
         id: this.toolId(),
         name: 'configure_experience',
         arguments: {
-          pageId: 'page-home',
-          sectionId: heroSection.id,
+          pageId,
+          sectionId: this.nodeIdMap.get(heroSection.id) || heroSection.id,
           experienceConfig: {
             background: {
               type: 'mesh-gradient',
@@ -359,8 +379,8 @@ export class SiteGenerationOrchestrator {
           id: this.toolId(),
           name: 'configure_experience',
           arguments: {
-            pageId: 'page-home',
-            sectionId: section.id,
+            pageId,
+            sectionId: this.nodeIdMap.get(section.id) || section.id,
             experienceConfig: {
               motion: {
                 type: 'reveal',
@@ -395,7 +415,7 @@ export class SiteGenerationOrchestrator {
         id: this.toolId(),
         name: 'set_node_styles',
         arguments: {
-          nodeId: heroSection.id,
+          nodeId: this.nodeIdMap.get(heroSection.id) || heroSection.id,
           styles: {
             responsive: {
               mobile: {
@@ -431,7 +451,7 @@ export class SiteGenerationOrchestrator {
           id: this.toolId(),
           name: 'set_node_styles',
           arguments: {
-            nodeId: section.id,
+            nodeId: this.nodeIdMap.get(section.id) || section.id,
             styles: {
               responsive: {
                 ...(Object.keys(mobileStyles).length > 0 ? { mobile: mobileStyles } : {}),

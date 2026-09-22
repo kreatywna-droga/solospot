@@ -88,7 +88,8 @@ export interface SectionTreeOps {
     type: string,
     defaultProps: Record<string, unknown>,
     atIndex?: number,
-    label?: string
+    label?: string,
+    explicitId?: string
   ): { sections: SectionNode[]; newId: string };
 
   /**
@@ -176,8 +177,11 @@ function deepCloneWithNewIds(node: SectionNode): SectionNode {
 }
 
 export const sectionTree: SectionTreeOps = {
-  insertSection(sections, type, defaultProps, atIndex, label) {
-    const newId = generateId(type);
+  insertSection(sections, type, defaultProps, atIndex, label, explicitId?) {
+    // FORENSIC GATE v2.0: when the caller supplies an ID (HACP pre-generates
+    // it during VERIFY), reuse it so verify-time and dispatch-time agree on
+    // the created node ID. Otherwise generate a fresh one (legacy behavior).
+    const newId = explicitId || generateId(type);
     const newNode: SectionNode = {
       id: newId,
       type,

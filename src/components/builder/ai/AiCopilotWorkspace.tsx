@@ -88,8 +88,18 @@ export function AiCopilotWorkspace() {
   const executeToolCallForGeneration = useCallback(async (call: any) => {
     const currentDoc = builderDocRef.current
     const result = await bridge.executeToolCall(call, currentDoc, currentDoc.pages[0]?.id || 'page-home')
-    dispatch(result.command!)
-    return { success: result.verification.passed, message: result.message }
+    // FORENSIC GATE v2.0: never dispatch an absent command (read-only tools
+    // like inspect_document_summary produce no command — dispatch(undefined)
+    // would corrupt the dispatch pipeline). Forward createdNodeId so the
+    // generation orchestrator can target follow-up calls at real node IDs.
+    if (result.command) {
+      dispatch(result.command)
+    }
+    return {
+      success: result.verification.passed,
+      message: result.message,
+      createdNodeId: (result as any).createdNodeId,
+    }
   }, [bridge, dispatch])
 
   const { state: genState, startGeneration, abortGeneration } = useAutonomousGeneration(
