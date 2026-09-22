@@ -51,10 +51,12 @@ export function AiCopilotWorkspace() {
   const [lastUserPrompt, setLastUserPrompt] = useState<string>('')
   const [attachedFiles, setAttachedFiles] = useState<ChatMessageAttachment[]>([])
   const [attachMenuOpen, setAttachMenuOpen] = useState(false)
+  const [quickMenuOpen, setQuickMenuOpen] = useState(false)
   const [fileAccept, setFileAccept] = useState('image/*,.pdf,.doc,.docx,.txt,.md,.json,.csv')
   const abortControllerRef = useRef<AbortController | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const attachMenuRef = useRef<HTMLDivElement>(null)
+  const quickMenuRef = useRef<HTMLDivElement>(null)
   const [activityEvents, setActivityEvents] = useState<HacpActivityEvent[]>([])
   const [conversationContext, setConversationContext] = useState<HacpConversationContext>({
     history: [],
@@ -183,6 +185,18 @@ export function AiCopilotWorkspace() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [attachMenuOpen])
+
+  // Close quick actions menu when clicking outside
+  useEffect(() => {
+    if (!quickMenuOpen) return
+    const handleClickOutside = (e: MouseEvent) => {
+      if (quickMenuRef.current && !quickMenuRef.current.contains(e.target as Node)) {
+        setQuickMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [quickMenuOpen])
 
   // Handle autonomous generation completion
   useEffect(() => {
@@ -377,6 +391,42 @@ export function AiCopilotWorkspace() {
       'Zmień tło Hero na czarne.',
       'Nadaj tej sekcji bardziej premium charakter. Użyj złotego gradientu i delikatnej reakcji na kursor.',
       'Chciałbym, żeby prowadnice w Builderze były bardziej podobne do Wix.',
+    ]
+  }, [])
+
+  const quickActions = useMemo(() => {
+    return [
+      {
+        icon: Sparkles,
+        label: 'Złoty Gradient & Kursor',
+        prompt: 'Nadaj tej sekcji bardziej premium charakter. Użyj złotego gradientu i delikatnej reakcji na kursor.',
+      },
+      {
+        icon: Eye,
+        label: 'Analiza Strony',
+        prompt: 'Przeanalizuj aktualną stronę i powiedz mi, jakie sekcje się na niej znajdują.',
+      },
+      {
+        icon: Zap,
+        label: 'Dodaj Hero',
+        prompt: 'Stwórz nowoczesny Hero Banner z wbudowanym gradientem SoloSpot Gold.',
+      },
+      {
+        icon: Shield,
+        label: 'Zrób Audyt',
+        prompt: 'Zrób audyt.',
+      },
+      {
+        icon: Cpu,
+        label: 'Prowadnice Wix (Platform)',
+        prompt: 'Chciałbym, żeby prowadnice w Builderze były bardziej podobne do Wix.',
+      },
+      {
+        icon: Wand2,
+        label: 'Generuj Stronę',
+        prompt: 'Stwórz stronę internetową dla szkoły językowej',
+        primary: true,
+      },
     ]
   }, [])
 
@@ -690,7 +740,7 @@ export function AiCopilotWorkspace() {
           {/* AI Provider Status */}
           <button
             onClick={() => setShowStatusModal(true)}
-            className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-mono font-semibold border transition-all cursor-pointer ${
+            className={`hidden flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-mono font-semibold border transition-all cursor-pointer ${
               isExecuting && currentPhase === 'REQUESTING_MODEL'
                 ? 'bg-amber-500/15 border-amber-500/40 text-amber-300 animate-pulse'
                 : aiProviderStatus === 'ONLINE'
@@ -720,7 +770,7 @@ export function AiCopilotWorkspace() {
           {/* HACP Status */}
           <button
             onClick={() => setShowStatusModal(true)}
-            className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-mono font-semibold bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/20 transition-all cursor-pointer"
+            className="hidden flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-mono font-semibold bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/20 transition-all cursor-pointer"
             title="Kliknij, aby otworzyć stan połączenia HACP"
           >
             <span
@@ -738,7 +788,7 @@ export function AiCopilotWorkspace() {
           </button>
 
           {/* Execution Status */}
-          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono font-semibold bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+          <div className="hidden flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono font-semibold bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
             <span className={`w-1.5 h-1.5 rounded-full ${isExecuting ? 'bg-cyan-400 animate-pulse' : 'bg-cyan-400'}`} />
             <span>{isExecuting ? 'EXEC: RUNNING' : 'EXEC: READY'}</span>
           </div>
@@ -1008,7 +1058,7 @@ export function AiCopilotWorkspace() {
       </div>
 
       {/* ── 5. QUICK ACTIONS ROW ───────────────────────────────────────────── */}
-      <div className="px-3 py-1.5 bg-[#0A0E15] border-t border-white/[0.06] flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-shrink-0">
+      <div className="hidden px-3 py-1.5 bg-[#0A0E15] border-t border-white/[0.06] flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-shrink-0">
         <button
           onClick={() =>
             handleSendMessage(
@@ -1074,6 +1124,41 @@ export function AiCopilotWorkspace() {
 
       {/* ── 6. INPUT AREA ──────────────────────────────────────────────────── */}
       <div className="p-3 bg-[#202024] border-t border-white/[0.08] flex-shrink-0">
+        <div ref={quickMenuRef} className="relative mb-2">
+          <button
+            onClick={() => setQuickMenuOpen((v) => !v)}
+            disabled={isExecuting}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-medium bg-white/[0.05] border border-white/10 text-zinc-300 hover:text-white hover:bg-white/[0.10] transition-colors disabled:opacity-40"
+          >
+            <Zap className="w-3 h-3 text-[#D9A86C]" />
+            <span>Szybkie akcje</span>
+            <ChevronDown className={`w-3 h-3 transition-transform ${quickMenuOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {quickMenuOpen && (
+            <div className="absolute bottom-full left-0 mb-2 z-50 min-w-[220px] bg-[#202024] border border-white/15 rounded-xl shadow-2xl p-1.5 flex flex-col gap-0.5">
+              {quickActions.map((action) => (
+                <button
+                  key={action.label}
+                  onClick={() => {
+                    handleSendMessage(action.prompt)
+                    setQuickMenuOpen(false)
+                  }}
+                  disabled={isExecuting}
+                  className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[10px] text-left transition-colors disabled:opacity-40 ${
+                    action.primary
+                      ? 'bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#18181B] font-bold hover:shadow-md'
+                      : 'text-zinc-300 hover:bg-white/[0.06] hover:text-white'
+                  }`}
+                >
+                  <action.icon className={`w-3.5 h-3.5 ${action.primary ? 'text-[#18181B]' : 'text-[#D9A86C]'}`} />
+                  <span>{action.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div ref={pickerRef} className="relative">
           {/* Model picker popup — anchored above the input */}
           {isPickerOpen && (
