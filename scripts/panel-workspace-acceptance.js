@@ -90,11 +90,9 @@ function SNAPSHOT_FN() {
 
   // Inspector (right panel) — the <aside> using border-l (the left sidebar uses border-r)
   const asides = Array.from(document.querySelectorAll('aside'));
-  const aside =
-    asides.find((a) => (a.className || '').includes('border-l')) ||
-    (asides.length ? asides[asides.length - 1] : null);
+  const aside = asides.find((a) => (a.className || '').includes('border-l')) || null;
   const inspRoot = aside ? aside.firstElementChild : null;
-  const inspector = inspRoot
+  const inspector = aside && inspRoot
     ? { present: true, rect: R(aside.getBoundingClientRect()), rootBg: bg(inspRoot), headerBg: bg(inspRoot.firstElementChild) }
     : { present: false, rect: null, rootBg: null, headerBg: null };
 
@@ -313,6 +311,23 @@ async function main() {
       const maxH = parseFloat(p.maxHeightStyle || '0');
       check('FIX 2: maxHeight capped to workspace height', maxH > 0 && maxH <= snap.ws.height - MARGIN * 2 + 1, `maxHeight=${maxH} wsHeight=${snap.ws.height}`);
       check('FIX 2: panel body scrolls internally', p.bodyOverflowY === 'auto', `overflow-y=${p.bodyOverflowY}`);
+
+      // Regression guard: a transformed ancestor (canvas zoom wrapper) turns into the
+      // containing block for position:fixed and skews the panel by the canvas offset.
+      const geo = await page.evaluate(() => {
+        const el = Array.from(document.querySelectorAll('div')).find((d) => {
+          const cs = getComputedStyle(d);
+          return cs.position === 'fixed' && cs.zIndex === '9999';
+        });
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        return {
+          styleLeft: parseFloat(el.style.left), styleTop: parseFloat(el.style.top),
+          rectLeft: r.left, rectTop: r.top,
+          offsetParent: el.offsetParent ? el.offsetParent.tagName : null,
+        };
+      });
+      check('FIX 2: panel is viewport-anchored (no transformed containing block)', Boolean(geo) && near(geo.rectLeft, geo.styleLeft, 1.5) && near(geo.rectTop, geo.styleTop, 1.5), geo ? `style=(${geo.styleLeft},${geo.styleTop}) rect=(${geo.rectLeft},${geo.rectTop}) offsetParent=${geo.offsetParent}` : 'panel not found');
       check('all panel parameters remain accessible', p.controlCount > 0, `controls=${p.controlCount}`);
 
       // PHASE 19 TEST 4 — panel must not cover the bottom actions

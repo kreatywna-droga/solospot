@@ -20,6 +20,7 @@
  */
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   X, ChevronDown, Settings,
@@ -669,6 +670,22 @@ export function ContextualSettingsPanel({
   // Position
   const position = usePanelPosition(elementRect, !!sectionId)
 
+  /**
+   * Portal mount point.
+   *
+   * The panel is rendered through a portal into the Builder workspace instead of
+   * inline in the canvas overlay: an ancestor inside the canvas carries a
+   * `transform` (the zoom/pan wrapper), and a `transform` makes that ancestor the
+   * containing block for `position: fixed`. Without the portal, `left`/`top` in
+   * viewport coordinates are resolved against the offset canvas wrapper and the
+   * panel lands outside the workspace. Portaling keeps `position: fixed`
+   * viewport-relative, so the clamped coordinates hold.
+   */
+  const [mountEl, setMountEl] = useState<HTMLElement | null>(null)
+  useEffect(() => {
+    setMountEl(document.querySelector<HTMLElement>('[data-builder-workspace]') ?? document.body)
+  }, [])
+
   // Find the node
   const found = useMemo(() => findNode(builderDoc, sectionId), [builderDoc, sectionId])
   const node = found?.node
@@ -758,7 +775,9 @@ export function ContextualSettingsPanel({
     }
   }
 
-  return (
+  if (!mountEl) return null
+
+  return createPortal(
     <AnimatePresence>
       {sectionId && (
         <motion.div
@@ -804,6 +823,7 @@ export function ContextualSettingsPanel({
           </div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    mountEl
   )
 }
