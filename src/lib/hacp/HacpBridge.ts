@@ -106,6 +106,8 @@ export class HacpBridge {
       { id: 'analyze_page', name: 'Analiza struktury strony', category: 'READ', description: 'Ewaluacja struktury i hierarchii', available: true },
       { id: 'inspect_page_structure', name: 'Analiza struktury strony', category: 'READ', description: 'Hierarchia sekcji w dokumencie', available: true },
       { id: 'insert_section', name: 'Wstawianie nowej sekcji', category: 'BUILD', description: 'Dodawanie sekcji do drzewa strony', available: true },
+      { id: 'insert_section_from_library', name: 'Wstawianie sekcji z biblioteki', category: 'BUILD', description: 'Wstawianie konkretnej sekcji z biblioteki szablonów', available: true },
+      { id: 'insert_experience_from_library', name: 'Wstawianie Experience z biblioteki', category: 'BUILD', description: 'Wstawianie Experience z katalogu 270+ efektów', available: true },
       { id: 'update_props', name: 'Aktualizacja właściwości', category: 'EDIT', description: 'Modyfikacja propsów węzła', available: true },
       { id: 'update_node_props', name: 'Aktualizacja właściwości', category: 'EDIT', description: 'Zmiana nagłówka, kolorów, CTA', available: true },
       { id: 'move_element', name: 'Przesunięcie elementu', category: 'EDIT', description: 'Zmiana pozycji sekcji', available: true },
@@ -540,6 +542,156 @@ export class HacpBridge {
         verification: { passed: true, operation: name, target: 'section-library' },
         message: JSON.stringify({ count: results.length, sections: results }, null, 2),
       };
+    }
+
+    if (name === 'insert_section_from_library') {
+      const sectionTemplateId = args.sectionTemplateId as string;
+      if (!sectionTemplateId) {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: 'none' },
+          message: 'insert_section_from_library wymaga parametru sectionTemplateId (ID szablonu z biblioteki).',
+        };
+      }
+
+      try {
+        const { ALL_SECTION_TEMPLATES } = await import('../../components/builder/library/sections');
+        const template = ALL_SECTION_TEMPLATES?.find((t: any) => t.id === sectionTemplateId);
+
+        if (!template) {
+          return {
+            status: 'FAILED',
+            verification: { passed: false, operation: name, target: sectionTemplateId },
+            message: `Nie znaleziono szablonu sekcji o ID "${sectionTemplateId}" w bibliotece. Użyj search_sections aby znaleźć dostępne szablony.`,
+          };
+        }
+
+        const sectionNode = template.createNode();
+        const targetPageId = (args.pageId as string) || activePageId;
+        const atIndex = typeof args.atIndex === 'number' ? args.atIndex : undefined;
+
+        const cmd: BuilderCommand = {
+          type: 'ADD_SECTION',
+          pageId: targetPageId,
+          sectionType: template.category || 'content',
+          defaultProps: sectionNode.props || {},
+          atIndex,
+          label: (args.label as string) || template.name || `Library: ${sectionTemplateId}`,
+        };
+
+        const result = this.verifyCommandExecution(cmd, document, { targetId: targetPageId });
+
+        if (result.verification.passed) {
+          const insertedPage = result.nextDoc.pages.find((p) => p.id === targetPageId) || result.nextDoc.pages[0];
+          const insertedSection = insertedPage?.sections?.[atIndex ?? insertedPage.sections.length - 1];
+
+          return {
+            command: cmd,
+            verification: result.verification,
+            status: 'EXECUTED',
+            message: `Wstawiłem sekcję **${template.name}** (${template.category}) z biblioteki do strony.`,
+            appliedChange: {
+              target: targetPageId,
+              property: 'sections',
+              summary: `Wstawiono z biblioteki: ${template.name} (${sectionTemplateId})`,
+            },
+          };
+        }
+
+        return {
+          command: cmd,
+          verification: result.verification,
+          status: 'FAILED',
+          message: `Nie udało się wstawić sekcji "${sectionTemplateId}" z biblioteki: weryfikacja nie powiodła się.`,
+        };
+      } catch (err: any) {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: sectionTemplateId },
+          message: `Błąd podczas wstawiania sekcji z biblioteki: ${err?.message || 'Nieznany błąd'}`,
+        };
+      }
+    }
+
+    if (name === 'insert_experience_from_library') {
+      const experienceId = args.experienceId as string;
+      if (!experienceId) {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: 'none' },
+          message: 'insert_experience_from_library wymaga parametru experienceId (ID Experience z biblioteki).',
+        };
+      }
+
+      try {
+        const { getExperienceById } = await import('../experience/ExperienceCatalog');
+        const experience = getExperienceById(experienceId);
+
+        if (!experience) {
+          return {
+            status: 'FAILED',
+            verification: { passed: false, operation: name, target: experienceId },
+            message: `Nie znaleziono Experience o ID "${experienceId}" w katalogu. Użyj search_experiences aby znaleźć dostępne Experience.`,
+          };
+        }
+
+        const sectionId = (args.sectionId as string) || activePage?.sections[0]?.id || '';
+        if (!sectionId) {
+          return {
+            status: 'FAILED',
+            verification: { passed: false, operation: name, target: experienceId },
+            message: 'Nie określono sekcji docelowej. Zaznacz sekcję na Canvasie lub podaj sectionId.',
+          };
+        }
+
+        const experienceConfig = (args.configuration as Record<string, unknown>) || {
+          background: experience.runtimeConfig?.background || { type: 'mesh-gradient', colors: ['#D9A86C', '#F2C27F', '#1A1813', '#080B10'] },
+          motion: experience.runtimeConfig?.motion || { type: 'float', speed: 0.85 },
+        };
+
+        const cmd: BuilderCommand = {
+          type: 'UPDATE_PROPS',
+          pageId: (args.pageId as string) || activePageId,
+          sectionId,
+          props: {
+            experienceConfig,
+            experienceId: experience.id,
+            experienceName: experience.name,
+          },
+        };
+
+        const result = this.verifyCommandExecution(cmd, document, {
+          targetId: sectionId,
+          property: 'experienceConfig',
+        });
+
+        if (result.verification.passed) {
+          return {
+            command: cmd,
+            verification: result.verification,
+            status: 'EXECUTED',
+            message: `Zastosowałem Experience **${experience.name}** (${experience.category}) na sekcji \`${sectionId}\`.`,
+            appliedChange: {
+              target: sectionId,
+              property: 'experienceConfig',
+              summary: `Zastosowano Experience: ${experience.name} (${experienceId})`,
+            },
+          };
+        }
+
+        return {
+          command: cmd,
+          verification: result.verification,
+          status: 'FAILED',
+          message: `Nie udało się zastosować Experience "${experienceId}" na sekcji \`${sectionId}\`.`,
+        };
+      } catch (err: any) {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: experienceId },
+          message: `Błąd podczas wstawiania Experience z biblioteki: ${err?.message || 'Nieznany błąd'}`,
+        };
+      }
     }
 
     if (name === 'search_website_templates') {
@@ -1086,6 +1238,15 @@ export class HacpBridge {
     if (aiProviderResponse && aiProviderResponse.status === 'SUCCESS') {
       const toolCalls: HacpToolCall[] = aiProviderResponse.toolCalls || [];
 
+      console.log('[HacpBridge] EXECUTION_TRACE:', {
+        phase: 'TOOL_CALLS_RECEIVED',
+        toolCallCount: toolCalls.length,
+        toolNames: toolCalls.map((tc) => tc.name),
+        toolArgs: toolCalls.map((tc) => ({ name: tc.name, args: tc.arguments })),
+        aiMessage: aiProviderResponse.message?.substring(0, 100),
+        timestamp: new Date().toISOString(),
+      });
+
       if (toolCalls.length > 0) {
         this.status = 'BUSY';
         onProgress?.('EXECUTING_TOOL');
@@ -1097,6 +1258,13 @@ export class HacpBridge {
         let finalMessage = '';
 
         for (const tc of toolCalls) {
+          console.log('[HacpBridge] EXECUTION_TRACE:', {
+            phase: 'EXECUTING_TOOL',
+            toolName: tc.name,
+            toolArgs: tc.arguments,
+            timestamp: new Date().toISOString(),
+          });
+
           steps.push({
             id: `step-${tc.name}-${Date.now()}`,
             name: `AI Tool Call: ${tc.name}`,
@@ -1107,6 +1275,16 @@ export class HacpBridge {
 
           const exec = await this.executeToolCall(tc, document, activePageId);
           lastVerification = exec.verification;
+
+          console.log('[HacpBridge] EXECUTION_TRACE:', {
+            phase: 'TOOL_RESULT',
+            toolName: tc.name,
+            status: exec.status,
+            verificationPassed: exec.verification.passed,
+            hasCommand: Boolean(exec.command),
+            message: exec.message?.substring(0, 100),
+            timestamp: new Date().toISOString(),
+          });
 
           if (exec.command) {
             commands.push(exec.command);

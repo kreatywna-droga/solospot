@@ -50,6 +50,17 @@ const ADVERTISED_TOOLS = [
   'batch_execute',
   'undo',
   'redo',
+  // Library Intelligence
+  'search_experiences',
+  'get_experience_categories',
+  'search_sections',
+  'search_website_templates',
+  'get_typography_presets',
+  'get_design_presets',
+  'resolve_target',
+  // Library Insertion
+  'insert_section_from_library',
+  'insert_experience_from_library',
 ];
 
 // Tools that have handlers in HacpBridge (verified by code review)
@@ -89,6 +100,17 @@ const HACP_HANDLER_TOOLS = [
   'redo',
   // Diagnostic
   'test_echo',
+  // Library Intelligence
+  'search_experiences',
+  'get_experience_categories',
+  'search_sections',
+  'search_website_templates',
+  'get_typography_presets',
+  'get_design_presets',
+  'resolve_target',
+  // Library Insertion
+  'insert_section_from_library',
+  'insert_experience_from_library',
 ];
 
 // ─── TEST SUITE ────────────────────────────────────────────────────

@@ -15,6 +15,8 @@
 
 import type { ExperienceItem, ExperienceType, ExperienceMood, ExperienceMotionLevel } from '../experience/ExperienceTypes';
 import { searchExperiences, getExperienceById, BUILTIN_EXPERIENCES, getUserExperiences } from '../experience/ExperienceCatalog';
+import { ALL_SECTION_TEMPLATES } from '../../components/builder/library/sections';
+import { WEBSITE_TEMPLATES } from '../../components/builder/templates/WebsiteTemplatesData';
 
 // ── Experience Search & Inspection ──────────────────────────────────
 
@@ -169,9 +171,6 @@ export function searchSectionLibrary(options: {
   category?: string;
   limit?: number;
 }): SectionSearchResult[] {
-  // Import section templates dynamically
-  const { ALL_SECTION_TEMPLATES } = require('../../components/builder/library/sections');
-
   let results = ALL_SECTION_TEMPLATES || [];
 
   if (options.query) {
@@ -200,7 +199,6 @@ export function searchSectionLibrary(options: {
 }
 
 export function getSectionCategories(): Array<{ category: string; count: number }> {
-  const { ALL_SECTION_TEMPLATES } = require('../../components/builder/library/sections');
   const categories = new Map<string, number>();
   for (const s of ALL_SECTION_TEMPLATES || []) {
     categories.set(s.category, (categories.get(s.category) || 0) + 1);
@@ -226,8 +224,6 @@ export function searchWebsiteTemplates(options: {
   industry?: string;
   limit?: number;
 }): WebsiteTemplateResult[] {
-  const { WEBSITE_TEMPLATES } = require('../../components/builder/templates/WebsiteTemplatesData');
-
   let results = WEBSITE_TEMPLATES || [];
 
   if (options.query) {

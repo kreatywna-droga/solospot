@@ -244,4 +244,164 @@ describe('Real AI Provider & HACP Tool Calling Verification', () => {
     expect(redoRes.status).toBe('EXECUTED');
     expect(redoRes.shouldTriggerRedo).toBe(true);
   });
+
+  // --------------------------------------------------------------------------
+  // 10. Library Insertion: search_sections returns real results
+  // --------------------------------------------------------------------------
+  it('T10 — search_sections returns real template results from library', async () => {
+    const toolCall: HacpToolCall = {
+      id: 'tc-search',
+      name: 'search_sections',
+      arguments: { query: 'testimonials', limit: 5 },
+    };
+
+    const result = await bridge.executeToolCall(toolCall, mockDoc, mockDoc.pages[0].id);
+
+    expect(result.status).toBe('EXECUTED');
+    expect(result.verification.passed).toBe(true);
+
+    const parsed = JSON.parse(result.message);
+    expect(parsed.count).toBeGreaterThan(0);
+    expect(parsed.sections).toBeDefined();
+    expect(parsed.sections.length).toBeGreaterThan(0);
+
+    // Verify results have required fields
+    const first = parsed.sections[0];
+    expect(first.id).toBeDefined();
+    expect(first.name).toBeDefined();
+    expect(first.category).toBeDefined();
+  });
+
+  // --------------------------------------------------------------------------
+  // 11. Library Insertion: insert_section_from_library with valid template
+  // --------------------------------------------------------------------------
+  it('T11 — insert_section_from_library resolves template and adds section to document', async () => {
+    const initialCount = mockDoc.pages[0].sections.length;
+
+    const toolCall: HacpToolCall = {
+      id: 'tc-insert-lib',
+      name: 'insert_section_from_library',
+      arguments: {
+        sectionTemplateId: 'testimonials-cards',
+        pageId: mockDoc.pages[0].id,
+      },
+    };
+
+    const result = await bridge.executeToolCall(toolCall, mockDoc, mockDoc.pages[0].id);
+
+    expect(result.status).toBe('EXECUTED');
+    expect(result.verification.passed).toBe(true);
+    expect(result.command?.type).toBe('ADD_SECTION');
+    expect(result.message).toContain('testimonials');
+
+    // Verify document actually changed (section count increased)
+    const { applyCommandToDocument } = await import('../../../../packages/builder-core/src');
+    const nextDoc = applyCommandToDocument(mockDoc, result.command!);
+    expect(nextDoc.pages[0].sections.length).toBe(initialCount + 1);
+  });
+
+  // --------------------------------------------------------------------------
+  // 12. Library Insertion: insert_section_from_library with INVALID template → FAILED
+  // --------------------------------------------------------------------------
+  it('T12 — insert_section_from_library with invalid template ID yields FAILED', async () => {
+    const toolCall: HacpToolCall = {
+      id: 'tc-insert-invalid',
+      name: 'insert_section_from_library',
+      arguments: {
+        sectionTemplateId: 'nonexistent-template-999',
+        pageId: mockDoc.pages[0].id,
+      },
+    };
+
+    const result = await bridge.executeToolCall(toolCall, mockDoc, mockDoc.pages[0].id);
+
+    expect(result.status).toBe('FAILED');
+    expect(result.verification.passed).toBe(false);
+    expect(result.message).toContain('Nie znaleziono');
+  });
+
+  // --------------------------------------------------------------------------
+  // 13. Library Insertion: insert_section_from_library without templateId → FAILED
+  // --------------------------------------------------------------------------
+  it('T13 — insert_section_from_library without sectionTemplateId yields FAILED', async () => {
+    const toolCall: HacpToolCall = {
+      id: 'tc-insert-notemplate',
+      name: 'insert_section_from_library',
+      arguments: {
+        pageId: mockDoc.pages[0].id,
+      },
+    };
+
+    const result = await bridge.executeToolCall(toolCall, mockDoc, mockDoc.pages[0].id);
+
+    expect(result.status).toBe('FAILED');
+    expect(result.verification.passed).toBe(false);
+    expect(result.message).toContain('wymaga parametru sectionTemplateId');
+  });
+
+  // --------------------------------------------------------------------------
+  // 14. Multi-step: search → insert → verify document changed
+  // --------------------------------------------------------------------------
+  it('T14 — multi-step: search_sections then insert_section_from_library changes document', async () => {
+    // Step 1: Search
+    const searchCall: HacpToolCall = {
+      id: 'tc-search-14',
+      name: 'search_sections',
+      arguments: { query: 'testimonials' },
+    };
+    const searchResult = await bridge.executeToolCall(searchCall, mockDoc, mockDoc.pages[0].id);
+    expect(searchResult.status).toBe('EXECUTED');
+
+    // Parse search results to get a real template ID
+    const searchData = JSON.parse(searchResult.message);
+    const templateId = searchData.sections[0]?.id;
+    expect(templateId).toBeDefined();
+
+    // Step 2: Insert using the found template ID
+    const initialCount = mockDoc.pages[0].sections.length;
+    const insertCall: HacpToolCall = {
+      id: 'tc-insert-14',
+      name: 'insert_section_from_library',
+      arguments: {
+        sectionTemplateId: templateId,
+        pageId: mockDoc.pages[0].id,
+      },
+    };
+    const insertResult = await bridge.executeToolCall(insertCall, mockDoc, mockDoc.pages[0].id);
+    expect(insertResult.status).toBe('EXECUTED');
+    expect(insertResult.verification.passed).toBe(true);
+
+    // Step 3: Verify document changed
+    const { applyCommandToDocument } = await import('../../../../packages/builder-core/src');
+    const nextDoc = applyCommandToDocument(mockDoc, insertResult.command!);
+    expect(nextDoc.pages[0].sections.length).toBe(initialCount + 1);
+  });
+
+  // --------------------------------------------------------------------------
+  // 15. No Fake Fallback: unsupported library tool yields UNSUPPORTED
+  // --------------------------------------------------------------------------
+  it('T15 — unsupported tool yields UNSUPPORTED, never fake success', async () => {
+    const toolCall: HacpToolCall = {
+      id: 'tc-fake',
+      name: 'deploy_to_production',
+      arguments: {},
+    };
+
+    const result = await bridge.executeToolCall(toolCall, mockDoc, mockDoc.pages[0].id);
+
+    expect(result.status).toBe('UNSUPPORTED');
+    expect(result.verification.passed).toBe(false);
+    expect(result.message).toContain('nie jest obecnie obsługiwane');
+  });
+
+  // --------------------------------------------------------------------------
+  // 16. Tool Definitions: all new library tools are defined
+  // --------------------------------------------------------------------------
+  it('T16 — insert_section_from_library and insert_experience_from_library are defined', () => {
+    const names = BUILDER_TOOL_DEFINITIONS.map((t) => t.name);
+    expect(names).toContain('insert_section_from_library');
+    expect(names).toContain('insert_experience_from_library');
+    expect(names).toContain('search_sections');
+    expect(names).toContain('search_experiences');
+  });
 });

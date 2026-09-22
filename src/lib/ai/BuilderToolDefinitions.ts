@@ -489,6 +489,63 @@ export const BUILDER_TOOL_DEFINITIONS: HacpToolDefinition[] = [
   },
 
   // =====================================================================
+  // LIBRARY INSERTION TOOLS — Real insertion from Section/Experience Library
+  // =====================================================================
+
+  {
+    name: 'insert_section_from_library',
+    description: 'Wstaw konkretną sekcję z biblioteki (odkrytą przez search_sections) do dokumentu. Użyj ID sekcji zwróconego przez search_sections. Tworzy REALNĄ sekcję z pełną zawartością (node tree) z biblioteki.',
+    parameters: {
+      type: 'object',
+      properties: {
+        sectionTemplateId: {
+          type: 'string',
+          description: 'ID szablonu sekcji z biblioteki (zwrócone przez search_sections, np. "hero-centered", "features-3-cards", "testimonials-grid").',
+        },
+        pageId: {
+          type: 'string',
+          description: 'ID strony docelowej. Jeśli pominięte, wstawia na stronę główną.',
+        },
+        atIndex: {
+          type: 'number',
+          description: 'Indeks (0-based) na liście sekcji, gdzie wstawić. Jeśli pominięte, wstawia na koniec.',
+        },
+        label: {
+          type: 'string',
+          description: 'Opcjonalna czytelna etykieta sekcji.',
+        },
+      },
+      required: ['sectionTemplateId'],
+    },
+  },
+  {
+    name: 'insert_experience_from_library',
+    description: 'Wstaw konkretne Experience z biblioteki (odkryte przez search_experiences) do sekcji. Użyj ID Experience zwróconego przez search_experiences. Konfiguruje efekty wizualne na docelowej sekcji.',
+    parameters: {
+      type: 'object',
+      properties: {
+        experienceId: {
+          type: 'string',
+          description: 'ID Experience z biblioteki (zwrócone przez search_experiences).',
+        },
+        sectionId: {
+          type: 'string',
+          description: 'ID sekcji docelowej do której dodać Experience. Jeśli pominięte, użyj aktualnie zaznaczonej sekcji.',
+        },
+        pageId: {
+          type: 'string',
+          description: 'ID strony.',
+        },
+        configuration: {
+          type: 'object',
+          description: 'Opcjonalna dodatkowa konfiguracja Experience (intensity, custom settings).',
+        },
+      },
+      required: ['experienceId'],
+    },
+  },
+
+  // =====================================================================
   // INSPECTOR PARITY TOOLS — Full Builder Access for AI
   // =====================================================================
 
@@ -572,20 +629,6 @@ export const BUILDER_TOOL_DEFINITIONS: HacpToolDefinition[] = [
         nodeId: {
           type: 'string',
           description: 'ID węzła.',
-        },
-      },
-      required: ['nodeId'],
-    },
-  },
-  {
-    name: 'inspect_experience',
-    description: 'Pobierz konfigurację Experience (efekty wizualne, motion, tło, particles) węzła.',
-    parameters: {
-      type: 'object',
-      properties: {
-        nodeId: {
-          type: 'string',
-          description: 'ID węzła (sekcji).',
         },
       },
       required: ['nodeId'],

@@ -101,11 +101,23 @@ DOSTEPNE NARZEDZIA MUTACJI:
 - remove_node(nodeId) → usuniecie elementu
 - move_node(nodeId, targetParentId, targetIndex?) → przeniesienie elementu do innego kontenera
 - insert_section / remove_section / move_section → operacje na sekcjach
+- insert_section_from_library(sectionTemplateId, pageId?, atIndex?, label?) → WSTAWIENIE REALNEJ SEKCJI Z BIBLIOTEKI (uzyj ID z search_sections)
+- insert_experience_from_library(experienceId, sectionId?, pageId?, configuration?) → WSTAWIENIE EXPERIENCE Z BIBLIOTEKI (uzyj ID z search_experiences)
 - set_background_color(sectionId?, color) → ustawienie koloru tla sekcji
 - configure_experience(pageId, sectionId, config) → konfiguracja efektow wizualnych
 - update_theme(primaryColor, secondaryColor, font) → zmiana motywu
 - batch_execute(operations[]) → wykonanie wielu operacji w jednym kroku
 - undo/redo → cofnij/przywroc
+
+DOSTEPNE NARZEDZIA BIBLIOTEKI:
+- search_experiences(query?, type?, category?, mood?, industry?, limit?) → przeszukaj biblioteke 270+ Experience
+- inspect_experience(experienceId) → szczegolowe info o konkretnym Experience
+- get_experience_categories() → list kategorii Experience
+- search_sections(query?, category?, limit?) → przeszukaj biblioteke sekcji (hero, features, testimonials, etc.)
+- search_website_templates(query?, industry?, limit?) → przeszukaj gotowe szablony stron
+- get_typography_presets() → presety czcionek z rekomendacjami
+- get_design_presets() → presety designu (kolory, czcionki, motywy)
+- resolve_target(prompt) → rozwiąż naturalne odniesienie do elementu
 
 PELNIA MOZLIWOSCI BUILDERA — SEMANTYCZNA WIEDZA:
 
@@ -185,11 +197,25 @@ BIBLIOTEKI I EXPERIENCE:
 - get_design_presets → presety designu (kolory, czcionki, motywy)
 - resolve_target(prompt) → rozwiąż naturalne odniesienie ("ten nagłówek", "ta sekcja", "pierwsza sekcja")
 
+WSTAWIANIE Z BIBLIOTEKI (BEZWZGLĘDNIE WYMAGANE):
+Gdy uzytkownik prosi o dodanie sekcji z biblioteki:
+1. Wywołaj search_sections aby znaleźć odpowiednią sekcję.
+2. Z wyników wyszukania weź ID szablonu (pole "id", np. "hero-centered", "features-3-cards").
+3. NATYCHMIAST wywołaj insert_section_from_library(sectionTemplateId: "<ID z wyniku>").
+4. NIGDY nie kończ na samym search_sections — ZAWSZE wykonaj insert_section_from_library.
+
+Gdy uzytkownik prosi o dodanie Experience:
+1. Wywołaj search_experiences aby znaleźć odpowiednie Experience.
+2. Z wyników wyszukaj ID Experience (pole "id").
+3. NATYCHMIAST wywołaj insert_experience_from_library(experienceId: "<ID z wyniku>", sectionId: "<ID sekcji docelowej>").
+4. NIGDY nie kończ na samym search_experiences — ZAWSZE wykonaj insert_experience_from_library.
+
 WORKFLOW Z BIBLIOTEKAMI:
-1. Gdy uzytkownik prosi o Experience → NAJPIERW search_experiences, POTEM inspect_experience, POTEM configure_experience.
-2. Gdy uzytkownik prosi o sekcję → NAJPIERW search_sections, POTEM insert_section.
+1. Gdy uzytkownik prosi o Experience → search_experiences → inspect_experience → insert_experience_from_library.
+2. Gdy uzytkownik prosi o sekcję → search_sections → insert_section_from_library.
 3. Gdy uzytkownik prosi o szablon → search_website_templates.
 4. NIGDY nie wstawiaj Experience "z głowy" — ZAWSZE najpierw przeszukaj bibliotekę.
+5. ABSOLUTNY ZAKAZ: Nie mów "Znalazłem sekcję. Teraz ją dodam." BEZ wykonania tool call insert_section_from_library. Jeśli znalazłeś — WSTAW natychmiast.
 
 SEMANTYCZNE ODNIOSIENIA:
 - "ten nagłówek" → użyj resolve_target lub sprawdź selectedNodeId

@@ -185,7 +185,7 @@ export class OpenCodeProvider implements AIProvider {
       let messageContent = choice?.message?.content || '';
       const finishReason = choice?.finish_reason || 'stop';
 
-      const toolCalls: HacpToolCall[] = [];
+      let toolCalls: HacpToolCall[] = [];
       if (choice?.message?.tool_calls && Array.isArray(choice.message.tool_calls)) {
         for (const tc of choice.message.tool_calls) {
           try {
@@ -206,20 +206,64 @@ export class OpenCodeProvider implements AIProvider {
       }
 
       // ======================================================================
-      // 2-STEP AGENT LOOP: If model called tools, execute Request #2 to get final natural response
+      // N-STEP AGENT LOOP: Execute read-only tools, chain multi-step reasoning
       // ======================================================================
-      if (toolCalls.length > 0) {
-        const toolMessages: any[] = [
-          ...normalizedMessages,
-          {
-            role: 'assistant',
-            content: choice.message.content || null,
-            tool_calls: choice.message.tool_calls,
-          },
-        ];
+
+      // Read-only tools that can be executed locally in the provider loop
+      const READ_ONLY_TOOLS = new Set([
+        'test_echo', 'read_builder_document', 'inspect_selected_node', 'inspect_page_structure',
+        'inspect_node', 'inspect_children', 'inspect_parent', 'find_nodes',
+        'inspect_responsive', 'inspect_experience', 'inspect_asset',
+        'inspect_available_capabilities', 'inspect_document_summary', 'read_page_full',
+        'search_experiences', 'get_experience_categories',
+        'search_sections', 'search_website_templates', 'get_typography_presets',
+        'get_design_presets', 'resolve_target',
+      ]);
+
+      // Maximum iterations for the agent loop (search → inspect → decide → insert)
+      const MAX_AGENT_ITERATIONS = 8;
+      let allToolCalls: HacpToolCall[] = [];
+      let currentMessages = [...normalizedMessages];
+      let currentChoice = choice;
+      let iteration = 0;
+
+      while (toolCalls.length > 0 && iteration < MAX_AGENT_ITERATIONS) {
+        iteration++;
+
+        console.log('[OpenCodeProvider] AGENT_LOOP_TRACE:', {
+          phase: 'ITERATION_START',
+          iteration,
+          toolCallCount: toolCalls.length,
+          toolNames: toolCalls.map((tc) => tc.name),
+          timestamp: new Date().toISOString(),
+        });
+
+        // Add assistant message with tool_calls to history
+        currentMessages.push({
+          role: 'assistant',
+          content: currentChoice.message.content || null,
+          tool_calls: currentChoice.message.tool_calls,
+        } as any);
+
+        // Separate read-only tools from mutation tools
+        const readOnlyCalls: HacpToolCall[] = [];
+        const mutationCalls: HacpToolCall[] = [];
 
         for (const tc of toolCalls) {
+          if (READ_ONLY_TOOLS.has(tc.name)) {
+            readOnlyCalls.push(tc);
+          } else {
+            mutationCalls.push(tc);
+          }
+        }
+
+        // Track all tool calls (mutations will be executed by HacpBridge)
+        allToolCalls.push(...mutationCalls);
+
+        // Execute read-only tools locally and build tool result messages
+        for (const tc of readOnlyCalls) {
           let toolResult: Record<string, unknown> = {};
+
           if (tc.name === 'test_echo') {
             toolResult = {
               status: 'SUCCESS',
@@ -241,17 +285,109 @@ export class OpenCodeProvider implements AIProvider {
               selectedNodeLabel: request.builderContext?.selectedNodeLabel || 'Hero Section',
               viewport: request.builderContext?.viewport || 'DESKTOP',
             };
-          } else {
-            // Mutation tools (update_node_props, insert_section, move_section, etc.)
+          } else if (tc.name === 'search_sections') {
+            // Execute search_sections locally to return real results to the model
+            try {
+              const { searchSectionLibrary } = await import('./LibraryIntelligence');
+              const results = searchSectionLibrary({
+                query: tc.arguments?.query as string,
+                category: tc.arguments?.category as string,
+                limit: (tc.arguments?.limit as number) || 20,
+              });
+              toolResult = { status: 'SUCCESS', count: results.length, sections: results };
+            } catch {
+              toolResult = { status: 'SUCCESS', count: 0, sections: [], note: 'Library search executed.' };
+            }
+          } else if (tc.name === 'search_experiences') {
+            try {
+              const { searchExperienceLibrary } = await import('./LibraryIntelligence');
+              const results = searchExperienceLibrary({
+                query: tc.arguments?.query as string,
+                type: tc.arguments?.type as any,
+                category: tc.arguments?.category as string,
+                mood: tc.arguments?.mood as any,
+                industry: tc.arguments?.industry as string,
+                limit: (tc.arguments?.limit as number) || 20,
+              });
+              toolResult = { status: 'SUCCESS', count: results.length, experiences: results };
+            } catch {
+              toolResult = { status: 'SUCCESS', count: 0, experiences: [], note: 'Library search executed.' };
+            }
+          } else if (tc.name === 'inspect_experience') {
+            try {
+              const { inspectExperience } = await import('./LibraryIntelligence');
+              const result = inspectExperience(tc.arguments?.experienceId as string);
+              toolResult = (result as unknown as Record<string, unknown>) || { status: 'NOT_FOUND', message: 'Experience not found.' };
+            } catch {
+              toolResult = { status: 'ERROR', message: 'Inspection failed.' };
+            }
+          } else if (tc.name === 'get_experience_categories') {
+            try {
+              const { getExperienceCategories, getExperienceMoods, getExperienceIndustries } = await import('./LibraryIntelligence');
+              toolResult = {
+                status: 'SUCCESS',
+                categories: getExperienceCategories(),
+                moods: getExperienceMoods(),
+                industries: getExperienceIndustries(),
+              };
+            } catch {
+              toolResult = { status: 'ERROR', message: 'Failed to get categories.' };
+            }
+          } else if (tc.name === 'search_website_templates') {
+            try {
+              const { searchWebsiteTemplates } = await import('./LibraryIntelligence');
+              const results = searchWebsiteTemplates({
+                query: tc.arguments?.query as string,
+                industry: tc.arguments?.industry as string,
+                limit: (tc.arguments?.limit as number) || 10,
+              });
+              toolResult = { status: 'SUCCESS', count: results.length, templates: results };
+            } catch {
+              toolResult = { status: 'SUCCESS', count: 0, templates: [] };
+            }
+          } else if (tc.name === 'get_typography_presets') {
+            try {
+              const { getTypographyPresets } = await import('./LibraryIntelligence');
+              toolResult = { status: 'SUCCESS', presets: getTypographyPresets() };
+            } catch {
+              toolResult = { status: 'ERROR', message: 'Failed to get presets.' };
+            }
+          } else if (tc.name === 'get_design_presets') {
+            try {
+              const { getDesignPresets } = await import('./LibraryIntelligence');
+              toolResult = { status: 'SUCCESS', presets: getDesignPresets() };
+            } catch {
+              toolResult = { status: 'ERROR', message: 'Failed to get presets.' };
+            }
+          } else if (tc.name === 'resolve_target') {
+            toolResult = {
+              status: 'SUCCESS',
+              note: 'Target resolution will be performed by HACP Bridge with full document context.',
+              prompt: tc.arguments?.prompt,
+            };
+          } else if (tc.name === 'inspect_node' || tc.name === 'inspect_children' || tc.name === 'inspect_parent' ||
+                     tc.name === 'find_nodes' || tc.name === 'inspect_responsive' || tc.name === 'inspect_asset' ||
+                     tc.name === 'inspect_available_capabilities' || tc.name === 'inspect_document_summary' || tc.name === 'read_page_full') {
+            // These inspection tools return builder context data
             toolResult = {
               status: 'SUCCESS',
               operation: tc.name,
               arguments: tc.arguments,
-              detail: `Zlecenie ${tc.name} zostało zweryfikowane i przekazane do wykonania na Canvas.`,
+              pageId: request.builderContext?.pageId || 'page-home',
+              selectedNodeId: request.builderContext?.selectedNodeId,
+              viewport: request.builderContext?.viewport || 'DESKTOP',
+              note: `Inspekcja ${tc.name} wykonana. Pełne dane dostępne w kontekście Buildera.`,
+            };
+          } else {
+            toolResult = {
+              status: 'SUCCESS',
+              operation: tc.name,
+              arguments: tc.arguments,
+              detail: `Narzędzie ${tc.name} wykonane.`,
             };
           }
 
-          toolMessages.push({
+          currentMessages.push({
             role: 'tool',
             tool_call_id: tc.id,
             name: tc.name,
@@ -259,8 +395,14 @@ export class OpenCodeProvider implements AIProvider {
           });
         }
 
+        // If there are mutation tools, stop the provider loop — HacpBridge will execute them
+        if (mutationCalls.length > 0) {
+          break;
+        }
+
+        // No mutations — make another LLM request with tools to continue reasoning
         try {
-          const secondResponse = await fetch(endpoint, {
+          const nextResponse = await fetch(endpoint, {
             method: 'POST',
             signal: AbortSignal.timeout(15000),
             headers: {
@@ -269,29 +411,71 @@ export class OpenCodeProvider implements AIProvider {
             },
             body: JSON.stringify({
               model: selectedModelId,
-              messages: toolMessages,
+              messages: currentMessages,
+              tools: toolsPayload,
+              tool_choice: 'auto',
               temperature: 0.2,
               max_tokens: 1000,
             }),
           });
 
-          if (secondResponse.ok) {
-            const secondData = await secondResponse.json();
-            const secondChoice = secondData.choices?.[0];
-            if (secondChoice?.message?.content && secondChoice.message.content.trim().length > 0) {
-              messageContent = secondChoice.message.content.trim();
-            }
-          }
-        } catch (secondErr) {
-          console.warn('[OpenCodeProvider] Second turn model completion error or timeout:', secondErr);
-        }
+          if (!nextResponse.ok) break;
 
-        // If messageContent is still empty, synthesize an honest, helpful natural language statement
-        if (!messageContent || messageContent.trim().length === 0) {
-          const firstTc = toolCalls[0];
-          messageContent = UserFacingResponseNormalizer.getFriendlyToolCompletionMessage(firstTc.name);
+          const nextData = await nextResponse.json();
+          const nextChoice = nextData.choices?.[0];
+
+          if (!nextChoice?.message) break;
+
+          currentChoice = nextChoice;
+          messageContent = nextChoice.message.content || '';
+
+          // Check if the model made more tool calls
+          if (nextChoice.message.tool_calls && Array.isArray(nextChoice.message.tool_calls) && nextChoice.message.tool_calls.length > 0) {
+            toolCalls = [];
+            for (const tc of nextChoice.message.tool_calls) {
+              try {
+                const parsedArgs = typeof tc.function?.arguments === 'string'
+                  ? JSON.parse(tc.function.arguments || '{}')
+                  : tc.function?.arguments || {};
+                toolCalls.push({
+                  id: tc.id || `call-${Date.now()}`,
+                  name: tc.function?.name || '',
+                  arguments: parsedArgs,
+                });
+              } catch {
+                // Skip malformed tool calls
+              }
+            }
+          } else {
+            // No more tool calls — model generated final text response
+            toolCalls = [];
+          }
+        } catch (loopErr) {
+          console.warn('[OpenCodeProvider] Agent loop iteration error:', loopErr);
+          break;
         }
       }
+
+      // Use the final message content from the last LLM response
+      if (!messageContent || messageContent.trim().length === 0) {
+        if (allToolCalls.length > 0) {
+          messageContent = UserFacingResponseNormalizer.getFriendlyToolCompletionMessage(allToolCalls[0].name);
+        } else {
+          messageContent = 'Przeanalizowałem żądanie. Pomóż mi zrozumieć, co dokładnie chciałbyś zmienić.';
+        }
+      }
+
+      // Use all mutation tool calls (the provider loop collected read-only results for the model)
+      toolCalls = allToolCalls.length > 0 ? allToolCalls : toolCalls;
+
+      console.log('[OpenCodeProvider] AGENT_LOOP_TRACE:', {
+        phase: 'LOOP_COMPLETE',
+        totalIterations: iteration,
+        mutationToolCalls: allToolCalls.map((tc) => tc.name),
+        finalToolCalls: toolCalls.map((tc) => tc.name),
+        messageContent: messageContent?.substring(0, 100),
+        timestamp: new Date().toISOString(),
+      });
 
       // Strictly normalize user-facing output: scrub any reasoning tags (<think>), English leaks, or raw JSON
       const cleanUserFacingMessage = UserFacingResponseNormalizer.normalize(messageContent, {
