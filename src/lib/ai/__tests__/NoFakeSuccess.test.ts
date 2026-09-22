@@ -308,6 +308,129 @@ describe('NoFakeSuccess — HACP outcome', () => {
   });
 });
 
+describe('RealSectionStructure — library insert is a real layered tree', () => {
+  function countNodes(root: any): number {
+    let n = 0;
+    const walk = (x: any) => {
+      n++;
+      (x.children || []).forEach(walk);
+    };
+    walk(root);
+    return n;
+  }
+
+  function findByLabel(root: any, label: string): any {
+    let hit: any = null;
+    const walk = (x: any) => {
+      if (x.label === label) hit = x;
+      (x.children || []).forEach(walk);
+    };
+    walk(root);
+    return hit;
+  }
+
+  async function insertTemplate(templateId: string) {
+    const bridge = HacpBridge.getInstance();
+    const doc = createBuilderDocument({});
+    const pageId = doc.pages[0].id;
+    const exec = await bridge.executeToolCall(
+      { id: `call-${templateId}`, name: 'insert_section_from_library', arguments: { sectionTemplateId: templateId, pageId } },
+      doc,
+      pageId
+    );
+    const after = exec.command ? applyCommandToDocument(doc, exec.command) : doc;
+    const sec = after.pages[0].sections[after.pages[0].sections.length - 1];
+    return { exec, after, sec, pageId };
+  }
+
+  it('testimonials-cards inserts the full 30-node layered tree (not a shell)', async () => {
+    const { exec, sec } = await insertTemplate('testimonials-cards');
+    expect(exec.status).toBe('EXECUTED');
+    expect(countNodes(sec)).toBe(30);
+    expect((sec.children || []).length).toBe(2);
+    expect(sec.styles).toBeDefined();
+    expect(exec.createdNodeId).toBe(sec.id);
+  });
+
+  it('nested card children exist with real types (container/text/image)', async () => {
+    const { sec } = await insertTemplate('testimonials-cards');
+    const quotes: any[] = [];
+    const stars: any[] = [];
+    const walk = (x: any) => {
+      if (x.label === 'Quote') quotes.push(x);
+      if (x.label === 'Stars') stars.push(x);
+      (x.children || []).forEach(walk);
+    };
+    walk(sec);
+    const headline = findByLabel(sec, 'Headline');
+    // 3 cards × (stars + quote)
+    expect(quotes.length).toBe(3);
+    expect(stars.length).toBe(3);
+    for (const q of quotes) expect(q.type).toBe('text');
+    for (const s of stars) {
+      expect(s.type).toBe('text');
+      expect(String(s.props?.text || '')).toContain('★');
+    }
+    expect(headline?.type).toBe('heading');
+    expect(quotes.some((q) => String(q.props?.text || '').includes('platform'))).toBe(true);
+  });
+
+  it('child text is editable via UPDATE_PROPS (canvas inline-edit path)', async () => {
+    const bridge = HacpBridge.getInstance();
+    const { after, sec, pageId } = await insertTemplate('testimonials-cards');
+    const headline = findByLabel(sec, 'Headline');
+    expect(headline).toBeDefined();
+    const edit = await bridge.executeToolCall(
+      { id: 'edit-1', name: 'update_node_props', arguments: { pageId, sectionId: headline.id, props: { text: 'Kochane przez zespoły' } } },
+      after,
+      pageId
+    );
+    expect(edit.status).toBe('EXECUTED');
+    const edited = applyCommandToDocument(after, edit.command!);
+    expect(findNode(edited, headline.id)?.node?.props?.text).toBe('Kochane przez zespoły');
+  });
+
+  it('card styles are editable via SET_NODE_STYLES', async () => {
+    const bridge = HacpBridge.getInstance();
+    const { after, sec, pageId } = await insertTemplate('testimonials-cards');
+    const card = findByLabel(sec, 'Testimonial: Sarah Mitchell');
+    expect(card).toBeDefined();
+    const styled = await bridge.executeToolCall(
+      { id: 'style-1', name: 'set_node_styles', arguments: { pageId, nodeId: card.id, styles: { backgroundColor: '#111111' } } },
+      after,
+      pageId
+    );
+    expect(styled.status).toBe('EXECUTED');
+    const next = applyCommandToDocument(after, styled.command!);
+    expect((findNode(next, card.id)?.node?.styles as any)?.backgroundColor).toBe('#111111');
+  });
+
+  it('SAVE/reload round-trip preserves the full tree (persistence)', async () => {
+    const { sec } = await insertTemplate('testimonials-cards');
+    const reloaded = JSON.parse(JSON.stringify(sec));
+    expect(countNodes(reloaded)).toBe(30);
+    expect(findByLabel(reloaded, 'Headline')?.props?.text).toBe('Loved by Teams Worldwide');
+  });
+
+  it.each([
+    'hero-centered',
+    'features-3-cards',
+    'services-3-cards',
+    'faq-centered',
+    'pricing-3-tier',
+    'cta-banner',
+    'testimonials-cards',
+  ])('regression: %s inserts a real tree (no flatten, no break)', async (templateId) => {
+    const { exec, sec } = await insertTemplate(templateId);
+    expect(exec.status).toBe('EXECUTED');
+    expect(exec.verification.passed).toBe(true);
+    // Every library section must carry children — a lone shell is class A failure
+    expect((sec.children || []).length).toBeGreaterThan(0);
+    expect(countNodes(sec)).toBeGreaterThan(3);
+    expect(exec.createdNodeId).toBe(sec.id);
+  });
+});
+
 describe('NoFakeSuccess — autonomous generation (dentist path)', () => {
   function dentistMiniPlan(): SitePlan {
     return {

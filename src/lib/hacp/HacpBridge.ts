@@ -612,9 +612,12 @@ export class HacpBridge {
         const sectionNode = template.createNode();
         const targetPageId = (args.pageId as string) || activePageId;
         const atIndex = typeof args.atIndex === 'number' ? args.atIndex : undefined;
-        const sectionId =
-          (args.sectionId as string) ||
-          this.generateSectionId(template.category || sectionTemplateId);
+        // SECTION STRUCTURE GATE v1.0: carry the template's REAL subtree
+        // (children + styles) in the command. Previously only props were
+        // copied, flattening 30-node templates into an empty shell (class A).
+        // sectionNode.id is generated fresh per createNode() call and travels
+        // inside the command, so VERIFY-time and dispatch-time agree.
+        const sectionId = (args.sectionId as string) || sectionNode.id;
 
         const cmd: BuilderCommand = {
           type: 'ADD_SECTION',
@@ -624,6 +627,8 @@ export class HacpBridge {
           atIndex,
           label: (args.label as string) || template.name || `Library: ${sectionTemplateId}`,
           sectionId,
+          children: sectionNode.children || [],
+          styles: sectionNode.styles,
         };
 
         const result = this.verifyCommandExecution(cmd, document, { targetId: targetPageId });

@@ -103,6 +103,14 @@ export type BuilderCommand =
        * so HACP VERIFY-time and Builder dispatch-time agree on createdNodeId.
        */
       readonly sectionId?: string;
+      /**
+       * Full subtree for library inserts (SECTION STRUCTURE GATE v1.0).
+       * When present, the inserted section keeps the template's real layered
+       * children instead of degrading to an empty shell.
+       */
+      readonly children?: BuilderNode[];
+      /** Section-level styles from the library template (padding, bg...). */
+      readonly styles?: NodeStyles;
     }
   | {
       readonly type: 'ADD_CHILD_SECTION';
@@ -402,7 +410,9 @@ export function applyCommandToDocument(
           command.defaultProps,
           command.atIndex,
           command.label,
-          command.sectionId
+          command.sectionId,
+          command.children,
+          command.styles
         );
         return { ...page, sections };
       });

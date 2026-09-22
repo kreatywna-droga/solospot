@@ -17,7 +17,7 @@
  *    └── Footer               (leaf)
  */
 
-import { SectionNode } from './BuilderDocument';
+import { SectionNode, NodeStyles } from './BuilderDocument';
 
 // ---------------------------------------------------------------------------
 // ID generation
@@ -25,6 +25,21 @@ import { SectionNode } from './BuilderDocument';
 
 function generateId(prefix = 'sec'): string {
   return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+}
+
+/**
+ * Deep-copy a subtree while re-pointing parentIds at a new parent.
+ * Child IDs are preserved: the carried tree is created once per command
+ * (HACP VERIFY), so verify-time and dispatch-time share identical IDs.
+ */
+function reparentSubtree(node: SectionNode, parentId: string): SectionNode {
+  return {
+    ...node,
+    parentId,
+    props: { ...(node.props || {}) },
+    styles: node.styles ? JSON.parse(JSON.stringify(node.styles)) : undefined,
+    children: (node.children || []).map((c) => reparentSubtree(c, node.id)),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -89,7 +104,9 @@ export interface SectionTreeOps {
     defaultProps: Record<string, unknown>,
     atIndex?: number,
     label?: string,
-    explicitId?: string
+    explicitId?: string,
+    children?: SectionNode[],
+    styles?: NodeStyles
   ): { sections: SectionNode[]; newId: string };
 
   /**
@@ -177,17 +194,22 @@ function deepCloneWithNewIds(node: SectionNode): SectionNode {
 }
 
 export const sectionTree: SectionTreeOps = {
-  insertSection(sections, type, defaultProps, atIndex, label, explicitId?) {
+  insertSection(sections, type, defaultProps, atIndex, label, explicitId?, children?, styles?) {
     // FORENSIC GATE v2.0: when the caller supplies an ID (HACP pre-generates
     // it during VERIFY), reuse it so verify-time and dispatch-time agree on
     // the created node ID. Otherwise generate a fresh one (legacy behavior).
     const newId = explicitId || generateId(type);
+    // SECTION STRUCTURE GATE v1.0: library inserts carry the template's real
+    // subtree; re-parent it under the new section so traversal/selection stay
+    // consistent. Plan-based inserts pass no children (legacy empty shell).
+    const reparented = (children || []).map((c) => reparentSubtree(c, newId));
     const newNode: SectionNode = {
       id: newId,
       type,
       label: label ?? type,
       props: { ...defaultProps },
-      children: [],
+      styles: styles || undefined,
+      children: reparented,
       visible: true,
       locked: false,
       order: 0,
