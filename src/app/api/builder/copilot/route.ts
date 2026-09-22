@@ -310,8 +310,9 @@ ZASADY PROFESJONALNEJ KONWERSACJI:
           });
 
           // Convert orchestrator result to AICopilotResponse format
+          // TRUTHFULNESS: Never map CHAT/PARTIAL to SUCCESS — they are not mutations.
           const result = {
-            status: orchResult.status === 'CHAT' ? 'SUCCESS' : orchResult.status === 'PARTIAL' ? 'SUCCESS' : orchResult.status,
+            status: orchResult.status,
             provider: 'AgentOrchestrator',
             model: orchResult.modelUsed,
             message: orchResult.message,

@@ -313,8 +313,8 @@ export class OpenCodeProvider implements AIProvider {
                 limit: (tc.arguments?.limit as number) || 20,
               });
               toolResult = { status: 'SUCCESS', count: results.length, sections: results };
-            } catch {
-              toolResult = { status: 'SUCCESS', count: 0, sections: [], note: 'Library search executed.' };
+            } catch (searchErr: any) {
+              toolResult = { status: 'ERROR', count: 0, sections: [], error: String(searchErr?.message || searchErr), note: 'Library search failed.' };
             }
           } else if (tc.name === 'search_experiences') {
             try {
@@ -328,8 +328,8 @@ export class OpenCodeProvider implements AIProvider {
                 limit: (tc.arguments?.limit as number) || 20,
               });
               toolResult = { status: 'SUCCESS', count: results.length, experiences: results };
-            } catch {
-              toolResult = { status: 'SUCCESS', count: 0, experiences: [], note: 'Library search executed.' };
+            } catch (searchErr: any) {
+              toolResult = { status: 'ERROR', count: 0, experiences: [], error: String(searchErr?.message || searchErr), note: 'Library search failed.' };
             }
           } else if (tc.name === 'inspect_experience') {
             try {
@@ -360,8 +360,8 @@ export class OpenCodeProvider implements AIProvider {
                 limit: (tc.arguments?.limit as number) || 10,
               });
               toolResult = { status: 'SUCCESS', count: results.length, templates: results };
-            } catch {
-              toolResult = { status: 'SUCCESS', count: 0, templates: [] };
+            } catch (searchErr: any) {
+              toolResult = { status: 'ERROR', count: 0, templates: [], error: String(searchErr?.message || searchErr), note: 'Template search failed.' };
             }
           } else if (tc.name === 'get_typography_presets') {
             try {
@@ -397,11 +397,12 @@ export class OpenCodeProvider implements AIProvider {
               note: `Inspekcja ${tc.name} wykonana. Pełne dane dostępne w kontekście Buildera.`,
             };
           } else {
+            // TRUTHFULNESS: Unknown tool — no execution occurred, cannot claim SUCCESS
             toolResult = {
-              status: 'SUCCESS',
+              status: 'NOT_SUPPORTED',
               operation: tc.name,
               arguments: tc.arguments,
-              detail: `Narzędzie ${tc.name} wykonane.`,
+              detail: `Narzędzie ${tc.name} nie jest obsługiwane w trybie read-only.`,
             };
           }
 
@@ -500,8 +501,12 @@ export class OpenCodeProvider implements AIProvider {
         toolExecuted: toolCalls[0]?.name,
       });
 
+      // TRUTHFULNESS: Only claim SUCCESS when mutation tool calls exist.
+      // Chat-only responses (no tool calls) are CHAT, not SUCCESS.
+      const hasMutations = toolCalls.length > 0;
+
       return {
-        status: 'SUCCESS',
+        status: hasMutations ? 'SUCCESS' : 'CHAT',
         provider: this.name,
         model: data.model || selectedModelId,
         message: cleanUserFacingMessage,

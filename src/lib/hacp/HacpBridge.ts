@@ -1369,7 +1369,8 @@ export class HacpBridge {
         message: cleanChatMsg,
         commandsToDispatch: [],
         eventsToEmit: [],
-        executionStatus: 'EXECUTED',
+        // TRUTHFULNESS: CHAT = conversational, no mutation executed
+        executionStatus: 'CLARIFY',
         aiProviderStatus,
         aiProviderName,
         selectedModel: aiProviderResponse.model,
@@ -1486,7 +1487,8 @@ export class HacpBridge {
         },
         commandsToDispatch: [],
         eventsToEmit: [],
-        executionStatus: 'EXECUTED',
+        // TRUTHFULNESS: AUDIT = read-only inspection, no mutation executed
+        executionStatus: 'CLARIFY',
         aiProviderStatus,
         updatedConversationContext: { lastIntent: 'AUDIT' },
       };
@@ -1513,7 +1515,8 @@ export class HacpBridge {
         message: responseMessage,
         commandsToDispatch: [],
         eventsToEmit: [],
-        executionStatus: aiProviderStatus === 'OFFLINE' ? 'UNSUPPORTED' : 'EXECUTED',
+        // TRUTHFULNESS: CHAT = conversational, no mutation executed
+        executionStatus: aiProviderStatus === 'OFFLINE' ? 'UNSUPPORTED' : 'CLARIFY',
         aiProviderStatus,
         updatedConversationContext: { lastIntent: 'CHAT' },
       };
@@ -1539,7 +1542,8 @@ export class HacpBridge {
         message: responseMessage,
         commandsToDispatch: [],
         eventsToEmit: [],
-        executionStatus: 'EXECUTED',
+        // TRUTHFULNESS: INSPECT = read-only query, no mutation executed
+        executionStatus: 'CLARIFY',
         aiProviderStatus,
         updatedConversationContext: { lastIntent: 'INSPECT', lastTargetNodeId: targetId },
       };
@@ -1594,7 +1598,8 @@ export class HacpBridge {
           message,
           commandsToDispatch: [],
           eventsToEmit: [],
-          executionStatus: 'EXECUTED',
+          // TRUTHFULNESS: PROPOSE = proposal only, no mutation executed
+          executionStatus: 'CLARIFY',
           aiProviderStatus,
           updatedConversationContext: { lastIntent: 'PROPOSE', lastTargetNodeId: targetId, lastProposal: proposal1 },
         };
@@ -1634,7 +1639,8 @@ export class HacpBridge {
         message: `Proponuję dla sekcji **${targetLabel}**: zmianę tła, kolorów lub układu. Napisz "Zrób to" aby zastosować lub wskaż konkretną zmianę.`,
         commandsToDispatch: [],
         eventsToEmit: [],
-        executionStatus: 'EXECUTED',
+        // TRUTHFULNESS: PROPOSE = proposal only, no mutation executed
+        executionStatus: 'CLARIFY',
         aiProviderStatus,
         updatedConversationContext: { lastIntent: 'PROPOSE', lastTargetNodeId: targetId, lastProposal: proposal },
       };

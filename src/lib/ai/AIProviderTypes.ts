@@ -63,7 +63,7 @@ export interface AICopilotRequest {
 }
 
 export interface AICopilotResponse {
-  status: 'SUCCESS' | 'NOT_CONFIGURED' | 'ERROR';
+  status: 'SUCCESS' | 'NOT_CONFIGURED' | 'ERROR' | 'CHAT' | 'PARTIAL';
   provider: string;
   model: string;
   message: string;

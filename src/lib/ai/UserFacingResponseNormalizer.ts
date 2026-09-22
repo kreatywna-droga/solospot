@@ -50,12 +50,13 @@ export class UserFacingResponseNormalizer {
     // 5. Clean up multiple empty lines or trailing/leading whitespace
     text = text.replace(/\n{3,}/g, '\n\n').trim();
 
-    // 6. If scrubbing emptied the response completely, supply friendly fallback
+    // 6. If scrubbing emptied the response completely, use honest fallback
+    // TRUTHFULNESS: Never claim "zmieniłem" without verified execution.
     if (text.length === 0) {
       if (options?.toolExecuted) {
         return this.getFriendlyToolCompletionMessage(options.toolExecuted);
       }
-      return 'Gotowe. Wprowadziłem zmiany zgodnie z Twoją prośbą.';
+      return 'Przeanalizowałem żądanie. Pomóż mi zrozumieć, co dokładnie chciałbyś zmienić.';
     }
 
     return text;
