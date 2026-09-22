@@ -721,9 +721,9 @@ export function AiCopilotWorkspace() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#18181B] text-[#F5F1EA] select-none font-sans overflow-hidden">
+    <div className="flex flex-col h-full bg-[#202024] text-[#F5F1EA] select-none font-sans overflow-hidden">
       {/* ── 1. HEADER ──────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-3.5 py-2.5 bg-[#202024] border-b border-white/[0.08] flex-shrink-0">
+      <div className="flex items-center justify-between px-3.5 py-2.5 bg-[#2E2E33] border-b border-[#15151A] flex-shrink-0">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#D9A86C] to-[#F2C27F] flex items-center justify-center shadow-md shadow-[#D9A86C]/20">
             <Bot className="w-4 h-4 text-[#18181B]" />
@@ -835,7 +835,7 @@ export function AiCopilotWorkspace() {
                   key={idx}
                   onClick={() => handleSendMessage(sug)}
                   disabled={isExecuting}
-                  className="w-full p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:border-[#D9A86C]/40 hover:bg-[#D9A86C]/[0.05] text-left transition-all text-xs text-zinc-300 hover:text-white disabled:opacity-50"
+                  className="w-full p-2.5 rounded-xl bg-white/[0.02] border border-[#15151A] hover:border-[#D9A86C]/40 hover:bg-[#D9A86C]/[0.05] text-left transition-all text-xs text-zinc-300 hover:text-white disabled:opacity-50"
                 >
                   „{sug}”
                 </button>
@@ -864,7 +864,7 @@ export function AiCopilotWorkspace() {
                   </span>
                 )}
                 {msg.intent === 'UNDO' && (
-                  <span className="px-1.5 py-0.2 rounded bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-bold text-[8px]">
+                  <span className="px-1.5 py-0.2 rounded bg-[#D9A86C]/10 border border-[#D9A86C]/30 text-[#D9A86C] font-bold text-[8px]">
                     HISTORY REVERT
                   </span>
                 )}
@@ -911,7 +911,7 @@ export function AiCopilotWorkspace() {
 
                 {/* Subtle, elegant mutation pill if Canvas was modified */}
                 {msg.appliedChangeSummary && (
-                  <div className="mt-2.5 pt-2 border-t border-white/[0.08] flex items-center justify-between text-[10px] font-mono text-emerald-400">
+                  <div className="mt-2.5 pt-2 border-t border-[#15151A] flex items-center justify-between text-[10px] font-mono text-emerald-400">
                     <div className="flex items-center gap-1.5 min-w-0 pr-2">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
                       <span className="truncate">Zastosowano: {msg.appliedChangeSummary}</span>
@@ -944,7 +944,7 @@ export function AiCopilotWorkspace() {
 
                 {/* Assistant footer toolbar: copy & regenerate */}
                 {msg.type === 'ai' && (
-                  <div className="mt-2.5 pt-2 border-t border-white/[0.04] flex items-center justify-between text-[10px] text-zinc-500">
+                  <div className="mt-2.5 pt-2 border-t border-[#15151A] flex items-center justify-between text-[10px] text-zinc-500">
                     <span className="text-[9px] font-mono text-zinc-600">{currentModelName}</span>
                     <div className="flex items-center gap-1">
                       <button
@@ -1064,7 +1064,7 @@ export function AiCopilotWorkspace() {
       </div>
 
       {/* ── 5. QUICK ACTIONS ROW ───────────────────────────────────────────── */}
-      <div className="hidden px-3 py-1.5 bg-[#18181B] border-t border-white/[0.06] flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-shrink-0">
+      <div className="hidden px-3 py-1.5 bg-[#18181B] border-t border-[#15151A] flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-shrink-0">
         <button
           onClick={() =>
             handleSendMessage(
@@ -1129,7 +1129,7 @@ export function AiCopilotWorkspace() {
       </div>
 
       {/* ── 6. INPUT AREA ──────────────────────────────────────────────────── */}
-      <div className="p-3 bg-[#202024] border-t border-white/[0.08] flex-shrink-0">
+      <div className="p-3 bg-[#202024] border-t border-[#15151A] flex-shrink-0">
         <div ref={quickMenuRef} className="relative mb-2">
           <button
             onClick={() => setQuickMenuOpen((v) => !v)}
@@ -1170,7 +1170,7 @@ export function AiCopilotWorkspace() {
           {isPickerOpen && (
             <div className="absolute bottom-full left-0 right-0 mb-2 z-50 bg-[#202024] border border-white/15 rounded-xl shadow-2xl p-2 max-h-72 flex flex-col gap-1.5">
               {/* Router mode switcher */}
-              <div className="flex items-center gap-1 bg-white/[0.04] p-0.5 rounded-lg border border-white/[0.06]">
+              <div className="flex items-center gap-1 bg-white/[0.04] p-0.5 rounded-lg border border-[#15151A]">
                 {(['AUTO', 'FREE', 'PAID'] as const).map((mode) => (
                   <button
                     key={mode}
@@ -1253,7 +1253,7 @@ export function AiCopilotWorkspace() {
 
                 {/* PAID MODELS */}
                 {paidModels.length > 0 && (
-                  <div className="space-y-1 pt-1 border-t border-white/[0.06]">
+                  <div className="space-y-1 pt-1 border-t border-[#15151A]">
                     <span className="text-[9px] font-mono font-bold text-cyan-400 px-1 uppercase tracking-wider block">
                       Płatne / Pro • {paidModels.length}
                     </span>
@@ -1427,7 +1427,7 @@ export function AiCopilotWorkspace() {
       {showStatusModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-[#202024] border border-white/15 rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#15151A]">
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 text-[#D9A86C]" />
                 <h3 className="font-bold text-sm text-white">HACP CONTROL STATUS</h3>
@@ -1441,7 +1441,7 @@ export function AiCopilotWorkspace() {
             </div>
 
             <div className="space-y-2 text-xs font-mono">
-              <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+              <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-[#15151A]">
                 <span className="text-zinc-400">AI Provider:</span>
                 <span className={`font-bold ${aiProviderStatus === 'ONLINE' ? 'text-emerald-400' : aiProviderStatus === 'NOT_CONFIGURED' ? 'text-amber-400' : 'text-red-400'}`}>
                   {aiProviderStatus === 'ONLINE' ? aiProviderName : aiProviderStatus === 'NOT_CONFIGURED' ? 'NOT CONFIGURED' : 'OFFLINE'}
@@ -1464,23 +1464,23 @@ export function AiCopilotWorkspace() {
                   </p>
                 </div>
               )}
-              <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+              <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-[#15151A]">
                 <span className="text-zinc-400">HACP Protocol:</span>
                 <span className="text-emerald-400 font-bold">ONLINE (v3.0)</span>
               </div>
-              <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+              <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-[#15151A]">
                 <span className="text-zinc-400">Execution Mode:</span>
                 <span className="text-cyan-400 font-bold">STRICT BEFORE/AFTER</span>
               </div>
-              <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+              <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-[#15151A]">
                 <span className="text-zinc-400">Capabilities:</span>
                 <span className="text-[#F2C27F] font-bold">{capabilities.length} available</span>
               </div>
-              <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+              <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-[#15151A]">
                 <span className="text-zinc-400">Current execution:</span>
                 <span className="text-zinc-200 font-bold">{isExecuting ? 'BUSY' : 'IDLE'}</span>
               </div>
-              <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+              <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-[#15151A]">
                 <span className="text-zinc-400">Verification Engine:</span>
                 <span className="text-emerald-400 font-bold">ACTIVE (SSOT)</span>
               </div>
@@ -1500,7 +1500,7 @@ export function AiCopilotWorkspace() {
       {showCapabilitiesModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-[#202024] border border-white/15 rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] flex-shrink-0">
+            <div className="flex items-center justify-between pb-3 border-b border-[#15151A] flex-shrink-0">
               <div className="flex items-center gap-2">
                 <Cpu className="w-4 h-4 text-[#D9A86C]" />
                 <h3 className="font-bold text-sm text-white">REJESTR MOŻLIWOŚCI (CAPABILITIES)</h3>
@@ -1524,7 +1524,7 @@ export function AiCopilotWorkspace() {
                     .map((cap) => (
                       <div
                         key={cap.id}
-                        className="p-2 rounded-lg bg-white/[0.02] border border-white/[0.05] flex items-start justify-between gap-2"
+                        className="p-2 rounded-lg bg-white/[0.02] border border-[#15151A] flex items-start justify-between gap-2"
                       >
                         <div>
                           <span className="font-bold text-zinc-200 block text-xs">{cap.name}</span>

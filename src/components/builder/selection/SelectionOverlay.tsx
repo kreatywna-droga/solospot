@@ -947,14 +947,14 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
                   transform: 'translate(-50%, -100%)',
                 }}
                 onMouseDown={handleMoveStart}
-                className="absolute z-[125] pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 bg-[#202024] hover:bg-[#D9A86C] text-zinc-300 hover:text-white text-[11px] font-medium rounded-lg shadow-xl border border-[#D9A86C]/40 cursor-grab active:cursor-grabbing transition-all select-none group touch-none"
+                className="absolute z-[125] pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 bg-[#18181B] hover:bg-[#D9A86C] text-zinc-300 hover:text-white text-[11px] font-medium rounded-lg shadow-xl border border-[#D9A86C]/40 cursor-grab active:cursor-grabbing transition-all select-none group touch-none"
                 title="Przeciągnij myszą, aby swobodnie przesunąć element po Canvasie"
               >
                 <Move className="w-3.5 h-3.5 text-[#F2C27F] group-hover:text-white transition-colors" />
                 <span className="font-semibold">Przesuń</span>
                 <span
                   ref={moveBadgeRef}
-                  className={`ml-1 text-[10px] font-mono text-violet-200 bg-black/40 px-1.5 py-0.5 rounded border border-white/10 ${moving ? '' : 'hidden'}`}
+                  className={`ml-1 text-[10px] font-mono text-[#F2C27F] bg-black/40 px-1.5 py-0.5 rounded border border-white/10 ${moving ? '' : 'hidden'}`}
                 >
                   {moving ? `X: ${moving.startTx + Math.round(moving.deltaX)}px, Y: ${moving.startTy + Math.round(moving.deltaY)}px` : ''}
                 </span>
@@ -981,9 +981,9 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
                 >
                   {resizing.isTextNode && resizing.handle.length === 2 ? (
                     <>
-                      <span className="text-violet-200 text-[10px] uppercase">Czcionka:</span>
+                      <span className="text-[#F2C27F] text-[10px] uppercase">Czcionka:</span>
                       <span>{resizing.currentFontSize}px</span>
-                      <span className="text-violet-200 text-[10px] uppercase ml-1">Szer:</span>
+                      <span className="text-[#F2C27F] text-[10px] uppercase ml-1">Szer:</span>
                       <span>{resizing.currentWidth}px</span>
                     </>
                   ) : (

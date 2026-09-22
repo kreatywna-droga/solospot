@@ -30,6 +30,8 @@ import { findNode, type ToolbarPositionResult, type ToolbarActionType } from '..
 import { useBuilder } from '../state/BuilderProvider'
 import { MediaPickerModal } from '../sidebar/MediaPickerModal'
 import { FontPicker } from '../../../../packages/authoring-studio/src/inspector/widgets/FontPicker'
+import { ColorControl } from '../../../../packages/authoring-studio/src/inspector/controls'
+import { SmoothSlider } from '../inspector/SmoothSlider'
 import { applyAssetToNode } from '@/lib/assets/AssetResolver'
 import { SaveExperienceModal } from '../experience/SaveExperienceModal'
 
@@ -330,7 +332,7 @@ export function QuickToolbar({
       >
         {/* Main Toolbar Container */}
         <div
-          className="flex items-center gap-1 px-2 py-1.5 bg-[#202024]/95 backdrop-blur-md border border-white/15 rounded-xl shadow-2xl shadow-black/60 text-white text-xs select-none"
+          className="flex items-center gap-1 px-2 py-1.5 bg-[#18181B]/95 backdrop-blur-md border border-[#1F1F24] rounded-xl shadow-2xl shadow-black/60 text-white text-xs select-none"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Element Type Badge */}
@@ -352,7 +354,7 @@ export function QuickToolbar({
                   className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[11px] font-medium text-slate-200 transition-colors"
                   title="Zmień czcionkę"
                 >
-                  <Type className="w-3 h-3 text-violet-400" />
+                  <Type className="w-3 h-3 text-[#F2C27F]" />
                   <span className="max-w-[70px] truncate">{styles.fontFamily || 'Inter'}</span>
                   <ChevronDown className="w-2.5 h-2.5 opacity-60" />
                 </button>
@@ -374,7 +376,7 @@ export function QuickToolbar({
               <div className="relative flex items-center">
                 <button
                   onClick={() => setShowFontSizePopover(!showFontSizePopover)}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[11px] font-mono font-semibold text-white border border-white/[0.08] transition-colors"
+                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[11px] font-mono font-semibold text-white border border-[#1F1F24] transition-colors"
                   title="Rozmiar czcionki (dokładna wartość + suwak)"
                 >
                   <span>{parseInt(String(styles.fontSize || '16px').replace('px', '')) || 16}px</span>
@@ -385,34 +387,15 @@ export function QuickToolbar({
                   <div className={`absolute left-0 p-3 bg-[#202024] border border-white/15 rounded-xl shadow-2xl z-[300] min-w-[200px] space-y-2 ${popoverPlacement}`}>
                     <div className="flex items-center justify-between text-[11px] font-medium text-zinc-300">
                       <span>Rozmiar tekstu</span>
-                      <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded px-1.5 py-0.5">
-                        <input
-                          type="number"
-                          min={8}
-                          max={150}
-                          value={parseInt(String(styles.fontSize || '16px').replace('px', '')) || 16}
-                          onChange={(e) => {
-                            const v = Math.min(150, Math.max(8, Number(e.target.value) || 8))
-                            handleLiveFontSize(v)
-                            handleUpdateStyles({ fontSize: `${v}px`, height: undefined })
-                          }}
-                          className="w-10 bg-transparent text-right font-mono text-white text-xs focus:outline-none"
-                        />
-                        <span className="text-[10px] text-zinc-400">px</span>
-                      </div>
                     </div>
-                    <input
-                      type="range"
+                    <SmoothSlider
                       min={8}
                       max={150}
                       step={1}
                       value={parseInt(String(styles.fontSize || '16px').replace('px', '')) || 16}
-                      onInput={(e) => {
-                        const v = Number((e.target as HTMLInputElement).value)
-                        handleLiveFontSize(v)
-                      }}
-                      onChange={(e) => handleUpdateStyles({ fontSize: `${e.target.value}px`, height: undefined })}
-                      className="w-full accent-[#D9A86C] h-1 cursor-pointer"
+                      unit="px"
+                      onLivePreview={(v) => handleLiveFontSize(v)}
+                      onChange={(v) => handleUpdateStyles({ fontSize: `${v}px`, height: undefined })}
                     />
                     <div className="flex items-center gap-1 pt-1 border-t border-white/5">
                       {[16, 24, 32, 48, 64].map((sz) => (
@@ -468,20 +451,12 @@ export function QuickToolbar({
               </div>
 
               {/* Color Swatch + Exact HEX input */}
-              <div className="relative flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-1.5 py-0.5">
-                <input
-                  type="color"
+              <div className="flex items-center gap-1 bg-white/[0.04] border border-[#1F1F24] rounded-lg px-1.5 py-0.5">
+                <ColorControl
+                  compact
                   value={styles.color || '#ffffff'}
-                  onChange={(e) => handleUpdateStyles({ color: e.target.value })}
-                  className="w-4 h-4 rounded border-0 cursor-pointer bg-transparent"
+                  onChange={(v) => handleUpdateStyles({ color: v })}
                   title="Kolor tekstu"
-                />
-                <input
-                  type="text"
-                  value={styles.color || '#ffffff'}
-                  onChange={(e) => handleUpdateStyles({ color: e.target.value })}
-                  className="w-14 bg-transparent text-[10px] font-mono text-zinc-300 focus:outline-none focus:text-white"
-                  placeholder="#ffffff"
                 />
               </div>
 
@@ -552,7 +527,7 @@ export function QuickToolbar({
                   className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[11px] text-zinc-300 font-medium"
                   title="Edytuj link URL"
                 >
-                  <ExternalLink className="w-3 h-3 text-violet-400" />
+                  <ExternalLink className="w-3 h-3 text-[#F2C27F]" />
                   <span>Link</span>
                 </button>
 
@@ -563,7 +538,7 @@ export function QuickToolbar({
                       value={linkVal}
                       onChange={(e) => setLinkVal(e.target.value)}
                       placeholder="https://..."
-                      className="flex-1 px-2 py-1 bg-white/[0.04] border border-white/[0.08] rounded-lg text-xs text-white focus:outline-none focus:border-[#D9A86C]"
+                      className="flex-1 px-2 py-1 bg-white/[0.04] border border-[#1F1F24] rounded-lg text-xs text-white focus:outline-none focus:border-[#D9A86C]"
                     />
                     <button
                       onClick={() => {
@@ -582,7 +557,7 @@ export function QuickToolbar({
               <div className="relative flex items-center">
                 <button
                   onClick={() => setShowFontSizePopover(!showFontSizePopover)}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[11px] font-mono font-semibold text-white border border-white/[0.08] transition-colors"
+                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[11px] font-mono font-semibold text-white border border-[#1F1F24] transition-colors"
                   title="Rozmiar czcionki przycisku"
                 >
                   <span>{parseInt(String(styles.fontSize || '14px').replace('px', '')) || 14}px</span>
@@ -593,29 +568,14 @@ export function QuickToolbar({
                   <div className="absolute top-full left-0 mt-2 p-3 bg-[#202024] border border-white/15 rounded-xl shadow-2xl z-[300] min-w-[180px] space-y-2">
                     <div className="flex items-center justify-between text-[11px] font-medium text-zinc-300">
                       <span>Rozmiar tekstu</span>
-                      <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded px-1.5 py-0.5">
-                        <input
-                          type="number"
-                          min={10}
-                          max={48}
-                          value={parseInt(String(styles.fontSize || '14px').replace('px', '')) || 14}
-                          onChange={(e) => {
-                            const v = Math.min(48, Math.max(10, Number(e.target.value) || 10))
-                            handleUpdateStyles({ fontSize: `${v}px` })
-                          }}
-                          className="w-10 bg-transparent text-right font-mono text-white text-xs focus:outline-none"
-                        />
-                        <span className="text-[10px] text-zinc-400">px</span>
-                      </div>
                     </div>
-                    <input
-                      type="range"
+                    <SmoothSlider
                       min={10}
                       max={48}
                       step={1}
                       value={parseInt(String(styles.fontSize || '14px').replace('px', '')) || 14}
-                      onChange={(e) => handleUpdateStyles({ fontSize: `${e.target.value}px` })}
-                      className="w-full accent-[#D9A86C] h-1 cursor-pointer"
+                      unit="px"
+                      onChange={(v) => handleUpdateStyles({ fontSize: `${v}px` })}
                     />
                     <div className="flex items-center gap-1 pt-1 border-t border-white/5">
                       {[12, 14, 16, 18, 22].map((sz) => (
@@ -637,17 +597,18 @@ export function QuickToolbar({
               </div>
 
               {/* Color Swatch for Button Background */}
-              <input
-                type="color"
-                value={styles.backgroundColor || '#B8893A'}
-                onChange={(e) => handleUpdateStyles({ backgroundColor: e.target.value })}
-                className="w-5 h-5 rounded-md border border-white/20 cursor-pointer bg-transparent"
-                title="Kolor tła przycisku"
-              />
+              <div className="flex items-center">
+                <ColorControl
+                  compact
+                  value={styles.backgroundColor || '#B8893A'}
+                  onChange={(v) => handleUpdateStyles({ backgroundColor: v })}
+                  title="Kolor tła przycisku"
+                />
+              </div>
 
               {/* Button Image Background Upload */}
-              <label className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[11px] font-semibold text-white border border-white/[0.08] cursor-pointer transition-colors" title="Wgraj obraz jako tło przycisku">
-                <ImageIcon className="w-3 h-3 text-violet-400" />
+              <label className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[11px] font-semibold text-white border border-[#1F1F24] cursor-pointer transition-colors" title="Wgraj obraz jako tło przycisku">
+                <ImageIcon className="w-3 h-3 text-[#D9A86C]" />
                 <span>Obraz tła</span>
                 <input
                   type="file"
@@ -698,7 +659,7 @@ export function QuickToolbar({
                       value={linkVal}
                       onChange={(e) => setLinkVal(e.target.value)}
                       placeholder="https://... (mp4/webm)"
-                      className="flex-1 px-2 py-1 bg-white/[0.04] border border-white/[0.08] rounded-lg text-xs text-white focus:outline-none focus:border-[#D9A86C]"
+                      className="flex-1 px-2 py-1 bg-white/[0.04] border border-[#1F1F24] rounded-lg text-xs text-white focus:outline-none focus:border-[#D9A86C]"
                     />
                     <button
                       onClick={() => {
@@ -742,13 +703,12 @@ export function QuickToolbar({
           {/* ------------------------------------------------------------- */}
           {(nodeType === 'svg' || nodeType === 'icon') && (
             <>
-              <div className="flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.08] rounded-lg px-2 py-0.5">
+              <div className="flex items-center gap-1.5 bg-white/[0.04] border border-[#1F1F24] rounded-lg px-2 py-0.5">
                 <span className="text-[10px] text-zinc-400">Kolor:</span>
-                <input
-                  type="color"
+                <ColorControl
+                  compact
                   value={styles.color || '#D9A86C'}
-                  onChange={(e) => handleUpdateStyles({ color: e.target.value })}
-                  className="w-4 h-4 rounded border-0 cursor-pointer bg-transparent"
+                  onChange={(v) => handleUpdateStyles({ color: v })}
                   title="Kolor ikony / SVG"
                 />
               </div>
@@ -780,14 +740,14 @@ export function QuickToolbar({
                       onClick={() => handleInsertChildNode('text')}
                       className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left text-xs text-slate-200 hover:text-white hover:bg-white/[0.08] transition-colors"
                     >
-                      <Type className="w-3.5 h-3.5 text-violet-400" />
+                      <Type className="w-3.5 h-3.5 text-[#D9A86C]" />
                       <span>Tekst</span>
                     </button>
                     <button
                       onClick={() => handleInsertChildNode('heading')}
                       className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left text-xs text-slate-200 hover:text-white hover:bg-white/[0.08] transition-colors"
                     >
-                      <Type className="w-3.5 h-3.5 text-indigo-400 font-bold" />
+                      <Type className="w-3.5 h-3.5 text-[#F2C27F] font-bold" />
                       <span>Nagłówek</span>
                     </button>
                     <button
@@ -823,7 +783,7 @@ export function QuickToolbar({
                       onClick={() => fileInputRef.current?.click()}
                       className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left text-xs text-[#F2C27F] hover:text-white hover:bg-[#D9A86C]/30 transition-colors"
                     >
-                      <Upload className="w-3.5 h-3.5 text-violet-400" />
+                      <Upload className="w-3.5 h-3.5 text-[#F2C27F]" />
                       <span>Wgraj z dysku...</span>
                     </button>
                   </div>
@@ -831,11 +791,10 @@ export function QuickToolbar({
               </div>
 
               <div className="flex items-center gap-1">
-                <input
-                  type="color"
+                <ColorControl
+                  compact
                   value={styles.backgroundColor || (nodeType === 'section' ? '#06060c' : 'transparent')}
-                  onChange={(e) => handleUpdateStyles({ backgroundColor: e.target.value })}
-                  className="w-5 h-5 rounded-md border border-white/20 cursor-pointer bg-transparent"
+                  onChange={(v) => handleUpdateStyles({ backgroundColor: v })}
                   title="Kolor tła"
                 />
               </div>
@@ -878,10 +837,10 @@ export function QuickToolbar({
           {node && (
             <button
               onClick={() => setShowSaveExperience(true)}
-              className="p-1 rounded-lg text-zinc-400 hover:text-violet-300 hover:bg-[#C99A4A]/10 transition-colors"
+              className="p-1 rounded-lg text-zinc-400 hover:text-[#F2C27F] hover:bg-[#C99A4A]/10 transition-colors"
               title="Zapisz jako Experience (Save as Experience)"
             >
-              <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+              <Sparkles className="w-3.5 h-3.5 text-[#D9A86C]" />
             </button>
           )}
 
@@ -908,7 +867,7 @@ export function QuickToolbar({
         {/* Small pointer arrow pointing to the selected element (for non-sections) */}
         {nodeType !== 'section' && (
           <div
-            className={`w-2 h-2 bg-[#202024] border border-white/15 rotate-45 ${
+            className={`w-2 h-2 bg-[#18181B] border border-[#1F1F24] rotate-45 ${
               isTop ? 'border-t-0 border-l-0' : 'border-b-0 border-r-0'
             }`}
           />

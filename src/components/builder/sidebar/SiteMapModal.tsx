@@ -66,13 +66,13 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-5xl max-h-[85vh] bg-[#18181B] border border-white/[0.12] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        className="w-full max-w-5xl max-h-[85vh] bg-[#18181B] border border-[#1F1F24] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-[#2E2E33]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#1F1F24] bg-[#2E2E33]">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#D9A86C]/20 border border-[#D9A86C]/25 flex items-center justify-center text-violet-400">
+            <div className="w-9 h-9 rounded-xl bg-[#D9A86C]/20 border border-[#D9A86C]/25 flex items-center justify-center text-[#D9A86C]">
               <LayoutGrid className="w-5 h-5" />
             </div>
             <div>
@@ -86,7 +86,7 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
           <div className="flex items-center gap-3">
             <button
               onClick={handleAddPage}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-xs font-semibold transition-all shadow-md shadow-[#D9A86C]-600/20"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-xs font-semibold transition-all shadow-md shadow-[#D9A86C]/20"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Dodaj stronę</span>
@@ -111,14 +111,14 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
                   key={page.id}
                   className={`flex flex-col rounded-2xl border transition-all duration-200 overflow-hidden ${
                     isActive
-                      ? 'bg-violet-950/20 border-[#D9A86C]/40 shadow-xl shadow-[#D9A86C]-500/10 ring-1 ring-violet-500/30'
-                      : 'bg-white/[0.03] border-white/[0.08] hover:border-white/20'
+                      ? 'bg-[#D9A86C]/20 border-[#D9A86C]/40 shadow-xl shadow-[#D9A86C]/10 ring-1 ring-[#D9A86C]/30'
+                      : 'bg-white/[0.03] border-[#1F1F24] hover:border-white/20'
                   }`}
                 >
                   {/* Page Card Header */}
                   <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <Globe className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-violet-400' : 'text-zinc-400'}`} />
+                      <Globe className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-[#D9A86C]' : 'text-zinc-400'}`} />
                       <div className="min-w-0">
                         <div className="font-bold text-xs text-white truncate flex items-center gap-2">
                           {page.name}
@@ -165,7 +165,7 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
                             <span className="text-[10px] font-mono text-zinc-500 w-4 text-center">
                               {idx + 1}
                             </span>
-                            <span className="w-1.5 h-1.5 rounded-full bg-violet-400 flex-shrink-0" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#D9A86C] flex-shrink-0" />
                             <span className="font-medium truncate">{section.label}</span>
                           </div>
                           <span className="text-[9px] text-zinc-500 font-mono hidden group-hover:block">
@@ -181,7 +181,7 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
                     <span>{page.sections.length} sekcji</span>
                     <button
                       onClick={() => handleNavigateToPage(page.id)}
-                      className="text-violet-400 hover:text-[#F2C27F] font-medium hover:underline flex items-center gap-1"
+                      className="text-[#D9A86C] hover:text-[#F2C27F] font-medium hover:underline flex items-center gap-1"
                     >
                       <span>Edytuj stronę</span>
                       <ChevronRight className="w-3 h-3" />

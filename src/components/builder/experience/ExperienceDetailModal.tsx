@@ -73,20 +73,20 @@ export function ExperienceDetailModal({
   return (
     <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/90 backdrop-blur-md p-2 md:p-6 animate-in fade-in select-none">
       <div
-        className="w-full max-w-6xl max-h-[95vh] bg-[#18181B] border border-[#2E2E33] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
+        className="w-full max-w-6xl max-h-[95vh] bg-[#18181B] border border-[#1F1F24] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Top Bar */}
-        <div className="px-6 py-4 border-b border-[#2E2E33] bg-[#2E2E33] flex items-center justify-between gap-4">
+        <div className="px-6 py-4 border-b border-[#1F1F24] bg-[#2E2E33] flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-violet-400 bg-violet-500/10 px-2.5 py-1 rounded-md border border-[#D9A86C]/20">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#D9A86C] bg-[#D9A86C]/10 px-2.5 py-1 rounded-md border border-[#D9A86C]/20">
               {experience.type}
             </span>
             <div className="min-w-0">
               <h2 className="text-lg font-bold text-white truncate flex items-center gap-2">
                 <span>{experience.name}</span>
                 {experience.badge && (
-                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-[#D9A86C]/40">
+                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[#D9A86C]/20 text-[#F2C27F] border border-[#D9A86C]/40">
                     {experience.badge}
                   </span>
                 )}
@@ -98,7 +98,7 @@ export function ExperienceDetailModal({
           </div>
 
           {/* Viewport Switcher Controls */}
-          <div className="flex items-center gap-1.5 bg-[#18181B] p-1 rounded-xl border border-[#2E2E33]">
+          <div className="flex items-center gap-1.5 bg-[#18181B] p-1 rounded-xl border border-[#1F1F24]">
             <button
               onClick={() => setViewport('desktop')}
               className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
@@ -170,17 +170,17 @@ export function ExperienceDetailModal({
                 <div className="w-px h-3 bg-white/20" />
                 <button
                   onClick={() => setIsInteractive(!isInteractive)}
-                  className={`flex items-center gap-1.5 transition-colors ${isInteractive ? 'text-violet-300 font-semibold' : 'text-zinc-400 hover:text-white'}`}
+                  className={`flex items-center gap-1.5 transition-colors ${isInteractive ? 'text-[#F2C27F] font-semibold' : 'text-zinc-400 hover:text-white'}`}
                   title="Toggle interactive mode (hover, click, drag)"
                 >
-                  <MousePointerClick className="w-3 h-3 text-violet-400" />
+                  <MousePointerClick className="w-3 h-3 text-[#D9A86C]" />
                   <span>{isInteractive ? 'Interactive: ON' : 'Interactive: OFF'}</span>
                 </button>
               </div>
 
               {/* Scroll Simulation Slider */}
               <div className="flex items-center gap-2 bg-[#202024]/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10 text-xs text-zinc-300 pointer-events-auto shadow-lg">
-                <Sliders className="w-3 h-3 text-violet-400" />
+                <Sliders className="w-3 h-3 text-[#D9A86C]" />
                 <span className="text-[11px] text-zinc-400 font-medium hidden sm:inline">Scroll Sim:</span>
                 <input
                   type="range"
@@ -191,7 +191,7 @@ export function ExperienceDetailModal({
                   className="w-20 md:w-28 accent-[#D9A86C] cursor-pointer h-1.5 bg-[#2E2E33] rounded-lg"
                   title={`Simulated scroll progress: ${scrollProgress}%`}
                 />
-                <span className="font-mono text-[11px] text-violet-300 w-8 text-right">{scrollProgress}%</span>
+                <span className="font-mono text-[11px] text-[#F2C27F] w-8 text-right">{scrollProgress}%</span>
               </div>
             </div>
 
@@ -214,7 +214,7 @@ export function ExperienceDetailModal({
           </div>
 
           {/* Details & Action Panel */}
-          <div className="w-full lg:w-80 bg-[#202024] border-t lg:border-t-0 lg:border-l border-[#2E2E33] p-6 flex flex-col justify-between overflow-y-auto">
+          <div className="w-full lg:w-80 bg-[#202024] border-t lg:border-t-0 lg:border-l border-[#1F1F24] p-6 flex flex-col justify-between overflow-y-auto">
             <div className="space-y-6">
               {/* Description Block */}
               <div>
@@ -227,39 +227,39 @@ export function ExperienceDetailModal({
               {/* Capabilities Checklist */}
               <div>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2 flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-violet-400" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#D9A86C]" />
                   <span>Runtime Capabilities</span>
                 </h4>
                 <div className="grid grid-cols-2 gap-1.5 text-[11px]">
-                  <div className="bg-[#202024] px-2.5 py-1.5 rounded-lg border border-[#2E2E33] flex items-center gap-1.5 text-zinc-300">
+                  <div className="bg-[#202024] px-2.5 py-1.5 rounded-lg border border-[#1F1F24] flex items-center gap-1.5 text-zinc-300">
                     <Check className="w-3 h-3 text-emerald-400" />
                     <span>Live Preview</span>
                   </div>
-                  <div className="bg-[#202024] px-2.5 py-1.5 rounded-lg border border-[#2E2E33] flex items-center gap-1.5 text-zinc-300">
+                  <div className="bg-[#202024] px-2.5 py-1.5 rounded-lg border border-[#1F1F24] flex items-center gap-1.5 text-zinc-300">
                     <Check className="w-3 h-3 text-emerald-400" />
                     <span>Responsive</span>
                   </div>
                   {experience.capabilities?.perspective3d && (
-                    <div className="bg-[#202024] px-2.5 py-1.5 rounded-lg border border-[#2E2E33] flex items-center gap-1.5 text-violet-300 font-semibold">
-                      <Box className="w-3 h-3 text-violet-400" />
+                    <div className="bg-[#202024] px-2.5 py-1.5 rounded-lg border border-[#1F1F24] flex items-center gap-1.5 text-[#F2C27F] font-semibold">
+                      <Box className="w-3 h-3 text-[#D9A86C]" />
                       <span>CSS 3D Depth</span>
                     </div>
                   )}
                   {experience.capabilities?.backgroundVideo && (
-                    <div className="bg-[#202024] px-2.5 py-1.5 rounded-lg border border-[#2E2E33] flex items-center gap-1.5 text-violet-300 font-semibold">
-                      <Film className="w-3 h-3 text-violet-400" />
+                    <div className="bg-[#202024] px-2.5 py-1.5 rounded-lg border border-[#1F1F24] flex items-center gap-1.5 text-[#F2C27F] font-semibold">
+                      <Film className="w-3 h-3 text-[#D9A86C]" />
                       <span>Video Ready</span>
                     </div>
                   )}
                   {experience.capabilities?.scrollAnimation && (
-                    <div className="bg-[#202024] px-2.5 py-1.5 rounded-lg border border-[#2E2E33] flex items-center gap-1.5 text-violet-300 font-semibold">
-                      <Sliders className="w-3 h-3 text-violet-400" />
+                    <div className="bg-[#202024] px-2.5 py-1.5 rounded-lg border border-[#1F1F24] flex items-center gap-1.5 text-[#F2C27F] font-semibold">
+                      <Sliders className="w-3 h-3 text-[#D9A86C]" />
                       <span>Scroll Motion</span>
                     </div>
                   )}
                   {experience.capabilities?.gradient && (
-                    <div className="bg-[#202024] px-2.5 py-1.5 rounded-lg border border-[#2E2E33] flex items-center gap-1.5 text-violet-300 font-semibold">
-                      <Sparkles className="w-3 h-3 text-violet-400" />
+                    <div className="bg-[#202024] px-2.5 py-1.5 rounded-lg border border-[#1F1F24] flex items-center gap-1.5 text-[#F2C27F] font-semibold">
+                      <Sparkles className="w-3 h-3 text-[#D9A86C]" />
                       <span>Mesh Glow</span>
                     </div>
                   )}
@@ -270,19 +270,19 @@ export function ExperienceDetailModal({
               <div className="space-y-2.5">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Attributes</h4>
                 <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="bg-[#202024] p-2.5 rounded-xl border border-[#2E2E33]">
+                  <div className="bg-[#202024] p-2.5 rounded-xl border border-[#1F1F24]">
                     <span className="text-[10px] text-zinc-500 block uppercase font-bold">Category</span>
                     <span className="font-semibold text-zinc-200 capitalize">{experience.category}</span>
                   </div>
-                  <div className="bg-[#202024] p-2.5 rounded-xl border border-[#2E2E33]">
+                  <div className="bg-[#202024] p-2.5 rounded-xl border border-[#1F1F24]">
                     <span className="text-[10px] text-zinc-500 block uppercase font-bold">Mood</span>
                     <span className="font-semibold text-zinc-200 capitalize">{experience.mood || 'Modern'}</span>
                   </div>
-                  <div className="bg-[#202024] p-2.5 rounded-xl border border-[#2E2E33]">
+                  <div className="bg-[#202024] p-2.5 rounded-xl border border-[#1F1F24]">
                     <span className="text-[10px] text-zinc-500 block uppercase font-bold">Motion</span>
                     <span className="font-semibold text-zinc-200 capitalize">{experience.motionLevel || 'Subtle'}</span>
                   </div>
-                  <div className="bg-[#202024] p-2.5 rounded-xl border border-[#2E2E33]">
+                  <div className="bg-[#202024] p-2.5 rounded-xl border border-[#1F1F24]">
                     <span className="text-[10px] text-zinc-500 block uppercase font-bold">Source</span>
                     <span className="font-semibold text-zinc-200 capitalize">{experience.source}</span>
                   </div>
@@ -293,14 +293,14 @@ export function ExperienceDetailModal({
               {experience.assetSlots && experience.assetSlots.length > 0 && (
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2 flex items-center gap-1.5">
-                    <ImageIcon className="w-3.5 h-3.5 text-violet-400" />
+                    <ImageIcon className="w-3.5 h-3.5 text-[#D9A86C]" />
                     <span>Asset Slots ({experience.assetSlots.length})</span>
                   </h4>
                   <div className="space-y-1.5">
                     {experience.assetSlots.map(slot => (
-                      <div key={slot.id} className="text-[11px] bg-[#202024] px-3 py-2 rounded-lg border border-[#2E2E33] flex items-center justify-between text-zinc-300">
+                      <div key={slot.id} className="text-[11px] bg-[#202024] px-3 py-2 rounded-lg border border-[#1F1F24] flex items-center justify-between text-zinc-300">
                         <span className="font-medium">{slot.label}</span>
-                        <span className="text-[10px] font-mono text-violet-400 bg-violet-500/10 px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] font-mono text-[#D9A86C] bg-[#D9A86C]/10 px-1.5 py-0.5 rounded">
                           {slot.slotType}
                         </span>
                       </div>
@@ -315,7 +315,7 @@ export function ExperienceDetailModal({
                   <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">Tags</h4>
                   <div className="flex flex-wrap gap-1.5">
                     {experience.tags.map(tag => (
-                      <span key={tag} className="text-[10px] bg-white/[0.06] text-zinc-300 px-2 py-1 rounded-md border border-white/[0.08]">
+                      <span key={tag} className="text-[10px] bg-white/[0.06] text-zinc-300 px-2 py-1 rounded-md border border-[#1F1F24]">
                         #{tag}
                       </span>
                     ))}
@@ -325,12 +325,12 @@ export function ExperienceDetailModal({
             </div>
 
             {/* Primary Action Button & Insertion Dropdown */}
-            <div className="pt-6 border-t border-[#2E2E33] space-y-2 mt-6">
+            <div className="pt-6 border-t border-[#1F1F24] space-y-2 mt-6">
               <div className="relative">
                 <button
                   onClick={() => handleApply('add')}
                   disabled={insertedSuccess}
-                  className="w-full py-3.5 rounded-xl font-extrabold text-xs tracking-wide bg-gradient-to-r from-[#B8893A] to-[#D9A86C] hover:from-violet-500 hover:to-fuchsia-500 text-white shadow-xl shadow-[#D9A86C]-600/30 flex items-center justify-center gap-2 transition-transform active:scale-95 disabled:opacity-50"
+                  className="w-full py-3.5 rounded-xl font-extrabold text-xs tracking-wide bg-gradient-to-r from-[#B8893A] to-[#D9A86C] hover:from-[#B8893A] hover:to-[#D9A86C] text-white shadow-xl shadow-[#D9A86C]/30 flex items-center justify-center gap-2 transition-transform active:scale-95 disabled:opacity-50"
                 >
                   {insertedSuccess ? (
                     <>
@@ -339,7 +339,7 @@ export function ExperienceDetailModal({
                     </>
                   ) : (
                     <>
-                      <Sparkles className="w-4 h-4 text-violet-200" />
+                      <Sparkles className="w-4 h-4 text-white" />
                       <span>USE THIS EXPERIENCE</span>
                     </>
                   )}
@@ -352,22 +352,22 @@ export function ExperienceDetailModal({
                   onClick={() => handleApply('above')}
                   className="px-2.5 py-2 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-[11px] font-semibold text-zinc-300 flex items-center justify-center gap-1.5 transition-colors"
                 >
-                  <ArrowUp className="w-3 h-3 text-violet-400" />
+                  <ArrowUp className="w-3 h-3 text-[#D9A86C]" />
                   <span>Insert Above</span>
                 </button>
                 <button
                   onClick={() => handleApply('below')}
                   className="px-2.5 py-2 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-[11px] font-semibold text-zinc-300 flex items-center justify-center gap-1.5 transition-colors"
                 >
-                  <ArrowDown className="w-3 h-3 text-violet-400" />
+                  <ArrowDown className="w-3 h-3 text-[#D9A86C]" />
                   <span>Insert Below</span>
                 </button>
                 {selectedSectionId && (
                   <button
                     onClick={() => handleApply('replace')}
-                    className="col-span-2 px-2.5 py-2 rounded-lg bg-violet-950/40 hover:bg-violet-950/70 border border-[#D9A86C]/30 text-[11px] font-semibold text-violet-300 flex items-center justify-center gap-1.5 transition-colors"
+                    className="col-span-2 px-2.5 py-2 rounded-lg bg-[#B8893A]/40 hover:bg-[#B8893A]/70 border border-[#D9A86C]/30 text-[11px] font-semibold text-[#F2C27F] flex items-center justify-center gap-1.5 transition-colors"
                   >
-                    <Replace className="w-3 h-3 text-violet-400" />
+                    <Replace className="w-3 h-3 text-[#D9A86C]" />
                     <span>Replace Selected Section</span>
                   </button>
                 )}

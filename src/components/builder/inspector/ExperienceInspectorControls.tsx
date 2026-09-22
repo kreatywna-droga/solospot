@@ -207,7 +207,7 @@ function ColorArrayField({
   return (
     <div className="space-y-2">
       <div
-        className="w-full h-6 rounded-lg border border-white/[0.08]"
+        className="w-full h-6 rounded-lg border border-[#15151A]"
         style={{ background: gradient }}
       />
       <div className="flex items-center gap-2 flex-wrap">
@@ -230,7 +230,7 @@ function ColorArrayField({
         ))}
         <button
           onClick={addColor}
-          className="w-5 h-5 flex items-center justify-center rounded border border-white/[0.08] text-zinc-400 hover:text-white hover:bg-white/[0.06] text-[10px]"
+          className="w-5 h-5 flex items-center justify-center rounded border border-[#15151A] text-zinc-400 hover:text-white hover:bg-white/[0.06] text-[10px]"
           title="Dodaj kolor"
         >
           +
@@ -289,19 +289,19 @@ export function ExperienceInspectorControls({
 
   return (
     <div className="flex flex-col h-full bg-[#202024] text-white select-none">
-      <div className="px-4 py-3 border-b border-white/[0.08] bg-[#2E2E33]">
+      <div className="px-4 py-3 border-b border-[#15151A] bg-[#2E2E33]">
         <div className="text-xs font-bold text-white">Experience Controls</div>
         <p className="text-[11px] text-zinc-500 mt-0.5">Scene configuration</p>
       </div>
 
-      <div className="flex border-b border-white/[0.08]">
+      <div className="flex border-b border-[#15151A]">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex-1 py-2 text-[11px] font-semibold transition-all ${
               activeTab === tab.id
-                ? 'text-violet-400 border-b-2 border-[#D9A86C]'
+                ? 'text-[#F2C27F] border-b-2 border-[#D9A86C]'
                 : 'text-zinc-500 hover:text-zinc-300'
             }`}
           >
@@ -361,7 +361,7 @@ export function ExperienceInspectorControls({
               unit="x"
             />
 
-            <div className="border-t border-white/[0.06] pt-4 space-y-4">
+            <div className="border-t border-[#15151A] pt-4 space-y-4">
               <FieldGroup label="Particles">
                 <ToggleField
                   label="Enable Particles"
@@ -458,7 +458,7 @@ export function ExperienceInspectorControls({
               </>
             )}
 
-            <div className="border-t border-white/[0.06] pt-4 space-y-4">
+            <div className="border-t border-[#15151A] pt-4 space-y-4">
               <FieldGroup label="Scroll Type">
                 <SelectField
                   value={config.scroll?.type ?? 'none'}

@@ -52,9 +52,9 @@ export function LayerSync({ containerRef }: LayerSyncProps) {
         })
 
         // Highlight flash effect
-        layerEl.classList.add('bg-violet-500/30')
+        layerEl.classList.add('bg-[#D9A86C]/30')
         setTimeout(() => {
-          layerEl.classList.remove('bg-violet-500/30')
+          layerEl.classList.remove('bg-[#D9A86C]/30')
         }, 600)
       }
     }, 50)

@@ -38,6 +38,13 @@ import { FontPicker } from '../../../../packages/authoring-studio/src/inspector/
 import { MediaPickerModal } from '../sidebar/MediaPickerModal';
 import { resolveAssetToMutationPayload } from '@/lib/assets/AssetResolver';
 import { SmoothSlider } from './SmoothSlider';
+import {
+  ColorControl,
+  GradientControl,
+  isGradientCss,
+  buildLinearGradient,
+  DEFAULT_GRADIENT,
+} from '../../../../packages/authoring-studio/src/inspector/controls';
 import { ExperienceInspectorControls } from './ExperienceInspectorControls';
 import type { InspectorCategory } from '../../../../packages/builder-core/src/InspectorRuntime';
 import type { NodeStyles, NodeResponsive } from '../../../../packages/builder-core/src/BuilderDocument';
@@ -66,7 +73,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
   /** Which property the media picker writes to */
   const [mediaPickerTarget, setMediaPickerTarget] = useState<'image' | 'section-bg' | 'video-bg'>('image');
   /** Explicit background tab override — reset when the selection changes */
-  const [bgModeOverride, setBgModeOverride] = useState<'color' | 'image' | 'video' | null>(null);
+  const [bgModeOverride, setBgModeOverride] = useState<'color' | 'gradient' | 'image' | 'video' | null>(null);
 
   // Reset transient UI state when the selected element changes
   useEffect(() => {
@@ -88,6 +95,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
   const svgSizeLabelRef = useRef<HTMLSpanElement>(null);
   const txLabelRef = useRef<HTMLSpanElement>(null);
   const tyLabelRef = useRef<HTMLSpanElement>(null);
+  const overlayLabelRef = useRef<HTMLSpanElement>(null);
 
   // Helper: get canvas DOM element for the selected node for live preview
   const getCanvasEl = useCallback((): HTMLElement | null => {
@@ -111,7 +119,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
   if (!sectionId || !selectedNode) {
     return (
       <div className="flex flex-col h-full overflow-hidden bg-[#202024] text-white select-none">
-        <div className="px-4 py-3 border-b border-white/[0.08] bg-[#2E2E33] flex items-center justify-between">
+        <div className="px-4 py-3 border-b border-[#15151A] bg-[#2E2E33] flex items-center justify-between">
           <div>
             <span className="text-xs font-bold text-white">Inspektor</span>
             <p className="text-[11px] text-zinc-500 mt-0.5">Właściwości elementu</p>
@@ -149,7 +157,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
   return (
     <div className="flex flex-col h-full overflow-hidden bg-[#202024] text-white select-none">
       {/* Element Header */}
-      <div className="px-4 py-3 border-b border-white/[0.08] bg-[#2E2E33] flex items-center justify-between">
+      <div className="px-4 py-3 border-b border-[#15151A] bg-[#2E2E33] flex items-center justify-between">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-white truncate">{nodeLabel}</span>
@@ -195,7 +203,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                 onChange={(e) => onPropChange('text', e.target.value)}
                 placeholder="Wpisz treść tekstu..."
                 rows={3}
-                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C] resize-none"
+                className="w-full px-3 py-2 bg-white/[0.04] border border-[#15151A] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C] resize-none"
               />
             </div>
 
@@ -212,7 +220,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             <div className="space-y-2">
               <div className="flex items-center justify-between text-[11px]">
                 <span className="font-semibold text-zinc-300">Rozmiar tekstu</span>
-                <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-2 py-0.5">
+                <div className="flex items-center gap-1 bg-white/[0.04] border border-[#15151A] rounded-lg px-2 py-0.5">
                   <span ref={fontSizeLabelRef} className="w-10 text-right font-mono text-white text-xs">
                     {parseInt(String(currentStyles.fontSize || '16px').replace('px', '')) || 16}
                   </span>
@@ -242,7 +250,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                     className={`flex-1 py-0.5 text-[9px] font-mono rounded border transition-all ${
                       (parseInt(String(currentStyles.fontSize || '16px').replace('px', '')) || 16) === sz
                         ? 'bg-[#D9A86C]/20 text-[#F2C27F] border-[#D9A86C]/30'
-                        : 'bg-white/[0.04] text-zinc-500 border-white/[0.06] hover:text-zinc-300'
+                        : 'bg-white/[0.04] text-zinc-500 border-[#15151A] hover:text-zinc-300'
                     }`}
                   >
                     {sz}px
@@ -255,26 +263,18 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold text-zinc-300">Kolor tekstu</label>
-                <div className="flex items-center gap-2 p-1.5 bg-white/[0.04] border border-white/[0.08] rounded-xl">
-                  <input
-                    type="color"
+                <div className="p-1.5 bg-white/[0.04] border border-[#15151A] rounded-xl">
+                  <ColorControl
                     value={currentStyles.color || '#ffffff'}
-                    onChange={(e) => onStyleChange({ color: e.target.value })}
-                    className="w-7 h-7 rounded-lg border-0 cursor-pointer bg-transparent flex-shrink-0"
-                  />
-                  <input
-                    type="text"
-                    value={currentStyles.color || '#ffffff'}
-                    onChange={(e) => onStyleChange({ color: e.target.value })}
+                    onChange={(v) => onStyleChange({ color: v })}
                     placeholder="#ffffff"
-                    className="w-full bg-transparent text-[11px] font-mono text-zinc-300 focus:outline-none focus:text-white"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold text-zinc-300">Wyrównanie</label>
-                <div className="flex items-center p-1 bg-white/[0.04] border border-white/[0.08] rounded-xl gap-1">
+                <div className="flex items-center p-1 bg-white/[0.04] border border-[#15151A] rounded-xl gap-1">
                   <button
                     onClick={() => onStyleChange({ textAlign: 'left' })}
                     className={`flex-1 py-1.5 rounded-lg flex items-center justify-center transition-colors ${
@@ -328,7 +328,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                 value={String(props.src ?? '')}
                 onChange={(e) => onPropChange('src', e.target.value)}
                 placeholder="https://..."
-                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C]"
+                className="w-full px-3 py-2 bg-white/[0.04] border border-[#15151A] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C]"
               />
             </div>
 
@@ -340,7 +340,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
                     currentStyles.objectFit === 'cover' || !currentStyles.objectFit
                       ? 'bg-[#D9A86C] text-white border-[#D9A86C]'
-                      : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
+                      : 'bg-white/[0.04] text-zinc-400 border-[#15151A] hover:text-white'
                   }`}
                 >
                   Wypełnij (Cover)
@@ -350,7 +350,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
                     currentStyles.objectFit === 'contain'
                       ? 'bg-[#D9A86C] text-white border-[#D9A86C]'
-                      : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
+                      : 'bg-white/[0.04] text-zinc-400 border-[#15151A] hover:text-white'
                   }`}
                 >
                   Dopasuj (Contain)
@@ -373,7 +373,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                     className={`py-1 text-[11px] font-semibold rounded-lg border transition-all ${
                       currentStyles.borderRadius === r.val
                         ? 'bg-[#D9A86C] text-white border-[#D9A86C]'
-                        : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
+                        : 'bg-white/[0.04] text-zinc-400 border-[#15151A] hover:text-white'
                     }`}
                   >
                     {r.label}
@@ -383,10 +383,10 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             </div>
 
             {/* Image Width & Height — SmoothSlider */}
-            <div className="space-y-2 pt-1 border-t border-white/[0.06]">
+            <div className="space-y-2 pt-1 border-t border-[#15151A]">
               <div className="flex items-center justify-between">
                 <label className="text-[11px] font-semibold text-zinc-300">Szerokość obrazu</label>
-                <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded px-2 py-0.5">
+                <div className="flex items-center gap-1 bg-white/[0.04] border border-[#15151A] rounded px-2 py-0.5">
                   <span ref={imgWidthLabelRef} className="w-12 text-right font-mono text-white text-xs">
                     {parseInt(String(currentStyles.width || '400px').replace('px', '')) || 400}
                   </span>
@@ -410,7 +410,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-[11px] font-semibold text-zinc-300">Wysokość obrazu</label>
-                <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded px-2 py-0.5">
+                <div className="flex items-center gap-1 bg-white/[0.04] border border-[#15151A] rounded px-2 py-0.5">
                   <span ref={imgHeightLabelRef} className="w-12 text-right font-mono text-white text-xs">
                     {parseInt(String(currentStyles.height || '260px').replace('px', '')) || 260}
                   </span>
@@ -445,7 +445,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                 value={String(props.text ?? '')}
                 onChange={(e) => onPropChange('text', e.target.value)}
                 placeholder="np. Kup Teraz, Zarejestruj się"
-                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C]"
+                className="w-full px-3 py-2 bg-white/[0.04] border border-[#15151A] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C]"
               />
             </div>
 
@@ -458,7 +458,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   value={String(props.href ?? '')}
                   onChange={(e) => onPropChange('href', e.target.value)}
                   placeholder="https://... lub #kontakt"
-                  className="w-full pl-9 pr-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C]"
+                  className="w-full pl-9 pr-3 py-2 bg-white/[0.04] border border-[#15151A] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C]"
                 />
               </div>
             </div>
@@ -466,47 +466,31 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold text-zinc-300">Kolor tła</label>
-                <div className="flex items-center gap-2 p-1.5 bg-white/[0.04] border border-white/[0.08] rounded-xl">
-                  <input
-                    type="color"
-                    value={currentStyles.backgroundColor || '#7c3aed'}
-                    onChange={(e) => onStyleChange({ backgroundColor: e.target.value })}
-                    className="w-7 h-7 rounded-lg border-0 cursor-pointer bg-transparent flex-shrink-0"
-                  />
-                  <input
-                    type="text"
-                    value={currentStyles.backgroundColor || '#7c3aed'}
-                    onChange={(e) => onStyleChange({ backgroundColor: e.target.value })}
-                    placeholder="#7c3aed"
-                    className="w-full bg-transparent text-[11px] font-mono text-zinc-300 focus:outline-none focus:text-white"
+                <div className="p-1.5 bg-white/[0.04] border border-[#15151A] rounded-xl">
+                  <ColorControl
+                    value={currentStyles.backgroundColor || '#D9A86C'}
+                    onChange={(v) => onStyleChange({ backgroundColor: v })}
+                    placeholder="#D9A86C"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold text-zinc-300">Kolor tekstu</label>
-                <div className="flex items-center gap-2 p-1.5 bg-white/[0.04] border border-white/[0.08] rounded-xl">
-                  <input
-                    type="color"
+                <div className="p-1.5 bg-white/[0.04] border border-[#15151A] rounded-xl">
+                  <ColorControl
                     value={currentStyles.color || '#ffffff'}
-                    onChange={(e) => onStyleChange({ color: e.target.value })}
-                    className="w-7 h-7 rounded-lg border-0 cursor-pointer bg-transparent flex-shrink-0"
-                  />
-                  <input
-                    type="text"
-                    value={currentStyles.color || '#ffffff'}
-                    onChange={(e) => onStyleChange({ color: e.target.value })}
+                    onChange={(v) => onStyleChange({ color: v })}
                     placeholder="#ffffff"
-                    className="w-full bg-transparent text-[11px] font-mono text-zinc-300 focus:outline-none focus:text-white"
                   />
                 </div>
               </div>
             </div>
 
             {/* Button Background Image Upload */}
-            <div className="space-y-1.5 pt-1 border-t border-white/[0.06]">
+            <div className="space-y-1.5 pt-1 border-t border-[#15151A]">
               <label className="text-[11px] font-semibold text-zinc-300">Tło obrazkowe przycisku</label>
-              <div className="flex items-center gap-2 p-1.5 bg-white/[0.04] border border-white/[0.08] rounded-xl">
+              <div className="flex items-center gap-2 p-1.5 bg-white/[0.04] border border-[#15151A] rounded-xl">
                 <input
                   type="text"
                   value={currentStyles.backgroundImage || ''}
@@ -514,7 +498,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   placeholder="https://... URL lub plik"
                   className="flex-1 bg-transparent text-[11px] font-mono text-zinc-300 focus:outline-none focus:text-white"
                 />
-                <label className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#D9A86C] hover:bg-[#7C3AED] text-white text-[11px] font-semibold cursor-pointer transition-colors flex-shrink-0">
+                <label className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-[11px] font-semibold cursor-pointer transition-colors flex-shrink-0">
                   <Upload className="w-3 h-3" />
                   <span>Wgraj</span>
                   <input
@@ -550,10 +534,10 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             </div>
 
             {/* Button Width & Height — SmoothSlider */}
-            <div className="space-y-2 pt-1 border-t border-white/[0.06]">
+            <div className="space-y-2 pt-1 border-t border-[#15151A]">
               <div className="flex items-center justify-between">
                 <label className="text-[11px] font-semibold text-zinc-300">Szerokość przycisku</label>
-                <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded px-2 py-0.5">
+                <div className="flex items-center gap-1 bg-white/[0.04] border border-[#15151A] rounded px-2 py-0.5">
                   <span ref={btnWidthLabelRef} className="w-12 text-right font-mono text-white text-xs">
                     {parseInt(String(currentStyles.width || '180px').replace('px', '')) || 180}
                   </span>
@@ -577,7 +561,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-[11px] font-semibold text-zinc-300">Wysokość przycisku</label>
-                <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded px-2 py-0.5">
+                <div className="flex items-center gap-1 bg-white/[0.04] border border-[#15151A] rounded px-2 py-0.5">
                   <span ref={btnHeightLabelRef} className="w-12 text-right font-mono text-white text-xs">
                     {parseInt(String(currentStyles.height || '44px').replace('px', '')) || 44}
                   </span>
@@ -603,10 +587,10 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             </div>
 
             {/* Button Font Size — SmoothSlider */}
-            <div className="space-y-2 pt-1 border-t border-white/[0.06]">
+            <div className="space-y-2 pt-1 border-t border-[#15151A]">
               <div className="flex items-center justify-between text-[11px]">
                 <span className="font-semibold text-zinc-300">Rozmiar tekstu przycisku</span>
-                <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded px-2 py-0.5">
+                <div className="flex items-center gap-1 bg-white/[0.04] border border-[#15151A] rounded px-2 py-0.5">
                   <span ref={btnFontSizeLabelRef} className="w-10 text-right font-mono text-white text-xs">
                     {parseInt(String(currentStyles.fontSize || '14px').replace('px', '')) || 14}
                   </span>
@@ -638,7 +622,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                     className={`flex-1 py-0.5 text-[9px] font-mono rounded border transition-all ${
                       (parseInt(String(currentStyles.fontSize || '14px').replace('px', '')) || 14) === sz
                         ? 'bg-[#D9A86C]/20 text-[#F2C27F] border-[#D9A86C]/30'
-                        : 'bg-white/[0.04] text-zinc-500 border-white/[0.06] hover:text-zinc-300'
+                        : 'bg-white/[0.04] text-zinc-500 border-[#15151A] hover:text-zinc-300'
                     }`}
                   >
                     {sz}px
@@ -654,20 +638,29 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
         {/* ============================================================= */}
         {isRootSection && (() => {
           // Derived mode from the document…
-          const derived: 'color' | 'image' | 'video' =
+          const derived: 'color' | 'gradient' | 'image' | 'video' =
             props.backgroundVideo ? 'video'
+            : isGradientCss(currentStyles.backgroundImage) ? 'gradient'
             : currentStyles.backgroundImage && currentStyles.backgroundImage !== 'none' ? 'image'
             : 'color';
           // …overridden by explicit user tab choice (reset when the selection changes)
           const bgType = bgModeOverride ?? derived;
 
-          const selectBgMode = (mode: 'color' | 'image' | 'video') => {
+          const selectBgMode = (mode: 'color' | 'gradient' | 'image' | 'video') => {
             setBgModeOverride(mode);
             if (mode === 'color') {
               onStyleChange({ backgroundImage: 'none' });
               onPropChange('backgroundVideo', '');
+            } else if (mode === 'gradient') {
+              onPropChange('backgroundVideo', '');
+              if (!isGradientCss(currentStyles.backgroundImage)) {
+                onStyleChange({ backgroundImage: buildLinearGradient(DEFAULT_GRADIENT) });
+              }
             } else if (mode === 'image') {
               onPropChange('backgroundVideo', '');
+              if (isGradientCss(currentStyles.backgroundImage)) {
+                onStyleChange({ backgroundImage: 'none' });
+              }
             } else {
               onStyleChange({ backgroundImage: 'none' });
             }
@@ -675,11 +668,11 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
 
           return (
             <div className="space-y-4">
-              {/* ---- Background type tabs: Kolor | Zdjęcie | Wideo ---- */}
+              {/* ---- Background type tabs: Kolor | Gradient | Zdjęcie | Wideo ---- */}
               <div className="space-y-2">
                 <label className="text-[11px] font-semibold text-zinc-300">Tło sekcji</label>
-                <div className="flex items-center p-1 bg-white/[0.04] border border-white/[0.08] rounded-xl gap-1">
-                  {(['color', 'image', 'video'] as const).map((tab) => (
+                <div className="flex items-center p-1 bg-white/[0.04] border border-[#15151A] rounded-xl gap-1">
+                  {(['color', 'gradient', 'image', 'video'] as const).map((tab) => (
                     <button
                       key={tab}
                       onClick={() => selectBgMode(tab)}
@@ -689,7 +682,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                           : 'text-zinc-400 hover:text-white'
                       }`}
                     >
-                      {tab === 'color' ? '🎨 Kolor' : tab === 'image' ? '🖼 Zdjęcie' : '🎬 Wideo'}
+                      {tab === 'color' ? '🎨 Kolor' : tab === 'gradient' ? '🌈 Gradient' : tab === 'image' ? '🖼 Zdjęcie' : '🎬 Wideo'}
                     </button>
                   ))}
                 </div>
@@ -697,23 +690,32 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
 
               {/* ---- Solid colour ---- */}
               {bgType === 'color' && (
-                <div className="flex items-center gap-3 p-2 bg-white/[0.04] border border-white/[0.08] rounded-xl">
-                  <input
-                    type="color"
+                <div className="p-2 bg-white/[0.04] border border-[#15151A] rounded-xl">
+                  <div className="text-xs font-semibold text-white mb-1">Kolor tła</div>
+                  <ColorControl
                     value={currentStyles.backgroundColor || '#06060c'}
-                    onChange={(e) => onStyleChange({ backgroundColor: e.target.value })}
-                    className="w-8 h-8 rounded-lg border-0 cursor-pointer bg-transparent flex-shrink-0"
+                    onChange={(v) => onStyleChange({ backgroundColor: v })}
+                    placeholder="#06060c"
                   />
-                  <div className="min-w-0 flex-1">
-                    <div className="text-xs font-semibold text-white mb-0.5">Kolor tła</div>
-                    <input
-                      type="text"
-                      value={currentStyles.backgroundColor || '#06060c'}
-                      onChange={(e) => onStyleChange({ backgroundColor: e.target.value })}
-                      placeholder="#06060c"
-                      className="w-full bg-transparent text-[11px] font-mono text-zinc-300 focus:outline-none focus:text-white"
-                    />
-                  </div>
+                </div>
+              )}
+
+              {/* ---- Linear gradient ---- */}
+              {bgType === 'gradient' && (
+                <div className="p-2 bg-white/[0.04] border border-[#15151A] rounded-xl">
+                  <div className="text-xs font-semibold text-white mb-1.5">Gradient tła</div>
+                  <GradientControl
+                    value={
+                      isGradientCss(currentStyles.backgroundImage)
+                        ? currentStyles.backgroundImage
+                        : buildLinearGradient(DEFAULT_GRADIENT)
+                    }
+                    onChange={(css) => onStyleChange({ backgroundImage: css || 'none' })}
+                    onLivePreview={(css) => {
+                      const el = getCanvasEl();
+                      if (el) el.style.setProperty('background-image', css || 'none', 'important');
+                    }}
+                  />
                 </div>
               )}
 
@@ -747,7 +749,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                         });
                       }}
                       placeholder="https://..."
-                      className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C]"
+                      className="w-full px-3 py-2 bg-white/[0.04] border border-[#15151A] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C]"
                     />
                   </div>
 
@@ -766,7 +768,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                           className={`py-1 text-[11px] font-semibold rounded-lg border transition-all ${
                             currentStyles.backgroundSize === opt.size || (!currentStyles.backgroundSize && opt.size === 'cover')
                               ? 'bg-[#D9A86C] text-white border-[#D9A86C]'
-                              : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
+                              : 'bg-white/[0.04] text-zinc-400 border-[#15151A] hover:text-white'
                           }`}
                         >
                           {opt.label}
@@ -776,24 +778,21 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   </div>
 
                   {/* Darkening overlay */}
-                  <div className="space-y-1.5 pt-1 border-t border-white/[0.06]">
+                  <div className="space-y-1.5 pt-1 border-t border-[#15151A]">
                     <div className="flex items-center justify-between">
                       <label className="text-[11px] font-semibold text-zinc-300">Przyciemnienie (overlay)</label>
-                      <span className="text-[11px] font-mono text-white">
+                      <span ref={overlayLabelRef} className="text-[11px] font-mono text-white">
                         {Math.round((currentStyles.overlayOpacity ?? 0.4) * 100)}%
                       </span>
                     </div>
-                    <input
-                      type="range"
+                    <SmoothSlider
                       min={0}
                       max={100}
                       step={5}
                       value={Math.round((currentStyles.overlayOpacity ?? 0.4) * 100)}
-                      onChange={(e) => onStyleChange({ overlayOpacity: Number(e.target.value) / 100 })}
-                      className="w-full accent-[#D9A86C] h-1 cursor-pointer rounded-full"
-                      style={{
-                        background: `linear-gradient(to right, #B8893A ${Math.round((currentStyles.overlayOpacity ?? 0.4) * 100)}%, rgba(255,255,255,0.1) ${Math.round((currentStyles.overlayOpacity ?? 0.4) * 100)}%)`,
-                      }}
+                      labelRef={overlayLabelRef}
+                      unit="%"
+                      onChange={(v) => onStyleChange({ overlayOpacity: v / 100 })}
                     />
                   </div>
                 </div>
@@ -817,36 +816,33 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                       value={String(props.backgroundVideo ?? '')}
                       onChange={(e) => onPropChange('backgroundVideo', e.target.value)}
                       placeholder="https://... (mp4, webm)"
-                      className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C]"
+                      className="w-full px-3 py-2 bg-white/[0.04] border border-[#15151A] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C]"
                     />
                     <p className="text-[10px] text-zinc-500">Wideo odtwarzane automatycznie w tle (bez dźwięku, w pętli)</p>
                   </div>
 
                   {/* Darkening overlay */}
-                  <div className="space-y-1.5 pt-1 border-t border-white/[0.06]">
+                  <div className="space-y-1.5 pt-1 border-t border-[#15151A]">
                     <div className="flex items-center justify-between">
                       <label className="text-[11px] font-semibold text-zinc-300">Przyciemnienie (overlay)</label>
-                      <span className="text-[11px] font-mono text-white">
+                      <span ref={overlayLabelRef} className="text-[11px] font-mono text-white">
                         {Math.round((currentStyles.overlayOpacity ?? 0.4) * 100)}%
                       </span>
                     </div>
-                    <input
-                      type="range"
+                    <SmoothSlider
                       min={0}
                       max={100}
                       step={5}
                       value={Math.round((currentStyles.overlayOpacity ?? 0.4) * 100)}
-                      onChange={(e) => onStyleChange({ overlayOpacity: Number(e.target.value) / 100 })}
-                      className="w-full accent-[#D9A86C] h-1 cursor-pointer rounded-full"
-                      style={{
-                        background: `linear-gradient(to right, #B8893A ${Math.round((currentStyles.overlayOpacity ?? 0.4) * 100)}%, rgba(255,255,255,0.1) ${Math.round((currentStyles.overlayOpacity ?? 0.4) * 100)}%)`,
-                      }}
+                      labelRef={overlayLabelRef}
+                      unit="%"
+                      onChange={(v) => onStyleChange({ overlayOpacity: v / 100 })}
                     />
                   </div>
                 </div>
               )}
 
-              <div className="space-y-1.5 pt-2 border-t border-white/[0.06]">
+              <div className="space-y-1.5 pt-2 border-t border-[#15151A]">
                 <label className="text-[11px] font-semibold text-zinc-300">Odstępy pionowe (Padding)</label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
@@ -868,7 +864,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                         className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
                           isSelected
                             ? 'bg-[#D9A86C] text-white border-[#D9A86C]'
-                            : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
+                            : 'bg-white/[0.04] text-zinc-400 border-[#15151A] hover:text-white'
                         }`}
                       >
                         {p.label}
@@ -894,7 +890,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   className={`py-2 text-xs font-semibold rounded-xl border transition-all ${
                     currentStyles.flexDirection === 'column' || !currentStyles.flexDirection
                       ? 'bg-[#D9A86C] text-white border-[#D9A86C]'
-                      : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
+                      : 'bg-white/[0.04] text-zinc-400 border-[#15151A] hover:text-white'
                   }`}
                 >
                   W pionie (Kolumna)
@@ -904,7 +900,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   className={`py-2 text-xs font-semibold rounded-xl border transition-all ${
                     currentStyles.flexDirection === 'row'
                       ? 'bg-[#D9A86C] text-white border-[#D9A86C]'
-                      : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
+                      : 'bg-white/[0.04] text-zinc-400 border-[#15151A] hover:text-white'
                   }`}
                 >
                   W poziomie (Wiersz)
@@ -926,7 +922,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                     className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
                       currentStyles.gap === g.val
                         ? 'bg-[#D9A86C] text-white border-[#D9A86C]'
-                        : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
+                        : 'bg-white/[0.04] text-zinc-400 border-[#15151A] hover:text-white'
                     }`}
                   >
                     {g.label.split(' ')[0]}
@@ -952,14 +948,14 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                   onPropChange('url', e.target.value)
                 }}
                 placeholder="https://... (mp4, webm)"
-                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C]"
+                className="w-full px-3 py-2 bg-white/[0.04] border border-[#15151A] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C]"
               />
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-[11px] font-semibold text-zinc-300">Szerokość wideo</label>
-                <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded px-2 py-0.5">
+                <div className="flex items-center gap-1 bg-white/[0.04] border border-[#15151A] rounded px-2 py-0.5">
                   <span ref={vidWidthLabelRef} className="w-12 text-right font-mono text-white text-xs">
                     {parseInt(String(currentStyles.width || '480px').replace('px', '')) || 480}
                   </span>
@@ -983,7 +979,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-[11px] font-semibold text-zinc-300">Wysokość wideo</label>
-                <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded px-2 py-0.5">
+                <div className="flex items-center gap-1 bg-white/[0.04] border border-[#15151A] rounded px-2 py-0.5">
                   <span ref={vidHeightLabelRef} className="w-12 text-right font-mono text-white text-xs">
                     {parseInt(String(currentStyles.height || '270px').replace('px', '')) || 270}
                   </span>
@@ -1004,11 +1000,11 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-2 pt-1 border-t border-white/[0.06]">
+            <div className="grid grid-cols-2 gap-2 pt-1 border-t border-[#15151A]">
               <button
                 onClick={() => onPropChange('loop', !props.loop)}
                 className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
-                  props.loop ? 'bg-[#D9A86C] text-white border-[#D9A86C]' : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
+                  props.loop ? 'bg-[#D9A86C] text-white border-[#D9A86C]' : 'bg-white/[0.04] text-zinc-400 border-[#15151A] hover:text-white'
                 }`}
               >
                 Pętla (Loop)
@@ -1016,7 +1012,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
               <button
                 onClick={() => onPropChange('autoPlay', !props.autoPlay)}
                 className={`py-1.5 text-xs font-semibold rounded-xl border transition-all ${
-                  props.autoPlay ? 'bg-[#D9A86C] text-white border-[#D9A86C]' : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white'
+                  props.autoPlay ? 'bg-[#D9A86C] text-white border-[#D9A86C]' : 'bg-white/[0.04] text-zinc-400 border-[#15151A] hover:text-white'
                 }`}
               >
                 Autoodtwarzanie
@@ -1033,7 +1029,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-[11px] font-semibold text-zinc-300">Rozmiar ikony</label>
-                <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded px-2 py-0.5">
+                <div className="flex items-center gap-1 bg-white/[0.04] border border-[#15151A] rounded px-2 py-0.5">
                   <span ref={svgSizeLabelRef} className="w-10 text-right font-mono text-white text-xs">
                     {parseInt(String(currentStyles.width || '48px').replace('px', '')) || 48}
                   </span>
@@ -1056,19 +1052,11 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
 
             <div className="space-y-1.5">
               <label className="text-[11px] font-semibold text-zinc-300">Kolor ikony</label>
-              <div className="flex items-center gap-2 p-1.5 bg-white/[0.04] border border-white/[0.08] rounded-xl">
-                <input
-                  type="color"
+              <div className="p-1.5 bg-white/[0.04] border border-[#15151A] rounded-xl">
+                <ColorControl
                   value={currentStyles.color || '#D9A86C'}
-                  onChange={(e) => onStyleChange({ color: e.target.value })}
-                  className="w-7 h-7 rounded-lg border-0 cursor-pointer bg-transparent flex-shrink-0"
-                />
-                <input
-                  type="text"
-                  value={currentStyles.color || '#D9A86C'}
-                  onChange={(e) => onStyleChange({ color: e.target.value })}
+                  onChange={(v) => onStyleChange({ color: v })}
                   placeholder="#D9A86C"
-                  className="w-full bg-transparent text-[11px] font-mono text-zinc-300 focus:outline-none focus:text-white"
                 />
               </div>
             </div>
@@ -1078,16 +1066,16 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
         {/* ============================================================= */}
         {/* UNIVERSAL CANVAS POSITION (X / Y)                             */}
         {/* ============================================================= */}
-        <div className="pt-3 border-t border-white/[0.08] space-y-3">
+        <div className="pt-3 border-t border-[#15151A] space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-300">
-              <Move className="w-3.5 h-3.5 text-violet-400" />
+              <Move className="w-3.5 h-3.5 text-[#D9A86C]" />
               <span>Pozycja na Canvasie</span>
             </div>
             {(currentStyles.translateX || currentStyles.translateY) && (
               <button
                 onClick={() => onStyleChange({ translateX: '0px', translateY: '0px' })}
-                className="text-[10px] text-violet-400 hover:text-[#F2C27F] font-medium transition-colors"
+                className="text-[10px] text-[#D9A86C] hover:text-[#F2C27F] font-medium transition-colors"
               >
                 Resetuj (0, 0)
               </button>
@@ -1096,7 +1084,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
 
           <div className="grid grid-cols-2 gap-2">
             {/* Position X — SmoothSlider */}
-            <div className="space-y-1 bg-white/[0.04] p-2 rounded-xl border border-white/[0.06]">
+            <div className="space-y-1 bg-white/[0.04] p-2 rounded-xl border border-[#15151A]">
               <div className="flex items-center justify-between text-[10px] text-zinc-400 font-medium">
                 <span>Oś X</span>
                 <span ref={txLabelRef} className="font-mono text-white">
@@ -1121,7 +1109,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
             </div>
 
             {/* Position Y — SmoothSlider */}
-            <div className="space-y-1 bg-white/[0.04] p-2 rounded-xl border border-white/[0.06]">
+            <div className="space-y-1 bg-white/[0.04] p-2 rounded-xl border border-[#15151A]">
               <div className="flex items-center justify-between text-[10px] text-zinc-400 font-medium">
                 <span>Oś Y</span>
                 <span ref={tyLabelRef} className="font-mono text-white">
@@ -1150,13 +1138,13 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
         {/* ============================================================= */}
         {/* ADVANCED COLLAPSIBLE ACCORDION                                */}
         {/* ============================================================= */}
-        <div className="pt-3 border-t border-white/[0.08]">
+        <div className="pt-3 border-t border-[#15151A]">
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-xs font-bold text-zinc-300 hover:text-white transition-all border border-white/[0.06]"
+            className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-xs font-bold text-zinc-300 hover:text-white transition-all border border-[#15151A]"
           >
             <div className="flex items-center gap-2">
-              <Sliders className="w-3.5 h-3.5 text-violet-400" />
+              <Sliders className="w-3.5 h-3.5 text-[#D9A86C]" />
               <span>Ustawienia zaawansowane</span>
             </div>
             {showAdvanced ? (
@@ -1167,7 +1155,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
           </button>
 
           {showAdvanced && (
-            <div className="mt-3 pt-3 border-t border-white/[0.06]">
+            <div className="mt-3 pt-3 border-t border-[#15151A]">
               <DesignInspector
                 styles={currentStyles}
                 onStyleChange={onStyleChange}

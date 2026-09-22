@@ -40,7 +40,7 @@ export function GuidesToggle({
       onClick={() => onChange(!enabled)}
       className={`relative ${sizeClass} rounded-lg transition-all duration-150 ${
         enabled
-          ? 'bg-violet-500/20 text-violet-300 hover:bg-[#C99A4A]/30'
+          ? 'bg-[#D9A86C]/20 text-[#F2C27F] hover:bg-[#C99A4A]/30'
           : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'
       }`}
       title={
@@ -53,7 +53,7 @@ export function GuidesToggle({
 
       {/* Active indicator dot */}
       {enabled && activeGuideCount > 0 && (
-        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-violet-400 rounded-full" />
+        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-[#D9A86C] rounded-full" />
       )}
     </button>
   )

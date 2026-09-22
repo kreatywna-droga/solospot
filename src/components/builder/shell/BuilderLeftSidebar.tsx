@@ -58,10 +58,10 @@ export function BuilderLeftSidebar({ activeTab, onTabChange, width = 320 }: Buil
   return (
     <aside
       style={{ width: `${actualWidth}px` }}
-      className="border-r border-[#2E2E33] bg-[#202024] flex flex-row overflow-hidden flex-shrink-0 h-full select-none"
+      className="border-r border-[#15151A] bg-[#202024] flex flex-row overflow-hidden flex-shrink-0 h-full select-none"
     >
       {/* Vertical tab strip — larger icons for better visibility */}
-      <div className="w-9 bg-[#18181B] border-r border-[#2E2E33] flex flex-col items-center justify-center gap-2 flex-shrink-0 py-2">
+      <div className="w-9 bg-[#202024] border-r border-[#15151A] flex flex-col items-center justify-center gap-2 flex-shrink-0 py-2">
         {TABS.map(tab => (
           <button
             key={tab.id}
@@ -167,7 +167,7 @@ function HistoryPanel() {
         )}
       </div>
 
-      <div className="p-3 border-t border-white/[0.08] bg-[#18181B] text-[11px] text-zinc-500 text-center">
+      <div className="p-3 border-t border-white/[0.08] bg-[#202024] text-[11px] text-zinc-500 text-center">
         Zarejestrowano {entries.length} krok{entries.length === 1 ? '' : entries.length < 5 ? 'i' : 'ów'}
       </div>
     </div>

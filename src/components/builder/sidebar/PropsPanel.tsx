@@ -50,8 +50,8 @@ function StringField({ schema, value, onChange }: FieldProps) {
         value={typeof value === 'string' ? value : ''}
         onChange={e => onChange(schema.key, e.target.value)}
         placeholder={(schema as { placeholder?: string }).placeholder ?? schema.label}
-        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600
-                   focus:outline-none focus:border-[#D9A86C]/50 focus:ring-1 focus:ring-violet-500/30 transition-all"
+        className="w-full bg-[#18181B] border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600
+                   focus:outline-none focus:border-[#D9A86C]/50 focus:ring-1 focus:ring-[#D9A86C]/30 transition-all"
       />
       {schema.description && (
         <p className="text-[11px] text-slate-600 mt-1">{schema.description}</p>
@@ -70,8 +70,8 @@ function TextField({ schema, value, onChange }: FieldProps) {
         value={typeof value === 'string' ? value : ''}
         onChange={e => onChange(schema.key, e.target.value)}
         rows={3}
-        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white
-                   focus:outline-none focus:border-[#D9A86C]/50 focus:ring-1 focus:ring-violet-500/30 transition-all resize-none"
+        className="w-full bg-[#18181B] border border-white/10 rounded-lg px-3 py-2 text-sm text-white
+                   focus:outline-none focus:border-[#D9A86C]/50 focus:ring-1 focus:ring-[#D9A86C]/30 transition-all resize-none"
       />
     </div>
   )
@@ -91,8 +91,8 @@ function NumberField({ schema, value, onChange }: FieldProps) {
         max={s.max}
         step={s.step ?? 1}
         onChange={e => onChange(schema.key, parseFloat(e.target.value))}
-        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white
-                   focus:outline-none focus:border-[#D9A86C]/50 focus:ring-1 focus:ring-violet-500/30 transition-all"
+        className="w-full bg-[#18181B] border border-white/10 rounded-lg px-3 py-2 text-sm text-white
+                   focus:outline-none focus:border-[#D9A86C]/50 focus:ring-1 focus:ring-[#D9A86C]/30 transition-all"
       />
     </div>
   )
@@ -107,7 +107,7 @@ function BooleanField({ schema, value, onChange }: FieldProps) {
       <button
         onClick={() => onChange(schema.key, !value)}
         className={`relative w-10 h-5 rounded-full transition-all duration-200 flex-shrink-0
-          ${value ? 'bg-violet-500' : 'bg-white/10'}`}
+          ${value ? 'bg-[#D9A86C]' : 'bg-white/10'}`}
       >
         <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200
           ${value ? 'translate-x-5' : 'translate-x-0.5'}`} />
@@ -134,8 +134,8 @@ function ColorField({ schema, value, onChange }: FieldProps) {
           type="text"
           value={colorVal}
           onChange={e => onChange(schema.key, e.target.value)}
-          className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white font-mono
-                     focus:outline-none focus:border-[#D9A86C]/50 focus:ring-1 focus:ring-violet-500/30 transition-all"
+          className="flex-1 bg-[#18181B] border border-white/10 rounded-lg px-3 py-2 text-sm text-white font-mono
+                     focus:outline-none focus:border-[#D9A86C]/50 focus:ring-1 focus:ring-[#D9A86C]/30 transition-all"
         />
       </div>
     </div>
@@ -154,7 +154,7 @@ function ImageField({ schema, value, onChange }: FieldProps) {
         {schema.label}
       </label>
       {displayUrl && (
-        <div className="mb-2 relative rounded-lg overflow-hidden bg-white/5 border border-white/10 aspect-video flex items-center justify-center group">
+        <div className="mb-2 relative rounded-lg overflow-hidden bg-[#18181B] border border-white/10 aspect-video flex items-center justify-center group">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={displayUrl} alt={schema.label} className="w-full h-full object-cover" />
           <button
@@ -172,7 +172,7 @@ function ImageField({ schema, value, onChange }: FieldProps) {
           value={displayUrl}
           readOnly
           placeholder="Brak wybranego assetu"
-          className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white font-mono text-xs focus:outline-none"
+          className="flex-1 bg-[#18181B] border border-white/10 rounded-lg px-3 py-2 text-sm text-white font-mono text-xs focus:outline-none"
         />
         <button
           onClick={() => setShowPicker(true)}
@@ -213,7 +213,7 @@ function SelectField({ schema, value, onChange }: FieldProps) {
           onChange(schema.key, opt?.value ?? e.target.value)
         }}
         className="w-full bg-[#202024] border border-white/10 rounded-lg px-3 py-2 text-sm text-white
-                   focus:outline-none focus:border-[#D9A86C]/50 transition-all"
+                   focus:outline-none focus:border-[#D9A86C]/50 focus:ring-1 focus:ring-[#D9A86C]/30 transition-all"
       >
         {options.map(opt => (
           <option key={String(opt.value)} value={String(opt.value)}>
@@ -246,7 +246,7 @@ function PropField({ schema, value, onChange }: FieldProps) {
     case 'object':
     default:
       return (
-        <div className="text-xs text-slate-600 italic p-2 bg-white/5 rounded-lg">
+        <div className="text-xs text-slate-600 italic p-2 bg-[#18181B] rounded-lg">
           {schema.label}: <span className="font-mono">{schema.type}</span> — panel C6.3
         </div>
       )
@@ -335,8 +335,8 @@ export function PropsPanel() {
                     pageId: activePage.id,
                     seo: { title: e.target.value }
                   })}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white
-                             focus:outline-none focus:border-[#D9A86C]/50 transition-all"
+                  className="w-full bg-[#18181B] border border-white/10 rounded-lg px-3 py-2 text-sm text-white
+                             focus:outline-none focus:border-[#D9A86C]/50 focus:ring-1 focus:ring-[#D9A86C]/30 transition-all"
                 />
               </div>
               <div>
@@ -351,8 +351,8 @@ export function PropsPanel() {
                     seo: { description: e.target.value }
                   })}
                   rows={3}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white
-                             focus:outline-none focus:border-[#D9A86C]/50 transition-all resize-none"
+                  className="w-full bg-[#18181B] border border-white/10 rounded-lg px-3 py-2 text-sm text-white
+                             focus:outline-none focus:border-[#D9A86C]/50 focus:ring-1 focus:ring-[#D9A86C]/30 transition-all resize-none"
                 />
               </div>
             </>
@@ -414,14 +414,14 @@ export function PropsPanel() {
           <button
             onClick={handleToggleVisibility}
             className={`p-1.5 rounded-lg hover:bg-white/10 transition-colors
-              ${selectedNode.visible ? 'text-slate-400 hover:text-white' : 'text-violet-400'}`}
+              ${selectedNode.visible ? 'text-slate-400 hover:text-white' : 'text-[#D9A86C]'}`}
             title={selectedNode.visible ? 'Ukryj' : 'Pokaż'}
           >
             {selectedNode.visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
           </button>
           <button
             onClick={handleDuplicate}
-            className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-violet-400 transition-colors"
+            className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-[#F2C27F] transition-colors"
             title="Duplikuj"
           >
             <Copy className="w-4 h-4" />

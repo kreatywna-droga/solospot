@@ -27,7 +27,7 @@ import { overlayRectToScreenRect, overlayTransform } from '../../../../packages/
 interface HoverHighlightProps {
   /** The overlay rect for the hovered element */
   rect: OverlayRect
-  /** Border color (default: violet-600 at 40%) */
+  /** Border color (default: gold accent at 40%) */
   color?: string
   /** Border width in px */
   borderWidth?: number

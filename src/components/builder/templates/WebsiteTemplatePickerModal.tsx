@@ -132,11 +132,11 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
     <>
       <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/85 backdrop-blur-md p-3 md:p-6 animate-in fade-in duration-150 select-none">
         <div
-          className="w-full max-w-7xl max-h-[94vh] bg-[#18181B] border border-[#2E2E33] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
+          className="w-full max-w-7xl max-h-[94vh] bg-[#18181B] border border-[#1F1F24] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[#2E2E33] bg-[#2E2E33]">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[#1F1F24] bg-[#2E2E33]">
             <div>
               <h2 className="text-base md:text-lg font-extrabold text-white flex items-center gap-2.5">
                 <Sparkles className="w-5 h-5 text-[#F2C27F]" />
@@ -158,7 +158,7 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
           </div>
 
           {/* Filters Bar */}
-          <div className="p-4 border-b border-[#2E2E33] bg-[#18181B] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <div className="p-4 border-b border-[#1F1F24] bg-[#18181B] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             <div className="relative flex-1">
               <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
               <input
@@ -166,7 +166,7 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search templates by name, tag, industry..."
-                className="w-full pl-10 pr-4 py-2.5 bg-[#202024] border border-[#2E2E33]/50 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C] transition-colors"
+                className="w-full pl-10 pr-4 py-2.5 bg-[#202024] border border-[#1F1F24]/50 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C] transition-colors"
               />
             </div>
             <div className="flex items-center gap-2">
@@ -174,25 +174,25 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
                 <select
                   value={selectedStyle}
                   onChange={(e) => setSelectedStyle(e.target.value)}
-                  className="appearance-none bg-[#202024] hover:bg-[#2E2E33] border border-[#D9A86C]/40 text-xs font-bold text-violet-300 rounded-xl px-4 py-2.5 pr-8 focus:outline-none focus:border-[#D9A86C] cursor-pointer transition-colors"
+                  className="appearance-none bg-[#202024] hover:bg-[#2E2E33] border border-[#D9A86C]/40 text-xs font-bold text-[#F2C27F] rounded-xl px-4 py-2.5 pr-8 focus:outline-none focus:border-[#D9A86C] cursor-pointer transition-colors"
                 >
                   {STYLE_OPTIONS.map(s => (
                     <option key={s} value={s}>{s === 'All' ? 'All Styles' : s}</option>
                   ))}
                 </select>
-                <ChevronDown className="w-4 h-4 text-violet-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <ChevronDown className="w-4 h-4 text-[#D9A86C] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
               <div className="relative flex-shrink-0">
                 <select
                   value={selectedIndustry}
                   onChange={(e) => setSelectedIndustry(e.target.value)}
-                  className="appearance-none bg-[#202024] hover:bg-[#2E2E33] border border-[#D9A86C]/40 text-xs font-bold text-violet-300 rounded-xl px-4 py-2.5 pr-8 focus:outline-none focus:border-[#D9A86C] cursor-pointer transition-colors"
+                  className="appearance-none bg-[#202024] hover:bg-[#2E2E33] border border-[#D9A86C]/40 text-xs font-bold text-[#F2C27F] rounded-xl px-4 py-2.5 pr-8 focus:outline-none focus:border-[#D9A86C] cursor-pointer transition-colors"
                 >
                   {INDUSTRY_OPTIONS.map(i => (
                     <option key={i} value={i}>{i === 'All' ? 'All Industries' : i}</option>
                   ))}
                 </select>
-                <ChevronDown className="w-4 h-4 text-violet-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <ChevronDown className="w-4 h-4 text-[#D9A86C] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
             </div>
           </div>
@@ -213,7 +213,7 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
                   return (
                     <div
                       key={tmpl.id}
-                      className="group relative rounded-2xl bg-[#202024] border border-[#2E2E33] hover:border-[#D9A86C]/70 hover:shadow-2xl hover:shadow-[#D9A86C]-950/30 transition-all duration-200 flex flex-col justify-between overflow-hidden"
+                      className="group relative rounded-2xl bg-[#202024] border border-[#1F1F24] hover:border-[#D9A86C]/70 hover:shadow-2xl hover:shadow-[#D9A86C]/30 transition-all duration-200 flex flex-col justify-between overflow-hidden"
                     >
                       {/* Visual Preview — Largest Element */}
                       <div
@@ -239,7 +239,7 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
                             }}
                             className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/25 flex items-center gap-2 transition-all"
                           >
-                            <Eye className="w-4 h-4 text-violet-300" />
+                            <Eye className="w-4 h-4 text-[#F2C27F]" />
                             <span>PREVIEW ALL SECTIONS</span>
                           </button>
                           {tmpl.id !== 'blank' && (
@@ -248,7 +248,7 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
                                 e.stopPropagation();
                                 handleApplyTemplate(tmpl);
                               }}
-                              className="px-4 py-2.5 rounded-xl bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-xs font-extrabold shadow-xl shadow-[#D9A86C]-600/50 flex items-center gap-2 transition-transform active:scale-95"
+                              className="px-4 py-2.5 rounded-xl bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-xs font-extrabold shadow-xl shadow-[#D9A86C]/50 flex items-center gap-2 transition-transform active:scale-95"
                             >
                               <CheckCircle2 className="w-4 h-4" />
                               <span>USE TEMPLATE</span>
@@ -257,15 +257,15 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
                         </div>
 
                         {tmpl.badge && (
-                          <span className="absolute top-3 right-3 text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-violet-500/90 text-white shadow-lg z-10">
+                          <span className="absolute top-3 right-3 text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-[#D9A86C]/90 text-white shadow-lg z-10">
                             {tmpl.badge}
                           </span>
                         )}
                       </div>
 
                       {/* Template Info */}
-                      <div className="px-5 py-4 bg-[#202024] border-t border-[#2E2E33]">
-                        <h3 className="text-sm font-extrabold text-white group-hover:text-violet-300 transition-colors mb-1">
+                      <div className="px-5 py-4 bg-[#202024] border-t border-[#1F1F24]">
+                        <h3 className="text-sm font-extrabold text-white group-hover:text-[#F2C27F] transition-colors mb-1">
                           {tmpl.name}
                         </h3>
                         <p className="text-xs text-zinc-400 line-clamp-1 mb-2">{tmpl.tagline}</p>
@@ -280,7 +280,7 @@ export function WebsiteTemplatePickerModal({ isOpen, onClose }: WebsiteTemplateP
                           {tmpl.id !== 'blank' && (
                             <button
                               onClick={() => handleApplyTemplate(tmpl)}
-                              className="text-xs font-extrabold text-white flex items-center gap-1.5 bg-[#D9A86C] hover:bg-[#C99A4A] px-3 py-1.5 rounded-lg shadow-md shadow-[#D9A86C]-600/30 transition-all"
+                              className="text-xs font-extrabold text-white flex items-center gap-1.5 bg-[#D9A86C] hover:bg-[#C99A4A] px-3 py-1.5 rounded-lg shadow-md shadow-[#D9A86C]/30 transition-all"
                             >
                               <span>Use</span>
                               <ArrowRight className="w-3.5 h-3.5" />
@@ -342,14 +342,14 @@ function FullTemplatePreview({
 
   return (
     <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-150">
-      <div className="w-full max-w-6xl max-h-[92vh] bg-[#18181B] border border-[#2E2E33] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white">
+      <div className="w-full max-w-6xl max-h-[92vh] bg-[#18181B] border border-[#1F1F24] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#2E2E33] bg-[#2E2E33]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#1F1F24] bg-[#2E2E33]">
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-base font-bold text-white">{template.name}</h2>
               {template.badge && (
-                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-[#D9A86C]/30">
+                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[#D9A86C]/20 text-[#F2C27F] border border-[#D9A86C]/30">
                   {template.badge}
                 </span>
               )}
@@ -403,9 +403,9 @@ function FullTemplatePreview({
         </div>
 
         {/* Modal Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-[#2E2E33] bg-[#2E2E33]">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-[#1F1F24] bg-[#2E2E33]">
           <div className="flex items-center gap-2 text-xs text-zinc-400">
-            <span className="font-mono text-violet-400 uppercase font-semibold">{template.sectionTemplateIds.length} sections</span>
+            <span className="font-mono text-[#D9A86C] uppercase font-semibold">{template.sectionTemplateIds.length} sections</span>
             {template.style && (
               <>
                 <span>·</span>
@@ -428,7 +428,7 @@ function FullTemplatePreview({
             </button>
             <button
               onClick={onUse}
-              className="px-5 py-2.5 rounded-xl bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-xs font-bold shadow-lg shadow-[#D9A86C]-600/30 flex items-center gap-2 transition-all active:scale-95"
+              className="px-5 py-2.5 rounded-xl bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-xs font-bold shadow-lg shadow-[#D9A86C]/30 flex items-center gap-2 transition-all active:scale-95"
             >
               <CheckCircle2 className="w-4 h-4" />
               <span>Use This Template</span>

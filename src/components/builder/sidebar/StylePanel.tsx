@@ -114,15 +114,15 @@ export function StylePanel() {
   return (
     <div className="flex flex-col h-full bg-[#202024] text-white">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08]">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[#15151A] bg-[#2E2E33]">
         <div className="flex items-center gap-2">
-          <Palette className="w-4 h-4 text-violet-400" />
+          <Palette className="w-4 h-4 text-[#D9A86C]" />
           <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-300">Design System & Styl</h2>
         </div>
       </div>
 
       {/* Sub Tabs */}
-      <div className="flex items-center gap-1 p-2 border-b border-white/[0.08] bg-[#2E2E33]">
+      <div className="flex items-center gap-1 p-2 border-b border-[#15151A] bg-[#2E2E33]">
         {[
           { id: 'colors', label: 'Kolory', icon: Palette },
           { id: 'typography', label: 'Typografia', icon: Type },
@@ -167,7 +167,7 @@ export function StylePanel() {
                   type="text"
                   value={theme.primaryColor || '#7c3aed'}
                   onChange={e => updateColor('primaryColor', e.target.value)}
-                  className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-[#D9A86C]"
+                  className="flex-1 bg-white/[0.04] border border-[#15151A] rounded-lg px-3 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-[#D9A86C]"
                 />
               </div>
             </div>
@@ -185,7 +185,7 @@ export function StylePanel() {
                   type="text"
                   value={theme.secondaryColor || '#d946ef'}
                   onChange={e => updateColor('secondaryColor', e.target.value)}
-                  className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-[#D9A86C]"
+                  className="flex-1 bg-white/[0.04] border border-[#15151A] rounded-lg px-3 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-[#D9A86C]"
                 />
               </div>
             </div>
@@ -203,15 +203,15 @@ export function StylePanel() {
                   type="text"
                   value={theme.backgroundColor || '#090910'}
                   onChange={e => updateColor('backgroundColor', e.target.value)}
-                  className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-[#D9A86C]"
+                  className="flex-1 bg-white/[0.04] border border-[#15151A] rounded-lg px-3 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-[#D9A86C]"
                 />
               </div>
             </div>
 
             {/* Visual preview swatch */}
-            <div className="p-3 rounded-xl border border-white/[0.08] bg-black/40 space-y-2">
+            <div className="p-3 rounded-xl border border-[#15151A] bg-black/40 space-y-2">
               <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Podgląd palety:</span>
-              <div className="h-10 rounded-lg flex overflow-hidden border border-white/[0.08] shadow-inner">
+              <div className="h-10 rounded-lg flex overflow-hidden border border-[#15151A] shadow-inner">
                 <div className="flex-1 flex items-center justify-center text-[10px] font-bold text-white shadow" style={{ backgroundColor: theme.primaryColor }}>
                   Primary
                 </div>
@@ -234,7 +234,7 @@ export function StylePanel() {
               <select
                 value={theme.font || 'Inter'}
                 onChange={e => updateFont(e.target.value)}
-                className="w-full bg-[#2E2E33] border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#D9A86C]"
+                className="w-full bg-[#202024] border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#D9A86C]"
               >
                 {FONT_OPTIONS.map(font => (
                   <option key={font.value} value={font.value}>
@@ -245,7 +245,7 @@ export function StylePanel() {
             </div>
 
             {/* Typography scale preview */}
-            <div className="p-4 rounded-xl border border-white/[0.08] bg-black/40 space-y-3">
+            <div className="p-4 rounded-xl border border-[#15151A] bg-black/40 space-y-3">
               <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Skala typograficzna ({theme.font || 'Inter'}):</span>
               <div className="space-y-2">
                 <div className="text-xl font-bold text-white truncate">Nagłówek H1 (Heading 1)</div>
@@ -276,7 +276,7 @@ export function StylePanel() {
                     className={`py-2 px-1 rounded-lg border text-center transition-all ${
                       theme.borderRadius === r.val
                         ? 'border-[#D9A86C] bg-[#D9A86C]/20 text-white font-bold'
-                        : 'border-white/[0.08] hover:border-white/20 bg-white/[0.04] text-zinc-400'
+                        : 'border-[#15151A] hover:border-white/20 bg-white/[0.04] text-zinc-400'
                     }`}
                   >
                     <div className="w-4 h-4 mx-auto mb-1 border border-white/40" style={{ borderRadius: r.val }} />
@@ -286,7 +286,7 @@ export function StylePanel() {
               </div>
             </div>
 
-            <div className="p-3 rounded-xl border border-white/[0.08] bg-white/[0.02] space-y-2">
+            <div className="p-3 rounded-xl border border-[#15151A] bg-white/[0.02] space-y-2">
               <span className="text-[11px] font-bold text-zinc-300">Globalne Tokeny CSS:</span>
               <pre className="text-[10px] font-mono text-[#F2C27F] bg-black/60 p-2.5 rounded-lg overflow-x-auto">
 {`:root {
@@ -307,7 +307,7 @@ export function StylePanel() {
               <button
                 key={preset.name}
                 onClick={() => applyPreset(preset)}
-                className="w-full flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:border-[#D9A86C]/50 hover:bg-[#D9A86C]/[0.07] transition-all text-left group"
+                className="w-full flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-[#15151A] hover:border-[#D9A86C]/50 hover:bg-[#D9A86C]/[0.07] transition-all text-left group"
               >
                 <div className="space-y-1">
                   <div className="font-bold text-xs text-white group-hover:text-[#F2C27F] transition-colors">

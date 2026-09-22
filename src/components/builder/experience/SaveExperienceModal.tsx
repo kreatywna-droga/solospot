@@ -73,13 +73,13 @@ export function SaveExperienceModal({
   return (
     <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in select-none">
       <div
-        className="w-full max-w-xl bg-[#18181B] border border-[#2E2E33] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
+        className="w-full max-w-xl bg-[#18181B] border border-[#1F1F24] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-6 py-4 border-b border-[#2E2E33] bg-[#2E2E33] flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-[#1F1F24] bg-[#202024] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#D9A86C]/20 border border-[#D9A86C]/30 flex items-center justify-center text-violet-400">
+            <div className="w-8 h-8 rounded-xl bg-[#D9A86C]/20 border border-[#D9A86C]/30 flex items-center justify-center text-[#F2C27F]">
               <BookmarkPlus className="w-4 h-4" />
             </div>
             <div>
@@ -104,7 +104,7 @@ export function SaveExperienceModal({
           )}
 
           {/* Mini preview */}
-          <div className="rounded-xl overflow-hidden border border-[#2E2E33] bg-[#18181B] p-2">
+          <div className="rounded-xl overflow-hidden border border-[#1F1F24] bg-[#18181B] p-2">
             <ScaleToFitContainer targetWidth={800} maxHeight={160}>
               <SectionPreviewRenderer sectionNode={sectionNode} />
             </ScaleToFitContainer>
@@ -113,7 +113,7 @@ export function SaveExperienceModal({
           {/* Name Field */}
           <div>
             <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-              Experience Name <span className="text-violet-400">*</span>
+              Experience Name <span className="text-[#F2C27F]">*</span>
             </label>
             <input
               type="text"
@@ -123,7 +123,7 @@ export function SaveExperienceModal({
                 setError(null);
               }}
               placeholder="e.g. Minimal Hero with Glowing Badges"
-              className="w-full px-3.5 py-2.5 bg-[#202024] border border-[#2E2E33] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C]"
+              className="w-full px-3.5 py-2.5 bg-[#202024] border border-[#1F1F24] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C]"
               required
             />
           </div>
@@ -136,7 +136,7 @@ export function SaveExperienceModal({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Brief description of the layout, intended mood, or purpose..."
               rows={2}
-              className="w-full px-3.5 py-2 bg-[#202024] border border-[#2E2E33] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C] resize-none"
+              className="w-full px-3.5 py-2 bg-[#202024] border border-[#1F1F24] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C] resize-none"
             />
           </div>
 
@@ -147,7 +147,7 @@ export function SaveExperienceModal({
               <select
                 value={mood}
                 onChange={(e) => setMood(e.target.value as ExperienceMood)}
-                className="w-full px-3 py-2 bg-[#202024] border border-[#2E2E33] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C] capitalize"
+                className="w-full px-3 py-2 bg-[#202024] border border-[#1F1F24] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C] capitalize"
               >
                 {EXPERIENCE_MOODS.filter(m => m.id !== 'all').map(m => (
                   <option key={m.id} value={m.id}>{m.label}</option>
@@ -159,7 +159,7 @@ export function SaveExperienceModal({
               <select
                 value={motionLevel}
                 onChange={(e) => setMotionLevel(e.target.value as ExperienceMotionLevel)}
-                className="w-full px-3 py-2 bg-[#202024] border border-[#2E2E33] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C] capitalize"
+                className="w-full px-3 py-2 bg-[#202024] border border-[#1F1F24] rounded-xl text-xs text-white focus:outline-none focus:border-[#D9A86C] capitalize"
               >
                 {EXPERIENCE_MOTION_LEVELS.filter(m => m.id !== 'all').map(m => (
                   <option key={m.id} value={m.id}>{m.label}</option>
@@ -176,12 +176,12 @@ export function SaveExperienceModal({
               value={tagsInput}
               onChange={(e) => setTagsInput(e.target.value)}
               placeholder="e.g. hero, luxury, dark, gradient"
-              className="w-full px-3.5 py-2 bg-[#202024] border border-[#2E2E33] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C]"
+              className="w-full px-3.5 py-2 bg-[#202024] border border-[#1F1F24] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C]"
             />
           </div>
 
           {/* Footer Actions */}
-          <div className="pt-3 border-t border-[#2E2E33] flex items-center justify-end gap-2.5">
+          <div className="pt-3 border-t border-[#1F1F24] flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}
@@ -192,7 +192,7 @@ export function SaveExperienceModal({
             <button
               type="submit"
               disabled={savedSuccess}
-              className="px-5 py-2.5 rounded-xl text-xs font-bold bg-[#D9A86C] hover:bg-[#C99A4A] text-white shadow-lg shadow-[#D9A86C]-600/30 flex items-center gap-1.5 transition-transform active:scale-95 disabled:opacity-50"
+              className="px-5 py-2.5 rounded-xl text-xs font-bold bg-[#D9A86C] hover:bg-[#C99A4A] text-white shadow-lg shadow-[#D9A86C]/30 flex items-center gap-1.5 transition-transform active:scale-95 disabled:opacity-50"
             >
               {savedSuccess ? (
                 <>

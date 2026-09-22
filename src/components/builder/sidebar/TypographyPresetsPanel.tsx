@@ -46,7 +46,7 @@ export const TypographyPresetsPanel: React.FC<TypographyPresetsPanelProps> = ({ 
               className="w-full flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5 hover:border-[#D9A86C]/30 hover:bg-[#C99A4A]/10 active:scale-[0.98] transition-all text-left group cursor-grab active:cursor-grabbing select-none"
             >
               <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="w-8 h-8 rounded-lg bg-violet-500/15 flex items-center justify-center text-violet-400 group-hover:bg-[#C99A4A]/25 group-hover:text-violet-300 transition-colors shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-[#D9A86C]/15 flex items-center justify-center text-[#D9A86C] group-hover:bg-[#C99A4A]/25 group-hover:text-[#F2C27F] transition-colors shrink-0">
                   {Icon ? <Icon className="w-4 h-4" /> : null}
                 </div>
                 <div className="min-w-0 flex-1 pr-2">

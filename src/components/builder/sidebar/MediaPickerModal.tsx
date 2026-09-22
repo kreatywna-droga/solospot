@@ -310,7 +310,7 @@ export function MediaPickerModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-4xl max-h-[85vh] bg-[#18181B] border border-white/[0.12] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        className="w-full max-w-4xl max-h-[85vh] bg-[#18181B] border border-[#1F1F24] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Hidden File Input */}
@@ -324,9 +324,9 @@ export function MediaPickerModal({
         />
 
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-[#2E2E33]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#1F1F24] bg-[#202024]">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#D9A86C]/20 border border-[#D9A86C]/25 flex items-center justify-center text-violet-400">
+            <div className="w-8 h-8 rounded-lg bg-[#D9A86C]/20 border border-[#D9A86C]/25 flex items-center justify-center text-[#F2C27F]">
               <ImageIcon className="w-4 h-4" />
             </div>
             <div>
@@ -340,8 +340,8 @@ export function MediaPickerModal({
         </div>
 
         {/* Navigation Tabs & Search */}
-        <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-3 border-b border-white/[0.08] bg-[#202024]">
-          <div className="flex items-center gap-1 bg-white/[0.04] p-1 rounded-xl border border-white/5">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-3 border-b border-[#1F1F24] bg-[#202024]">
+          <div className="flex items-center gap-1 bg-white/[0.04] p-1 rounded-xl border border-[#1F1F24]">
             {[
               { id: 'my_files', label: 'Moje pliki', count: assets.length },
               { id: 'library', label: 'SoloSpot Library', count: ALL_CURATED_ASSETS.length },
@@ -379,7 +379,7 @@ export function MediaPickerModal({
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder={activeTab === 'shutterstock' ? "Szukaj w Shutterstock..." : "Szukaj grafik..."}
-                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C]"
+                className="w-full bg-white/[0.04] border border-[#1F1F24] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C]"
               />
             </div>
           )}
@@ -399,11 +399,11 @@ export function MediaPickerModal({
           {activeTab === 'my_files' && (
             loading ? (
               <div className="flex flex-col items-center justify-center py-20 text-zinc-500">
-                <Loader2 className="w-8 h-8 animate-spin text-violet-500 mb-2" />
+                <Loader2 className="w-8 h-8 animate-spin text-[#D9A86C] mb-2" />
                 <span className="text-xs">Ładowanie plików...</span>
               </div>
             ) : filteredAssets.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-white/[0.08] rounded-2xl bg-white/[0.01]">
+              <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-[#1F1F24] rounded-2xl bg-white/[0.01]">
                 <ImageIcon className="w-10 h-10 text-slate-600 mb-2" />
                 <p className="text-xs font-semibold text-zinc-300 mb-1">Brak wgranych plików</p>
                 <p className="text-[11px] text-zinc-500 mb-4">Wgraj grafikę z dysku lub wybierz z biblioteki SoloSpot / Shutterstock</p>
@@ -428,8 +428,8 @@ export function MediaPickerModal({
                       }}
                       className={`group relative aspect-square rounded-xl border overflow-hidden cursor-pointer transition-all ${
                         isSelected
-                          ? 'border-[#D9A86C] ring-2 ring-violet-500/50 shadow-lg shadow-[#D9A86C]-500/20'
-                          : 'border-white/[0.08] hover:border-white/25 bg-white/[0.04]'
+                          ? 'border-[#D9A86C] ring-2 ring-[#D9A86C]/50 shadow-lg shadow-[#D9A86C]/20'
+                          : 'border-[#1F1F24] hover:border-white/25 bg-white/[0.04]'
                       }`}
                     >
                       {asset.mimeType?.startsWith('video/') || asset.type === 'video' ? (
@@ -475,7 +475,7 @@ export function MediaPickerModal({
                     className={`px-3 py-1 rounded-full text-xs whitespace-nowrap transition-all ${
                       libraryCategory === cat.id
                         ? 'bg-[#D9A86C] text-white font-bold shadow-sm'
-                        : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08] border border-white/5'
+                        : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08] border border-[#1F1F24]'
                     }`}
                   >
                     {cat.label}
@@ -503,8 +503,8 @@ export function MediaPickerModal({
                         }}
                         className={`group relative aspect-video rounded-xl border overflow-hidden cursor-pointer transition-all ${
                           isSelected
-                            ? 'border-[#D9A86C] ring-2 ring-violet-500/50 shadow-lg shadow-[#D9A86C]-500/20'
-                            : 'border-white/[0.08] hover:border-white/25 bg-white/[0.04]'
+                            ? 'border-[#D9A86C] ring-2 ring-[#D9A86C]/50 shadow-lg shadow-[#D9A86C]/20'
+                            : 'border-[#1F1F24] hover:border-white/25 bg-white/[0.04]'
                         }`}
                       >
                         {item.type === 'video' ? (
@@ -514,7 +514,7 @@ export function MediaPickerModal({
                               alt={item.title || 'Video'}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                             />
-                            <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-sm text-[9px] font-bold text-violet-300 border border-[#D9A86C]/30">
+                            <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-sm text-[9px] font-bold text-[#F2C27F] border border-[#D9A86C]/30">
                               VIDEO
                             </div>
                           </div>
@@ -577,7 +577,7 @@ export function MediaPickerModal({
                         className={`group relative aspect-video rounded-xl border overflow-hidden cursor-pointer transition-all ${
                           isSelected
                             ? 'border-amber-400 ring-2 ring-amber-400/50 shadow-lg shadow-amber-400/20'
-                            : 'border-white/[0.08] hover:border-white/25 bg-white/[0.04]'
+                            : 'border-[#1F1F24] hover:border-white/25 bg-white/[0.04]'
                         }`}
                       >
                         {item.type === 'video' ? (
@@ -631,19 +631,19 @@ export function MediaPickerModal({
             >
               {uploading ? (
                 <div className="flex flex-col items-center gap-2">
-                  <Loader2 className="w-10 h-10 animate-spin text-violet-400" />
+                  <Loader2 className="w-10 h-10 animate-spin text-[#F2C27F]" />
                   <p className="text-xs text-white font-semibold">Wgrywanie pliku na serwer...</p>
                 </div>
               ) : (
                 <>
-                  <div className="w-12 h-12 rounded-2xl bg-[#D9A86C]/20 border border-[#D9A86C]/25 flex items-center justify-center text-violet-400 mb-3">
+                  <div className="w-12 h-12 rounded-2xl bg-[#D9A86C]/20 border border-[#D9A86C]/25 flex items-center justify-center text-[#F2C27F] mb-3">
                     <Upload className="w-6 h-6" />
                   </div>
                   <h4 className="text-sm font-bold text-white mb-1">Przeciągnij i upuść pliki tutaj</h4>
                   <p className="text-xs text-zinc-400 mb-4">Obsługiwane formaty: PNG, JPG, WebP, SVG, MP4</p>
                   <button
                     type="button"
-                    className="px-4 py-2 rounded-xl bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-xs font-bold transition-all shadow-md shadow-[#D9A86C]-600/20"
+                    className="px-4 py-2 rounded-xl bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-xs font-bold transition-all shadow-md shadow-[#D9A86C]/20"
                   >
                     Wybierz z dysku
                   </button>
@@ -667,12 +667,12 @@ export function MediaPickerModal({
                     setSelectedUrl(e.target.value)
                   }}
                   placeholder="https://images.unsplash.com/photo-..."
-                  className="w-full bg-white/[0.04] border border-white/[0.12] rounded-xl px-4 py-2.5 text-xs text-white font-mono placeholder-slate-600 focus:outline-none focus:border-[#D9A86C]"
+                  className="w-full bg-white/[0.04] border border-[#1F1F24] rounded-xl px-4 py-2.5 text-xs text-white font-mono placeholder-slate-600 focus:outline-none focus:border-[#D9A86C]"
                 />
               </div>
 
               {customUrl && (
-                <div className="border border-white/[0.08] rounded-xl p-3 bg-black/40">
+                <div className="border border-[#1F1F24] rounded-xl p-3 bg-black/40">
                   <p className="text-[11px] text-zinc-400 mb-2 font-medium">Podgląd:</p>
                   <div className="max-h-48 flex items-center justify-center overflow-hidden rounded-lg bg-black/60">
                     <img
@@ -691,7 +691,7 @@ export function MediaPickerModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-4 border-t border-white/[0.08] bg-[#2E2E33] flex items-center justify-between">
+        <div className="px-6 py-4 border-t border-[#1F1F24] bg-[#202024] flex items-center justify-between">
           <div className="text-xs text-zinc-400 truncate max-w-sm">
             {selectedUrl ? (
               <span className="text-[#F2C27F] font-mono text-[11px] truncate">Wybrano: {selectedUrl.slice(0, 45)}...</span>
@@ -710,7 +710,7 @@ export function MediaPickerModal({
             <button
               onClick={handleConfirm}
               disabled={!selectedUrl && !customUrl}
-              className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#B8893A] to-[#D9A86C] hover:shadow-lg hover:shadow-[#D9A86C]-600/20 text-white text-xs font-bold transition-all disabled:opacity-40"
+              className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#B8893A] to-[#D9A86C] hover:shadow-lg hover:shadow-[#D9A86C]/20 text-white text-xs font-bold transition-all disabled:opacity-40"
             >
               Wstaw do sekcji
             </button>

@@ -133,19 +133,19 @@ export function ExperienceLibraryModal({
     <>
       <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/90 backdrop-blur-md p-2 md:p-6 animate-in fade-in duration-150 select-none">
         <div
-          className="w-full max-w-7xl max-h-[95vh] bg-[#18181B] border border-[#2E2E33] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
+          className="w-full max-w-7xl max-h-[95vh] bg-[#18181B] border border-[#1F1F24] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[#2E2E33] bg-[#2E2E33]">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[#1F1F24] bg-[#202024]">
             <div>
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-[#D9A86C]/20 border border-[#D9A86C]/30 flex items-center justify-center text-violet-400">
+                <div className="w-8 h-8 rounded-xl bg-[#D9A86C]/20 border border-[#D9A86C]/30 flex items-center justify-center text-[#F2C27F]">
                   <Sparkles className="w-4 h-4" />
                 </div>
                 <h2 className="text-base md:text-lg font-extrabold text-white flex items-center gap-2">
                   <span>Experience Library</span>
-                  <span className="text-xs font-mono font-bold text-violet-400 bg-violet-500/10 px-2.5 py-0.5 rounded-full border border-[#D9A86C]/20">
+                  <span className="text-xs font-mono font-bold text-[#F2C27F] bg-[#D9A86C]/10 px-2.5 py-0.5 rounded-full border border-[#D9A86C]/20">
                     v2.0
                   </span>
                   <span className="text-xs font-semibold text-zinc-400 px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
@@ -155,7 +155,7 @@ export function ExperienceLibraryModal({
               </div>
               <p className="text-xs text-zinc-400 mt-1">
                 {insertIndex !== undefined ? (
-                  <span className="text-violet-300 font-medium">
+                  <span className="text-[#F2C27F] font-medium">
                     Inserting at position #{insertIndex + 1} {predecessor && successor ? `(between "${predecessor}" and "${successor}")` : predecessor ? `(after "${predecessor}")` : successor ? `(before "${successor}")` : '(start of page)'}.
                   </span>
                 ) : (
@@ -172,7 +172,7 @@ export function ExperienceLibraryModal({
           </div>
 
           {/* Primary Category Bar */}
-          <div className="px-6 py-2.5 border-b border-[#2E2E33] bg-[#2E2E33] flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+          <div className="px-6 py-2.5 border-b border-[#1F1F24] bg-[#202024] flex items-center gap-1.5 overflow-x-auto no-scrollbar">
             {EXPERIENCE_CATEGORIES.slice(0, 10).map(cat => {
               const isSelected = selectedCategory === cat.id;
               return (
@@ -181,7 +181,7 @@ export function ExperienceLibraryModal({
                   onClick={() => setSelectedCategory(cat.id)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
                     isSelected
-                      ? 'bg-[#D9A86C] text-white shadow-lg shadow-[#D9A86C]-600/30 font-bold'
+                      ? 'bg-[#D9A86C] text-white shadow-lg shadow-[#D9A86C]/30 font-bold'
                       : 'text-zinc-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
@@ -192,7 +192,7 @@ export function ExperienceLibraryModal({
           </div>
 
           {/* Search & Multi-Facet Filters Bar */}
-          <div className="p-4 border-b border-[#2E2E33] bg-[#18181B] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <div className="p-4 border-b border-[#1F1F24] bg-[#18181B] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             {/* Search Input */}
             <div className="relative flex-1">
               <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
@@ -201,7 +201,7 @@ export function ExperienceLibraryModal({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search experiences by name, keyword, style, industry (e.g. Hero, Bento, Aurora, SaaS)..."
-                className="w-full pl-10 pr-4 py-2 bg-[#202024] border border-[#2E2E33] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C] transition-colors"
+                className="w-full pl-10 pr-4 py-2 bg-[#202024] border border-[#1F1F24] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C] transition-colors"
               />
             </div>
 
@@ -211,7 +211,7 @@ export function ExperienceLibraryModal({
               <select
                 value={selectedMood}
                 onChange={(e) => setSelectedMood(e.target.value as any)}
-                className="bg-[#202024] border border-[#2E2E33] text-xs font-semibold text-zinc-300 rounded-xl px-3 py-2 focus:outline-none focus:border-[#D9A86C] cursor-pointer"
+                className="bg-[#202024] border border-[#1F1F24] text-xs font-semibold text-zinc-300 rounded-xl px-3 py-2 focus:outline-none focus:border-[#D9A86C] cursor-pointer"
               >
                 {EXPERIENCE_MOODS.map(m => (
                   <option key={m.id} value={m.id}>{m.label}</option>
@@ -222,7 +222,7 @@ export function ExperienceLibraryModal({
               <select
                 value={selectedMotion}
                 onChange={(e) => setSelectedMotion(e.target.value as any)}
-                className="bg-[#202024] border border-[#2E2E33] text-xs font-semibold text-zinc-300 rounded-xl px-3 py-2 focus:outline-none focus:border-[#D9A86C] cursor-pointer"
+                className="bg-[#202024] border border-[#1F1F24] text-xs font-semibold text-zinc-300 rounded-xl px-3 py-2 focus:outline-none focus:border-[#D9A86C] cursor-pointer"
               >
                 {EXPERIENCE_MOTION_LEVELS.map(m => (
                   <option key={m.id} value={m.id}>{m.label}</option>
@@ -233,7 +233,7 @@ export function ExperienceLibraryModal({
               <select
                 value={selectedIndustry}
                 onChange={(e) => setSelectedIndustry(e.target.value)}
-                className="bg-[#202024] border border-[#2E2E33] text-xs font-semibold text-zinc-300 rounded-xl px-3 py-2 focus:outline-none focus:border-[#D9A86C] cursor-pointer"
+                className="bg-[#202024] border border-[#1F1F24] text-xs font-semibold text-zinc-300 rounded-xl px-3 py-2 focus:outline-none focus:border-[#D9A86C] cursor-pointer"
               >
                 {EXPERIENCE_INDUSTRIES.map(i => (
                   <option key={i} value={i}>{i === 'All' ? 'All Industries' : i}</option>
@@ -266,7 +266,7 @@ export function ExperienceLibraryModal({
                 </p>
                 <button
                   onClick={resetFilters}
-                  className="mt-2 px-4 py-2 rounded-xl bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-xs font-bold transition-all shadow-md shadow-[#D9A86C]-600/30"
+                  className="mt-2 px-4 py-2 rounded-xl bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-xs font-bold transition-all shadow-md shadow-[#D9A86C]/30"
                 >
                   Reset Filters
                 </button>
@@ -281,7 +281,7 @@ export function ExperienceLibraryModal({
                   return (
                     <div
                       key={exp.id}
-                      className="group relative rounded-2xl bg-[#202024] border border-[#2E2E33] hover:border-[#D9A86C]/60 hover:shadow-2xl hover:shadow-[#D9A86C]-950/30 transition-all duration-200 flex flex-col justify-between overflow-hidden"
+                      className="group relative rounded-2xl bg-[#202024] border border-[#1F1F24] hover:border-[#D9A86C]/60 hover:shadow-2xl hover:shadow-[#D9A86C]/30 transition-all duration-200 flex flex-col justify-between overflow-hidden"
                     >
                       {/* Visual-First Live Scale-To-Fit Preview */}
                       <div
@@ -291,7 +291,7 @@ export function ExperienceLibraryModal({
                         {/* Floating Top Badges */}
                         <div className="absolute top-3 left-3 right-3 z-10 flex items-center justify-between pointer-events-none">
                           <div className="flex items-center gap-1.5 pointer-events-auto">
-                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-violet-300 bg-black/70 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10 shadow-sm">
+                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#F2C27F] bg-black/70 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10 shadow-sm">
                               {exp.type}
                             </span>
                             {exp.badge && (
@@ -336,7 +336,7 @@ export function ExperienceLibraryModal({
                               e.stopPropagation();
                               handleQuickInsert(exp);
                             }}
-                            className="px-4 py-2.5 rounded-xl bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-xs font-extrabold shadow-xl shadow-[#D9A86C]-600/40 flex items-center gap-1.5 transition-transform active:scale-95"
+                            className="px-4 py-2.5 rounded-xl bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-xs font-extrabold shadow-xl shadow-[#D9A86C]/40 flex items-center gap-1.5 transition-transform active:scale-95"
                           >
                             <Plus className="w-3.5 h-3.5" />
                             <span>USE EXPERIENCE</span>
@@ -348,19 +348,19 @@ export function ExperienceLibraryModal({
                             }}
                             className="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/20 flex items-center gap-1.5 transition-all"
                           >
-                            <Eye className="w-3.5 h-3.5 text-violet-300" />
+                            <Eye className="w-3.5 h-3.5 text-[#F2C27F]" />
                             <span>PREVIEW</span>
                           </button>
                         </div>
                       </div>
 
                       {/* Card Meta Footer */}
-                      <div className="p-4 bg-[#202024] border-t border-[#2E2E33] flex flex-col gap-2">
+                      <div className="p-4 bg-[#202024] border-t border-[#1F1F24] flex flex-col gap-2">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
                             <h3
                               onClick={() => setDetailExperience(exp)}
-                              className="text-sm font-bold text-white group-hover:text-violet-300 transition-colors truncate cursor-pointer"
+                              className="text-sm font-bold text-white group-hover:text-[#F2C27F] transition-colors truncate cursor-pointer"
                             >
                               {exp.name}
                             </h3>
@@ -415,7 +415,7 @@ export function ExperienceLibraryModal({
                             </button>
                             <button
                               onClick={() => handleQuickInsert(exp)}
-                              className="text-xs font-extrabold text-white flex items-center gap-1 bg-[#D9A86C] hover:bg-[#C99A4A] px-3 py-1 rounded-lg shadow-sm shadow-[#D9A86C]-600/30 transition-all active:scale-95"
+                              className="text-xs font-extrabold text-white flex items-center gap-1 bg-[#D9A86C] hover:bg-[#C99A4A] px-3 py-1 rounded-lg shadow-sm shadow-[#D9A86C]/30 transition-all active:scale-95"
                             >
                               <span>Use</span>
                             </button>

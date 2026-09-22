@@ -23,11 +23,26 @@ import {
   Palette, LayoutDashboard, AlignLeft, Type, Settings2,
   AlignCenter, AlignRight, AlignJustify,
   AlignStartVertical, AlignCenterVertical, AlignEndVertical,
-  ChevronDown, Lock, Eye, EyeOff,
+  ChevronDown,
   StretchHorizontal, Grid3X3, Upload,
 } from 'lucide-react';
 import type { NodeStyles } from '../../../builder-core/src/BuilderDocument';
 import { FontPicker } from './widgets/FontPicker';
+import {
+  ColorControl,
+  GradientControl,
+  UnitInput,
+  SelectInput,
+  NumberInput,
+  IconToggleGroup,
+  ShadowEditor,
+  FourSideEditor,
+  SmoothSlider,
+  inputCls,
+  isGradientCss,
+  buildLinearGradient,
+  DEFAULT_GRADIENT,
+} from './controls';
 
 // ---------------------------------------------------------------------------
 // Shared mini-components
@@ -64,565 +79,9 @@ const Row = ({ label, children }: { label: string; children: React.ReactNode }) 
   </div>
 );
 
-const inputCls =
-  'w-full bg-[#0e0e1a] border border-white/10 rounded px-2 py-1 text-[12px] text-white focus:outline-none focus:border-gold-placeholder-500/60 transition-colors';
-
-const unitInputCls =
-  'w-full bg-[#0e0e1a] border border-white/10 rounded-l px-2 py-1 text-[12px] text-white focus:outline-none focus:border-gold-placeholder-500/60 transition-colors';
-
-function UnitInput({
-  value,
-  onChange,
-  onLivePreview,
-  placeholder = '0',
-  min,
-  max,
-  step,
-  slider,
-  defaultUnit = 'px',
-}: {
-  value?: string;
-  onChange: (v: string) => void;
-  /** Called on every slider input for immediate DOM preview (no re-render) */
-  onLivePreview?: (v: string) => void;
-  placeholder?: string;
-  min?: number;
-  max?: number;
-  step?: number;
-  /** When provided, renders a slider + numeric input pair sharing the same value */
-  slider?: boolean;
-  /** Default unit to append if no unit is detected (default: 'px') */
-  defaultUnit?: string;
-}) {
-  const match = value ? String(value).match(/^([+-]?(?:\d*\.)?\d+)([a-zA-Z%]*)$/) : null;
-  const numVal = match ? parseFloat(match[1]) : (value ? parseFloat(String(value).replace(/[^0-9.-]/g, '')) : NaN);
-  let rawUnit = match && match[2] !== undefined ? match[2] : undefined;
-  // If defaultUnit is empty string (unitless ratio) and rawUnit is 'px' on a small number (< 5), treat as legacy corrupted unit
-  if (defaultUnit === '' && rawUnit === 'px' && !Number.isNaN(numVal) && numVal < 5) {
-    rawUnit = '';
-  }
-  const detectedUnit = rawUnit !== undefined ? rawUnit : defaultUnit;
-  const hasNum = !Number.isNaN(numVal);
-
-  const [unit, setUnit] = React.useState(detectedUnit);
-
-  React.useEffect(() => {
-    let rawUnit = match && match[2] !== undefined ? match[2] : undefined;
-    if (defaultUnit === '' && rawUnit === 'px' && !Number.isNaN(numVal) && numVal < 5) {
-      rawUnit = '';
-    }
-    const newUnit = rawUnit !== undefined ? rawUnit : defaultUnit;
-    setUnit(newUnit);
-  }, [value, defaultUnit]);
-
-  const commit = (num: string, u: string) => {
-    if (!num) {
-      onChange('');
-      return;
-    }
-    const activeUnit = u !== undefined ? u : defaultUnit;
-    onChange(`${num}${activeUnit}`);
-  };
-
-  const commitNumber = (n: number, u: string) => {
-    const rounded = Math.round(n * 100) / 100;
-    const activeUnit = u !== undefined ? u : defaultUnit;
-    onChange(`${rounded}${activeUnit}`);
-  };
-
-  return (
-    <div className="flex flex-col gap-1">
-      <div className="flex">
-        <input
-          type="number"
-          value={hasNum ? numVal : ''}
-          placeholder={placeholder}
-          min={min}
-          max={max}
-          step={step}
-          onChange={(e) => commit(e.target.value, unit)}
-          className={unitInputCls}
-        />
-        <select
-          value={unit}
-          onChange={(e) => {
-            const nextUnit = e.target.value;
-            setUnit(nextUnit);
-            commit(hasNum ? String(numVal) : '', nextUnit);
-          }}
-          className="bg-[#0e0e1a] border border-l-0 border-white/10 rounded-r text-[11px] text-slate-400 px-1 focus:outline-none"
-        >
-          <option value="">—</option>
-          <option>px</option>
-          <option>%</option>
-          <option>rem</option>
-          <option>em</option>
-          <option>vw</option>
-          <option>vh</option>
-          <option>fr</option>
-          <option>auto</option>
-        </select>
-      </div>
-      {slider && min !== undefined && max !== undefined && (
-        <input
-          type="range"
-          min={min}
-          max={max}
-          step={step ?? 1}
-          value={hasNum ? Math.min(max, Math.max(min, numVal)) : min}
-          onInput={(e) => {
-            const n = parseFloat((e.target as HTMLInputElement).value);
-            const rounded = Math.round(n * 100) / 100;
-            const activeUnit = unit !== undefined ? unit : defaultUnit;
-            const v = activeUnit ? `${rounded}${activeUnit}` : `${rounded}`;
-            onLivePreview?.(v);
-          }}
-          onChange={(e) => {
-            const activeUnit = unit !== undefined ? unit : defaultUnit;
-            commitNumber(parseFloat(e.target.value), activeUnit);
-          }}
-          className="w-full accent-gold-placeholder-500 h-1 cursor-pointer"
-        />
-      )}
-    </div>
-  );
-}
-
-const COLOR_PRESETS = [
-  { label: 'Przezroczysty', value: 'transparent' },
-  { label: 'Biały', value: '#ffffff' },
-  { label: 'Czarny', value: '#000000' },
-  { label: 'Ciemny', value: '#0a0a14' },
-  { label: 'Fiolet', value: '#7c3aed' },
-  { label: 'Róż', value: '#ec4899' },
-  { label: 'Niebieski', value: '#3b82f6' },
-  { label: 'Szmaragd', value: '#10b981' },
-  { label: 'Bursztyn', value: '#f59e0b' },
-  { label: 'Szary', value: '#64748b' },
-];
-
-function ColorInput({
-  value,
-  onChange,
-}: {
-  value?: string;
-  onChange: (v: string) => void;
-}) {
-  const hexVal = React.useMemo(() => {
-    if (!value || value === 'transparent') return '#ffffff';
-    if (/^#[0-9a-fA-F]{6}$/.test(value)) return value;
-    if (/^#[0-9a-fA-F]{3}$/.test(value)) {
-      return `#${value[1]}${value[1]}${value[2]}${value[2]}${value[3]}${value[3]}`;
-    }
-    return '#ffffff';
-  }, [value]);
-
-  return (
-    <div className="flex flex-col gap-1.5 w-full">
-      <div className="flex items-center gap-1.5">
-        <div
-          className="w-7 h-7 rounded-lg border border-white/20 flex-shrink-0 cursor-pointer relative overflow-hidden shadow-inner"
-          style={{ background: value || 'transparent' }}
-          title="Kliknij, aby otworzyć próbnik kolorów"
-        >
-          <input
-            type="color"
-            value={hexVal}
-            onChange={(e) => onChange(e.target.value)}
-            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-          />
-        </div>
-        <input
-          type="text"
-          value={value || ''}
-          placeholder="#ffffff, transparent, rgba(…)"
-          onChange={(e) => onChange(e.target.value)}
-          className={`${inputCls} font-mono text-xs`}
-        />
-      </div>
-      <div className="flex flex-wrap gap-1">
-        {COLOR_PRESETS.map((preset) => (
-          <button
-            key={preset.value}
-            type="button"
-            title={preset.label}
-            onClick={() => onChange(preset.value)}
-            className={`w-3.5 h-3.5 rounded-sm border transition-transform hover:scale-125 ${
-              value === preset.value ? 'ring-1 ring-gold-placeholder-400 border-white' : 'border-white/20'
-            }`}
-            style={{
-              backgroundColor: preset.value === 'transparent' ? '#1a1a24' : preset.value,
-            }}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function SelectInput({
-  value,
-  onChange,
-  options,
-}: {
-  value?: string;
-  onChange: (v: string) => void;
-  options: { label: string; value: string }[];
-}) {
-  return (
-    <select
-      value={value || ''}
-      onChange={(e) => onChange(e.target.value)}
-      className={`${inputCls} cursor-pointer`}
-    >
-      <option value="">—</option>
-      {options.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
-    </select>
-  );
-}
-
-function NumberInput({
-  value,
-  onChange,
-  min,
-  max,
-  step = 1,
-  placeholder,
-}: {
-  value?: number;
-  onChange: (v: number) => void;
-  min?: number;
-  max?: number;
-  step?: number;
-  placeholder?: string;
-}) {
-  return (
-    <input
-      type="number"
-      value={value ?? ''}
-      min={min}
-      max={max}
-      step={step}
-      placeholder={placeholder}
-      onChange={(e) => onChange(parseFloat(e.target.value))}
-      className={inputCls}
-    />
-  );
-}
-
-// ---------------------------------------------------------------------------
-// 4-side Spacing editor (Padding / Margin)
-// ---------------------------------------------------------------------------
-
-type FourSide = { top?: string; right?: string; bottom?: string; left?: string };
-
-function FourSideEditor({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value?: FourSide | string;
-  onChange: (v: FourSide) => void;
-}) {
-  const [linked, setLinked] = React.useState(true);
-
-  const parsed: FourSide =
-    value && typeof value === 'object'
-      ? (value as FourSide)
-      : typeof value === 'string'
-      ? { top: value, right: value, bottom: value, left: value }
-      : {};
-
-  const handleSide = (side: keyof FourSide, v: string) => {
-    if (linked) {
-      onChange({ top: v, right: v, bottom: v, left: v });
-    } else {
-      onChange({ ...parsed, [side]: v });
-    }
-  };
-
-  const sides: { key: keyof FourSide; short: string }[] = [
-    { key: 'top', short: 'T' },
-    { key: 'right', short: 'R' },
-    { key: 'bottom', short: 'B' },
-    { key: 'left', short: 'L' },
-  ];
-
-  const masterVal = parseInt(parsed.top || '0', 10) || 0;
-
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between mb-1">
-        <span className="text-[11px] text-slate-400 font-medium">{label}</span>
-        <button
-          type="button"
-          onClick={() => setLinked((v) => !v)}
-          className={`px-1.5 py-0.5 rounded text-[10px] flex items-center gap-1 transition-colors ${
-            linked
-              ? 'text-gold-placeholder-400 bg-gold-placeholder-500/20 border border-gold-placeholder-500/30'
-              : 'text-slate-500 hover:text-white bg-white/5'
-          }`}
-          title={linked ? 'Rozłącz boki (edytuj każdy osobno)' : 'Połącz wszystkie boki'}
-        >
-          <Lock className="w-3 h-3" />
-          <span className="text-[9px]">{linked ? 'Połączone' : 'Osobno'}</span>
-        </button>
-      </div>
-
-      {linked ? (
-        <div className="flex items-center gap-2 bg-[#0a0a14] p-2 rounded-lg border border-white/5">
-          <input
-            type="range"
-            min={0}
-            max={120}
-            step={1}
-            value={masterVal}
-            onChange={(e) => {
-              const v = `${e.target.value}px`;
-              onChange({ top: v, right: v, bottom: v, left: v });
-            }}
-            className="flex-1 accent-gold-placeholder-500 h-1 cursor-pointer"
-          />
-          <div className="flex items-center">
-            <input
-              type="number"
-              min={0}
-              max={999}
-              value={masterVal}
-              onChange={(e) => {
-                const v = `${e.target.value || '0'}px`;
-                onChange({ top: v, right: v, bottom: v, left: v });
-              }}
-              className="w-12 bg-[#0e0e1a] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-gold-placeholder-500/60 font-mono"
-            />
-            <span className="text-[10px] text-slate-500 ml-1">px</span>
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-1.5 bg-[#0a0a14] p-2 rounded-lg border border-white/5">
-          {sides.map(({ key, short }) => {
-            const sideVal = parseInt(parsed[key] || '0', 10) || 0;
-            return (
-              <div key={key} className="flex items-center gap-2">
-                <span className="w-8 text-[10px] font-bold text-slate-400 uppercase">{short}:</span>
-                <input
-                  type="range"
-                  min={0}
-                  max={120}
-                  step={1}
-                  value={sideVal}
-                  onChange={(e) => handleSide(key, `${e.target.value}px`)}
-                  className="flex-1 accent-gold-placeholder-500 h-1 cursor-pointer"
-                />
-                <input
-                  type="number"
-                  min={0}
-                  max={999}
-                  value={sideVal}
-                  onChange={(e) => handleSide(key, `${e.target.value || '0'}px`)}
-                  className="w-12 bg-[#0e0e1a] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-gold-placeholder-500/60 font-mono"
-                />
-                <span className="text-[10px] text-slate-500">px</span>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Icon toggle group
-// ---------------------------------------------------------------------------
-
-function IconToggleGroup<T extends string>({
-  value,
-  onChange,
-  options,
-}: {
-  value?: T;
-  onChange: (v: T) => void;
-  options: { value: T; icon: React.ReactNode; title: string }[];
-}) {
-  return (
-    <div className="flex gap-0.5">
-      {options.map((opt) => (
-        <button
-          key={opt.value}
-          title={opt.title}
-          onClick={() => onChange(opt.value)}
-          className={`flex-1 flex items-center justify-center p-1.5 rounded text-[11px] transition-colors ${
-            value === opt.value
-              ? 'bg-gold-placeholder-500/20 text-gold-placeholder-300 border border-gold-placeholder-500/40'
-              : 'text-slate-500 hover:text-white hover:bg-white/5 border border-transparent'
-          }`}
-        >
-          {opt.icon}
-        </button>
-      ))}
-    </div>
-  );
-}
-
 // ---------------------------------------------------------------------------
 // Design tab
 // ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// Shadow Editor — parses/builds CSS box-shadow string
-// ---------------------------------------------------------------------------
-
-function parseBoxShadow(raw?: string): { x: number; y: number; blur: number; spread: number; color: string; opacity: number; enabled: boolean } {
-  if (!raw || raw === 'none') return { x: 0, y: 4, blur: 16, spread: 0, color: '#000000', opacity: 0.25, enabled: false };
-  // Match: [inset] offset-x offset-y [blur-radius] [spread-radius] [color]
-  const m = raw.match(/^-?(?:inset\s+)?(-?\d+(?:\.\d+)?)(?:px)?\s+(-?\d+(?:\.\d+)?)(?:px)?\s+(-?\d+(?:\.\d+)?)(?:px)?(?:\s+(-?\d+(?:\.\d+)?)(?:px)?)?\s*(.*)$/);
-  if (!m) return { x: 0, y: 4, blur: 16, spread: 0, color: '#000000', opacity: 0.25, enabled: true };
-  const x = parseFloat(m[1]) || 0;
-  const y = parseFloat(m[2]) || 0;
-  const blur = parseFloat(m[3]) || 0;
-  const spread = m[4] ? (parseFloat(m[4]) || 0) : 0;
-  const colorStr = (m[5] || '#000000').trim();
-
-  let color = '#000000';
-  let opacity = 0.25;
-
-  // Case 1: rgba(r, g, b, a)
-  const rgbaMatch = colorStr.match(/rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)/i);
-  if (rgbaMatch) {
-    const r = Math.min(255, Math.max(0, parseInt(rgbaMatch[1], 10))).toString(16).padStart(2, '0');
-    const g = Math.min(255, Math.max(0, parseInt(rgbaMatch[2], 10))).toString(16).padStart(2, '0');
-    const b = Math.min(255, Math.max(0, parseInt(rgbaMatch[3], 10))).toString(16).padStart(2, '0');
-    color = `#${r}${g}${b}`;
-    opacity = parseFloat(rgbaMatch[4]);
-  } else {
-    // Case 2: rgb(r, g, b)
-    const rgbMatch = colorStr.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i);
-    if (rgbMatch) {
-      const r = Math.min(255, Math.max(0, parseInt(rgbMatch[1], 10))).toString(16).padStart(2, '0');
-      const g = Math.min(255, Math.max(0, parseInt(rgbMatch[2], 10))).toString(16).padStart(2, '0');
-      const b = Math.min(255, Math.max(0, parseInt(rgbMatch[3], 10))).toString(16).padStart(2, '0');
-      color = `#${r}${g}${b}`;
-      opacity = 1;
-    } else {
-      // Case 3: #rrggbb or #rgb
-      const hexMatch = colorStr.match(/#([0-9a-fA-F]{3,6})/);
-      if (hexMatch) {
-        let hex = hexMatch[1];
-        if (hex.length === 3) {
-          hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
-        }
-        color = `#${hex}`;
-        opacity = 1;
-      }
-    }
-  }
-
-  return { x, y, blur, spread, color, opacity, enabled: true };
-}
-
-function buildBoxShadow(s: { x: number; y: number; blur: number; spread: number; color: string; opacity: number; enabled: boolean }): string {
-  if (!s.enabled) return 'none';
-  const r = parseInt(s.color.slice(1, 3), 16);
-  const g = parseInt(s.color.slice(3, 5), 16);
-  const b = parseInt(s.color.slice(5, 7), 16);
-  return `${s.x}px ${s.y}px ${s.blur}px ${s.spread}px rgba(${r},${g},${b},${s.opacity})`;
-}
-
-function ShadowEditor({
-  value,
-  onChange,
-  onLivePreview,
-}: {
-  value?: string;
-  onChange: (v: string) => void;
-  onLivePreview?: (v: string) => void;
-}) {
-  const shadow = React.useMemo(() => parseBoxShadow(value), [value]);
-  const [local, setLocal] = React.useState(shadow);
-  React.useEffect(() => { setLocal(shadow); }, [value]);
-
-  const update = (patch: Partial<typeof local>) => {
-    const next = { ...local, ...patch };
-    setLocal(next);
-    const css = buildBoxShadow(next);
-    onChange(css);
-    onLivePreview?.(css);
-  };
-
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <span className="text-[11px] text-slate-400 font-medium">Shadow</span>
-        <button
-          type="button"
-          onClick={() => update({ enabled: !local.enabled })}
-          className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-colors ${
-            local.enabled
-              ? 'bg-[#D9A86C] text-white'
-              : 'bg-white/5 text-slate-500 hover:text-white'
-          }`}
-        >
-          {local.enabled ? 'ON' : 'OFF'}
-        </button>
-      </div>
-      {local.enabled && (
-        <>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-[10px] text-slate-500">X</label>
-              <input type="range" min={-50} max={50} step={1} value={local.x}
-                onInput={(e) => update({ x: parseFloat((e.target as HTMLInputElement).value) })}
-                className="w-full accent-gold-placeholder-500 h-1" />
-              <div className="text-[10px] text-slate-400 text-right font-mono">{local.x}px</div>
-            </div>
-            <div>
-              <label className="text-[10px] text-slate-500">Y</label>
-              <input type="range" min={-50} max={50} step={1} value={local.y}
-                onInput={(e) => update({ y: parseFloat((e.target as HTMLInputElement).value) })}
-                className="w-full accent-gold-placeholder-500 h-1" />
-              <div className="text-[10px] text-slate-400 text-right font-mono">{local.y}px</div>
-            </div>
-            <div>
-              <label className="text-[10px] text-slate-500">Blur</label>
-              <input type="range" min={0} max={100} step={1} value={local.blur}
-                onInput={(e) => update({ blur: parseFloat((e.target as HTMLInputElement).value) })}
-                className="w-full accent-gold-placeholder-500 h-1" />
-              <div className="text-[10px] text-slate-400 text-right font-mono">{local.blur}px</div>
-            </div>
-            <div>
-              <label className="text-[10px] text-slate-500">Spread</label>
-              <input type="range" min={-50} max={50} step={1} value={local.spread}
-                onInput={(e) => update({ spread: parseFloat((e.target as HTMLInputElement).value) })}
-                className="w-full accent-gold-placeholder-500 h-1" />
-              <div className="text-[10px] text-slate-400 text-right font-mono">{local.spread}px</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="relative w-7 h-7 rounded-lg border border-white/20 flex-shrink-0 overflow-hidden shadow-inner"
-              style={{ background: local.color }}>
-              <input type="color" value={local.color}
-                onChange={(e) => update({ color: e.target.value })}
-                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
-            </div>
-            <div className="flex-1">
-              <label className="text-[10px] text-slate-500">Opacity</label>
-              <input type="range" min={0} max={1} step={0.01} value={local.opacity}
-                onInput={(e) => update({ opacity: parseFloat((e.target as HTMLInputElement).value) })}
-                className="w-full accent-gold-placeholder-500 h-1" />
-            </div>
-            <div className="text-[10px] text-slate-400 font-mono w-10 text-right">{Math.round(local.opacity * 100)}%</div>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
 
 function DesignTab({
   styles,
@@ -692,19 +151,35 @@ function DesignTab({
         <Section title="Media i tło sekcji">
           <Row label="Typ tła">
             <SelectInput
-              value={styles.videoSrc ? 'video' : styles.backgroundImage ? 'image' : 'color'}
+              value={styles.videoSrc ? 'video' : isGradientCss(styles.backgroundImage) ? 'gradient' : styles.backgroundImage ? 'image' : 'color'}
               onChange={(v) => {
                 if (v === 'color') onChange({ backgroundImage: '', videoSrc: '' });
-                else if (v === 'image' && !styles.backgroundImage) onChange({ backgroundImage: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809', videoSrc: '' });
+                else if (v === 'gradient') onChange({
+                  videoSrc: '',
+                  backgroundImage: isGradientCss(styles.backgroundImage) ? styles.backgroundImage : buildLinearGradient(DEFAULT_GRADIENT),
+                });
+                else if (v === 'image') {
+                  if (isGradientCss(styles.backgroundImage)) onChange({ backgroundImage: '' });
+                  if (!styles.backgroundImage) onChange({ backgroundImage: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809', videoSrc: '' });
+                }
                 else if (v === 'video' && !styles.videoSrc) onChange({ videoSrc: 'https://assets.mixkit.co/videos/preview/mixkit-set-of-plateaus-seen-from-the-sky-in-a-sunset-26070-large.mp4' });
               }}
               options={[
                 { value: 'color', label: 'Kolor / Czysty' },
+                { value: 'gradient', label: 'Gradient (Linear)' },
                 { value: 'image', label: 'Zdjęcie (Image)' },
                 { value: 'video', label: 'Wideo tła (Video MP4)' },
               ]}
             />
           </Row>
+          {isGradientCss(styles.backgroundImage) && (
+            <Row label="Gradient">
+              <GradientControl
+                value={styles.backgroundImage}
+                onChange={(css) => onChange({ backgroundImage: css })}
+              />
+            </Row>
+          )}
           {styles.videoSrc ? (
             <>
               <Row label="Wideo URL">
@@ -745,7 +220,7 @@ function DesignTab({
             </Row>
           )}
           <Row label="Kolor nakładki">
-            <ColorInput
+<ColorControl 
               value={styles.overlayColor || '#000000'}
               onChange={(v) => onChange({ overlayColor: v })}
             />
@@ -837,11 +312,20 @@ function DesignTab({
 
       <Section title="Fill">
         <Row label="Background">
-          <ColorInput
+          <ColorControl
             value={styles.backgroundColor}
             onChange={(v) => {
               onChange({ backgroundColor: v });
               livePreview('background-color', v);
+            }}
+          />
+        </Row>
+        <Row label="Gradient">
+          <GradientControl
+            value={isGradientCss(styles.backgroundImage) ? styles.backgroundImage : ''}
+            onChange={(css) => {
+              onChange({ backgroundImage: css });
+              livePreview('background-image', css || 'none');
             }}
           />
         </Row>
@@ -898,7 +382,7 @@ function DesignTab({
           </div>
         </Row>
         <Row label="Color">
-          <ColorInput
+          <ColorControl
             value={styles.color}
             onChange={(v) => {
               onChange({ color: v });
@@ -908,16 +392,17 @@ function DesignTab({
         </Row>
         <Row label="Opacity">
           <div className="flex items-center gap-2">
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              value={styles.opacity ?? 1}
-              onInput={(e) => livePreview('opacity', (e.target as HTMLInputElement).value)}
-              onChange={(e) => onChange({ opacity: parseFloat(e.target.value) })}
-              className="flex-1 accent-gold-placeholder-500 h-1 cursor-pointer"
-            />
+            <div className="flex-1">
+              <SmoothSlider
+                min={0}
+                max={1}
+                step={0.01}
+                value={styles.opacity ?? 1}
+                onChange={(n) => onChange({ opacity: n })}
+                onLivePreview={(n) => livePreview('opacity', String(n))}
+                unit=""
+              />
+            </div>
             <div className="flex items-center">
               <input
                 type="number"
@@ -931,7 +416,7 @@ function DesignTab({
                     onChange({ opacity: Math.min(1, Math.max(0, val / 100)) });
                   }
                 }}
-                className="w-12 bg-[#0e0e1a] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-gold-placeholder-500/60 font-mono"
+                className="w-12 bg-[#18181B] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-[#D9A86C]/60 font-mono"
               />
               <span className="text-[10px] text-slate-500 ml-1">%</span>
             </div>
@@ -941,7 +426,7 @@ function DesignTab({
 
       <Section title="Border">
         <Row label="Color">
-          <ColorInput
+          <ColorControl
             value={styles.borderColor}
             onChange={(v) => {
               onChange({ borderColor: v });
@@ -1021,15 +506,16 @@ function DesignTab({
         </Row>
         <Row label="Skala">
           <div className="flex items-center gap-2">
-            <input
-              type="range"
-              min={10}
-              max={300}
-              step={1}
-              value={Math.round((styles.scale ?? 1) * 100)}
-              onChange={(e) => onChange({ scale: parseFloat(e.target.value) / 100 })}
-              className="flex-1 accent-gold-placeholder-500 h-1 cursor-pointer"
-            />
+            <div className="flex-1">
+              <SmoothSlider
+                min={10}
+                max={300}
+                step={1}
+                value={Math.round((styles.scale ?? 1) * 100)}
+                onChange={(n) => onChange({ scale: n / 100 })}
+                unit="%"
+              />
+            </div>
             <div className="flex items-center">
               <input
                 type="number"
@@ -1040,7 +526,7 @@ function DesignTab({
                   const val = parseFloat(e.target.value);
                   if (!Number.isNaN(val)) onChange({ scale: Math.max(0.1, val / 100) });
                 }}
-                className="w-12 bg-[#0e0e1a] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-gold-placeholder-500/60 font-mono"
+                className="w-12 bg-[#18181B] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-[#D9A86C]/60 font-mono"
               />
               <span className="text-[10px] text-slate-500 ml-1">%</span>
             </div>
@@ -1048,15 +534,16 @@ function DesignTab({
         </Row>
         <Row label="Obrót (Rot)">
           <div className="flex items-center gap-2">
-            <input
-              type="range"
-              min={-180}
-              max={180}
-              step={1}
-              value={styles.rotate ?? 0}
-              onChange={(e) => onChange({ rotate: parseInt(e.target.value, 10) })}
-              className="flex-1 accent-gold-placeholder-500 h-1 cursor-pointer"
-            />
+            <div className="flex-1">
+              <SmoothSlider
+                min={-180}
+                max={180}
+                step={1}
+                value={styles.rotate ?? 0}
+                onChange={(n) => onChange({ rotate: Math.round(n) })}
+                unit="°"
+              />
+            </div>
             <div className="flex items-center">
               <input
                 type="number"
@@ -1067,7 +554,7 @@ function DesignTab({
                   const val = parseInt(e.target.value, 10);
                   if (!Number.isNaN(val)) onChange({ rotate: val });
                 }}
-                className="w-12 bg-[#0e0e1a] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-gold-placeholder-500/60 font-mono"
+                className="w-12 bg-[#18181B] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none focus:border-[#D9A86C]/60 font-mono"
               />
               <span className="text-[10px] text-slate-500 ml-1">°</span>
             </div>

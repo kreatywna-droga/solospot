@@ -98,14 +98,14 @@ export function StoreLifecycleModal({
   return (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-150">
       <div
-        className="w-full max-w-lg bg-[#202024] border border-[#2E2E33] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
+        className="w-full max-w-lg bg-[#202024] border border-[#1F1F24] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#2E2E33] bg-[#18181B]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#1F1F24] bg-[#18181B]">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-violet-500/10 border border-[#D9A86C]/20 flex items-center justify-center">
-              <StoreIcon className="w-4 h-4 text-violet-400" />
+            <div className="w-8 h-8 rounded-xl bg-[#D9A86C]/10 border border-[#D9A86C]/20 flex items-center justify-center">
+              <StoreIcon className="w-4 h-4 text-[#D9A86C]" />
             </div>
             <div>
               <h2 className="text-sm font-bold text-white">Cykl Życia Sklepu</h2>
@@ -137,7 +137,7 @@ export function StoreLifecycleModal({
           )}
 
           {/* Section 1: Store Lifecycle Status (Deactivate / Activate) */}
-          <div className="p-4 rounded-xl bg-[#2E2E33] border border-[#2E2E33] space-y-4">
+          <div className="p-4 rounded-xl bg-[#202024] border border-[#1F1F24] space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-xs font-semibold text-zinc-300">Bieżący stan sklepu:</span>
@@ -167,7 +167,7 @@ export function StoreLifecycleModal({
               </button>
             </div>
 
-            <p className="text-[11px] text-zinc-400 leading-relaxed border-t border-[#2E2E33] pt-3">
+            <p className="text-[11px] text-zinc-400 leading-relaxed border-t border-[#1F1F24] pt-3">
               {status === 'ACTIVE' ? (
                 'Dezaktywacja tymczasowo wstrzymuje widoczność sklepu dla klientów zewnętrznych. Wszystkie strony, produkty, zamówienia, multimedia i ustawienia pozostają w 100% bezpieczne i zachowane. Możesz przywrócić aktywność sklepu w dowolnym momencie.'
               ) : (
@@ -233,7 +233,7 @@ export function StoreLifecycleModal({
                     className={`flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
                       deleteInput.trim() === storeName.trim()
                         ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/40'
-                        : 'bg-[#202024] text-zinc-500 cursor-not-allowed border border-[#2E2E33]'
+                        : 'bg-[#202024] text-zinc-500 cursor-not-allowed border border-[#1F1F24]'
                     }`}
                   >
                     {deleting ? (
@@ -250,7 +250,7 @@ export function StoreLifecycleModal({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-[#2E2E33] bg-[#18181B] flex justify-end">
+        <div className="px-6 py-3 border-t border-[#1F1F24] bg-[#18181B] flex justify-end">
           <button
             onClick={onClose}
             className="px-4 py-1.5 rounded-xl text-xs font-medium bg-[#202024] hover:bg-[#2E2E33] text-zinc-300 hover:text-white transition-all"

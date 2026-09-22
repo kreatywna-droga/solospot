@@ -31,10 +31,15 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    "archive/**",
-    "migrate.js",
+    "**/archive/**",
+    "**/migrate.js",
     "test_db.js",
     "test-first-runtime-flow-demonstration.mjs",
+    // Agent/worktree scratch directories
+    "**/.kilo/**",
+    "**/scratch/**",
+    "**/backup_tmp/**",
+    "**/dist/**",
   ]),
 ]);
 

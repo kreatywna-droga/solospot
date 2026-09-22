@@ -48,7 +48,7 @@ function getNodeIcon(type: string, hasChildren: boolean) {
       return <Grid className="w-3.5 h-3.5 text-purple-400" />
     default:
       return hasChildren ? (
-        <Box className="w-3.5 h-3.5 text-violet-400" />
+        <Box className="w-3.5 h-3.5 text-[#D9A86C]" />
       ) : (
         <LayoutDashboard className="w-3.5 h-3.5 text-zinc-400" />
       )
@@ -150,11 +150,11 @@ function LayerRow({ node, depth, pageId, selectedId, onSelect }: LayerRowProps) 
         onClick={() => onSelect(node.id)}
         className={`group flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer transition-all text-sm select-none relative
           ${isSelected
-            ? 'bg-[#D9A86C]/15 border border-[#D9A86C]/40 text-white shadow-sm shadow-[#D9A86C]-500/10'
+            ? 'bg-[#D9A86C]/15 border border-[#D9A86C]/40 text-white shadow-sm shadow-[#D9A86C]/10'
             : 'hover:bg-white/[0.05] text-zinc-300 hover:text-white border border-transparent'
           }
           ${!node.visible ? 'opacity-40' : ''}
-          ${isDragOver ? 'ring-2 ring-violet-400 bg-violet-500/30' : ''}
+          ${isDragOver ? 'ring-2 ring-[#D9A86C] bg-[#D9A86C]/30' : ''}
         `}
         style={{ paddingLeft: `${8 + depth * 16}px` }}
       >
@@ -244,7 +244,7 @@ function LayerRow({ node, depth, pageId, selectedId, onSelect }: LayerRowProps) 
           </button>
           <button
             onClick={handleDuplicate}
-            className="p-0.5 rounded hover:bg-white/[0.08] text-zinc-500 hover:text-violet-400 transition-colors"
+            className="p-0.5 rounded hover:bg-white/[0.08] text-zinc-500 hover:text-[#D9A86C] transition-colors"
             title="Duplikuj"
           >
             <Copy className="w-3 h-3" />
@@ -315,7 +315,7 @@ export function LayerTree() {
   })
 
   return (
-    <div className="flex flex-col gap-0.5 p-2">
+    <div className="flex flex-col h-full gap-0.5 p-2 bg-[#202024] text-white">
       {/* Filters */}
       <div className="flex items-center gap-1 px-2 py-1.5">
         <Filter className="w-3.5 h-3.5 text-zinc-500" />
