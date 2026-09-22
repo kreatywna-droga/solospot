@@ -200,33 +200,42 @@ function ColorArrayField({
     onChange(next);
   };
 
+  const gradient = colors.length > 1
+    ? `linear-gradient(to right, ${colors.join(', ')})`
+    : colors[0] || '#B8893A';
+
   return (
     <div className="space-y-2">
-      <div className="flex flex-wrap gap-2">
+      <div
+        className="w-full h-6 rounded-lg border border-white/[0.08]"
+        style={{ background: gradient }}
+      />
+      <div className="flex items-center gap-2 flex-wrap">
         {colors.map((c, i) => (
-          <div key={i} className="flex items-center gap-1 p-1 bg-white/[0.04] border border-white/[0.08] rounded-lg">
+          <div key={i} className="relative group">
             <input
               type="color"
               value={c}
               onChange={(e) => updateColor(i, e.target.value)}
-              className="w-6 h-6 rounded border-0 cursor-pointer bg-transparent"
+              className="w-5 h-5 rounded border-0 cursor-pointer bg-transparent"
             />
-            <span className="text-[10px] font-mono text-zinc-400 w-14 truncate">{c}</span>
             <button
               onClick={() => removeColor(i)}
-              className="text-[10px] text-zinc-500 hover:text-red-400 px-0.5"
+              className="absolute -top-1 -right-1 w-3 h-3 flex items-center justify-center rounded-full bg-zinc-700 text-zinc-300 text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"
+              title="Usuń kolor"
             >
               ×
             </button>
           </div>
         ))}
+        <button
+          onClick={addColor}
+          className="w-5 h-5 flex items-center justify-center rounded border border-white/[0.08] text-zinc-400 hover:text-white hover:bg-white/[0.06] text-[10px]"
+          title="Dodaj kolor"
+        >
+          +
+        </button>
       </div>
-      <button
-        onClick={addColor}
-        className="text-[11px] text-violet-400 hover:text-violet-300 font-semibold"
-      >
-        + Add Color
-      </button>
     </div>
   );
 }

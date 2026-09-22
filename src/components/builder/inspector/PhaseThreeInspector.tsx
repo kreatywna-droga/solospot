@@ -790,7 +790,10 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                       step={5}
                       value={Math.round((currentStyles.overlayOpacity ?? 0.4) * 100)}
                       onChange={(e) => onStyleChange({ overlayOpacity: Number(e.target.value) / 100 })}
-                      className="w-full accent-[#D9A86C] h-1 cursor-pointer"
+                      className="w-full accent-[#D9A86C] h-1 cursor-pointer rounded-full"
+                      style={{
+                        background: `linear-gradient(to right, #B8893A ${Math.round((currentStyles.overlayOpacity ?? 0.4) * 100)}%, rgba(255,255,255,0.1) ${Math.round((currentStyles.overlayOpacity ?? 0.4) * 100)}%)`,
+                      }}
                     />
                   </div>
                 </div>
@@ -834,7 +837,10 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
                       step={5}
                       value={Math.round((currentStyles.overlayOpacity ?? 0.4) * 100)}
                       onChange={(e) => onStyleChange({ overlayOpacity: Number(e.target.value) / 100 })}
-                      className="w-full accent-[#D9A86C] h-1 cursor-pointer"
+                      className="w-full accent-[#D9A86C] h-1 cursor-pointer rounded-full"
+                      style={{
+                        background: `linear-gradient(to right, #B8893A ${Math.round((currentStyles.overlayOpacity ?? 0.4) * 100)}%, rgba(255,255,255,0.1) ${Math.round((currentStyles.overlayOpacity ?? 0.4) * 100)}%)`,
+                      }}
                     />
                   </div>
                 </div>
@@ -1151,7 +1157,7 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
           >
             <div className="flex items-center gap-2">
               <Sliders className="w-3.5 h-3.5 text-violet-400" />
-              <span>Zaawansowane ustawienia (Advanced)</span>
+              <span>Ustawienia zaawansowane</span>
             </div>
             {showAdvanced ? (
               <ChevronUp className="w-4 h-4 text-zinc-400" />
