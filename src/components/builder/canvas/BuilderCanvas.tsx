@@ -2616,7 +2616,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
   return (
     <div
       ref={containerRef}
-      className="flex-1 flex flex-col items-center justify-start overflow-y-auto overflow-x-hidden bg-[#141416] p-0 relative w-full h-full select-none builder-canvas-scrollbar"
+      className="flex-1 flex flex-col items-center justify-start overflow-y-auto overflow-x-hidden bg-[#18181B] p-0 relative w-full h-full select-none builder-canvas-scrollbar"
       onClick={handleCanvasClick}
     >
       {/* Scalable Canvas Frame Container */}
@@ -3002,7 +3002,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
 
         {/* Add section & Layout Presets at bottom */}
         {sections.length > 0 && (
-          <div className="border-t border-white/[0.08] bg-[#1a1a1e] p-5 flex flex-col items-center gap-4">
+          <div className="border-t border-white/[0.08] bg-[#202024] p-5 flex flex-col items-center gap-4">
             <div className="flex items-center gap-3">
               {/* Smart Guides Toggle */}
               <GuidesToggle

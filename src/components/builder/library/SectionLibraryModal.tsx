@@ -218,10 +218,10 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
     return (
       <div
         key={template.id}
-        className="group relative rounded-2xl bg-[#14141a] border border-[#272730] hover:border-[#D9A86C]/70 hover:shadow-2xl hover:shadow-[#D9A86C]-950/30 transition-all duration-200 flex flex-col justify-between overflow-hidden"
+        className="group relative rounded-2xl bg-[#202024] border border-[#2E2E33] hover:border-[#D9A86C]/70 hover:shadow-2xl hover:shadow-[#D9A86C]-950/30 transition-all duration-200 flex flex-col justify-between overflow-hidden"
       >
         {/* Card Header */}
-        <div className="p-5 pb-4 flex items-start justify-between gap-3 border-b border-[#22222a] bg-[#1a1a22]">
+        <div className="p-5 pb-4 flex items-start justify-between gap-3 border-b border-[#202024] bg-[#2E2E33]">
           <div>
             <div className="flex items-center gap-2.5">
               <h3 className="text-sm font-extrabold text-white group-hover:text-violet-300 transition-colors">
@@ -241,7 +241,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
 
         {/* Large Scale-To-Fit Visual Preview Area */}
         <div
-          className="relative w-full cursor-pointer overflow-hidden group/preview bg-[#090910] p-3"
+          className="relative w-full cursor-pointer overflow-hidden group/preview bg-[#18181B] p-3"
           onClick={() => setPreviewModalTemplate(template)}
         >
           <ScaleToFitContainer targetWidth={960} maxHeight={340}>
@@ -274,7 +274,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
         </div>
 
         {/* Card Footer */}
-        <div className="px-5 py-4 bg-[#16161c] border-t border-[#22222a] flex items-center justify-between gap-3">
+        <div className="px-5 py-4 bg-[#202024] border-t border-[#202024] flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-mono font-bold text-violet-400 uppercase tracking-wider bg-violet-500/10 px-2.5 py-1 rounded-md border border-[#D9A86C]/20">
               {template.category}
@@ -310,11 +310,11 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
     <>
       <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/85 backdrop-blur-md p-3 md:p-6 animate-in fade-in duration-150 select-none">
         <div
-          className="w-full max-w-7xl max-h-[94vh] bg-[#1a1a20] border border-[#252B3A] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
+          className="w-full max-w-7xl max-h-[94vh] bg-[#18181B] border border-[#2E2E33] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[#2E2E33] bg-[#141418]">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[#2E2E33] bg-[#2E2E33]">
             <div>
               <h2 className="text-base md:text-lg font-extrabold text-white flex items-center gap-2.5">
                 <LayoutDashboard className="w-5 h-5 text-[#F2C27F]" />
@@ -347,7 +347,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
           </div>
 
           {/* Search, Filters & View Switcher Bar */}
-          <div className="p-4 border-b border-[#2E2E33] bg-[#18181e] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <div className="p-4 border-b border-[#2E2E33] bg-[#18181B] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             {/* Search Input */}
             <div className="relative flex-1">
               <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
@@ -356,7 +356,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search sections by name, category, tag, or use case (e.g. Hero, Pricing, Restaurant, E-commerce)..."
-                className="w-full pl-10 pr-4 py-2.5 bg-[#22222a] border border-[#3F3F46]/50 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C] transition-colors"
+                className="w-full pl-10 pr-4 py-2.5 bg-[#202024] border border-[#2E2E33]/50 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C] transition-colors"
               />
             </div>
 
@@ -366,7 +366,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value as SectionCategory)}
-                  className="appearance-none bg-[#22222a] hover:bg-[#2B2B36] border border-[#D9A86C]/40 text-xs font-bold text-violet-300 rounded-xl px-4 py-2.5 pr-8 focus:outline-none focus:border-[#D9A86C] cursor-pointer transition-colors"
+                  className="appearance-none bg-[#202024] hover:bg-[#2E2E33] border border-[#D9A86C]/40 text-xs font-bold text-violet-300 rounded-xl px-4 py-2.5 pr-8 focus:outline-none focus:border-[#D9A86C] cursor-pointer transition-colors"
                 >
                   <option value="all">All Categories ({SECTION_TEMPLATES.length})</option>
                   {CATEGORIES.filter(c => c.id !== 'all').map(cat => {
@@ -385,7 +385,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
                 <select
                   value={selectedStyle}
                   onChange={(e) => setSelectedStyle(e.target.value)}
-                  className="appearance-none bg-[#22222a] hover:bg-[#2B2B36] border border-[#D9A86C]/40 text-xs font-bold text-violet-300 rounded-xl px-4 py-2.5 pr-8 focus:outline-none focus:border-[#D9A86C] cursor-pointer transition-colors"
+                  className="appearance-none bg-[#202024] hover:bg-[#2E2E33] border border-[#D9A86C]/40 text-xs font-bold text-violet-300 rounded-xl px-4 py-2.5 pr-8 focus:outline-none focus:border-[#D9A86C] cursor-pointer transition-colors"
                 >
                   {STYLE_OPTIONS.map(s => (
                     <option key={s} value={s}>{s === 'All' ? 'All Styles' : s}</option>
@@ -395,7 +395,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
               </div>
 
               {/* View Mode Switcher */}
-              <div className="flex items-center bg-[#22222a] p-1 rounded-xl border border-[#3F3F46]/40">
+              <div className="flex items-center bg-[#202024] p-1 rounded-xl border border-[#2E2E33]/40">
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
@@ -421,10 +421,10 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
           </div>
 
           {/* Quick Category Scroll Pills Bar */}
-          <div className="px-4 py-2 bg-[#141418] border-b border-[#24242c] flex items-center">
+          <div className="px-4 py-2 bg-[#18181B] border-b border-[#2E2E33] flex items-center">
             <button
               onClick={() => scrollCategories('left')}
-              className="p-1 rounded-lg bg-[#22222a] hover:bg-[#2D2D32] border border-[#3F3F46]/40 text-zinc-400 hover:text-white mr-1.5 flex-shrink-0 transition-colors"
+              className="p-1 rounded-lg bg-[#202024] hover:bg-[#2E2E33] border border-[#2E2E33]/40 text-zinc-400 hover:text-white mr-1.5 flex-shrink-0 transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -443,7 +443,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
                     className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
                       isSelected
                         ? 'bg-[#D9A86C] text-white shadow-md shadow-[#D9A86C]-600/30 border border-violet-400 font-bold'
-                        : 'bg-[#22222a] text-zinc-400 hover:text-white hover:bg-[#2B2B36] border border-[#3F3F46]/30'
+                        : 'bg-[#202024] text-zinc-400 hover:text-white hover:bg-[#2E2E33] border border-[#2E2E33]/30'
                     }`}
                   >
                     <Icon className="w-3.5 h-3.5" />
@@ -455,14 +455,14 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
 
             <button
               onClick={() => scrollCategories('right')}
-              className="p-1 rounded-lg bg-[#22222a] hover:bg-[#2D2D32] border border-[#3F3F46]/40 text-zinc-400 hover:text-white ml-1.5 flex-shrink-0 transition-colors"
+              className="p-1 rounded-lg bg-[#202024] hover:bg-[#2E2E33] border border-[#2E2E33]/40 text-zinc-400 hover:text-white ml-1.5 flex-shrink-0 transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 overflow-y-auto p-6 bg-[#111116]">
+          <div className="flex-1 overflow-y-auto p-6 bg-[#18181B]">
             {filteredTemplates.length === 0 ? (
               <div className="py-24 flex flex-col items-center justify-center text-zinc-500 text-center gap-3">
                 <LayoutDashboard className="w-14 h-14 text-slate-600" />
@@ -477,10 +477,10 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
                 {groupedCategories.map((group) => {
                   const isExpanded = expandedCategories[group.id] !== false;
                   return (
-                    <div key={group.id} className="border border-[#272730] rounded-2xl bg-[#16161e] overflow-hidden shadow-lg">
+                    <div key={group.id} className="border border-[#2E2E33] rounded-2xl bg-[#202024] overflow-hidden shadow-lg">
                       <button
                         onClick={() => toggleCategoryExpand(group.id)}
-                        className="w-full px-6 py-4 flex items-center justify-between bg-[#1f1f28] hover:bg-[#262632] transition-colors border-b border-[#282834]"
+                        className="w-full px-6 py-4 flex items-center justify-between bg-[#2E2E33] hover:bg-[#2E2E33] transition-colors border-b border-[#2E2E33]"
                       >
                         <div className="flex items-center gap-3">
                           <group.icon className="w-5 h-5 text-violet-400" />
@@ -496,7 +496,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
                       </button>
 
                       {isExpanded && (
-                        <div className="p-6 grid grid-cols-1 xl:grid-cols-2 gap-6 bg-[#111116]">
+                        <div className="p-6 grid grid-cols-1 xl:grid-cols-2 gap-6 bg-[#18181B]">
                           {group.items.map(template => renderSectionCard(template))}
                         </div>
                       )}
@@ -517,9 +517,9 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
       {/* Large Detailed Preview Modal */}
       {previewModalTemplate && (
         <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-150">
-          <div className="w-full max-w-6xl max-h-[92vh] bg-[#141418] border border-[#2E2E33] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white">
+          <div className="w-full max-w-6xl max-h-[92vh] bg-[#18181B] border border-[#2E2E33] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white">
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[#2E2E33] bg-[#1a1a20]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#2E2E33] bg-[#2E2E33]">
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-base font-bold text-white">{previewModalTemplate.name}</h2>
@@ -533,7 +533,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
               </div>
 
               {/* Viewport Switcher */}
-              <div className="flex items-center gap-1 bg-[#0e0e14] p-1 rounded-xl border border-white/10">
+              <div className="flex items-center gap-1 bg-[#18181B] p-1 rounded-xl border border-white/10">
                 {([
                   ['desktop', Monitor, 'Desktop (1280px)'],
                   ['tablet', Tablet, 'Tablet (768px)'],
@@ -562,7 +562,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
             </div>
 
             {/* Large Live Section Preview */}
-            <div className="flex-1 overflow-y-auto p-6 bg-[#090910] flex items-center justify-center min-h-[420px]">
+            <div className="flex-1 overflow-y-auto p-6 bg-[#18181B] flex items-center justify-center min-h-[420px]">
               <ScaleToFitContainer
                 targetWidth={previewViewport === 'desktop' ? 1280 : previewViewport === 'tablet' ? 768 : 375}
                 maxHeight={560}
@@ -574,7 +574,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-between px-6 py-4 border-t border-[#2E2E33] bg-[#1a1a20]">
+            <div className="flex items-center justify-between px-6 py-4 border-t border-[#2E2E33] bg-[#2E2E33]">
               <div className="flex items-center gap-2 text-xs text-zinc-400">
                 <span className="font-mono text-violet-400 uppercase font-semibold">{previewModalTemplate.category}</span>
                 {previewModalTemplate.style && (

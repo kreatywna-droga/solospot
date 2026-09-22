@@ -1058,7 +1058,7 @@ export function AiCopilotWorkspace() {
       </div>
 
       {/* ── 5. QUICK ACTIONS ROW ───────────────────────────────────────────── */}
-      <div className="hidden px-3 py-1.5 bg-[#0A0E15] border-t border-white/[0.06] flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-shrink-0">
+      <div className="hidden px-3 py-1.5 bg-[#18181B] border-t border-white/[0.06] flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-shrink-0">
         <button
           onClick={() =>
             handleSendMessage(
