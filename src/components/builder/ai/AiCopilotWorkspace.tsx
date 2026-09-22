@@ -64,6 +64,7 @@ export function AiCopilotWorkspace() {
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const pickerRef = useRef<HTMLDivElement>(null)
 
   const bridge = useMemo(() => HacpBridge.getInstance(), [])
   const hacpStatus: HacpStatus = isExecuting ? 'BUSY' : bridge.getStatus()
@@ -145,6 +146,18 @@ export function AiCopilotWorkspace() {
       })
       .catch((err) => console.warn('[AiCopilotWorkspace] Models discovery fetch failed:', err))
   }, [])
+
+  // Close model picker when clicking outside
+  useEffect(() => {
+    if (!isPickerOpen) return
+    const handleClickOutside = (e: MouseEvent) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        setIsPickerOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [isPickerOpen])
 
   // Handle autonomous generation completion
   useEffect(() => {
@@ -938,26 +951,182 @@ export function AiCopilotWorkspace() {
 
       {/* ── 6. INPUT AREA ──────────────────────────────────────────────────── */}
       <div className="p-3 bg-[#202024] border-t border-white/[0.08] flex-shrink-0">
-        <div className="relative flex items-end gap-2 bg-[#18181B] border border-white/10 focus-within:border-[#D9A86C]/50 rounded-2xl p-2 transition-all">
-          <textarea
-            ref={textareaRef}
-            rows={2}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={isExecuting}
-            placeholder="Napisz do SoloSpot AI..."
-            className="flex-1 bg-transparent text-xs text-white placeholder-zinc-500 focus:outline-none resize-none min-h-[38px] max-h-[120px] py-1 px-1 leading-relaxed"
-          />
+        <div ref={pickerRef} className="relative">
+          {/* Model picker popup — anchored above the input */}
+          {isPickerOpen && (
+            <div className="absolute bottom-full left-0 right-0 mb-2 z-50 bg-[#202024] border border-white/15 rounded-xl shadow-2xl p-2 max-h-72 flex flex-col gap-1.5">
+              {/* Router mode switcher */}
+              <div className="flex items-center gap-1 bg-white/[0.04] p-0.5 rounded-lg border border-white/[0.06]">
+                {(['AUTO', 'FREE', 'PAID'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => {
+                      setRouterMode(mode)
+                      sessionStorage.setItem('solospot_ai_mode', mode)
+                    }}
+                    className={`flex-1 px-2 py-1 rounded-md text-[9px] font-mono font-bold transition-all ${
+                      routerMode === mode
+                        ? 'bg-[#D9A86C] text-[#18181B] shadow-xs'
+                        : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'
+                    }`}
+                    title={
+                      mode === 'AUTO'
+                        ? 'Automatyczny wybór najlepszego modelu'
+                        : mode === 'FREE'
+                        ? 'Używaj tylko modeli darmowych'
+                        : 'Używaj modeli płatnych / Pro'
+                    }
+                  >
+                    {mode}
+                  </button>
+                ))}
+              </div>
 
-          <button
-            onClick={() => handleSendMessage()}
-            disabled={!inputValue.trim() || isExecuting}
-            className="w-8 h-8 rounded-xl bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#18181B] flex items-center justify-center disabled:opacity-30 hover:scale-105 active:scale-95 transition-all shadow-md shadow-[#D9A86C]/20 flex-shrink-0"
-            title="Wyślij (Enter)"
-          >
-            <Send className="w-3.5 h-3.5" />
-          </button>
+              {/* Search input */}
+              <input
+                type="text"
+                placeholder="Filtruj modele..."
+                value={searchFilter}
+                onChange={(e) => setSearchFilter(e.target.value)}
+                className="w-full bg-white/[0.04] border border-white/10 rounded-lg px-2 py-1.5 text-[10px] text-white placeholder-zinc-500 focus:outline-none"
+              />
+
+              <div className="overflow-y-auto space-y-2 pr-1 flex-1 builder-canvas-scrollbar">
+                {/* FREE MODELS */}
+                {freeModels.length > 0 && (
+                  <div className="space-y-1">
+                    <span className="text-[9px] font-mono font-bold text-emerald-400 px-1 uppercase tracking-wider block">
+                      Darmowe (Free) • {freeModels.length}
+                    </span>
+                    {freeModels
+                      .filter(
+                        (m) =>
+                          !searchFilter ||
+                          m.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+                          m.id.toLowerCase().includes(searchFilter.toLowerCase())
+                      )
+                      .map((m) => (
+                        <button
+                          key={m.id}
+                          onClick={() => {
+                            setSelectedModelId(m.id)
+                            setCurrentModelName(m.name)
+                            setIsFreeModel(true)
+                            setSupportsTools(m.supportsTools)
+                            setRouterMode('MANUAL')
+                            setIsPickerOpen(false)
+                            sessionStorage.setItem('solospot_ai_model', m.id)
+                            sessionStorage.setItem('solospot_ai_mode', 'MANUAL')
+                          }}
+                          className={`w-full text-left p-1.5 rounded-lg flex items-center justify-between text-[10px] font-mono transition-colors cursor-pointer ${
+                            selectedModelId === m.id
+                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                              : 'hover:bg-white/[0.05] text-zinc-300'
+                          }`}
+                        >
+                          <span className="truncate">{m.name}</span>
+                          <div className="flex items-center gap-1 flex-shrink-0 text-[8px]">
+                            {m.supportsTools ? (
+                              <span className="text-emerald-400">✓ Tools</span>
+                            ) : (
+                              <span className="text-zinc-500">Chat Only</span>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                  </div>
+                )}
+
+                {/* PAID MODELS */}
+                {paidModels.length > 0 && (
+                  <div className="space-y-1 pt-1 border-t border-white/[0.06]">
+                    <span className="text-[9px] font-mono font-bold text-cyan-400 px-1 uppercase tracking-wider block">
+                      Płatne / Pro • {paidModels.length}
+                    </span>
+                    {paidModels
+                      .filter(
+                        (m) =>
+                          !searchFilter ||
+                          m.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+                          m.id.toLowerCase().includes(searchFilter.toLowerCase())
+                      )
+                      .slice(0, 30)
+                      .map((m) => (
+                        <button
+                          key={m.id}
+                          onClick={() => {
+                            setSelectedModelId(m.id)
+                            setCurrentModelName(m.name)
+                            setIsFreeModel(false)
+                            setSupportsTools(m.supportsTools)
+                            setRouterMode('MANUAL')
+                            setIsPickerOpen(false)
+                            sessionStorage.setItem('solospot_ai_model', m.id)
+                            sessionStorage.setItem('solospot_ai_mode', 'MANUAL')
+                          }}
+                          className={`w-full text-left p-1.5 rounded-lg flex items-center justify-between text-[10px] font-mono transition-colors cursor-pointer ${
+                            selectedModelId === m.id
+                              ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                              : 'hover:bg-white/[0.05] text-zinc-300'
+                          }`}
+                        >
+                          <span className="truncate">{m.name}</span>
+                          <div className="flex items-center gap-1 flex-shrink-0 text-[8px]">
+                            {m.supportsTools ? (
+                              <span className="text-cyan-400">✓ Tools</span>
+                            ) : (
+                              <span className="text-zinc-500">Chat Only</span>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="relative flex items-end gap-2 bg-[#18181B] border border-white/10 focus-within:border-[#D9A86C]/50 rounded-2xl p-2 transition-all">
+            <textarea
+              ref={textareaRef}
+              rows={3}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={isExecuting}
+              placeholder="Napisz do SoloSpot AI..."
+              className="flex-1 bg-transparent text-xs text-white placeholder-zinc-500 focus:outline-none resize-none min-h-[60px] max-h-[160px] py-2 px-1 pb-7 leading-relaxed"
+            />
+
+            {/* Model selector trigger inside the textarea */}
+            <button
+              onClick={() => setIsPickerOpen((v) => !v)}
+              className="absolute left-2 bottom-2 flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-[10px] font-medium text-zinc-300 transition-colors"
+              title="Wybierz model AI"
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${isFreeModel ? 'bg-emerald-400' : 'bg-cyan-400'}`} />
+              <span className="truncate max-w-[80px] sm:max-w-[110px]">{currentModelName}</span>
+              <span
+                className={`text-[8px] font-bold px-1 py-0.5 rounded border ${
+                  isFreeModel
+                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                    : 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
+                }`}
+              >
+                {isFreeModel ? 'FREE' : 'PAID'}
+              </span>
+              <ChevronDown className="w-3 h-3 text-zinc-400" />
+            </button>
+
+            <button
+              onClick={() => handleSendMessage()}
+              disabled={!inputValue.trim() || isExecuting}
+              className="w-9 h-9 rounded-xl bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#18181B] flex items-center justify-center disabled:opacity-30 hover:scale-105 active:scale-95 transition-all shadow-md shadow-[#D9A86C]/20 flex-shrink-0 mb-0.5"
+              title="Wyślij (Enter)"
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center justify-between mt-1.5 px-1 text-[9px] font-mono text-zinc-500">
