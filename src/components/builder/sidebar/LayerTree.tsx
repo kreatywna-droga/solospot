@@ -315,7 +315,7 @@ export function LayerTree() {
   })
 
   return (
-    <div className="flex flex-col h-full gap-0.5 p-2 bg-[#202024] text-white">
+    <div className="flex flex-col h-full gap-0.5 p-2 bg-[#18181B] text-white">
       {/* Filters */}
       <div className="flex items-center gap-1 px-2 py-1.5">
         <Filter className="w-3.5 h-3.5 text-zinc-500" />

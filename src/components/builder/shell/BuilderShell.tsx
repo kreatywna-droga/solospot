@@ -44,7 +44,7 @@ function BuilderBreadcrumbs() {
   if (breadcrumbs.length === 0) return null
 
   return (
-    <nav className="h-7 flex items-center gap-1 px-4 border-b border-[#15151A] bg-[#202024] text-[10px]">
+    <nav className="h-7 flex items-center gap-1 px-4 border-b border-[#44444B] bg-[#18181B] text-[10px]">
       {breadcrumbs.map((crumb, index) => (
         <div key={crumb.id} className="flex items-center gap-1">
           {index > 0 && <span className="text-zinc-500 mx-0.5">/</span>}
@@ -320,7 +320,7 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
           {!inspectorVisible && (
             <button
               onClick={toggleInspector}
-              className="absolute right-4 bottom-4 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#202024]/90 hover:bg-[#2E2E33] border border-[#15151A] hover:border-[#D9A86C]/50 text-zinc-300 hover:text-[#F2C27F] text-xs font-medium shadow-xl backdrop-blur-md transition-all group active:scale-95"
+              className="absolute right-4 bottom-4 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#202024]/90 hover:bg-[#2E2E33] border border-[#3A3A40] hover:border-[#D9A86C]/50 text-zinc-300 hover:text-[#F2C27F] text-xs font-medium shadow-xl backdrop-blur-md transition-all group active:scale-95"
               title="Otwórz inspektor właściwości (Alt+I)"
             >
               <PanelRightOpen className="w-3.5 h-3.5 text-[#D9A86C] transition-transform group-hover:scale-110" />
@@ -352,7 +352,7 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
         {inspectorVisible && (
           <aside
             style={{ width: `${rightWidth}px` }}
-            className="border-l border-[#15151A] bg-[#202024] flex flex-col overflow-hidden flex-shrink-0 h-full select-none"
+            className="border-l border-[#44444B] bg-[#202024] flex flex-col overflow-hidden flex-shrink-0 h-full select-none"
           >
             <PhaseThreeInspector
               sectionId={canvas.selectedSectionId}

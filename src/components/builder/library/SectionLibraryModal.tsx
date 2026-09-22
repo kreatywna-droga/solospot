@@ -221,7 +221,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
         className="group relative rounded-2xl bg-[#202024] border border-[#1F1F24] hover:border-[#D9A86C]/70 hover:shadow-2xl hover:shadow-[#D9A86C]/30 transition-all duration-200 flex flex-col justify-between overflow-hidden"
       >
         {/* Card Header */}
-        <div className="p-5 pb-4 flex items-start justify-between gap-3 border-b border-[#1F1F24] bg-[#2E2E33]">
+        <div className="p-5 pb-4 flex items-start justify-between gap-3 border-b border-[#3A3A40] bg-[#252529]">
           <div>
             <div className="flex items-center gap-2.5">
               <h3 className="text-sm font-extrabold text-white group-hover:text-[#F2C27F] transition-colors">
@@ -274,7 +274,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
         </div>
 
         {/* Card Footer */}
-        <div className="px-5 py-4 bg-[#202024] border-t border-[#1F1F24] flex items-center justify-between gap-3">
+        <div className="px-5 py-4 bg-[#252529] border-t border-[#3A3A40] flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-mono font-bold text-[#D9A86C] uppercase tracking-wider bg-[#D9A86C]/10 px-2.5 py-1 rounded-md border border-[#D9A86C]/20">
               {template.category}
@@ -310,11 +310,11 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
     <>
       <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/85 backdrop-blur-md p-3 md:p-6 animate-in fade-in duration-150 select-none">
         <div
-          className="w-full max-w-7xl max-h-[94vh] bg-[#18181B] border border-[#1F1F24] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
+          className="w-full max-w-7xl max-h-[94vh] bg-[#2A2A2F] border border-[#44444B] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[#1F1F24] bg-[#2E2E33]">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[#3A3A40] bg-[#252529]">
             <div>
               <h2 className="text-base md:text-lg font-extrabold text-white flex items-center gap-2.5">
                 <LayoutDashboard className="w-5 h-5 text-[#F2C27F]" />
@@ -347,7 +347,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
           </div>
 
           {/* Search, Filters & View Switcher Bar */}
-          <div className="p-4 border-b border-[#1F1F24] bg-[#18181B] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <div className="p-4 border-b border-[#3A3A40] bg-[#252529] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             {/* Search Input */}
             <div className="relative flex-1">
               <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
@@ -421,7 +421,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
           </div>
 
           {/* Quick Category Scroll Pills Bar */}
-          <div className="px-4 py-2 bg-[#18181B] border-b border-[#1F1F24] flex items-center">
+          <div className="px-4 py-2 bg-[#252529] border-b border-[#3A3A40] flex items-center">
             <button
               onClick={() => scrollCategories('left')}
               className="p-1 rounded-lg bg-[#202024] hover:bg-[#2E2E33] border border-[#1F1F24]/40 text-zinc-400 hover:text-white mr-1.5 flex-shrink-0 transition-colors"
@@ -480,7 +480,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
                     <div key={group.id} className="border border-[#1F1F24] rounded-2xl bg-[#202024] overflow-hidden shadow-lg">
                       <button
                         onClick={() => toggleCategoryExpand(group.id)}
-                        className="w-full px-6 py-4 flex items-center justify-between bg-[#2E2E33] hover:bg-[#2E2E33] transition-colors border-b border-[#1F1F24]"
+                        className="w-full px-6 py-4 flex items-center justify-between bg-[#252529] hover:bg-[#252529] transition-colors border-b border-[#3A3A40]"
                       >
                         <div className="flex items-center gap-3">
                           <group.icon className="w-5 h-5 text-[#D9A86C]" />
@@ -517,9 +517,9 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
       {/* Large Detailed Preview Modal */}
       {previewModalTemplate && (
         <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-150">
-          <div className="w-full max-w-6xl max-h-[92vh] bg-[#18181B] border border-[#1F1F24] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white">
+          <div className="w-full max-w-6xl max-h-[92vh] bg-[#2A2A2F] border border-[#44444B] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white">
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[#1F1F24] bg-[#2E2E33]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#3A3A40] bg-[#252529]">
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-base font-bold text-white">{previewModalTemplate.name}</h2>
@@ -574,7 +574,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-between px-6 py-4 border-t border-[#1F1F24] bg-[#2E2E33]">
+            <div className="flex items-center justify-between px-6 py-4 border-t border-[#3A3A40] bg-[#252529]">
               <div className="flex items-center gap-2 text-xs text-zinc-400">
                 <span className="font-mono text-[#D9A86C] uppercase font-semibold">{previewModalTemplate.category}</span>
                 {previewModalTemplate.style && (

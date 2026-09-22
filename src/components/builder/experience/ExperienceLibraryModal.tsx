@@ -133,11 +133,11 @@ export function ExperienceLibraryModal({
     <>
       <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/90 backdrop-blur-md p-2 md:p-6 animate-in fade-in duration-150 select-none">
         <div
-          className="w-full max-w-7xl max-h-[95vh] bg-[#18181B] border border-[#1F1F24] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
+          className="w-full max-w-7xl max-h-[95vh] bg-[#2A2A2F] border border-[#44444B] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[#1F1F24] bg-[#202024]">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[#3A3A40] bg-[#252529]">
             <div>
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-[#D9A86C]/20 border border-[#D9A86C]/30 flex items-center justify-center text-[#F2C27F]">
@@ -172,7 +172,7 @@ export function ExperienceLibraryModal({
           </div>
 
           {/* Primary Category Bar */}
-          <div className="px-6 py-2.5 border-b border-[#1F1F24] bg-[#202024] flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+          <div className="px-6 py-2.5 border-b border-[#3A3A40] bg-[#252529] flex items-center gap-1.5 overflow-x-auto no-scrollbar">
             {EXPERIENCE_CATEGORIES.slice(0, 10).map(cat => {
               const isSelected = selectedCategory === cat.id;
               return (
@@ -192,7 +192,7 @@ export function ExperienceLibraryModal({
           </div>
 
           {/* Search & Multi-Facet Filters Bar */}
-          <div className="p-4 border-b border-[#1F1F24] bg-[#18181B] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <div className="p-4 border-b border-[#3A3A40] bg-[#252529] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             {/* Search Input */}
             <div className="relative flex-1">
               <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
@@ -355,7 +355,7 @@ export function ExperienceLibraryModal({
                       </div>
 
                       {/* Card Meta Footer */}
-                      <div className="p-4 bg-[#202024] border-t border-[#1F1F24] flex flex-col gap-2">
+                      <div className="p-4 bg-[#252529] border-t border-[#3A3A40] flex flex-col gap-2">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
                             <h3

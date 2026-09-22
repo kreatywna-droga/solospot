@@ -102,7 +102,7 @@ export function StoreLifecycleModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#1F1F24] bg-[#18181B]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#3A3A40] bg-[#252529]">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-[#D9A86C]/10 border border-[#D9A86C]/20 flex items-center justify-center">
               <StoreIcon className="w-4 h-4 text-[#D9A86C]" />
@@ -167,7 +167,7 @@ export function StoreLifecycleModal({
               </button>
             </div>
 
-            <p className="text-[11px] text-zinc-400 leading-relaxed border-t border-[#1F1F24] pt-3">
+            <p className="text-[11px] text-zinc-400 leading-relaxed border-t border-[#3A3A40] pt-3">
               {status === 'ACTIVE' ? (
                 'Dezaktywacja tymczasowo wstrzymuje widoczność sklepu dla klientów zewnętrznych. Wszystkie strony, produkty, zamówienia, multimedia i ustawienia pozostają w 100% bezpieczne i zachowane. Możesz przywrócić aktywność sklepu w dowolnym momencie.'
               ) : (
@@ -250,7 +250,7 @@ export function StoreLifecycleModal({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-[#1F1F24] bg-[#18181B] flex justify-end">
+        <div className="px-6 py-3 border-t border-[#3A3A40] bg-[#252529] flex justify-end">
           <button
             onClick={onClose}
             className="px-4 py-1.5 rounded-xl text-xs font-medium bg-[#202024] hover:bg-[#2E2E33] text-zinc-300 hover:text-white transition-all"

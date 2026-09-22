@@ -73,11 +73,11 @@ export function SaveExperienceModal({
   return (
     <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in select-none">
       <div
-        className="w-full max-w-xl bg-[#18181B] border border-[#1F1F24] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
+        className="w-full max-w-xl bg-[#2A2A2F] border border-[#44444B] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-6 py-4 border-b border-[#1F1F24] bg-[#202024] flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-[#3A3A40] bg-[#252529] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-[#D9A86C]/20 border border-[#D9A86C]/30 flex items-center justify-center text-[#F2C27F]">
               <BookmarkPlus className="w-4 h-4" />
@@ -181,7 +181,7 @@ export function SaveExperienceModal({
           </div>
 
           {/* Footer Actions */}
-          <div className="pt-3 border-t border-[#1F1F24] flex items-center justify-end gap-2.5">
+          <div className="pt-3 border-t border-[#3A3A40] flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}

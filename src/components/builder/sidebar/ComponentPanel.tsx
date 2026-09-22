@@ -380,9 +380,9 @@ export function ComponentPanel({ onClose }: ComponentPanelProps) {
   const [showExperiences, setShowExperiences] = useState(false)
 
   return (
-    <div className="flex flex-col h-full bg-[#202024] text-white">
+    <div className="flex flex-col h-full bg-[#18181B] text-white">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-[#15151A] bg-[#2E2E33]">
+      <div className="flex items-center justify-between p-4 border-b border-[#3A3A40] bg-[#202024]">
         <h2 className="text-xs font-bold text-white uppercase tracking-wider">Biblioteka Tworzenia</h2>
         {onClose && (
           <button onClick={onClose} className="p-1 rounded-lg hover:bg-white/[0.08] text-zinc-400 hover:text-white transition-colors">
@@ -417,7 +417,7 @@ export function ComponentPanel({ onClose }: ComponentPanelProps) {
       </div>
 
       {/* Sub-tab switcher */}
-      <div className="flex border-b border-[#15151A] px-3 pt-2 gap-1">
+      <div className="flex border-b border-[#3A3A40] px-3 pt-2 gap-1">
         <button
           type="button"
           onClick={() => setSubTab('components')}
@@ -457,7 +457,7 @@ export function ComponentPanel({ onClose }: ComponentPanelProps) {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Szukaj sekcji lub elementu..."
-                className="w-full bg-white/[0.04] border border-[#15151A] rounded-lg pl-8 pr-3 py-2 text-sm text-white
+                className="w-full bg-white/[0.04] border border-[#3A3A40] rounded-lg pl-8 pr-3 py-2 text-sm text-white
                            placeholder-zinc-600 focus:outline-none focus:border-[#D9A86C]/50 transition-all"
               />
             </div>

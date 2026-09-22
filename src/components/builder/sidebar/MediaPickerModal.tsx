@@ -310,7 +310,7 @@ export function MediaPickerModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-4xl max-h-[85vh] bg-[#18181B] border border-[#1F1F24] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        className="w-full max-w-4xl max-h-[85vh] bg-[#2A2A2F] border border-[#44444B] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Hidden File Input */}
@@ -324,7 +324,7 @@ export function MediaPickerModal({
         />
 
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#1F1F24] bg-[#202024]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#3A3A40] bg-[#252529]">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-[#D9A86C]/20 border border-[#D9A86C]/25 flex items-center justify-center text-[#F2C27F]">
               <ImageIcon className="w-4 h-4" />
@@ -340,7 +340,7 @@ export function MediaPickerModal({
         </div>
 
         {/* Navigation Tabs & Search */}
-        <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-3 border-b border-[#1F1F24] bg-[#202024]">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-3 border-b border-[#3A3A40] bg-[#252529]">
           <div className="flex items-center gap-1 bg-white/[0.04] p-1 rounded-xl border border-[#1F1F24]">
             {[
               { id: 'my_files', label: 'Moje pliki', count: assets.length },
@@ -691,7 +691,7 @@ export function MediaPickerModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-4 border-t border-[#1F1F24] bg-[#202024] flex items-center justify-between">
+        <div className="px-6 py-4 border-t border-[#3A3A40] bg-[#252529] flex items-center justify-between">
           <div className="text-xs text-zinc-400 truncate max-w-sm">
             {selectedUrl ? (
               <span className="text-[#F2C27F] font-mono text-[11px] truncate">Wybrano: {selectedUrl.slice(0, 45)}...</span>

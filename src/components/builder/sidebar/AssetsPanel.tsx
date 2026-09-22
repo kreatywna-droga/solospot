@@ -327,7 +327,7 @@ export function AssetsPanel() {
 
   return (
     <div
-      className="flex flex-col h-full bg-[#202024] text-white"
+      className="flex flex-col h-full bg-[#18181B] text-white"
       onDragOver={e => { e.preventDefault(); setIsDragging(true) }}
       onDragLeave={() => setIsDragging(false)}
       onDrop={e => {
@@ -347,7 +347,7 @@ export function AssetsPanel() {
       />
 
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[#15151A] bg-[#2E2E33]">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[#3A3A40] bg-[#202024]">
         <div className="flex items-center gap-2">
           <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-300">Asset Hub</h2>
           <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.08] text-zinc-400 font-mono">
@@ -391,7 +391,7 @@ export function AssetsPanel() {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Szukaj plików..."
-            className="w-full bg-white/[0.04] border border-[#15151A] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white
+            className="w-full bg-white/[0.04] border border-[#3A3A40] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white
                        placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C]/50 transition-all"
           />
         </div>
@@ -429,7 +429,7 @@ export function AssetsPanel() {
             <span className="text-xs">Ładowanie mediów...</span>
           </div>
         ) : filteredAssets.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-56 text-center px-4 border border-dashed border-[#15151A] rounded-xl bg-white/[0.02]">
+          <div className="flex flex-col items-center justify-center h-56 text-center px-4 border border-dashed border-[#3A3A40] rounded-xl bg-white/[0.02]">
             <ImageIcon className="w-8 h-8 text-slate-600 mb-2" />
             <p className="text-xs font-semibold text-zinc-300 mb-1">Brak assetów w tej kategorii</p>
             <p className="text-[11px] text-zinc-500 mb-4">
@@ -448,7 +448,7 @@ export function AssetsPanel() {
               <div
                 key={asset.id}
                 onClick={() => setSelectedAsset(asset)}
-                className="group relative aspect-square rounded-xl bg-white/[0.04] border border-[#15151A] overflow-hidden cursor-pointer hover:border-[#D9A86C]/50 hover:shadow-lg hover:shadow-[#D9A86C]/10 transition-all flex flex-col"
+                className="group relative aspect-square rounded-xl bg-white/[0.04] border border-[#3A3A40] overflow-hidden cursor-pointer hover:border-[#D9A86C]/50 hover:shadow-lg hover:shadow-[#D9A86C]/10 transition-all flex flex-col"
               >
                 <div className="flex-1 w-full overflow-hidden bg-black/40 flex items-center justify-center">
                   {asset.type === 'image' || asset.mimeType.includes('svg') ? (
@@ -485,7 +485,7 @@ export function AssetsPanel() {
       {selectedAsset && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="relative w-full max-w-lg bg-[#18181B] rounded-2xl border border-white/15 overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[#15151A]">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#3A3A40]">
               <span className="text-xs font-bold text-white truncate max-w-xs">
                 {selectedAsset.originalName}
               </span>
@@ -514,7 +514,7 @@ export function AssetsPanel() {
               )}
             </div>
 
-            <div className="p-4 space-y-2 border-t border-[#15151A] text-xs">
+            <div className="p-4 space-y-2 border-t border-[#3A3A40] text-xs">
               <div className="grid grid-cols-2 gap-2 text-[11px] text-zinc-400">
                 <div>Rozmiar: <span className="text-white font-mono font-medium">{(selectedAsset.size / 1024).toFixed(1)} KB</span></div>
                 <div>Typ: <span className="text-white font-mono">{selectedAsset.mimeType}</span></div>
@@ -527,7 +527,7 @@ export function AssetsPanel() {
                   type="text"
                   readOnly
                   value={selectedAsset.publicUrl}
-                  className="flex-1 bg-white/[0.04] border border-[#15151A] rounded-lg px-2.5 py-1.5 text-[11px] text-zinc-300 font-mono truncate focus:outline-none"
+                  className="flex-1 bg-white/[0.04] border border-[#3A3A40] rounded-lg px-2.5 py-1.5 text-[11px] text-zinc-300 font-mono truncate focus:outline-none"
                 />
                 <button
                   onClick={() => handleCopyUrl(selectedAsset.publicUrl, selectedAsset.id)}
@@ -548,7 +548,7 @@ export function AssetsPanel() {
               </div>
             </div>
 
-            <div className="px-4 py-3 bg-[#18181B] border-t border-[#15151A] flex items-center justify-between">
+            <div className="px-4 py-3 bg-[#18181B] border-t border-[#3A3A40] flex items-center justify-between">
               {deleteConfirm ? (
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] text-red-400">Potwierdzić?</span>

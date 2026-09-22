@@ -33,8 +33,8 @@ export function BuilderBottomBar() {
   ]
 
   return (
-    <div className="h-10 flex items-center justify-between px-4 border-t border-[#15151A]
-                    bg-[#202024] backdrop-blur-sm flex-shrink-0 z-20 select-none">
+    <div className="h-10 flex items-center justify-between px-4 border-t border-[#44444B]
+                    bg-[#18181B] backdrop-blur-sm flex-shrink-0 z-20 select-none">
       {/* Left: Zoom */}
       <div className="flex items-center gap-1">
         <button
@@ -49,7 +49,7 @@ export function BuilderBottomBar() {
             {zoom === 0 || !zoom ? 'Dopasuj (Fit)' : `${Math.round(zoom * 100)}%`}
           </button>
           <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block">
-            <div className="bg-[#202024] border border-[#15151A] rounded-xl p-1 shadow-2xl flex items-center gap-0.5">
+            <div className="bg-[#202024] border border-[#3A3A40] rounded-xl p-1 shadow-2xl flex items-center gap-0.5">
               {zoomPresets.map(p => (
                 <button
                   key={p.label}

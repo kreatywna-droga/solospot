@@ -66,11 +66,11 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-5xl max-h-[85vh] bg-[#18181B] border border-[#1F1F24] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        className="w-full max-w-5xl max-h-[85vh] bg-[#2A2A2F] border border-[#44444B] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#1F1F24] bg-[#2E2E33]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#3A3A40] bg-[#252529]">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-[#D9A86C]/20 border border-[#D9A86C]/25 flex items-center justify-center text-[#D9A86C]">
               <LayoutGrid className="w-5 h-5" />
