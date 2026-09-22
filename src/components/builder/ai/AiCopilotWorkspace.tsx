@@ -1266,13 +1266,13 @@ export function AiCopilotWorkspace() {
 
             <textarea
               ref={textareaRef}
-              rows={5}
+              rows={3}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
               disabled={isExecuting}
               placeholder="Napisz do SoloSpot AI..."
-              className="flex-1 bg-transparent text-xs text-white placeholder-zinc-500 focus:outline-none resize-none min-h-[120px] max-h-[260px] py-2 pl-9 pr-1 pb-9 leading-relaxed"
+              className="flex-1 bg-transparent text-xs text-white placeholder-zinc-500 focus:outline-none resize-none min-h-[60px] max-h-[130px] py-2 pl-9 pr-1 pb-7 leading-relaxed"
             />
 
             {/* Model selector trigger inside the textarea */}
