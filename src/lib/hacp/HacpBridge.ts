@@ -191,6 +191,8 @@ export class HacpBridge {
     status: HacpExecutionStatus;
     shouldTriggerUndo?: boolean;
     shouldTriggerRedo?: boolean;
+    /** The actual node ID created by insert_node (randomly generated) */
+    createdNodeId?: string;
   }> {
     const { name, arguments: args } = toolCall;
     const activePage = document.pages.find((p) => p.id === activePageId) || document.pages[0];
@@ -982,12 +984,13 @@ export class HacpBridge {
     if (name === 'insert_node') {
       const parentId = args.parentId as string;
       const nodeType = (args.nodeType as string) || 'text';
+      const generatedNodeId = `node_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
       const cmd: BuilderCommand = {
         type: 'INSERT_NODE',
         pageId: (args.pageId as string) || activePageId,
         parentId,
         node: {
-          id: `node_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+          id: generatedNodeId,
           type: nodeType,
           label: (args.label as string) || nodeType,
           props: (args.props as Record<string, unknown>) || { text: 'Element' },
@@ -1013,6 +1016,7 @@ export class HacpBridge {
           property: 'nodes',
           summary: `Wstawiono ${nodeType} do ${parentId}`,
         },
+        createdNodeId: generatedNodeId,
       };
     }
 

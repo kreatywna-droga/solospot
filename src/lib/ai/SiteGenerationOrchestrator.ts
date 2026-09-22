@@ -30,6 +30,8 @@ export interface ToolResult {
   success: boolean;
   message: string;
   durationMs: number;
+  /** The actual node ID created by insert_node (for ID mapping) */
+  createdNodeId?: string;
 }
 
 // ── Orchestrator Callbacks ──────────────────────────────────────────
@@ -65,6 +67,8 @@ export class SiteGenerationOrchestrator {
   private config: OrchestratorConfig;
   private callbacks: OrchestratorCallbacks;
   private abortController: AbortController | null = null;
+  /** Maps LLM-plan node IDs → actual HacpBridge-generated node IDs */
+  private nodeIdMap: Map<string, string> = new Map();
 
   constructor(
     brief: string,
@@ -99,7 +103,7 @@ export class SiteGenerationOrchestrator {
    */
   async execute(
     plan: SitePlan,
-    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string }>,
+    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string; createdNodeId?: string }>,
     document: BuilderDocument
   ): Promise<GenerationSession> {
     this.session.plan = plan;
@@ -163,7 +167,7 @@ export class SiteGenerationOrchestrator {
 
   private async executeDesignSystem(
     ds: DesignSystem,
-    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string }>
+    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string; createdNodeId?: string }>
   ): Promise<void> {
     this.setPhase('design-system', 'Konfigurowanie motywu strony...');
     this.session.progress = 5;
@@ -185,7 +189,7 @@ export class SiteGenerationOrchestrator {
 
   private async executeSections(
     sections: SectionPlan[],
-    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string }>,
+    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string; createdNodeId?: string }>,
     document: BuilderDocument,
     assetStrategy?: { heroImageQuery?: string }
   ): Promise<void> {
@@ -210,7 +214,7 @@ export class SiteGenerationOrchestrator {
   private async executeSection(
     section: SectionPlan,
     index: number,
-    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string }>,
+    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string; createdNodeId?: string }>,
     assetQuery?: string
   ): Promise<void> {
     const templateType = SECTION_TEMPLATES[section.role] || section.templateType;
@@ -280,7 +284,7 @@ export class SiteGenerationOrchestrator {
   private async executeNodes(
     parentId: string,
     nodes: NodePlan[],
-    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string }>
+    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string; createdNodeId?: string }>
   ): Promise<void> {
     for (let i = 0; i < nodes.length; i++) {
       if (this.abortController?.signal.aborted) break;
@@ -299,11 +303,17 @@ export class SiteGenerationOrchestrator {
         },
       };
 
-      await this.execTool(nodeCall, executeTool);
+      const result = await this.execTool(nodeCall, executeTool);
 
-      // Recurse for nested children
+      // FIX: Track the mapping from LLM-plan node ID → actual generated node ID
+      if (result?.createdNodeId) {
+        this.nodeIdMap.set(node.id, result.createdNodeId);
+      }
+
+      // Recurse for nested children using the ACTUAL generated ID as parentId
       if (node.children && node.children.length > 0) {
-        await this.executeNodes(node.id, node.children, executeTool);
+        const actualParentId = result?.createdNodeId || node.id;
+        await this.executeNodes(actualParentId, node.children, executeTool);
       }
     }
   }
@@ -312,7 +322,7 @@ export class SiteGenerationOrchestrator {
 
   private async executeExperienceStrategy(
     plan: SitePlan,
-    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string }>,
+    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string; createdNodeId?: string }>,
     document: BuilderDocument
   ): Promise<void> {
     const exp = plan.experienceStrategy;
@@ -368,7 +378,7 @@ export class SiteGenerationOrchestrator {
 
   private async executeResponsiveStrategy(
     plan: SitePlan,
-    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string }>,
+    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string; createdNodeId?: string }>,
     document: BuilderDocument
   ): Promise<void> {
     const resp = plan.responsiveStrategy;
@@ -438,7 +448,7 @@ export class SiteGenerationOrchestrator {
   // ── Verification ────────────────────────────────────────────────
 
   private async executeVerification(
-    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string }>,
+    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string; createdNodeId?: string }>,
     document: BuilderDocument
   ): Promise<void> {
     this.setPhase('verification', 'Weryfikacja wygenerowanej strony...');
@@ -457,12 +467,12 @@ export class SiteGenerationOrchestrator {
 
   private async execTool(
     call: HacpToolCall,
-    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string }>
-  ): Promise<boolean> {
-    if (this.abortController?.signal.aborted) return false;
+    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string; createdNodeId?: string }>
+  ): Promise<ToolResult | null> {
+    if (this.abortController?.signal.aborted) return null;
     if (this.session.toolsExecuted >= this.config.maxTools) {
       this.session.error = `Osiągnięto limit narzędzi (${this.config.maxTools}).`;
-      return false;
+      return null;
     }
 
     const start = Date.now();
@@ -476,6 +486,7 @@ export class SiteGenerationOrchestrator {
         success: result.success,
         message: result.message,
         durationMs,
+        createdNodeId: result.createdNodeId,
       };
 
       this.callbacks.onToolExecuted(toolResult);
@@ -489,7 +500,7 @@ export class SiteGenerationOrchestrator {
         await new Promise((r) => setTimeout(r, this.config.toolDelayMs));
       }
 
-      return result.success;
+      return toolResult;
     } catch (error) {
       const durationMs = Date.now() - start;
       this.callbacks.onToolExecuted({
@@ -502,7 +513,7 @@ export class SiteGenerationOrchestrator {
       if (this.config.failFast) {
         throw error;
       }
-      return false;
+      return null;
     }
   }
 

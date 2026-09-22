@@ -34,6 +34,7 @@ import { findNode } from '../../../../packages/builder-core/src'
 import { useAutonomousGeneration } from '@/lib/ai/useAutonomousGeneration'
 import type { GenerationPhase } from '@/lib/ai/SitePlanTypes'
 import type { ChatMessageAttachment } from '@/lib/ai/AIProviderTypes'
+import { AiRobotMascot, type AiRobotState } from './AiRobotMascot'
 
 export function AiCopilotWorkspace() {
   const { document: builderDoc, canvas, dispatch } = useBuilder()
@@ -77,11 +78,17 @@ export function AiCopilotWorkspace() {
   const capabilities = useMemo(() => bridge.getCapabilities(), [bridge])
 
   // Autonomous Website Generation
+  // FIX: Use ref for document so the callback always reads the latest state
+  // instead of closing over a stale snapshot from useCallback creation time.
+  const builderDocRef = useRef(builderDoc)
+  builderDocRef.current = builderDoc
+
   const executeToolCallForGeneration = useCallback(async (call: any) => {
-    const result = await bridge.executeToolCall(call, builderDoc, builderDoc.pages[0]?.id || 'page-home')
+    const currentDoc = builderDocRef.current
+    const result = await bridge.executeToolCall(call, currentDoc, currentDoc.pages[0]?.id || 'page-home')
     dispatch(result.command!)
     return { success: result.verification.passed, message: result.message }
-  }, [bridge, builderDoc, dispatch])
+  }, [bridge, dispatch])
 
   const { state: genState, startGeneration, abortGeneration } = useAutonomousGeneration(
     builderDoc,
@@ -352,6 +359,16 @@ export function AiCopilotWorkspace() {
     }
     return () => clearInterval(interval)
   }, [isExecuting])
+
+  // Robot mascot state derived from execution phases
+  const robotState = useMemo<AiRobotState>(() => {
+    if (genState.isRunning) return 'building'
+    if (isExecuting) {
+      if (currentPhase === 'EXECUTING_TOOL' || currentPhase === 'WAITING_FOR_TOOL_RESULT') return 'building'
+      if (currentPhase === 'REQUESTING_MODEL' || currentPhase === 'GENERATING_FINAL_RESPONSE') return 'thinking'
+    }
+    return 'idle'
+  }, [isExecuting, currentPhase, genState.isRunning])
 
   // Contextual suggestions when conversation is empty
   const suggestions = useMemo(() => {
@@ -741,11 +758,14 @@ export function AiCopilotWorkspace() {
         {messages.length === 0 ? (
           <div className="h-full flex flex-col justify-center space-y-3 p-1">
             <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#D9A86C]/10 via-[#202024] to-transparent border border-[#D9A86C]/20 space-y-2">
-              <div className="flex items-center gap-2 text-[#F2C27F] font-bold text-xs">
-                <Sparkles className="w-4 h-4 text-[#D9A86C]" />
-                <span>Twój inteligentny Copilot Buildera</span>
+              <div className="flex items-center gap-3">
+                <AiRobotMascot state={robotState} size={56} />
+                <div className="flex flex-col">
+                  <span className="text-[#F2C27F] font-bold text-xs">Twój inteligentny Copilot Buildera</span>
+                  <span className="text-[11px] text-zinc-300">Co dziś budujemy?</span>
+                </div>
               </div>
-              <p className="text-[11px] text-zinc-300 leading-relaxed">
+              <p className="text-[11px] text-zinc-400 leading-relaxed">
                 Opisz, co chcesz zmienić lub zbudować na stronie. SoloSpot AI analizuje bieżący kontekst Canvas, dobiera odpowiednie Experience i natychmiast nanosi modyfikacje.
               </p>
             </div>
