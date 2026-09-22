@@ -17,7 +17,7 @@ import {
   Bot, Sparkles, CheckCircle2, AlertCircle, Clock,
   ChevronDown, RotateCcw, RotateCw, Send,
   Eye, Zap, X, Shield, Cpu, RefreshCw, Sliders, Info, CornerDownLeft,
-  Copy, Check, Square, Wand2
+  Copy, Check, Square, Wand2, Plus, Paperclip, FileText, Image as ImageIcon
 } from 'lucide-react'
 import { useBuilder, useBuilderHistory } from '../state/BuilderProvider'
 import { HacpBridge } from '@/lib/hacp/HacpBridge'
@@ -33,6 +33,7 @@ import type {
 import { findNode } from '../../../../packages/builder-core/src'
 import { useAutonomousGeneration } from '@/lib/ai/useAutonomousGeneration'
 import type { GenerationPhase } from '@/lib/ai/SitePlanTypes'
+import type { ChatMessageAttachment } from '@/lib/ai/AIProviderTypes'
 
 export function AiCopilotWorkspace() {
   const { document: builderDoc, canvas, dispatch } = useBuilder()
@@ -47,7 +48,12 @@ export function AiCopilotWorkspace() {
   const [secondsWaiting, setSecondsWaiting] = useState(0)
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null)
   const [lastUserPrompt, setLastUserPrompt] = useState<string>('')
+  const [attachedFiles, setAttachedFiles] = useState<ChatMessageAttachment[]>([])
+  const [attachMenuOpen, setAttachMenuOpen] = useState(false)
+  const [fileAccept, setFileAccept] = useState('image/*,.pdf,.doc,.docx,.txt,.md,.json,.csv')
   const abortControllerRef = useRef<AbortController | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const attachMenuRef = useRef<HTMLDivElement>(null)
   const [activityEvents, setActivityEvents] = useState<HacpActivityEvent[]>([])
   const [conversationContext, setConversationContext] = useState<HacpConversationContext>({
     history: [],
@@ -158,6 +164,18 @@ export function AiCopilotWorkspace() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [isPickerOpen])
+
+  // Close attachment menu when clicking outside
+  useEffect(() => {
+    if (!attachMenuOpen) return
+    const handleClickOutside = (e: MouseEvent) => {
+      if (attachMenuRef.current && !attachMenuRef.current.contains(e.target as Node)) {
+        setAttachMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [attachMenuOpen])
 
   // Handle autonomous generation completion
   useEffect(() => {
@@ -376,9 +394,65 @@ export function AiCopilotWorkspace() {
     }
   }
 
+  const determineAttachmentType = (mimeType: string): ChatMessageAttachment['type'] => {
+    if (mimeType.startsWith('image/')) return 'image'
+    if (
+      mimeType === 'application/pdf' ||
+      mimeType === 'application/msword' ||
+      mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      mimeType === 'application/vnd.ms-excel' ||
+      mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    ) {
+      return 'document'
+    }
+    return 'file'
+  }
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    const newAttachments: ChatMessageAttachment[] = []
+    for (const file of Array.from(files)) {
+      try {
+        const content = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(String(reader.result || ''))
+          reader.onerror = reject
+          if (file.type.startsWith('text/') || file.type === 'application/json' || file.type === 'application/markdown') {
+            reader.readAsText(file)
+          } else {
+            reader.readAsDataURL(file)
+          }
+        })
+        newAttachments.push({
+          type: determineAttachmentType(file.type),
+          name: file.name,
+          mimeType: file.type || 'application/octet-stream',
+          content,
+        })
+      } catch (err) {
+        console.error('[AiCopilotWorkspace] Failed to read file:', file.name, err)
+      }
+    }
+
+    setAttachedFiles((prev) => [...prev, ...newAttachments].slice(0, 10))
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  const removeAttachment = (index: number) => {
+    setAttachedFiles((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const triggerFileSelect = (accept: string) => {
+    setFileAccept(accept)
+    setAttachMenuOpen(false)
+    requestAnimationFrame(() => fileInputRef.current?.click())
+  }
+
   const handleSendMessage = async (promptToSend?: string) => {
     const text = (promptToSend || inputValue).trim()
-    if (!text || isExecuting) return
+    if ((!text && attachedFiles.length === 0) || isExecuting) return
 
     // ── Autonomous Generation Detection ──
     const lowerText = text.toLowerCase()
@@ -400,9 +474,11 @@ export function AiCopilotWorkspace() {
         type: 'user',
         text,
         timestamp: new Date().toLocaleTimeString('pl-PL'),
+        attachments: attachedFiles.length > 0 ? [...attachedFiles] : undefined,
       }
       setMessages((prev) => [...prev, userMessage])
       setInputValue('')
+      setAttachedFiles([])
 
       // Add system message about generation starting
       const genMsg: HacpMessage = {
@@ -424,10 +500,12 @@ export function AiCopilotWorkspace() {
       type: 'user',
       text,
       timestamp: new Date().toLocaleTimeString('pl-PL'),
+      attachments: attachedFiles.length > 0 ? [...attachedFiles] : undefined,
     }
 
     setMessages((prev) => [...prev, userMessage])
     setInputValue('')
+    setAttachedFiles([])
     setIsExecuting(true)
 
     const controller = new AbortController()
@@ -442,7 +520,8 @@ export function AiCopilotWorkspace() {
         conversationContext,
         routerMode,
         selectedModelId,
-        (phase) => setCurrentPhase(phase)
+        (phase) => setCurrentPhase(phase),
+        userMessage.attachments
       )
 
       if (controller.signal.aborted) return
@@ -472,7 +551,7 @@ export function AiCopilotWorkspace() {
           ...result.updatedConversationContext,
           history: [
             ...prev.history,
-            { role: 'user' as const, text, timestamp: new Date().toLocaleTimeString('pl-PL') },
+            { role: 'user' as const, text, timestamp: new Date().toLocaleTimeString('pl-PL'), attachments: userMessage.attachments },
             {
               role: 'ai' as const,
               text: result.message,
@@ -729,6 +808,30 @@ export function AiCopilotWorkspace() {
                 <div className="whitespace-pre-line text-xs font-sans leading-relaxed selection:bg-[#D9A86C]/30">
                   {msg.text}
                 </div>
+
+                {/* Attachment preview inside the message bubble */}
+                {msg.type === 'user' && msg.attachments && msg.attachments.length > 0 && (
+                  <div className="mt-2.5 flex flex-wrap gap-2">
+                    {msg.attachments.map((a, i) => (
+                      <div
+                        key={`${a.name}-${i}`}
+                        className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#18181B]/10 border border-[#18181B]/10 text-[10px] text-[#18181B]/80 font-medium"
+                        title={a.name}
+                      >
+                        {a.type === 'image' && a.content.startsWith('data:') ? (
+                          <img
+                            src={a.content}
+                            alt={a.name}
+                            className="w-10 h-10 object-cover rounded-md border border-[#18181B]/10"
+                          />
+                        ) : (
+                          <FileText className="w-3.5 h-3.5 text-[#18181B]/70 flex-shrink-0" />
+                        )}
+                        <span className="truncate max-w-[120px]">{a.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* Subtle, elegant mutation pill if Canvas was modified */}
                 {msg.appliedChangeSummary && (
@@ -1086,26 +1189,100 @@ export function AiCopilotWorkspace() {
             </div>
           )}
 
+          {attachedFiles.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {attachedFiles.map((a, i) => (
+                <div
+                  key={`${a.name}-${i}`}
+                  className="flex items-center gap-1.5 pl-1.5 pr-2 py-1 rounded-lg bg-white/[0.05] border border-white/10 text-[10px] text-zinc-300 max-w-[140px]"
+                  title={a.name}
+                >
+                  {a.type === 'image' ? (
+                    <ImageIcon className="w-3 h-3 text-[#D9A86C] flex-shrink-0" />
+                  ) : (
+                    <FileText className="w-3 h-3 text-[#D9A86C] flex-shrink-0" />
+                  )}
+                  <span className="truncate">{a.name}</span>
+                  <button
+                    onClick={() => removeAttachment(i)}
+                    className="p-0.5 rounded hover:bg-white/10 text-zinc-500 hover:text-zinc-200 flex-shrink-0"
+                    title="Usuń załącznik"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="relative flex items-end gap-2 bg-[#18181B] border border-white/10 focus-within:border-[#D9A86C]/50 rounded-2xl p-2 transition-all">
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept={fileAccept}
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+
+            {/* Attachment type menu — appears above the plus button */}
+            {attachMenuOpen && (
+              <div
+                ref={attachMenuRef}
+                className="absolute bottom-full left-2 mb-2 z-50 min-w-[140px] bg-[#202024] border border-white/15 rounded-xl shadow-2xl p-1 flex flex-col gap-0.5"
+              >
+                <button
+                  onClick={() => triggerFileSelect('image/*')}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-[10px] text-zinc-300 hover:bg-white/[0.06] hover:text-white transition-colors text-left"
+                >
+                  <ImageIcon className="w-3.5 h-3.5 text-[#D9A86C]" />
+                  <span>Obraz</span>
+                </button>
+                <button
+                  onClick={() => triggerFileSelect('.pdf,.doc,.docx,.txt,.md,.json,.csv')}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-[10px] text-zinc-300 hover:bg-white/[0.06] hover:text-white transition-colors text-left"
+                >
+                  <FileText className="w-3.5 h-3.5 text-[#D9A86C]" />
+                  <span>Dokument</span>
+                </button>
+                <button
+                  onClick={() => triggerFileSelect('*/*')}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-[10px] text-zinc-300 hover:bg-white/[0.06] hover:text-white transition-colors text-left"
+                >
+                  <Paperclip className="w-3.5 h-3.5 text-[#D9A86C]" />
+                  <span>Dowolny plik</span>
+                </button>
+              </div>
+            )}
+
+            <button
+              onClick={() => setAttachMenuOpen((v) => !v)}
+              disabled={isExecuting || attachedFiles.length >= 10}
+              className="absolute left-2 bottom-2 p-1 rounded-md bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-zinc-400 hover:text-zinc-200 transition-colors disabled:opacity-40"
+              title="Dodaj załącznik"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+
             <textarea
               ref={textareaRef}
-              rows={3}
+              rows={5}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
               disabled={isExecuting}
               placeholder="Napisz do SoloSpot AI..."
-              className="flex-1 bg-transparent text-xs text-white placeholder-zinc-500 focus:outline-none resize-none min-h-[60px] max-h-[160px] py-2 px-1 pb-7 leading-relaxed"
+              className="flex-1 bg-transparent text-xs text-white placeholder-zinc-500 focus:outline-none resize-none min-h-[120px] max-h-[260px] py-2 pl-9 pr-1 pb-9 leading-relaxed"
             />
 
             {/* Model selector trigger inside the textarea */}
             <button
               onClick={() => setIsPickerOpen((v) => !v)}
-              className="absolute left-2 bottom-2 flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-[10px] font-medium text-zinc-300 transition-colors"
+              className="absolute left-9 bottom-2 flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-[10px] font-medium text-zinc-300 transition-colors"
               title="Wybierz model AI"
             >
               <span className={`w-1.5 h-1.5 rounded-full ${isFreeModel ? 'bg-emerald-400' : 'bg-cyan-400'}`} />
-              <span className="truncate max-w-[80px] sm:max-w-[110px]">{currentModelName}</span>
+              <span className="truncate max-w-[70px] sm:max-w-[100px]">{currentModelName}</span>
               <span
                 className={`text-[8px] font-bold px-1 py-0.5 rounded border ${
                   isFreeModel
@@ -1120,7 +1297,7 @@ export function AiCopilotWorkspace() {
 
             <button
               onClick={() => handleSendMessage()}
-              disabled={!inputValue.trim() || isExecuting}
+              disabled={(!inputValue.trim() && attachedFiles.length === 0) || isExecuting}
               className="w-9 h-9 rounded-xl bg-gradient-to-r from-[#D9A86C] to-[#F2C27F] text-[#18181B] flex items-center justify-center disabled:opacity-30 hover:scale-105 active:scale-95 transition-all shadow-md shadow-[#D9A86C]/20 flex-shrink-0 mb-0.5"
               title="Wyślij (Enter)"
             >

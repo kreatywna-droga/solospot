@@ -17,7 +17,7 @@ import type { ChatMessage, AICopilotRequest } from '@/lib/ai/AIProviderTypes';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { prompt, messages = [], builderContext = {}, visualMetrics, routerMode, selectedModelId } = body;
+    const { prompt, messages = [], builderContext = {}, visualMetrics, routerMode, selectedModelId, attachments = [] } = body;
 
     const registry = AIProviderRegistry.getInstance();
 
@@ -269,6 +269,7 @@ ZASADY PROFESJONALNEJ KONWERSACJI:
         return {
           role,
           content: m.content || m.text || '',
+          attachments: m.attachments,
         };
       }),
     ];
@@ -276,7 +277,9 @@ ZASADY PROFESJONALNEJ KONWERSACJI:
     // If current prompt is not yet at the end of messages, append it
     const lastMsg = chatMessages[chatMessages.length - 1];
     if (prompt && (!lastMsg || lastMsg.content !== prompt || lastMsg.role !== 'user')) {
-      chatMessages.push({ role: 'user', content: prompt });
+      chatMessages.push({ role: 'user', content: prompt, attachments });
+    } else if (lastMsg && lastMsg.role === 'user' && attachments && attachments.length > 0) {
+      lastMsg.attachments = attachments;
     }
 
     const aiRequest: AICopilotRequest = {
@@ -284,7 +287,7 @@ ZASADY PROFESJONALNEJ KONWERSACJI:
       messages: chatMessages,
       builderContext,
       visualMetrics,
-      tools: BUILDER_TOOL_DEFINITIONS,
+      tools: undefined, // Tools are selected dynamically by AgentOrchestrator
       routerMode: routerMode || 'FREE',
       modelId: selectedModelId,
     };
@@ -328,7 +331,8 @@ ZASADY PROFESJONALNEJ KONWERSACJI:
     }
 
     // FALLBACK: Direct provider execution (full tool set)
-    const result = await registry.execute(aiRequest);
+    const fallbackRequest = { ...aiRequest, tools: BUILDER_TOOL_DEFINITIONS };
+    const result = await registry.execute(fallbackRequest);
     return NextResponse.json(result, {
       headers: {
         'Content-Type': 'application/json; charset=utf-8',

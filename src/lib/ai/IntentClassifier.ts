@@ -65,8 +65,9 @@ const EDIT_KEYWORDS = [
 
 const MOVE_KEYWORDS = [
   'przenieś', 'move', 'arrange', 'uporządkuj', 'przesuń', 'shift',
-  'na górze', 'on top', 'na dole', 'at bottom', 'nad', 'above',
-  'pod', 'below', 'przed', 'before', 'po', 'after',
+  'na górze', 'on top', 'na dole', 'at bottom',
+  'nad ', 'above ', 'pod ', 'below ',
+  'przed ', 'before ', 'po ', 'after ',
 ];
 
 const DELETE_KEYWORDS = [
@@ -83,14 +84,18 @@ const STYLE_KEYWORDS = [
 
 const DESIGN_SYSTEM_KEYWORDS = [
   'design system', 'system projektowania', 'paleta kolorów', 'color palette',
-  'typografia', 'typography system', 'hierarchia', 'hierarchy',
+  'typografia', 'typografię', 'typografii', 'typography system',
+  'hierarchia', 'hierarchy',
   'brand', 'marka', 'identity', 'tożsamość', 'guidelines',
 ];
 
 const SITE_GEN_KEYWORDS = [
-  'zbuduj stronę', 'build website', 'stwórz stronę', 'create website',
-  'zaplanuj stronę', 'plan website', 'wygeneruj', 'generate',
-  'postaw stronę', 'set up website', 'zaprojektuj', 'design a website',
+  'zbuduj stronę', 'build website', 'build a website',
+  'stwórz stronę', 'create website', 'create a website',
+  'zaplanuj stronę', 'plan website',
+  'wygeneruj', 'generate',
+  'postaw stronę', 'set up website',
+  'zaprojektuj', 'design a website',
   'landing page', 'complete site', 'full website',
 ];
 
@@ -126,28 +131,27 @@ export class IntentClassifier {
     const normalized = prompt.toLowerCase().trim();
 
     // Priority 1: Undo/Redo
-    if (this.matchesAny(normalized, ['cofnij', 'undo', 'przywróć', 'redo'])) {
+    if (this.matchesAny(normalized, ['cofnij', 'undo'])) {
       return this.result('UNDO', 1.0, [], {}, 'User requested undo');
     }
-    if (this.matchesAny(normalized, ['ponów', 'redo', 'przywróć zmianę'])) {
+    if (this.matchesAny(normalized, ['ponów', 'redo', 'przywróć', 'przywróć zmianę'])) {
       return this.result('REDO', 1.0, [], {}, 'User requested redo');
     }
 
     // Priority 2: Delete
-    if (this.matchesAny(normalized, DELETE_KEYWORDS)) {
+    if (this.containsOnlyAction(normalized, DELETE_KEYWORDS)) {
       const targets = this.extractTargets(normalized);
       return this.result('DELETE', 0.9, targets, {}, 'User requested deletion');
     }
 
-    // Priority 3: Move
-    if (this.matchesAny(normalized, MOVE_KEYWORDS)) {
-      const targets = this.extractTargets(normalized);
-      return this.result('MOVE_SECTION', 0.85, targets, {}, 'User requested move/reorder');
-    }
-
-    // Priority 4: Site generation (must check before section)
+    // Priority 3: Site generation (must check BEFORE section and move)
     if (this.matchesAny(normalized, SITE_GEN_KEYWORDS)) {
       return this.result('SITE_GENERATION', 0.95, [], {}, 'User wants to build a complete website');
+    }
+
+    // Priority 4: Design system (must check BEFORE edit and style)
+    if (this.matchesAny(normalized, DESIGN_SYSTEM_KEYWORDS)) {
+      return this.result('DESIGN_SYSTEM', 0.9, [], {}, 'User wants to configure design system');
     }
 
     // Priority 5: Experience
@@ -158,7 +162,13 @@ export class IntentClassifier {
       }, 'User wants an Experience/visual effect');
     }
 
-    // Priority 6: Section insertion
+    // Priority 6: Move (check BEFORE section if clear move action word present)
+    if (this.hasMoveAction(normalized) && this.matchesAny(normalized, MOVE_KEYWORDS)) {
+      const targets = this.extractTargets(normalized);
+      return this.result('MOVE_SECTION', 0.85, targets, {}, 'User requested move/reorder');
+    }
+
+    // Priority 7: Section insertion
     if (this.matchesAny(normalized, SECTION_KEYWORDS)) {
       const targets = this.extractTargets(normalized);
       return this.result('INSERT_SECTION', 0.9, targets, {
@@ -166,7 +176,13 @@ export class IntentClassifier {
       }, 'User wants to insert a section');
     }
 
-    // Priority 7: Edit node
+    // Priority 8: Move (positional prepositions only, no section keywords)
+    if (this.containsOnlyAction(normalized, MOVE_KEYWORDS)) {
+      const targets = this.extractTargets(normalized);
+      return this.result('MOVE_SECTION', 0.85, targets, {}, 'User requested move/reorder');
+    }
+
+    // Priority 8: Edit node
     if (this.matchesAny(normalized, EDIT_KEYWORDS)) {
       const targets = this.extractTargets(normalized);
       return this.result('EDIT_NODE', 0.85, targets, {
@@ -175,16 +191,11 @@ export class IntentClassifier {
       }, 'User wants to edit a node property');
     }
 
-    // Priority 8: Style
+    // Priority 9: Style
     if (this.matchesAny(normalized, STYLE_KEYWORDS)) {
       return this.result('STYLE', 0.8, [], {
         property: this.extractProperty(normalized),
       }, 'User wants to change styling');
-    }
-
-    // Priority 9: Design system
-    if (this.matchesAny(normalized, DESIGN_SYSTEM_KEYWORDS)) {
-      return this.result('DESIGN_SYSTEM', 0.9, [], {}, 'User wants to configure design system');
     }
 
     // Priority 10: Inspect
@@ -202,13 +213,7 @@ export class IntentClassifier {
       return this.result('DEBUG', 0.8, [], {}, 'User reports a problem');
     }
 
-    // Priority 13: Site template
-    if (this.matchesAny(normalized, SITE_KEYWORDS)) {
-      const targets = this.extractTargets(normalized);
-      return this.result('INSERT_SITE_TEMPLATE', 0.7, targets, {}, 'User mentions website/page');
-    }
-
-    // Priority 14: Default to CHAT
+    // Priority 13: Default to CHAT
     return this.result('CHAT', 0.5, [], {}, 'No specific intent detected — conversational');
   }
 
@@ -216,10 +221,32 @@ export class IntentClassifier {
     return keywords.some((kw) => text.includes(kw));
   }
 
+  /**
+   * Check if text contains action keywords but NOT conflicting keywords from other categories.
+   * For example, "Wrzuć testimonials pod Hero" has "pod" (move) but is an insert action.
+   */
+  private static containsOnlyAction(text: string, keywords: string[]): boolean {
+    if (!this.matchesAny(text, keywords)) return false;
+    // For MOVE: only trigger if there's a move action word AND no insert action word
+    if (keywords === MOVE_KEYWORDS) {
+      const insertActions = ['dodaj', 'wstaw', 'wrzuć', 'dodaję', 'wstawiam', 'add', 'insert'];
+      if (this.matchesAny(text, insertActions)) return false;
+    }
+    return true;
+  }
+
+  /**
+   * Check if text has a clear move action word (not just positional prepositions).
+   */
+  private static hasMoveAction(text: string): boolean {
+    const moveActions = ['przenieś', 'move', 'przesuń', 'shift', 'uporządkuj', 'arrange'];
+    return moveActions.some((a) => text.includes(a));
+  }
+
   private static extractTargets(text: string): string[] {
     const targets: string[] = [];
     const sectionTypes = [
-      'hero', 'features', 'testimonial', 'opini', 'faq', 'pricing', 'cennik',
+      'hero', 'features', 'testimonial', 'testimonials', 'opini', 'faq', 'pricing', 'cennik',
       'kontakt', 'contact', 'about', 'o nas', 'footer', 'navbar', 'nav',
       'cta', 'banner', 'gallery', 'portfolio', 'team', 'zespoł', 'stats',
       'counter', 'logos', 'partnerzy', 'proces', 'process', 'benefit',

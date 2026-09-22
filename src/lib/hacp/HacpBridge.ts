@@ -34,7 +34,7 @@ import type {
   HacpExecutionStatus,
   ExecutionVerification,
 } from './HacpTypes';
-import type { HacpToolCall } from '../ai/AIProviderTypes';
+import type { HacpToolCall, ChatMessageAttachment } from '../ai/AIProviderTypes';
 import { UserFacingResponseNormalizer } from '../ai/UserFacingResponseNormalizer';
 
 export class HacpBridge {
@@ -1181,7 +1181,8 @@ export class HacpBridge {
     conversationContext: HacpConversationContext = { history: [] },
     routerMode: 'AUTO' | 'FREE' | 'PAID' | 'MANUAL' = 'AUTO',
     selectedModelId?: string,
-    onProgress?: (phase: 'REQUESTING_MODEL' | 'EXECUTING_TOOL' | 'WAITING_FOR_TOOL_RESULT' | 'GENERATING_FINAL_RESPONSE' | 'COMPLETED' | 'ERROR') => void
+    onProgress?: (phase: 'REQUESTING_MODEL' | 'EXECUTING_TOOL' | 'WAITING_FOR_TOOL_RESULT' | 'GENERATING_FINAL_RESPONSE' | 'COMPLETED' | 'ERROR') => void,
+    attachments?: ChatMessageAttachment[]
   ): Promise<HacpExecutionResult> {
     const startTime = new Date().toLocaleTimeString('pl-PL');
     const cleanPrompt = prompt.trim();
@@ -1207,11 +1208,13 @@ export class HacpBridge {
             messages: conversationContext.history.map((h) => ({
               role: (h.role as string) === 'ai' ? 'assistant' : h.role,
               content: h.text,
+              attachments: h.attachments,
             })),
             builderContext: context,
             visualMetrics: context.visualMetrics,
             routerMode,
             selectedModelId,
+            attachments,
           }),
         });
 

@@ -25,6 +25,8 @@ export type PlanStepAction =
   | 'APPLY_THEME'
   | 'VERIFY'
   | 'REFINE'
+  | 'UNDO'
+  | 'REDO'
   | 'DONE'
   | 'FAILED'
   | 'CLARIFICATION_REQUIRED';
@@ -191,13 +193,13 @@ export class ExecutionPlanManager {
       case 'UNDO':
         return [
           { action: 'CLASSIFY_INTENT', status: 'DONE' },
-          { action: 'DONE', status: 'PENDING' },
+          { action: 'UNDO', status: 'PENDING' },
         ];
 
       case 'REDO':
         return [
           { action: 'CLASSIFY_INTENT', status: 'DONE' },
-          { action: 'DONE', status: 'PENDING' },
+          { action: 'REDO', status: 'PENDING' },
         ];
 
       default:
@@ -212,7 +214,7 @@ export class ExecutionPlanManager {
    * Mark current step as done and advance.
    */
   static advancePlan(plan: ExecutionPlan, result?: unknown): ExecutionPlan {
-    const updated = { ...plan, updatedAt: Date.now() };
+    const updated = { ...plan, steps: [...plan.steps], updatedAt: Date.now() };
     const currentStep = updated.steps[updated.currentStepIndex];
     if (currentStep) {
       updated.steps[updated.currentStepIndex] = {
@@ -222,6 +224,14 @@ export class ExecutionPlanManager {
       };
     }
     updated.currentStepIndex++;
+    // Auto-advance through any remaining DONE-status steps or terminal action steps
+    while (
+      updated.currentStepIndex < updated.steps.length &&
+      (updated.steps[updated.currentStepIndex].status === 'DONE' ||
+       updated.steps[updated.currentStepIndex].action === 'DONE')
+    ) {
+      updated.currentStepIndex++;
+    }
     if (updated.currentStepIndex >= updated.steps.length) {
       updated.status = 'DONE';
     }
@@ -232,7 +242,7 @@ export class ExecutionPlanManager {
    * Mark current step as failed.
    */
   static failPlan(plan: ExecutionPlan, error: string): ExecutionPlan {
-    const updated = { ...plan, updatedAt: Date.now(), status: 'FAILED' as const };
+    const updated = { ...plan, steps: [...plan.steps], updatedAt: Date.now(), status: 'FAILED' as const };
     const currentStep = updated.steps[updated.currentStepIndex];
     if (currentStep) {
       updated.steps[updated.currentStepIndex] = {

@@ -45,7 +45,7 @@ export class OpenCodeModelRouter {
   ): Promise<RouteResolution> {
     const catalog = await this.discovery.discoverModels();
     // Free-model-first: default is the best free model, not a paid model
-    const defaultPaidModel =
+    const defaultFreeModel =
       catalog.freeModels.find((m) => m.id === 'nex-agi/nex-n2.5-pro:free') ||
       catalog.freeModels.find((m) => m.supportsTools) ||
       catalog.freeModels[0] ||
@@ -82,11 +82,11 @@ export class OpenCodeModelRouter {
       const freeCandidates = catalog.freeModels;
       if (freeCandidates.length === 0) {
         return {
-          selectedModel: defaultPaidModel,
+          selectedModel: defaultFreeModel,
           mode: 'FREE',
           fallbackUsed: true,
           requiresTools,
-          toolSupported: defaultPaidModel.supportsTools,
+          toolSupported: defaultFreeModel.supportsTools,
         };
       }
 
@@ -105,7 +105,7 @@ export class OpenCodeModelRouter {
         selectedModel: preferredFree,
         mode: 'FREE',
         fallbackUsed: false,
-        requiresTools: false,
+        requiresTools,
         toolSupported: preferredFree.supportsTools,
       };
     }
@@ -117,7 +117,7 @@ export class OpenCodeModelRouter {
         catalog.freeModels.find((m) => m.id === 'nex-agi/nex-n2.5-pro:free') ||
         catalog.freeModels.find((m) => m.supportsTools) ||
         catalog.freeModels[0] ||
-        defaultPaidModel;
+        defaultFreeModel;
 
       return {
         selectedModel: paidModel,

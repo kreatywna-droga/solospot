@@ -60,20 +60,20 @@ export function BuilderLeftSidebar({ activeTab, onTabChange, width = 320 }: Buil
       style={{ width: `${actualWidth}px` }}
       className="border-r border-[#2E2E33] bg-[#202024] flex flex-row overflow-hidden flex-shrink-0 h-full select-none"
     >
-      {/* Vertical tab strip — moves together with the resizable sidebar */}
-      <div className="w-[32px] bg-[#18181B] border-r border-[#2E2E33] flex flex-col items-center py-2 gap-1 flex-shrink-0">
+      {/* Vertical tab strip — compact so icons fit snugly */}
+      <div className="w-[26px] bg-[#18181B] border-r border-[#2E2E33] flex flex-col items-center py-1.5 gap-0.5 flex-shrink-0">
         {TABS.map(tab => (
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
-            className={`w-7 h-7 rounded-md flex items-center justify-center transition-all
+            className={`w-6 h-6 rounded-md flex items-center justify-center transition-all
               ${currentTab === tab.id
                 ? 'bg-[#D9A86C]/15 text-[#F2C27F] border border-[#D9A86C]/30 shadow-lg shadow-[#D9A86C]/10'
                 : 'text-zinc-400 hover:text-white hover:bg-white/[0.05] border border-transparent'
               }`}
             title={`${tab.label} (${tab.shortcut})`}
           >
-            <tab.icon className="w-4 h-4" />
+            <tab.icon className="w-3.5 h-3.5" />
           </button>
         ))}
       </div>

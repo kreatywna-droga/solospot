@@ -117,7 +117,20 @@ export class AgentOrchestrator {
       routerMode: 'FREE',
     };
 
-    const modelResponse = await this.provider.generateWithTools(minimalRequest);
+    let modelResponse: AICopilotResponse;
+    try {
+      modelResponse = await this.provider.generateWithTools(minimalRequest);
+    } catch (err: any) {
+      return {
+        status: 'FAILED',
+        intent: classified.category,
+        plan: ExecutionPlanManager.failPlan(plan, err?.message || 'Provider error'),
+        toolCalls: [],
+        message: `Model request failed: ${err?.message || 'Unknown error'}`,
+        modelUsed: 'unknown',
+        durationMs: Date.now() - startTime,
+      };
+    }
 
     // 5. PROCESS MODEL RESPONSE
     const toolCalls = modelResponse.toolCalls || [];
@@ -220,6 +233,22 @@ export class AgentOrchestrator {
           target: experienceMatch,
           parameters: { experienceId: experienceMatch },
         };
+      }
+    }
+
+    // Pattern: Model says it will edit a node
+    if (classified.category === 'EDIT_NODE') {
+      if (this.containsAny(lower, ['zmieniam', 'zmienię', 'aktualizuję', 'zmienię'])) {
+        // Need explicit property and value — can't auto-inject
+        return null;
+      }
+    }
+
+    // Pattern: Model says it will move a section
+    if (classified.category === 'MOVE_SECTION') {
+      if (this.containsAny(lower, ['przenoszę', 'przenieśli', 'przeniesienie'])) {
+        // Need explicit target position — can't auto-inject
+        return null;
       }
     }
 
