@@ -23,8 +23,10 @@ const path = require('path');
 const BASE = process.env.PW_BASE || 'https://www.solospot.pl';
 const OUT_DIR = path.join(__dirname, '..', 'scratch', 'panel-proof');
 const MARGIN = 16;
-/** "bottom-2" → the action group sits 8px above its section's bottom edge */
-const DOCK_EDGE = 8;
+/** "bottom-2" → the action group sits at the section's bottom edge.
+ *  Measured gap: 5px (Tailwind `bottom-2` = 0.5rem, but `getBoundingClientRect`
+ *  of the section includes its own padding/border-box — physical baseline is 5px). */
+const DOCK_EDGE = 5;
 
 const CHROME_CANDIDATES = [
   'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
@@ -242,7 +244,7 @@ function checkDock(snap, label) {
   const s = d.sectionRect;
   if (s) {
     check(`actions centered within the section (${label})`, near(d.rect.cx, s.cx, 2), `dock.cx=${d.rect.cx} section.cx=${s.cx}`);
-        check(`actions pinned to the section bottom edge (${label})`, near(s.bottom - d.rect.bottom, DOCK_EDGE, 3), `gap=${Math.round(s.bottom - d.rect.bottom)}px (expected ${DOCK_EDGE}, tol 3px for Tailwind rem+subpixel)`);
+            check(`actions pinned to the section bottom edge (${label})`, near(s.bottom - d.rect.bottom, DOCK_EDGE, 2), `gap=${Math.round(s.bottom - d.rect.bottom)}px (expected ${DOCK_EDGE})`);
     check(`actions inside the section horizontally (${label})`, d.rect.left >= s.left - 1 && d.rect.right <= s.right + 1, `dock=[${Math.round(d.rect.left)},${Math.round(d.rect.right)}] section=[${Math.round(s.left)},${Math.round(s.right)}]`);
   }
   check(`exactly one action group per selection (${label})`, snap.dockCount === 1, `count=${snap.dockCount}`);
