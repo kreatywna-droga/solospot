@@ -54,7 +54,7 @@ import { loadGoogleFont } from '../../../../packages/builder-core/src/fonts/Font
 import { ExperienceLibraryModal, SaveExperienceModal, ExperienceRuntimeScene } from '../experience'
 import { WebsiteTemplatePickerModal } from '../templates/WebsiteTemplatePickerModal'
 import { SmartGuidesOverlay } from './guides/SmartGuidesOverlay'
-import { SectionActionDock } from './SectionActionDock'
+import { SectionActionDock, shouldShowSectionActions } from './SectionActionDock'
 import { useSmartGuides, useElementBounds, collectCanvasElementBounds } from './guides/useSmartGuides'
 import { GuidesToggle } from './guides/GuidesToggle'
 
@@ -2902,6 +2902,25 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                       onHover={handleHoverSection}
                       onStartDragNode={handleDirectNodeDragStart}
                     />
+
+                    {/* Section actions — pinned to the BOTTOM EDGE of this section
+                        and horizontally centered within it (shown for the
+                        selected/hovered section; hero or any other section type) */}
+                    {shouldShowSectionActions(node.id, canvas.selectedSectionId, canvas.hoveredSectionId) && (
+                      <SectionActionDock
+                        node={node}
+                        index={index}
+                        isSelected={canvas.selectedSectionId === node.id}
+                        onSaveExperience={(target) => {
+                          setSaveExperienceTargetNode(target)
+                          setIsSaveExperienceOpen(true)
+                        }}
+                        onAddSection={(insertIndex) => {
+                          setInsertSectionIndex(insertIndex)
+                          setIsSectionLibraryOpen(true)
+                        }}
+                      />
+                    )}
                   </div>
                 </React.Fragment>
               )
@@ -2934,21 +2953,6 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
               </div>
             )}
 
-            {/* Workspace-level section actions — centered above the workspace
-                bottom edge via portal, always fully visible (edit mode only) */}
-            <SectionActionDock
-              sections={sections}
-              selectedSectionId={canvas.selectedSectionId}
-              hoveredSectionId={canvas.hoveredSectionId}
-              onSaveExperience={(node) => {
-                setSaveExperienceTargetNode(node)
-                setIsSaveExperienceOpen(true)
-              }}
-              onAddSection={(insertIndex) => {
-                setInsertSectionIndex(insertIndex)
-                setIsSectionLibraryOpen(true)
-              }}
-            />
           </>
         )}
 

@@ -1,76 +1,62 @@
 'use client'
 
 /**
- * SectionActionDock — workspace-level action group for the active section.
+ * SectionActionDock — action group anchored to the BOTTOM EDGE of one section.
  *
- * Renders "Zapisz Experience" + "Dodaj sekcję" as a single group anchored to
- * the Builder WORKSPACE (`<main data-builder-workspace>`), not to the section
- * inside the scrolling/zooming canvas — so the actions stay fully visible:
+ * Renders "Zapisz Experience" + "Dodaj sekcję" as a single group pinned to the
+ * bottom edge of the section it belongs to (hero or any other section type),
+ * horizontally CENTERED within that section:
  *
- *   - horizontally centered within the workspace,
- *   - 24px above the workspace bottom edge (clear of the bottom bar),
- *   - independent of canvas scroll, zoom, and Inspector open/closed state.
+ *   <section relative>
+ *     ...
+ *     [ Zapisz Experience ] [ + Dodaj sekcję ]   ← bottom-2, centered
+ *   </section>
  *
- * The actions still target the selected (or, when nothing is selected, the
- * hovered) section — only the anchoring changed.
+ * It is rendered inside the section's own `relative` wrapper (not a workspace
+ * portal), so the group travels with its section through canvas scroll and zoom —
+ * the original anchoring, centred instead of bottom-right.
+ *
+ * Both actions target that same section: "Zapisz Experience" is shown for the
+ * selected section, "Dodaj sekcję" inserts directly after it.
  */
 
-import { useEffect, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { Plus, Sparkles } from 'lucide-react'
 import type { BuilderNode } from '../../../../packages/builder-core/src/BuilderDocument'
 
 /**
- * Which section the dock acts on: the selected section wins; the hovered
- * section is used only when nothing is selected (keeps insert-on-hover
- * discoverable without hiding the selected section's actions).
+ * The group is shown for the section that is selected or hovered, so it is
+ * available for every section type (hero included).
  */
-export function resolveDockTarget(
-  selectedId: string | null,
-  hoveredId: string | null,
-  sectionIds: string[]
-): { id: string; index: number } | null {
-  const id = selectedId ?? hoveredId
-  if (!id) return null
-  const index = sectionIds.indexOf(id)
-  return index >= 0 ? { id, index } : null
+export function shouldShowSectionActions(
+  nodeId: string,
+  selectedSectionId: string | null,
+  hoveredSectionId: string | null
+): boolean {
+  return selectedSectionId === nodeId || hoveredSectionId === nodeId
 }
 
 interface SectionActionDockProps {
-  sections: BuilderNode[]
-  selectedSectionId: string | null
-  hoveredSectionId: string | null
+  /** The section this group is anchored to */
+  node: BuilderNode
+  /** Index of that section within the page */
+  index: number
+  /** True when this is the selected section (gates "Zapisz Experience") */
+  isSelected: boolean
   onSaveExperience: (node: BuilderNode) => void
   onAddSection: (insertIndex: number) => void
 }
 
 export function SectionActionDock({
-  sections,
-  selectedSectionId,
-  hoveredSectionId,
+  node,
+  index,
+  isSelected,
   onSaveExperience,
   onAddSection,
 }: SectionActionDockProps) {
-  const [mountEl, setMountEl] = useState<HTMLElement | null>(null)
-
-  useEffect(() => {
-    setMountEl(document.querySelector<HTMLElement>('[data-builder-workspace]'))
-  }, [])
-
-  const target = resolveDockTarget(
-    selectedSectionId,
-    hoveredSectionId,
-    sections.map(s => s.id)
-  )
-  if (!target || !mountEl) return null
-
-  const node = sections[target.index]
-  const isSelected = selectedSectionId === node.id
-
-  return createPortal(
+  return (
     <div
       data-testid="section-action-dock"
-      className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 pointer-events-auto"
+      className="absolute bottom-2 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 pointer-events-auto"
     >
       {isSelected && (
         <button
@@ -88,15 +74,14 @@ export function SectionActionDock({
       <button
         onClick={(e) => {
           e.stopPropagation()
-          onAddSection(target.index + 1)
+          onAddSection(index + 1)
         }}
         className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-[11px] font-bold shadow-lg shadow-[#D9A86C]/40 scale-95 hover:scale-105 whitespace-nowrap"
-        title={`Dodaj sekcję po "${node.label || 'Sekcja #' + (target.index + 1)}"`}
+        title={`Dodaj sekcję po "${node.label || 'Sekcja #' + (index + 1)}"`}
       >
         <Plus className="w-3.5 h-3.5" />
         <span>Dodaj sekcję</span>
       </button>
-    </div>,
-    mountEl
+    </div>
   )
 }

@@ -23,7 +23,8 @@ const path = require('path');
 const BASE = process.env.PW_BASE || 'https://www.solospot.pl';
 const OUT_DIR = path.join(__dirname, '..', 'scratch', 'panel-proof');
 const MARGIN = 16;
-const DOCK_OFFSET = 24;
+/** "bottom-2" → the action group sits 8px above its section's bottom edge */
+const DOCK_EDGE = 8;
 
 const CHROME_CANDIDATES = [
   'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
@@ -96,22 +97,33 @@ function SNAPSHOT_FN() {
     ? { present: true, rect: R(aside.getBoundingClientRect()), rootBg: bg(inspRoot), headerBg: bg(inspRoot.firstElementChild) }
     : { present: false, rect: null, rootBg: null, headerBg: null };
 
-  // Workspace-level bottom actions (Zapisz Experience + Dodaj sekcję)
+  // Section actions (Zapisz Experience + Dodaj sekcję) — anchored per section
   const dock = document.querySelector('[data-testid="section-action-dock"]');
   let dockData = null;
   if (dock) {
     const r = R(dock.getBoundingClientRect());
     const cs = getComputedStyle(dock);
+    const sectionEl = dock.closest('[data-section-id]');
     dockData = {
       rect: r,
       position: cs.position,
       buttons: Array.from(dock.querySelectorAll('button')).map((b) => (b.textContent || '').trim()),
       visibility: cs.visibility,
       opacity: cs.opacity,
+      sectionRect: sectionEl ? R(sectionEl.getBoundingClientRect()) : null,
+      domAnchoredInSection: Boolean(sectionEl),
     };
   }
 
-  return { ws, panelData, inspector, dockData, nodeCount: document.querySelectorAll('[data-node-id]').length };
+  return {
+    ws,
+    panelData,
+    inspector,
+    dockData,
+    dockCount: document.querySelectorAll('[data-testid="section-action-dock"]').length,
+    nodeCount: document.querySelectorAll('[data-node-id]').length,
+    sectionCount: document.querySelectorAll('[data-section-id]').length,
+  };
 }
 
 async function snapshot(page) {
@@ -217,18 +229,25 @@ async function clickDockButton(page, text) {
   return true;
 }
 
-/** Runs the three assertions for the workspace-level bottom action group. */
+/** Runs the per-section anchoring assertions for the section action group. */
 function checkDock(snap, label) {
   const d = snap.dockData;
   if (!d) {
-    check(`dock rendered (${label})`, false, 'no [data-testid="section-action-dock"]');
+    check(`actions rendered for the section (${label})`, false, 'no [data-testid="section-action-dock"]');
     return;
   }
-  check(`dock rendered as one group (${label})`, d.buttons.length >= 1 && d.buttons.length <= 2, `buttons=[${d.buttons.join(' | ')}]`);
-  check(`dock fully inside workspace (${label})`, insideWorkspace(d.rect, snap.ws).length === 0, insideWorkspace(d.rect, snap.ws).join('; '));
-  check(`dock centered in workspace (${label})`, near(d.rect.cx, snap.ws.cx, 2), `dock.cx=${d.rect.cx} ws.cx=${snap.ws.cx}`);
-  check(`dock ${DOCK_OFFSET}px above workspace bottom (${label})`, near(snap.ws.bottom - d.rect.bottom, DOCK_OFFSET, 2), `gap=${Math.round(snap.ws.bottom - d.rect.bottom)}px`);
-  check(`dock fully visible / not clipped (${label})`, d.visibility === 'visible' && d.rect.height > 20, `h=${d.rect.height} vis=${d.visibility}`);
+  check(`actions rendered as one group (${label})`, d.buttons.length >= 1 && d.buttons.length <= 2, `buttons=[${d.buttons.join(' | ')}]`);
+  // Anchoring: the group must live INSIDE the section wrapper (per-section, any type)
+  check(`actions anchored inside the section DOM (${label})`, d.domAnchoredInSection, `section found=${Boolean(d.sectionRect)}`);
+  const s = d.sectionRect;
+  if (s) {
+    check(`actions centered within the section (${label})`, near(d.rect.cx, s.cx, 2), `dock.cx=${d.rect.cx} section.cx=${s.cx}`);
+    check(`actions pinned to the section bottom edge (${label})`, near(s.bottom - d.rect.bottom, DOCK_EDGE, 2), `gap=${Math.round(s.bottom - d.rect.bottom)}px (expected ${DOCK_EDGE})`);
+    check(`actions inside the section horizontally (${label})`, d.rect.left >= s.left - 1 && d.rect.right <= s.right + 1, `dock=[${Math.round(d.rect.left)},${Math.round(d.rect.right)}] section=[${Math.round(s.left)},${Math.round(s.right)}]`);
+  }
+  check(`exactly one action group per selection (${label})`, snap.dockCount === 1, `count=${snap.dockCount}`);
+  check(`actions fully visible / not clipped (${label})`, d.visibility === 'visible' && d.rect.height > 20, `h=${d.rect.height} vis=${d.visibility}`);
+  check(`actions inside the workspace horizontally (${label})`, d.rect.left >= snap.ws.left - 1 && d.rect.right <= snap.ws.right + 1, `dock=[${Math.round(d.rect.left)},${Math.round(d.rect.right)}] ws=[${Math.round(snap.ws.left)},${Math.round(snap.ws.right)}]`);
 }
 
 async function main() {
