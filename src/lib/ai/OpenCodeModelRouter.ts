@@ -44,11 +44,11 @@ export class OpenCodeModelRouter {
     requiresTools = true
   ): Promise<RouteResolution> {
     const catalog = await this.discovery.discoverModels();
+    // Free-model-first: default is the best free model, not a paid model
     const defaultPaidModel =
-      catalog.models.find((m) => m.id === 'openai/gpt-4o-mini') ||
-      catalog.models.find((m) => m.id === 'gpt-4o-mini') ||
-      catalog.models.find((m) => m.id.includes('mini') && m.supportsTools) ||
-      catalog.models.find((m) => m.id.includes('flash') && m.supportsTools) ||
+      catalog.freeModels.find((m) => m.id === 'nex-agi/nex-n2.5-pro:free') ||
+      catalog.freeModels.find((m) => m.supportsTools) ||
+      catalog.freeModels[0] ||
       catalog.models.find((m) => m.supportsTools) ||
       catalog.models[0];
 
@@ -110,12 +110,13 @@ export class OpenCodeModelRouter {
       };
     }
 
-    // PAID MODE
+    // PAID MODE: Same as AUTO (free-model-first architecture)
+    // Paid models are not used — only free models
     if (mode === 'PAID') {
       const paidModel =
-        catalog.models.find((m) => m.id === 'openai/gpt-4o-mini') ||
-        catalog.paidModels.find((m) => m.id.includes('mini') || m.id.includes('flash')) ||
-        catalog.paidModels.find((m) => m.supportsTools) ||
+        catalog.freeModels.find((m) => m.id === 'nex-agi/nex-n2.5-pro:free') ||
+        catalog.freeModels.find((m) => m.supportsTools) ||
+        catalog.freeModels[0] ||
         defaultPaidModel;
 
       return {
@@ -127,12 +128,14 @@ export class OpenCodeModelRouter {
       };
     }
 
-    // AUTO MODE: Choose first capable cost-effective model
+    // AUTO MODE: Choose best free model (free-model-first architecture)
     const autoModel =
-      catalog.models.find((m) => m.id === 'openai/gpt-4o-mini') ||
-      catalog.models.find((m) => m.id === 'gpt-4o-mini') ||
-      catalog.models.find((m) => (m.id.includes('mini') || m.id.includes('flash')) && m.supportsTools) ||
-      defaultPaidModel;
+      catalog.freeModels.find((m) => m.id === 'nex-agi/nex-n2.5-pro:free') ||
+      catalog.freeModels.find((m) => m.id === 'nvidia/nemotron-3.5-lightning:free') ||
+      catalog.freeModels.find((m) => m.supportsTools) ||
+      catalog.freeModels[0] ||
+      catalog.models.find((m) => m.supportsTools) ||
+      catalog.models[0];
 
     return {
       selectedModel: autoModel,

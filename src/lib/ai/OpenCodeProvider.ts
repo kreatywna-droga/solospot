@@ -68,12 +68,29 @@ export class OpenCodeProvider implements AIProvider {
       const cleanApiKey = (this.apiKey || '').replace(/[^\x20-\x7E]/g, '').trim();
 
       // Normalize chat messages: map 'ai' to 'assistant' to strictly adhere to OpenAI specs
+      const buildOpenCodeContent = (m: ChatMessage): string | unknown[] => {
+        const attachments = m.attachments || [];
+        if (attachments.length === 0) return m.content;
+
+        const parts: unknown[] = [{ type: 'text', text: m.content }];
+        for (const a of attachments) {
+          if (a.type === 'image' && a.content.startsWith('data:')) {
+            parts.push({ type: 'image_url', image_url: { url: a.content, detail: 'auto' } });
+          } else {
+            const isText = a.mimeType.startsWith('text/') || a.mimeType === 'application/json' || a.mimeType === 'application/markdown';
+            const inline = isText ? a.content : `[Załącznik: ${a.name} (${a.mimeType})]`;
+            parts.push({ type: 'text', text: `\n---\n${inline}\n---\n` });
+          }
+        }
+        return parts;
+      };
+
       const normalizedMessages = request.messages.map((m: any) => {
         let role: ChatMessage['role'] = m.role || (m.type === 'user' ? 'user' : 'assistant');
         if ((role as string) === 'ai') role = 'assistant';
         return {
           role,
-          content: m.content || m.text || '',
+          content: buildOpenCodeContent(m as ChatMessage),
           ...(m.name ? { name: m.name } : {}),
           ...(m.toolCallId ? { tool_call_id: m.toolCallId } : {}),
         };
@@ -129,10 +146,10 @@ export class OpenCodeProvider implements AIProvider {
         const fallbackCandidates = [
           'nex-agi/nex-n2.5-pro:free',
           'nex-agi/nex-n2.5-mini:free',
-          'dots-studio/dots-3-note-preview:free',
-          'liquid/lfm-2.5-2.6b:free',
           'nvidia/nemotron-3.5-lightning:free',
-          'openai/gpt-4o-mini',
+          'nvidia/nemotron-3-ultra-550b-a55b:free',
+          'inclusionai/ling-3.0-flash-vl:free',
+          'dots-studio/dots-3-note-preview:free',
         ].filter((id) => id !== activeModelId);
 
         for (const candidateId of fallbackCandidates) {
@@ -140,7 +157,8 @@ export class OpenCodeProvider implements AIProvider {
             console.log(`[OpenCodeProvider] Retrying with fallback candidate: ${candidateId}`);
             bodyPayload.model = candidateId;
             bodyPayload.max_tokens = 600;
-            if (candidateId === 'openai/gpt-4o-mini' && toolsPayload.length > 0) {
+            // Always include tools in fallback (free models support tools)
+            if (toolsPayload.length > 0) {
               bodyPayload.tools = toolsPayload;
               bodyPayload.tool_choice = 'auto';
             }

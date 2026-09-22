@@ -12,6 +12,7 @@
 
 import type { BuilderCommand } from '../../../packages/builder-core/src';
 import type { ExperienceSceneConfig } from '@/lib/experience/ExperienceRuntimeTypes';
+import type { ChatMessageAttachment } from '@/lib/ai/AIProviderTypes';
 
 export type HacpStatus = 'OFFLINE' | 'CONNECTING' | 'ONLINE' | 'BUSY' | 'ERROR';
 
@@ -117,6 +118,7 @@ export interface HacpConversationContext {
     intent?: HacpIntentType;
     scope?: HacpEngineeringScope;
     timestamp: string;
+    attachments?: ChatMessageAttachment[];
   }>;
 }
 
@@ -132,6 +134,7 @@ export interface HacpMessage {
   isError?: boolean;
   suggestedActions?: string[];
   visualMetrics?: HacpVisualMetrics;
+  attachments?: ChatMessageAttachment[];
 }
 
 export type CapabilityCategory =

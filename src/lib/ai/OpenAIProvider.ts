@@ -5,7 +5,7 @@
  * Supports OpenAI models (gpt-4o, gpt-4o-mini), OpenRouter, Groq, or custom gateways.
  */
 
-import type { AIProvider, AICopilotRequest, AICopilotResponse, HacpToolCall } from './AIProviderTypes';
+import type { AIProvider, AICopilotRequest, AICopilotResponse, HacpToolCall, ChatMessage } from './AIProviderTypes';
 
 export class OpenAIProvider implements AIProvider {
   public readonly id = 'openai';
@@ -52,11 +52,28 @@ export class OpenAIProvider implements AIProvider {
       }));
 
       const endpoint = `${this.baseURL.replace(/\/$/, '')}/chat/completions`;
+      const buildOpenAIContent = (m: ChatMessage): string | unknown[] => {
+        const attachments = m.attachments || [];
+        if (attachments.length === 0) return m.content;
+
+        const parts: unknown[] = [{ type: 'text', text: m.content }];
+        for (const a of attachments) {
+          if (a.type === 'image' && a.content.startsWith('data:')) {
+            parts.push({ type: 'image_url', image_url: { url: a.content, detail: 'auto' } });
+          } else {
+            const isText = a.mimeType.startsWith('text/') || a.mimeType === 'application/json' || a.mimeType === 'application/markdown';
+            const inline = isText ? a.content : `[Załącznik: ${a.name} (${a.mimeType})]`;
+            parts.push({ type: 'text', text: `\n---\n${inline}\n---\n` });
+          }
+        }
+        return parts;
+      };
+
       const bodyPayload: Record<string, unknown> = {
         model: this.model,
         messages: request.messages.map((m) => ({
           role: m.role,
-          content: m.content,
+          content: buildOpenAIContent(m),
           ...(m.name ? { name: m.name } : {}),
           ...(m.toolCallId ? { tool_call_id: m.toolCallId } : {}),
         })),

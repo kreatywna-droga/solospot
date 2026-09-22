@@ -9,11 +9,22 @@ import type { HacpBuilderContext, HacpVisualMetrics } from '../hacp/HacpTypes';
 
 export type AIProviderStatus = 'CONFIGURED' | 'NOT_CONFIGURED' | 'ERROR';
 
+export type ChatMessageAttachmentType = 'image' | 'document' | 'file';
+
+export interface ChatMessageAttachment {
+  type: ChatMessageAttachmentType;
+  name: string;
+  mimeType: string;
+  /** Base64 data URL for images/binaries, or raw text content for text documents. */
+  content: string;
+}
+
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant' | 'tool';
   content: string;
   name?: string;
   toolCallId?: string;
+  attachments?: ChatMessageAttachment[];
 }
 
 export interface HacpToolParameterProperty {

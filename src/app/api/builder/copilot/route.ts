@@ -285,10 +285,49 @@ ZASADY PROFESJONALNEJ KONWERSACJI:
       builderContext,
       visualMetrics,
       tools: BUILDER_TOOL_DEFINITIONS,
-      routerMode: routerMode || 'AUTO',
+      routerMode: routerMode || 'FREE',
       modelId: selectedModelId,
     };
 
+    // FREE MODEL ORCHESTRATION: Use controlled execution flow
+    // Model SELECTS, SoloSpot EXECUTES, HACP SECURES
+    if (aiRequest.routerMode === 'FREE' || aiRequest.routerMode === 'AUTO') {
+      try {
+        const { AgentOrchestrator } = await import('@/lib/ai/AgentOrchestrator');
+        const activeProvider = registry.getActiveProvider();
+        if (activeProvider) {
+          const orchestrator = new AgentOrchestrator({
+            generateWithTools: (req) => activeProvider.generateWithTools(req),
+          });
+          const orchResult = await orchestrator.orchestrate(aiRequest, {
+            documentNodeCount: builderContext.documentNodeCount ?? 0,
+            hasSelection: Boolean(builderContext.selectedNodeId),
+            selectedNodeType: builderContext.selectedNodeType,
+            sectionsSummary: builderContext.sectionsSummary,
+          });
+
+          // Convert orchestrator result to AICopilotResponse format
+          const result = {
+            status: orchResult.status === 'CHAT' ? 'SUCCESS' : orchResult.status === 'PARTIAL' ? 'SUCCESS' : orchResult.status,
+            provider: 'AgentOrchestrator',
+            model: orchResult.modelUsed,
+            message: orchResult.message,
+            toolCalls: orchResult.toolCalls.length > 0 ? orchResult.toolCalls : undefined,
+            isFreeModel: true,
+            routerMode: `ORCHESTRATED_${aiRequest.routerMode}`,
+            durationMs: orchResult.durationMs,
+          };
+
+          return NextResponse.json(result, {
+            headers: { 'Content-Type': 'application/json; charset=utf-8' },
+          });
+        }
+      } catch (orchErr: any) {
+        console.warn('[copilot] Orchestrator failed, falling back to direct:', orchErr?.message);
+      }
+    }
+
+    // FALLBACK: Direct provider execution (full tool set)
     const result = await registry.execute(aiRequest);
     return NextResponse.json(result, {
       headers: {

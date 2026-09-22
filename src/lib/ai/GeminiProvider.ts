@@ -5,7 +5,7 @@
  * Uses gemini-2.0-flash or gemini-1.5-pro with tools/functionDeclarations.
  */
 
-import type { AIProvider, AICopilotRequest, AICopilotResponse, HacpToolCall } from './AIProviderTypes';
+import type { AIProvider, AICopilotRequest, AICopilotResponse, HacpToolCall, ChatMessage } from './AIProviderTypes';
 
 export class GeminiProvider implements AIProvider {
   public readonly id = 'gemini';
@@ -50,11 +50,28 @@ export class GeminiProvider implements AIProvider {
       }));
 
       // Format messages into Gemini contents
+      const buildGeminiParts = (m: ChatMessage) => {
+        const parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [{ text: m.content }];
+        for (const a of m.attachments || []) {
+          if (a.type === 'image') {
+            const base64 = a.content.startsWith('data:')
+              ? a.content.split(',')[1] || ''
+              : Buffer.from(a.content).toString('base64');
+            parts.push({ inlineData: { mimeType: a.mimeType, data: base64 } });
+          } else {
+            const isText = a.mimeType.startsWith('text/') || a.mimeType === 'application/json' || a.mimeType === 'application/markdown';
+            const inline = isText ? a.content : `[Załącznik: ${a.name} (${a.mimeType})]`;
+            parts.push({ text: `\n---\n${inline}\n---\n` });
+          }
+        }
+        return parts;
+      };
+
       const contents = request.messages
         .filter((m) => m.role !== 'system')
         .map((m) => ({
           role: m.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: m.content }],
+          parts: buildGeminiParts(m),
         }));
 
       // Extract system instruction if present
