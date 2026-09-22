@@ -110,10 +110,10 @@ export class OpenCodeModelDiscovery {
         const rawList = Array.isArray(json.data) ? json.data : [];
         if (rawList.length > 0) {
           const gatewayModels = this.normalizeGatewayModels(rawList);
-          const freeGateway = gatewayModels.filter((m) => m.isFree);
+          const toolCapableGateway = gatewayModels.filter((m) => m.supportsTools);
           const existingIds = new Set(models.map((m) => m.id));
-          const newFree = freeGateway.filter((m) => !existingIds.has(m.id));
-          models = [...newFree, ...models];
+          const newModels = toolCapableGateway.filter((m) => !existingIds.has(m.id));
+          models = [...newModels, ...models];
           source = 'gateway_api';
         }
       }
