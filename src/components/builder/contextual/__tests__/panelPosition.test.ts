@@ -10,6 +10,8 @@ import { describe, it, expect } from 'vitest'
 import {
   computePanelPosition,
   getWorkspaceBounds,
+  getViewportBounds,
+  intersectBounds,
   type WorkspaceBounds,
   type ElementRect,
 } from '../usePanelPosition'
@@ -139,5 +141,59 @@ describe('getWorkspaceBounds', () => {
     const b = getWorkspaceBounds()
     expect(b.width).toBeGreaterThanOrEqual(0)
     expect(b.height).toBeGreaterThanOrEqual(0)
+  })
+})
+
+describe('intersectBounds — workspace ∩ viewport (PHASE 3–5)', () => {
+  const viewport = bounds(0, 0, 1920, 1080)
+
+  it('returns the workspace unchanged when it is fully inside the viewport', () => {
+    const ws = bounds(320, 56, 1600, 1040)
+    expect(intersectBounds(ws, viewport)).toEqual(ws)
+  })
+
+  it('clips a workspace that overflows the right/bottom viewport edges', () => {
+    // Real-world case observed in the production Builder: the workspace <main>
+    // extended to x=1952 / y=1128, i.e. beyond a 1920x1080 viewport.
+    const ws = bounds(648, 144, 1952, 1128)
+    const effective = intersectBounds(ws, viewport)
+    expect(effective).not.toBeNull()
+    expect(effective!.right).toBe(1920)
+    expect(effective!.bottom).toBe(1080)
+    expect(effective!.width).toBe(1272)
+    expect(effective!.height).toBe(936)
+  })
+
+  it('clips a workspace shifted past the left/top viewport edges', () => {
+    const ws = bounds(-200, -50, 1000, 900)
+    const effective = intersectBounds(ws, viewport)
+    expect(effective!.left).toBe(0)
+    expect(effective!.top).toBe(0)
+  })
+
+  it('returns null when the rects do not overlap at all', () => {
+    expect(intersectBounds(bounds(2000, 0, 2400, 500), viewport)).toBeNull()
+    expect(intersectBounds(bounds(0, 1200, 500, 1500), viewport)).toBeNull()
+  })
+
+  it('keeps the clamped panel on screen for an overflowing workspace', () => {
+    // Panel anchored to an element near the overflowing right edge
+    const ws = bounds(648, 144, 1952, 1128)
+    const effective = intersectBounds(ws, viewport)!
+    const pos = computePanelPosition(rect(1000, 300, 604, 200), effective)
+    // 1920 - 320 - 16 = 1584 → panel right edge 1904 <= 1920
+    expect(pos.x).toBeLessThanOrEqual(1584)
+    expect(pos.x + PANEL_W).toBeLessThanOrEqual(viewport.right - MARGIN)
+    expect(pos.y + pos.maxHeight).toBeLessThanOrEqual(viewport.bottom - MARGIN)
+    expectInsideWorkspace(pos, effective)
+  })
+})
+
+describe('getViewportBounds', () => {
+  it('is zeroed outside a browser environment', () => {
+    const v = getViewportBounds()
+    expect(v.left).toBe(0)
+    expect(v.top).toBe(0)
+    expect(v.width).toBeGreaterThanOrEqual(0)
   })
 })

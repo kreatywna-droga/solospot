@@ -66,21 +66,46 @@ const DEFAULT_OPTIONS: Required<UsePanelPositionOptions> = {
 }
 
 /**
- * The bounding area for floating panels: the Builder workspace region
- * (`<main data-builder-workspace>`). Falls back to the browser viewport when
- * the workspace element is not present (e.g. outside the Builder shell).
+ * Intersection of two rectangles. Returns `null` when they do not overlap.
+ *
+ * The Builder workspace (`<main data-builder-workspace>`) can extend beyond the
+ * browser viewport — e.g. when the canvas is panned or the shell row overflows
+ * horizontally. Clamping to the workspace alone would then still push a panel
+ * off the visible screen, so the effective bounding area is the intersection of
+ * the workspace and the viewport.
  */
-export function getWorkspaceBounds(): WorkspaceBounds {
-  if (typeof document !== 'undefined') {
-    const el = document.querySelector('[data-builder-workspace]')
-    if (el) {
-      const r = el.getBoundingClientRect()
-      return { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height }
-    }
-  }
+export function intersectBounds(a: WorkspaceBounds, b: WorkspaceBounds): WorkspaceBounds | null {
+  const left = Math.max(a.left, b.left)
+  const top = Math.max(a.top, b.top)
+  const right = Math.min(a.right, b.right)
+  const bottom = Math.min(a.bottom, b.bottom)
+  if (right <= left || bottom <= top) return null
+  return { left, top, right, bottom, width: right - left, height: bottom - top }
+}
+
+/** The browser viewport as a rect (viewport coordinates). */
+export function getViewportBounds(): WorkspaceBounds {
   const w = typeof window !== 'undefined' ? window.innerWidth : 0
   const h = typeof window !== 'undefined' ? window.innerHeight : 0
   return { left: 0, top: 0, right: w, bottom: h, width: w, height: h }
+}
+
+/**
+ * The bounding area for floating panels: the Builder workspace region
+ * (`<main data-builder-workspace>`) INTERSECTED with the visible viewport, so a
+ * panel is never positioned off-screen even when the workspace overflows.
+ * Falls back to the viewport when the workspace element is absent.
+ */
+export function getWorkspaceBounds(): WorkspaceBounds {
+  const viewport = getViewportBounds()
+  if (typeof document === 'undefined') return viewport
+  const el = document.querySelector('[data-builder-workspace]')
+  if (!el) return viewport
+  const r = el.getBoundingClientRect()
+  const workspace: WorkspaceBounds = {
+    left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height,
+  }
+  return intersectBounds(workspace, viewport) ?? viewport
 }
 
 /**
