@@ -26,13 +26,20 @@ import type { BuilderNode } from '../../../../packages/builder-core/src/BuilderD
 /**
  * The group is shown for the section that is selected or hovered, so it is
  * available for every section type (hero included).
+ *
+ * Priority: the SELECTED section always wins — when a section is selected,
+ * only its dock is rendered (the hovered section is ignored). When nothing is
+ * selected, the HOVERED section's dock is shown instead. This guarantees that
+ * at most one dock is ever rendered at a time (selected + hovered on
+ * different sections would otherwise produce two groups).
  */
 export function shouldShowSectionActions(
   nodeId: string,
   selectedSectionId: string | null,
   hoveredSectionId: string | null
 ): boolean {
-  return selectedSectionId === nodeId || hoveredSectionId === nodeId
+  if (selectedSectionId) return selectedSectionId === nodeId
+  return hoveredSectionId === nodeId
 }
 
 interface SectionActionDockProps {
