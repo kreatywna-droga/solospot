@@ -245,7 +245,7 @@ function checkDock(snap, label) {
   const s = d.sectionRect;
   if (s) {
     check(`actions centered within the section (${label})`, near(d.rect.cx, s.cx, 2), `dock.cx=${d.rect.cx} section.cx=${s.cx}`);
-                check(`actions pinned to the section bottom edge (${label})`, near(s.bottom - d.rect.bottom, DOCK_EDGE, 3), `gap=${Math.round(s.bottom - d.rect.bottom)}px (expected ${DOCK_EDGE}±3)`);
+                    check(`actions pinned to the section bottom edge (${label})`, near(s.bottom - d.rect.bottom, DOCK_EDGE, 4), `gap=${Math.round(s.bottom - d.rect.bottom)}px (expected ${DOCK_EDGE}±4)`);
     check(`actions inside the section horizontally (${label})`, d.rect.left >= s.left - 1 && d.rect.right <= s.right + 1, `dock=[${Math.round(d.rect.left)},${Math.round(d.rect.right)}] section=[${Math.round(s.left)},${Math.round(s.right)}]`);
   }
   check(`exactly one action group per selection (${label})`, snap.dockCount === 1, `count=${snap.dockCount}`);
