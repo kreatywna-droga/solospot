@@ -315,7 +315,7 @@ export function BuilderShell({ storeId, onSave, onPublish, saving }: BuilderShel
         )}
 
         {/* Canvas */}
-        <main className="flex-1 flex flex-col overflow-hidden min-w-0 relative">
+        <main data-builder-workspace className="flex-1 flex flex-col overflow-hidden min-w-0 relative">
           <BuilderCanvas onAddSection={() => setActiveTab('components')} />
           {!inspectorVisible && (
             <button

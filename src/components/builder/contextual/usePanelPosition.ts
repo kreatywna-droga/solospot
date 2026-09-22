@@ -13,10 +13,17 @@
  *   3. Below element
  *   4. Above element
  *
- * Updates on: scroll, zoom, resize, element move.
+ * BOUNDING AREA:
+ *   The panel is clamped to the Builder WORKSPACE (the `<main data-builder-workspace>`
+ *   region between the sidebars), not to the browser viewport — so it can never
+ *   slide under the Inspector, the top bars, or off the visible workspace.
+ *   When the content is taller than the available space, the panel gets a
+ *   max-height and scrolls internally instead of leaving the workspace.
+ *
+ * Updates on: scroll, zoom, resize, element move, workspace resize.
  */
 
-import { useState, useCallback, useLayoutEffect, useRef } from 'react'
+import { useState, useCallback, useLayoutEffect } from 'react'
 
 export interface PanelPosition {
   x: number
@@ -32,13 +39,22 @@ export interface ElementRect {
   height: number
 }
 
+export interface WorkspaceBounds {
+  left: number
+  top: number
+  right: number
+  bottom: number
+  width: number
+  height: number
+}
+
 interface UsePanelPositionOptions {
   /** Panel dimensions */
   panelWidth?: number
   panelMinHeight?: number
   /** Gap between element and panel (px) */
   gap?: number
-  /** Safe margin from viewport edges (px) */
+  /** Safe margin from workspace edges (px) */
   viewportMargin?: number
 }
 
@@ -47,6 +63,117 @@ const DEFAULT_OPTIONS: Required<UsePanelPositionOptions> = {
   panelMinHeight: 200,
   gap: 12,
   viewportMargin: 16,
+}
+
+/**
+ * The bounding area for floating panels: the Builder workspace region
+ * (`<main data-builder-workspace>`). Falls back to the browser viewport when
+ * the workspace element is not present (e.g. outside the Builder shell).
+ */
+export function getWorkspaceBounds(): WorkspaceBounds {
+  if (typeof document !== 'undefined') {
+    const el = document.querySelector('[data-builder-workspace]')
+    if (el) {
+      const r = el.getBoundingClientRect()
+      return { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height }
+    }
+  }
+  const w = typeof window !== 'undefined' ? window.innerWidth : 0
+  const h = typeof window !== 'undefined' ? window.innerHeight : 0
+  return { left: 0, top: 0, right: w, bottom: h, width: w, height: h }
+}
+
+/**
+ * Pure position computation — anchored to the element, then clamped so the
+ * whole panel (up to maxHeight) stays inside `bounds` with `viewportMargin`
+ * clearance on every side.
+ */
+export function computePanelPosition(
+  elementRect: ElementRect,
+  bounds: WorkspaceBounds,
+  options: UsePanelPositionOptions = {}
+): PanelPosition {
+  const opts = { ...DEFAULT_OPTIONS, ...options }
+  const margin = opts.viewportMargin
+  const panelW = opts.panelWidth
+  const maxPanelHeight = Math.max(opts.panelMinHeight, bounds.height - margin * 2)
+
+  // Element bounds (same coordinate space as `bounds` — viewport coords)
+  const elLeft = elementRect.x
+  const elTop = elementRect.y
+  const elRight = elementRect.x + elementRect.width
+  const elBottom = elementRect.y + elementRect.height
+
+  // Available spaces inside the workspace
+  const spaceRight = bounds.right - elRight - opts.gap - margin
+  const spaceLeft = elLeft - bounds.left - opts.gap - margin
+  const spaceBelow = bounds.bottom - elBottom - opts.gap - margin
+  const spaceAbove = elTop - bounds.top - opts.gap - margin
+
+  let x = 0
+  let y = 0
+  let placement: PanelPosition['placement'] = 'right'
+  let maxHeight = maxPanelHeight
+
+  // Try right side first
+  if (spaceRight >= panelW) {
+    placement = 'right'
+    x = elRight + opts.gap
+    y = elTop
+    maxHeight = Math.min(bounds.bottom - margin - y, maxPanelHeight)
+  }
+  // Try left side
+  else if (spaceLeft >= panelW) {
+    placement = 'left'
+    x = elLeft - panelW - opts.gap
+    y = elTop
+    maxHeight = Math.min(bounds.bottom - margin - y, maxPanelHeight)
+  }
+  // Neither side fits fully — prefer the larger horizontal side and clamp to workspace edge
+  else if (spaceRight >= spaceLeft) {
+    placement = 'right'
+    x = Math.min(elRight + opts.gap, bounds.right - panelW - margin)
+    y = elTop
+    maxHeight = Math.min(bounds.bottom - margin - y, maxPanelHeight)
+  }
+  else {
+    placement = 'left'
+    x = Math.max(bounds.left + margin, elLeft - panelW - opts.gap)
+    y = elTop
+    maxHeight = Math.min(bounds.bottom - margin - y, maxPanelHeight)
+  }
+
+  // If vertical room on the side is too small, fall back to below/above
+  if (maxHeight < opts.panelMinHeight) {
+    if (spaceBelow >= opts.panelMinHeight) {
+      placement = 'below'
+      x = Math.max(bounds.left + margin, Math.min(elLeft, bounds.right - panelW - margin))
+      y = elBottom + opts.gap
+      maxHeight = Math.min(spaceBelow, maxPanelHeight)
+    }
+    // Fallback: above
+    else {
+      placement = 'above'
+      maxHeight = Math.min(Math.max(spaceAbove, opts.panelMinHeight), maxPanelHeight)
+      x = Math.max(bounds.left + margin, Math.min(elLeft, bounds.right - panelW - margin))
+      y = Math.max(bounds.top + margin, elTop - opts.gap - maxHeight)
+    }
+  }
+
+  // Final horizontal clamp — panel never leaves the workspace left/right
+  const minX = bounds.left + margin
+  const maxX = Math.max(minX, bounds.right - panelW - margin)
+  x = Math.max(minX, Math.min(x, maxX))
+
+  // Max height with internal scrolling — keep a usable minimum when possible
+  maxHeight = Math.max(Math.min(opts.panelMinHeight, maxPanelHeight), Math.min(maxHeight, maxPanelHeight))
+
+  // Final vertical clamp — the panel's bottom edge (at maxHeight) stays inside
+  const minY = bounds.top + margin
+  const maxY = Math.max(minY, bounds.bottom - margin - maxHeight)
+  y = Math.max(minY, Math.min(y, maxY))
+
+  return { x, y, placement, maxHeight }
 }
 
 export function usePanelPosition(
@@ -61,86 +188,10 @@ export function usePanelPosition(
     placement: 'right',
     maxHeight: 600,
   })
-  const panelRef = useRef<HTMLDivElement>(null)
 
   const computePosition = useCallback(() => {
     if (!elementRect || !isOpen) return
-
-    const viewportW = window.innerWidth
-    const viewportH = window.innerHeight
-    const scrollX = window.scrollX
-    const scrollY = window.scrollY
-
-    // Element bounds in viewport coords
-    const elLeft = elementRect.x
-    const elTop = elementRect.y
-    const elRight = elementRect.x + elementRect.width
-    const elBottom = elementRect.y + elementRect.height
-
-    // Available spaces
-    const spaceRight = viewportW - elRight - opts.gap - opts.viewportMargin
-    const spaceLeft = elLeft - opts.gap - opts.viewportMargin
-    const spaceBelow = viewportH - elBottom - opts.gap - opts.viewportMargin
-    const spaceAbove = elTop - opts.gap - opts.viewportMargin
-
-    let x = 0
-    let y = 0
-    let placement: PanelPosition['placement'] = 'right'
-    let maxHeight = viewportH - opts.viewportMargin * 2
-
-    // Try right side first
-    if (spaceRight >= opts.panelWidth) {
-      placement = 'right'
-      x = elRight + opts.gap
-      y = elTop
-      maxHeight = Math.min(spaceBelow + elementRect.height, viewportH - opts.viewportMargin * 2)
-    }
-    // Try left side
-    else if (spaceLeft >= opts.panelWidth) {
-      placement = 'left'
-      x = elLeft - opts.panelWidth - opts.gap
-      y = elTop
-      maxHeight = Math.min(spaceBelow + elementRect.height, viewportH - opts.viewportMargin * 2)
-    }
-    // Neither side fits fully — prefer the larger horizontal side and clamp to viewport edge
-    else if (spaceRight >= spaceLeft) {
-      placement = 'right'
-      x = Math.min(elRight + opts.gap, viewportW - opts.panelWidth - opts.viewportMargin)
-      y = elTop
-      maxHeight = Math.min(spaceBelow + elementRect.height, viewportH - opts.viewportMargin * 2)
-    }
-    else {
-      placement = 'left'
-      x = Math.max(opts.viewportMargin, elLeft - opts.panelWidth - opts.gap)
-      y = elTop
-      maxHeight = Math.min(spaceBelow + elementRect.height, viewportH - opts.viewportMargin * 2)
-    }
-
-    // If vertical room on the side is too small, fall back to below/above
-    if (maxHeight < opts.panelMinHeight) {
-      if (spaceBelow >= opts.panelMinHeight) {
-        placement = 'below'
-        x = Math.max(opts.viewportMargin, Math.min(elLeft, viewportW - opts.panelWidth - opts.viewportMargin))
-        y = elBottom + opts.gap
-        maxHeight = spaceBelow
-      }
-      // Fallback: above
-      else {
-        placement = 'above'
-        x = Math.max(opts.viewportMargin, Math.min(elLeft, viewportW - opts.panelWidth - opts.viewportMargin))
-        y = Math.max(opts.viewportMargin, elTop - opts.gap - opts.panelMinHeight)
-        maxHeight = spaceAbove
-      }
-    }
-
-    // Final clamp to viewport so the panel is never rendered off-screen
-    x = Math.max(opts.viewportMargin, Math.min(x, viewportW - opts.panelWidth - opts.viewportMargin))
-    y = Math.max(opts.viewportMargin, Math.min(y, viewportH - opts.viewportMargin))
-
-    // Max height with scrolling — keep a usable minimum when possible
-    maxHeight = Math.max(opts.panelMinHeight, Math.min(maxHeight, viewportH - opts.viewportMargin * 2))
-
-    setPosition({ x, y, placement, maxHeight })
+    setPosition(computePanelPosition(elementRect, getWorkspaceBounds(), opts))
   }, [elementRect, isOpen, opts.panelWidth, opts.panelMinHeight, opts.gap, opts.viewportMargin])
 
   // Recompute on every render when open
@@ -148,7 +199,8 @@ export function usePanelPosition(
     computePosition()
   }, [computePosition])
 
-  // Recompute on scroll/resize
+  // Recompute on scroll/resize and when the workspace region itself resizes
+  // (sidebar / inspector drag-resize changes the clamping bounds).
   useLayoutEffect(() => {
     if (!isOpen) return
 
@@ -157,9 +209,19 @@ export function usePanelPosition(
     window.addEventListener('scroll', handleUpdate, { passive: true })
     window.addEventListener('resize', handleUpdate, { passive: true })
 
+    let observer: ResizeObserver | null = null
+    if (typeof ResizeObserver !== 'undefined') {
+      const workspaceEl = document.querySelector('[data-builder-workspace]')
+      if (workspaceEl) {
+        observer = new ResizeObserver(handleUpdate)
+        observer.observe(workspaceEl)
+      }
+    }
+
     return () => {
       window.removeEventListener('scroll', handleUpdate)
       window.removeEventListener('resize', handleUpdate)
+      observer?.disconnect()
     }
   }, [isOpen, computePosition])
 

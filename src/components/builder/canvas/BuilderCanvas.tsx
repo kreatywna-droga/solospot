@@ -54,6 +54,7 @@ import { loadGoogleFont } from '../../../../packages/builder-core/src/fonts/Font
 import { ExperienceLibraryModal, SaveExperienceModal, ExperienceRuntimeScene } from '../experience'
 import { WebsiteTemplatePickerModal } from '../templates/WebsiteTemplatePickerModal'
 import { SmartGuidesOverlay } from './guides/SmartGuidesOverlay'
+import { SectionActionDock } from './SectionActionDock'
 import { useSmartGuides, useElementBounds, collectCanvasElementBounds } from './guides/useSmartGuides'
 import { GuidesToggle } from './guides/GuidesToggle'
 
@@ -2901,37 +2902,6 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                       onHover={handleHoverSection}
                       onStartDragNode={handleDirectNodeDragStart}
                     />
-                    {/* Actions anchored to selected/hovered section */}
-                    {(canvas.selectedSectionId === node.id || canvas.hoveredSectionId === node.id) && (
-                      <div className="absolute bottom-2 right-2 z-20 flex items-center gap-1.5 pointer-events-auto">
-                        {canvas.selectedSectionId === node.id && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setSaveExperienceTargetNode(node)
-                              setIsSaveExperienceOpen(true)
-                            }}
-                            className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#202024] hover:bg-[#2E2E33] border border-[#D9A86C]/40 text-[#F2C27F] hover:text-white text-[11px] font-bold shadow-lg shadow-[#D9A86C]/40 transition-all scale-95 hover:scale-105 whitespace-nowrap"
-                            title="Zapisz tę sekcję do swoich Experience (My Experiences)"
-                          >
-                            <Sparkles className="w-3 h-3 text-[#F2C27F]" />
-                            <span>Zapisz Experience</span>
-                          </button>
-                        )}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setInsertSectionIndex(index + 1)
-                            setIsSectionLibraryOpen(true)
-                          }}
-                          className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#D9A86C] hover:bg-[#C99A4A] text-white text-[11px] font-bold shadow-lg shadow-[#D9A86C]/40 scale-95 hover:scale-105 whitespace-nowrap"
-                          title={`Dodaj sekcję po "${node.label || 'Sekcja #' + (index + 1)}"`}
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          <span>Dodaj sekcję</span>
-                        </button>
-                      </div>
-                    )}
                   </div>
                 </React.Fragment>
               )
@@ -2963,6 +2933,22 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                 <div className="absolute inset-x-8 top-0 h-px bg-transparent group-hover/insert:bg-[#D9A86C]/40 transition-all pointer-events-none" />
               </div>
             )}
+
+            {/* Workspace-level section actions — centered above the workspace
+                bottom edge via portal, always fully visible (edit mode only) */}
+            <SectionActionDock
+              sections={sections}
+              selectedSectionId={canvas.selectedSectionId}
+              hoveredSectionId={canvas.hoveredSectionId}
+              onSaveExperience={(node) => {
+                setSaveExperienceTargetNode(node)
+                setIsSaveExperienceOpen(true)
+              }}
+              onAddSection={(insertIndex) => {
+                setInsertSectionIndex(insertIndex)
+                setIsSectionLibraryOpen(true)
+              }}
+            />
           </>
         )}
 

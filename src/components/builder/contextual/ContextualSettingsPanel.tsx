@@ -778,10 +778,10 @@ export function ContextualSettingsPanel({
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
         >
-          <div className="bg-[#2A2A2F] border border-[#44444B] rounded-xl shadow-2xl overflow-hidden flex flex-col"
+          <div className="bg-[#18181B] border border-[#44444B] rounded-xl shadow-2xl overflow-hidden flex flex-col"
             style={{ maxHeight: position.maxHeight }}>
-            {/* Header */}
-            <div className="flex items-center justify-between px-3 py-2 border-b border-[#3A3A40] bg-[#252529] flex-shrink-0">
+            {/* Header — same surface system as the Inspector (panel #202024 on shell #18181B) */}
+            <div className="flex items-center justify-between px-3 py-2 border-b border-[#3A3A40] bg-[#202024] flex-shrink-0">
               <div className="flex items-center gap-2 min-w-0">
                 <span className="text-[11px] font-bold text-white uppercase tracking-wider truncate">
                   {profile.label}
