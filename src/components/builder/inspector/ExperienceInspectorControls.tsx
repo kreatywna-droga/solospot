@@ -221,7 +221,7 @@ function ColorArrayField({
             />
             <button
               onClick={() => removeColor(i)}
-              className="absolute -top-1 -right-1 w-3 h-3 flex items-center justify-center rounded-full bg-zinc-700 text-zinc-300 text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute -top-1 -right-1 w-3 h-3 flex items-center justify-center rounded-full bg-[#202024] text-zinc-300 text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"
               title="Usuń kolor"
             >
               ×

@@ -97,7 +97,7 @@ export function BuilderTopBar({
               <p className="text-[11px] text-zinc-500 font-mono truncate">{document.metadata.storeSlug}</p>
               <button
                 onClick={() => setShowLifecycleModal(true)}
-                className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#202024] hover:bg-[#2E2E33] border border-[#252B3A] text-[10px] text-zinc-300 hover:text-[#D9A86C] transition-all"
+                className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#202024] hover:bg-[#2E2E33] border border-[#2E2E33] text-[10px] text-zinc-300 hover:text-[#D9A86C] transition-all"
                 title="Zarządzaj cyklem życia sklepu (Aktywuj / Dezaktywuj / Usuń)"
               >
                 <Power className="w-2.5 h-2.5 text-emerald-400" />
@@ -213,7 +213,7 @@ export function BuilderTopBar({
           <button
             onClick={onSave}
             disabled={saving}
-            className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-[#202024] border border-[#252B3A]
+            className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-[#202024] border border-[#2E2E33]
                        text-xs font-medium text-zinc-300 hover:bg-[#2E2E33] hover:text-[#D9A86C]
                        transition-all disabled:opacity-50"
           >
@@ -237,7 +237,7 @@ export function BuilderTopBar({
           {/* Command Palette */}
           <button
             onClick={() => setShowCommandPalette(true)}
-            className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-[#202024] border border-[#252B3A]
+            className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-[#202024] border border-[#2E2E33]
                        text-[10px] text-zinc-400 hover:text-[#D9A86C] hover:bg-[#2E2E33] transition-all"
             title="Command Palette (Ctrl+K)"
           >

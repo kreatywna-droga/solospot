@@ -133,11 +133,11 @@ export function ExperienceLibraryModal({
     <>
       <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/90 backdrop-blur-md p-2 md:p-6 animate-in fade-in duration-150 select-none">
         <div
-          className="w-full max-w-7xl max-h-[95vh] bg-[#14141c] border border-[#272736] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
+          className="w-full max-w-7xl max-h-[95vh] bg-[#18181B] border border-[#2E2E33] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[#252535] bg-[#191924]">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[#2E2E33] bg-[#2E2E33]">
             <div>
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-[#D9A86C]/20 border border-[#D9A86C]/30 flex items-center justify-center text-violet-400">
@@ -172,7 +172,7 @@ export function ExperienceLibraryModal({
           </div>
 
           {/* Primary Category Bar */}
-          <div className="px-6 py-2.5 border-b border-[#222230] bg-[#161622] flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+          <div className="px-6 py-2.5 border-b border-[#2E2E33] bg-[#2E2E33] flex items-center gap-1.5 overflow-x-auto no-scrollbar">
             {EXPERIENCE_CATEGORIES.slice(0, 10).map(cat => {
               const isSelected = selectedCategory === cat.id;
               return (
@@ -192,7 +192,7 @@ export function ExperienceLibraryModal({
           </div>
 
           {/* Search & Multi-Facet Filters Bar */}
-          <div className="p-4 border-b border-[#222230] bg-[#13131c] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <div className="p-4 border-b border-[#2E2E33] bg-[#18181B] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             {/* Search Input */}
             <div className="relative flex-1">
               <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
@@ -201,7 +201,7 @@ export function ExperienceLibraryModal({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search experiences by name, keyword, style, industry (e.g. Hero, Bento, Aurora, SaaS)..."
-                className="w-full pl-10 pr-4 py-2 bg-[#1b1b26] border border-[#2d2d3e] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C] transition-colors"
+                className="w-full pl-10 pr-4 py-2 bg-[#202024] border border-[#2E2E33] rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D9A86C] transition-colors"
               />
             </div>
 
@@ -211,7 +211,7 @@ export function ExperienceLibraryModal({
               <select
                 value={selectedMood}
                 onChange={(e) => setSelectedMood(e.target.value as any)}
-                className="bg-[#1b1b26] border border-[#2d2d3e] text-xs font-semibold text-zinc-300 rounded-xl px-3 py-2 focus:outline-none focus:border-[#D9A86C] cursor-pointer"
+                className="bg-[#202024] border border-[#2E2E33] text-xs font-semibold text-zinc-300 rounded-xl px-3 py-2 focus:outline-none focus:border-[#D9A86C] cursor-pointer"
               >
                 {EXPERIENCE_MOODS.map(m => (
                   <option key={m.id} value={m.id}>{m.label}</option>
@@ -222,7 +222,7 @@ export function ExperienceLibraryModal({
               <select
                 value={selectedMotion}
                 onChange={(e) => setSelectedMotion(e.target.value as any)}
-                className="bg-[#1b1b26] border border-[#2d2d3e] text-xs font-semibold text-zinc-300 rounded-xl px-3 py-2 focus:outline-none focus:border-[#D9A86C] cursor-pointer"
+                className="bg-[#202024] border border-[#2E2E33] text-xs font-semibold text-zinc-300 rounded-xl px-3 py-2 focus:outline-none focus:border-[#D9A86C] cursor-pointer"
               >
                 {EXPERIENCE_MOTION_LEVELS.map(m => (
                   <option key={m.id} value={m.id}>{m.label}</option>
@@ -233,7 +233,7 @@ export function ExperienceLibraryModal({
               <select
                 value={selectedIndustry}
                 onChange={(e) => setSelectedIndustry(e.target.value)}
-                className="bg-[#1b1b26] border border-[#2d2d3e] text-xs font-semibold text-zinc-300 rounded-xl px-3 py-2 focus:outline-none focus:border-[#D9A86C] cursor-pointer"
+                className="bg-[#202024] border border-[#2E2E33] text-xs font-semibold text-zinc-300 rounded-xl px-3 py-2 focus:outline-none focus:border-[#D9A86C] cursor-pointer"
               >
                 {EXPERIENCE_INDUSTRIES.map(i => (
                   <option key={i} value={i}>{i === 'All' ? 'All Industries' : i}</option>
@@ -254,7 +254,7 @@ export function ExperienceLibraryModal({
           </div>
 
           {/* Cards Grid Content Area */}
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#0c0c14]">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#18181B]">
             {filteredExperiences.length === 0 ? (
               <div className="py-24 text-center flex flex-col items-center justify-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-500">
@@ -281,11 +281,11 @@ export function ExperienceLibraryModal({
                   return (
                     <div
                       key={exp.id}
-                      className="group relative rounded-2xl bg-[#14141d] border border-[#232332] hover:border-[#D9A86C]/60 hover:shadow-2xl hover:shadow-[#D9A86C]-950/30 transition-all duration-200 flex flex-col justify-between overflow-hidden"
+                      className="group relative rounded-2xl bg-[#202024] border border-[#2E2E33] hover:border-[#D9A86C]/60 hover:shadow-2xl hover:shadow-[#D9A86C]-950/30 transition-all duration-200 flex flex-col justify-between overflow-hidden"
                     >
                       {/* Visual-First Live Scale-To-Fit Preview */}
                       <div
-                        className="relative w-full cursor-pointer overflow-hidden bg-[#07070e] p-2 group/preview"
+                        className="relative w-full cursor-pointer overflow-hidden bg-[#18181B] p-2 group/preview"
                         onClick={() => setDetailExperience(exp)}
                       >
                         {/* Floating Top Badges */}
@@ -355,7 +355,7 @@ export function ExperienceLibraryModal({
                       </div>
 
                       {/* Card Meta Footer */}
-                      <div className="p-4 bg-[#161622] border-t border-[#202030] flex flex-col gap-2">
+                      <div className="p-4 bg-[#202024] border-t border-[#2E2E33] flex flex-col gap-2">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
                             <h3

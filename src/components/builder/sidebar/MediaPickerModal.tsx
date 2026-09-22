@@ -310,7 +310,7 @@ export function MediaPickerModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-4xl max-h-[85vh] bg-[#0c0c16] border border-white/[0.12] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        className="w-full max-w-4xl max-h-[85vh] bg-[#18181B] border border-white/[0.12] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Hidden File Input */}
@@ -386,7 +386,7 @@ export function MediaPickerModal({
         </div>
 
         {/* Tab Content */}
-        <div className="flex-1 overflow-y-auto p-6 bg-[#04040a]">
+        <div className="flex-1 overflow-y-auto p-6 bg-[#18181B]">
           {/* Upload Error Banner */}
           {uploadError && (
             <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center justify-between">

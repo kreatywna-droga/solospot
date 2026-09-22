@@ -310,12 +310,24 @@ ZASADY PROFESJONALNEJ KONWERSACJI:
           });
 
           // Convert orchestrator result to AICopilotResponse format
-          // TRUTHFULNESS: Never map CHAT/PARTIAL to SUCCESS — they are not mutations.
+          // TRUTHFULNESS: Never map CHAT/PARTIAL/SUCCESS incorrectly —
+          // ERROR stays ERROR, NOT_CONFIGURED stays NOT_CONFIGURED,
+          // FAILED (thrown provider) maps to ERROR, CLARIFICATION_REQUIRED maps to PARTIAL.
+          const statusMap: Record<string, string> = {
+            SUCCESS: 'SUCCESS',
+            CHAT: 'CHAT',
+            PARTIAL: 'PARTIAL',
+            ERROR: 'ERROR',
+            NOT_CONFIGURED: 'NOT_CONFIGURED',
+            FAILED: 'ERROR',
+            CLARIFICATION_REQUIRED: 'PARTIAL',
+          };
           const result = {
-            status: orchResult.status,
+            status: statusMap[orchResult.status] || orchResult.status,
             provider: 'AgentOrchestrator',
             model: orchResult.modelUsed,
             message: orchResult.message,
+            error: orchResult.error,
             toolCalls: orchResult.toolCalls.length > 0 ? orchResult.toolCalls : undefined,
             isFreeModel: true,
             routerMode: `ORCHESTRATED_${aiRequest.routerMode}`,
@@ -358,7 +370,7 @@ export async function GET() {
   const registry = AIProviderRegistry.getInstance();
   const active = registry.getActiveProvider();
   return NextResponse.json({
-    status: active ? 'ONLINE' : 'OFFLINE',
+    status: active ? 'ONLINE' : 'NOT_CONFIGURED',
     provider: active ? active.name : 'NONE',
     configured: Boolean(active),
     missingKeys: registry.getMissingKeys(),

@@ -947,7 +947,7 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
                   transform: 'translate(-50%, -100%)',
                 }}
                 onMouseDown={handleMoveStart}
-                className="absolute z-[125] pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 bg-[#121124] hover:bg-[#D9A86C] text-violet-200 hover:text-white text-[11px] font-medium rounded-lg shadow-xl border border-[#D9A86C]/40 cursor-grab active:cursor-grabbing transition-all select-none group touch-none"
+                className="absolute z-[125] pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 bg-[#202024] hover:bg-[#D9A86C] text-zinc-300 hover:text-white text-[11px] font-medium rounded-lg shadow-xl border border-[#D9A86C]/40 cursor-grab active:cursor-grabbing transition-all select-none group touch-none"
                 title="Przeciągnij myszą, aby swobodnie przesunąć element po Canvasie"
               >
                 <Move className="w-3.5 h-3.5 text-[#F2C27F] group-hover:text-white transition-colors" />

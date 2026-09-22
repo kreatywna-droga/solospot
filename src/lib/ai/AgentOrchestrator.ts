@@ -26,13 +26,14 @@ import type { HacpToolDefinition, HacpToolCall, AICopilotRequest, AICopilotRespo
  * Result from the orchestrator's controlled execution.
  */
 export interface OrchestratorResult {
-  status: 'SUCCESS' | 'PARTIAL' | 'FAILED' | 'CLARIFICATION_REQUIRED' | 'CHAT';
+  status: 'SUCCESS' | 'PARTIAL' | 'FAILED' | 'CLARIFICATION_REQUIRED' | 'CHAT' | 'ERROR' | 'NOT_CONFIGURED';
   intent: IntentCategory;
   plan: ExecutionPlan;
   toolCalls: HacpToolCall[];
   message: string;
   modelUsed: string;
   durationMs: number;
+  error?: string;
   /**
    * If the model didn't generate a tool call but the controller
    * detected a pending mutation, the controller can inject a tool call.
@@ -129,6 +130,34 @@ export class AgentOrchestrator {
         message: `Model request failed: ${err?.message || 'Unknown error'}`,
         modelUsed: 'unknown',
         durationMs: Date.now() - startTime,
+        error: err?.message,
+      };
+    }
+
+    // 4b. HONEST PROVIDER STATUS — never mask provider failure as CHAT
+    if (modelResponse.status === 'ERROR') {
+      const providerError = modelResponse.error || modelResponse.message || 'Provider error';
+      return {
+        status: 'ERROR',
+        intent: classified.category,
+        plan: ExecutionPlanManager.failPlan(plan, providerError),
+        toolCalls: [],
+        message: modelResponse.message || `AI provider error: ${providerError}`,
+        modelUsed: modelResponse.model,
+        durationMs: Date.now() - startTime,
+        error: providerError,
+      };
+    }
+    if (modelResponse.status === 'NOT_CONFIGURED') {
+      return {
+        status: 'NOT_CONFIGURED',
+        intent: classified.category,
+        plan: ExecutionPlanManager.failPlan(plan, 'AI_PROVIDER = NOT_CONFIGURED'),
+        toolCalls: [],
+        message: modelResponse.message || 'AI provider is not configured.',
+        modelUsed: modelResponse.model,
+        durationMs: Date.now() - startTime,
+        error: modelResponse.error || 'AI_PROVIDER = NOT_CONFIGURED',
       };
     }
 

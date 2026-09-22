@@ -226,7 +226,7 @@ export function PagesPanel() {
       </div>
 
       {/* Footer / Summary */}
-      <div className="p-3 border-t border-white/[0.08] bg-[#05050a] flex items-center justify-between text-[11px] text-zinc-500">
+      <div className="p-3 border-t border-white/[0.08] bg-[#202024] flex items-center justify-between text-[11px] text-zinc-500">
         <div className="flex items-center gap-1.5">
           <FileText className="w-3 h-3" />
           <span>{document.pages.length} stron</span>
@@ -292,7 +292,7 @@ function PageSettingsModal({ page, onClose }: PageSettingsModalProps) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-[#0c0c16] border border-white/15 rounded-2xl shadow-2xl p-6 space-y-4"
+        className="w-full max-w-md bg-[#18181B] border border-white/15 rounded-2xl shadow-2xl p-6 space-y-4"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">

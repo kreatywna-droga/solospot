@@ -66,7 +66,7 @@ export function SiteMapModal({ onClose, onSelectPage }: SiteMapModalProps) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-5xl max-h-[85vh] bg-[#0c0c16] border border-white/[0.12] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        className="w-full max-w-5xl max-h-[85vh] bg-[#18181B] border border-white/[0.12] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}

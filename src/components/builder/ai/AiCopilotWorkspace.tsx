@@ -63,7 +63,7 @@ export function AiCopilotWorkspace() {
   })
   const [visualMetrics, setVisualMetrics] = useState<HacpVisualMetrics | undefined>(undefined)
   const [recentMutation, setRecentMutation] = useState<string | undefined>(undefined)
-  const [aiProviderStatus, setAiProviderStatus] = useState<'ONLINE' | 'OFFLINE'>('OFFLINE')
+  const [aiProviderStatus, setAiProviderStatus] = useState<'ONLINE' | 'OFFLINE' | 'NOT_CONFIGURED'>('OFFLINE')
   const [aiProviderName, setAiProviderName] = useState<string>('NONE')
   const [missingKeys, setMissingKeys] = useState<string[]>([])
 
@@ -125,15 +125,19 @@ export function AiCopilotWorkspace() {
         if (data.status === 'ONLINE' || data.configured) {
           setAiProviderStatus('ONLINE')
           setAiProviderName(data.provider || 'OpenCode')
+        } else if (data.status === 'NOT_CONFIGURED') {
+          setAiProviderStatus('NOT_CONFIGURED')
+          setAiProviderName('NOT CONFIGURED')
+          if (data.missingKeys) setMissingKeys(data.missingKeys)
         } else {
           setAiProviderStatus('OFFLINE')
-          setAiProviderName('NOT CONFIGURED')
+          setAiProviderName('OFFLINE')
           if (data.missingKeys) setMissingKeys(data.missingKeys)
         }
       })
       .catch(() => {
         setAiProviderStatus('OFFLINE')
-        setAiProviderName('NOT CONFIGURED')
+        setAiProviderName('OFFLINE')
       })
 
     // Discover models dynamically from OpenCode
@@ -763,6 +767,8 @@ export function AiCopilotWorkspace() {
                 ? 'AI: THINKING'
                 : aiProviderStatus === 'ONLINE'
                 ? `AI: READY`
+                : aiProviderStatus === 'NOT_CONFIGURED'
+                ? 'AI: NO KEY'
                 : 'AI: OFFLINE'}
             </span>
           </button>
@@ -1437,16 +1443,24 @@ export function AiCopilotWorkspace() {
             <div className="space-y-2 text-xs font-mono">
               <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
                 <span className="text-zinc-400">AI Provider:</span>
-                <span className={`font-bold ${aiProviderStatus === 'ONLINE' ? 'text-emerald-400' : 'text-amber-400'}`}>
-                  {aiProviderStatus === 'ONLINE' ? aiProviderName : 'OFFLINE'}
+                <span className={`font-bold ${aiProviderStatus === 'ONLINE' ? 'text-emerald-400' : aiProviderStatus === 'NOT_CONFIGURED' ? 'text-amber-400' : 'text-red-400'}`}>
+                  {aiProviderStatus === 'ONLINE' ? aiProviderName : aiProviderStatus === 'NOT_CONFIGURED' ? 'NOT CONFIGURED' : 'OFFLINE'}
                 </span>
               </div>
-              {aiProviderStatus === 'OFFLINE' && (
+              {aiProviderStatus === 'NOT_CONFIGURED' && (
                 <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-300">
                   <span>Wymagany klucz API: </span>
                   <span className="font-bold">{missingKeys.length > 0 ? missingKeys.join(' lub ') : 'OPENCODE_API_KEY / OPENAI_API_KEY / GEMINI_API_KEY'}</span>
                   <p className="text-zinc-400 mt-1">
                     Brak konfiguracji w .env — system nie symuluje AI, wykonuje operacje HACP w trybie kontrolowanym.
+                  </p>
+                </div>
+              )}
+              {aiProviderStatus === 'OFFLINE' && (
+                <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-[10px] text-red-300">
+                  <span>Model skonfigurowany, ale niedostępny.</span>
+                  <p className="text-zinc-400 mt-1">
+                    Błąd sieci lub serwera modelu — spróbuj ponownie za chwilę.
                   </p>
                 </div>
               )}

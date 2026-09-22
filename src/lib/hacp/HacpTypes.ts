@@ -19,7 +19,7 @@ export type HacpStatus = 'OFFLINE' | 'CONNECTING' | 'ONLINE' | 'BUSY' | 'ERROR';
 export type HacpStepStatus = 'WAITING' | 'RUNNING' | 'SUCCESS' | 'FAILED' | 'BLOCKED';
 
 /** Honest execution status — NEVER return EXECUTED if no mutation occurred */
-export type HacpExecutionStatus = 'EXECUTED' | 'CLARIFY' | 'FAILED' | 'UNSUPPORTED';
+export type HacpExecutionStatus = 'EXECUTED' | 'CLARIFY' | 'FAILED' | 'UNSUPPORTED' | 'ERROR' | 'BLOCKED';
 
 export type HacpMessageType = 'user' | 'ai' | 'system' | 'hacp_activity';
 
@@ -208,7 +208,7 @@ export interface HacpExecutionResult {
     property?: string;
   };
   verification?: ExecutionVerification;
-  aiProviderStatus?: 'ONLINE' | 'OFFLINE';
+  aiProviderStatus?: 'ONLINE' | 'OFFLINE' | 'NOT_CONFIGURED';
   aiProviderName?: string;
   selectedModel?: string;
   isFreeModel?: boolean;

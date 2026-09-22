@@ -97,7 +97,7 @@ export function ScaleToFitContainer({
   return (
     <div
       ref={containerRef}
-      className={`relative w-full overflow-hidden bg-[#090912] rounded-xl select-none ${className}`}
+      className={`relative w-full overflow-hidden bg-[#18181B] rounded-xl select-none ${className}`}
       style={{ height: `${scaledHeight}px` }}
     >
       <div
@@ -486,7 +486,7 @@ export function SectionPreviewRenderer({
 
   if (isPredefinedRuntimeSection) {
     return (
-      <div className={`w-full bg-[#090912] ${className}`}>
+      <div className={`w-full bg-[#18181B] ${className}`}>
         <CartProvider>
           <SectionRenderer
             section={{

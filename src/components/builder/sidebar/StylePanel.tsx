@@ -122,7 +122,7 @@ export function StylePanel() {
       </div>
 
       {/* Sub Tabs */}
-      <div className="flex items-center gap-1 p-2 border-b border-white/[0.08] bg-[#080810]">
+      <div className="flex items-center gap-1 p-2 border-b border-white/[0.08] bg-[#2E2E33]">
         {[
           { id: 'colors', label: 'Kolory', icon: Palette },
           { id: 'typography', label: 'Typografia', icon: Type },

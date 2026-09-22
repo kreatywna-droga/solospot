@@ -212,7 +212,7 @@ function SelectField({ schema, value, onChange }: FieldProps) {
           const opt = options.find(o => String(o.value) === e.target.value)
           onChange(schema.key, opt?.value ?? e.target.value)
         }}
-        className="w-full bg-[#0a0a14] border border-white/10 rounded-lg px-3 py-2 text-sm text-white
+        className="w-full bg-[#202024] border border-white/10 rounded-lg px-3 py-2 text-sm text-white
                    focus:outline-none focus:border-[#D9A86C]/50 transition-all"
       >
         {options.map(opt => (

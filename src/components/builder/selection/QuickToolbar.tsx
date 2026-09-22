@@ -330,7 +330,7 @@ export function QuickToolbar({
       >
         {/* Main Toolbar Container */}
         <div
-          className="flex items-center gap-1 px-2 py-1.5 bg-[#0c0c16]/95 backdrop-blur-md border border-white/15 rounded-xl shadow-2xl shadow-black/60 text-white text-xs select-none"
+          className="flex items-center gap-1 px-2 py-1.5 bg-[#202024]/95 backdrop-blur-md border border-white/15 rounded-xl shadow-2xl shadow-black/60 text-white text-xs select-none"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Element Type Badge */}
@@ -382,7 +382,7 @@ export function QuickToolbar({
                 </button>
 
                 {showFontSizePopover && (
-                  <div className={`absolute left-0 p-3 bg-[#0d0d18] border border-white/15 rounded-xl shadow-2xl z-[300] min-w-[200px] space-y-2 ${popoverPlacement}`}>
+                  <div className={`absolute left-0 p-3 bg-[#202024] border border-white/15 rounded-xl shadow-2xl z-[300] min-w-[200px] space-y-2 ${popoverPlacement}`}>
                     <div className="flex items-center justify-between text-[11px] font-medium text-zinc-300">
                       <span>Rozmiar tekstu</span>
                       <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded px-1.5 py-0.5">
@@ -557,7 +557,7 @@ export function QuickToolbar({
                 </button>
 
                 {showLinkInput && (
-                  <div className="absolute top-full left-0 mt-2 p-2 bg-[#0c0c14] border border-white/15 rounded-xl shadow-2xl flex items-center gap-1.5 z-[300] min-w-[220px]">
+                  <div className="absolute top-full left-0 mt-2 p-2 bg-[#202024] border border-white/15 rounded-xl shadow-2xl flex items-center gap-1.5 z-[300] min-w-[220px]">
                     <input
                       type="text"
                       value={linkVal}
@@ -590,7 +590,7 @@ export function QuickToolbar({
                 </button>
 
                 {showFontSizePopover && (
-                  <div className="absolute top-full left-0 mt-2 p-3 bg-[#0d0d18] border border-white/15 rounded-xl shadow-2xl z-[300] min-w-[180px] space-y-2">
+                  <div className="absolute top-full left-0 mt-2 p-3 bg-[#202024] border border-white/15 rounded-xl shadow-2xl z-[300] min-w-[180px] space-y-2">
                     <div className="flex items-center justify-between text-[11px] font-medium text-zinc-300">
                       <span>Rozmiar tekstu</span>
                       <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded px-1.5 py-0.5">
@@ -692,7 +692,7 @@ export function QuickToolbar({
                 </button>
 
                 {showLinkInput && (
-                  <div className="absolute top-full left-0 mt-2 p-2 bg-[#0c0c14] border border-white/15 rounded-xl shadow-2xl flex items-center gap-1.5 z-[300] min-w-[240px]">
+                  <div className="absolute top-full left-0 mt-2 p-2 bg-[#202024] border border-white/15 rounded-xl shadow-2xl flex items-center gap-1.5 z-[300] min-w-[240px]">
                     <input
                       type="text"
                       value={linkVal}
@@ -775,7 +775,7 @@ export function QuickToolbar({
                 </button>
 
                 {showAddMenu && (
-                  <div className="absolute top-full left-0 mt-2 p-1.5 bg-[#0e0d1c] border border-white/15 rounded-xl shadow-2xl z-[300] min-w-[190px] space-y-1 select-none">
+                  <div className="absolute top-full left-0 mt-2 p-1.5 bg-[#202024] border border-white/15 rounded-xl shadow-2xl z-[300] min-w-[190px] space-y-1 select-none">
                     <button
                       onClick={() => handleInsertChildNode('text')}
                       className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left text-xs text-slate-200 hover:text-white hover:bg-white/[0.08] transition-colors"
@@ -908,7 +908,7 @@ export function QuickToolbar({
         {/* Small pointer arrow pointing to the selected element (for non-sections) */}
         {nodeType !== 'section' && (
           <div
-            className={`w-2 h-2 bg-[#0c0c16] border border-white/15 rotate-45 ${
+            className={`w-2 h-2 bg-[#202024] border border-white/15 rotate-45 ${
               isTop ? 'border-t-0 border-l-0' : 'border-b-0 border-r-0'
             }`}
           />

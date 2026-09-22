@@ -221,7 +221,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
         className="group relative rounded-2xl bg-[#202024] border border-[#2E2E33] hover:border-[#D9A86C]/70 hover:shadow-2xl hover:shadow-[#D9A86C]-950/30 transition-all duration-200 flex flex-col justify-between overflow-hidden"
       >
         {/* Card Header */}
-        <div className="p-5 pb-4 flex items-start justify-between gap-3 border-b border-[#202024] bg-[#2E2E33]">
+        <div className="p-5 pb-4 flex items-start justify-between gap-3 border-b border-[#2E2E33] bg-[#2E2E33]">
           <div>
             <div className="flex items-center gap-2.5">
               <h3 className="text-sm font-extrabold text-white group-hover:text-violet-300 transition-colors">
@@ -274,7 +274,7 @@ export function SectionLibraryModal({ isOpen, onClose, insertIndex, sections, on
         </div>
 
         {/* Card Footer */}
-        <div className="px-5 py-4 bg-[#202024] border-t border-[#202024] flex items-center justify-between gap-3">
+        <div className="px-5 py-4 bg-[#202024] border-t border-[#2E2E33] flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-mono font-bold text-violet-400 uppercase tracking-wider bg-violet-500/10 px-2.5 py-1 rounded-md border border-[#D9A86C]/20">
               {template.category}

@@ -467,7 +467,7 @@ export function AssetsPanel() {
                     <FileText className="w-6 h-6 text-zinc-400" />
                   )}
                 </div>
-                <div className="p-1.5 bg-[#080810]/95 border-t border-white/5">
+                <div className="p-1.5 bg-[#202024]/95 border-t border-white/5">
                   <p className="text-[10px] font-medium text-zinc-300 truncate" title={asset.originalName}>
                     {asset.originalName}
                   </p>
@@ -484,7 +484,7 @@ export function AssetsPanel() {
       {/* Asset Preview Modal */}
       {selectedAsset && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="relative w-full max-w-lg bg-[#0c0c16] rounded-2xl border border-white/15 overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+          <div className="relative w-full max-w-lg bg-[#18181B] rounded-2xl border border-white/15 overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08]">
               <span className="text-xs font-bold text-white truncate max-w-xs">
                 {selectedAsset.originalName}
@@ -548,7 +548,7 @@ export function AssetsPanel() {
               </div>
             </div>
 
-            <div className="px-4 py-3 bg-[#080810] border-t border-white/[0.08] flex items-center justify-between">
+            <div className="px-4 py-3 bg-[#202024] border-t border-white/[0.08] flex items-center justify-between">
               {deleteConfirm ? (
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] text-red-400">Potwierdzić?</span>

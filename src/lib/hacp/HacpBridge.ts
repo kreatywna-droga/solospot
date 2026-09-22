@@ -1199,7 +1199,7 @@ export class HacpBridge {
     // 1. ATTEMPT REAL AI PROVIDER REQUEST
     // ========================================================================
     let aiProviderResponse: any = null;
-    let aiProviderStatus: 'ONLINE' | 'OFFLINE' = 'OFFLINE';
+    let aiProviderStatus: 'ONLINE' | 'OFFLINE' | 'NOT_CONFIGURED' = 'OFFLINE';
     let aiProviderName = 'NONE';
 
     if (typeof window !== 'undefined' && typeof window.fetch === 'function') {
@@ -1224,14 +1224,26 @@ export class HacpBridge {
 
         if (res.ok) {
           aiProviderResponse = await res.json();
-          if (aiProviderResponse.status === 'SUCCESS') {
+          // Availability mapping: provider reachability is separate from execution status.
+          // SUCCESS/CHAT/PARTIAL/ERROR(with configured provider) → provider reachable (ONLINE),
+          // outage-like errors (5xx/timeout/network) → OFFLINE, missing key → NOT_CONFIGURED.
+          const responseStatus = aiProviderResponse?.status;
+          const responseError = String(aiProviderResponse?.error || aiProviderResponse?.message || '');
+          if (responseStatus === 'NOT_CONFIGURED') {
+            aiProviderStatus = 'NOT_CONFIGURED';
+            aiProviderName = 'NONE';
+          } else if (responseStatus === 'SUCCESS' || responseStatus === 'CHAT' || responseStatus === 'PARTIAL') {
             aiProviderStatus = 'ONLINE';
             aiProviderName = aiProviderResponse.provider || 'AI';
-          } else if (aiProviderResponse.status === 'ERROR') {
-            console.warn('[HacpBridge] Upstream model error (e.g. rate limit), falling back to native deterministic reasoning:', aiProviderResponse.error);
-            aiProviderStatus = 'ONLINE';
-            aiProviderName = aiProviderResponse.provider || 'OpenCode';
-            // Do not abort — allow Section 3 (HacpIntentEngine) to seamlessly execute or propose actions
+          } else if (responseStatus === 'ERROR') {
+            const isOutage = /HTTP_5\d\d|TIMEOUT|timeout|network|ECONN|ENOTFOUND|fetch|Brak odpowiedzi/i.test(responseError);
+            if (isOutage) {
+              aiProviderStatus = 'OFFLINE';
+            } else {
+              // e.g. HTTP_429 rate limit — provider is configured, just failing this call
+              aiProviderStatus = 'ONLINE';
+              aiProviderName = aiProviderResponse.provider || 'AI';
+            }
           }
         }
       } catch (err) {
@@ -1240,9 +1252,40 @@ export class HacpBridge {
     }
 
     // ========================================================================
-    // 2. IF REAL AI GENERATED TOOL CALLS → EXECUTE & VERIFY
+    // 1b. PROVIDER ERROR → HONEST EARLY RETURN (never masked as CHAT)
     // ========================================================================
-    if (aiProviderResponse && aiProviderResponse.status === 'SUCCESS') {
+    if (aiProviderResponse && aiProviderResponse.status === 'ERROR') {
+      const rawErrorMessage =
+        aiProviderResponse.message ||
+        aiProviderResponse.error ||
+        'Model AI zwrócił błąd podczas przetwarzania zapytania.';
+      const isRateLimited = /429|rate.?limit|too many/i.test(String(aiProviderResponse.error || rawErrorMessage));
+      const errorMessage = UserFacingResponseNormalizer.normalize(rawErrorMessage);
+      console.warn('[HacpBridge] Upstream model error, returning honest ERROR (no fake CHAT):', aiProviderResponse.error);
+      onProgress?.('ERROR');
+      return {
+        success: false,
+        intent: 'CLARIFY',
+        scope: 'PAGE_DESIGN',
+        message: errorMessage,
+        commandsToDispatch: [],
+        eventsToEmit: [],
+        executionStatus: isRateLimited ? 'BLOCKED' : 'ERROR',
+        errorReason: aiProviderResponse.error || rawErrorMessage,
+        aiProviderStatus,
+        aiProviderName: aiProviderResponse.provider || aiProviderName,
+        selectedModel: aiProviderResponse.model,
+        isFreeModel: aiProviderResponse.isFreeModel,
+        routerMode: aiProviderResponse.routerMode,
+        updatedConversationContext: { lastIntent: 'CLARIFY' },
+      };
+    }
+
+    // ========================================================================
+    // 2. IF REAL AI GENERATED TOOL CALLS → EXECUTE & VERIFY
+    //    OR IF REAL AI RETURNED CHAT → RETURN MODEL MESSAGE (never discard)
+    // ========================================================================
+    if (aiProviderResponse && (aiProviderResponse.status === 'SUCCESS' || aiProviderResponse.status === 'CHAT')) {
       const toolCalls: HacpToolCall[] = aiProviderResponse.toolCalls || [];
 
       console.log('[HacpBridge] EXECUTION_TRACE:', {
@@ -1501,7 +1544,10 @@ export class HacpBridge {
     // CASE 3: CHAT
     if (classification.intent === 'CHAT') {
       let responseMessage = 'Cześć! Mogę pomóc z sekcjami, kolorami, nagłówkami, CTA i Experience. Co chciałbyś zmienić?';
-      if (aiProviderStatus === 'OFFLINE') {
+      if (aiProviderStatus === 'NOT_CONFIGURED') {
+        responseMessage =
+          'Model AI nie jest skonfigurowany — brak klucza API (OPENCODE_API_KEY / OPENAI_API_KEY / GEMINI_API_KEY). Możesz nadal wykonywać bezpośrednie polecenia HACP, np. "Dodaj sekcję hero" lub "Zmień kolor tła na czerwony".';
+      } else if (aiProviderStatus === 'OFFLINE') {
         responseMessage =
           'SoloSpot AI jest gotowy do pracy, jednak nie udało się połączyć z wybranym modelem. Wybierz inny model w menu u góry lub spróbuj ponownie za chwilę.';
       } else {
@@ -1519,8 +1565,9 @@ export class HacpBridge {
         message: responseMessage,
         commandsToDispatch: [],
         eventsToEmit: [],
-        // TRUTHFULNESS: CHAT = conversational, no mutation executed
-        executionStatus: aiProviderStatus === 'OFFLINE' ? 'UNSUPPORTED' : 'CLARIFY',
+        // TRUTHFULNESS: CHAT = conversational, no mutation executed;
+        // only OFFLINE/NOT_CONFIGURED (provider unavailable) → UNSUPPORTED
+        executionStatus: aiProviderStatus === 'ONLINE' ? 'CLARIFY' : 'UNSUPPORTED',
         aiProviderStatus,
         updatedConversationContext: { lastIntent: 'CHAT' },
       };
@@ -1652,10 +1699,14 @@ export class HacpBridge {
 
     // CASE 6: CLARIFY
     if (classification.intent === 'CLARIFY') {
-      const message =
-        aiProviderStatus === 'OFFLINE'
-          ? `AI PROVIDER: NOT CONFIGURED\n\nModel językowy nie jest podłączony do SoloSpot.\nAby włączyć asystenta z rozumieniem naturalnego języka i kontekstu, skonfiguruj klucz:\n• OPENCODE_API_KEY (rekomendowany OpenCode Inference API)\n\nMożesz także wykonywać bezpośrednie polecenia HACP, np:\n• "Dodaj sekcję hero"\n• "Zmień nagłówek na X"\n• "Dodaj przycisk Kup teraz"\n• "Zmień kolor tła na czerwony"\n• "Cofnij" / "Ponów"`
-          : `Nie rozpoznałem jednoznacznego polecenia. Możesz spróbować:\n1. "Dodaj sekcję hero"\n2. "Zmień nagłówek na X"\n3. "Dodaj przycisk Kup teraz"\n4. "Zmień kolor tła na czerwony"\n5. "Cofnij" / "Ponów"`;
+      let message: string;
+      if (aiProviderStatus === 'NOT_CONFIGURED') {
+        message = `AI PROVIDER: NOT CONFIGURED\n\nModel językowy nie jest podłączony do SoloSpot.\nAby włączyć asystenta z rozumieniem naturalnego języka i kontekstu, skonfiguruj klucz:\n• OPENCODE_API_KEY (rekomendowany OpenCode Inference API)\n\nMożesz także wykonywać bezpośrednie polecenia HACP, np:\n• "Dodaj sekcję hero"\n• "Zmień nagłówek na X"\n• "Dodaj przycisk Kup teraz"\n• "Zmień kolor tła na czerwony"\n• "Cofnij" / "Ponów"`;
+      } else if (aiProviderStatus === 'OFFLINE') {
+        message = `AI PROVIDER: OFFLINE\n\nModel skonfigurowany, ale nie udało się z nim połączyć (błąd sieci lub serwera).\nSpróbuj ponownie za chwilę lub wybierz inny model w menu u góry.\n\nMożesz także wykonywać bezpośrednie polecenia HACP, np:\n• "Dodaj sekcję hero"\n• "Zmień nagłówek na X"`;
+      } else {
+        message = `Nie rozpoznałem jednoznacznego polecenia. Możesz spróbować:\n1. "Dodaj sekcję hero"\n2. "Zmień nagłówek na X"\n3. "Dodaj przycisk Kup teraz"\n4. "Zmień kolor tła na czerwony"\n5. "Cofnij" / "Ponów"`;
+      }
 
       return {
         success: true,

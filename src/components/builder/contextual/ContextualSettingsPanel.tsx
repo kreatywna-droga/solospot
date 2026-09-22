@@ -56,10 +56,10 @@ interface ContextualSettingsPanelProps {
 // ---------------------------------------------------------------------------
 
 const inputCls =
-  'w-full bg-[#0e0e1a] border border-white/10 rounded px-2 py-1 text-[12px] text-white focus:outline-none focus:border-[#D9A86C]/60 transition-colors'
+  'w-full bg-[#18181B] border border-white/10 rounded px-2 py-1 text-[12px] text-white focus:outline-none focus:border-[#D9A86C]/60 transition-colors'
 
 const unitInputCls =
-  'w-full bg-[#0e0e1a] border border-white/10 rounded-l px-2 py-1 text-[12px] text-white focus:outline-none focus:border-[#D9A86C]/60 transition-colors'
+  'w-full bg-[#18181B] border border-white/10 rounded-l px-2 py-1 text-[12px] text-white focus:outline-none focus:border-[#D9A86C]/60 transition-colors'
 
 // ---------------------------------------------------------------------------
 // Accordion Section
@@ -110,7 +110,7 @@ const COLOR_PRESETS = [
   { label: 'Przezroczysty', value: 'transparent' },
   { label: 'Biały', value: '#ffffff' },
   { label: 'Czarny', value: '#000000' },
-  { label: 'Ciemny', value: '#0a0a14' },
+  { label: 'Ciemny', value: '#18181B' },
   { label: 'Fiolet', value: '#7c3aed' },
   { label: 'Róż', value: '#ec4899' },
   { label: 'Niebieski', value: '#3b82f6' },
@@ -229,7 +229,7 @@ function UnitInput({
         <select
           value={unit}
           onChange={(e) => { setUnit(e.target.value); commit(hasNum ? String(numVal) : '', e.target.value) }}
-          className="bg-[#0e0e1a] border border-l-0 border-white/10 rounded-r text-[11px] text-slate-400 px-1 focus:outline-none"
+          className="bg-[#18181B] border border-l-0 border-white/10 rounded-r text-[11px] text-slate-400 px-1 focus:outline-none"
         >
           <option value="">—</option>
           <option>px</option>
@@ -480,19 +480,19 @@ function FourSideEditor({ label, value, onChange }: { label: string; value?: Fou
         </button>
       </div>
       {linked ? (
-        <div className="flex items-center gap-2 bg-[#0a0a14] p-2 rounded-lg border border-white/5">
+        <div className="flex items-center gap-2 bg-[#18181B] p-2 rounded-lg border border-white/5">
           <input type="range" min={0} max={120} step={1} value={masterVal}
             onChange={(e) => { const v = `${e.target.value}px`; onChange({ top: v, right: v, bottom: v, left: v }) }}
             className="flex-1 accent-[#D9A86C] h-1 cursor-pointer" />
           <div className="flex items-center">
             <input type="number" min={0} max={999} value={masterVal}
               onChange={(e) => { const v = `${e.target.value || '0'}px`; onChange({ top: v, right: v, bottom: v, left: v }) }}
-              className="w-12 bg-[#0e0e1a] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none font-mono" />
+              className="w-12 bg-[#18181B] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none font-mono" />
             <span className="text-[10px] text-slate-500 ml-1">px</span>
           </div>
         </div>
       ) : (
-        <div className="space-y-1.5 bg-[#0a0a14] p-2 rounded-lg border border-white/5">
+        <div className="space-y-1.5 bg-[#18181B] p-2 rounded-lg border border-white/5">
           {([['top', 'T'], ['right', 'R'], ['bottom', 'B'], ['left', 'L']] as const).map(([key, short]) => {
             const sideVal = parseInt(parsed[key] || '0', 10) || 0
             return (
@@ -503,7 +503,7 @@ function FourSideEditor({ label, value, onChange }: { label: string; value?: Fou
                   className="flex-1 accent-[#D9A86C] h-1 cursor-pointer" />
                 <input type="number" min={0} max={999} value={sideVal}
                   onChange={(e) => handleSide(key, `${e.target.value || '0'}px`)}
-                  className="w-12 bg-[#0e0e1a] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none font-mono" />
+                  className="w-12 bg-[#18181B] border border-white/10 rounded px-1 py-0.5 text-[11px] text-white text-right focus:outline-none font-mono" />
                 <span className="text-[10px] text-slate-500">px</span>
               </div>
             )
@@ -1019,7 +1019,7 @@ function AdvancedGroup({ styles, onStyleChange }: { styles: Record<string, any>;
           onChange={(e) => onStyleChange({ customCss: e.target.value })}
           placeholder={'/* custom CSS */\ncolor: red;\nfont-size: 18px;'}
           rows={4}
-          className="w-full bg-[#0e0e1a] border border-white/10 rounded px-2 py-1.5 text-[11px] text-green-300 font-mono focus:outline-none focus:border-[#D9A86C]/60 resize-none"
+          className="w-full bg-[#18181B] border border-white/10 rounded px-2 py-1.5 text-[11px] text-green-300 font-mono focus:outline-none focus:border-[#D9A86C]/60 resize-none"
           spellCheck={false}
         />
       </div>
@@ -1152,7 +1152,7 @@ export function ContextualSettingsPanel({
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
         >
-          <div className="bg-[#0c0c16] border border-white/10 rounded-xl shadow-2xl overflow-hidden flex flex-col"
+          <div className="bg-[#202024] border border-white/10 rounded-xl shadow-2xl overflow-hidden flex flex-col"
             style={{ maxHeight: position.maxHeight }}>
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-2 border-b border-white/10 flex-shrink-0">
