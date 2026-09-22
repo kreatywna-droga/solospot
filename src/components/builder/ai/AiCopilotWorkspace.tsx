@@ -14,8 +14,8 @@
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import {
-  Bot, Sparkles, Activity, CheckCircle2, AlertCircle, Clock,
-  ChevronDown, ChevronUp, RotateCcw, RotateCw, Send, Layers,
+  Bot, Sparkles, CheckCircle2, AlertCircle, Clock,
+  ChevronDown, RotateCcw, RotateCw, Send,
   Eye, Zap, X, Shield, Cpu, RefreshCw, Sliders, Info, CornerDownLeft,
   Copy, Check, Square, Wand2
 } from 'lucide-react'
@@ -59,8 +59,6 @@ export function AiCopilotWorkspace() {
   const [missingKeys, setMissingKeys] = useState<string[]>([])
 
   // Collapsible panels state
-  const [contextOpen, setContextOpen] = useState(true)
-  const [activityOpen, setActivityOpen] = useState(false)
   const [showStatusModal, setShowStatusModal] = useState(false)
   const [showCapabilitiesModal, setShowCapabilitiesModal] = useState(false)
 
@@ -804,106 +802,6 @@ export function AiCopilotWorkspace() {
           </div>
           <span className="text-zinc-500 text-[8px] font-mono uppercase">OpenCode</span>
         </div>
-      </div>
-
-      {/* ── 2. LIVE BUILDER OBSERVATION PANEL ──────────────────────────────── */}
-      <div className="border-b border-white/[0.06] bg-[#0A0E15] flex-shrink-0">
-        <button
-          onClick={() => setContextOpen((v) => !v)}
-          className="w-full flex items-center justify-between px-3.5 py-1.5 text-[10px] font-mono uppercase tracking-wider text-zinc-400 hover:text-zinc-200 transition-colors"
-        >
-          <div className="flex items-center gap-1.5">
-            <Layers className="w-3 h-3 text-[#D9A86C]" />
-            <span>Live Builder Context</span>
-            {selectedNodeInfo && (
-              <span className="text-[#F2C27F] font-bold">● {selectedNodeInfo.label}</span>
-            )}
-          </div>
-          {contextOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-        </button>
-
-        {contextOpen && (
-          <div className="px-3.5 pb-2.5 pt-0.5 grid grid-cols-2 gap-1.5 text-[10px] font-mono">
-            <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-1.5">
-              <span className="text-zinc-500 block text-[9px]">STRONA</span>
-              <span className="text-zinc-200 truncate block font-medium">{currentContext.pageName}</span>
-            </div>
-            <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-1.5">
-              <span className="text-zinc-500 block text-[9px]">VIEWPORT</span>
-              <span className="text-zinc-300 truncate block font-medium">
-                {currentContext.viewport} {visualMetrics ? `(${visualMetrics.width}px)` : ''}
-              </span>
-            </div>
-            <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-1.5">
-              <span className="text-zinc-500 block text-[9px]">SELEKCJA</span>
-              <span className="text-[#F2C27F] truncate block font-medium">
-                {selectedNodeInfo?.label || '(Brak zaznaczenia)'}
-              </span>
-              {visualMetrics && (
-                <span className="text-[8px] text-zinc-400 block mt-0.5">
-                  {visualMetrics.width} × {visualMetrics.height}px
-                </span>
-              )}
-            </div>
-            <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-1.5">
-              <span className="text-zinc-500 block text-[9px]">EXPERIENCE</span>
-              <span className="text-zinc-300 truncate block">
-                {selectedNodeInfo?.experienceConfig?.background?.type ? `Exp: ${selectedNodeInfo.experienceConfig.background.type}` : 'Standard'}
-              </span>
-            </div>
-            <div className="col-span-2 bg-white/[0.02] border border-white/[0.05] rounded-lg p-1.5 flex items-center justify-between">
-              <div className="min-w-0 pr-2">
-                <span className="text-zinc-500 block text-[9px]">OSTATNIA ZMIANA</span>
-                <span className="text-emerald-400 truncate block text-[10px] font-medium">
-                  {recentMutation || 'Brak aktywnych zmian'}
-                </span>
-              </div>
-              <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 whitespace-nowrap">
-                LIVE SYNC
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* ── 3. COLLAPSIBLE ACTIVITY PANEL ──────────────────────────────────── */}
-      <div className="border-b border-white/[0.06] bg-[#0A0E15] flex-shrink-0">
-        <button
-          onClick={() => setActivityOpen((v) => !v)}
-          className="w-full flex items-center justify-between px-3.5 py-1.5 text-[10px] font-mono uppercase tracking-wider text-zinc-400 hover:text-zinc-200 transition-colors"
-        >
-          <div className="flex items-center gap-1.5">
-            <Activity className="w-3 h-3 text-[#D9A86C]" />
-            <span>Activity Stream</span>
-            <span className="text-zinc-500 text-[9px]">({activityEvents.length})</span>
-          </div>
-          {activityOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-        </button>
-
-        {activityOpen && (
-          <div className="px-3.5 pb-2.5 max-h-36 overflow-y-auto space-y-1 text-[10px] font-mono builder-canvas-scrollbar">
-            {activityEvents.length === 0 ? (
-              <p className="text-zinc-500 text-[10px] italic">Brak zarejestrowanych zdarzeń HACP.</p>
-            ) : (
-              activityEvents.map((evt) => (
-                <div key={evt.id} className="flex items-start gap-2 p-1.5 rounded bg-white/[0.02] border border-white/[0.04]">
-                  <span className="text-zinc-500 text-[9px] flex-shrink-0">{evt.timestamp}</span>
-                  <div className="flex-1 min-w-0">
-                    <span className="text-zinc-200 font-semibold block truncate">{evt.title}</span>
-                    <span className="text-zinc-400 text-[9px] block truncate">{evt.description}</span>
-                  </div>
-                  <span
-                    className={`text-[8px] px-1 py-0.2 rounded font-bold uppercase ${
-                      evt.status === 'SUCCESS' ? 'text-emerald-400 bg-emerald-500/10' : 'text-zinc-400 bg-white/5'
-                    }`}
-                  >
-                    {evt.status || 'OK'}
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
-        )}
       </div>
 
       {/* ── 4. CONVERSATION AREA ────────────────────────────────────────────── */}
