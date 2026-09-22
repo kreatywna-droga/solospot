@@ -30,7 +30,7 @@ import { motion } from 'framer-motion'
 import {
   ArrowUp, ArrowDown, Trash2, Copy, Plus,
   Layers, Package, Star, FileText, LayoutDashboard, Grid, Sparkles,
-  Video, Upload, Image as ImageIcon, Type, GripVertical, Move, Hand,
+  Video, Upload, Image as ImageIcon, Type, GripVertical, Hand,
 } from 'lucide-react'
 import { useBuilder } from '../state/BuilderProvider'
 import { SectionNode, BuilderNode } from '../../../../packages/builder-core/src/BuilderDocument'
@@ -1928,26 +1928,7 @@ function SectionBlock({
 
       {/* Hover / selected toolbar */}
       {showOverlay && (
-        <div className="absolute top-2 left-0 right-0 flex items-center justify-between px-3 z-10 pointer-events-none">
-          {/* Section label chip as interactive Grab Handle */}
-          <div
-            onMouseDown={(e) => {
-              e.stopPropagation()
-              if (!isSelected) onSelect()
-              onStartDragNode?.(node, e)
-            }}
-            className="flex items-center gap-1.5 bg-gradient-to-r from-[#B8893A] to-[#D9A86C] hover:from-[#D9A86C] hover:to-[#F2C27F] text-white text-[11px] font-bold px-3 py-1.5 rounded-xl pointer-events-auto shadow-xl shadow-[#D9A86C]/30 cursor-grab active:cursor-grabbing hover:scale-105 transition-all select-none border border-white/20 group/grab"
-            title="Chwyć łapką i przeciągnij całe okno wraz z całą zawartością (Góra / Dół)"
-          >
-            <GripVertical className="w-4 h-4 text-white group-hover/grab:text-white" />
-            <span>{node.label}</span>
-            <span className="text-white/80 font-mono text-[10px]">#{index + 1}</span>
-            <span className="ml-1 text-[10px] bg-black/30 px-2 py-0.5 rounded-md text-white flex items-center gap-1 font-medium">
-              <Move className="w-3 h-3 text-white" />
-              <span>Łapka: Przesuń całe okno</span>
-            </span>
-          </div>
-
+        <div className="absolute top-2 left-0 right-0 flex items-center justify-end px-3 z-10 pointer-events-none">
           {/* Action toolbar */}
           <div className="flex items-center gap-1 bg-[#202024]/95 backdrop-blur rounded-xl p-1
                           border border-white/[0.10] shadow-xl pointer-events-auto">
@@ -2614,7 +2595,7 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
   return (
     <div
       ref={containerRef}
-      className="flex-1 flex flex-col items-center justify-start overflow-y-auto overflow-x-hidden bg-[#18181B] p-0 relative w-full h-full select-none builder-canvas-scrollbar"
+      className="flex-1 flex flex-col items-center justify-start overflow-y-auto overflow-x-hidden bg-[#202024] p-0 relative w-full h-full select-none builder-canvas-scrollbar"
       onClick={handleCanvasClick}
     >
       {/* Scalable Canvas Frame Container */}
