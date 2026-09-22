@@ -67,7 +67,7 @@ export function Sidebar({ items, brand, className = '' }: SidebarProps) {
                     : 'text-[#B8B1A7] hover:text-[#F5F1EA] hover:bg-white/5'
                   }`}
               >
-                {item.icon && <span className="w-7 h-7">{item.icon}</span>}
+                {item.icon && <span className="w-10 h-10">{item.icon}</span>}
                 {item.label}
               </Link>
             )
