@@ -11,6 +11,11 @@
 import type { AIProvider, AICopilotRequest, AICopilotResponse, HacpToolCall, ChatMessage } from './AIProviderTypes';
 import { OpenCodeModelRouter } from './OpenCodeModelRouter';
 import { UserFacingResponseNormalizer } from './UserFacingResponseNormalizer';
+import {
+  classifyUpstreamError,
+  getUserFacingProviderError,
+  sanitizeUpstreamMessage,
+} from './UpstreamErrorClassifier';
 
 export class OpenCodeProvider implements AIProvider {
   public readonly id = 'opencode';
@@ -122,6 +127,20 @@ export class OpenCodeProvider implements AIProvider {
       let activeModelId = selectedModelId;
       let response: Response | null = null;
       let data: any = null;
+      let errorBodyText = '';
+      const requestId = `req-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+      const requestStartedAt = Date.now();
+      let fallbackUsed = false;
+
+      console.log(
+        JSON.stringify({
+          stage: 'UPSTREAM_REQUEST',
+          requestId,
+          provider: this.id,
+          model: activeModelId,
+          endpointHost: (() => { try { return new URL(cleanBaseUrl).host; } catch { return 'unknown'; } })(),
+        })
+      );
 
       try {
         response = await fetch(endpoint, {
@@ -133,12 +152,29 @@ export class OpenCodeProvider implements AIProvider {
           },
           body: JSON.stringify(bodyPayload),
         });
-        if (response.ok) {
-          data = await response.json();
+        const rawBody = await response.text();
+        errorBodyText = rawBody;
+        try {
+          data = JSON.parse(rawBody);
+        } catch {
+          data = null;
         }
       } catch (fetchErr: any) {
         console.warn(`[OpenCodeProvider] Primary fetch failed on ${activeModelId}:`, fetchErr?.message);
+        errorBodyText = String(fetchErr?.message || fetchErr);
       }
+
+      console.log(
+        JSON.stringify({
+          stage: 'UPSTREAM_RESPONSE',
+          requestId,
+          provider: this.id,
+          model: activeModelId,
+          http: response?.status ?? 0,
+          durationMs: Date.now() - requestStartedAt,
+          ok: Boolean(response?.ok && data && !data.error),
+        })
+      );
 
       // If initial request failed (HTTP error e.g. 429 rate limit or JSON error payload)
       if (!response || !response.ok || data?.error) {
@@ -162,6 +198,7 @@ export class OpenCodeProvider implements AIProvider {
               bodyPayload.tools = toolsPayload;
               bodyPayload.tool_choice = 'auto';
             }
+            const retryStartedAt = Date.now();
             const retryRes = await fetch(endpoint, {
               method: 'POST',
               signal: AbortSignal.timeout(15000),
@@ -171,15 +208,47 @@ export class OpenCodeProvider implements AIProvider {
               },
               body: JSON.stringify(bodyPayload),
             });
+            const retryRaw = await retryRes.text();
             if (retryRes.ok) {
-              const retryData = await retryRes.json();
-              if (!retryData.error && retryData.choices?.length > 0) {
+              let retryData: any = null;
+              try {
+                retryData = JSON.parse(retryRaw);
+              } catch {
+                retryData = null;
+              }
+              if (retryData && !retryData.error && retryData.choices?.length > 0) {
                 response = retryRes;
                 data = retryData;
                 activeModelId = candidateId;
+                // PHASE 10: secondary request actually succeeded after real primary failure
+                fallbackUsed = true;
+                console.log(
+                  JSON.stringify({
+                    stage: 'UPSTREAM_RESPONSE',
+                    requestId,
+                    provider: this.id,
+                    model: activeModelId,
+                    http: retryRes.status,
+                    durationMs: Date.now() - retryStartedAt,
+                    ok: true,
+                    fallbackUsed: true,
+                  })
+                );
                 break;
               }
             }
+            console.log(
+              JSON.stringify({
+                stage: 'UPSTREAM_RESPONSE',
+                requestId,
+                provider: this.id,
+                model: candidateId,
+                http: retryRes.status,
+                durationMs: Date.now() - retryStartedAt,
+                ok: false,
+                fallbackUsed: true,
+              })
+            );
           } catch (retryErr: any) {
             console.warn(`[OpenCodeProvider] Candidate ${candidateId} failed:`, retryErr?.message);
           }
@@ -187,15 +256,50 @@ export class OpenCodeProvider implements AIProvider {
       }
 
       if (!response || !response.ok || !data || data.error || !data.choices || data.choices.length === 0) {
-        const errDetail = data?.error?.message || (response ? `HTTP_${response.status}` : 'Brak odpowiedzi');
+        const bodyMessage =
+          data?.error?.message ||
+          sanitizeUpstreamMessage(errorBodyText) ||
+          (response ? `HTTP_${response.status}` : 'Brak odpowiedzi');
+        const networkError =
+          !response && errorBodyText && !errorBodyText.trim().startsWith('{')
+            ? errorBodyText
+            : undefined;
+        const errorType = classifyUpstreamError({
+          httpStatus: response?.status,
+          bodyMessage: String(bodyMessage),
+          networkError,
+        });
+        const safeDetail = errorType === 'RATE_LIMIT' || errorType === 'AUTH'
+          ? sanitizeUpstreamMessage(String(bodyMessage), 160)
+          : undefined;
+        const userMessage = getUserFacingProviderError(errorType, activeModelId, safeDetail);
+
+        console.log(
+          JSON.stringify({
+            stage: 'FINAL_RESPONSE',
+            requestId,
+            provider: this.id,
+            model: activeModelId,
+            status: 'ERROR',
+            errorType,
+            http: response?.status ?? 0,
+            durationMs: Date.now() - requestStartedAt,
+            fallbackUsed,
+          })
+        );
+
         return {
           status: 'ERROR',
           provider: this.name,
           model: activeModelId,
-          message: `Nie udało się uzyskać odpowiedzi z wybranego modelu (${activeModelId}). Serwer modelu jest chwilowo niedostępny lub przeciążony. Spróbuj ponownie lub wybierz inny model w menu powyżej.`,
-          error: String(errDetail),
+          message: userMessage,
+          error: String(bodyMessage),
+          errorType,
+          fallbackUsed: fallbackUsed || undefined,
+          requestId,
           isFreeModel: activeModelId.includes('free'),
           routerMode: resolution.mode,
+          durationMs: Date.now() - requestStartedAt,
         };
       }
 
@@ -505,12 +609,26 @@ export class OpenCodeProvider implements AIProvider {
       // Chat-only responses (no tool calls) are CHAT, not SUCCESS.
       const hasMutations = toolCalls.length > 0;
 
+      console.log(
+        JSON.stringify({
+          stage: 'FINAL_RESPONSE',
+          requestId,
+          provider: this.id,
+          model: data.model || activeModelId,
+          status: hasMutations ? 'SUCCESS' : 'CHAT',
+          durationMs: Date.now() - requestStartedAt,
+          fallbackUsed,
+        })
+      );
+
       return {
         status: hasMutations ? 'SUCCESS' : 'CHAT',
         provider: this.name,
         model: data.model || selectedModelId,
         message: cleanUserFacingMessage,
         toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
+        fallbackUsed: fallbackUsed || undefined,
+        requestId,
         isFreeModel: resolution.selectedModel.isFree,
         finishReason,
         routerMode: resolution.mode,
@@ -530,9 +648,10 @@ export class OpenCodeProvider implements AIProvider {
         String(err?.message || '').toLowerCase().includes('aborted') ||
         String(err?.message || '').toLowerCase().includes('timeout');
 
-      const friendlyMessage = isTimeout
-        ? 'Upłynął limit czasu oczekiwania na odpowiedź wybranego modelu (15s). Spróbuj ponownie lub wybierz szybszy model w menu u góry.'
-        : `Wystąpił problem podczas komunikacji z modelem AI: ${err?.message || 'Nieznany błąd'}`;
+      const errorType = isTimeout
+        ? 'TIMEOUT'
+        : classifyUpstreamError({ networkError: String(err?.message || err) });
+      const friendlyMessage = getUserFacingProviderError(errorType, 'UNKNOWN');
 
       return {
         status: 'ERROR',
@@ -540,6 +659,7 @@ export class OpenCodeProvider implements AIProvider {
         model: 'UNKNOWN',
         message: friendlyMessage,
         error: isTimeout ? 'TIMEOUT_EXCEEDED' : String(err?.message || err),
+        errorType,
       };
     }
   }

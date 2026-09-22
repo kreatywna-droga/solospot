@@ -70,10 +70,15 @@ export interface AICopilotResponse {
   toolCalls?: HacpToolCall[];
   missingKeys?: string[];
   error?: string;
+  /** Classified upstream failure type (RATE_LIMIT, AUTH, MODEL_NOT_FOUND, UPSTREAM_UNAVAILABLE, TIMEOUT, UNKNOWN). */
+  errorType?: string;
+  /** True only when a secondary model/provider request actually succeeded after a real primary failure. */
+  fallbackUsed?: boolean;
   isFreeModel?: boolean;
   finishReason?: string;
   routerMode?: string;
   durationMs?: number;
+  requestId?: string;
   rawUsage?: {
     promptTokens?: number;
     completionTokens?: number;
