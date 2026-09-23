@@ -1,5 +1,5 @@
 /**
- * background-experiences.ts — 22 Distinct Atmospheric Background Experiences for SoloSpot v3.0
+ * background-experiences.ts — 23 Distinct Atmospheric Background Experiences for SoloSpot v3.0
  *
  * Distinct atmospheric backdrops, ambient video, gradient meshes, and dynamic textures.
  * Zero duplicate loop generators — each experience has unique gradients, composition, and colors.
@@ -14,6 +14,37 @@ import {
 import type { ExperienceItem } from '../ExperienceTypes';
 
 export const backgroundExperiences: ExperienceItem[] = [
+  // 0. Clean Background — Neutral empty canvas (MUST BE FIRST for default/fallback)
+  {
+    id: 'background-clean',
+    name: 'Clean Background',
+    type: 'background',
+    category: 'background',
+    description: 'Completely neutral empty background — no gradient, no image, no pattern, no decoration, no overlay, no effects. Pure canvas base.',
+    tagline: 'Neutral empty canvas',
+    badge: 'Base',
+    source: 'builtin',
+    schemaVersion: '2.0.0',
+    contentVersion: '3.0.0',
+    mood: 'minimal',
+    motionLevel: 'static',
+    industry: ['general'],
+    tags: ['clean', 'neutral', 'empty', 'canvas', 'base'],
+    createNode: () => {
+      return createSectionNode({
+        id: generateNodeId('section'),
+        type: 'section',
+        label: 'Background: Clean',
+        styles: {
+          backgroundColor: '#09090b',
+          backgroundImage: 'none',
+          padding: { top: '0', right: '0', bottom: '0', left: '0' },
+        },
+        children: [],
+      });
+    },
+  },
+
   // 1. Aurora Borealis Mesh
   {
     id: 'background-aurora-mesh',
