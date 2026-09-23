@@ -52,6 +52,7 @@ import { SectionRenderer } from '@/components/runtime/SectionRenderer'
 import { CartProvider } from '@/lib/cart/CartStore'
 import { loadGoogleFont } from '../../../../packages/builder-core/src/fonts/FontCatalog'
 import { ExperienceLibraryModal, SaveExperienceModal, ExperienceRuntimeScene } from '../experience'
+import { insertComponent } from '@/lib/experience/ComponentInsertionEngine'
 import { WebsiteTemplatePickerModal } from '../templates/WebsiteTemplatePickerModal'
 import { SmartGuidesOverlay } from './guides/SmartGuidesOverlay'
 import { SectionActionDock, shouldShowSectionActions } from './SectionActionDock'
@@ -412,7 +413,7 @@ function CanvasNode({
   onDoubleClickNode,
   onStartDragNode,
 }: CanvasNodeProps) {
-  const { dispatch, ctx } = useBuilder()
+  const { dispatch, ctx, document: builderDoc } = useBuilder()
   const [isDropTarget, setIsDropTarget] = useState(false)
   const isSelected = selectedId === node.id
   const isHovered = hoveredId === node.id && !isSelected
@@ -1265,118 +1266,35 @@ function CanvasNode({
             <span>Pusty kontener — upuść plik lub dodaj element</span>
           </div>
           <div className="flex items-center gap-2 flex-wrap justify-center">
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                const newNodeId = `node_text_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
-                dispatch({
-                  type: 'INSERT_NODE',
-                  pageId,
-                  parentId: node.id,
-                  node: {
-                    id: newNodeId,
-                    type: 'text',
-                    label: 'Tekst',
-                    parentId: node.id,
-                    order: node.children?.length ?? 0,
-                    visible: true,
-                    locked: false,
-                    props: { content: 'Nowy tekst...', text: 'Nowy tekst...' },
-                    styles: { fontSize: '16px', color: '#ffffff' },
-                    children: [],
-                  },
-                })
-                dispatch({ type: 'CANVAS', action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId } })
-              }}
-              className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-[#D9A86C]/30 border border-white/10 hover:border-[#D9A86C]/40 text-[11px] text-slate-300 hover:text-white transition-all"
-            >
-              + Tekst
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                const newNodeId = `node_image_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
-                dispatch({
-                  type: 'INSERT_NODE',
-                  pageId,
-                  parentId: node.id,
-                  node: {
-                    id: newNodeId,
-                    type: 'image',
-                    label: 'Obraz',
-                    parentId: node.id,
-                    order: node.children?.length ?? 0,
-                    visible: true,
-                    locked: false,
-                    props: { src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80', alt: 'Obraz' },
-                    styles: { width: '400px', height: '260px', objectFit: 'cover', borderRadius: '12px' },
-                    children: [],
-                  },
-                })
-                dispatch({ type: 'CANVAS', action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId } })
-              }}
-              className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-[#D9A86C]/30 border border-white/10 hover:border-[#D9A86C]/40 text-[11px] text-slate-300 hover:text-white transition-all"
-            >
-              + Obraz
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                const newNodeId = `node_video_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
-                dispatch({
-                  type: 'INSERT_NODE',
-                  pageId,
-                  parentId: node.id,
-                  node: {
-                    id: newNodeId,
-                    type: 'video',
-                    label: 'Wideo',
-                    parentId: node.id,
-                    order: node.children?.length ?? 0,
-                    visible: true,
-                    locked: false,
-                    props: {
-                      src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-                      controls: true,
-                      muted: true,
-                    },
-                    styles: { width: '480px', height: '270px', borderRadius: '12px' },
-                    children: [],
-                  },
-                })
-                dispatch({ type: 'CANVAS', action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId } })
-              }}
-              className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-[#D9A86C]/30 border border-white/10 hover:border-[#D9A86C]/40 text-[11px] text-slate-300 hover:text-white transition-all"
-            >
-              + Wideo
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                const newNodeId = `node_button_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
-                dispatch({
-                  type: 'INSERT_NODE',
-                  pageId,
-                  parentId: node.id,
-                  node: {
-                    id: newNodeId,
-                    type: 'button',
-                    label: 'Przycisk',
-                    parentId: node.id,
-                    order: node.children?.length ?? 0,
-                    visible: true,
-                    locked: false,
-                    props: { text: 'Kliknij tutaj', href: '#' },
-                    styles: { backgroundColor: '#B8893A', color: '#ffffff', padding: '10px 20px', borderRadius: '8px' },
-                    children: [],
-                  },
-                })
-                dispatch({ type: 'CANVAS', action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId } })
-              }}
-              className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-[#D9A86C]/30 border border-white/10 hover:border-[#D9A86C]/40 text-[11px] text-slate-300 hover:text-white transition-all"
-            >
-              + Przycisk
-            </button>
+            {(() => {
+              const actions = [
+                { type: 'text', label: '+ Tekst' },
+                { type: 'image', label: '+ Obraz' },
+                { type: 'video', label: '+ Wideo' },
+                { type: 'button', label: '+ Przycisk' },
+              ];
+              return actions.map(action => {
+                const descriptor = ctx.registry.get(action.type);
+                if (!descriptor) return null;
+                return (
+                  <button
+                    key={action.type}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      insertComponent(descriptor, {
+                        document: builderDoc,
+                        pageId,
+                        targetParentId: node.id,
+                        targetIndex: node.children?.length ?? 0,
+                      }, dispatch);
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-[#D9A86C]/30 border border-white/10 hover:border-[#D9A86C]/40 text-[11px] text-slate-300 hover:text-white transition-all"
+                  >
+                    {action.label}
+                  </button>
+                );
+              });
+            })()}
           </div>
         </div>
       )}

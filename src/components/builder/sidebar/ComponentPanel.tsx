@@ -22,9 +22,11 @@ import {
 } from 'lucide-react'
 import { useBuilder } from '../state/BuilderProvider'
 import { ComponentDescriptor } from '../../../../packages/builder-core/src/ComponentRegistry'
-import { BuilderNode, createBuilderNode, generateNodeId, findNode } from '../../../../packages/builder-core/src'
+import { createBuilderNode, generateNodeId, findNode, BuilderNode } from '../../../../packages/builder-core/src'
 import { TypographyPresetsPanel, TypographyPreset } from './TypographyPresetsPanel'
 import { ExperienceLibraryModal } from '../experience/ExperienceLibraryModal'
+import { insertExperienceToCanvas, type InsertionContext } from '@/lib/experience/ExperienceInsertionEngine'
+import { insertComponent } from '@/lib/experience/ComponentInsertionEngine'
 
 // ---------------------------------------------------------------------------
 // Category tabs
@@ -186,112 +188,11 @@ export function ComponentPanel({ onClose }: ComponentPanelProps) {
     const targetPageId = canvas.selectedPageId || builderDoc.pages[0]?.id
     if (!targetPageId) return
 
-    const newNodeId = generateNodeId(descriptor.type)
-    const newNode: BuilderNode = createBuilderNode({
-      id: newNodeId,
-      type: descriptor.type,
-      label: descriptor.label,
-      props: { ...descriptor.defaultProps },
-      styles: descriptor.type === 'container' ? { display: 'flex', flexDirection: 'column', padding: '16px', gap: '16px' } : undefined,
-      children: [],
-    })
-
-    const selectedId = canvas.selectedSectionId
-    const found = selectedId ? findNode(builderDoc, selectedId) : null
-    const activePage = builderDoc.pages.find(p => p.id === targetPageId)
-
-    // Rule 1: A Section is always a top-level page block
-    if (descriptor.type === 'section') {
-      let insertIdx = activePage ? activePage.sections.length : undefined
-      if (found) {
-        // If an element or section is selected, insert the new section right after the root section
-        const rootSectionId = found.parent ? (function getRootId(n: typeof found): string {
-          let curr = n
-          while (curr && curr.parent) {
-            const next = findNode(builderDoc, curr.parent.id)
-            if (!next || !next.parent) return curr.parent.id
-            curr = next
-          }
-          return curr.node.id
-        })(found) : found.node.id
-
-        if (activePage) {
-          const rootIdx = activePage.sections.findIndex(s => s.id === rootSectionId)
-          if (rootIdx >= 0) insertIdx = rootIdx + 1
-        }
-      }
-
-      dispatch({
-        type: 'INSERT_NODE',
-        parentId: null,
-        node: newNode,
-        index: insertIdx,
-        pageId: targetPageId,
-      })
-    } else if (found) {
-      // Rule 2: If a Container or Section is selected, insert inside it
-      if (found.node.type === 'container' || found.node.type === 'section') {
-        dispatch({
-          type: 'INSERT_NODE',
-          parentId: found.node.id,
-          node: { ...newNode, parentId: found.node.id },
-          index: found.node.children.length,
-          pageId: targetPageId,
-        })
-      } else {
-        // Rule 3: If an atomic component is selected, insert as sibling immediately after it
-        const parentId = found.parent ? found.parent.id : null
-        const siblings = found.parent ? found.parent.children : (found.page?.sections ?? [])
-        const siblingIdx = siblings.findIndex(s => s.id === found.node.id)
-        dispatch({
-          type: 'INSERT_NODE',
-          parentId,
-          node: { ...newNode, parentId },
-          index: siblingIdx >= 0 ? siblingIdx + 1 : undefined,
-          pageId: targetPageId,
-        })
-      }
-    } else {
-      // Rule 4: Nothing selected — insert into last section or wrap in new section
-      if (activePage && activePage.sections.length > 0) {
-        const lastSection = activePage.sections[activePage.sections.length - 1]
-        // If last section has a container child, append inside container, else inside section
-        const targetParent = (lastSection.children && lastSection.children.length > 0 && lastSection.children[lastSection.children.length - 1].type === 'container')
-          ? lastSection.children[lastSection.children.length - 1]
-          : lastSection
-
-        dispatch({
-          type: 'INSERT_NODE',
-          parentId: targetParent.id,
-          node: { ...newNode, parentId: targetParent.id },
-          index: targetParent.children.length,
-          pageId: targetPageId,
-        })
-      } else {
-        // Empty page: create standard Section wrapper with the new node as child
-        const wrapperSection = createBuilderNode({
-          id: generateNodeId('section'),
-          type: 'section',
-          label: 'Sekcja',
-          props: { padding: 'md', background: '#0a0a14' },
-          children: [{ ...newNode, parentId: null }],
-        })
-        newNode.parentId = wrapperSection.id
-        wrapperSection.children = [newNode]
-        dispatch({
-          type: 'INSERT_NODE',
-          parentId: null,
-          node: wrapperSection,
-          pageId: targetPageId,
-        })
-      }
-    }
-
-    // Immediately select the newly created node
-    dispatch({
-      type: 'CANVAS',
-      action: { type: 'SELECT_SECTION', sectionId: newNodeId, pageId: targetPageId },
-    })
+    insertComponent(descriptor, {
+      document: builderDoc,
+      pageId: targetPageId,
+      selectedNodeId: canvas.selectedSectionId,
+    }, dispatch)
 
     onClose?.()
   }, [dispatch, canvas.selectedSectionId, canvas.selectedPageId, builderDoc, onClose])

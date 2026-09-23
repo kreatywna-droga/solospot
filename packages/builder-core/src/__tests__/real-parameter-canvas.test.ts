@@ -471,8 +471,12 @@ describe('NS25 — Responsive Parameter Isolation', () => {
 });
 
 describe('NS25 — Video Element Verification', () => {
-  it('correctly reports video as UNSUPPORTED when not present in registry', () => {
+  it('correctly reports video as SUPPORTED in registry', () => {
     const registry = createBuilderComponentRegistry();
-    expect(registry.has('video')).toBe(false);
+    expect(registry.has('video')).toBe(true);
+    const videoDesc = registry.get('video');
+    expect(videoDesc).toBeDefined();
+    expect(videoDesc?.label).toBe('Wideo');
+    expect(videoDesc?.category).toBe('Media');
   });
 });
