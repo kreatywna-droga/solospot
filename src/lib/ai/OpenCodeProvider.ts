@@ -523,31 +523,86 @@ export class OpenCodeProvider implements AIProvider {
           break;
         }
 
-        // No mutations — make another LLM request with tools to continue reasoning
+        // No mutations — make another LLM request with tools to continue reasoning.
+        // REPAIR (READ→WRITE Gate): continuation must reuse the model that actually
+        // succeeded for the initial turn (activeModelId after fallback), NOT the
+        // original router selection (selectedModelId). The original selection may
+        // be a model that already timed out / 429'd — sending continuation back to
+        // it caused the forensic-trace 15s timeout and dropped the chance to call
+        // insert_section_from_library after search_sections.
+        // Continuation also gets the same fallback candidate chain as the initial
+        // request so a single flaky free model cannot permanently block WRITE.
         try {
-          const nextResponse = await fetch(endpoint, {
-            method: 'POST',
-            signal: AbortSignal.timeout(15000),
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${cleanApiKey}`,
-            },
-            body: JSON.stringify({
-              model: selectedModelId,
+          const continuationBody = (modelId: string): string =>
+            JSON.stringify({
+              model: modelId,
               messages: currentMessages,
               tools: toolsPayload,
               tool_choice: 'auto',
               temperature: 0.2,
               max_tokens: 1000,
-            }),
-          });
+            });
 
-          if (!nextResponse.ok) break;
+          const continuationCandidates = [
+            activeModelId,
+            ...[
+              'nex-agi/nex-n2.5-pro:free',
+              'nex-agi/nex-n2.5-mini:free',
+              'nvidia/nemotron-3.5-lightning:free',
+              'nvidia/nemotron-3-ultra-550b-a55b:free',
+              'inclusionai/ling-3.0-flash-vl:free',
+              'dots-studio/dots-3-note-preview:free',
+            ].filter((id) => id !== activeModelId),
+          ];
 
-          const nextData = await nextResponse.json();
-          const nextChoice = nextData.choices?.[0];
+          let nextChoice: any = null;
+          for (const candidateId of continuationCandidates) {
+            try {
+              const nextResponse = await fetch(endpoint, {
+                method: 'POST',
+                signal: AbortSignal.timeout(15000),
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${cleanApiKey}`,
+                },
+                body: continuationBody(candidateId),
+              });
 
-          if (!nextChoice?.message) break;
+              if (!nextResponse.ok) continue;
+
+              const nextData = await nextResponse.json();
+              const choice = nextData.choices?.[0];
+              if (!choice?.message) continue;
+
+              nextChoice = choice;
+              if (candidateId !== activeModelId) {
+                activeModelId = candidateId;
+                fallbackUsed = true;
+              }
+              console.log(
+                JSON.stringify({
+                  stage: 'AGENT_LOOP_CONTINUATION',
+                  requestId,
+                  model: candidateId,
+                  http: nextResponse.status,
+                  fallbackUsed,
+                  iteration,
+                })
+              );
+              break;
+            } catch (contErr: any) {
+              console.warn(
+                `[OpenCodeProvider] Continuation candidate ${candidateId} failed:`,
+                contErr?.message
+              );
+              // try next candidate
+            }
+          }
+
+          if (!nextChoice) {
+            console.warn('[OpenCodeProvider] Agent loop continuation exhausted — keeping READ-only result');
+            break;
+          }
 
           currentChoice = nextChoice;
           messageContent = nextChoice.message.content || '';
