@@ -1,16 +1,42 @@
+# Dependencies & build
 node_modules
 .next
 .git
 .vercel
-public/videos/
-*.zip
-*.mov
-*.mp4
-*.mkv
-*.blend
-SZABLONY STRON/
-SZABLONY*
-scratch/
-.agents/
-  
- 
+coverage
+*.tsbuildinfo
+
+# Huge local assets not needed for Vercel build
+/public/videos/
+**/*.mp4
+**/*.mov
+**/*.mkv
+**/*.blend
+**/*.zip
+
+# Templates / offline bulk (root only — do NOT ignore src/**/templates)
+/SZABLONY STRON/
+/SZABLONY*
+/ASSET GRAPHIC/
+/templates/
+/archive/
+/backup_tmp/
+/content/
+/dist/
+/docs/
+/scripts/
+
+# Agent / editor tooling
+/.kilo/
+/.claude/
+/.continue/
+/.kimi-code/
+/.qodo/
+/.vscode/
+/.agent-control/
+/.agents/
+/scratch/
+
+# Logs
+*.log
+/final-output.txt
