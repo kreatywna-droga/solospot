@@ -1,7 +1,9 @@
 # SOLOSPOT — AI CAPABILITY SURFACE REPAIR GATE v1.0
 
-**Status:** **PASS** (local gates) — pending production verify confirmation  
+**Status:** **PASS**  
 **Data:** 2026-09-23  
+**Commit:** `1a4e383` → `origin/main`  
+**Deploy:** Vercel Production `dpl_Mqcr3YnQWuzE38xqBWqqv6kQDnqE` → https://www.solospot.pl (Ready)
 **Baseline:** `docs/AI_CAPABILITY_CORRIDOR_FORENSIC_GATE_V1_REPORT.md` (FORENSIC GATE v1.0, **HOLD**)  
 **Scope:** REPO → REGISTERED → SELECTABLE → EXPOSED → EXECUTABLE → DISPATCH → VERIFY  
 **Zakres zabroniony (nie ruszane):** BuilderDocument SSOT, Canvas UI, Workspace UI, model router, free-model strategy, Asset Corridor (search/insert AI), nowe Experience/Library/Inspector gates.
@@ -176,19 +178,29 @@ UI My Assets / Shutterstock API — poza promptem AI (osobny gate).
 
 ## 8. FAZA 8 — Deploy pipeline
 
-| Step | Status |
-|---|---|
-| CODE REVIEW (diff scope) | ✅ 4 src files + tests + docs |
-| TEST (targeted) | ✅ 440 pass |
-| TSC | ✅ |
-| BUILD | ✅ next build |
-| COMMIT | see git log below |
-| PUSH origin/main | see git log below |
-| VERCEL PROD | see production verify section |
-| PRODUCTION VERIFY | see production verify section |
+| Step | Status | Dowód |
+|---|:---:|---|
+| CODE REVIEW (diff scope) | ✅ | staged 8 files only (bez junk `$`, `.kilo`, public drift) |
+| TEST (targeted) | ✅ | `src/lib/ai` 440/440; gate suites 158/158 |
+| TSC | ✅ | `npx tsc --noEmit` → TSC_OK |
+| BUILD | ✅ | local `next build` + Vercel build 2m |
+| COMMIT | ✅ | `1a4e383` fix(ai): surface repair gate… |
+| PUSH origin/main | ✅ | `72e1786..1a4e383 main -> main` |
+| VERCEL PROD | ✅ | aliased https://www.solospot.pl / solospot.pl / solospot.vercel.app |
+| PRODUCTION VERIFY | ✅ | see below |
 
-**Deploy:** `npx vercel --prod --yes` (project `solospot`, `prj_BmG5luviQgKMBZuhXozCYE288yxq`).  
-Cel prod verify: `/api/builder/copilot` zdrowy; brak regression build.
+**Deploy:** `npx vercel --prod --yes` (project `solospot`, `prj_BmG5luviQgKMBZuhXozCYE288yxq`).
+
+### Production verify (2026-09-23T15:52Z)
+
+| Check | Result |
+|---|---|
+| `GET /api/health` | **200** `{"status":"healthy","database":"connected",...}` |
+| `GET /api/builder/copilot` | **200** |
+| `POST /api/builder/copilot` (CHAT) | **200** `{"status":"CHAT","provider":"AgentOrchestrator",...}` real model reply |
+| `GET /` home | **200** len=137640 |
+| Deployment status | **● Ready**, target=production, aliases www.solospot.pl |
+| `GET /api/diagnostics` | 403 (protected — expected, not a regression) |
 
 ---
 
@@ -201,7 +213,7 @@ Cel prod verify: `/api/builder/copilot` zdrowy; brak regression build.
 | Korytarze Library / Experience / Inspector działają | ✅ 3/3 |
 | Invalid args nie crashują (orphan guards) | ✅ |
 | Matrix spójny (advertised ⊆ surface; REPO partition) | ✅ |
-| Production verify | ⏳ (w sekcji deploy status) |
+| Production verify | ✅ health 200 + copilot CHAT 200 + home 200 |
 
 ---
 
