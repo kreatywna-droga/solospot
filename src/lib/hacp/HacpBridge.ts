@@ -154,7 +154,24 @@ export class HacpBridge {
     docBefore: BuilderDocument,
     expectedChange: { targetId: string; property?: string; expectedValue?: unknown }
   ): { nextDoc: BuilderDocument; verification: ExecutionVerification; changed: boolean } {
-    const nextDoc = applyCommandToDocument(docBefore, command);
+    // SURFACE REPAIR GATE — ORPHAN GUARD: invalid/missing args must never
+    // crash the execution path. applyCommandToDocument throws on bad IDs
+    // (e.g. moveNode(undefined)); convert that into an honest FAILED result.
+    let nextDoc: BuilderDocument;
+    try {
+      nextDoc = applyCommandToDocument(docBefore, command);
+    } catch (err) {
+      return {
+        nextDoc: docBefore,
+        changed: false,
+        verification: {
+          passed: false,
+          operation: command.type,
+          target: expectedChange.targetId,
+          diffSummary: `INVALID_ARGUMENTS: ${err instanceof Error ? err.message : String(err)}`,
+        },
+      };
+    }
     const changed = JSON.stringify(docBefore) !== JSON.stringify(nextDoc);
 
     let specificPassed = changed;
@@ -221,6 +238,8 @@ export class HacpBridge {
     activePageId: string
   ): Promise<{
     command?: BuilderCommand;
+    /** SURFACE REPAIR GATE: batch_execute may yield multiple commands for dispatch */
+    commands?: BuilderCommand[];
     verification: ExecutionVerification;
     appliedChange?: AppliedChangeItem;
     message: string;
@@ -1038,6 +1057,13 @@ export class HacpBridge {
 
     if (name === 'insert_node') {
       const parentId = args.parentId as string;
+      if (!parentId || typeof parentId !== 'string') {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: 'none' },
+          message: 'insert_node wymaga parametru parentId (ID nadrzednego wezla).',
+        };
+      }
       const nodeType = (args.nodeType as string) || 'text';
       const generatedNodeId = `node_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
       const cmd: BuilderCommand = {
@@ -1077,6 +1103,13 @@ export class HacpBridge {
 
     if (name === 'set_node_styles') {
       const nodeId = args.nodeId as string;
+      if (!nodeId || typeof nodeId !== 'string') {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: 'none' },
+          message: 'set_node_styles wymaga parametru nodeId.',
+        };
+      }
       const styles = (args.styles as Record<string, unknown>) || {};
       const cmd: BuilderCommand = {
         type: 'SET_NODE_STYLES',
@@ -1129,32 +1162,91 @@ export class HacpBridge {
     }
 
     if (name === 'batch_execute') {
-      const operations = (args.operations as Array<{ tool: string; args: Record<string, unknown> }>) || [];
+      // SURFACE REPAIR GATE v1.0 — F-03 DISPATCH DROP REPAIR:
+      // Collect sub-tool BuilderCommands and return them for dispatch.
+      // NEVER report EXECUTED when commandCount === 0.
+      const rawOps = args.operations;
+      if (!Array.isArray(rawOps) || rawOps.length === 0) {
+        return {
+          status: 'FAILED',
+          verification: {
+            passed: false,
+            operation: 'batch_execute',
+            target: activePageId,
+            diffSummary: 'batch_execute wymaga niepustej tablicy operations.',
+          },
+          message: 'batch_execute wymaga niepustej tablicy operations[].',
+        };
+      }
+      const operations = rawOps as Array<{ tool: string; args: Record<string, unknown> }>;
       const results: string[] = [];
+      const collectedCommands: BuilderCommand[] = [];
       let allPassed = true;
+      // Evolve a working document so sequential mutations in one batch
+      // verify against the state left by the previous operation.
+      let workingDoc = document;
 
       for (const op of operations) {
+        if (!op || typeof op.tool !== 'string' || !op.tool) {
+          allPassed = false;
+          results.push(`- (invalid op): brak pola "tool".`);
+          continue;
+        }
         const toolCall: HacpToolCall = {
           id: `batch_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
           name: op.tool,
-          arguments: op.args,
+          arguments: op.args || {},
         };
-        const res = await this.executeToolCall(toolCall, document, activePageId);
+        const res = await this.executeToolCall(toolCall, workingDoc, activePageId);
         results.push(`- ${op.tool}: ${res.message}`);
         if (!res.verification.passed) allPassed = false;
+        if (res.command) {
+          collectedCommands.push(res.command);
+          try {
+            workingDoc = applyCommandToDocument(workingDoc, res.command);
+          } catch {
+            allPassed = false;
+          }
+        }
+        if (res.commands?.length) {
+          collectedCommands.push(...res.commands);
+        }
+      }
+
+      if (collectedCommands.length === 0) {
+        // ZERO COMMANDS — never EXECUTED (FORENSIC GATE / F-03).
+        return {
+          status: allPassed ? 'CLARIFY' : 'FAILED',
+          verification: {
+            passed: false,
+            operation: 'batch_execute',
+            target: activePageId,
+            diffSummary: `batch_execute wykonal ${operations.length} operacji, ale 0 wygenerowalo BuilderCommand.`,
+          },
+          message: allPassed
+            ? `Batch zakonczony: ${operations.length} operacji odczytu/konfiguracji, 0 mutacji dokumentu. Brak dispatchu.`
+            : `Batch nie powodzial sie i nie wygenerowal zadnego BuilderCommand.`,
+          appliedChange: {
+            target: activePageId,
+            property: 'batch',
+            summary: results.join('\n'),
+          },
+        };
       }
 
       return {
         status: allPassed ? 'EXECUTED' : 'FAILED',
+        commands: collectedCommands,
+        command: collectedCommands[0],
         verification: {
           passed: allPassed,
           operation: 'batch_execute',
           target: activePageId,
-          diffSummary: `Wykonano ${operations.length} operacji.`,
+          diffSummary: `Wykonano ${operations.length} operacji, wygenerowano ${collectedCommands.length} command(s).`,
         },
         message: allPassed
-          ? `Wykonano ${operations.length} operacji pomyślnie.`
-          : `Część operacji nie powiodła się.`,
+          ? `Wykonano ${operations.length} operacji, wygenerowano ${collectedCommands.length} command(s) do dispatchu.`
+          : `Czesc operacji nie powiodla sie — zwrocono ${collectedCommands.length} command(s).`,
         appliedChange: {
           target: activePageId,
           property: 'batch',
@@ -1165,6 +1257,13 @@ export class HacpBridge {
 
     if (name === 'remove_node') {
       const nodeId = args.nodeId as string;
+      if (!nodeId || typeof nodeId !== 'string') {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: 'none' },
+          message: 'remove_node wymaga parametru nodeId.',
+        };
+      }
       const cmd: BuilderCommand = {
         type: 'REMOVE_NODE',
         nodeId,
@@ -1189,6 +1288,15 @@ export class HacpBridge {
 
     if (name === 'move_node') {
       const nodeId = args.nodeId as string;
+      // ORPHAN GUARD (F-06): missing nodeId must be FAILED, never a throw
+      // from nodeTree.moveNode("undefined").
+      if (!nodeId || typeof nodeId !== 'string') {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: 'none' },
+          message: 'move_node wymaga parametru nodeId.',
+        };
+      }
       const targetParentId = (args.targetParentId as string) || null;
       const targetIndex = args.targetIndex as number | undefined;
       const cmd: BuilderCommand = {
@@ -1378,7 +1486,22 @@ export class HacpBridge {
             timestamp: new Date().toLocaleTimeString('pl-PL'),
           });
 
-          const exec = await this.executeToolCall(tc, document, activePageId);
+          // ORPHAN GUARD: a throwing tool must never crash executePlan.
+          let exec: Awaited<ReturnType<HacpBridge['executeToolCall']>>;
+          try {
+            exec = await this.executeToolCall(tc, document, activePageId);
+          } catch (err) {
+            exec = {
+              status: 'FAILED',
+              message: `INVALID_ARGUMENTS: ${err instanceof Error ? err.message : String(err)}`,
+              verification: {
+                passed: false,
+                operation: tc.name,
+                target: 'unknown',
+                diffSummary: `Tool ${tc.name} threw during execution.`,
+              },
+            };
+          }
           lastVerification = exec.verification;
 
           console.log('[HacpBridge] EXECUTION_TRACE:', {
@@ -1391,7 +1514,10 @@ export class HacpBridge {
             timestamp: new Date().toISOString(),
           });
 
-          if (exec.command) {
+          // SURFACE REPAIR GATE: collect batch_execute multi-commands too.
+          if (exec.commands && exec.commands.length > 0) {
+            commands.push(...exec.commands);
+          } else if (exec.command) {
             commands.push(exec.command);
           }
           if (exec.appliedChange) {

@@ -308,6 +308,199 @@ describe('NoFakeSuccess — HACP outcome', () => {
   });
 });
 
+describe('Surface Repair Gate — batch_execute dispatch (F-03)', () => {
+  it('batch with mutations returns commands and EXECUTED (not dispatch-drop)', async () => {
+    const bridge = HacpBridge.getInstance();
+    const doc = createBuilderDocument({});
+    const pageId = doc.pages[0].id;
+    const before = doc.pages[0].sections.length;
+    const exec = await bridge.executeToolCall(
+      {
+        id: 'batch-mut',
+        name: 'batch_execute',
+        arguments: {
+          operations: [
+            {
+              tool: 'insert_section_from_library',
+              args: { sectionTemplateId: 'testimonials-cards', pageId },
+            },
+          ],
+        },
+      },
+      doc,
+      pageId
+    );
+
+    expect(exec.status).toBe('EXECUTED');
+    expect(exec.commands).toBeDefined();
+    expect(exec.commands!.length).toBeGreaterThan(0);
+    expect(exec.command).toBeDefined();
+    expect(exec.verification.passed).toBe(true);
+
+    // Dispatch the returned commands and verify document mutation.
+    let next = doc;
+    for (const cmd of exec.commands!) {
+      next = applyCommandToDocument(next, cmd);
+    }
+    expect(next.pages[0].sections.length).toBe(before + 1);
+  });
+
+  it('batch with ZERO mutations → CLARIFY, never EXECUTED', async () => {
+    const bridge = HacpBridge.getInstance();
+    const doc = createBuilderDocument({});
+    const pageId = doc.pages[0].id;
+    const exec = await bridge.executeToolCall(
+      {
+        id: 'batch-read',
+        name: 'batch_execute',
+        arguments: {
+          operations: [
+            { tool: 'search_sections', args: { query: 'hero' } },
+            { tool: 'inspect_document_summary', args: {} },
+          ],
+        },
+      },
+      doc,
+      pageId
+    );
+
+    expect(exec.status).not.toBe('EXECUTED');
+    expect(exec.status).toBe('CLARIFY');
+    expect(exec.commands).toBeUndefined();
+    expect(exec.command).toBeUndefined();
+    expect(exec.verification.passed).toBe(false);
+  });
+
+  it('batch with empty operations[] → FAILED, never EXECUTED', async () => {
+    const bridge = HacpBridge.getInstance();
+    const doc = createBuilderDocument({});
+    const exec = await bridge.executeToolCall(
+      { id: 'batch-empty', name: 'batch_execute', arguments: { operations: [] } },
+      doc,
+      doc.pages[0].id
+    );
+    expect(exec.status).toBe('FAILED');
+    expect(exec.verification.passed).toBe(false);
+  });
+
+  it('batch with missing operations → FAILED, never EXECUTED', async () => {
+    const bridge = HacpBridge.getInstance();
+    const doc = createBuilderDocument({});
+    const exec = await bridge.executeToolCall(
+      { id: 'batch-missing', name: 'batch_execute', arguments: {} },
+      doc,
+      doc.pages[0].id
+    );
+    expect(exec.status).toBe('FAILED');
+  });
+
+  it('resolveToolExecutionOutcome(batch commands) → EXECUTED when commands present', () => {
+    const outcome = resolveToolExecutionOutcome(true, 2);
+    expect(outcome.executionStatus).toBe('EXECUTED');
+    expect(outcome.intent).toBe('EXECUTE');
+  });
+
+  it('resolveToolExecutionOutcome(0 commands) → CLARIFY, never EXECUTED', () => {
+    const outcome = resolveToolExecutionOutcome(true, 0);
+    expect(outcome.executionStatus).not.toBe('EXECUTED');
+    expect(outcome.executionStatus).toBe('CLARIFY');
+  });
+});
+
+describe('Surface Repair Gate — orphan argument guards (F-06)', () => {
+  it('move_node without nodeId → FAILED, no throw', async () => {
+    const bridge = HacpBridge.getInstance();
+    const doc = createBuilderDocument({});
+    const exec = await bridge.executeToolCall(
+      { id: 'mv-empty', name: 'move_node', arguments: {} },
+      doc,
+      doc.pages[0].id
+    );
+    expect(exec.status).toBe('FAILED');
+    expect(exec.verification.passed).toBe(false);
+    expect(exec.message).toContain('nodeId');
+  });
+
+  it('move_node with undefined nodeId → FAILED, no throw', async () => {
+    const bridge = HacpBridge.getInstance();
+    const doc = createBuilderDocument({});
+    const exec = await bridge.executeToolCall(
+      { id: 'mv-undef', name: 'move_node', arguments: { nodeId: undefined } },
+      doc,
+      doc.pages[0].id
+    );
+    expect(exec.status).toBe('FAILED');
+  });
+
+  it('insert_node without parentId → FAILED, no throw', async () => {
+    const bridge = HacpBridge.getInstance();
+    const doc = createBuilderDocument({});
+    const exec = await bridge.executeToolCall(
+      { id: 'in-empty', name: 'insert_node', arguments: {} },
+      doc,
+      doc.pages[0].id
+    );
+    expect(exec.status).toBe('FAILED');
+    expect(exec.message).toContain('parentId');
+  });
+
+  it('remove_node without nodeId → FAILED, no throw', async () => {
+    const bridge = HacpBridge.getInstance();
+    const doc = createBuilderDocument({});
+    const exec = await bridge.executeToolCall(
+      { id: 'rm-empty', name: 'remove_node', arguments: {} },
+      doc,
+      doc.pages[0].id
+    );
+    expect(exec.status).toBe('FAILED');
+  });
+
+  it('set_node_styles without nodeId → FAILED, no throw', async () => {
+    const bridge = HacpBridge.getInstance();
+    const doc = createBuilderDocument({});
+    const exec = await bridge.executeToolCall(
+      { id: 'st-empty', name: 'set_node_styles', arguments: { styles: { color: '#fff' } } },
+      doc,
+      doc.pages[0].id
+    );
+    expect(exec.status).toBe('FAILED');
+  });
+
+  it('valid move_node with real IDs still works (semantics unchanged)', async () => {
+    const bridge = HacpBridge.getInstance();
+    const doc = createBuilderDocument({});
+    const pageId = doc.pages[0].id;
+    // Insert a section first so we have a real node to move.
+    const insert = await bridge.executeToolCall(
+      {
+        id: 'prep-insert',
+        name: 'insert_section_from_library',
+        args: undefined as never,
+        arguments: { sectionTemplateId: 'testimonials-cards', pageId },
+      } as never,
+      doc,
+      pageId
+    );
+    expect(insert.status).toBe('EXECUTED');
+    const afterInsert = applyCommandToDocument(doc, insert.command!);
+    const sectionId = insert.createdNodeId!;
+    // Move the section within the same page (to root = null parent is valid for sections?).
+    // Use move_section instead for a section-level move — but move_node on the section ID
+    // with a valid nodeId should not throw INVALID_ARGUMENTS.
+    const move = await bridge.executeToolCall(
+      {
+        id: 'mv-real',
+        name: 'move_node',
+        arguments: { nodeId: sectionId, targetParentId: null, pageId },
+      },
+      afterInsert,
+      pageId
+    );
+    // Either EXECUTED (moved) or FAILED (verification failed) — but NEVER a throw.
+    expect(['EXECUTED', 'FAILED']).toContain(move.status);
+  });
+});
+
 describe('RealSectionStructure — library insert is a real layered tree', () => {
   function countNodes(root: any): number {
     let n = 0;

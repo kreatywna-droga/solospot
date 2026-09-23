@@ -13,46 +13,39 @@
 import { describe, it, expect } from 'vitest';
 import { BUILDER_TOOL_DEFINITIONS } from '../BuilderToolDefinitions';
 import { CAPABILITIES, getCapabilitiesForNodeType } from '../BuilderCapabilityRegistry';
+import { ToolSurfaceSelector } from '../ToolSurfaceSelector';
+import type { IntentCategory } from '../IntentClassifier';
 
 // ─── TOOL NAME SETS ────────────────────────────────────────────────
 
 const DEFINED_TOOL_NAMES = new Set(BUILDER_TOOL_DEFINITIONS.map((t) => t.name));
 
-// Tools listed in the system prompt (extracted from route.ts)
-// These are the tools the AI model is told it can use
+// Tools listed in the system prompt (extracted from route.ts).
+// SURFACE REPAIR GATE v1.0: only tools that are SELECTABLE (appear in at
+// least one ToolSurface) may be advertised. Internal/legacy/future tools
+// stay in BuilderToolDefinitions (REPO) but are NOT advertised.
 const ADVERTISED_TOOLS = [
-  // Inspection
+  // Inspection (SELECTABLE surfaces only)
   'inspect_node',
   'inspect_children',
-  'inspect_parent',
   'find_nodes',
-  'inspect_responsive',
-  'inspect_experience',
-  'inspect_asset',
-  'inspect_available_capabilities',
   'inspect_document_summary',
   'inspect_selected_node',
   'inspect_page_structure',
   'read_builder_document',
   'read_page_full',
-  // Mutation
+  // Mutation (SELECTABLE surfaces only)
   'update_node_props',
   'set_node_styles',
-  'insert_node',
   'remove_node',
-  'move_node',
-  'insert_section',
   'remove_section',
   'move_section',
-  'set_background_color',
   'configure_experience',
   'update_theme',
-  'batch_execute',
   'undo',
   'redo',
-  // Library Intelligence
+  // Library Intelligence (SELECTABLE surfaces only)
   'search_experiences',
-  'get_experience_categories',
   'search_sections',
   'search_website_templates',
   'get_typography_presets',
@@ -61,6 +54,24 @@ const ADVERTISED_TOOLS = [
   // Library Insertion
   'insert_section_from_library',
   'insert_experience_from_library',
+];
+
+// Tools that are intentionally NOT advertised (REPO-only / internal / future gate).
+// Decision matrix (FAZA 2 of AI CAPABILITY SURFACE REPAIR GATE v1.0):
+//   B = internal/legacy, C = future gate
+const REPO_ONLY_TOOLS = [
+  'test_echo',              // diagnostic, never advertised
+  'insert_section',         // B — public path is insert_section_from_library
+  'set_background_color',   // B — superseded by update_node_props on EDIT_NODE
+  'insert_node',            // C — needs parent validation + surface design
+  'move_node',              // C — needs orphan guard + surface design
+  'batch_execute',          // C — repaired dispatch, surface exposure future gate
+  'inspect_experience',     // B — search_experiences covers discovery
+  'get_experience_categories', // B — covered by search_experiences
+  'inspect_asset',          // C — belongs to Asset Corridor Gate
+  'inspect_parent',         // B — not exposed on any surface
+  'inspect_responsive',     // B — not exposed on any surface
+  'inspect_available_capabilities', // B — not exposed on any surface
 ];
 
 // Tools that have handlers in HacpBridge (verified by code review)
@@ -128,19 +139,42 @@ describe('Tool Inventory Verification', () => {
     expect(missing).toEqual([]);
   });
 
-  // ── 2. Defined tools must be advertised ────────────────────────
+  // ── 2. REPO-only tools must NOT be advertised (surface discipline) ──
 
-  it('every defined tool is advertised to the model (no hidden tools)', () => {
+  it('REPO-only tools are never advertised to the model', () => {
     const advertisedSet = new Set(ADVERTISED_TOOLS);
-    const hidden: string[] = [];
-    for (const tool of DEFINED_TOOL_NAMES) {
-      // test_echo is diagnostic, not advertised in prompt — allowed
-      if (tool === 'test_echo') continue;
-      if (!advertisedSet.has(tool)) {
-        hidden.push(tool);
+    const leaked: string[] = [];
+    for (const tool of REPO_ONLY_TOOLS) {
+      if (advertisedSet.has(tool)) {
+        leaked.push(tool);
       }
     }
-    expect(hidden).toEqual([]);
+    expect(leaked).toEqual([]);
+  });
+
+  it('every advertised tool is SELECTABLE on at least one surface', () => {
+    // All 16 IntentCategory values — collect union of every surface.
+    const intents: IntentCategory[] = [
+      'CHAT', 'INSPECT', 'INSERT_SECTION', 'INSERT_EXPERIENCE',
+      'INSERT_SITE_TEMPLATE', 'EDIT_NODE', 'MOVE_SECTION', 'DELETE',
+      'STYLE', 'DESIGN_SYSTEM', 'SITE_GENERATION', 'AUDIT', 'DEBUG',
+      'UNDO', 'REDO', 'CLARIFICATION_REQUIRED',
+    ];
+    const selectableUnion = new Set<string>();
+    for (const intent of intents) {
+      for (const name of ToolSurfaceSelector.getToolNamesForIntent(intent)) {
+        selectableUnion.add(name);
+      }
+    }
+    const notSelectable = ADVERTISED_TOOLS.filter((t) => !selectableUnion.has(t));
+    expect(notSelectable).toEqual([]);
+  });
+
+  it('every REPO-only tool is either diagnostic or has a documented reason', () => {
+    // All REPO-only tools must exist in definitions (they are REPO, not ghosts).
+    for (const tool of REPO_ONLY_TOOLS) {
+      expect(DEFINED_TOOL_NAMES.has(tool)).toBe(true);
+    }
   });
 
   // ── 3. Advertised tools must have HacpBridge handlers ─────────
@@ -271,16 +305,23 @@ describe('Tool Inventory Completeness', () => {
     const summary = {
       totalDefinitions: BUILDER_TOOL_DEFINITIONS.length,
       totalAdvertised: ADVERTISED_TOOLS.length,
+      totalRepoOnly: REPO_ONLY_TOOLS.length,
       totalHandlers: HACP_HANDLER_TOOLS.length,
       totalCapabilities: CAPABILITIES.length,
       definitionNames: BUILDER_TOOL_DEFINITIONS.map((t) => t.name).sort(),
       advertisedTools: [...ADVERTISED_TOOLS].sort(),
+      repoOnlyTools: [...REPO_ONLY_TOOLS].sort(),
       handlerTools: [...HACP_HANDLER_TOOLS].sort(),
     };
 
-    // All counts must match (except handlers which includes test_echo)
-    expect(summary.totalDefinitions).toBe(summary.totalAdvertised + 1); // +1 for test_echo
-    expect(summary.totalHandlers).toBe(summary.totalAdvertised + 1); // +1 for test_echo
+    // REPO = ADVERTISED ∪ REPO_ONLY (disjoint)
+    expect(summary.totalDefinitions).toBe(summary.totalAdvertised + summary.totalRepoOnly);
+    expect(new Set([...summary.advertisedTools, ...summary.repoOnlyTools]).size)
+      .toBe(summary.totalDefinitions);
+    // No overlap
+    for (const t of summary.advertisedTools) {
+      expect(summary.repoOnlyTools).not.toContain(t);
+    }
 
     // Every advertised tool must be in definitions
     for (const tool of summary.advertisedTools) {
