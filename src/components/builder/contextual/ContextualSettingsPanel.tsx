@@ -817,7 +817,7 @@ export function ContextualSettingsPanel({
             </div>
 
             {/* Scrollable body */}
-            <div className="flex-1 overflow-y-auto" style={{ maxHeight: position.maxHeight - 48 }}>
+            <div className="flex-1 overflow-y-auto builder-canvas-scrollbar" style={{ maxHeight: position.maxHeight - 48 }}>
               {profile.groups.map(renderGroup)}
             </div>
           </div>
