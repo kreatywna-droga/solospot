@@ -199,6 +199,29 @@ export class ToolSurfaceSelector {
   }
 
   /**
+   * Union of tool names across multiple intents (multi-intent merge).
+   * FAZA 6: EDIT_NODE + DELETE → model can both update_node_props and remove_*.
+   * Does not invent tools — only unions existing surfaces.
+   */
+  static getToolNamesForIntents(intents: IntentCategory[]): string[] {
+    const set = new Set<string>();
+    for (const intent of intents) {
+      for (const name of this.getToolNamesForIntent(intent)) {
+        set.add(name);
+      }
+    }
+    return Array.from(set);
+  }
+
+  /**
+   * Full tool definitions for a multi-intent union.
+   */
+  static getToolsForIntents(intents: IntentCategory[]): HacpToolDefinition[] {
+    const names = new Set(this.getToolNamesForIntents(intents));
+    return BUILDER_TOOL_DEFINITIONS.filter((t) => names.has(t.name));
+  }
+
+  /**
    * Get surface description for debugging.
    */
   static getDescription(intent: IntentCategory): string {

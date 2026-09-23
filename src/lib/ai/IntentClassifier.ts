@@ -129,6 +129,8 @@ export class IntentClassifier {
     }
   ): ClassifiedIntent {
     const normalized = prompt.toLowerCase().trim();
+    const hasEditAction = this.matchesAny(normalized, EDIT_KEYWORDS);
+    const hasDeleteAction = this.matchesAny(normalized, DELETE_KEYWORDS);
 
     // Priority 1: Undo/Redo
     if (this.matchesAny(normalized, ['cofnij', 'undo'])) {
@@ -138,8 +140,10 @@ export class IntentClassifier {
       return this.result('REDO', 1.0, [], {}, 'User requested redo');
     }
 
-    // Priority 2: Delete
-    if (this.containsOnlyAction(normalized, DELETE_KEYWORDS)) {
+    // Priority 2: Delete — only when NOT also editing.
+    // Multi-intent ("Zmień tytuł … Usuń MYSHOE") is handled at EDIT_NODE
+    // with secondaryIntents so the tool surface can be merged (FAZA 6 repair).
+    if (hasDeleteAction && !hasEditAction && this.containsOnlyAction(normalized, DELETE_KEYWORDS)) {
       const targets = this.extractTargets(normalized);
       return this.result('DELETE', 0.9, targets, {}, 'User requested deletion');
     }
@@ -172,7 +176,6 @@ export class IntentClassifier {
     // editing existing content. "Zmień tytuł Hero..." must NOT match
     // INSERT_SECTION just because "hero" is a section keyword (GATE: existing
     // node edit). Explicit edit action wins over section-keyword co-occurrence.
-    const hasEditAction = this.matchesAny(normalized, EDIT_KEYWORDS);
     if (this.matchesAny(normalized, SECTION_KEYWORDS) && !hasEditAction) {
       const targets = this.extractTargets(normalized);
       return this.result('INSERT_SECTION', 0.9, targets, {
@@ -187,12 +190,27 @@ export class IntentClassifier {
     }
 
     // Priority 8: Edit node (including "Zmień tytuł Hero" — edit action + section target)
+    // Multi-intent: edit + delete → primary EDIT_NODE, secondary DELETE recorded
+    // so ToolSurfaceSelector can merge both surfaces (no new capabilities).
     if (hasEditAction) {
       const targets = this.extractTargets(normalized);
-      return this.result('EDIT_NODE', 0.85, targets, {
+      const parameters: Record<string, unknown> = {
         property: this.extractProperty(normalized),
         value: this.extractValue(normalized),
-      }, 'User wants to edit a node property');
+      };
+      if (hasDeleteAction && this.containsOnlyAction(normalized, DELETE_KEYWORDS)) {
+        parameters.secondaryIntents = ['DELETE'];
+        parameters.multiIntent = true;
+      }
+      return this.result(
+        'EDIT_NODE',
+        0.85,
+        targets,
+        parameters,
+        hasDeleteAction
+          ? 'User wants to edit a node property (multi-intent: edit + delete)'
+          : 'User wants to edit a node property'
+      );
     }
 
     // Priority 9: Style

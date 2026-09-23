@@ -100,8 +100,23 @@ export class AgentOrchestrator {
     });
 
     // 2. SELECT TOOL SURFACE
-    const tools = ToolSurfaceSelector.getToolsForIntent(classified.category);
-    const toolNames = ToolSurfaceSelector.getToolNamesForIntent(classified.category);
+    // Multi-intent merge (FAZA 6): primary + secondaryIntents → union of surfaces.
+    // Example: EDIT_NODE + DELETE → update_node_props AND remove_* available.
+    const secondaryIntents = Array.isArray(classified.parameters.secondaryIntents)
+      ? (classified.parameters.secondaryIntents as IntentCategory[])
+      : [];
+    const intentList: IntentCategory[] =
+      secondaryIntents.length > 0
+        ? [classified.category, ...secondaryIntents]
+        : [classified.category];
+    const tools =
+      intentList.length > 1
+        ? ToolSurfaceSelector.getToolsForIntents(intentList)
+        : ToolSurfaceSelector.getToolsForIntent(classified.category);
+    const toolNames =
+      intentList.length > 1
+        ? ToolSurfaceSelector.getToolNamesForIntents(intentList)
+        : ToolSurfaceSelector.getToolNamesForIntent(classified.category);
 
     // 3. CREATE EXECUTION PLAN
     const plan = ExecutionPlanManager.createPlan(
