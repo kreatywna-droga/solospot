@@ -21,7 +21,7 @@
 | FAZY 7–8 TEST 1–4 | ✅ **4/4** |
 | FAZA 9 anti-fake-success | ✅ |
 | FAZA 10 regression / tsc / build | ✅ (pre-existing T37 excluded) |
-| FAZA 11 commit → push → deploy → prod verify | see §8 |
+| FAZA 11 commit → push → deploy → prod verify | ✅ |
 
 **Gate verdict: PASS**
 
@@ -127,12 +127,15 @@ mutationToolCalls: [update_node_props, remove_node]
 
 ## 8. FAZA 11 — DEPLOY
 
-| Step | Status |
+| Step | Result |
 |---|---|
-| commit | see git log |
-| push | `origin/main` |
-| `npx vercel deploy --prod --yes` | pending this session |
-| prod verify `https://www.solospot.pl/api/builder/copilot` | pending this session |
+| commit | `22237ae` `fix(ai): plan-execution continuation gate — multi-intent surface merge` |
+| push | `origin/main` = `22237ae0c53228d8a89b215adb028bb78c3e2684` |
+| deploy | `npx vercel deploy --prod --yes --archive=tgz` → `solospot-btd52b99l` **Ready** (`dpl_75tiDKrL8y4MeZ5VP6ohfnD9ku1Z`) |
+| aliases | `www.solospot.pl`, `solospot.pl`, `solospot.vercel.app` → `solospot-btd52b99l` |
+| prod GET `/api/builder/copilot` | **200 ONLINE** OpenCode |
+| prod POST gate prompt | **SUCCESS** + `update_node_props {title:"MARCIN BERNATOWICZ"} @ sec_hero` · `successHonest: true` · `notFakeSuccess: true` · 31.5s |
+| prod home | **200** |
 
 ---
 
