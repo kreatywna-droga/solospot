@@ -36,11 +36,52 @@ import type { GenerationPhase } from '@/lib/ai/SitePlanTypes'
 import type { ChatMessageAttachment } from '@/lib/ai/AIProviderTypes'
 import { AiRobotMascot, type AiRobotState } from './AiRobotMascot'
 
+/** HacpMessage + local-only tool names (no HACP / HacpTypes changes). */
+export type AiContextMessage = HacpMessage & { toolNames?: string[] }
+
+function normalizeToolName(name: string): string {
+  return name.replace(/^AI Tool Call:\s*/i, '').trim()
+}
+
+function extractToolNames(msg: AiContextMessage): string[] {
+  if (msg.toolNames && msg.toolNames.length > 0) return msg.toolNames
+  if (msg.card?.steps?.length) {
+    return msg.card.steps.map((s) => normalizeToolName(s.name)).filter(Boolean)
+  }
+  return []
+}
+
+/** Full AI conversation clipboard payload for external models (ChatGPT etc.). */
+export function buildAiContextText(
+  messages: AiContextMessage[],
+  _activityEvents?: HacpActivityEvent[]
+): string {
+  const lines: string[] = ['=== SOLOSPOT AI CONTEXT ===', '']
+  for (const msg of messages) {
+    if (msg.type === 'user') {
+      lines.push('[USER]', msg.text, '')
+    } else if (msg.type === 'ai') {
+      lines.push('[AI]', msg.text)
+      for (const tool of extractToolNames(msg)) {
+        lines.push(`[TOOL] ${tool}`)
+      }
+      if (msg.appliedChangeSummary) {
+        lines.push(`[RESULT] ${msg.appliedChangeSummary}`)
+      }
+      lines.push('')
+    } else {
+      lines.push('[SYSTEM]', msg.text, '')
+    }
+  }
+  lines.push('=== END CONTEXT ===')
+  return lines.join('\n')
+}
+
 export function AiCopilotWorkspace() {
   const { document: builderDoc, canvas, dispatch } = useBuilder()
   const { canUndo, canRedo, undo, redo } = useBuilderHistory()
 
-  const [messages, setMessages] = useState<HacpMessage[]>([])
+  const [messages, setMessages] = useState<AiContextMessage[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isExecuting, setIsExecuting] = useState(false)
   const [currentPhase, setCurrentPhase] = useState<
@@ -48,6 +89,7 @@ export function AiCopilotWorkspace() {
   >('IDLE')
   const [secondsWaiting, setSecondsWaiting] = useState(0)
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null)
+  const [copiedContext, setCopiedContext] = useState<'idle' | 'ok' | 'error'>('idle')
   const [lastUserPrompt, setLastUserPrompt] = useState<string>('')
   const [attachedFiles, setAttachedFiles] = useState<ChatMessageAttachment[]>([])
   const [attachMenuOpen, setAttachMenuOpen] = useState(false)
@@ -275,6 +317,13 @@ export function AiCopilotWorkspace() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, isExecuting])
 
+  // Reset COPY CONTEXT feedback label
+  useEffect(() => {
+    if (copiedContext === 'idle') return
+    const t = setTimeout(() => setCopiedContext('idle'), 2500)
+    return () => clearTimeout(t)
+  }, [copiedContext])
+
   // Derive current builder context
   const activePage = useMemo(() => {
     return builderDoc.pages.find((p) => p.id === canvas.selectedPageId) || builderDoc.pages[0]
@@ -493,6 +542,19 @@ export function AiCopilotWorkspace() {
       navigator.clipboard.writeText(text)
       setCopiedMessageId(id)
       setTimeout(() => setCopiedMessageId(null), 2000)
+    }
+  }
+
+  const handleCopyContext = async () => {
+    const text = buildAiContextText(messages, activityEvents)
+    try {
+      if (typeof navigator === 'undefined' || !navigator.clipboard?.writeText) {
+        throw new Error('Clipboard API unavailable')
+      }
+      await navigator.clipboard.writeText(text)
+      setCopiedContext('ok')
+    } catch {
+      setCopiedContext('error')
     }
   }
 
@@ -720,7 +782,11 @@ export function AiCopilotWorkspace() {
         ? result.message.trim()
         : 'Model nie zwrócił odpowiedzi. Spróbuj ponownie lub wybierz inny model.'
 
-      const aiMessage: HacpMessage = {
+      const toolNames = (result.executionCard?.steps || [])
+        .map((s) => normalizeToolName(s.name))
+        .filter(Boolean)
+
+      const aiMessage: AiContextMessage = {
         id: `msg-ai-${Date.now()}`,
         type: 'ai',
         text: finalMsgText,
@@ -729,6 +795,8 @@ export function AiCopilotWorkspace() {
         scope: result.scope,
         appliedChangeSummary: mutationSummary,
         isError: !hasContent,
+        card: result.executionCard,
+        toolNames: toolNames.length > 0 ? toolNames : undefined,
       }
 
       setMessages((prev) => [...prev, aiMessage])
@@ -837,6 +905,32 @@ export function AiCopilotWorkspace() {
           </div>
 
           <button
+            onClick={handleCopyContext}
+            disabled={messages.length === 0}
+            className="flex items-center gap-1 px-1.5 py-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            title="Kopiuj cały kontekst AI"
+          >
+            {copiedContext === 'ok' ? (
+              <Check className="w-3.5 h-3.5 text-emerald-400" />
+            ) : copiedContext === 'error' ? (
+              <AlertCircle className="w-3.5 h-3.5 text-red-400" />
+            ) : (
+              <Copy className="w-3.5 h-3.5" />
+            )}
+            <span className="hidden sm:inline text-[9px] font-mono font-semibold">COPY CONTEXT</span>
+          </button>
+          {copiedContext !== 'idle' && (
+            <span
+              className={`text-[9px] font-mono font-semibold ${
+                copiedContext === 'ok' ? 'text-emerald-400' : 'text-red-400'
+              }`}
+              role="status"
+            >
+              {copiedContext === 'ok' ? 'Skopiowano cały kontekst' : 'Nie udało się skopiować kontekstu'}
+            </span>
+          )}
+
+          <button
             onClick={() => setShowCapabilitiesModal(true)}
             className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors"
             title="Dostępne możliwości HACP"
@@ -847,7 +941,7 @@ export function AiCopilotWorkspace() {
       </div>
 
       {/* ── 4. CONVERSATION AREA ────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto p-3.5 space-y-3.5 min-h-0 builder-canvas-scrollbar">
+      <div className="flex-1 overflow-y-auto p-3.5 space-y-3.5 min-h-0 builder-canvas-scrollbar select-text">
         {messages.length === 0 ? (
           <div className="h-full flex flex-col justify-center space-y-3 p-1">
             <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#D9A86C]/10 via-[#202024] to-transparent border border-[#D9A86C]/20 space-y-2">
@@ -918,7 +1012,7 @@ export function AiCopilotWorkspace() {
                 }`}
               >
                 {/* User-facing conversational text */}
-                <div className="whitespace-pre-line text-xs font-sans leading-relaxed selection:bg-[#D9A86C]/30">
+                <div className="whitespace-pre-line text-xs font-sans leading-relaxed select-text selection:bg-[#D9A86C]/30">
                   {msg.text}
                 </div>
 
