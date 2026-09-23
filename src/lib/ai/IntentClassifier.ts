@@ -168,8 +168,12 @@ export class IntentClassifier {
       return this.result('MOVE_SECTION', 0.85, targets, {}, 'User requested move/reorder');
     }
 
-    // Priority 7: Section insertion
-    if (this.matchesAny(normalized, SECTION_KEYWORDS)) {
+    // Priority 7: Section insertion — ONLY when the user is not explicitly
+    // editing existing content. "Zmień tytuł Hero..." must NOT match
+    // INSERT_SECTION just because "hero" is a section keyword (GATE: existing
+    // node edit). Explicit edit action wins over section-keyword co-occurrence.
+    const hasEditAction = this.matchesAny(normalized, EDIT_KEYWORDS);
+    if (this.matchesAny(normalized, SECTION_KEYWORDS) && !hasEditAction) {
       const targets = this.extractTargets(normalized);
       return this.result('INSERT_SECTION', 0.9, targets, {
         stylePreference: this.extractStylePreference(normalized),
@@ -177,13 +181,13 @@ export class IntentClassifier {
     }
 
     // Priority 8: Move (positional prepositions only, no section keywords)
-    if (this.containsOnlyAction(normalized, MOVE_KEYWORDS)) {
+    if (this.containsOnlyAction(normalized, MOVE_KEYWORDS) && !hasEditAction) {
       const targets = this.extractTargets(normalized);
       return this.result('MOVE_SECTION', 0.85, targets, {}, 'User requested move/reorder');
     }
 
-    // Priority 8: Edit node
-    if (this.matchesAny(normalized, EDIT_KEYWORDS)) {
+    // Priority 8: Edit node (including "Zmień tytuł Hero" — edit action + section target)
+    if (hasEditAction) {
       const targets = this.extractTargets(normalized);
       return this.result('EDIT_NODE', 0.85, targets, {
         property: this.extractProperty(normalized),

@@ -22,12 +22,13 @@ describe('ToolSurfaceSelector', () => {
       expect(names).toContain('insert_experience_from_library');
     });
 
-    it('returns 6 tools for EDIT_NODE', () => {
+    it('returns 7 tools for EDIT_NODE', () => {
       const tools = ToolSurfaceSelector.getToolsForIntent('EDIT_NODE');
-      expect(tools.length).toBe(6);
+      expect(tools.length).toBe(7);
       const names = tools.map((t) => t.name);
       expect(names).toContain('update_node_props');
       expect(names).toContain('set_node_styles');
+      expect(names).toContain('find_nodes');
     });
 
     it('returns 4 tools for MOVE_SECTION', () => {

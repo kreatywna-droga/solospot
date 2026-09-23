@@ -59,12 +59,13 @@ const TOOL_SURFACES: ToolSurface[] = [
     tools: [
       'inspect_selected_node',
       'inspect_node',
+      'find_nodes',
       'resolve_target',
       'update_node_props',
       'set_node_styles',
       'inspect_document_summary',
     ],
-    description: 'Inspect, resolve target, update properties/styles',
+    description: 'Find existing node, inspect, resolve target, update properties/styles',
   },
   {
     intent: 'MOVE_SECTION',

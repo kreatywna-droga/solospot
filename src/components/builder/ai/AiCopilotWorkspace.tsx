@@ -355,6 +355,33 @@ export function AiCopilotWorkspace() {
         order: i,
         childCount: s.children?.length || 0,
       })),
+      // GATE 1 target resolution: flatten live document nodes (no hardcoded ids)
+      nodesIndex: (() => {
+        const out: Array<{
+          id: string
+          type: string
+          label?: string
+          sectionId?: string
+          parentId?: string | null
+          props?: Record<string, unknown>
+        }> = []
+        const walk = (nodes: any[], sectionId?: string) => {
+          for (const n of nodes || []) {
+            const sid = sectionId || ((n.type === 'section' || n.type === 'hero') ? n.id : undefined)
+            out.push({
+              id: n.id,
+              type: n.type,
+              label: n.label,
+              sectionId: sid,
+              parentId: n.parentId ?? null,
+              props: n.props,
+            })
+            if (n.children?.length) walk(n.children, sid)
+          }
+        }
+        walk(activePage?.sections || [])
+        return out
+      })(),
       availableCapabilitiesCount: capabilities.filter((c) => c.available).length,
       visualMetrics,
       recentMutation,

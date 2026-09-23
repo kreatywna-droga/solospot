@@ -167,6 +167,19 @@ export interface HacpBuilderContext {
   documentNodeCount: number;
   availableCapabilitiesCount: number;
   sectionsSummary?: Array<{ id: string; type: string; label?: string }>;
+  /**
+   * Flattened node index from the live BuilderDocument (GATE 1 target resolution).
+   * Lets provider-side find_nodes/inspect resolve real nodeIds (e.g. MYSHOE text)
+   * without hardcoding — built client-side from the current document SSOT.
+   */
+  nodesIndex?: Array<{
+    id: string;
+    type: string;
+    label?: string;
+    sectionId?: string;
+    parentId?: string | null;
+    props?: Record<string, unknown>;
+  }>;
   visualMetrics?: HacpVisualMetrics;
   layoutDiagnostics?: HacpLayoutDiagnostics;
   recentMutation?: string;

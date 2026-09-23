@@ -481,15 +481,94 @@ export class OpenCodeProvider implements AIProvider {
             } catch {
               toolResult = { status: 'ERROR', message: 'Failed to get presets.' };
             }
-          } else if (tc.name === 'resolve_target') {
+          } else if (tc.name === 'find_nodes') {
+            // GATE 1: target resolution against live document index (no hardcoded nodeId)
+            const idx = request.builderContext?.nodesIndex || [];
+            const crit = (tc.arguments || {}) as Record<string, unknown>;
+            const textOf = (n: { props?: Record<string, unknown> }) => {
+              const p = n.props || {};
+              return ['text', 'title', 'subtitle', 'description', 'heading', 'cta', 'ctaText', 'label']
+                .map((k) => (typeof p[k] === 'string' ? (p[k] as string) : ''))
+                .filter(Boolean)
+                .join(' ');
+            };
+            let matches = idx.slice();
+            if (typeof crit.type === 'string' && crit.type) {
+              matches = matches.filter((n) => n.type === crit.type);
+            }
+            if (typeof crit.labelContains === 'string' && crit.labelContains) {
+              const q = crit.labelContains.toLowerCase();
+              matches = matches.filter((n) => (n.label || '').toLowerCase().includes(q));
+            }
+            if (typeof crit.textContains === 'string' && crit.textContains) {
+              const q = crit.textContains.toLowerCase();
+              matches = matches.filter(
+                (n) => textOf(n).toLowerCase().includes(q) || (n.label || '').toLowerCase().includes(q)
+              );
+            }
+            if (typeof crit.sectionId === 'string' && crit.sectionId) {
+              matches = matches.filter((n) => n.sectionId === crit.sectionId || n.id === crit.sectionId);
+            }
             toolResult = {
               status: 'SUCCESS',
-              note: 'Target resolution will be performed by HACP Bridge with full document context.',
-              prompt: tc.arguments?.prompt,
+              operation: 'find_nodes',
+              count: matches.length,
+              nodes: matches.map((n) => ({
+                id: n.id,
+                type: n.type,
+                label: n.label,
+                sectionId: n.sectionId,
+                parentId: n.parentId,
+                props: n.props,
+              })),
+              note: 'Wyniki z live BuilderDocument nodesIndex.',
             };
-          } else if (tc.name === 'inspect_node' || tc.name === 'inspect_children' || tc.name === 'inspect_parent' ||
-                     tc.name === 'find_nodes' || tc.name === 'inspect_responsive' || tc.name === 'inspect_asset' ||
-                     tc.name === 'inspect_available_capabilities' || tc.name === 'inspect_document_summary' || tc.name === 'read_page_full') {
+          } else if (tc.name === 'resolve_target') {
+            const idx = request.builderContext?.nodesIndex || [];
+            const prompt = String(tc.arguments?.prompt || request.prompt || '');
+            const lower = prompt.toLowerCase();
+            // Prefer text match, then label match (Hero/section names)
+            const byText = idx.find((n) => {
+              const p = n.props || {};
+              return ['text', 'title', 'subtitle'].some(
+                (k) => typeof p[k] === 'string' && lower.includes(String(p[k]).toLowerCase())
+              );
+            });
+            const byLabel = idx.find((n) => n.label && lower.includes(n.label.toLowerCase()));
+            const resolved = byText || byLabel || idx.find((n) => n.type === 'hero' || (n.label || '').toLowerCase() === 'hero');
+            toolResult = resolved
+              ? {
+                  status: 'SUCCESS',
+                  operation: 'resolve_target',
+                  nodeId: resolved.id,
+                  nodeType: resolved.type,
+                  nodeLabel: resolved.label,
+                  sectionId: resolved.sectionId,
+                  parentId: resolved.parentId,
+                  props: resolved.props,
+                }
+              : {
+                  status: 'NOT_FOUND',
+                  operation: 'resolve_target',
+                  prompt,
+                  note: 'Nie znaleziono pasującego węzła w nodesIndex.',
+                };
+          } else if (tc.name === 'inspect_node') {
+            const nodeId = String(tc.arguments?.nodeId || '');
+            const found = (request.builderContext?.nodesIndex || []).find((n) => n.id === nodeId);
+            toolResult = found
+              ? { status: 'SUCCESS', operation: 'inspect_node', node: found }
+              : {
+                  status: 'NOT_FOUND',
+                  operation: 'inspect_node',
+                  nodeId,
+                  pageId: request.builderContext?.pageId || 'page-home',
+                };
+          } else if (tc.name === 'inspect_document_summary' || tc.name === 'inspect_page_structure' ||
+                     tc.name === 'inspect_children' || tc.name === 'inspect_parent' ||
+                     tc.name === 'inspect_selected_node' || tc.name === 'inspect_responsive' ||
+                     tc.name === 'inspect_asset' || tc.name === 'inspect_available_capabilities' ||
+                     tc.name === 'read_page_full') {
             // These inspection tools return builder context data
             toolResult = {
               status: 'SUCCESS',
@@ -498,6 +577,8 @@ export class OpenCodeProvider implements AIProvider {
               pageId: request.builderContext?.pageId || 'page-home',
               selectedNodeId: request.builderContext?.selectedNodeId,
               viewport: request.builderContext?.viewport || 'DESKTOP',
+              sectionsSummary: request.builderContext?.sectionsSummary,
+              nodesIndexCount: (request.builderContext?.nodesIndex || []).length,
               note: `Inspekcja ${tc.name} wykonana. Pełne dane dostępne w kontekście Buildera.`,
             };
           } else {
