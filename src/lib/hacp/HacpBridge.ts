@@ -61,6 +61,87 @@ export function resolveToolExecutionOutcome(
   };
 }
 
+/**
+ * ARGUMENT INTEGRITY REPAIR GATE v1.0 — runtime guard for
+ * insert_section_from_library.sectionTemplateId.
+ * Schema alone is NOT trusted: missing / empty / null / undefined /
+ * wrong type / whitespace must fail CLOSED before any template lookup
+ * or BuilderCommand construction.
+ */
+export function validateSectionTemplateIdArg(
+  raw: unknown
+): { ok: true; sectionTemplateId: string } | { ok: false; reason: string } {
+  if (raw === undefined || raw === null) {
+    return {
+      ok: false,
+      reason: 'insert_section_from_library wymaga parametru sectionTemplateId (ID szablonu z biblioteki).',
+    };
+  }
+  if (typeof raw !== 'string') {
+    return {
+      ok: false,
+      reason:
+        'insert_section_from_library wymaga parametru sectionTemplateId jako string (ID z search_sections). Nieprawidłowy typ argumentu.',
+    };
+  }
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) {
+    return {
+      ok: false,
+      reason: 'insert_section_from_library wymaga parametru sectionTemplateId (ID szablonu z biblioteki).',
+    };
+  }
+  return { ok: true, sectionTemplateId: trimmed };
+}
+
+/** True when a tool status counts as "ran to completion" (not a hard failure). */
+export function isToolStatusCompleted(status: HacpExecutionStatus): boolean {
+  return status === 'EXECUTED' || status === 'CLARIFY';
+}
+
+/**
+ * FINAL MESSAGE — ARGUMENT INTEGRITY REPAIR GATE v1.0.
+ * Never claim "Wykonałem narzędzia: X" when X FAILED.
+ * Separate TOOL CALLED / TOOL SUCCEEDED / MUTATION / VERIFICATION.
+ * Never append the static hint "np. insert_section_from_library" when that
+ * exact tool was invoked and failed.
+ */
+export function buildNoMutationUserMessage(
+  outcomes: Array<{ name: string; status: HacpExecutionStatus; message?: string }>
+): string {
+  const failed = outcomes.filter((o) => !isToolStatusCompleted(o.status));
+  const completed = outcomes.filter((o) => isToolStatusCompleted(o.status));
+
+  if (failed.length > 0) {
+    const parts = failed.map((o) => {
+      let reason = (o.message || '').trim() || 'nieznany błąd wykonania narzędzia.';
+      // Prefer the short failure clause when the handler echoed the tool name.
+      const prefix = `${o.name} `;
+      if (reason.startsWith(prefix)) {
+        reason = reason.slice(prefix.length).trim();
+      }
+      reason = reason.replace(/[.\s]+$/, '');
+      return `Próba wykonania ${o.name} nie powiodła się: ${reason}`;
+    });
+    const completedNote =
+      completed.length > 0
+        ? ` Wykonano wyłącznie operacje bez mutacji: ${completed.map((o) => o.name).join(', ')}.`
+        : '';
+    return `${parts.join('. ')}. Nie wprowadzono zmian w BuilderDocument.${completedNote}`;
+  }
+
+  // All tools completed but produced zero BuilderCommands (read-only batch).
+  const names = completed.map((o) => o.name).join(', ');
+  const mutationHint = outcomes.some((o) => /^insert_|^update_|^set_|^remove_|^move_|^batch_|^configure_/.test(o.name))
+    ? ''
+    : ' Aby wykonać mutację, wywołaj insert_section_from_library z prawidłowym sectionTemplateId (ID z search_sections).';
+  return (
+    `Wykonano narzędzia odczytowe: ${names}. ` +
+    `Nie wprowadzono zmian w BuilderDocument — nie wywołano mutacji.` +
+    mutationHint
+  );
+}
+
 export class HacpBridge {
   private static instance: HacpBridge;
   private status: HacpStatus = 'ONLINE';
@@ -607,14 +688,15 @@ export class HacpBridge {
     }
 
     if (name === 'insert_section_from_library') {
-      const sectionTemplateId = args.sectionTemplateId as string;
-      if (!sectionTemplateId) {
+      const argCheck = validateSectionTemplateIdArg(args?.sectionTemplateId);
+      if (!argCheck.ok) {
         return {
           status: 'FAILED',
           verification: { passed: false, operation: name, target: 'none' },
-          message: 'insert_section_from_library wymaga parametru sectionTemplateId (ID szablonu z biblioteki).',
+          message: argCheck.reason,
         };
       }
+      const sectionTemplateId = argCheck.sectionTemplateId;
 
       try {
         const { ALL_SECTION_TEMPLATES } = await import('../../components/builder/library/sections');
@@ -1466,6 +1548,7 @@ export class HacpBridge {
         const steps: HacpExecutionStep[] = [];
         const commands: BuilderCommand[] = [];
         const appliedChanges: AppliedChangeItem[] = [];
+        const toolOutcomes: Array<{ name: string; status: HacpExecutionStatus; message?: string }> = [];
         let allPassed = true;
         let lastVerification: ExecutionVerification | undefined = undefined;
         let finalMessage = '';
@@ -1503,6 +1586,7 @@ export class HacpBridge {
             };
           }
           lastVerification = exec.verification;
+          toolOutcomes.push({ name: tc.name, status: exec.status, message: exec.message });
 
           console.log('[HacpBridge] EXECUTION_TRACE:', {
             phase: 'TOOL_RESULT',
@@ -1558,11 +1642,25 @@ export class HacpBridge {
 
         let cleanToolMsg: string;
         if (commands.length === 0) {
-          const executedNames = toolCalls.map((tc) => tc.name).join(', ');
+          // ARGUMENT INTEGRITY REPAIR — honest split of TOOL CALLED vs SUCCEEDED
+          // vs MUTATION vs VERIFICATION. Never "Wykonałem narzędzia: X" when X FAILED.
+          cleanToolMsg = buildNoMutationUserMessage(toolOutcomes);
+        } else if (!allPassed) {
+          // Commands exist but at least one tool failed verification/status —
+          // never echo the model's optimistic promise as done.
+          const failedOutcomes = toolOutcomes.filter((o) => !isToolStatusCompleted(o.status));
+          const failText = failedOutcomes
+            .map((o) => {
+              let reason = (o.message || '').trim() || 'błąd wykonania.';
+              const prefix = `${o.name} `;
+              if (reason.startsWith(prefix)) reason = reason.slice(prefix.length).trim();
+              reason = reason.replace(/[.\s]+$/, '');
+              return `Próba wykonania ${o.name} nie powiodła się: ${reason}`;
+            })
+            .join('. ');
           cleanToolMsg =
-            `Wykonałem narzędzia: ${executedNames}. ` +
-            `Nie wprowadziłem zmian w BuilderDocument — liczba sekcji bez zmian, brak nowego węzła. ` +
-            `Brakuje kroku mutacji (np. insert_section_from_library). Spróbuj ponownie lub wskaż konkretny szablon z wyników wyszukiwania.`;
+            (failText || 'Część operacji nie powiodła się przy weryfikacji.') +
+            ` Wygenerowano ${commands.length} command(ów), ale mutacja NIE została potwierdzona jako udana.`;
         } else {
           const rawToolMsg =
             aiProviderResponse.message && aiProviderResponse.message.trim().length > 0
