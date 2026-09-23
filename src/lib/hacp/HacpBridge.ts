@@ -622,7 +622,12 @@ export class HacpBridge {
         const cmd: BuilderCommand = {
           type: 'ADD_SECTION',
           pageId: targetPageId,
-          sectionType: template.category || 'content',
+          // VISUAL LAYER FORENSIC GATE v1.0: root section type MUST be the
+          // real node type ("section") so SectionBlock treats it as a SECTION
+          // (children + dark background stay inside the section wrapper).
+          // template.category (e.g. "testimonials") is a library facet only —
+          // never the root node type.
+          sectionType: sectionNode.type || 'section',
           defaultProps: sectionNode.props || {},
           atIndex,
           label: (args.label as string) || template.name || `Library: ${sectionTemplateId}`,

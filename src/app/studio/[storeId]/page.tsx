@@ -28,6 +28,7 @@ import {
   ApiStore,
   apiStoreToBuilderDoc,
   builderDocToApiPatch,
+  nodeToApiSection,
 } from '@/lib/builder/studioDoc'
 
 // ---------------------------------------------------------------------------
@@ -53,6 +54,46 @@ export default function StudioPage({ params }: { params: Promise<{ storeId: stri
             setStore(data.store)
             return
           }
+        }
+
+        // Offline / demo store (GET 401 or missing): restore last local save
+        // written by handleSave when PATCH fails. Without this, reload drops
+        // all edits and falls back to the hardcoded single-Hero demo.
+        try {
+          const localRaw = localStorage.getItem(`solospot_store_${id}`)
+          if (localRaw) {
+            const localDoc = JSON.parse(localRaw) as BuilderDocument
+            if (localDoc?.pages?.length) {
+              const branding = localDoc.theme ?? {}
+              setStore({
+                id: localDoc.id || id,
+                name: localDoc.metadata?.storeName || 'SoloSpot Visual Builder',
+                slug: localDoc.metadata?.storeSlug || id,
+                domain: null,
+                status: 'ACTIVE',
+                tenantId: localDoc.tenantId || 'tenant-demo',
+                config: {
+                  publicationStatus: 'DRAFT',
+                  branding: {
+                    primaryColor: branding.primaryColor ?? '#7c3aed',
+                    secondaryColor: branding.secondaryColor ?? '#f1f5f9',
+                    font: branding.font ?? 'Inter',
+                    logo: branding.logo,
+                    favicon: branding.favicon,
+                  },
+                  pages: localDoc.pages.map((page) => ({
+                    id: page.id,
+                    name: page.name,
+                    slug: page.slug,
+                    sections: page.sections.map((s, idx) => nodeToApiSection(s, idx)),
+                  })),
+                },
+              })
+              return
+            }
+          }
+        } catch {
+          // corrupt local save — fall through to demo fallback
         }
 
         // Standalone / Offline / Demo fallback for Studio

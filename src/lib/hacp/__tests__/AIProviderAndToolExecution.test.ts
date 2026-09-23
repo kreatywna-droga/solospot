@@ -294,10 +294,22 @@ describe('Real AI Provider & HACP Tool Calling Verification', () => {
     expect(result.command?.type).toBe('ADD_SECTION');
     expect(result.message).toContain('testimonials');
 
+    // VISUAL LAYER FORENSIC GATE: root type must be real node type, not category
+    const cmd = result.command as { sectionType?: string; styles?: { backgroundColor?: string }; children?: unknown[] };
+    expect(cmd.sectionType).toBe('section');
+    expect(cmd.sectionType).not.toBe('testimonials');
+    expect(cmd.styles?.backgroundColor).toBe('#06060c');
+    expect(Array.isArray(cmd.children)).toBe(true);
+    expect((cmd.children || []).length).toBeGreaterThanOrEqual(2);
+
     // Verify document actually changed (section count increased)
     const { applyCommandToDocument } = await import('../../../../packages/builder-core/src');
     const nextDoc = applyCommandToDocument(mockDoc, result.command!);
     expect(nextDoc.pages[0].sections.length).toBe(initialCount + 1);
+    const inserted = nextDoc.pages[0].sections[nextDoc.pages[0].sections.length - 1];
+    expect(inserted.type).toBe('section');
+    expect(inserted.styles?.backgroundColor).toBe('#06060c');
+    expect((inserted.children || []).length).toBeGreaterThanOrEqual(2);
   });
 
   // --------------------------------------------------------------------------
