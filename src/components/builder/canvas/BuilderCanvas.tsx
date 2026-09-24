@@ -213,8 +213,16 @@ interface SectionBlockProps {
 // Responsive style & prop resolvers
 // ---------------------------------------------------------------------------
 
-function resolveEffectiveStyles(node: SectionNode, viewport: ViewportLabel): Record<string, any> {
-  const base = (node.styles || {}) as Record<string, any>
+function resolveEffectiveStyles(node: SectionNode, viewport: ViewportLabel, theme?: Record<string, any>): Record<string, any> {
+  const themeStyles = theme
+    ? {
+        color: theme.primaryColor,
+        fontFamily: theme.font,
+        backgroundColor: theme.backgroundColor,
+        borderRadius: theme.borderRadius,
+      }
+    : {}
+  const base = { ...themeStyles, ...(node.styles || {}) } as Record<string, any>
   if (viewport === 'DESKTOP') return base
   const tablet = (node.responsive?.tablet || {}) as Record<string, any>
   if (viewport === 'TABLET') return { ...base, ...tablet }
@@ -418,7 +426,7 @@ function CanvasNode({
   const isSelected = selectedId === node.id
   const isHovered = hoveredId === node.id && !isSelected
 
-  const styles = resolveEffectiveStyles(node, viewport)
+  const styles = resolveEffectiveStyles(node, viewport, builderDoc?.theme)
   const props = resolveEffectiveProps(node, viewport)
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -1309,7 +1317,7 @@ function SectionBlock({
   const [isSectionDropTarget, setIsSectionDropTarget] = useState(false)
   // Resolved styles (base + responsive overrides for active viewport) —
   // applied to the section wrapper so Design Inspector changes are visible.
-  const resolvedStyles = resolveEffectiveStyles(node, canvas.viewport.label)
+  const resolvedStyles = resolveEffectiveStyles(node, canvas.viewport.label, document?.theme)
 
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
