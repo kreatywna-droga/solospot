@@ -3,7 +3,7 @@
 **Status:** **PASS** (local + prod — see §16–§17)
 **Date:** 2026-09-24
 **Baseline:** Knowledge Foundation Gate closed (`c1fbe3d` + `30ef170`, `dpl_ESGPeR1rPBNSXeLPxBsbKVXHcCvp`)
-**Gate commit:** see §14 · **Prod deploy:** see §15 · **Prod URL:** https://www.solospot.pl
+**Gate commit:** `4f8847b` · **Prod deploy:** `dpl_J9zx9KZGhSkkbQCCjNmsJKDQuyf9` → https://www.solospot.pl (Ready) · **Prod E2E:** 17 PASS / 0 FAIL / 1 WARN
 
 ---
 
@@ -230,30 +230,32 @@ Full numeric thresholds asserted in `SecondaryIndustries.test.ts` (styles≥5, b
 
 ## 14. Commit SHA
 
-- **Gate feat commit:** `__GATE_COMMIT__` — `feat(design-brain): master gate — 17-module design brain, packages/design-system, planner soft-attach, dental E2E 17/0`
-- **Docs commit:** `__DOCS_COMMIT__` — report delta after prod verification
-- Pushed: `origin/main` = docs commit (verified)
+- **Gate feat commit:** `4f8847b4cf9f7f9366cfc75b36cf935352c65fe1` — `feat(design-brain): master gate — 17-module design brain, packages/design-system, planner soft-attach, dental E2E 17/0`
+- **Docs commit:** this report delta after prod verification (see `git log -- docs/HACP_DESIGN_BRAIN_MASTER_GATE_V1_REPORT.md`)
+- Pushed: `origin/main` includes gate feat commit (verified `git rev-parse origin/main` = `4f8847b`)
 
 ---
 
 ## 15. Vercel deployment (exactly one)
 
 - **Command:** `npx vercel deploy --prod --yes` (single invocation)
-- **Deployment ID:** `__DEPLOY_ID__`
-- **URL:** `__DEPLOY_URL__`
-- **Alias:** https://www.solospot.pl
-- **Status:** `__DEPLOY_STATUS__`
-- Deployed from gate feat commit (design-brain + design-system + planner integration included)
+- **Deployment ID:** `dpl_J9zx9KZGhSkkbQCCjNmsJKDQuyf9`
+- **URL:** https://solospot-39mfc687p-kreatywna-droga.vercel.app
+- **Alias:** https://www.solospot.pl · https://solospot.pl · https://solospot.vercel.app
+- **Status:** ● Ready (iad1 · Next.js 16.2.9 · TypeScript OK · 55/55 pages · `Ready in 4m`)
+- **Inspect:** https://vercel.com/kreatywna-droga/solospot/J9zx9KZGhSkkbQCCjNmsJKDQuyf9
+- Deployed from gate feat commit `4f8847b` (design-brain + design-system + planner integration included)
 
 ---
 
 ## 16. Prod E2E
 
 - **Command:** `$env:BASE_URL='https://www.solospot.pl'; node scratch/design-brain-master-gate-e2e.js`
-- **Result:** `__PROD_RESULT__`
-- **DesignBrain log (prod):** `__PROD_DB_LOG__`
-- **Knowledge log (prod):** `__PROD_KN_LOG__`
-- Sections: `__PROD_SECTIONS__` · dentalHits: `__PROD_DENTAL__`
+- **Result:** **17 PASS / 0 FAIL / 1 WARN** (WARN = pre-existing 401/404 console noise, same as local)
+- **DesignBrain log (prod):** `[DesignBrain] v=1.0.0 status=COMPLETE industry=dentist style=premium pages=7 sections=11 blueprint=BP-dental-clinic critique=0ISSUE repair=blocked qa=typography=REPAIR_REQUIRED,composition=PASS,responsive=NOT_EXECUTED,consistency=PASS,accessibility=NOT_EXECUTED,content=PASS,ux=NOT_EXECUTED,businessGoal=PASS,antiGeneric=PASS`
+- **Knowledge log (prod):** `[Knowledge] schema=1.0.0 industry=dentist purpose=lead-generation entries=3 pattern=IP-dental-medical blueprint=BP-dental-clinic qa=24 anti=8 tone=professional-warm reassuring cta=Umów wizytę sections=navbar|hero|services|about|team|testimonials|cta|contact|footer`
+- Sections: `1 → 8` · dentalHits: `8/8` · A9 `batch_execute` absent · A12 mutated before complete · A14 soft-attach did not block (`knowledgeLogs=2, designBrainLogs=1`)
+- Local and prod both **17/0/1** — zero regression between environments
 
 ---
 
@@ -280,7 +282,7 @@ Full numeric thresholds asserted in `SecondaryIndustries.test.ts` (styles≥5, b
 - [x] Lint gate files = 0 errors
 - [x] `npm run build` SUCCESS
 - [x] Single prod deploy
-- [x] Prod dental E2E **`__PROD_RESULT__`**
+- [x] Prod dental E2E **17 PASS / 0 FAIL / 1 WARN**
 - [x] Report written `docs/HACP_DESIGN_BRAIN_MASTER_GATE_V1_REPORT.md`
 - [x] Baseline Knowledge Foundation Gate still green (no regressions in knowledge/ai suites)
 
