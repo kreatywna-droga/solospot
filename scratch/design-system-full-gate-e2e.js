@@ -36,6 +36,27 @@ async function waitMs(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+async function clearSearch(page) {
+  await page.evaluate(() => {
+    const input = document.querySelector('[data-testid="ds-search-input"]');
+    if (!input) return;
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+    setter.call(input, '');
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  await waitMs(400);
+}
+
+async function setSearch(page, value) {
+  await clearSearch(page);
+  if (value) {
+    await page.click('[data-testid="ds-search-input"]');
+    await page.type('[data-testid="ds-search-input"]', value, { delay: 25 });
+    await waitMs(500);
+  }
+}
+
 (async () => {
   fs.mkdirSync(OUT_DIR, { recursive: true });
   const browser = await puppeteer.launch({
@@ -95,9 +116,7 @@ async function waitMs(ms) {
 
   // Search
   await page.waitForSelector('[data-testid="ds-search-input"]', { timeout: 10000 });
-  await page.click('[data-testid="ds-search-input"]', { clickCount: 3 });
-  await page.type('[data-testid="ds-search-input"]', 'dental', { delay: 20 });
-  await waitMs(500);
+  await setSearch(page, 'dental');
   const dentalHits = await page.evaluate(
     () => document.querySelectorAll('[data-testid="ds-catalog-item"]').length
   );
@@ -112,27 +131,119 @@ async function waitMs(ms) {
   );
   log(nextStep(), 'Industry filter visible after toggle', 'ds-filter-industry present', filtersVisible ? 'present' : 'missing', filtersVisible ? 'PASS' : 'FAIL');
 
-  // Category: fonts
-  await page.click('[data-testid="ds-cat-fonts"]');
+  // Industry filter selection
+  await page.select('[data-testid="ds-filter-industry"]', 'dental');
+  await waitMs(500);
+  const industryFiltered = await page.evaluate(
+    () => document.querySelectorAll('[data-testid="ds-catalog-item"]').length
+  );
+  log(nextStep(), 'Industry filter = dental applied', '> 0 items', String(industryFiltered), industryFiltered > 0 ? 'PASS' : 'FAIL');
+  await page.screenshot({ path: path.join(OUT_DIR, '03a-industry-filter.png') });
+
+  // Mood filter
+  const moodSelect = await page.$('[data-testid="ds-filter-mood"]');
+  if (moodSelect) {
+    const moodOptions = await page.evaluate(() => {
+      const sel = document.querySelector('[data-testid="ds-filter-mood"]');
+      return sel ? Array.from(sel.options).map((o) => o.value).filter(Boolean) : [];
+    });
+    if (moodOptions.length > 0) {
+      await page.select('[data-testid="ds-filter-mood"]', moodOptions[0]);
+      await waitMs(400);
+      const moodFiltered = await page.evaluate(
+        () => document.querySelectorAll('[data-testid="ds-catalog-item"]').length
+      );
+      log(nextStep(), `Mood filter = ${moodOptions[0]}`, '>= 0 items', String(moodFiltered), 'PASS');
+    } else {
+      log(nextStep(), 'Mood filter options loaded', '> 0 options', '0', 'FAIL');
+    }
+  } else {
+    log(nextStep(), 'Mood filter present', 'ds-filter-mood', 'missing', 'FAIL');
+  }
+
+  // Reset filters
+  await page.select('[data-testid="ds-filter-industry"]', '');
+  if (moodSelect) {
+    await page.evaluate(() => {
+      const sel = document.querySelector('[data-testid="ds-filter-mood"]');
+      if (sel) sel.value = '';
+      sel?.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  }
   await waitMs(400);
+  const filtersReset = await page.evaluate(
+    () => document.querySelectorAll('[data-testid="ds-catalog-item"]').length
+  );
+  log(nextStep(), 'Filters reset → full list restored', '> 0 items', String(filtersReset), filtersReset > 0 ? 'PASS' : 'FAIL');
+
+  // Category: fonts (clear query first)
+  await clearSearch(page);
+  await page.click('[data-testid="ds-cat-fonts"]');
+  await waitMs(500);
   const fontItems = await page.evaluate(
     () => document.querySelectorAll('[data-testid="ds-catalog-item"]').length
   );
   log(nextStep(), 'Fonts category lists items', '> 0', String(fontItems), fontItems > 0 ? 'PASS' : 'FAIL');
+  await page.screenshot({ path: path.join(OUT_DIR, '03b-fonts.png') });
 
   // Category: colors
   await page.click('[data-testid="ds-cat-colors"]');
-  await waitMs(400);
+  await waitMs(500);
   const colorItems = await page.evaluate(
     () => document.querySelectorAll('[data-testid="ds-catalog-item"]').length
   );
   log(nextStep(), 'Colors category lists items', '> 0', String(colorItems), colorItems > 0 ? 'PASS' : 'FAIL');
+  await page.screenshot({ path: path.join(OUT_DIR, '03c-colors.png') });
 
-  // Back to style packs
+  // Category: typography
+  await page.click('[data-testid="ds-cat-typography"]');
+  await waitMs(400);
+  const typoItems = await page.evaluate(
+    () => document.querySelectorAll('[data-testid="ds-catalog-item"]').length
+  );
+  log(nextStep(), 'Typography category lists items', '> 0', String(typoItems), typoItems > 0 ? 'PASS' : 'FAIL');
+
+  // Category: industry presets
+  await page.click('[data-testid="ds-cat-industry-presets"]');
+  await waitMs(400);
+  const industryItems = await page.evaluate(
+    () => document.querySelectorAll('[data-testid="ds-catalog-item"]').length
+  );
+  log(nextStep(), 'Industry presets category lists items', '> 0', String(industryItems), industryItems > 0 ? 'PASS' : 'FAIL');
+
+  // Category: buttons
+  await page.click('[data-testid="ds-cat-buttons"]');
+  await waitMs(400);
+  const buttonItems = await page.evaluate(
+    () => document.querySelectorAll('[data-testid="ds-catalog-item"]').length
+  );
+  log(nextStep(), 'Buttons category lists items', '> 0', String(buttonItems), buttonItems > 0 ? 'PASS' : 'FAIL');
+
+  // Category: cards
+  await page.click('[data-testid="ds-cat-cards"]');
+  await waitMs(400);
+  const cardItems = await page.evaluate(
+    () => document.querySelectorAll('[data-testid="ds-catalog-item"]').length
+  );
+  log(nextStep(), 'Cards category lists items', '> 0', String(cardItems), cardItems > 0 ? 'PASS' : 'FAIL');
+
+  // Category: backgrounds
+  await page.click('[data-testid="ds-cat-backgrounds"]');
+  await waitMs(400);
+  const bgItems = await page.evaluate(
+    () => document.querySelectorAll('[data-testid="ds-catalog-item"]').length
+  );
+  log(nextStep(), 'Backgrounds category lists items', '> 0', String(bgItems), bgItems > 0 ? 'PASS' : 'FAIL');
+
+  // Back to style packs with dental query
   await page.click('[data-testid="ds-cat-style-packs"]');
-  await page.click('[data-testid="ds-search-input"]', { clickCount: 3 });
-  await page.type('[data-testid="ds-search-input"]', 'dental', { delay: 20 });
-  await waitMs(500);
+  await waitMs(300);
+  await setSearch(page, 'dental');
+  const packItemsAfter = await page.evaluate(
+    () => document.querySelectorAll('[data-testid="ds-catalog-item"]').length
+  );
+  log(nextStep(), 'Style Packs + dental query after category hops', '> 0', String(packItemsAfter), packItemsAfter > 0 ? 'PASS' : 'FAIL');
+  await page.waitForSelector('[data-testid="ds-btn-apply"]', { timeout: 8000 });
 
   // Preview (PREVIEW ≠ APPLY)
   const beforeTheme = await page.evaluate(() => {
@@ -333,6 +444,14 @@ async function waitMs(ms) {
   );
   log(nextStep(), 'Catalog still available after HACP', 'ds-catalog-root', catalogStill ? 'present' : 'missing', catalogStill ? 'PASS' : 'FAIL');
   await page.screenshot({ path: path.join(OUT_DIR, '14-catalog-reopen.png') });
+
+  // Search still works after HACP round-trip
+  await setSearch(page, 'luxury');
+  const luxuryHits = await page.evaluate(
+    () => document.querySelectorAll('[data-testid="ds-catalog-item"]').length
+  );
+  log(nextStep(), 'Post-HACP search "luxury"', '> 0 results', String(luxuryHits), luxuryHits > 0 ? 'PASS' : 'FAIL');
+  await page.screenshot({ path: path.join(OUT_DIR, '15-post-hacp-search.png') });
 
   // Count unique UI interactions logged
   const uiStepsLogged = RESULTS.filter((r) => r.id.startsWith('S')).length;
