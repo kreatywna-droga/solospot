@@ -340,6 +340,11 @@ export class OpenCodeProvider implements AIProvider {
         'search_experiences', 'get_experience_categories',
         'search_sections', 'search_website_templates', 'get_typography_presets',
         'get_design_presets', 'resolve_target',
+        // Design System (ONE catalog — read-only)
+        'search_design_styles', 'search_style_packs', 'search_fonts', 'search_font_pairings',
+        'search_color_palettes', 'search_typography_systems', 'search_button_styles',
+        'search_card_styles', 'search_backgrounds', 'search_industry_presets',
+        'inspect_design_style', 'inspect_style_pack',
       ]);
 
       // Maximum iterations for the agent loop (search → inspect → decide → insert)

@@ -46,6 +46,8 @@ export interface ApiStore {
     branding?: {
       primaryColor?: string
       secondaryColor?: string
+      backgroundColor?: string
+      borderRadius?: string
       font?: string
       logo?: string
       favicon?: string
@@ -114,6 +116,8 @@ export function apiStoreToBuilderDoc(store: ApiStore): BuilderDocument {
   const theme: Partial<BuilderTheme> = {
     primaryColor: branding.primaryColor ?? '#7c3aed',
     secondaryColor: branding.secondaryColor ?? '#d946ef',
+    backgroundColor: branding.backgroundColor,
+    borderRadius: branding.borderRadius,
     font: branding.font ?? 'Inter',
     logo: branding.logo,
     favicon: branding.favicon,
@@ -170,6 +174,8 @@ export function builderDocToApiPatch(doc: BuilderDocument): Record<string, unkno
       branding: {
         primaryColor: compiled.branding.primaryColor,
         secondaryColor: compiled.branding.secondaryColor,
+        backgroundColor: compiled.branding.backgroundColor,
+        borderRadius: compiled.branding.borderRadius,
         font: compiled.branding.font,
         logo: compiled.branding.logo,
         favicon: compiled.branding.favicon,

@@ -671,4 +671,161 @@ export const BUILDER_TOOL_DEFINITIONS: HacpToolDefinition[] = [
       properties: {},
     },
   },
+  // ── Design System (ONE catalog — packages/design-system) ─────────
+  {
+    name: 'search_design_styles',
+    description: 'Przeszukaj katalog Design System (style packs, fonts, palettes, typography, components). Zwraca prawdziwe pozycje z jednego katalogu używanego też przez UI Buildera.',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Fraza wyszukiwania (np. dental, luxury, premium).' },
+        category: { type: 'string', description: 'Kategoria: style-packs|fonts|colors|typography|buttons|cards|backgrounds|industry-presets|radius|shadows|sections|hero.' },
+        industry: { type: 'string', description: 'Filtr branży (np. dental, saas).' },
+        mood: { type: 'string', description: 'Filtr nastroju (np. luxury, modern).' },
+        style: { type: 'string', description: 'Filtr stylu.' },
+        limit: { type: 'number', description: 'Maks. liczba wyników na kategorię.' },
+      },
+    },
+  },
+  {
+    name: 'search_style_packs',
+    description: 'Przeszukaj Style Packs w Design System (te same ID co w UI Buildera).',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Fraza (np. dental, luxury).' },
+        industry: { type: 'string', description: 'Filtr branży.' },
+        mood: { type: 'string', description: 'Filtr nastroju.' },
+        limit: { type: 'number', description: 'Maks. wyników.' },
+      },
+    },
+  },
+  {
+    name: 'search_fonts',
+    description: 'Przeszukaj font library Design System.',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Nazwa lub tag fontu.' },
+        category: { type: 'string', description: 'Kategoria fontu.' },
+        limit: { type: 'number', description: 'Maks. wyników.' },
+      },
+    },
+  },
+  {
+    name: 'search_font_pairings',
+    description: 'Przeszukaj pary fontów (display + body).',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Nazwa pary lub fontu.' },
+        limit: { type: 'number', description: 'Maks. wyników.' },
+      },
+    },
+  },
+  {
+    name: 'search_color_palettes',
+    description: 'Przeszukaj palety kolorów Design System.',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Nazwa lub styl palety.' },
+        industry: { type: 'string', description: 'Filtr branży.' },
+        limit: { type: 'number', description: 'Maks. wyników.' },
+      },
+    },
+  },
+  {
+    name: 'search_typography_systems',
+    description: 'Przeszukaj systemy typografii.',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Nazwa lub styl.' },
+        limit: { type: 'number', description: 'Maks. wyników.' },
+      },
+    },
+  },
+  {
+    name: 'search_button_styles',
+    description: 'Przeszukaj style przycisków.',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Nazwa lub styl.' },
+        limit: { type: 'number', description: 'Maks. wyników.' },
+      },
+    },
+  },
+  {
+    name: 'search_card_styles',
+    description: 'Przeszukaj style kart.',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Nazwa lub styl.' },
+        limit: { type: 'number', description: 'Maks. wyników.' },
+      },
+    },
+  },
+  {
+    name: 'search_backgrounds',
+    description: 'Przeszukaj style tła (backgrounds).',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Nazwa lub styl.' },
+        limit: { type: 'number', description: 'Maks. wyników.' },
+      },
+    },
+  },
+  {
+    name: 'search_industry_presets',
+    description: 'Przeszukaj presety branżowe (Industry Presets) z rekomendowanymi Style Packami.',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Fraza lub branża.' },
+        industry: { type: 'string', description: 'Dokładna branża (np. dental).' },
+        limit: { type: 'number', description: 'Maks. wyników.' },
+      },
+    },
+  },
+  {
+    name: 'inspect_design_style',
+    description: 'Pokaż szczegóły stylu designu (font, paleta, radius, shadow) wraz z kompatybilnością.',
+    parameters: {
+      type: 'object',
+      properties: {
+        styleId: { type: 'string', description: 'ID stylu z katalogu.' },
+      },
+      required: ['styleId'],
+    },
+  },
+  {
+    name: 'inspect_style_pack',
+    description: 'Pokaż pełny Style Pack: typography, colors, radius, shadows, buttons, cards, compatibility.',
+    parameters: {
+      type: 'object',
+      properties: {
+        packId: { type: 'string', description: 'ID Style Packa (np. sp-luxury-dental).' },
+      },
+      required: ['packId'],
+    },
+  },
+  {
+    name: 'apply_design_style',
+    description: 'Zastosuj Style Pack do motywu strony (realna mutacja BuilderDocument przez UPDATE_THEME). Zmienia kolory, font, radius — NIE niszczy struktury ani treści.',
+    parameters: {
+      type: 'object',
+      properties: {
+        stylePackId: { type: 'string', description: 'ID Style Packa do zastosowania.' },
+        options: {
+          type: 'object',
+          description: 'Opcjonalne ograniczenie: { applyTo: ["colors","typography","radius","background"] }.',
+        },
+      },
+      required: ['stylePackId'],
+    },
+  },
 ];

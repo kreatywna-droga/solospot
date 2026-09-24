@@ -4,6 +4,7 @@
  * StylePanel — Global Design System & Theme Tokens (SoloSpot Builder 2.0)
  *
  * Manages:
+ *   - Design System catalog (ONE SSOT: packages/design-system) — search/filters/preview/apply
  *   - Global Colors (Primary, Secondary, Background, Text, Accent, Border)
  *   - Global Typography (Heading & Body font families, base size, line heights)
  *   - Global Spacing & Border Radius tokens
@@ -12,11 +13,12 @@
 
 import { useState } from 'react'
 import {
-  Palette, Type, Sliders, Sparkles, Check,
-  RotateCcw, Layers, Layout, Paintbrush,
+  Palette, Type, Sliders, Sparkles,
+  LayoutGrid,
 } from 'lucide-react'
 import { useBuilder } from '../state/BuilderProvider'
 import { ColorControl } from '../../../../packages/authoring-studio/src/inspector/controls'
+import { DesignSystemCatalog } from '../design-system/DesignSystemCatalog'
 
 const FONT_OPTIONS = [
   { label: 'Inter (Domyślny / Modern)', value: 'Inter' },
@@ -76,7 +78,7 @@ export function StylePanel() {
   const theme = document.theme
   const tokens = theme.tokens ?? {}
 
-  const [activeSubTab, setActiveSubTab] = useState<'colors' | 'typography' | 'tokens' | 'presets'>('colors')
+  const [activeSubTab, setActiveSubTab] = useState<'catalog' | 'colors' | 'typography' | 'tokens' | 'presets'>('catalog')
 
   const updateColor = (key: 'primaryColor' | 'secondaryColor' | 'backgroundColor', value: string) => {
     dispatch({
@@ -125,6 +127,7 @@ export function StylePanel() {
       {/* Sub Tabs */}
       <div className="flex items-center gap-1 p-2 border-b border-[#3A3A40] bg-[#202024]">
         {[
+          { id: 'catalog', label: 'Katalog', icon: LayoutGrid },
           { id: 'colors', label: 'Kolory', icon: Palette },
           { id: 'typography', label: 'Typografia', icon: Type },
           { id: 'tokens', label: 'Tokeny', icon: Sliders },
@@ -151,7 +154,14 @@ export function StylePanel() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-5 text-xs">
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden text-xs">
+        {activeSubTab === 'catalog' && (
+          <div className="flex-1 min-h-0 flex flex-col" data-testid="ds-catalog-root">
+            <DesignSystemCatalog />
+          </div>
+        )}
+
+        <div className={`${activeSubTab === 'catalog' ? 'hidden' : 'flex-1 overflow-y-auto p-4 space-y-5'}`}>
         {/* TAB: COLORS */}
         {activeSubTab === 'colors' && (
           <div className="space-y-4">
@@ -302,6 +312,7 @@ export function StylePanel() {
             ))}
           </div>
         )}
+        </div>
       </div>
     </div>
   )

@@ -57,7 +57,7 @@ function createTestRequest(prompt: string): AICopilotRequest {
 }
 
 describe('NoFakeSuccess — mutation classification', () => {
-  it('insert/update/remove/move/configure/undo/redo are mutations', () => {
+  it('insert/update/remove/move/configure/apply/undo/redo are mutations', () => {
     for (const name of [
       'insert_section_from_library',
       'insert_experience_from_library',
@@ -73,6 +73,7 @@ describe('NoFakeSuccess — mutation classification', () => {
       'move_node',
       'configure_experience',
       'batch_execute',
+      'apply_design_style',
       'undo',
       'redo',
     ]) {
@@ -85,6 +86,12 @@ describe('NoFakeSuccess — mutation classification', () => {
       'search_sections',
       'search_experiences',
       'search_website_templates',
+      'search_design_styles',
+      'search_style_packs',
+      'search_fonts',
+      'search_color_palettes',
+      'inspect_design_style',
+      'inspect_style_pack',
       'inspect_page_structure',
       'inspect_document_summary',
       'inspect_node',

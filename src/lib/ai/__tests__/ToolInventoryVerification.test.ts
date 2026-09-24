@@ -54,6 +54,20 @@ const ADVERTISED_TOOLS = [
   // Library Insertion
   'insert_section_from_library',
   'insert_experience_from_library',
+  // Design System (ONE catalog — packages/design-system)
+  'search_design_styles',
+  'search_style_packs',
+  'search_fonts',
+  'search_font_pairings',
+  'search_color_palettes',
+  'search_typography_systems',
+  'search_button_styles',
+  'search_card_styles',
+  'search_backgrounds',
+  'search_industry_presets',
+  'inspect_design_style',
+  'inspect_style_pack',
+  'apply_design_style',
 ];
 
 // Tools that are intentionally NOT advertised (REPO-only / internal / future gate).
@@ -122,6 +136,20 @@ const HACP_HANDLER_TOOLS = [
   // Library Insertion
   'insert_section_from_library',
   'insert_experience_from_library',
+  // Design System (ONE catalog — packages/design-system)
+  'search_design_styles',
+  'search_style_packs',
+  'search_fonts',
+  'search_font_pairings',
+  'search_color_palettes',
+  'search_typography_systems',
+  'search_button_styles',
+  'search_card_styles',
+  'search_backgrounds',
+  'search_industry_presets',
+  'inspect_design_style',
+  'inspect_style_pack',
+  'apply_design_style',
 ];
 
 // ─── TEST SUITE ────────────────────────────────────────────────────

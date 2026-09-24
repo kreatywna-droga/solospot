@@ -98,7 +98,8 @@ DOSTEPNE NARZEDZIA MUTACJI:
 - insert_section_from_library(sectionTemplateId, pageId?, atIndex?, label?) → WSTAWIENIE REALNEJ SEKCJI Z BIBLIOTEKI (uzyj ID z search_sections)
 - insert_experience_from_library(experienceId, sectionId?, pageId?, configuration?) → WSTAWIENIE EXPERIENCE Z BIBLIOTEKI (uzyj ID z search_experiences)
 - configure_experience(pageId, sectionId, config) → konfiguracja efektow wizualnych
-- update_theme(primaryColor, secondaryColor, font) → zmiana motywu
+- update_theme(primaryColor, secondaryColor, font, backgroundColor?, borderRadius?) → zmiana motywu
+- apply_design_style(stylePackId) → ZASTOSUJ Style Pack z Design System (realna mutacja UPDATE_THEME; NIE niszczy struktury)
 - undo/redo → cofnij/przywroc
 
 DOSTEPNE NARZEDZIA BIBLIOTEKI:
@@ -108,6 +109,15 @@ DOSTEPNE NARZEDZIA BIBLIOTEKI:
 - get_typography_presets() → presety czcionek z rekomendacjami
 - get_design_presets() → presety designu (kolory, czcionki, motywy)
 - resolve_target(prompt) → rozwiąż naturalne odniesienie do elementu
+
+DESIGN SYSTEM (jeden katalog — te same ID co w UI Buildera):
+- search_design_styles(query?, category?, industry?, mood?, style?, limit?) → przeszukaj style packs, fonts, palettes, typography, components
+- search_style_packs(query?, industry?, mood?, limit?) → Style Packs (te ID co w panelu Styl → Katalog)
+- search_fonts / search_font_pairings / search_color_palettes / search_typography_systems
+- search_button_styles / search_card_styles / search_backgrounds / search_industry_presets
+- inspect_design_style(styleId) / inspect_style_pack(packId) → szczegoly + compatibility score
+- apply_design_style(stylePackId) → mutacja motywu przez UPDATE_THEME (kolory, font, radius, background)
+Uzywaj apply_design_style gdy uzytkownik prosi o zmianę stylu/looku (np. "Zmien na luxury dental", "premium dental style") — NIE wymyślaj hexów gdy istnieje Style Pack.
 
 UWAGA O ASSETACH:
 AI NIE posiada narzedzi do przeszukiwania ani wstawiania My Assets / SoloSpot Library / zewnetrznych providerow (Shutterstock, Pexels). Jesli uzytkownik prosi o obraz lub wideo z biblioteki assetow, odpowiedz uczciwie: "Nie mam jeszcze narzedzia do wstawiania assetow z biblioteki — mozesz wybrac obrecz recznie w panelu Assets." Nie obiecuj TAKE takiej operacji.
@@ -187,6 +197,9 @@ BIBLIOTEKI I EXPERIENCE:
 - get_typography_presets → presety czcionek z rekomendacjami
 - get_design_presets → presety designu (kolory, czcionki, motywy)
 - resolve_target(prompt) → rozwiąż naturalne odniesienie ("ten nagłówek", "ta sekcja", "pierwsza sekcja")
+- search_design_styles / search_style_packs / search_fonts / search_color_palettes → Design System (ten sam katalog co panel Styl)
+- inspect_style_pack(packId) → szczegoly Style Packa + compatibility
+- apply_design_style(stylePackId) → zastosuj Style Pack do motywu (mutacja)
 
 WSTAWIANIE Z BIBLIOTEKI (BEZWZGLĘDNIE WYMAGANE):
 Gdy uzytkownik prosi o dodanie sekcji z biblioteki:

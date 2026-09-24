@@ -227,8 +227,8 @@ export { HACP_TOOLS, HACP_CONSTRAINTS, HACP_CAPABILITY_CORRIDOR, getHACPTool, ge
 // BUILDER INTEGRATION
 // ============================================================
 
-export type { BuilderIntegration as BuilderIntegrationInterface } from './builder';
-export { createBuilderIntegration, applyStyleToBuilderDocument } from './builder';
+export type { BuilderIntegration as BuilderIntegrationInterface, ResolvedStylePackApplication, ResolveDeps } from './builder';
+export { createBuilderIntegration, applyStyleToBuilderDocument, resolveStylePackApplication } from './builder';
 
 // ============================================================
 // PREVIEW SYSTEM
@@ -269,6 +269,15 @@ import { compatibilityEngine } from './compatibility';
 import { createStyleSearch } from './search';
 import { createBuilderIntegration } from './builder';
 import { HACP_TOOLS } from './hacp';
+import { backgroundStyles } from './backgrounds';
+import { radiusStyles } from './radius';
+import { shadowStyles } from './shadows';
+import { spacingStyles } from './spacing';
+import { sectionStyles } from './sections';
+import { heroStyles } from './hero';
+import { imageTreatmentStyles } from './images';
+import { iconStyles } from './icons';
+import { effectStyles } from './effects';
 
 export const DesignSystem = {
   // Catalogs
@@ -282,6 +291,15 @@ export const DesignSystem = {
   stylePacks: fullStylePacks,
   industryPresets,
   designCombinations: fullDesignCombinations,
+  backgroundStyles,
+  radiusStyles,
+  shadowStyles,
+  spacingStyles,
+  sectionStyles,
+  heroStyles,
+  imageTreatmentStyles,
+  iconStyles,
+  effectStyles,
 
   // Engines
   compatibility: compatibilityEngine,
@@ -293,9 +311,31 @@ export const DesignSystem = {
     buttonSystems,
     cardSystems,
     fullDesignThemes,
-    fullStylePacks
+    fullStylePacks,
+    {
+      industryPresets,
+      backgrounds: backgroundStyles,
+      radiusStyles,
+      shadowStyles,
+      spacingStyles,
+      sectionStyles,
+      heroStyles,
+      imageStyles: imageTreatmentStyles,
+      iconStyles,
+      effectStyles,
+    }
   ),
-  builder: createBuilderIntegration(fullStylePacks, fullDesignThemes),
+  builder: createBuilderIntegration(fullStylePacks, fullDesignThemes, {
+    colorPalettes: fullColorPalettes,
+    typographySystems,
+    radiusStyles,
+    shadowStyles,
+    backgroundStyles,
+    spacingStyles,
+    buttonSystems,
+    cardSystems,
+    compatibility: compatibilityEngine,
+  }),
 
   // HACP Tools
   hacpTools: HACP_TOOLS,

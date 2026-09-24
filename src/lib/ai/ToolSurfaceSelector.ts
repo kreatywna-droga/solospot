@@ -95,20 +95,36 @@ const TOOL_SURFACES: ToolSurface[] = [
       'resolve_target',
       'set_node_styles',
       'update_theme',
+      'search_style_packs',
+      'inspect_style_pack',
+      'apply_design_style',
       'inspect_document_summary',
     ],
-    description: 'Inspect, style, theme',
+    description: 'Inspect, style, theme, apply design system pack',
   },
   {
     intent: 'DESIGN_SYSTEM',
     tools: [
+      'search_design_styles',
+      'search_style_packs',
+      'search_fonts',
+      'search_color_palettes',
+      'search_typography_systems',
+      'search_button_styles',
+      'search_card_styles',
+      'search_backgrounds',
+      'search_industry_presets',
+      'search_font_pairings',
+      'inspect_design_style',
+      'inspect_style_pack',
+      'apply_design_style',
       'get_typography_presets',
       'get_design_presets',
       'update_theme',
       'inspect_document_summary',
       'inspect_page_structure',
     ],
-    description: 'Typography, design presets, theme',
+    description: 'Full Design System catalog: search, inspect, apply style packs',
   },
   {
     intent: 'SITE_GENERATION',
@@ -249,7 +265,7 @@ export class ToolSurfaceSelector {
    */
   static isMutationTool(toolName: string): boolean {
     if (toolName === 'undo' || toolName === 'redo') return true;
-    return /^(insert_|update_|set_|remove_|move_|delete_|batch_|configure_)/.test(toolName);
+    return /^(insert_|update_|set_|remove_|move_|delete_|batch_|configure_|apply_)/.test(toolName);
   }
 
   /**

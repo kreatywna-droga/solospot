@@ -1,10 +1,35 @@
 /**
- * Builder Integration — BuilderDocument Style Application
+ * Builder Integration — StylePack → Builder theme/node style resolution
  *
- * Provides integration with BuilderDocument for style application.
+ * Pure data mapping. Does NOT mutate BuilderDocument directly.
+ * UI dispatch and HacpBridge both consume resolveStylePackApplication output
+ * so ONE design system feeds Builder and HACP (no duplicate catalogs).
  */
 
 import type { StyleApplicationResult, StyleApplicationOptions } from '../types';
+
+export interface ResolvedStylePackApplication {
+  stylePackId: string;
+  stylePackName: string;
+  theme: {
+    primaryColor?: string;
+    secondaryColor?: string;
+    backgroundColor?: string;
+    font?: string;
+    borderRadius?: string;
+  };
+  tokens: {
+    colors?: Record<string, string>;
+    typography?: Record<string, string>;
+    radius?: Record<string, string>;
+    spacing?: Record<string, string>;
+  };
+  sectionStyles: Record<string, string>;
+  applied: string[];
+  skipped: string[];
+  warnings: string[];
+  compatibility: { score: number; incompatible: string[]; warnings: string[] };
+}
 
 export interface BuilderIntegration {
   applyStylePack(stylePackId: string, documentId: string, options?: Record<string, unknown>): StyleApplicationResult;
@@ -13,14 +38,212 @@ export interface BuilderIntegration {
   getAppliedStyles(documentId: string): string[];
 }
 
+type CatalogLookup = (id: string) => any | undefined;
+
+export interface ResolveDeps {
+  stylePacks: any[];
+  colorPalettes: any[];
+  typographySystems: any[];
+  radiusStyles: any[];
+  shadowStyles: any[];
+  backgroundStyles: any[];
+  spacingStyles: any[];
+  buttonSystems?: any[];
+  cardSystems?: any[];
+  compatibility?: { generateReport(itemId: string): { score: number; incompatible: string[]; warnings: { message: string }[] } };
+}
+
+function findById(list: any[], id?: string): any | undefined {
+  if (!id) return undefined;
+  return list.find((x) => x?.id === id);
+}
+
+export function resolveStylePackApplication(
+  stylePackId: string,
+  deps: ResolveDeps,
+  options: StyleApplicationOptions | Record<string, unknown> = {}
+): ResolvedStylePackApplication | null {
+  const pack = findById(deps.stylePacks, stylePackId);
+  if (!pack) return null;
+
+  const applyTo = (options as StyleApplicationOptions).applyTo as string[] | undefined;
+  const wants = (key: string) => !applyTo || applyTo.includes(key);
+
+  const palette = findById(deps.colorPalettes, pack.colorPaletteId);
+  const typography = findById(deps.typographySystems, pack.typographyId);
+  const radius = findById(deps.radiusStyles, pack.radiusId);
+  const shadow = findById(deps.shadowStyles, pack.shadowId);
+  const background = findById(deps.backgroundStyles, pack.backgroundId);
+  const spacing = findById(deps.spacingStyles, pack.spacingId);
+
+  const applied: string[] = [];
+  const skipped: string[] = [];
+  const warnings: string[] = [];
+
+  const theme: ResolvedStylePackApplication['theme'] = {};
+  const tokens: ResolvedStylePackApplication['tokens'] = {};
+  const sectionStyles: Record<string, string> = {};
+
+  if (palette && wants('colors')) {
+    theme.primaryColor = palette.primary;
+    theme.secondaryColor = palette.secondary;
+    theme.backgroundColor = palette.background;
+    tokens.colors = {
+      primary: palette.primary,
+      secondary: palette.secondary,
+      accent: palette.accent,
+      background: palette.background,
+      surface: palette.surface,
+      text: palette.text,
+      muted: palette.muted,
+      border: palette.border,
+      cta: palette.cta,
+    };
+    sectionStyles.backgroundColor = palette.background;
+    sectionStyles.color = palette.text;
+    applied.push('colors');
+  } else if (!palette) {
+    skipped.push('colors');
+    warnings.push(`Color palette ${pack.colorPaletteId} not found`);
+  } else {
+    skipped.push('colors');
+  }
+
+  if (typography && wants('typography')) {
+    const headingFont =
+      typography.fontFamily ||
+      typography.scale?.h1?.fontFamily ||
+      typography.headingFont ||
+      undefined;
+    const bodyFont =
+      typography.scale?.body?.fontFamily ||
+      typography.bodyFont ||
+      headingFont;
+    theme.font = headingFont || bodyFont || undefined;
+    tokens.typography = {
+      headingFont: headingFont || '',
+      bodyFont: bodyFont || headingFont || '',
+      h1Size: typography.scale?.h1?.fontSize || '',
+      h2Size: typography.scale?.h2?.fontSize || '',
+      bodySize: typography.scale?.body?.fontSize || '',
+    };
+    if (theme.font) {
+      sectionStyles.fontFamily = bodyFont || theme.font;
+    }
+    applied.push('typography');
+  } else if (!typography) {
+    skipped.push('typography');
+    warnings.push(`Typography ${pack.typographyId} not found`);
+  } else {
+    skipped.push('typography');
+  }
+
+  if (radius && wants('radius')) {
+    theme.borderRadius = radius.values?.md || radius.values?.lg || undefined;
+    tokens.radius = { ...radius.values };
+    sectionStyles.borderRadius = radius.values?.lg || radius.values?.md || undefined;
+    applied.push('radius');
+  } else {
+    skipped.push('radius');
+  }
+
+  if (shadow && wants('shadows')) {
+    sectionStyles.boxShadow = shadow.values?.md || shadow.preview || undefined;
+    applied.push('shadows');
+  } else {
+    skipped.push('shadows');
+  }
+
+  if (background && wants('background')) {
+    if (background.values?.primary && !theme.backgroundColor) {
+      theme.backgroundColor = background.values.primary;
+    }
+    if (background.values?.gradient) {
+      sectionStyles.backgroundImage = background.values.gradient;
+    }
+    applied.push('background');
+  } else {
+    skipped.push('background');
+  }
+
+  if (spacing && wants('spacing')) {
+    tokens.spacing = {
+      sm: spacing.values?.sm || '',
+      md: spacing.values?.md || '',
+      lg: spacing.values?.lg || '',
+      xl: spacing.values?.xl || '',
+    };
+    applied.push('spacing');
+  } else {
+    skipped.push('spacing');
+  }
+
+  if (pack.buttonSystemId && wants('buttons')) applied.push('buttons');
+  else if (!pack.buttonSystemId) skipped.push('buttons');
+  else skipped.push('buttons');
+
+  if (pack.cardSystemId && wants('cards')) applied.push('cards');
+  else skipped.push('cards');
+
+  if (pack.sectionStyleId && wants('sections')) applied.push('sections');
+  if (pack.heroStyleId && wants('hero')) applied.push('hero');
+  if (pack.imageTreatmentId && wants('images')) applied.push('images');
+  if (pack.iconStyleId && wants('icons')) applied.push('icons');
+  if (pack.effectId && wants('effects')) applied.push('effects');
+
+  const compat = deps.compatibility?.generateReport(pack.id) ?? {
+    score: 100,
+    incompatible: [],
+    warnings: [],
+  };
+
+  // Clean undefined keys from theme
+  const cleanTheme: ResolvedStylePackApplication['theme'] = {};
+  for (const [k, v] of Object.entries(theme)) {
+    if (v !== undefined && v !== null && v !== '') {
+      (cleanTheme as any)[k] = v;
+    }
+  }
+
+  return {
+    stylePackId: pack.id,
+    stylePackName: pack.name,
+    theme: cleanTheme,
+    tokens,
+    sectionStyles,
+    applied,
+    skipped,
+    warnings,
+    compatibility: {
+      score: compat.score,
+      incompatible: compat.incompatible ?? [],
+      warnings: (compat.warnings ?? []).map((w) => w.message ?? String(w)),
+    },
+  };
+}
+
 export function createBuilderIntegration(
   stylePacks: any[],
-  designThemes: any[]
+  designThemes: any[],
+  deps?: Partial<ResolveDeps>
 ): BuilderIntegration {
+  const fullDeps: ResolveDeps = {
+    stylePacks,
+    colorPalettes: deps?.colorPalettes ?? [],
+    typographySystems: deps?.typographySystems ?? [],
+    radiusStyles: deps?.radiusStyles ?? [],
+    shadowStyles: deps?.shadowStyles ?? [],
+    backgroundStyles: deps?.backgroundStyles ?? [],
+    spacingStyles: deps?.spacingStyles ?? [],
+    buttonSystems: deps?.buttonSystems,
+    cardSystems: deps?.cardSystems,
+    compatibility: deps?.compatibility,
+  };
+
   return {
     applyStylePack(stylePackId: string, documentId: string, options: Record<string, unknown> = {}): StyleApplicationResult {
-      const pack = stylePacks.find((p: any) => p.id === stylePackId);
-      if (!pack) {
+      const resolved = resolveStylePackApplication(stylePackId, fullDeps, options);
+      if (!resolved) {
         return {
           success: false,
           applied: [],
@@ -29,73 +252,21 @@ export function createBuilderIntegration(
           warnings: [`Style pack ${stylePackId} not found`],
         };
       }
-
-      const applied: string[] = [];
-      const skipped: string[] = [];
-      const conflicts: StyleApplicationResult['conflicts'] = [];
-
-      // Apply typography
-      if (pack.typographyId && (!options.applyTo || (options.applyTo as string[]).includes('typography'))) {
-        applied.push('typography');
-      } else {
-        skipped.push('typography');
+      if (options.previewOnly) {
+        return {
+          success: true,
+          applied: [],
+          skipped: resolved.applied,
+          conflicts: [],
+          warnings: [...resolved.warnings, 'Preview only - no changes applied'],
+        };
       }
-
-      // Apply colors
-      if (pack.colorPaletteId && (!options.applyTo || (options.applyTo as string[]).includes('colors'))) {
-        applied.push('colors');
-      } else {
-        skipped.push('colors');
-      }
-
-      // Apply buttons
-      if (pack.buttonSystemId && (!options.applyTo || (options.applyTo as string[]).includes('buttons'))) {
-        applied.push('buttons');
-      } else {
-        skipped.push('buttons');
-      }
-
-      // Apply cards
-      if (pack.cardSystemId && (!options.applyTo || (options.applyTo as string[]).includes('cards'))) {
-        applied.push('cards');
-      } else {
-        skipped.push('cards');
-      }
-
-      // Apply radius
-      if (pack.radiusId && (!options.applyTo || (options.applyTo as string[]).includes('radius'))) {
-        applied.push('radius');
-      } else {
-        skipped.push('radius');
-      }
-
-      // Apply shadows
-      if (pack.shadowId && (!options.applyTo || (options.applyTo as string[]).includes('shadows'))) {
-        applied.push('shadows');
-      } else {
-        skipped.push('shadows');
-      }
-
-      // Apply background
-      if (pack.backgroundId && (!options.applyTo || (options.applyTo as string[]).includes('background'))) {
-        applied.push('background');
-      } else {
-        skipped.push('background');
-      }
-
-      // Apply spacing
-      if (pack.spacingId && (!options.applyTo || (options.applyTo as string[]).includes('spacing'))) {
-        applied.push('spacing');
-      } else {
-        skipped.push('spacing');
-      }
-
       return {
         success: true,
-        applied,
-        skipped,
-        conflicts,
-        warnings: [],
+        applied: resolved.applied,
+        skipped: resolved.skipped,
+        conflicts: [],
+        warnings: resolved.warnings,
       };
     },
     switchStylePack(oldPackId: string, newPackId: string, documentId: string): StyleApplicationResult {
@@ -107,7 +278,7 @@ export function createBuilderIntegration(
       };
     },
     previewStylePack(stylePackId: string): unknown {
-      const pack = stylePacks.find((p: any) => p.id === stylePackId);
+      const pack = fullDeps.stylePacks.find((p: any) => p.id === stylePackId);
       return pack ? pack.preview : null;
     },
     getAppliedStyles(documentId: string): string[] {

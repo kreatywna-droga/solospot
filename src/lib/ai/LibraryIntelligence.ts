@@ -17,6 +17,7 @@ import type { ExperienceItem, ExperienceType, ExperienceMood, ExperienceMotionLe
 import { searchExperiences, getExperienceById, BUILTIN_EXPERIENCES, getUserExperiences } from '../experience/ExperienceCatalog';
 import { ALL_SECTION_TEMPLATES } from '../../components/builder/library/sections';
 import { WEBSITE_TEMPLATES } from '../../components/builder/templates/WebsiteTemplatesData';
+import { DesignSystem } from '../../../packages/design-system/src/index';
 
 // ── Experience Search & Inspection ──────────────────────────────────
 
@@ -264,17 +265,15 @@ export interface TypographyPreset {
 }
 
 export function getTypographyPresets(): TypographyPreset[] {
+  const fromDs = DesignSystem.typographySystems.slice(0, 24).map((t: any) => ({
+    name: t.name || t.id,
+    fontFamily: t.fontFamily || t.scale?.h1?.fontFamily || t.headingFont || 'Inter',
+    category: t.style || t.category || 'system',
+    description: t.description || t.mood?.join?.(', ') || '',
+  }));
+  if (fromDs.length > 0) return fromDs;
   return [
     { name: 'Inter — Clean Modern', fontFamily: 'Inter', category: 'sans-serif', description: 'Clean, modern sans-serif for UI and body text' },
-    { name: 'Playfair Display — Luxury Serif', fontFamily: 'Playfair Display', category: 'serif', description: 'Elegant serif for luxury and editorial' },
-    { name: 'Space Grotesk — Tech', fontFamily: 'Space Grotesk', category: 'sans-serif', description: 'Geometric sans-serif for tech and SaaS' },
-    { name: 'DM Sans — Friendly', fontFamily: 'DM Sans', category: 'sans-serif', description: 'Friendly, rounded sans-serif' },
-    { name: 'Crimson Pro — Editorial', fontFamily: 'Crimson Pro', category: 'serif', description: 'Classic serif for editorial and long-form' },
-    { name: 'Sora — Futuristic', fontFamily: 'Sora', category: 'sans-serif', description: 'Futuristic geometric sans-serif' },
-    { name: 'Cormorant Garamond — Elegant', fontFamily: 'Cormorant Garamond', category: 'serif', description: 'Elegant, high-contrast serif' },
-    { name: 'Outfit — Versatile', fontFamily: 'Outfit', category: 'sans-serif', description: 'Versatile geometric sans-serif' },
-    { name: 'Fraunces — Distinctive', fontFamily: 'Fraunces', category: 'serif', description: 'Distinctive display serif with soft axes' },
-    { name: 'Manrope — Professional', fontFamily: 'Manrope', category: 'sans-serif', description: 'Professional semi-rounded sans-serif' },
   ];
 }
 
@@ -295,50 +294,19 @@ export interface DesignPreset {
 }
 
 export function getDesignPresets(): DesignPreset[] {
-  return [
-    {
-      name: 'Premium Dark Gold',
-      primaryColor: '#D9A86C', secondaryColor: '#F2C27F', accentColor: '#E8B86D',
-      backgroundColor: '#0A0A0F', surfaceColor: '#141419', textColor: '#F5F1EA',
-      mutedColor: '#8A8578', font: 'Inter',
-      description: 'Luxury dark theme with gold accents', category: 'luxury',
-    },
-    {
-      name: 'Clean White Minimal',
-      primaryColor: '#111827', secondaryColor: '#6B7280', accentColor: '#3B82F6',
-      backgroundColor: '#FFFFFF', surfaceColor: '#F9FAFB', textColor: '#111827',
-      mutedColor: '#9CA3AF', font: 'Inter',
-      description: 'Clean, minimal white theme', category: 'minimal',
-    },
-    {
-      name: 'Deep Navy Professional',
-      primaryColor: '#1E3A5F', secondaryColor: '#4A90D9', accentColor: '#60A5FA',
-      backgroundColor: '#0F172A', surfaceColor: '#1E293B', textColor: '#F1F5F9',
-      mutedColor: '#94A3B8', font: 'Inter',
-      description: 'Professional navy blue theme', category: 'corporate',
-    },
-    {
-      name: 'Warm Earth Tones',
-      primaryColor: '#B45309', secondaryColor: '#D97706', accentColor: '#F59E0B',
-      backgroundColor: '#FFFBEB', surfaceColor: '#FEF3C7', textColor: '#78350F',
-      mutedColor: '#A16207', font: 'DM Sans',
-      description: 'Warm, earthy and inviting', category: 'warm',
-    },
-    {
-      name: 'Neon Cyber',
-      primaryColor: '#06B6D4', secondaryColor: '#8B5CF6', accentColor: '#EC4899',
-      backgroundColor: '#0A0A0F', surfaceColor: '#18181B', textColor: '#F5F1EA',
-      mutedColor: '#71717A', font: 'Sora',
-      description: 'Futuristic neon cyber theme', category: 'futuristic',
-    },
-    {
-      name: 'Forest Green Natural',
-      primaryColor: '#059669', secondaryColor: '#10B981', accentColor: '#34D399',
-      backgroundColor: '#F0FDF4', surfaceColor: '#DCFCE7', textColor: '#14532D',
-      mutedColor: '#16A34A', font: 'Outfit',
-      description: 'Natural green theme for eco and health', category: 'natural',
-    },
-  ];
+  return DesignSystem.colorPalettes.slice(0, 24).map((p: any) => ({
+    name: p.name || p.id,
+    primaryColor: p.primary,
+    secondaryColor: p.secondary,
+    accentColor: p.accent,
+    backgroundColor: p.background,
+    surfaceColor: p.surface,
+    textColor: p.text,
+    mutedColor: p.muted,
+    font: 'Inter',
+    description: p.bestUseCases?.slice?.(0, 2)?.join?.(', ') || p.style || '',
+    category: (Array.isArray(p.mood) && p.mood[0]) || p.style || 'default',
+  }));
 }
 
 // ── Helpers ────────────────────────────────────────────────────────

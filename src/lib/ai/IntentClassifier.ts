@@ -87,6 +87,9 @@ const DESIGN_SYSTEM_KEYWORDS = [
   'typografia', 'typografię', 'typografii', 'typography system',
   'hierarchia', 'hierarchy',
   'brand', 'marka', 'identity', 'tożsamość', 'guidelines',
+  'style pack', 'style packs', 'styl strony', 'zmień styl', 'zmien styl',
+  'zmiana stylu', 'look and feel', 'premium dental', 'luxury dental',
+  'zastosuj styl', 'design style', 'katalog stylów',
 ];
 
 const SITE_GEN_KEYWORDS = [

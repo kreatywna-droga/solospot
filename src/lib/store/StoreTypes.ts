@@ -6,6 +6,8 @@ export interface StoreBranding {
   favicon?: string;
   primaryColor?: string;
   secondaryColor?: string;
+  backgroundColor?: string;
+  borderRadius?: string;
   font?: string;
   description?: string;
 }

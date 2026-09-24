@@ -1221,6 +1221,8 @@ export class HacpBridge {
       if (args.primaryColor) themeProps.primaryColor = args.primaryColor;
       if (args.secondaryColor) themeProps.secondaryColor = args.secondaryColor;
       if (args.font) themeProps.font = args.font;
+      if (args.backgroundColor) themeProps.backgroundColor = args.backgroundColor;
+      if (args.borderRadius) themeProps.borderRadius = args.borderRadius;
 
       const cmd: BuilderCommand = {
         type: 'UPDATE_THEME',
@@ -1239,6 +1241,99 @@ export class HacpBridge {
           target: 'theme',
           property: Object.keys(themeProps).join(', '),
           summary: `Zaktualizowano motyw: ${Object.keys(themeProps).join(', ')}`,
+        },
+      };
+    }
+
+    // ── Design System tools (ONE catalog: packages/design-system) ──
+    if (
+      name === 'search_design_styles' ||
+      name === 'search_style_packs' ||
+      name === 'search_fonts' ||
+      name === 'search_font_pairings' ||
+      name === 'search_color_palettes' ||
+      name === 'search_typography_systems' ||
+      name === 'search_button_styles' ||
+      name === 'search_card_styles' ||
+      name === 'search_backgrounds' ||
+      name === 'search_industry_presets' ||
+      name === 'inspect_design_style' ||
+      name === 'inspect_style_pack'
+    ) {
+      const { executeDesignSystemReadTool } = await import('../ai/DesignSystemRuntime');
+      const payload = executeDesignSystemReadTool(name, args);
+      return {
+        status: payload.ok ? 'EXECUTED' : 'FAILED',
+        verification: {
+          passed: payload.ok,
+          operation: name,
+          target: payload.target,
+          diffSummary: payload.ok
+            ? `Odczyt Design System: ${payload.target}`
+            : payload.error || 'Design System read failed',
+        },
+        message: payload.ok
+          ? JSON.stringify(payload.data, null, 2)
+          : (payload.error || 'Nie udało się odczytać Design System.'),
+      };
+    }
+
+    if (name === 'apply_design_style') {
+      const { resolveStylePackApplication } = await import(
+        '../../../packages/design-system/src/builder'
+      );
+      const { DesignSystem } = await import('../../../packages/design-system/src/index');
+      const stylePackId = (args.stylePackId as string) || '';
+      if (!stylePackId) {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: 'none' },
+          message: 'apply_design_style wymaga parametru stylePackId.',
+        };
+      }
+      const options = (args.options as Record<string, unknown>) || {};
+      const resolved = resolveStylePackApplication(stylePackId, {
+        stylePacks: DesignSystem.stylePacks,
+        colorPalettes: DesignSystem.colorPalettes,
+        typographySystems: DesignSystem.typographySystems,
+        radiusStyles: DesignSystem.radiusStyles,
+        shadowStyles: DesignSystem.shadowStyles,
+        backgroundStyles: DesignSystem.backgroundStyles,
+        spacingStyles: DesignSystem.spacingStyles,
+        compatibility: DesignSystem.compatibility,
+      }, options);
+
+      if (!resolved) {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: stylePackId },
+          message: `Style Pack "${stylePackId}" nie istnieje w katalogu Design System.`,
+        };
+      }
+      if (Object.keys(resolved.theme).length === 0) {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: stylePackId },
+          message: `Style Pack "${stylePackId}" nie rozwiązał żadnych pól motywu — brak mutacji.`,
+        };
+      }
+
+      const cmd: BuilderCommand = {
+        type: 'UPDATE_THEME',
+        theme: resolved.theme as any,
+      };
+      const result = this.verifyCommandExecution(cmd, document, { targetId: 'theme' });
+      return {
+        command: cmd,
+        verification: result.verification,
+        status: result.verification.passed ? 'EXECUTED' : 'FAILED',
+        message: result.verification.passed
+          ? `Zastosowano Style Pack **${resolved.stylePackName}** (${resolved.applied.join(', ')}). Kompatybilność: ${resolved.compatibility.score}%.`
+          : `Nie udało się zastosować Style Pack ${resolved.stylePackName}.`,
+        appliedChange: {
+          target: 'theme',
+          property: Object.keys(resolved.theme).join(', '),
+          summary: `Applied style pack ${resolved.stylePackId}: ${resolved.applied.join(', ')}`,
         },
       };
     }
