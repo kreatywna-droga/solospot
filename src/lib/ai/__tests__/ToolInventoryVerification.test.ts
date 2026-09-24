@@ -68,6 +68,10 @@ const ADVERTISED_TOOLS = [
   'inspect_design_style',
   'inspect_style_pack',
   'apply_design_style',
+  'apply_color_palette',
+  'apply_typography',
+  'apply_font',
+  'apply_design_combination',
 ];
 
 // Tools that are intentionally NOT advertised (REPO-only / internal / future gate).
@@ -150,6 +154,10 @@ const HACP_HANDLER_TOOLS = [
   'inspect_design_style',
   'inspect_style_pack',
   'apply_design_style',
+  'apply_color_palette',
+  'apply_typography',
+  'apply_font',
+  'apply_design_combination',
 ];
 
 // ─── TEST SUITE ────────────────────────────────────────────────────

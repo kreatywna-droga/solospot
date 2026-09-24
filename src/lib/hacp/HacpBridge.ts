@@ -1338,6 +1338,67 @@ export class HacpBridge {
       };
     }
 
+    if (
+      name === 'apply_color_palette' ||
+      name === 'apply_typography' ||
+      name === 'apply_font' ||
+      name === 'apply_design_combination'
+    ) {
+      const { resolveDesignApplication, designApplicationToCommandPayload } = await import(
+        '../../../packages/design-system/src/builder'
+      );
+      const { DesignSystem } = await import('../../../packages/design-system/src/index');
+      const idArg =
+        (args.paletteId as string) ||
+        (args.typographyId as string) ||
+        (args.fontId as string) ||
+        (args.combinationId as string) ||
+        (args.id as string) ||
+        '';
+      if (!idArg) {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: 'none' },
+          message: `${name} wymaga identyfikatora elementu.`,
+        };
+      }
+      const kind =
+        name === 'apply_color_palette'
+          ? 'color-palette'
+          : name === 'apply_typography'
+            ? 'typography'
+            : name === 'apply_font'
+              ? 'font'
+              : 'design-combination';
+      const resolved = resolveDesignApplication(
+        { kind, id: idArg, options: (args.options as Record<string, unknown>) || {} },
+        DesignSystem
+      );
+      const payload = designApplicationToCommandPayload(resolved);
+      if (!resolved.ok || !payload) {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: idArg },
+          message: resolved.message,
+        };
+      }
+      const cmd: BuilderCommand = payload as BuilderCommand;
+      const result = this.verifyCommandExecution(cmd, document, { targetId: 'theme' });
+      return {
+        command: cmd,
+        verification: result.verification,
+        status: result.verification.passed ? 'EXECUTED' : 'FAILED',
+        message: result.verification.passed
+          ? resolved.message
+          : `Nie udało się zastosować ${name} ${resolved.name}.`,
+        appliedChange: {
+          target: 'theme',
+          property: Object.keys(resolved.theme).join(', '),
+          summary: `Applied ${kind} ${resolved.id}: ${resolved.applied.join(', ')}`,
+        },
+      };
+    }
+
     if (name === 'batch_execute') {
       // SURFACE REPAIR GATE v1.0 — F-03 DISPATCH DROP REPAIR:
       // Collect sub-tool BuilderCommands and return them for dispatch.

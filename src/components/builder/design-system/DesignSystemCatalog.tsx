@@ -15,23 +15,47 @@ import { useBuilder } from '../state/BuilderProvider'
 
 type CategoryId =
   | 'style-packs'
-  | 'industry-presets'
+  | 'design-combinations'
   | 'fonts'
-  | 'colors'
+  | 'font-pairings'
   | 'typography'
+  | 'colors'
+  | 'color-combinations'
   | 'buttons'
   | 'cards'
   | 'backgrounds'
+  | 'hero'
+  | 'sections'
+  | 'images'
+  | 'icons'
+  | 'effects'
+  | 'shadows'
+  | 'radius'
+  | 'spacing'
+  | 'industry-presets'
+  | 'themes'
 
 const CATEGORIES: { id: CategoryId; label: string }[] = [
   { id: 'style-packs', label: 'Style Packs' },
-  { id: 'industry-presets', label: 'Branże' },
+  { id: 'design-combinations', label: 'Kombinacje' },
   { id: 'fonts', label: 'Fonty' },
-  { id: 'colors', label: 'Palety' },
+  { id: 'font-pairings', label: 'Pary fontów' },
   { id: 'typography', label: 'Typografia' },
+  { id: 'colors', label: 'Palety' },
+  { id: 'color-combinations', label: 'Kolory' },
   { id: 'buttons', label: 'Przyciski' },
   { id: 'cards', label: 'Karty' },
   { id: 'backgrounds', label: 'Tła' },
+  { id: 'hero', label: 'Hero' },
+  { id: 'sections', label: 'Sekcje' },
+  { id: 'images', label: 'Obrazy' },
+  { id: 'icons', label: 'Ikony' },
+  { id: 'effects', label: 'Efekty' },
+  { id: 'shadows', label: 'Cienie' },
+  { id: 'radius', label: 'Promień' },
+  { id: 'spacing', label: 'Odstępy' },
+  { id: 'industry-presets', label: 'Branże' },
+  { id: 'themes', label: 'Motywy' },
 ]
 
 function matchQ(item: any, q: string): boolean {
@@ -102,12 +126,18 @@ export function DesignSystemCatalog() {
     switch (category) {
       case 'style-packs':
         return byIndustry(DesignSystem.stylePacks)
+      case 'design-combinations':
+        return DesignSystem.designCombinations.filter((c: any) => matchQ(c, q))
       case 'industry-presets':
         return byIndustry(DesignSystem.industryPresets)
       case 'fonts':
         return DesignSystem.fonts.filter((f: any) => matchQ(f, q))
+      case 'font-pairings':
+        return DesignSystem.fontPairings.filter((p: any) => matchQ(p, q))
       case 'colors':
         return byIndustry(DesignSystem.colorPalettes)
+      case 'color-combinations':
+        return (DesignSystem as any).colorCombinations?.filter((c: any) => matchQ(c, q)) || []
       case 'typography':
         return DesignSystem.typographySystems.filter((t: any) => matchQ(t, q))
       case 'buttons':
@@ -116,6 +146,24 @@ export function DesignSystemCatalog() {
         return DesignSystem.cardSystems.filter((c: any) => matchQ(c, q))
       case 'backgrounds':
         return DesignSystem.backgroundStyles.filter((b: any) => matchQ(b, q))
+      case 'hero':
+        return DesignSystem.heroStyles.filter((h: any) => matchQ(h, q))
+      case 'sections':
+        return DesignSystem.sectionStyles.filter((s: any) => matchQ(s, q))
+      case 'images':
+        return DesignSystem.imageTreatmentStyles.filter((i: any) => matchQ(i, q))
+      case 'icons':
+        return DesignSystem.iconStyles.filter((i: any) => matchQ(i, q))
+      case 'effects':
+        return DesignSystem.effectStyles.filter((e: any) => matchQ(e, q))
+      case 'shadows':
+        return DesignSystem.shadowStyles.filter((s: any) => matchQ(s, q))
+      case 'radius':
+        return DesignSystem.radiusStyles.filter((r: any) => matchQ(r, q))
+      case 'spacing':
+        return DesignSystem.spacingStyles.filter((s: any) => matchQ(s, q))
+      case 'themes':
+        return DesignSystem.designThemes.filter((t: any) => matchQ(t, q))
       default:
         return []
     }

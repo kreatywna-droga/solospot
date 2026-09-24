@@ -71,6 +71,7 @@ export interface BuilderTheme {
   favicon?: string;
   backgroundColor?: string;
   borderRadius?: string;
+  appliedStylePackId?: string;
   tokens?: BuilderDesignTokens;
 }
 
@@ -294,6 +295,7 @@ export interface CompiledBranding {
   readonly description?: string;
   readonly backgroundColor?: string;
   readonly borderRadius?: string;
+  readonly appliedStylePackId?: string;
 }
 
 /**
@@ -507,6 +509,7 @@ export function compile(doc: BuilderDocument, breakpoint?: string): CompiledDocu
       favicon: doc.theme.favicon,
       backgroundColor: doc.theme.backgroundColor,
       borderRadius: doc.theme.borderRadius,
+      appliedStylePackId: doc.theme.appliedStylePackId,
     },
     pages: compiledPages,
     locale: doc.metadata.locale,

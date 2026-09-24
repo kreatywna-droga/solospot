@@ -203,6 +203,13 @@ export type { DesignCombination } from './combinations';
 export { designCombinations, fullDesignCombinations, getCombination, getCombinationsByIndustry, getCombinationsByMood, searchCombinations, getTopCombinations } from './combinations';
 
 // ============================================================
+// COLOR COMBINATIONS
+// ============================================================
+
+export type { ColorCombination } from './color-combinations';
+export { colorCombinations, fullColorCombinations, getColorCombination, getColorCombinationsByMood, searchColorCombinations } from './color-combinations';
+
+// ============================================================
 // COMPATIBILITY ENGINE
 // ============================================================
 
@@ -227,8 +234,8 @@ export { HACP_TOOLS, HACP_CONSTRAINTS, HACP_CAPABILITY_CORRIDOR, getHACPTool, ge
 // BUILDER INTEGRATION
 // ============================================================
 
-export type { BuilderIntegration as BuilderIntegrationInterface, ResolvedStylePackApplication, ResolveDeps } from './builder';
-export { createBuilderIntegration, applyStyleToBuilderDocument, resolveStylePackApplication } from './builder';
+export type { BuilderIntegration as BuilderIntegrationInterface, ResolvedStylePackApplication, ResolveDeps, DesignApplicationRequest, DesignApplicationResult, DesignApplicationKind } from './builder';
+export { createBuilderIntegration, applyStyleToBuilderDocument, resolveStylePackApplication, resolveDesignApplication, designApplicationToCommandPayload } from './builder';
 
 // ============================================================
 // PREVIEW SYSTEM
@@ -265,6 +272,7 @@ import { cardSystems } from './cards/cardSystems';
 import { fullStylePacks } from './style-packs';
 import { industryPresets } from './industries';
 import { fullDesignCombinations } from './combinations';
+import { fullColorCombinations } from './color-combinations';
 import { compatibilityEngine } from './compatibility';
 import { createStyleSearch } from './search';
 import { createBuilderIntegration } from './builder';
@@ -291,6 +299,7 @@ export const DesignSystem = {
   stylePacks: fullStylePacks,
   industryPresets,
   designCombinations: fullDesignCombinations,
+  colorCombinations: fullColorCombinations,
   backgroundStyles,
   radiusStyles,
   shadowStyles,

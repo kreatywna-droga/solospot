@@ -310,4 +310,233 @@ export function applyStyleToBuilderDocument(
   return result;
 }
 
+export type DesignApplicationKind =
+  | 'style-pack'
+  | 'color-palette'
+  | 'typography'
+  | 'font'
+  | 'design-combination';
+
+export interface DesignApplicationRequest {
+  kind: DesignApplicationKind;
+  id: string;
+  options?: Record<string, unknown>;
+}
+
+export interface DesignApplicationResult {
+  ok: boolean;
+  kind: DesignApplicationKind;
+  id: string;
+  name: string;
+  theme: Record<string, string | undefined>;
+  tokens: ResolvedStylePackApplication['tokens'];
+  applied: string[];
+  skipped: string[];
+  warnings: string[];
+  message: string;
+}
+
+const DEPS_FROM = (designSystem: any): ResolveDeps => ({
+  stylePacks: designSystem.stylePacks,
+  colorPalettes: designSystem.colorPalettes,
+  typographySystems: designSystem.typographySystems,
+  radiusStyles: designSystem.radiusStyles,
+  shadowStyles: designSystem.shadowStyles,
+  backgroundStyles: designSystem.backgroundStyles,
+  spacingStyles: designSystem.spacingStyles,
+  compatibility: designSystem.compatibility,
+});
+
+function findIn(list: any[], id: string): any | undefined {
+  return list?.find((x) => x?.id === id);
+}
+
+export function resolveDesignApplication(
+  req: DesignApplicationRequest,
+  designSystem: any
+): DesignApplicationResult {
+  const options = req.options || {};
+  const fail = (name: string, warnings: string[] = [], message: string): DesignApplicationResult => ({
+    ok: false,
+    kind: req.kind,
+    id: req.id,
+    name,
+    theme: {},
+    tokens: {},
+    applied: [],
+    skipped: [],
+    warnings,
+    message,
+  });
+
+  if (req.kind === 'style-pack') {
+    const resolved = resolveStylePackApplication(req.id, DEPS_FROM(designSystem), options);
+    if (!resolved) return fail(req.id, [], `Style Pack "${req.id}" nie istnieje.`);
+    if (Object.keys(resolved.theme).length === 0) {
+      return fail(resolved.stylePackName, resolved.warnings, 'Style Pack nie rozwiązał pól motywu.');
+    }
+    return {
+      ok: true,
+      kind: req.kind,
+      id: resolved.stylePackId,
+      name: resolved.stylePackName,
+      theme: resolved.theme as Record<string, string | undefined>,
+      tokens: resolved.tokens,
+      applied: resolved.applied,
+      skipped: resolved.skipped,
+      warnings: resolved.warnings,
+      message: `Zastosowano Style Pack **${resolved.stylePackName}** (${resolved.applied.join(', ')}).`,
+    };
+  }
+
+  if (req.kind === 'color-palette') {
+    const palette = findIn(designSystem.colorPalettes, req.id);
+    if (!palette) return fail(req.id, [], `Paleta "${req.id}" nie istnieje.`);
+    const theme = {
+      primaryColor: palette.primary,
+      secondaryColor: palette.secondary,
+      backgroundColor: palette.background,
+    };
+    const tokens = {
+      colors: {
+        primary: palette.primary,
+        secondary: palette.secondary,
+        accent: palette.accent,
+        background: palette.background,
+        surface: palette.surface,
+        text: palette.text,
+        muted: palette.muted,
+        border: palette.border,
+        cta: palette.cta,
+      },
+    };
+    return {
+      ok: true,
+      kind: req.kind,
+      id: palette.id,
+      name: palette.name,
+      theme,
+      tokens,
+      applied: ['colors'],
+      skipped: [],
+      warnings: [],
+      message: `Zastosowano paletę **${palette.name}**.`,
+    };
+  }
+
+  if (req.kind === 'typography') {
+    const typo = findIn(designSystem.typographySystems, req.id);
+    if (!typo) return fail(req.id, [], `Typografia "${req.id}" nie istnieje.`);
+    const headingFont =
+      typo.fontFamily || typo.scale?.h1?.fontFamily || typo.headingFont || undefined;
+    const bodyFont = typo.scale?.body?.fontFamily || typo.bodyFont || headingFont;
+    const theme: Record<string, string | undefined> = {};
+    if (headingFont || bodyFont) theme.font = headingFont || bodyFont;
+    const tokens = {
+      typography: {
+        headingFont: headingFont || '',
+        bodyFont: bodyFont || headingFont || '',
+        h1Size: typo.scale?.h1?.fontSize || '',
+        h2Size: typo.scale?.h2?.fontSize || '',
+        bodySize: typo.scale?.body?.fontSize || '',
+      },
+    };
+    if (Object.keys(theme).length === 0) {
+      return fail(typo.name || req.id, [], 'Typografia nie rozwiązała fontów motywu.');
+    }
+    return {
+      ok: true,
+      kind: req.kind,
+      id: typo.id,
+      name: typo.name || typo.id,
+      theme,
+      tokens,
+      applied: ['typography'],
+      skipped: [],
+      warnings: [],
+      message: `Zastosowano typografię **${typo.name || typo.id}**.`,
+    };
+  }
+
+  if (req.kind === 'font') {
+    const font = findIn(designSystem.fonts, req.id) || findIn(designSystem.fonts, req.id);
+    if (!font) return fail(req.id, [], `Font "${req.id}" nie istnieje.`);
+    const fontFamily = (font as any).fontFamily || font.name;
+    if (!fontFamily) return fail(font.name || req.id, [], 'Font nie ma nazwy rodzinnej.');
+    return {
+      ok: true,
+      kind: req.kind,
+      id: font.id,
+      name: font.name,
+      theme: { font: fontFamily },
+      tokens: { typography: { headingFont: fontFamily, bodyFont: fontFamily, h1Size: '', h2Size: '', bodySize: '' } },
+      applied: ['typography'],
+      skipped: [],
+      warnings: [],
+      message: `Zastosowano font **${font.name}**.`,
+    };
+  }
+
+  if (req.kind === 'design-combination') {
+    const combo = findIn(designSystem.designCombinations, req.id);
+    if (!combo) return fail(req.id, [], `Kombinacja "${req.id}" nie istnieje.`);
+    // Resolve via style pack fields when present; otherwise palette + font.
+    const palette = findIn(designSystem.colorPalettes, combo.colorPaletteId);
+    const font = findIn(designSystem.fonts, combo.fontId);
+    const theme: Record<string, string | undefined> = {};
+    const tokens: ResolvedStylePackApplication['tokens'] = {};
+    if (palette) {
+      theme.primaryColor = palette.primary;
+      theme.secondaryColor = palette.secondary;
+      theme.backgroundColor = palette.background;
+      tokens.colors = {
+        primary: palette.primary,
+        secondary: palette.secondary,
+        accent: palette.accent,
+        background: palette.background,
+        surface: palette.surface,
+        text: palette.text,
+        muted: palette.muted,
+        border: palette.border,
+        cta: palette.cta,
+      };
+    }
+    if (font) {
+      const fontFamily = (font as any).fontFamily || font.name;
+      if (fontFamily) theme.font = fontFamily;
+    }
+    if (Object.keys(theme).length === 0) {
+      return fail(combo.name || req.id, [], 'Kombinacja nie rozwiązała motywu.');
+    }
+    return {
+      ok: true,
+      kind: req.kind,
+      id: combo.id,
+      name: combo.name,
+      theme,
+      tokens,
+      applied: [...(palette ? ['colors'] : []), ...(font ? ['typography'] : [])],
+      skipped: [],
+      warnings: [],
+      message: `Zastosowano kombinację **${combo.name}**.`,
+    };
+  }
+
+  return fail(req.id, [], `Nieznany typ aplikacji: ${String(req.kind)}`);
+}
+
+export function designApplicationToCommandPayload(
+  result: DesignApplicationResult
+): { type: 'UPDATE_THEME'; theme: Record<string, unknown> } | null {
+  if (!result.ok || Object.keys(result.theme).length === 0) return null;
+  return {
+    type: 'UPDATE_THEME',
+    theme: {
+      ...result.theme,
+      tokens: result.tokens,
+      appliedStylePackId: result.kind === 'style-pack' ? result.id : undefined,
+    },
+  };
+}
+
 export default createBuilderIntegration([], []);

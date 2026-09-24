@@ -288,6 +288,19 @@ export const sectionStyles: SectionStyle[] = [
     compatibility: ['backgrounds-light', 'spacing-balanced', 'radius-rounded'],
     preview: 'padding: 64px 32px; max-width: 600px;',
   },
+  {
+    id: 'section-creative',
+    name: 'Creative',
+    style: 'creative',
+    description: 'Creative asymmetric section layout',
+    values: { paddingTop: '72px', paddingBottom: '72px', paddingLeft: '32px', paddingRight: '32px', marginTop: '0', marginBottom: '0', maxWidth: '1200px', layout: 'asymmetric' },
+    bestFor: ['creative', 'portfolio', 'showcase'],
+    notRecommendedFor: ['forms', 'dashboard', 'pricing'],
+    industries: ['creative-agency', 'photography', 'fashion'],
+    mood: ['creative', 'bold', 'expressive'],
+    compatibility: ['backgrounds-dark', 'spacing-loose', 'radius-sharp'],
+    preview: 'padding: 72px 32px; max-width: 1200px; display: grid; grid-template-columns: 1.2fr 0.8fr;',
+  },
 ];
 
 export const getSectionStyle = (id: string): SectionStyle | undefined =>

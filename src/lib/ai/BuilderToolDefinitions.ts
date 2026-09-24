@@ -828,4 +828,48 @@ export const BUILDER_TOOL_DEFINITIONS: HacpToolDefinition[] = [
       required: ['stylePackId'],
     },
   },
+  {
+    name: 'apply_color_palette',
+    description: 'Zastosuj paletę kolorów do motywu (UPDATE_THEME + tokens.colors). Nie zmienia struktury dokumentu.',
+    parameters: {
+      type: 'object',
+      properties: {
+        paletteId: { type: 'string', description: 'ID palety kolorów z Design System.' },
+      },
+      required: ['paletteId'],
+    },
+  },
+  {
+    name: 'apply_typography',
+    description: 'Zastosuj system typografii do motywu (UPDATE_THEME + tokens.typography). Nie zmienia struktury dokumentu.',
+    parameters: {
+      type: 'object',
+      properties: {
+        typographyId: { type: 'string', description: 'ID systemu typografii.' },
+      },
+      required: ['typographyId'],
+    },
+  },
+  {
+    name: 'apply_font',
+    description: 'Zastosuj pojedynczy font do motywu (UPDATE_THEME.font). Nie zmienia struktury dokumentu.',
+    parameters: {
+      type: 'object',
+      properties: {
+        fontId: { type: 'string', description: 'ID fontu z katalogu.' },
+      },
+      required: ['fontId'],
+    },
+  },
+  {
+    name: 'apply_design_combination',
+    description: 'Zastosuj kompozycję Design Combination (palette + font) do motywu przez jeden UPDATE_THEME.',
+    parameters: {
+      type: 'object',
+      properties: {
+        combinationId: { type: 'string', description: 'ID kombinacji (np. comb-001).' },
+      },
+      required: ['combinationId'],
+    },
+  },
 ];

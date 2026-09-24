@@ -74,6 +74,10 @@ describe('NoFakeSuccess — mutation classification', () => {
       'configure_experience',
       'batch_execute',
       'apply_design_style',
+      'apply_color_palette',
+      'apply_typography',
+      'apply_font',
+      'apply_design_combination',
       'undo',
       'redo',
     ]) {
