@@ -52,13 +52,13 @@ export function StyleCard(props: StyleCardProps): React.ReactElement {
   };
   
   return (
-    <div className="style-card" data-id={stylePack.id}>
-      <div className="style-card-preview">{stylePack.preview?.h1 || ''}</div>
+    <div className="style-card" data-style-id={stylePack.id}>
+      <div className="style-card-preview">{(stylePack.preview || {}).h1 || ''}</div>
       <div className="style-card-info">
         <h3>{stylePack.name}</h3>
         <p>{stylePack.description}</p>
         <div className="style-card-tags">
-          {stylePack.tags.map((t: string, index: number) => (
+          {(stylePack.tags || []).map((t: string, index: number) => (
             <span key={index}>{t}</span>
           ))}
         </div>
@@ -67,7 +67,7 @@ export function StyleCard(props: StyleCardProps): React.ReactElement {
         <button onClick={handleSelect}>Select</button>
       )}
       {onApply && (
-        <button onClick={handleApply}>Apply</button>
+        <button onClick={handleApply}>Notify</button>
       )}
     </div>
   );
