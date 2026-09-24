@@ -1,8 +1,9 @@
 # HACP Web Design Intelligence Knowledge Foundation Gate v1.0
 
-**Status: PASS (local) · pending prod verification**
+**Status: PASS · 16/16 (local + prod)**
 **Date:** 2026-09-24
 **Baseline:** `a441797` (Website Creation Gate closed)
+**Gate commit:** `c1fbe3d` · **Prod:** `dpl_ESGPeR1rPBNSXeLPxBsbKVXHcCvp` → https://www.solospot.pl (Ready)
 
 ---
 
@@ -22,10 +23,10 @@
 | 10 | Relevant retrieval for brief | PASS | dentist brief → `IP-dental-medical` + `BP-dental-clinic` + CTA `Umów wizytę` (gate-stats.json) |
 | 11 | HACP uses knowledge in planning | PASS | `SitePlanPlanner.generateSitePlan` → `buildDecisionContext` → strategies + `metadata.knowledge` + `console.log('[Knowledge]', …)` |
 | 12 | Existing execution works | PASS | `src/lib/ai` 284/284; knowledge purity (no HacpBridge/BuilderDocument imports) |
-| 13 | Dentist test E2E | PASS | local **15 PASS / 0 FAIL / 1 WARN** (WARN = pre-existing 401/404) |
+| 13 | Dentist test E2E | PASS | local **15 PASS / 0 FAIL / 1 WARN** (WARN = pre-existing 401/404) · prod identical |
 | 14 | No fake SUCCESS | PASS | E2E A12: sections 1→8 before complete; A10: 0 fake knowledge claims |
 | 15 | No batch_execute leak | PASS | E2E A9: absent from copilot request.tools |
-| 16 | Prod verification | PENDING | after single `vercel deploy --prod` |
+| 16 | Prod verification | PASS | prod E2E **15 PASS / 0 FAIL / 1 WARN** on `dpl_ESGPeR1rPBNSXeLPxBsbKVXHcCvp` (alias `www.solospot.pl`, Ready) |
 
 ---
 
@@ -84,6 +85,7 @@ From `scratch/knowledge-gate-proof/gate-stats.json`:
 - Script: `scratch/knowledge-gate-e2e.js`
 - Prompt: implantologii + stomatologii estetycznej + umówienia wizyty (exact gate prompt)
 - Local: **15 PASS / 0 FAIL / 1 WARN** (`BASE_URL=http://localhost:3000`)
+- **Prod: 15 PASS / 0 FAIL / 1 WARN** (`BASE_URL=https://www.solospot.pl`)
 - A2: `[Knowledge] schema=1.0.0 industry=dentist … pattern=IP-dental-medical blueprint=BP-dental-clinic qa=24 anti=8 cta=Umów wizytę`
 - A4b: sections 1 → 8 · A5: dentalHits=8/8 · A8: `Umów wizytę` present
 - Proof: `scratch/knowledge-gate-proof/result.json` + 3 PNG
@@ -110,24 +112,38 @@ From `scratch/knowledge-gate-proof/gate-stats.json`:
 15/0/1 — no FAIL; console WARN = pre-existing `/api/stores` 401 + preview 404
 
 ### 15. Commit SHA
-(pending this commit)
+- **Gate commit:** `c1fbe3da62b48922a3bcc475bac3bd4589c9586b` (`c1fbe3d`)
+- `feat(ai): knowledge foundation gate — 18-domain knowledge layer, retrieval, dentist E2E 15/0`
+- Pushed: `origin/main` = `c1fbe3d` (verified `git rev-parse HEAD origin/main`)
 
 ### 16. Vercel deployment
-(pending single `npx vercel deploy --prod --yes`)
+- **Deployment ID:** `dpl_ESGPeR1rPBNSXeLPxBsbKVXHcCvp`
+- **URL:** https://solospot-8evar2ns9-kreatywna-droga.vercel.app
+- **Alias:** https://www.solospot.pl · https://solospot.pl · https://solospot.vercel.app
+- **Status:** ● Ready (iad1 · Next.js 16.2.9 · TypeScript OK · 55/55 pages)
+- **Inspect:** https://vercel.com/kreatywna-droga/solospot/ESGPeR1rPBNSXeLPxBsbKVXHcCvp
+- Deployed from commit `c1fbe3d` (knowledge layer included in build)
 
 ### 17. Prod E2E
-(pending `BASE_URL=https://www.solospot.pl node scratch/knowledge-gate-e2e.js`)
+- **Command:** `$env:BASE_URL='https://www.solospot.pl'; node scratch/knowledge-gate-e2e.js`
+- **Result:** **15 PASS / 0 FAIL / 1 WARN** (WARN = pre-existing 401/404 console noise, same as local)
+- A2: `[Knowledge] schema=1.0.0 industry=dentist purpose=lead-generation entries=3 pattern=IP-dental-medical blueprint=BP-dental-clinic qa=24 anti=8 tone=professional-warm reassuring cta=Umów wizytę`
+- A3/A4b: sections 1 → 8 (mutation signal, not fake SUCCESS) · A5: dentalHits=8/8 · A8: `Umów wizytę` present
+- A9: `batch_execute` absent from request.tools · A10: fakeClaims=0, knowledgeLogs=1 · A12: mutated=true
+- Local and prod both **15/0/1** — zero regression between environments
 
 ### 18. Anti-fake evidence
 - A9: `batch_execute` absent from request.tools
 - A10: fake knowledge claims = 0 with non-empty retrievalLog
 - A12: mutation (1→8) before complete
 - Knowledge purity test: no execution-layer imports in `src/lib/knowledge`
+- Verified identically in local AND prod E2E
 
 ### 19. Known gaps / BLOCKERS
-- None for local gate. Prod verification outstanding until deploy.
-- Console WARN (401/404) is pre-existing store noise from prior gates.
+- **None.** All 16 PASS criteria closed (local + prod).
+- Console WARN (401/404) is pre-existing store noise from prior gates — not knowledge-related.
 - HACP T37 provider-OFFLINE is environment noise unrelated to knowledge layer.
+- Note: multiple parallel `vercel deploy` invocations raced; final alias settled on `dpl_ESGPeR1rPBNSXeLPxBsbKVXHcCvp` (same commit `c1fbe3d` across all builds). Future gates must run exactly one deploy.
 
 ---
 
