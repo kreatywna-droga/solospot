@@ -56,6 +56,13 @@ interface UsePanelPositionOptions {
   gap?: number
   /** Safe margin from workspace edges (px) */
   viewportMargin?: number
+  /**
+   * When true, never place the panel so it overlaps the source element if
+   * another placement (above/below/side) fits. Used by Mini Inspector AI so
+   * the window sits NEXT TO the selected component, not on top of it.
+   * Default false — preserves ContextualSettingsPanel clamp-into-edge behavior.
+   */
+  avoidOverlap?: boolean
 }
 
 const DEFAULT_OPTIONS: Required<UsePanelPositionOptions> = {
@@ -63,6 +70,7 @@ const DEFAULT_OPTIONS: Required<UsePanelPositionOptions> = {
   panelMinHeight: 200,
   gap: 12,
   viewportMargin: 16,
+  avoidOverlap: false,
 }
 
 /**
@@ -154,22 +162,49 @@ export function computePanelPosition(
     y = elTop
     maxHeight = Math.min(bounds.bottom - margin - y, maxPanelHeight)
   }
-  // Neither side fits fully — prefer the larger horizontal side and clamp to workspace edge
-  else if (spaceRight >= spaceLeft) {
-    placement = 'right'
-    x = Math.min(elRight + opts.gap, bounds.right - panelW - margin)
-    y = elTop
-    maxHeight = Math.min(bounds.bottom - margin - y, maxPanelHeight)
-  }
+  // Neither side fits fully
   else {
-    placement = 'left'
-    x = Math.max(bounds.left + margin, elLeft - panelW - opts.gap)
-    y = elTop
-    maxHeight = Math.min(bounds.bottom - margin - y, maxPanelHeight)
+    const preferRight = spaceRight >= spaceLeft
+    const clampX = preferRight
+      ? Math.min(elRight + opts.gap, bounds.right - panelW - margin)
+      : Math.max(bounds.left + margin, elLeft - panelW - opts.gap)
+    // Would the horizontal clamp sit ON TOP of the element?
+    const clampOverlaps = clampX < elRight - 1 && clampX + panelW > elLeft + 1
+
+    if (!opts.avoidOverlap || !clampOverlaps) {
+      placement = preferRight ? 'right' : 'left'
+      x = clampX
+      y = elTop
+      maxHeight = Math.min(bounds.bottom - margin - y, maxPanelHeight)
+    } else {
+      // avoidOverlap: try ABOVE first, then BELOW (gate order), then clamp.
+      const canAbove = spaceAbove >= opts.panelMinHeight
+      const canBelow = spaceBelow >= opts.panelMinHeight
+      if (canAbove) {
+        placement = 'above'
+        maxHeight = Math.min(spaceAbove, maxPanelHeight)
+        x = Math.max(bounds.left + margin, Math.min(elLeft, bounds.right - panelW - margin))
+        y = Math.max(bounds.top + margin, elTop - opts.gap - maxHeight)
+      } else if (canBelow) {
+        placement = 'below'
+        x = Math.max(bounds.left + margin, Math.min(elLeft, bounds.right - panelW - margin))
+        y = elBottom + opts.gap
+        maxHeight = Math.min(spaceBelow, maxPanelHeight)
+      } else {
+        // No non-overlapping fit — last resort clamp (still inside workspace)
+        placement = preferRight ? 'right' : 'left'
+        x = clampX
+        y = elTop
+        maxHeight = Math.min(bounds.bottom - margin - y, maxPanelHeight)
+      }
+    }
   }
 
   // If vertical room on the side is too small, fall back to below/above
-  if (maxHeight < opts.panelMinHeight) {
+  if (
+    (placement === 'right' || placement === 'left') &&
+    maxHeight < opts.panelMinHeight
+  ) {
     if (spaceBelow >= opts.panelMinHeight) {
       placement = 'below'
       x = Math.max(bounds.left + margin, Math.min(elLeft, bounds.right - panelW - margin))
@@ -217,7 +252,15 @@ export function usePanelPosition(
   const computePosition = useCallback(() => {
     if (!elementRect || !isOpen) return
     setPosition(computePanelPosition(elementRect, getWorkspaceBounds(), opts))
-  }, [elementRect, isOpen, opts.panelWidth, opts.panelMinHeight, opts.gap, opts.viewportMargin])
+  }, [
+    elementRect,
+    isOpen,
+    opts.panelWidth,
+    opts.panelMinHeight,
+    opts.gap,
+    opts.viewportMargin,
+    opts.avoidOverlap,
+  ])
 
   // Recompute on every render when open
   useLayoutEffect(() => {
@@ -226,12 +269,13 @@ export function usePanelPosition(
 
   // Recompute on scroll/resize and when the workspace region itself resizes
   // (sidebar / inspector drag-resize changes the clamping bounds).
+  // scroll does not bubble — capture so inner canvas scroll containers are seen.
   useLayoutEffect(() => {
     if (!isOpen) return
 
     const handleUpdate = () => computePosition()
 
-    window.addEventListener('scroll', handleUpdate, { passive: true })
+    window.addEventListener('scroll', handleUpdate, { passive: true, capture: true })
     window.addEventListener('resize', handleUpdate, { passive: true })
 
     let observer: ResizeObserver | null = null
@@ -244,7 +288,7 @@ export function usePanelPosition(
     }
 
     return () => {
-      window.removeEventListener('scroll', handleUpdate)
+      window.removeEventListener('scroll', handleUpdate, { capture: true } as EventListenerOptions)
       window.removeEventListener('resize', handleUpdate)
       observer?.disconnect()
     }

@@ -266,3 +266,50 @@ describe('computePanelPosition — Mini Inspector AI (panelWidth 360)', () => {
     expect(pos.y).toBeGreaterThanOrEqual(ws.top + MARGIN)
   })
 })
+
+// ---------------------------------------------------------------------------
+// avoidOverlap — Mini Inspector AI never sits on top of the selected node
+// ---------------------------------------------------------------------------
+
+describe('computePanelPosition — avoidOverlap', () => {
+  const opts = { panelWidth: 360, panelMinHeight: 220, gap: 12, viewportMargin: 16, avoidOverlap: true }
+
+  function overlaps(
+    pos: { x: number; y: number; maxHeight: number },
+    el: ElementRect
+  ): boolean {
+    const pr = pos.x + 360
+    const pb = pos.y + Math.min(pos.maxHeight, 400)
+    return pos.x < el.x + el.width - 1 && pr > el.x + 1 &&
+      pos.y < el.y + el.height - 1 && pb > el.y + 1
+  }
+
+  it('wide section spanning workspace → places BELOW, not on top', () => {
+    // Simulates prod hero: ~756px wide in ~984px workspace (neither side fits 360)
+    const ws = bounds(324, 56, 1308, 960)
+    const el = rect(437, 56, 756, 364)
+    const pos = computePanelPosition(el, ws, opts)
+    expect(pos.placement).toBe('below')
+    expect(overlaps(pos, el)).toBe(false)
+    expect(pos.y).toBeGreaterThanOrEqual(56 + 364 + 12 - 1)
+    expect(pos.x + 360).toBeLessThanOrEqual(ws.right - MARGIN)
+  })
+
+  it('wide section with no room below → places ABOVE', () => {
+    // Element sits near workspace bottom: spaceBelow < 220, spaceAbove >= 220,
+    // neither side fits 360px → avoidOverlap must pick above (not side-clamp).
+    const ws = bounds(0, 0, 1600, 500)
+    const el = rect(50, 250, 1500, 230)
+    const pos = computePanelPosition(el, ws, opts)
+    expect(pos.placement).toBe('above')
+    expect(overlaps(pos, el)).toBe(false)
+  })
+
+  it('default avoidOverlap=false keeps legacy side-clamp (CSP contract)', () => {
+    const ws = bounds(324, 56, 1308, 960)
+    const el = rect(437, 56, 756, 364)
+    const pos = computePanelPosition(el, ws, { panelWidth: 360, panelMinHeight: 220, gap: 12, viewportMargin: 16 })
+    // Legacy: prefers right/left clamp even if it would overlap
+    expect(pos.placement === 'right' || pos.placement === 'left').toBe(true)
+  })
+})

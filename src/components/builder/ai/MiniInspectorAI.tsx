@@ -148,23 +148,26 @@ export function MiniInspectorAI({
   }, [open, measureAnchor, canvas.zoom, canvas.selectedSectionId])
 
   // Follow window / workspace scroll + resize while open
+  // (scroll does not bubble — capture catches inner canvas scroll containers)
   React.useEffect(() => {
     if (!open) return
     const onViewportChange = () => measureAnchor()
-    window.addEventListener('scroll', onViewportChange, { passive: true })
+    window.addEventListener('scroll', onViewportChange, { passive: true, capture: true })
     window.addEventListener('resize', onViewportChange, { passive: true })
     return () => {
-      window.removeEventListener('scroll', onViewportChange)
+      window.removeEventListener('scroll', onViewportChange, { capture: true } as EventListenerOptions)
       window.removeEventListener('resize', onViewportChange)
     }
   }, [open, measureAnchor])
 
   // Collision placement — same engine as ContextualSettingsPanel (§2 REUSE)
+  // avoidOverlap: sit NEXT TO the selected node, never on top of it (gate)
   const position = usePanelPosition(anchorRect, open, {
     panelWidth: 360,
     panelMinHeight: 220,
     gap: 12,
     viewportMargin: 16,
+    avoidOverlap: true,
   })
 
   // Selection change: keep panel bound to the LIVE selected node (gate §14)
