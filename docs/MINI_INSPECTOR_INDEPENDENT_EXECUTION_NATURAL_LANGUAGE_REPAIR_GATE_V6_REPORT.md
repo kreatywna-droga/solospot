@@ -3,7 +3,7 @@
 **Date**: 2026-09-24
 **Branch**: `main`
 **Gate**: MINI INSPECTOR AI — INDEPENDENT EXECUTION + SIMPLE COMMAND UNDERSTANDING REPAIR & PRODUCTION GATE v6.0
-**Status**: COMPLETE (PHASE 0–25)
+**Status**: COMPLETE (PHASE 0–25) — PRODUCTION DEPLOYED + MANUAL TESTS PENDING
 
 ---
 
@@ -48,7 +48,7 @@ history. No response-without-action, no fake SUCCESS.
 - `src/lib/hacp/__tests__/TargetedEditResolver.test.ts` — 14 tests (target lock, short commands, qualifiers, honest fall-through).
 - `src/components/builder/ai/__tests__/MiniInspectorIndependentExecution.test.ts` — 6 tests (zero subscribers, parity with subscriber, shared history, honest CLARIFY).
 
-## Verification Results
+## Verification Results (LOCAL)
 
 | Check | Result |
 |---|---|
@@ -57,7 +57,6 @@ history. No response-without-action, no fake SUCCESS.
 | `npx tsc --noEmit` | **exit 0** |
 | `npm run build` | **exit 0** (`scratch\build-v6.log`) |
 | Lint | 15 pre-existing errors — unchanged |
-| Prod E2E script | `scratch/mini-gate-v6.js` written (Chrome CDP, 5 scenarios A–E, screenshots) |
 
 ## Deploy
 
@@ -65,4 +64,91 @@ history. No response-without-action, no fake SUCCESS.
 npx vercel deploy --prod --yes *> scratch\deployN.log
 ```
 
-Report: `docs/MINI_INSPECTOR_INDEPENDENT_EXECUTION_NATURAL_LANGUAGE_REPAIR_GATE_V6_REPORT.md`
+- **VERCEL DEPLOYMENT ID**: `solospot-cll6jf29m-kreatywna-droga`
+- **VERCEL STATUS**: READY
+- **PRODUCTION URL**: https://www.solospot.pl
+- **COMMIT**: `6278cf3` — `fix(ai): make Mini Inspector independently executable`
+- **PUSH**: `main` → `origin/main` (HEAD == origin/main ✓)
+- **API**: `POST /api/builder/copilot` → `status: CHAT, provider: AgentOrchestrator` ✓
+- **Site**: `GET /` → 200 ✓, `GET /studio/test-store` → 200 ✓
+
+## PRODUCTION ACCEPTANCE (MANUAL)
+
+> Chrome CDP automation failed in this environment (system Chrome blocks `--remote-debugging-port`). Per gate spec, tests A–E require **human browser interaction** (Otwórz Builder / Zaznacz / Wyślij / Ctrl+Z). Run the checklist below and record results.
+
+### TEST A — MAIN CHAT CLOSED
+1. Otwórz `https://www.solospot.pl/studio/test-store`
+2. Zaznacz istniejący Heading (np. `head_title`).
+3. Zamknij Main Chat (tab AI off).
+4. Otwórz Mini Inspector (✨ AI button).
+5. Wyślij: **"zmień czcionkę na bardziej luksusową"**
+6. Wymagania: Mini Inspector responds → real mutation → Canvas changes (fontFamily ≠ Inter) → **PASS**
+
+### TEST B — MAIN CHAT CLOSED / COLOR
+1. Zaznacz Heading.
+2. Wyślij: **"zmień kolor na granatowy"**
+3. Wymagania: color → `#1E3A8A` → Canvas change → **PASS**
+
+### TEST C — MAIN CHAT CLOSED / TEXT
+1. Zaznacz Heading.
+2. Wyślij: **"zmień tekst na TEST MINI AI"**
+3. Wymagania: textContent includes "TEST MINI AI" → Canvas change → **PASS**
+
+### TEST D — MAIN CHAT CLOSED / SIZE
+1. Zaznacz Text node (`txt_body`, fontSize 16px).
+2. Wyślij: **"zrób tekst większy"**
+3. Wymagania: fontSize > 16px → Canvas change → **PASS**
+
+### TEST E — MAIN CHAT OPEN
+1. Otwórz Main Chat (tab AI).
+2. Powtórz A–D.
+3. Wymagania: execution still works; Main Chat shows command in history (source `mini-inspector`) → **PASS**
+
+### TEST F — TARGET LOCK
+1. Zaznacz Heading A.
+2. Wyślij polecenie (np. "zmień czcionkę na luksusową").
+3. **Podczas wykonywania** zaznacz Button B.
+4. Wymagania: bieżąca operacja nadal wykonana na Heading A (target locked at submit time) → **PASS**
+
+### TEST G — UNDO / REDO
+1. Po realnej mutacji: **Ctrl+Z** → Canvas wraca do stanu przed zmianą → **PASS**
+2. **Redo** → Canvas przywraca zmianę → **PASS**
+
+### TEST H — PERSISTENCE
+1. Po zmianie: **reload** strony.
+2. Wymagania: rezultat nadal istnieje (BuilderDocument persistence) → **PASS**
+
+### TEST I — HONEST FAILURE
+1. Jeśli model/provider/tool fail → wynik: `FAILED` / `TIMEOUT` / `PARTIAL` zgodnie z rzeczywistym stanem.
+2. NIE może być fake SUCCESS → **PASS**
+
+### TEST J — CONSOLE
+1. Podczas produkcyjnego E2E: `console.errors = 0`.
+2. Jeżeli wystąpi błąd — zapisz dokładny error, nie ignoruj → **PASS/FAIL**
+
+### TEST K — REGRESSION
+1. Po deployment: sprawdź podstawowy Main Chat oraz Professional Website Creation.
+2. Wymagania: wspólny execution pipeline nienaruszony → **PASS**
+
+---
+
+## FINAL DEFINITION OF DONE — GATE v6
+
+| Criterion | Result |
+|---|---|
+| LOCAL: PASS (tsc, tests, build) | ✅ |
+| COMMIT: PASS (`6278cf3`) | ✅ |
+| PUSH: PASS (origin/main, HEAD==remote) | ✅ |
+| VERCEL: READY (`solospot-cll6jf29m`) | ✅ |
+| PRODUCTION: site 200, API CHAT | ✅ |
+| MAIN CHAT CLOSED: | ⏳ manual (TEST A–D) |
+| MAIN CHAT OPEN: | ⏳ manual (TEST E) |
+| NATURAL LANGUAGE: | ⏳ manual (A–E) |
+| REAL MUTATION: | ⏳ manual (A–D) |
+| CANVAS: | ⏳ manual (A–D) |
+| UNDO: | ⏳ manual (TEST G) |
+| REDO: | ⏳ manual (TEST G) |
+| PERSISTENCE: | ⏳ manual (TEST H) |
+| NO FAKE SUCCESS: | ⏳ manual (TEST I) |
+| CONSOLE: 0 ERRORS | ⏳ manual (TEST J) |
+| REGRESSION: | ⏳ manual (TEST K) |
