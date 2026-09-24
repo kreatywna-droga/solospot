@@ -257,10 +257,13 @@ export function AiCopilotWorkspace() {
   // Handle autonomous generation completion
   useEffect(() => {
     if (genState.phase === 'complete' && genState.session) {
+      const mut = genState.session.commandsGenerated || 0
       const completeMsg: HacpMessage = {
         id: `msg-gen-complete-${Date.now()}`,
         type: 'system',
-        text: `Strona wygenerowana pomyślnie! Wykonano ${genState.session.toolsExecuted} operacji. Strona jest gotowa do podglądu.`,
+        text: mut > 0
+          ? `Strona wygenerowana pomyślnie! Wykonano ${genState.session.toolsExecuted} operacji (${mut} mutacji BuilderDocument). Strona jest gotowa do podglądu.`
+          : `Generacja zakończona bez mutacji w BuilderDocument (${genState.session.toolsExecuted} operacji odczytowych).`,
         timestamp: new Date().toLocaleTimeString('pl-PL'),
       }
       setMessages((prev) => [...prev, completeMsg])

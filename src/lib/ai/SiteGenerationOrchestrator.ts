@@ -60,6 +60,12 @@ const DEFAULT_CONFIG: OrchestratorConfig = {
   failFast: true,
 };
 
+/** Tools that can mutate BuilderDocument (aligned with ToolSurfaceSelector). */
+function isMutationClassTool(name: string): boolean {
+  if (name === 'undo' || name === 'redo') return true;
+  return /^(insert_|update_|set_|remove_|move_|delete_|batch_|configure_)/.test(name);
+}
+
 // ── Main Orchestrator ───────────────────────────────────────────────
 
 export class SiteGenerationOrchestrator {
@@ -69,6 +75,8 @@ export class SiteGenerationOrchestrator {
   private abortController: AbortController | null = null;
   /** Maps LLM-plan node IDs → actual HacpBridge-generated node IDs */
   private nodeIdMap: Map<string, string> = new Map();
+  /** REAL mutations confirmed by successful mutation tools (no fake SUCCESS). */
+  private mutationsApplied = 0;
 
   constructor(
     brief: string,
@@ -162,10 +170,26 @@ export class SiteGenerationOrchestrator {
       // Phase 5: Verification pass — read document summary
       await this.executeVerification(executeTool, document);
 
-      // Phase 6: Complete
-      this.setPhase('complete', 'Generacja strony zakończona pomyślnie.');
+      // Phase 6: Complete — DUAL-PATH GATE: require REAL mutations when the
+      // plan asked for sections. Zero mutations ⇒ not SUCCESS (no fake claim).
+      const plannedSections = plan.sections?.length ?? 0;
+      if (plannedSections > 0 && this.mutationsApplied === 0) {
+        this.session.error =
+          `Generacja nie wprowadziła żadnych mutacji w BuilderDocument (0 z ${plannedSections} zaplanowanych sekcji).`;
+        this.setPhase('error', this.session.error);
+        this.callbacks.onError(this.session.error);
+        return this.session;
+      }
+
+      this.setPhase(
+        'complete',
+        this.mutationsApplied > 0
+          ? `Generacja strony zakończona pomyślnie (${this.mutationsApplied} mutacji).`
+          : 'Generacja strony zakończona pomyślnie.'
+      );
       this.session.completedAt = new Date().toISOString();
       this.session.progress = 100;
+      this.session.commandsGenerated = this.mutationsApplied;
 
     } catch (error) {
       this.session.error = error instanceof Error ? error.message : String(error);
@@ -501,6 +525,10 @@ export class SiteGenerationOrchestrator {
       const durationMs = Date.now() - start;
 
       this.session.toolsExecuted++;
+      // Count only successful mutation-class tools as real document changes.
+      if (result.success && isMutationClassTool(call.name)) {
+        this.mutationsApplied++;
+      }
       const toolResult: ToolResult = {
         toolName: call.name,
         success: result.success,

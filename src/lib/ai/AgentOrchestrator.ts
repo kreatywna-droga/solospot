@@ -17,9 +17,10 @@
  * Model-agnostic: works with any free or paid model.
  */
 
-import { IntentClassifier, type IntentCategory, type ClassifiedIntent } from './IntentClassifier';
-import { ToolSurfaceSelector } from './ToolSurfaceSelector';
 import { ExecutionPlanManager, type ExecutionPlan, type PlanStep } from './ExecutionPlan';
+import { selectRequestTools } from './selectRequestTools';
+import type { IntentCategory, ClassifiedIntent } from './IntentClassifier';
+import { ToolSurfaceSelector } from './ToolSurfaceSelector';
 import type { HacpToolDefinition, HacpToolCall, AICopilotRequest, AICopilotResponse } from './AIProviderTypes';
 
 /**
@@ -39,6 +40,8 @@ export interface OrchestratorResult {
    * detected a pending mutation, the controller can inject a tool call.
    */
   controllerInjected?: boolean;
+  /** Tool surface selected for this request (DUAL-PATH UNIFICATION GATE). */
+  toolSurface?: string[];
 }
 
 /**
@@ -91,39 +94,24 @@ export class AgentOrchestrator {
   ): Promise<OrchestratorResult> {
     const startTime = Date.now();
 
-    // 1. CLASSIFY INTENT
-    const classified = IntentClassifier.classify(request.prompt, {
+    // 1–2. CLASSIFY INTENT + SELECT TOOL SURFACE (shared selectRequestTools)
+    // Multi-intent merge (FAZA 6): primary + secondaryIntents → union of surfaces.
+    const surface = selectRequestTools(request.prompt, {
       hasSelection: context.hasSelection,
       selectedNodeType: context.selectedNodeType,
       documentNodeCount: context.documentNodeCount,
       conversationHistory: context.conversationHistory,
     });
-
-    // 2. SELECT TOOL SURFACE
-    // Multi-intent merge (FAZA 6): primary + secondaryIntents → union of surfaces.
-    // Example: EDIT_NODE + DELETE → update_node_props AND remove_* available.
-    const secondaryIntents = Array.isArray(classified.parameters.secondaryIntents)
-      ? (classified.parameters.secondaryIntents as IntentCategory[])
-      : [];
-    const intentList: IntentCategory[] =
-      secondaryIntents.length > 0
-        ? [classified.category, ...secondaryIntents]
-        : [classified.category];
-    const tools =
-      intentList.length > 1
-        ? ToolSurfaceSelector.getToolsForIntents(intentList)
-        : ToolSurfaceSelector.getToolsForIntent(classified.category);
-    const toolNames =
-      intentList.length > 1
-        ? ToolSurfaceSelector.getToolNamesForIntents(intentList)
-        : ToolSurfaceSelector.getToolNamesForIntent(classified.category);
+    const classifiedCategory = surface.intent;
+    const tools = surface.tools;
+    const toolNames = surface.toolNames;
 
     // 3. CREATE EXECUTION PLAN
     const plan = ExecutionPlanManager.createPlan(
-      classified.category,
+      classifiedCategory,
       request.prompt,
-      classified.targets,
-      classified.parameters
+      surface.classified.targets,
+      surface.classified.parameters
     );
 
     // 4. SEND MINIMAL TOOLS TO MODEL
@@ -139,13 +127,14 @@ export class AgentOrchestrator {
     } catch (err: any) {
       return {
         status: 'FAILED',
-        intent: classified.category,
+        intent: classifiedCategory,
         plan: ExecutionPlanManager.failPlan(plan, err?.message || 'Provider error'),
         toolCalls: [],
         message: `Model request failed: ${err?.message || 'Unknown error'}`,
         modelUsed: 'unknown',
         durationMs: Date.now() - startTime,
         error: err?.message,
+        toolSurface: toolNames,
       };
     }
 
@@ -154,30 +143,38 @@ export class AgentOrchestrator {
       const providerError = modelResponse.error || modelResponse.message || 'Provider error';
       return {
         status: 'ERROR',
-        intent: classified.category,
+        intent: classifiedCategory,
         plan: ExecutionPlanManager.failPlan(plan, providerError),
         toolCalls: [],
         message: modelResponse.message || `AI provider error: ${providerError}`,
         modelUsed: modelResponse.model,
         durationMs: Date.now() - startTime,
         error: providerError,
+        toolSurface: toolNames,
       };
     }
     if (modelResponse.status === 'NOT_CONFIGURED') {
       return {
         status: 'NOT_CONFIGURED',
-        intent: classified.category,
+        intent: classifiedCategory,
         plan: ExecutionPlanManager.failPlan(plan, 'AI_PROVIDER = NOT_CONFIGURED'),
         toolCalls: [],
         message: modelResponse.message || 'AI provider is not configured.',
         modelUsed: modelResponse.model,
         durationMs: Date.now() - startTime,
         error: modelResponse.error || 'AI_PROVIDER = NOT_CONFIGURED',
+        toolSurface: toolNames,
       };
     }
 
-    // 5. PROCESS MODEL RESPONSE
-    const toolCalls = modelResponse.toolCalls || [];
+    // 5. PROCESS MODEL RESPONSE — DUAL-PATH GATE: drop any tool call outside surface
+    const rawToolCalls = modelResponse.toolCalls || [];
+    const allowed = new Set(toolNames);
+    const toolCalls = rawToolCalls.filter((tc) => allowed.has(tc.name));
+    if (toolCalls.length !== rawToolCalls.length) {
+      const leaked = rawToolCalls.filter((tc) => !allowed.has(tc.name)).map((tc) => tc.name);
+      console.warn('[AgentOrchestrator] Dropped tool calls outside surface:', leaked);
+    }
 
     // 6. If model generated tool calls → return them for HACP execution.
     // FORENSIC GATE v1.0: SUCCESS requires a MUTATION tool call.
@@ -188,48 +185,51 @@ export class AgentOrchestrator {
       const hasMutation = ToolSurfaceSelector.hasMutationToolCall(toolCalls);
       return {
         status: hasMutation ? 'SUCCESS' : 'PARTIAL',
-        intent: classified.category,
+        intent: classifiedCategory,
         plan: ExecutionPlanManager.advancePlan(plan, { toolCalls }),
         toolCalls,
         message: modelResponse.message || '',
         modelUsed: modelResponse.model,
         durationMs: Date.now() - startTime,
+        toolSurface: toolNames,
       };
     }
 
     // 7. If no tool calls, check for pending mutation in text
     const pendingMutation = this.detectPendingMutation(
       modelResponse.message,
-      classified,
+      surface.classified,
       context
     );
 
     if (pendingMutation) {
       // Controller injects the appropriate tool call
       const injectedToolCall = this.createToolCallFromMutation(pendingMutation);
-      if (injectedToolCall) {
+      if (injectedToolCall && allowed.has(injectedToolCall.name)) {
         return {
           status: 'SUCCESS',
-          intent: classified.category,
+          intent: classifiedCategory,
           plan: ExecutionPlanManager.advancePlan(plan, { injected: true }),
           toolCalls: [injectedToolCall],
           message: modelResponse.message || '',
           modelUsed: modelResponse.model,
           durationMs: Date.now() - startTime,
           controllerInjected: true,
+          toolSurface: toolNames,
         };
       }
     }
 
     // 8. Pure chat response
     return {
-      status: classified.category === 'CHAT' ? 'CHAT' : 'PARTIAL',
-      intent: classified.category,
+      status: classifiedCategory === 'CHAT' ? 'CHAT' : 'PARTIAL',
+      intent: classifiedCategory,
       plan,
       toolCalls: [],
       message: modelResponse.message || '',
       modelUsed: modelResponse.model,
       durationMs: Date.now() - startTime,
+      toolSurface: toolNames,
     };
   }
 

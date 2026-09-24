@@ -11,7 +11,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { AIProviderRegistry } from '@/lib/ai/AIProviderRegistry';
-import { BUILDER_TOOL_DEFINITIONS } from '@/lib/ai/BuilderToolDefinitions';
+import { selectRequestTools, assertToolsWithinSurface } from '@/lib/ai/selectRequestTools';
 import type { ChatMessage, AICopilotRequest } from '@/lib/ai/AIProviderTypes';
 
 export async function POST(req: NextRequest) {
@@ -277,13 +277,28 @@ ZASADY PROFESJONALNEJ KONWERSACJI:
       messages: chatMessages,
       builderContext,
       visualMetrics,
-      tools: undefined, // Tools are selected dynamically by AgentOrchestrator
+      tools: undefined, // Tools are selected dynamically via ToolSurfaceSelector
       routerMode: routerMode || 'FREE',
       modelId: selectedModelId,
     };
 
-    // FREE MODEL ORCHESTRATION: Use controlled execution flow
-    // Model SELECTS, SoloSpot EXECUTES, HACP SECURES
+    // DUAL-PATH UNIFICATION GATE — classify once; every subsequent path
+    // must send request.tools ⊆ selectedToolSurface. Full BUILDER_TOOL_DEFINITIONS
+    // (including batch_execute) is REPO-only and must never reach the model.
+    const surface = selectRequestTools(aiRequest.prompt, {
+      hasSelection: Boolean(builderContext.selectedNodeId),
+      selectedNodeType: builderContext.selectedNodeType,
+      documentNodeCount: builderContext.documentNodeCount ?? 0,
+    });
+    // Defense-in-depth: even if surface.tools were wrong, keep only names on surface.
+    const allowedNames = new Set(surface.toolNames);
+    const surfaceTools = surface.tools.filter((t) => allowedNames.has(t.name));
+    const surfaceCheck = assertToolsWithinSurface(surfaceTools, surface.intentList);
+    if (!surfaceCheck.ok) {
+      console.error('[copilot] Tool surface leak blocked:', surfaceCheck.leaked);
+    }
+
+    // FREE/AUTO ORCHESTRATION: Model SELECTS within surface, SoloSpot EXECUTES, HACP SECURES
     if (aiRequest.routerMode === 'FREE' || aiRequest.routerMode === 'AUTO') {
       try {
         const { AgentOrchestrator } = await import('@/lib/ai/AgentOrchestrator');
@@ -329,13 +344,26 @@ ZASADY PROFESJONALNEJ KONWERSACJI:
           });
         }
       } catch (orchErr: any) {
-        console.warn('[copilot] Orchestrator failed, falling back to direct:', orchErr?.message);
+        // CONTROLLED CONTINUATION: keep the SAME Tool Surface — never expand
+        // to the full builder tool set (that bypass was the dual-path root cause).
+        console.warn(
+          '[copilot] Orchestrator failed, continuing on same tool surface:',
+          orchErr?.message,
+          'intent=',
+          surface.intent,
+          'tools=',
+          surface.toolNames
+        );
       }
     }
 
-    // FALLBACK: Direct provider execution (full tool set)
-    const fallbackRequest = { ...aiRequest, tools: BUILDER_TOOL_DEFINITIONS };
-    const result = await registry.execute(fallbackRequest);
+    // CONTROLLED CONTINUATION / PAID / MANUAL path:
+    // direct provider execution restricted to the selected Tool Surface only.
+    const controlledRequest: AICopilotRequest = {
+      ...aiRequest,
+      tools: surfaceTools.length > 0 ? surfaceTools : undefined,
+    };
+    const result = await registry.execute(controlledRequest);
     return NextResponse.json(result, {
       headers: {
         'Content-Type': 'application/json; charset=utf-8',

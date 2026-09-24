@@ -17,7 +17,7 @@
 
 import type { AIProvider, AICopilotRequest, AICopilotResponse } from './AIProviderTypes';
 import { AIProviderRegistry } from './AIProviderRegistry';
-import { BUILDER_TOOL_DEFINITIONS } from './BuilderToolDefinitions';
+import { ToolSurfaceSelector } from './ToolSurfaceSelector';
 import type {
   SitePlan,
   SectionPlan,
@@ -562,8 +562,9 @@ export async function generateLLMSitePlan(
     };
   }
 
-  // Build available tools list for context
-  const availableTools = BUILDER_TOOL_DEFINITIONS.map((t) => t.name);
+  // DUAL-PATH UNIFICATION GATE: planner may only see the SITE_GENERATION
+  // Tool Surface — never the full BUILDER_TOOL_DEFINITIONS (batch_execute etc.).
+  const availableTools = ToolSurfaceSelector.getToolNamesForIntent('SITE_GENERATION');
 
   // Build messages
   const systemPrompt = buildSystemPrompt(availableTools);

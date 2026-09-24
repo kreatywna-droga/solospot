@@ -130,7 +130,9 @@ export function useAutonomousGeneration(
         progress: session.error ? prev.progress : 100,
         message: session.error
           ? `Błąd: ${session.error}`
-          : `Generacja zakończona! Wykonano ${session.toolsExecuted} operacji. Plan: ${plannerLabel}.`,
+          : session.commandsGenerated > 0
+            ? `Generacja zakończona! Wykonano ${session.toolsExecuted} operacji (${session.commandsGenerated} mutacji). Plan: ${plannerLabel}.`
+            : `Generacja zakończona bez mutacji w BuilderDocument. Operacje odczytowe: ${session.toolsExecuted}. Plan: ${plannerLabel}.`,
       }));
     } catch (error) {
       setState((prev) => ({
