@@ -1,0 +1,4 @@
+feat(builder): Mini Inspector AI — 200ms re-measure safety net, harden prod E2E selection flow
+
+- MiniInspectorAI: setInterval 200ms measureAnchor while open (catches missed resize/zoom/layout reflow)
+- E2E: force dispatchEvent(resize) after setViewport, re-click selection after resize, re-open AI if collapsed, zoom-in restore (no random 100% button), node rect in S10 evidence, QuickToolbar probe before selection-change FAIL

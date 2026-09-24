@@ -154,9 +154,12 @@ export function MiniInspectorAI({
     const onViewportChange = () => measureAnchor()
     window.addEventListener('scroll', onViewportChange, { passive: true, capture: true })
     window.addEventListener('resize', onViewportChange, { passive: true })
+    // Safety net: CSS zoom transitions / layout reflow can miss discrete events
+    const tick = window.setInterval(onViewportChange, 200)
     return () => {
       window.removeEventListener('scroll', onViewportChange, { capture: true } as EventListenerOptions)
       window.removeEventListener('resize', onViewportChange)
+      window.clearInterval(tick)
     }
   }, [open, measureAnchor])
 
