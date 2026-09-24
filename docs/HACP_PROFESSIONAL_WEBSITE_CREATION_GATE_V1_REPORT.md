@@ -16,8 +16,8 @@
 | 1 | START→FINISH bez interwencji usera? | **TAK** — 1 prompt, `prompts=1` (1 chat + 0 posts), brak „WYKONAJ" |
 | 2 | Intent (_ANALIZA)? | `isSiteGenerationRequest` → SITE_GENERATION; UI gate + IntentClassifier Priority 3 |
 | 3 | Plan (ARCHITEKTURA)? | Deterministic `generateSitePlan`: industry=`dentist`, purpose=`booking`, 8 sekcji (navbar→hero→features→about→testimonials→cta→footer + extra) |
-| 4 | Tool calls (runtime trace)? | `[SiteGen]` console: `update_theme`, `search_sections`, `insert_section_from_library`, `update_node_props`, `inspect_children`, overlay node updates — **0× batch_execute** |
-| 5 | Mutacje BuilderDocument? | sections **1→8**, nodeCount **118**, `commandsGenerated`/`mutationsApplied` > 0 (UI: „Wykonano 11… operacji") |
+| 4 | Tool calls (runtime trace)? | `[SiteGen]` 49 lines: `update_theme`, `search_sections`×4, `insert_section_from_library`×4, `update_node_props`×23, `inspect_children`×15, overlay×2 — **0× batch_execute** |
+| 5 | Mutacje BuilderDocument? | sections **1→8**, nodeCount **118**; UI complete: **„Wykonano 115 operacji (67 mutacji BuilderDocument)"** |
 | 6 | BuilderDocument before/after? | before=1 → after=8 (`C1 PASS`), proof `scratch/website-creation-gate-proof/result.json` |
 | 7 | Biblioteka (PHASE 3)? | **TAK** — `search_sections` + `insert_section_from_library` soft-first; fallback engine `insert_section` |
 | 8 | Weryfikacja (VERIFY)? | Each tool → HacpBridge BEFORE→EXEC→AFTER→VERIFY; `inspect_document_summary` na końcu |
