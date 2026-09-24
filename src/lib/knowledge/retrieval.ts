@@ -24,6 +24,63 @@ const STOPWORDS = new Set([
   'profesjonalna', 'nowoczesny', 'nowoczesna', 'firmowa', 'web', 'www',
 ]);
 
+/** Keyword map for brief → industry when caller omits industry (shared with planner detection). */
+const BRIEF_INDUSTRY_KEYWORDS: Record<string, string[]> = {
+  dentist: ['dentist', 'dentyst', 'stomatolog', 'dental', 'zęb', 'implant', 'ortodoncj', 'wybielan'],
+  restaurant: ['restaurant', 'restauracja', 'menu', 'kuchnia', 'food', 'dining', 'sushi', 'burger', 'kawiarnia', 'cafe'],
+  hotel: ['hotel', 'hotelu', 'pokoje', 'nocleg', 'boutique hotel', 'rezerwacja pokoju'],
+  law: ['kancelaria', 'adwokat', 'radca prawny', 'lawyer', 'prawo', 'legal'],
+  realestate: ['nieruchomości', 'mieszkanie', 'apartment', 'property', 'biuro nieruchomości', 'real estate'],
+  saas: ['saas', 'software', 'platform', 'dashboard', 'aplikacja', 'crm', 'erp'],
+  agency: ['agencja', 'agency', 'marketing', 'reklama', 'branding', 'creative'],
+  architecture: ['architekton', 'architecture', 'pracowni architek', 'projektow'],
+  portfolio: ['portfolio', 'prace', 'showcase', 'galeria prac'],
+  ecommerce: ['sklep', 'ecommerce', 'shop', 'produkt', 'sprzedaż'],
+  fitness: ['siłownia', 'gym', 'fitness', 'trening'],
+  beauty: ['salon', 'fryzjer', 'uroda', 'beauty', 'kosmetyk'],
+  clinic: ['klinika', 'lekarska', 'medical', 'lekarz', 'zdrowie'],
+  education: ['szkoła', 'kurs', 'szkolenie', 'education', 'uczelnia'],
+  tech: ['startup', 'technologia', 'technology', 'digital'],
+  other: [],
+};
+
+const BRIEF_PURPOSE_KEYWORDS: Record<string, string[]> = {
+  booking: ['rezerwacja', 'umów wizyt', 'appointment', 'booking', 'schedule'],
+  'lead-generation': ['kontakt', 'zapytanie', 'wycena', 'lead', 'formularz'],
+  ecommerce: ['sklep', 'koszyk', 'cart', 'checkout', 'kup'],
+  portfolio: ['portfolio', 'prace', 'showcase'],
+  informational: ['o nas', 'about', 'informacje', 'blog'],
+};
+
+function detectIndustryFromBrief(brief: string): string | undefined {
+  const lower = brief.toLowerCase();
+  let best: string | undefined;
+  let bestScore = 0;
+  for (const [industry, keywords] of Object.entries(BRIEF_INDUSTRY_KEYWORDS)) {
+    if (industry === 'other') continue;
+    const score = keywords.filter((kw) => lower.includes(kw)).length;
+    if (score > bestScore) {
+      bestScore = score;
+      best = industry;
+    }
+  }
+  return bestScore > 0 ? best : undefined;
+}
+
+function detectPurposeFromBrief(brief: string): string | undefined {
+  const lower = brief.toLowerCase();
+  let best: string | undefined;
+  let bestScore = 0;
+  for (const [purpose, keywords] of Object.entries(BRIEF_PURPOSE_KEYWORDS)) {
+    const score = keywords.filter((kw) => lower.includes(kw)).length;
+    if (score > bestScore) {
+      bestScore = score;
+      best = purpose;
+    }
+  }
+  return bestScore > 0 ? best : undefined;
+}
+
 function tokenize(text: string): string[] {
   return text
     .toLowerCase()
@@ -87,10 +144,12 @@ export function extractBriefSignals(brief: string, industry?: string, purpose?: 
   for (const kw of specKeywords) {
     if (lower.includes(kw)) specializations.push(kw);
   }
+  const detectedIndustry = industry || detectIndustryFromBrief(brief) || 'other';
+  const detectedPurpose = purpose || detectPurposeFromBrief(brief) || 'informational';
   return {
     brief,
-    industry: industry || 'other',
-    purpose: purpose || 'informational',
+    industry: detectedIndustry,
+    purpose: detectedPurpose,
     specializations,
   };
 }
@@ -157,6 +216,7 @@ function buildDesignHints(
 /**
  * Main retrieval entry: brief (+ optional pre-detected industry/purpose) → DecisionContext.
  * Returns honest empty-ish context when nothing matches — never fabricates entries.
+ * When industry/purpose omitted, detects from brief keywords (soft — defaults 'other'/'informational').
  */
 export function buildDecisionContext(
   brief: string,

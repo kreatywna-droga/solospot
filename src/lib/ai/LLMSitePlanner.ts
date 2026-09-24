@@ -33,6 +33,64 @@ import type {
 } from './SitePlanTypes';
 import { DEFAULT_DESIGN_SYSTEM } from './SitePlanTypes';
 import { generateSitePlan as generateDeterministicPlan } from './SitePlanPlanner';
+import { runDesignBrain, summarizeDesignBrain } from '../design-brain';
+
+/**
+ * Soft-attach Design Brain decisions onto a SitePlan without mutating
+ * execution paths (DECISION-042–045: Design Brain never executes).
+ * Failures never block planning.
+ */
+async function attachDesignBrainDecisions(brief: string, plan: SitePlan): Promise<SitePlan> {
+  try {
+    const brain = await runDesignBrain(brief, { projectId: 'autonomous-generation' });
+    const summary = summarizeDesignBrain(brain);
+    const enriched: SitePlan = {
+      ...plan,
+      visualDirection: brain.sitePlan.visualDirection || plan.visualDirection,
+      designSystem: { ...plan.designSystem, ...brain.sitePlan.designSystem },
+      contentStrategy: {
+        ...plan.contentStrategy,
+        toneOfVoice: brain.sitePlan.contentStrategy?.toneOfVoice || plan.contentStrategy.toneOfVoice,
+        contentDensity: brain.sitePlan.contentStrategy?.contentDensity || plan.contentStrategy.contentDensity,
+      },
+      conversionStrategy: {
+        ...plan.conversionStrategy,
+        primaryCTA: brain.sitePlan.conversionStrategy?.primaryCTA || plan.conversionStrategy.primaryCTA,
+        primaryCTALocation:
+          brain.sitePlan.conversionStrategy?.primaryCTALocation?.length
+            ? brain.sitePlan.conversionStrategy.primaryCTALocation
+            : plan.conversionStrategy.primaryCTALocation,
+        trustSignals:
+          brain.sitePlan.conversionStrategy?.trustSignals?.length
+            ? brain.sitePlan.conversionStrategy.trustSignals
+            : plan.conversionStrategy.trustSignals,
+      },
+      responsiveStrategy: {
+        ...plan.responsiveStrategy,
+        ...brain.sitePlan.responsiveStrategy,
+      },
+      assetStrategy: {
+        ...plan.assetStrategy,
+        ...brain.sitePlan.assetStrategy,
+      },
+      experienceStrategy: {
+        ...plan.experienceStrategy,
+        ...brain.sitePlan.experienceStrategy,
+      },
+      metadata: {
+        ...plan.metadata,
+        designBrain: summary,
+        designBrainVersion: brain.version,
+        designBrainStatus: brain.status,
+      },
+    };
+    console.log('[DesignBrain]', summary);
+    return enriched;
+  } catch (error) {
+    console.warn('[DesignBrain] soft-fail attaching decisions:', error);
+    return plan;
+  }
+}
 
 // ── Planner Configuration ──────────────────────────────────────────
 
@@ -552,7 +610,8 @@ export async function generateLLMSitePlan(
 
   if (!provider || !provider.isConfigured()) {
     console.log('[LLMSitePlanner] No AI provider available, falling back to deterministic planner');
-    const plan = generateDeterministicPlan(brief);
+    const basePlan = generateDeterministicPlan(brief);
+    const plan = await attachDesignBrainDecisions(brief, basePlan);
     return {
       plan,
       plannerType: 'deterministic',
@@ -626,7 +685,8 @@ export async function generateLLMSitePlan(
       }
 
       // Normalize and return
-      const plan = normalizePlan(rawPlan, brief);
+      const basePlan = normalizePlan(rawPlan, brief);
+      const plan = await attachDesignBrainDecisions(brief, basePlan);
       return {
         plan,
         plannerType: 'llm',
@@ -643,7 +703,8 @@ export async function generateLLMSitePlan(
 
   // All retries exhausted — fall back to deterministic
   console.log(`[LLMSitePlanner] All ${cfg.maxRetries + 1} attempts failed, falling back to deterministic planner. Last error: ${lastError}`);
-  const plan = generateDeterministicPlan(brief);
+  const basePlan = generateDeterministicPlan(brief);
+  const plan = await attachDesignBrainDecisions(brief, basePlan);
   return {
     plan,
     plannerType: 'deterministic',

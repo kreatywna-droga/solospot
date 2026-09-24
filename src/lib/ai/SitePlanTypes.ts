@@ -222,6 +222,9 @@ export interface SitePlan {
       antiPatternCount: number;
       retrievalLog: string[];
     } | null;
+    designBrain?: string | Record<string, unknown>;
+    designBrainVersion?: string;
+    designBrainStatus?: 'COMPLETE' | 'PARTIAL' | 'BLOCKED' | 'CLARIFY' | 'FAILED';
   };
 }
 

@@ -1,0 +1,298 @@
+/**
+ * Border Radius Systems — Complete Radius Style Catalog
+ *
+ * Provides 20+ border radius configurations for consistent design application.
+ */
+
+export interface RadiusStyle {
+  id: string;
+  name: string;
+  style: string;
+  description: string;
+  values: {
+    sm: string;
+    md: string;
+    lg: string;
+    xl: string;
+    full: string;
+  };
+  bestFor: string[];
+  notRecommendedFor: string[];
+  industries: string[];
+  mood: string[];
+  compatibility: string[];
+  preview: string;
+}
+
+export const radiusStyles: RadiusStyle[] = [
+  {
+    id: 'radius-rounded',
+    name: 'Rounded',
+    style: 'rounded',
+    description: 'Standard rounded corners for modern UI',
+    values: { sm: '4px', md: '8px', lg: '12px', xl: '16px', full: '9999px' },
+    bestFor: ['buttons', 'cards', 'inputs', 'modals'],
+    notRecommendedFor: ['luxury', 'editorial'],
+    industries: ['technology', 'saas', 'medical', 'education'],
+    mood: ['modern', 'clean', 'friendly'],
+    compatibility: ['buttons-solid', 'cards-soft', 'cards-elevated'],
+    preview: 'border-radius: 8px;',
+  },
+  {
+    id: 'radius-sharp',
+    name: 'Sharp',
+    style: 'sharp',
+    description: 'Minimal or square corners for bold designs',
+    values: { sm: '0px', md: '2px', lg: '4px', xl: '8px', full: '0px' },
+    bestFor: ['luxury', 'editorial', 'architecture', 'brutalist'],
+    notRecommendedFor: ['wellness', 'soft', 'organic'],
+    industries: ['fashion', 'architecture', 'law', 'finance'],
+    mood: ['luxury', 'elegant', 'bold', 'brutalist'],
+    compatibility: ['buttons-luxury', 'cards-bordered', 'cards-minimal'],
+    preview: 'border-radius: 0px;',
+  },
+  {
+    id: 'radius-pill',
+    name: 'Pill',
+    style: 'pill',
+    description: 'Fully rounded pill shapes for friendly interfaces',
+    values: { sm: '9999px', md: '9999px', lg: '9999px', xl: '9999px', full: '9999px' },
+    bestFor: ['buttons', 'tags', 'badges', 'notifications'],
+    notRecommendedFor: ['editorial', 'luxury', 'architecture'],
+    industries: ['wellness', 'fitness', 'lifestyle', 'food'],
+    mood: ['friendly', 'soft', 'organic', 'modern'],
+    compatibility: ['buttons-pill', 'cards-soft', 'cards-feature'],
+    preview: 'border-radius: 9999px;',
+  },
+  {
+    id: 'radius-soft',
+    name: 'Soft',
+    style: 'soft',
+    description: 'Gentle rounded corners for approachable designs',
+    values: { sm: '6px', md: '10px', lg: '16px', xl: '24px', full: '9999px' },
+    bestFor: ['cards', 'modals', 'containers', 'images'],
+    notRecommendedFor: ['brutalist', 'tech', 'futuristic'],
+    industries: ['wellness', 'dental', 'medical', 'education'],
+    mood: ['soft', 'organic', 'warm', 'modern'],
+    compatibility: ['buttons-outline', 'cards-soft', 'cards-elevated'],
+    preview: 'border-radius: 10px;',
+  },
+  {
+    id: 'radius-circle',
+    name: 'Circle',
+    style: 'circle',
+    description: 'Perfect circular shapes for avatars and icons',
+    values: { sm: '50%', md: '50%', lg: '50%', xl: '50%', full: '50%' },
+    bestFor: ['avatars', 'icons', 'images', 'badges'],
+    notRecommendedFor: ['rectangular', 'editorial', 'architecture'],
+    industries: ['social', 'media', 'creative-agency', 'photography'],
+    mood: ['modern', 'creative', 'friendly'],
+    compatibility: ['cards-image', 'buttons-icon', 'cards-portfolio'],
+    preview: 'border-radius: 50%;',
+  },
+  {
+    id: 'radius-asymmetric',
+    name: 'Asymmetric',
+    style: 'asymmetric',
+    description: 'Different radii per corner for creative designs',
+    values: { sm: '4px 12px 4px 12px', md: '8px 24px 8px 24px', lg: '16px 32px 16px 32px', xl: '24px 48px 24px 48px', full: '50% 50% 50% 50%' },
+    bestFor: ['creative', 'artistic', 'portfolio', 'gallery'],
+    notRecommendedFor: ['corporate', 'medical', 'law'],
+    industries: ['creative-agency', 'photography', 'art', 'design'],
+    mood: ['creative', 'expressive', 'artistic', 'bold'],
+    compatibility: ['buttons-gradient', 'cards-asymmetric', 'cards-portfolio'],
+    preview: 'border-radius: 8px 24px 8px 24px;',
+  },
+  {
+    id: 'radius-hero',
+    name: 'Hero',
+    style: 'hero',
+    description: 'Large rounded corners for hero sections',
+    values: { sm: '16px', md: '24px', lg: '32px', xl: '48px', full: '9999px' },
+    bestFor: ['hero sections', 'landing pages', 'banners'],
+    notRecommendedFor: ['compact', 'dashboard', 'forms'],
+    industries: ['technology', 'saas', 'marketing', 'creative-agency'],
+    mood: ['modern', 'bold', 'impactful'],
+    compatibility: ['buttons-gradient', 'cards-elevated', 'backgrounds-gradient'],
+    preview: 'border-radius: 24px;',
+  },
+  {
+    id: 'radius-minimal',
+    name: 'Minimal',
+    style: 'minimal',
+    description: 'Almost no rounding for clean, minimal designs',
+    values: { sm: '2px', md: '4px', lg: '6px', xl: '8px', full: '9999px' },
+    bestFor: ['minimalist', 'clean', 'professional'],
+    notRecommendedFor: ['playful', 'creative', 'organic'],
+    industries: ['technology', 'finance', 'corporate', 'saas'],
+    mood: ['minimal', 'clean', 'professional', 'modern'],
+    compatibility: ['buttons-minimal', 'cards-minimal', 'cards-bordered'],
+    preview: 'border-radius: 4px;',
+  },
+  {
+    id: 'radius-luxury',
+    name: 'Luxury',
+    style: 'luxury',
+    description: 'Refined rounded corners for premium designs',
+    values: { sm: '8px', md: '12px', lg: '20px', xl: '32px', full: '9999px' },
+    bestFor: ['luxury', 'premium', 'elegant'],
+    notRecommendedFor: ['brutalist', 'tech', 'futuristic'],
+    industries: ['fashion', 'hotel', 'beauty', 'luxury'],
+    mood: ['luxury', 'elegant', 'refined', 'premium'],
+    compatibility: ['buttons-luxury', 'cards-luxury', 'backgrounds-gradient'],
+    preview: 'border-radius: 12px;',
+  },
+  {
+    id: 'radius-brutalist',
+    name: 'Brutalist',
+    style: 'brutalist',
+    description: 'Extreme rounding for bold, aggressive designs',
+    values: { sm: '0px', md: '0px', lg: '0px', xl: '0px', full: '0px' },
+    bestFor: ['brutalist', 'edgy', 'bold', 'counter-culture'],
+    notRecommendedFor: ['luxury', 'medical', 'wellness'],
+    industries: ['gaming', 'music', 'art', 'counter-culture'],
+    mood: ['brutalist', 'bold', 'edgy', 'aggressive'],
+    compatibility: ['buttons-brutalist', 'cards-bordered', 'backgrounds-solid'],
+    preview: 'border-radius: 0px;',
+  },
+  {
+    id: 'radius-organic',
+    name: 'Organic',
+    style: 'organic',
+    description: 'Natural, flowing rounded corners',
+    values: { sm: '12px', md: '20px', lg: '32px', xl: '48px', full: '9999px' },
+    bestFor: ['wellness', 'nature', 'organic', 'eco'],
+    notRecommendedFor: ['tech', 'futuristic', 'corporate'],
+    industries: ['wellness', 'nature', 'eco', 'food'],
+    mood: ['organic', 'natural', 'soft', 'warm'],
+    compatibility: ['buttons-pill', 'cards-soft', 'backgrounds-pattern'],
+    preview: 'border-radius: 20px;',
+  },
+  {
+    id: 'radius-tech',
+    name: 'Tech',
+    style: 'tech',
+    description: 'Angular, precise rounding for technology designs',
+    values: { sm: '4px', md: '8px', lg: '12px', xl: '16px', full: '9999px' },
+    bestFor: ['technology', 'saas', 'fintech', 'startup'],
+    notRecommendedFor: ['luxury', 'editorial', 'organic'],
+    industries: ['technology', 'saas', 'fintech', 'startup'],
+    mood: ['tech', 'modern', 'futuristic', 'clean'],
+    compatibility: ['buttons-solid', 'cards-elevated', 'cards-glass'],
+    preview: 'border-radius: 8px;',
+  },
+  {
+    id: 'radius-editorial',
+    name: 'Editorial',
+    style: 'editorial',
+    description: 'Classic editorial rounding for publishing',
+    values: { sm: '2px', md: '4px', lg: '8px', xl: '12px', full: '9999px' },
+    bestFor: ['editorial', 'publishing', 'magazine', 'news'],
+    notRecommendedFor: ['playful', 'creative', 'organic'],
+    industries: ['media', 'publishing', 'news', 'editorial'],
+    mood: ['editorial', 'classic', 'timeless', 'professional'],
+    compatibility: ['buttons-editorial', 'cards-editorial', 'backgrounds-solid'],
+    preview: 'border-radius: 4px;',
+  },
+  {
+    id: 'radius-futuristic',
+    name: 'Futuristic',
+    style: 'futuristic',
+    description: 'Extreme rounding for futuristic, sci-fi designs',
+    values: { sm: '8px', md: '16px', lg: '32px', xl: '64px', full: '9999px' },
+    bestFor: ['futuristic', 'sci-fi', 'technology', 'gaming'],
+    notRecommendedFor: ['luxury', 'editorial', 'brutalist'],
+    industries: ['technology', 'gaming', 'sci-fi', 'futuristic'],
+    mood: ['futuristic', 'tech', 'modern', 'bold'],
+    compatibility: ['buttons-gradient', 'cards-glass', 'cards-dark'],
+    preview: 'border-radius: 16px;',
+  },
+  {
+    id: 'radius-social',
+    name: 'Social',
+    style: 'social',
+    description: 'Friendly, approachable rounding for social platforms',
+    values: { sm: '8px', md: '12px', lg: '16px', xl: '24px', full: '9999px' },
+    bestFor: ['social', 'community', 'messaging', 'chat'],
+    notRecommendedFor: ['luxury', 'editorial', 'law'],
+    industries: ['social', 'community', 'messaging', 'chat'],
+    mood: ['friendly', 'modern', 'warm', 'approachable'],
+    compatibility: ['buttons-pill', 'cards-soft', 'cards-rounded'],
+    preview: 'border-radius: 12px;',
+  },
+  {
+    id: 'radius-ecommerce',
+    name: 'E-Commerce',
+    style: 'ecommerce',
+    description: 'Balanced rounding for e-commerce interfaces',
+    values: { sm: '4px', md: '8px', lg: '12px', xl: '16px', full: '9999px' },
+    bestFor: ['e-commerce', 'retail', 'shopping', 'product'],
+    notRecommendedFor: ['brutalist', 'editorial', 'luxury'],
+    industries: ['e-commerce', 'retail', 'shopping', 'product'],
+    mood: ['modern', 'clean', 'professional', 'friendly'],
+    compatibility: ['buttons-solid', 'cards-image', 'cards-product'],
+    preview: 'border-radius: 8px;',
+  },
+  {
+    id: 'radius-dashboard',
+    name: 'Dashboard',
+    style: 'dashboard',
+    description: 'Clean rounding for dashboard and data interfaces',
+    values: { sm: '4px', md: '6px', lg: '8px', xl: '12px', full: '9999px' },
+    bestFor: ['dashboard', 'data', 'analytics', 'admin'],
+    notRecommendedFor: ['creative', 'organic', 'luxury'],
+    industries: ['technology', 'saas', 'finance', 'data'],
+    mood: ['modern', 'clean', 'professional', 'minimal'],
+    compatibility: ['buttons-solid', 'cards-bordered', 'cards-elevated'],
+    preview: 'border-radius: 6px;',
+  },
+  {
+    id: 'radius-landing',
+    name: 'Landing',
+    style: 'landing',
+    description: 'Generous rounding for landing page sections',
+    values: { sm: '12px', md: '20px', lg: '32px', xl: '48px', full: '9999px' },
+    bestFor: ['landing pages', 'sections', 'hero', 'banners'],
+    notRecommendedFor: ['dashboard', 'forms', 'compact'],
+    industries: ['marketing', 'technology', 'saas', 'creative-agency'],
+    mood: ['modern', 'bold', 'impactful', 'friendly'],
+    compatibility: ['buttons-gradient', 'cards-elevated', 'backgrounds-gradient'],
+    preview: 'border-radius: 20px;',
+  },
+  {
+    id: 'radius-artistic',
+    name: 'Artistic',
+    style: 'artistic',
+    description: 'Expressive, creative rounding for art and design',
+    values: { sm: '8px', md: '16px', lg: '24px', xl: '48px', full: '9999px' },
+    bestFor: ['art', 'design', 'creative', 'portfolio'],
+    notRecommendedFor: ['corporate', 'medical', 'law'],
+    industries: ['creative-agency', 'art', 'design', 'photography'],
+    mood: ['creative', 'expressive', 'artistic', 'bold'],
+    compatibility: ['buttons-gradient', 'cards-asymmetric', 'cards-portfolio'],
+    preview: 'border-radius: 16px;',
+  },
+  {
+    id: 'radius-medical',
+    name: 'Medical',
+    style: 'medical',
+    description: 'Clean, trustworthy rounding for medical interfaces',
+    values: { sm: '4px', md: '8px', lg: '12px', xl: '16px', full: '9999px' },
+    bestFor: ['medical', 'healthcare', 'dental', 'pharmacy'],
+    notRecommendedFor: ['luxury', 'brutalist', 'futuristic'],
+    industries: ['medical', 'healthcare', 'dental', 'pharmacy'],
+    mood: ['clean', 'trustworthy', 'professional', 'medical'],
+    compatibility: ['buttons-outline', 'cards-soft', 'cards-bordered'],
+    preview: 'border-radius: 8px;',
+  },
+];
+
+export const getRadiusStyle = (id: string): RadiusStyle | undefined =>
+  radiusStyles.find((r) => r.id === id);
+
+export const getRadiusValues = (id: string) => {
+  const style = getRadiusStyle(id);
+  return style?.values;
+};
+
+export default radiusStyles;
