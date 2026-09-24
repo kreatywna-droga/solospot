@@ -1,0 +1,254 @@
+{
+  "initial style-packs": {
+    "activeChip": "ds-cat-style-packs",
+    "rootCount": 1,
+    "listCount": 1,
+    "totalItems": 10,
+    "perRoot": [
+      {
+        "i": 0,
+        "items": 10
+      }
+    ],
+    "perList": [
+      {
+        "i": 0,
+        "items": 10,
+        "visible": true,
+        "firstIds": [
+          "sp-modern-dental-premium",
+          "sp-medical-clean",
+          "sp-dental-wellness",
+          "sp-luxury-dental"
+        ]
+      }
+    ],
+    "firstItemChain": [
+      "div[ds-catalog-item].p-2.5.rounded-xl.border",
+      "div[ds-catalog-list].flex-1.overflow-y-auto.p-2.5",
+      "div.flex.flex-col.h-full",
+      "div[ds-catalog-root].flex-1.min-h-0.flex",
+      "div.flex-1.min-h-0.flex",
+      "div.flex.flex-col.h-full",
+      "div.flex-1.overflow-hidden",
+      "aside.border-r.border-[#44444B].bg-[#202024]",
+      "div.flex.flex-1.overflow-hidden",
+      "div.h-screen.bg-[#18181B].text-white"
+    ],
+    "stylePanelCount": 1,
+    "firstItemReactKeys": [
+      "__reactFiber$rkgexw8082e",
+      "__reactProps$rkgexw8082e"
+    ]
+  },
+  "after click FONTY": {
+    "activeChip": "ds-cat-fonts",
+    "rootCount": 1,
+    "listCount": 1,
+    "totalItems": 137,
+    "perRoot": [
+      {
+        "i": 0,
+        "items": 137
+      }
+    ],
+    "perList": [
+      {
+        "i": 0,
+        "items": 137,
+        "visible": true,
+        "firstIds": [
+          "inter",
+          "space-grotesk",
+          "outfit",
+          "figtree"
+        ]
+      }
+    ],
+    "firstItemChain": [
+      "div[ds-catalog-item].p-2.5.rounded-xl.border",
+      "div[ds-catalog-list].flex-1.overflow-y-auto.p-2.5",
+      "div.flex.flex-col.h-full",
+      "div[ds-catalog-root].flex-1.min-h-0.flex",
+      "div.flex-1.min-h-0.flex",
+      "div.flex.flex-col.h-full",
+      "div.flex-1.overflow-hidden",
+      "aside.border-r.border-[#44444B].bg-[#202024]",
+      "div.flex.flex-1.overflow-hidden",
+      "div.h-screen.bg-[#18181B].text-white"
+    ],
+    "stylePanelCount": 1,
+    "firstItemReactKeys": [
+      "__reactFiber$rkgexw8082e",
+      "__reactProps$rkgexw8082e"
+    ]
+  },
+  "after click PALETY (stale?)": {
+    "activeChip": "ds-cat-colors",
+    "rootCount": 1,
+    "listCount": 1,
+    "totalItems": 118,
+    "perRoot": [
+      {
+        "i": 0,
+        "items": 118
+      }
+    ],
+    "perList": [
+      {
+        "i": 0,
+        "items": 118,
+        "visible": true,
+        "firstIds": [
+          "inter",
+          "space-grotesk",
+          "outfit",
+          "figtree"
+        ]
+      }
+    ],
+    "firstItemChain": [
+      "div[ds-catalog-item].p-2.5.rounded-xl.border",
+      "div[ds-catalog-list].flex-1.overflow-y-auto.p-2.5",
+      "div.flex.flex-col.h-full",
+      "div[ds-catalog-root].flex-1.min-h-0.flex",
+      "div.flex-1.min-h-0.flex",
+      "div.flex.flex-col.h-full",
+      "div.flex-1.overflow-hidden",
+      "aside.border-r.border-[#44444B].bg-[#202024]",
+      "div.flex.flex-1.overflow-hidden",
+      "div.h-screen.bg-[#18181B].text-white"
+    ],
+    "stylePanelCount": 1,
+    "firstItemReactKeys": [
+      "__reactFiber$rkgexw8082e",
+      "__reactProps$rkgexw8082e"
+    ]
+  },
+  "after click TYPOGRAFIA": {
+    "activeChip": "ds-cat-typography",
+    "rootCount": 1,
+    "listCount": 1,
+    "totalItems": 70,
+    "perRoot": [
+      {
+        "i": 0,
+        "items": 70
+      }
+    ],
+    "perList": [
+      {
+        "i": 0,
+        "items": 70,
+        "visible": true,
+        "firstIds": [
+          "inter",
+          "space-grotesk",
+          "outfit",
+          "figtree"
+        ]
+      }
+    ],
+    "firstItemChain": [
+      "div[ds-catalog-item].p-2.5.rounded-xl.border",
+      "div[ds-catalog-list].flex-1.overflow-y-auto.p-2.5",
+      "div.flex.flex-col.h-full",
+      "div[ds-catalog-root].flex-1.min-h-0.flex",
+      "div.flex-1.min-h-0.flex",
+      "div.flex.flex-col.h-full",
+      "div.flex-1.overflow-hidden",
+      "aside.border-r.border-[#44444B].bg-[#202024]",
+      "div.flex.flex-1.overflow-hidden",
+      "div.h-screen.bg-[#18181B].text-white"
+    ],
+    "stylePanelCount": 1,
+    "firstItemReactKeys": [
+      "__reactFiber$rkgexw8082e",
+      "__reactProps$rkgexw8082e"
+    ]
+  },
+  "after click BRANŻE": {
+    "activeChip": "ds-cat-industry-presets",
+    "rootCount": 1,
+    "listCount": 1,
+    "totalItems": 60,
+    "perRoot": [
+      {
+        "i": 0,
+        "items": 60
+      }
+    ],
+    "perList": [
+      {
+        "i": 0,
+        "items": 60,
+        "visible": true,
+        "firstIds": [
+          "inter",
+          "space-grotesk",
+          "outfit",
+          "figtree"
+        ]
+      }
+    ],
+    "firstItemChain": [
+      "div[ds-catalog-item].p-2.5.rounded-xl.border",
+      "div[ds-catalog-list].flex-1.overflow-y-auto.p-2.5",
+      "div.flex.flex-col.h-full",
+      "div[ds-catalog-root].flex-1.min-h-0.flex",
+      "div.flex-1.min-h-0.flex",
+      "div.flex.flex-col.h-full",
+      "div.flex-1.overflow-hidden",
+      "aside.border-r.border-[#44444B].bg-[#202024]",
+      "div.flex.flex-1.overflow-hidden",
+      "div.h-screen.bg-[#18181B].text-white"
+    ],
+    "stylePanelCount": 1,
+    "firstItemReactKeys": [
+      "__reactFiber$rkgexw8082e",
+      "__reactProps$rkgexw8082e"
+    ]
+  },
+  "after rapid 10": {
+    "activeChip": "ds-cat-colors",
+    "rootCount": 1,
+    "listCount": 1,
+    "totalItems": 238,
+    "perRoot": [
+      {
+        "i": 0,
+        "items": 238
+      }
+    ],
+    "perList": [
+      {
+        "i": 0,
+        "items": 238,
+        "visible": true,
+        "firstIds": [
+          "inter",
+          "space-grotesk",
+          "outfit",
+          "figtree"
+        ]
+      }
+    ],
+    "firstItemChain": [
+      "div[ds-catalog-item].p-2.5.rounded-xl.border",
+      "div[ds-catalog-list].flex-1.overflow-y-auto.p-2.5",
+      "div.flex.flex-col.h-full",
+      "div[ds-catalog-root].flex-1.min-h-0.flex",
+      "div.flex-1.min-h-0.flex",
+      "div.flex.flex-col.h-full",
+      "div.flex-1.overflow-hidden",
+      "aside.border-r.border-[#44444B].bg-[#202024]",
+      "div.flex.flex-1.overflow-hidden",
+      "div.h-screen.bg-[#18181B].text-white"
+    ],
+    "stylePanelCount": 1,
+    "firstItemReactKeys": [
+      "__reactFiber$rkgexw8082e",
+      "__reactProps$rkgexw8082e"
+    ]
+  }
+}

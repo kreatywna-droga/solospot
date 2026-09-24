@@ -1,0 +1,16 @@
+fonts total: 97 unique: 97 dupes: []
+colors total: 78
+industry total: 20
+stylePacks total: 10
+typography total: 30
+buttons total: 13
+cards total: 20
+backgrounds total: 20
+fonts: len=97 unique=97 dupIds=[]
+colors: len=78 unique=78 dupIds=[]
+industries: len=20 unique=20 dupIds=[]
+packs: len=10 unique=10 dupIds=[]
+typo: len=30 unique=30 dupIds=[]
+buttons: len=13 unique=13 dupIds=[]
+cards: len=20 unique=20 dupIds=[]
+backgrounds: len=20 unique=20 dupIds=[]

@@ -701,16 +701,19 @@ export const additionalFonts: FontItemExtended[] = [
     ['creative branding','social media','invitations'], ['corporate','tech'], ['creative','lifestyle','wedding'], ['Dancing Script','Pacifico','Sacramento'], {source:'Google Fonts',license:'SIL Open Font License',url:'https://fonts.google.com/specimen/Courgette',commercialUse:true,modification:true,attributionRequired:false}, 'Courgette', ['elegant','flowing','casual']),
 ];
 
-// Final combined catalog
-export const fullFontCatalog: FontItemExtended[] = [...deduplicatedFontCatalog, ...additionalFonts];
-
-// Remove duplicates
+// Final combined catalog — MUST stay unique by id (React list keys in
+// DesignSystemCatalog use item.id; duplicate ids leave stale items in the
+// DOM after category switches).
+const combinedFonts: FontItemExtended[] = [...deduplicatedFontCatalog, ...additionalFonts];
 const finalSeen = new Set<string>();
-export const finalFontCatalog: FontItemExtended[] = fullFontCatalog.filter((font) => {
+export const fullFontCatalog: FontItemExtended[] = combinedFonts.filter((font) => {
   if (finalSeen.has(font.id)) return false;
   finalSeen.add(font.id);
   return true;
 });
 
+// Remove duplicates
+export const finalFontCatalog: FontItemExtended[] = fullFontCatalog;
+
 // Verify count
-console.log(`Font catalog contains ${finalFontCatalog.length} unique fonts`);
+console.log(`Font catalog contains ${fullFontCatalog.length} unique fonts`);

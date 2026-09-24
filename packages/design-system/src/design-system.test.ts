@@ -23,7 +23,30 @@ import { effectStyles } from './effects';
 
 describe('Design System', () => {
   it('should have a font catalog', () => {
-    expect(fullFontCatalog.length).toBeGreaterThanOrEqual(100);
+    expect(fullFontCatalog.length).toBeGreaterThanOrEqual(90);
+  });
+
+  it('REGRESSION: font catalog ids must be unique (duplicate React keys leave stale catalog items after tab switch)', () => {
+    const ids = fullFontCatalog.map((f) => f.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(DesignSystem.fonts.map((f: any) => f.id)).toEqual(ids);
+  });
+
+  it('REGRESSION: every catalog rendered by DesignSystemCatalog has unique ids', () => {
+    const catalogs: Record<string, any[]> = {
+      fonts: DesignSystem.fonts as any[],
+      industryPresets: DesignSystem.industryPresets as any[],
+      colorPalettes: DesignSystem.colorPalettes as any[],
+      typographySystems: DesignSystem.typographySystems as any[],
+      buttonSystems: DesignSystem.buttonSystems as any[],
+      cardSystems: DesignSystem.cardSystems as any[],
+      backgroundStyles: DesignSystem.backgroundStyles as any[],
+      stylePacks: DesignSystem.stylePacks as any[],
+    };
+    for (const [name, list] of Object.entries(catalogs)) {
+      const ids = list.map((i) => i.id);
+      expect(new Set(ids).size, `${name} has duplicate ids`).toBe(ids.length);
+    }
   });
 
   it('should have font pairings', () => {

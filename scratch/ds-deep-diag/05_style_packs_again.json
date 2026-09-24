@@ -1,0 +1,118 @@
+{
+  "activeChip": "ds-cat-style-packs",
+  "total": 50,
+  "ids": [
+    "inter",
+    "space-grotesk",
+    "outfit",
+    "figtree",
+    "hanken-grotesk",
+    "geist",
+    "onest",
+    "sora",
+    "epilogue",
+    "archivo",
+    "raleway",
+    "montserrat",
+    "poppins",
+    "nunito",
+    "plus-jakarta-sans",
+    "manrope",
+    "work-sans",
+    "karla",
+    "mulish",
+    "cabin",
+    "open-sans",
+    "lato",
+    "roboto",
+    "merriweather",
+    "spectral",
+    "domine",
+    "vollkorn",
+    "newsreader",
+    "zilla-slab",
+    "besley",
+    "dancing-script",
+    "pacifico",
+    "caveat",
+    "great-vibes",
+    "satisfy",
+    "sacramento",
+    "kalam",
+    "marck-script",
+    "courgette",
+    "noto-serif",
+    "sp-modern-dental-premium",
+    "sp-medical-clean",
+    "sp-dental-wellness",
+    "sp-luxury-dental",
+    "sp-dark-tech",
+    "sp-saas-modern",
+    "sp-creative-studio",
+    "sp-luxury-architecture",
+    "sp-fashion-editorial",
+    "sp-premium-restaurant"
+  ],
+  "meta": [
+    {
+      "id": "inter",
+      "firstLine": "Inter",
+      "fiberKey": "inter",
+      "fiberType": "div",
+      "pendingPropsId": "inter"
+    },
+    {
+      "id": "space-grotesk",
+      "firstLine": "Space Grotesk",
+      "fiberKey": "space-grotesk",
+      "fiberType": "div",
+      "pendingPropsId": "space-grotesk"
+    },
+    {
+      "id": "outfit",
+      "firstLine": "Outfit",
+      "fiberKey": "outfit",
+      "fiberType": "div",
+      "pendingPropsId": "outfit"
+    },
+    {
+      "id": "figtree",
+      "firstLine": "Figtree",
+      "fiberKey": "figtree",
+      "fiberType": "div",
+      "pendingPropsId": "figtree"
+    },
+    {
+      "id": "hanken-grotesk",
+      "firstLine": "Hanken Grotesk",
+      "fiberKey": "hanken-grotesk",
+      "fiberType": "div",
+      "pendingPropsId": "hanken-grotesk"
+    },
+    {
+      "id": "geist",
+      "firstLine": "Geist",
+      "fiberKey": "geist",
+      "fiberType": "div",
+      "pendingPropsId": "geist"
+    },
+    {
+      "id": "onest",
+      "firstLine": "Onest",
+      "fiberKey": "onest",
+      "fiberType": "div",
+      "pendingPropsId": "onest"
+    },
+    {
+      "id": "sora",
+      "firstLine": "Sora",
+      "fiberKey": "sora",
+      "fiberType": "div",
+      "pendingPropsId": "sora"
+    }
+  ],
+  "search": "",
+  "industryFilter": null,
+  "moodFilter": null,
+  "emptyMsg": null
+}

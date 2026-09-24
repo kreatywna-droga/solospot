@@ -1,0 +1,78 @@
+{
+  "activeChip": "ds-cat-style-packs",
+  "total": 10,
+  "ids": [
+    "sp-modern-dental-premium",
+    "sp-medical-clean",
+    "sp-dental-wellness",
+    "sp-luxury-dental",
+    "sp-dark-tech",
+    "sp-saas-modern",
+    "sp-creative-studio",
+    "sp-luxury-architecture",
+    "sp-fashion-editorial",
+    "sp-premium-restaurant"
+  ],
+  "meta": [
+    {
+      "id": "sp-modern-dental-premium",
+      "firstLine": "Modern Dental Premium",
+      "fiberKey": "sp-modern-dental-premium",
+      "fiberType": "div",
+      "pendingPropsId": "sp-modern-dental-premium"
+    },
+    {
+      "id": "sp-medical-clean",
+      "firstLine": "Medical Clean",
+      "fiberKey": "sp-medical-clean",
+      "fiberType": "div",
+      "pendingPropsId": "sp-medical-clean"
+    },
+    {
+      "id": "sp-dental-wellness",
+      "firstLine": "Dental Wellness",
+      "fiberKey": "sp-dental-wellness",
+      "fiberType": "div",
+      "pendingPropsId": "sp-dental-wellness"
+    },
+    {
+      "id": "sp-luxury-dental",
+      "firstLine": "Luxury Dental",
+      "fiberKey": "sp-luxury-dental",
+      "fiberType": "div",
+      "pendingPropsId": "sp-luxury-dental"
+    },
+    {
+      "id": "sp-dark-tech",
+      "firstLine": "Dark Tech",
+      "fiberKey": "sp-dark-tech",
+      "fiberType": "div",
+      "pendingPropsId": "sp-dark-tech"
+    },
+    {
+      "id": "sp-saas-modern",
+      "firstLine": "SaaS Modern",
+      "fiberKey": "sp-saas-modern",
+      "fiberType": "div",
+      "pendingPropsId": "sp-saas-modern"
+    },
+    {
+      "id": "sp-creative-studio",
+      "firstLine": "Creative Studio",
+      "fiberKey": "sp-creative-studio",
+      "fiberType": "div",
+      "pendingPropsId": "sp-creative-studio"
+    },
+    {
+      "id": "sp-luxury-architecture",
+      "firstLine": "Luxury Architecture",
+      "fiberKey": "sp-luxury-architecture",
+      "fiberType": "div",
+      "pendingPropsId": "sp-luxury-architecture"
+    }
+  ],
+  "search": "",
+  "industryFilter": null,
+  "moodFilter": null,
+  "emptyMsg": null
+}

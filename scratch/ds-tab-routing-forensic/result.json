@@ -1,0 +1,209 @@
+{
+  "baseUrl": "http://localhost:3111",
+  "at": "2026-09-24T16:20:09.104Z",
+  "firstBreak": null,
+  "postRapidBreak": null,
+  "results": [
+    {
+      "id": "S01",
+      "action": "Open http://localhost:3111",
+      "expected": "reachable",
+      "actual": "http://localhost:3111",
+      "status": "PASS",
+      "evidence": "http://localhost:3111"
+    },
+    {
+      "id": "S02",
+      "action": "Category style-packs routes to its dataset",
+      "expected": "active=style-packs, correct dataset",
+      "actual": "active=ds-cat-style-packs count=10 first=[sp-modern-dental-premium,sp-medical-clean,sp-dental-wellness]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S03",
+      "action": "Category industry-presets routes to its dataset",
+      "expected": "active=industry-presets, correct dataset",
+      "actual": "active=ds-cat-industry-presets count=20 first=[ind-dental,ind-medical,ind-law]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S04",
+      "action": "Category fonts routes to its dataset",
+      "expected": "active=fonts, correct dataset",
+      "actual": "active=ds-cat-fonts count=97 first=[inter,space-grotesk,outfit]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S05",
+      "action": "Category colors routes to its dataset",
+      "expected": "active=colors, correct dataset",
+      "actual": "active=ds-cat-colors count=78 first=[mono-black-white,mono-charcoal,mono-cream]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S06",
+      "action": "Category typography routes to its dataset",
+      "expected": "active=typography, correct dataset",
+      "actual": "active=ds-cat-typography count=30 first=[typography-modern-minimal,typography-luxury-editorial,typography-premium-corporate]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S07",
+      "action": "Category buttons routes to its dataset",
+      "expected": "active=buttons, correct dataset",
+      "actual": "active=ds-cat-buttons count=13 first=[buttons-solid,buttons-outline,buttons-ghost]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S08",
+      "action": "Category cards routes to its dataset",
+      "expected": "active=cards, correct dataset",
+      "actual": "active=ds-cat-cards count=20 first=[cards-minimal,cards-bordered,cards-elevated]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S09",
+      "action": "Category backgrounds routes to its dataset",
+      "expected": "active=backgrounds, correct dataset",
+      "actual": "active=ds-cat-backgrounds count=20 first=[background-solid,background-gradient,background-dark]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S10",
+      "action": "REPRO: FONTY → BRANŻE content switches",
+      "expected": "industry dataset (ind-*), not font ids",
+      "actual": "active=ds-cat-industry-presets count=20 first=[ind-dental,ind-medical,ind-law]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S11",
+      "action": "SEARCH regression: fonts+\"Inter\" → BRANŻE no font list",
+      "expected": "no inter/font ids in list (empty ⇒ empty message)",
+      "actual": "active=ds-cat-industry-presets count=0 first=[] searchText=\"Inter\" emptyMsg=true",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S12",
+      "action": "SEARCH regression: BRANŻE+\"dental\" → PALETY no industry list",
+      "expected": "palette dataset (not ind-*), empty ⇒ empty message",
+      "actual": "active=ds-cat-colors count=0 first=[] emptyMsg=true",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S13",
+      "action": "FILTER regression: style filter → TYPOGRAFIA",
+      "expected": "typography dataset, not stale packs",
+      "actual": "active=ds-cat-typography count=30 first=[typography-modern-minimal,typography-luxury-editorial,typography-premium-corporate]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S14",
+      "action": "PREVIEW regression: preview close → KARTY lists cards",
+      "expected": "cards dataset, modal closed",
+      "actual": "active=ds-cat-cards count=20 first=[cards-minimal,cards-bordered,cards-elevated] previewWasOpen=true",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S15",
+      "action": "Rapid switch ×50 — no stale content / hang",
+      "expected": "all sampled states match active tab dataset",
+      "actual": "samples=11 mismatches=0 final=[typography active=ds-cat-typography count=30 first=typography-modern-minimal]",
+      "status": "PASS",
+      "evidence": "[]"
+    },
+    {
+      "id": "S16",
+      "action": "Rapid switch ×100 — no stale content / hang",
+      "expected": "all sampled states match active tab dataset",
+      "actual": "samples=21 mismatches=0 final=[fonts active=ds-cat-fonts count=97 first=inter]",
+      "status": "PASS",
+      "evidence": "[]"
+    },
+    {
+      "id": "S17",
+      "action": "Post-rapid: style-packs",
+      "expected": "correct dataset",
+      "actual": "active=ds-cat-style-packs count=10 first=[sp-modern-dental-premium,sp-medical-clean,sp-dental-wellness]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S18",
+      "action": "Post-rapid: industry-presets",
+      "expected": "correct dataset",
+      "actual": "active=ds-cat-industry-presets count=20 first=[ind-dental,ind-medical,ind-law]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S19",
+      "action": "Post-rapid: fonts",
+      "expected": "correct dataset",
+      "actual": "active=ds-cat-fonts count=97 first=[inter,space-grotesk,outfit]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S20",
+      "action": "Post-rapid: colors",
+      "expected": "correct dataset",
+      "actual": "active=ds-cat-colors count=78 first=[mono-black-white,mono-charcoal,mono-cream]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S21",
+      "action": "Post-rapid: typography",
+      "expected": "correct dataset",
+      "actual": "active=ds-cat-typography count=30 first=[typography-modern-minimal,typography-luxury-editorial,typography-premium-corporate]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S22",
+      "action": "Post-rapid: buttons",
+      "expected": "correct dataset",
+      "actual": "active=ds-cat-buttons count=13 first=[buttons-solid,buttons-outline,buttons-ghost]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S23",
+      "action": "Post-rapid: cards",
+      "expected": "correct dataset",
+      "actual": "active=ds-cat-cards count=20 first=[cards-minimal,cards-bordered,cards-elevated]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S24",
+      "action": "Post-rapid: backgrounds",
+      "expected": "correct dataset",
+      "actual": "active=ds-cat-backgrounds count=20 first=[background-solid,background-gradient,background-dark]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S25",
+      "action": "Console errors = 0",
+      "expected": "0",
+      "actual": "0",
+      "status": "PASS",
+      "evidence": ""
+    }
+  ],
+  "consoleErrors": []
+}
