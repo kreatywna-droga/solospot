@@ -1,0 +1,42 @@
+import type { KnowledgeEntry } from '../types';
+
+export const VISUAL_CONSISTENCY_ENTRIES: KnowledgeEntry[] = [
+  {
+    id: 'VC-001', domain: '14-visual-consistency', title: 'One design direction for the whole page',
+    rule: 'Once visualDirection is chosen (minimal, luxury, bold…), every section speaks that language — typography, color, radius, density.',
+    why: 'Mixed languages read as assembled templates, not a brand.',
+    whenToUse: 'From first section to footer.',
+    whenNotToUse: 'Never switch direction mid-page without brand reason.',
+    goodExample: 'Minimal luxury hero → matching minimal services cards → matching footer.',
+    badExample: 'Luxury hero + random SaaS gradient cards + playful testimonials.',
+    antiPattern: 'inconsistent-typography | unrelated-component-styles',
+    executionHint: 'designSystem + contentStrategy are global; avoid per-section overrides.',
+    verification: 'Cross-section sample: same fonts, radius, button style, tone.',
+    relatedRules: ['DP-005'], tags: ['consistency', 'direction', 'core'],
+  },
+  {
+    id: 'VC-002', domain: '14-visual-consistency', title: 'Radius, shadow, icon system',
+    rule: 'One border-radius scale, one shadow elevation system, one icon style (outlined OR filled) site-wide.',
+    why: 'Micro-inconsistencies accumulate into “off” feeling.',
+    whenToUse: 'Cards, buttons, images, inputs, iconography.',
+    whenNotToUse: 'Do not mix filled and outlined icons randomly.',
+    goodExample: 'All cards 12px + soft shadow; all icons outlined.',
+    badExample: 'Cards 0/8/16/999px; some icons filled some line.',
+    antiPattern: 'inconsistent-border-radius | inconsistent-shadows',
+    executionHint: 'designSystem.borderRadius shared; iconStyle from assetStrategy.',
+    verification: 'Enumerate radii/shadow styles — within allowed scale.',
+    relatedRules: ['DP-005'], tags: ['radius', 'shadows', 'icons'],
+  },
+  {
+    id: 'VC-003', domain: '14-visual-consistency', title: 'Section rhythm consistency',
+    rule: 'Similar sections use similar internal structure and spacing so the scroll feels sequenced, not random.',
+    why: 'Rhythm is the difference between designed and dumped.',
+    whenToUse: 'Repeated card sections, alternating bands.',
+    whenNotToUse: 'Intentional editorial breaks still align to grid.',
+    goodExample: 'All feature-like sections share heading style + grid gap.',
+    badExample: 'Each section invents new padding and title treatment.',
+    executionHint: 'Reuse SECTION spacing tokens; same heading level for section titles.',
+    verification: 'Vertical rhythm check across sections.',
+    relatedRules: ['SP-003'], tags: ['rhythm', 'sections'],
+  },
+];

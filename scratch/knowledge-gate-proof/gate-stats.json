@@ -1,0 +1,95 @@
+{
+  "stats": {
+    "schema": "1.0.0",
+    "domains": 18,
+    "entries": 79,
+    "patterns": 20,
+    "qa": 24,
+    "cases": 20,
+    "blueprints": 10,
+    "antiPatterns": 10,
+    "byDomain": {
+      "01-design-principles": 8,
+      "02-information-architecture": 6,
+      "03-layout-composition": 5,
+      "04-typography": 5,
+      "05-color-systems": 4,
+      "06-spacing-rhythm": 4,
+      "07-component-intelligence": 5,
+      "08-content-design": 5,
+      "09-industry-patterns": 3,
+      "10-image-media": 4,
+      "11-ux-conversion": 4,
+      "12-responsive-design": 4,
+      "13-accessibility": 4,
+      "14-visual-consistency": 3,
+      "15-anti-patterns": 10,
+      "16-quality-assurance": 3,
+      "17-website-blueprints": 1,
+      "18-training-cases": 1
+    }
+  },
+  "decision": {
+    "industry": "dentist",
+    "purpose": "booking",
+    "entryIds": [
+      "CD-005",
+      "IP-002",
+      "LC-003"
+    ],
+    "pattern": "IP-dental-medical",
+    "blueprint": "BP-dental-clinic",
+    "qa": 24,
+    "anti": 8,
+    "designHints": {
+      "toneOfVoice": "professional-warm reassuring",
+      "contentDensity": "moderate",
+      "visualDirection": "clean trust teal/blue, soft radii, photography of clinic/team",
+      "primaryCta": "Umów wizytę",
+      "trustSignals": [
+        "book appointment",
+        "show specializations"
+      ],
+      "recommendedSections": [
+        "navbar",
+        "hero",
+        "services",
+        "about",
+        "team",
+        "testimonials",
+        "cta",
+        "contact",
+        "footer"
+      ],
+      "mediaNeeds": [
+        "clinic interior",
+        "team photos",
+        "smile/result imagery",
+        "icons for services"
+      ]
+    },
+    "retrievalLog": [
+      "industry-pattern:IP-dental-medical",
+      "blueprint:BP-dental-clinic",
+      "entries:3",
+      "signals:industry=dentist,purpose=booking"
+    ],
+    "topEntries": [
+      {
+        "id": "CD-005",
+        "domain": "08-content-design",
+        "title": "CTA copy is a verb + object"
+      },
+      {
+        "id": "IP-002",
+        "domain": "09-industry-patterns",
+        "title": "Specialization narrows content"
+      },
+      {
+        "id": "LC-003",
+        "domain": "03-layout-composition",
+        "title": "Split vs centered hero"
+      }
+    ]
+  }
+}

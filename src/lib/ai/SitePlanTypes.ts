@@ -213,6 +213,15 @@ export interface SitePlan {
     language: string;
     generatedAt: string;
     plannerType: 'llm' | 'deterministic';
+    knowledge?: {
+      schemaVersion: string;
+      entryIds: string[];
+      industryPatternId: string | null;
+      blueprintId: string | null;
+      qaCheckCount: number;
+      antiPatternCount: number;
+      retrievalLog: string[];
+    } | null;
   };
 }
 

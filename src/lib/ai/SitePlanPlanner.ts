@@ -23,6 +23,7 @@ import type {
   ConversionStrategy,
 } from './SitePlanTypes';
 import { DEFAULT_DESIGN_SYSTEM, INDUSTRY_DEFAULTS } from './SitePlanTypes';
+import { buildDecisionContext, summarizeDecisionContext, type DecisionContext } from '../knowledge';
 
 // ── Brief Analysis ──────────────────────────────────────────────────
 
@@ -545,11 +546,20 @@ export function generateSitePlan(brief: string): SitePlan {
   // Generate sections
   const sections = generateSections(analysis);
 
-  // Default strategies for deterministic fallback
+  // Knowledge layer retrieval (soft — never blocks planning)
+  let knowledgeContext: DecisionContext | null = null;
+  try {
+    knowledgeContext = buildDecisionContext(brief, detectedIndustry, detectedPurpose);
+    console.log('[Knowledge]', summarizeDecisionContext(knowledgeContext));
+  } catch {
+    knowledgeContext = null;
+  }
+
+  // Default strategies for deterministic fallback (knowledge-informed when available)
   const defaultContentStrategy: ContentStrategy = {
-    toneOfVoice: 'professional',
+    toneOfVoice: knowledgeContext?.designHints.toneOfVoice || 'professional',
     headlineStyle: 'bold',
-    contentDensity: 'moderate',
+    contentDensity: knowledgeContext?.designHints.contentDensity || 'moderate',
     language: 'pl',
     useEmojis: false,
     ctaStrategy: 'primary-action',
@@ -581,16 +591,18 @@ export function generateSitePlan(brief: string): SitePlan {
   };
 
   const defaultConversionStrategy: ConversionStrategy = {
-    primaryCTA: 'Dowiedz się więcej',
+    primaryCTA: knowledgeContext?.designHints.primaryCta || 'Dowiedz się więcej',
     primaryCTALocation: ['hero', 'footer'],
-    trustSignals: ['Opinie klientów', 'Gwarancja jakości'],
+    trustSignals: knowledgeContext?.designHints.trustSignals?.length
+      ? knowledgeContext.designHints.trustSignals
+      : ['Opinie klientów', 'Gwarancja jakości'],
     urgencyLevel: 'none',
   };
 
   return {
     purpose: detectedPurpose,
     industry: detectedIndustry,
-    visualDirection: 'professional',
+    visualDirection: (knowledgeContext?.designHints.visualDirection as never) || 'professional',
     designSystem,
     contentStrategy: defaultContentStrategy,
     assetStrategy: defaultAssetStrategy,
@@ -610,6 +622,17 @@ export function generateSitePlan(brief: string): SitePlan {
       language: 'pl',
       generatedAt: new Date().toISOString(),
       plannerType: 'deterministic',
+      knowledge: knowledgeContext
+        ? {
+            schemaVersion: knowledgeContext.schemaVersion,
+            entryIds: knowledgeContext.entryIds.slice(0, 12),
+            industryPatternId: knowledgeContext.industryPattern?.id ?? null,
+            blueprintId: knowledgeContext.blueprint?.id ?? null,
+            qaCheckCount: knowledgeContext.qaChecks.length,
+            antiPatternCount: knowledgeContext.antiPatterns.length,
+            retrievalLog: knowledgeContext.retrievalLog,
+          }
+        : null,
     },
   };
 }

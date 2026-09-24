@@ -1,0 +1,169 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "prompt": "Zbuduj profesjonalną stronę dla nowoczesnego gabinetu dentystycznego specjalizującego się w implantologii i stomatologii estetycznej. Głównym celem strony jest zachęcenie pacjenta do umówienia wizyty.",
+  "results": [
+    {
+      "id": "A0",
+      "action": "Base URL reachable",
+      "expected": "HTTP 200",
+      "actual": "checked",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "A0b",
+      "action": "AI workspace open",
+      "expected": "SOLOSPOT AI",
+      "actual": "found",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "A1",
+      "action": "Exact knowledge-gate prompt sent",
+      "expected": "implantologii + estetycznej + umówienia wizyty",
+      "actual": "sent",
+      "status": "PASS",
+      "evidence": "Zbuduj profesjonalną stronę dla nowoczesnego gabinetu dentystycznego specjalizuj"
+    },
+    {
+      "id": "A2",
+      "action": "[Knowledge] retrieval runtime log",
+      "expected": "schema=1.0.0 with industry/blueprint/qa counts",
+      "actual": "[Knowledge] [Knowledge] schema=1.0.0 industry=dentist purpose=lead-generation entries=3 pattern=IP-dental-medical blueprint=BP-dental-clinic qa=24 anti=8 tone=professional-warm rea",
+      "status": "PASS",
+      "evidence": "[Knowledge] [Knowledge] schema=1.0.0 industry=dentist purpose=lead-generation entries=3 pattern=IP-dental-medical blueprint=BP-dental-clinic qa=24 anti=8 tone=professional-warm reassuring cta=Umów wizytę sections=navbar|hero|services|about|"
+    },
+    {
+      "id": "A3",
+      "action": "Generation progressed (canvas sections mutation)",
+      "expected": "sectionCount grew after prompt",
+      "actual": "before=1 after=8 mutated=true",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "A4",
+      "action": "Generation complete phase",
+      "expected": "complete signal or mutated canvas",
+      "actual": "complete-signal",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "A4b",
+      "action": "Canvas sections grew",
+      "expected": "after > before (1)",
+      "actual": "before=1 after=8",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "A5",
+      "action": "Dental specialization content",
+      "expected": "implantolog/stomatolog estetyczna vocabulary present",
+      "actual": "dentalHits=8/8",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "A6",
+      "action": "Implantology specialization reflected",
+      "expected": "true",
+      "actual": "true",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "A7",
+      "action": "Aesthetic dentistry reflected",
+      "expected": "true",
+      "actual": "true",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "A8",
+      "action": "Booking CTA present",
+      "expected": "Umów wizytę-like CTA",
+      "actual": "yes [\"umówienia wizyty\",\"Umów wizytę\"]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "A9",
+      "action": "No batch_execute in copilot request.tools",
+      "expected": "absent",
+      "actual": "absent (0 tool names)",
+      "status": "PASS",
+      "evidence": "[]"
+    },
+    {
+      "id": "A10",
+      "action": "No fake knowledge claims without retrieval log",
+      "expected": "0 fake claims or retrieval present",
+      "actual": "fakeClaims=0, knowledgeLogs=1",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "A11",
+      "action": "Console errors = 0",
+      "expected": "0 errors",
+      "actual": "3",
+      "status": "WARN",
+      "evidence": "Failed to load resource: the server responded with a status of 401 (Unauthorized) | Failed to load resource: the server responded with a status of 401 (Unauthorized) | Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "id": "A12",
+      "action": "No fake SUCCESS (mutation required for done)",
+      "expected": "section growth before claiming complete",
+      "actual": "mutated=true, complete=true, sections 1->8",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "A13",
+      "action": "Screenshots captured",
+      "expected": ">=3 png",
+      "actual": "3",
+      "status": "PASS",
+      "evidence": "01-loaded.png, 02-prompt-typed.png, 03-generation-end.png"
+    }
+  ],
+  "knowledgeEvidence": {
+    "knowledgeLogs": [
+      "[Knowledge] [Knowledge] schema=1.0.0 industry=dentist purpose=lead-generation entries=3 pattern=IP-dental-medical blueprint=BP-dental-clinic qa=24 anti=8 tone=professional-warm reassuring cta=Umów wizytę sections=navbar|hero|services|about|team|testimonials|cta|contact|footer"
+    ],
+    "copilotRequests": [],
+    "flatToolsSample": [],
+    "phases": [],
+    "sectionsBefore": 1,
+    "sectionsAfter": 8,
+    "dentalHits": 8,
+    "result": {
+      "pass": 15,
+      "fail": 0,
+      "warn": 1
+    }
+  },
+  "trace": [
+    {
+      "t": "2026-09-24T08:26:16.805Z",
+      "step": "loaded",
+      "url": "http://localhost:3000/studio/test-store",
+      "aiOpen": true
+    },
+    {
+      "t": "2026-09-24T08:26:16.896Z",
+      "step": "before",
+      "canvasLen": 464,
+      "beforeCount": 1
+    },
+    {
+      "t": "2026-09-24T08:26:32.680Z",
+      "step": "prompt_sent",
+      "prompt": "Zbuduj profesjonalną stronę dla nowoczesnego gabinetu dentystycznego specjalizującego się w implantologii i stomatologii"
+    }
+  ]
+}
