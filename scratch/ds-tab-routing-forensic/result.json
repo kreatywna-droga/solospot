@@ -1,16 +1,16 @@
 {
-  "baseUrl": "http://localhost:3111",
-  "at": "2026-09-24T16:20:09.104Z",
+  "baseUrl": "https://www.solospot.pl",
+  "at": "2026-09-24T16:25:13.793Z",
   "firstBreak": null,
   "postRapidBreak": null,
   "results": [
     {
       "id": "S01",
-      "action": "Open http://localhost:3111",
+      "action": "Open https://www.solospot.pl",
       "expected": "reachable",
-      "actual": "http://localhost:3111",
+      "actual": "https://www.solospot.pl",
       "status": "PASS",
-      "evidence": "http://localhost:3111"
+      "evidence": "https://www.solospot.pl"
     },
     {
       "id": "S02",
