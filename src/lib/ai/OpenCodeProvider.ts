@@ -65,6 +65,20 @@ export class OpenCodeProvider implements AIProvider {
         requiresTools
       );
 
+      if (!resolution.selectedModel) {
+        return {
+          status: 'ERROR',
+          provider: this.name,
+          model: 'NONE',
+          message: 'Nie udało się wybrać modelu AI. Brak dostępnych modeli.',
+          error: 'NO_SELECTED_MODEL',
+          requestId: `req-${Date.now().toString(36)}`,
+          isFreeModel: false,
+          routerMode: resolution.mode,
+          durationMs: 0,
+        };
+      }
+
       const selectedModelId = resolution.selectedModel.id;
       const cleanBaseUrl = (this.baseURL || 'https://openrouter.ai/api/v1')
         .replace(/[^\x20-\x7E]/g, '')
@@ -342,7 +356,8 @@ export class OpenCodeProvider implements AIProvider {
         'get_design_presets', 'resolve_target',
         // Design System (ONE catalog — read-only)
         'search_design_styles', 'search_style_packs', 'search_fonts', 'search_font_pairings',
-        'search_color_palettes', 'search_typography_systems', 'search_button_styles',
+        'search_color_palettes', 'search_color_combinations', 'search_design_combinations',
+        'search_moods', 'search_typography_systems', 'search_button_styles',
         'search_card_styles', 'search_backgrounds', 'search_industry_presets',
         'inspect_design_style', 'inspect_style_pack',
       ]);

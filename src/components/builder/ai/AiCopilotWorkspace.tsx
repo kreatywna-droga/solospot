@@ -345,7 +345,7 @@ export function AiCopilotWorkspace() {
           command.document,
           conversationContext,
           'AUTO',
-          undefined,
+          selectedModelId,
           (phase) => setCurrentPhase(phase),
           undefined
         )
