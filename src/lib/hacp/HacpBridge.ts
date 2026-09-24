@@ -149,6 +149,11 @@ export class HacpBridge {
   private capabilities: HacpCapability[] = [];
   private eventSubscribers: Array<(event: HacpActivityEvent) => void> = [];
   private recentEvents: HacpActivityEvent[] = [];
+  private liveDispatch: ((command: BuilderCommand) => void) | null = null;
+
+  public setLiveDispatch(dispatch: (command: BuilderCommand) => void | Promise<void>): void {
+    this.liveDispatch = dispatch;
+  }
 
   private constructor() {
     this.registerDefaultCapabilities();
@@ -1324,6 +1329,13 @@ export class HacpBridge {
         theme: resolved.theme as any,
       };
       const result = this.verifyCommandExecution(cmd, document, { targetId: 'theme' });
+      if (result.verification.passed && this.liveDispatch) {
+        try {
+          this.liveDispatch(cmd);
+        } catch (err) {
+          // Live dispatch failed, but verification passed on snapshot
+        }
+      }
       return {
         command: cmd,
         verification: result.verification,
@@ -1385,6 +1397,13 @@ export class HacpBridge {
       }
       const cmd: BuilderCommand = payload as BuilderCommand;
       const result = this.verifyCommandExecution(cmd, document, { targetId: 'theme' });
+      if (result.verification.passed && this.liveDispatch) {
+        try {
+          this.liveDispatch(cmd);
+        } catch (err) {
+          // Live dispatch failed, but verification passed on snapshot
+        }
+      }
       return {
         command: cmd,
         verification: result.verification,

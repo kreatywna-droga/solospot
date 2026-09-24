@@ -10,7 +10,7 @@
 import { useMemo, useState, useCallback } from 'react'
 import { Search, Filter, Check, Eye, Sparkles, X } from 'lucide-react'
 import { DesignSystem } from '../../../../packages/design-system/src/index'
-import { resolveStylePackApplication } from '../../../../packages/design-system/src/builder'
+import { resolveStylePackApplication, resolveDesignApplication, designApplicationToCommandPayload } from '../../../../packages/design-system/src/builder'
 import { useBuilder } from '../state/BuilderProvider'
 
 type CategoryId =
@@ -170,36 +170,75 @@ export function DesignSystemCatalog() {
     }
   }, [category, query, industry, mood])
 
-  const applyStylePack = useCallback(
-    (stylePackId: string) => {
-      const resolved = resolveStylePackApplication(
-        stylePackId,
-        {
-          stylePacks: DesignSystem.stylePacks,
-          colorPalettes: DesignSystem.colorPalettes,
-          typographySystems: DesignSystem.typographySystems,
-          radiusStyles: DesignSystem.radiusStyles,
-          shadowStyles: DesignSystem.shadowStyles,
-          backgroundStyles: DesignSystem.backgroundStyles,
-          spacingStyles: DesignSystem.spacingStyles,
-          compatibility: DesignSystem.compatibility,
-        },
-        {}
-      )
-      if (!resolved || Object.keys(resolved.theme).length === 0) return
+  const CAN_APPLY: Record<CategoryId, boolean> = {
+    'style-packs': true,
+    'design-combinations': true,
+    'fonts': true,
+    'font-pairings': true,
+    'typography': true,
+    'colors': true,
+    'color-combinations': false,
+    'buttons': true,
+    'cards': true,
+    'backgrounds': true,
+    'hero': true,
+    'sections': true,
+    'images': true,
+    'icons': true,
+    'effects': true,
+    'shadows': true,
+    'radius': true,
+    'spacing': true,
+    'industry-presets': true,
+    'themes': false,
+  }
 
-      // Single UPDATE_THEME (theme + tokens + appliedStylePackId in one payload)
-      // → one HistoryStack entry → undo reverts theme AND clears badge.
+  const applyDesignSystemItem = useCallback(
+    (itemId: string, itemCategory: CategoryId) => {
+      const kind = itemCategory as any
+      const raw =
+        kind === 'style-packs'
+          ? resolveStylePackApplication(
+              itemId,
+              {
+                stylePacks: DesignSystem.stylePacks,
+                colorPalettes: DesignSystem.colorPalettes,
+                typographySystems: DesignSystem.typographySystems,
+                radiusStyles: DesignSystem.radiusStyles,
+                shadowStyles: DesignSystem.shadowStyles,
+                backgroundStyles: DesignSystem.backgroundStyles,
+                spacingStyles: DesignSystem.spacingStyles,
+                compatibility: DesignSystem.compatibility,
+              },
+              {}
+            )
+          : resolveDesignApplication({ kind, id: itemId, options: {} }, DesignSystem as any)
+
+      const resolved = raw as any
+      if (!resolved) return
+
+      const designResult =
+        kind === 'style-packs'
+          ? { ok: Object.keys(resolved.theme).length > 0, ...resolved }
+          : resolved
+
+      if (!designResult || !designResult.ok) return
+
+      const payload = designApplicationToCommandPayload(designResult)
+      if (!payload) return
+
       dispatch({
-        type: 'UPDATE_THEME',
+        ...payload,
         theme: {
-          ...resolved.theme,
-          tokens: resolved.tokens,
-          appliedStylePackId: stylePackId,
+          ...(payload.theme || {}),
+          appliedStylePackId:
+            kind === 'style-packs' || kind === 'industry-presets'
+              ? itemId
+              : (doc?.theme?.appliedStylePackId || undefined),
         } as any,
-      })
+      } as any)
     },
-    [dispatch]
+    [dispatch, DesignSystem, doc]
   )
 
   const previewPack = previewId
@@ -296,13 +335,13 @@ export function DesignSystemCatalog() {
           <p className="text-xs text-zinc-500 text-center py-6">Brak wyników dla „{query}”.</p>
         )}
         {items.map((item: any) => {
-          const isPack = category === 'style-packs'
-          const colors = isPack ? paletteOf(item) : null
+          const canApply = CAN_APPLY[category] ?? false
           return (
             <div
               key={item.id}
               data-testid="ds-catalog-item"
               data-item-id={item.id}
+              data-category={category}
               className={`p-2.5 rounded-xl border bg-white/[0.03] transition-all hover:border-[#D9A86C]/40 ${
                 appliedId === item.id ? 'border-[#D9A86C]/70 bg-[#D9A86C]/[0.08]' : 'border-[#3A3A40]'
               }`}
@@ -336,27 +375,18 @@ export function DesignSystemCatalog() {
                         </span>
                       ))}
                   </div>
-                  {colors && (
-                    <div className="flex gap-1 pt-0.5">
-                      <span className="w-4 h-4 rounded border border-white/20" style={{ backgroundColor: colors.primary }} />
-                      <span className="w-4 h-4 rounded border border-white/20" style={{ backgroundColor: colors.secondary }} />
-                      <span className="w-4 h-4 rounded border border-white/20" style={{ backgroundColor: colors.bg }} />
-                    </div>
-                  )}
                 </div>
                 <div className="flex flex-col gap-1.5 flex-shrink-0">
-                  {isPack && (
+                  <button
+                    onClick={() => setPreviewId(item.id)}
+                    data-testid="ds-btn-preview"
+                    className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold border border-[#3A3A40] text-zinc-300 hover:border-white/30 hover:text-white"
+                  >
+                    <Eye className="w-3 h-3" /> Podgląd
+                  </button>
+                  {canApply && (
                     <button
-                      onClick={() => setPreviewId(item.id)}
-                      data-testid="ds-btn-preview"
-                      className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold border border-[#3A3A40] text-zinc-300 hover:border-white/30 hover:text-white"
-                    >
-                      <Eye className="w-3 h-3" /> Podgląd
-                    </button>
-                  )}
-                  {isPack && (
-                    <button
-                      onClick={() => applyStylePack(item.id)}
+                      onClick={() => applyDesignSystemItem(item.id, category)}
                       data-testid="ds-btn-apply"
                       className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold bg-[#D9A86C] text-white hover:bg-[#c4965a]"
                     >
@@ -371,76 +401,75 @@ export function DesignSystemCatalog() {
       </div>
 
       {/* Preview modal — PREVIEW ≠ APPLY */}
-      {previewPack && (
-        <div
-          className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center p-4"
-          data-testid="ds-preview-modal"
-          onClick={() => setPreviewId(null)}
-        >
+      {previewId && (() => {
+        const previewItem = items.find((i: any) => i.id === previewId)
+        if (!previewItem) return null
+        return (
           <div
-            className="w-full max-w-md rounded-2xl border border-[#3A3A40] bg-[#18181B] overflow-hidden shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center p-4"
+            data-testid="ds-preview-modal"
+            onClick={() => setPreviewId(null)}
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[#3A3A40]">
-              <div className="flex items-center gap-2 text-white text-xs font-bold">
-                <Sparkles className="w-4 h-4 text-[#D9A86C]" />
-                {previewPack.name}
+            <div
+              className="w-full max-w-md rounded-2xl border border-[#3A3A40] bg-[#18181B] overflow-hidden shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between px-4 py-3 border-b border-[#3A3A40]">
+                <div className="flex items-center gap-2 text-white text-xs font-bold">
+                  <Sparkles className="w-4 h-4 text-[#D9A86C]" />
+                  {previewItem.name || previewItem.id}
+                </div>
+                <button onClick={() => setPreviewId(null)} className="text-zinc-400 hover:text-white" aria-label="Zamknij">
+                  <X className="w-4 h-4" />
+                </button>
               </div>
-              <button onClick={() => setPreviewId(null)} className="text-zinc-400 hover:text-white" aria-label="Zamknij">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="p-4 space-y-3" data-testid="ds-preview-content">
-              <div
-                className="rounded-xl p-4 border border-white/10"
-                style={{
-                  background: previewPack.preview?.background || paletteOf(previewPack).bg,
-                  fontFamily: DesignSystem.typographySystems.find(
-                    (t: any) => t.id === previewPack.typographyId
-                  )?.fontFamily || 'Inter',
-                }}
-              >
-                <div className="text-lg font-bold mb-1" style={{ color: paletteOf(previewPack).primary }}>
-                  {previewPack.preview?.h1 || previewPack.name}
+              <div className="p-4 space-y-3" data-testid="ds-preview-content">
+                <div className="rounded-xl p-4 border border-white/10">
+                  <div className="text-lg font-bold mb-1 text-white">
+                    {previewItem.name || previewItem.id}
+                  </div>
+                  <div className="text-sm mb-2 text-zinc-300">
+                    {previewItem.description || previewItem.style || previewItem.preview || 'Podgląd'}
+                  </div>
+                  {previewItem.values && (
+                    <div className="text-[11px] text-zinc-400 space-y-1">
+                      {Object.entries(previewItem.values).map(([key, value]: [string, any]) => (
+                        <div key={key} className="flex justify-between">
+                          <span className="text-zinc-500">{key}:</span>
+                          <span className="text-zinc-300">{String(value)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <div className="text-sm mb-2" style={{ color: paletteOf(previewPack).secondary }}>
-                  {previewPack.preview?.h2 || previewPack.description}
-                </div>
-                <div className="text-[11px] opacity-80 mb-3" style={{ color: '#e5e5e5' }}>
-                  {previewPack.preview?.body || previewPack.description}
-                </div>
-                <span
-                  className="inline-block px-3 py-1.5 text-[11px] font-bold text-white rounded-lg"
-                  style={{ background: paletteOf(previewPack).primary }}
+                <p className="text-[10px] text-zinc-500">
+                  Podgląd nie zmienia dokumentu. Kliknij „Zastosuj”, aby wykonać mutację.
+                </p>
+              </div>
+              <div className="flex justify-end gap-2 px-4 py-3 border-t border-[#3A3A40]">
+                <button
+                  onClick={() => setPreviewId(null)}
+                  className="px-3 py-1.5 rounded-lg text-[11px] font-semibold border border-[#3A3A40] text-zinc-300 hover:text-white"
                 >
-                  {previewPack.preview?.button || 'CTA'}
-                </span>
+                  Zamknij
+                </button>
+                {CAN_APPLY[category] && (
+                  <button
+                    onClick={() => {
+                      applyDesignSystemItem(previewItem.id, category)
+                      setPreviewId(null)
+                    }}
+                    data-testid="ds-btn-apply-from-preview"
+                    className="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-[#D9A86C] text-white hover:bg-[#c4965a]"
+                  >
+                    Zastosuj
+                  </button>
+                )}
               </div>
-              <p className="text-[10px] text-zinc-500">
-                Podgląd nie zmienia dokumentu. Kliknij „Zastosuj”, aby wykonać mutację UPDATE_THEME.
-              </p>
-            </div>
-            <div className="flex justify-end gap-2 px-4 py-3 border-t border-[#3A3A40]">
-              <button
-                onClick={() => setPreviewId(null)}
-                className="px-3 py-1.5 rounded-lg text-[11px] font-semibold border border-[#3A3A40] text-zinc-300 hover:text-white"
-              >
-                Zamknij
-              </button>
-              <button
-                onClick={() => {
-                  applyStylePack(previewPack.id)
-                  setPreviewId(null)
-                }}
-                data-testid="ds-btn-apply-from-preview"
-                className="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-[#D9A86C] text-white hover:bg-[#c4965a]"
-              >
-                Zastosuj styl
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
     </div>
   )
 }

@@ -37,6 +37,7 @@ import {
   createMemoryChannel,
   MemoryChannelPair,
 } from '../../../../packages/builder-core/src/index'
+import { HacpBridge } from '../../../lib/hacp/HacpBridge'
 
 // ---------------------------------------------------------------------------
 // Context shape exposed to children
@@ -102,6 +103,15 @@ export function BuilderProvider({
   const dispatch = useCallback((command: BuilderCommand) => {
     setCtx(prev => prev.dispatch(command))
   }, [])
+
+  // HACP live dispatch — enables HACP write tools to mutate live BuilderContext
+  useEffect(() => {
+    const bridge = HacpBridge.getInstance()
+    bridge.setLiveDispatch(dispatch)
+    return () => {
+      bridge.setLiveDispatch(null as any)
+    }
+  }, [dispatch])
 
   // Keyboard shortcuts
   useEffect(() => {
