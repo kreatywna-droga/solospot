@@ -95,6 +95,14 @@ export function MiniInspectorAI({
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
   const bridge = React.useMemo(() => HacpBridge.getInstance(), [])
 
+  // Mount into builder workspace portal
+  React.useEffect(() => {
+    setMountEl(
+      document.querySelector<HTMLElement>('[data-builder-workspace]') ??
+        document.body
+    )
+  }, [])
+
   // TARGET LOCK — re-resolve whenever selection / document / ids change
   const target: InspectorAITargetLock | null = React.useMemo(
     () => resolveInspectorAITarget(builderDoc, sectionId, pageId),
