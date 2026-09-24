@@ -1,11 +1,12 @@
 # SOLOSPOT — HACP PROFESSIONAL WEBSITE CREATION GATE v1.0 (DENTIST START→FINISH)
 
-**Status:** **PASS — 15/15, 0 FAIL, 0 WARN**
+**Status:** **PASS — 15/15, 0 FAIL, 0 WARN (local + prod)**
 **Data:** 2026-09-24
 **Charakter:** BUILD — kod + testy + runtime E2E + deploy
 **Baseline (FIRST BREAK):** exact gate prompt → CHAT-only (`pathTaken=chat-only`, 6 FAIL, 0 mutacji)
 **Prompt (jednorazowy, bez follow-upów):**
 > „Zbuduj mi profesjonalną stronę od start to finish dla nowoczesnego gabinetu dentystycznego."
+**Zamknięcie:** commit `3a325e0`+`5606d5f` → pushed → Vercel `dpl_3FkFbMbGwqJDuv2m6biEV65AXp2W` Ready → prod E2E 15/15 @ `https://www.solospot.pl`
 
 ---
 
@@ -30,10 +31,10 @@
 | 15 | tsc? | `npx tsc --noEmit` → **TSC_OK** |
 | 16 | build? | `npm run build` → **BUILD_OK**; BUILD_ID=`0qdv1V5Dot6rHZOmkytF4` |
 | 17 | lint? | Repo: 15 pre-existing errors (Function type, useParticleEngine, react-hooks…) — **0 nowych w plikach gate'a** (eslint na 6 plikach: 0 errors, 1 pre-existing img warning) |
-| 18 | Commit SHA? | patrz § Commits poniżej (git push → HASH) |
-| 19 | Push? | `main == origin/main` po pushu |
-| 20 | Vercel deploy? | `npx vercel deploy --prod --yes` → deployment READY (patrz § Deploy) |
-| 21 | Prod verification? | `BASE_URL=https://www.solospot.pl` gate E2E (patrz § Prod) |
+| 18 | Commit SHA? | **`3a325e0`** (gate 8 plików) + **`5606d5f`** (report delta) |
+| 19 | Push? | **OK** — `main == origin/main == 5606d5f` (`a17a535..5606d5f`) |
+| 20 | Vercel deploy? | `npx vercel deploy --prod --yes` → **Ready** — `dpl_3FkFbMbGwqJDuv2m6biEV65AXp2W` → `https://solospot-mrgq5e3d6-kreatywna-droga.vercel.app`, alias `https://www.solospot.pl` |
+| 21 | Prod verification? | `BASE_URL=https://www.solospot.pl` → **15 PASS / 0 FAIL / 0 WARN**, `generation-complete`, 1→8, dentalHits=6/8 (patrz § Prod) |
 | 22 | FIRST BREAK + capability gaps? | patrz § FIRST BREAK i § Capability gaps |
 
 ---
@@ -120,37 +121,62 @@
 ## Commits / Deploy / Prod
 
 ### Commits
-- Fix gate: `git commit` — pliki:
-  - `src/lib/ai/IntentClassifier.ts`
-  - `src/components/builder/ai/AiCopilotWorkspace.tsx`
-  - `src/lib/ai/SitePlanPlanner.ts`
-  - `src/lib/ai/SiteGenerationOrchestrator.ts`
-  - `src/lib/ai/__tests__/IntentClassifier.test.ts`
-  - `src/lib/ai/__tests__/SitePlanPlanner.test.ts`
-  - `scratch/website-creation-gate-e2e.js`
-- Docs: `docs/HACP_PROFESSIONAL_WEBSITE_CREATION_GATE_V1_REPORT.md`
+| SHA | Message | Zawartość |
+|---|---|---|
+| **`3a325e0911f06251a55659853b5a57d8198c7698`** | `feat(ai): website creation gate — dentist START→FINISH 15/15 PASS` | 8 plików, +1038/−61: `IntentClassifier.ts`, `AiCopilotWorkspace.tsx`, `SitePlanPlanner.ts`, `SiteGenerationOrchestrator.ts`, `IntentClassifier.test.ts`, `SitePlanPlanner.test.ts` (NOWY), `scratch/website-creation-gate-e2e.js` (NOWY), `docs/HACP_PROFESSIONAL_WEBSITE_CREATION_GATE_V1_REPORT.md` (NOWY) |
+| **`5606d5f369c7e758718eeeab9cbf6ef8acbe4a56`** | `feat(ai): website creation gate — intent SSOT, dentist stems, recursive content overlay` | report delta: tool-call trace + mutacje (115 ops / 67 mutations) |
 
-**NIE commitujemy** (leftovers / nie-nasze): `public/stores/s-new/*`, `TODO_SPRINT6_STEP6.progress.md`, stare `docs/AI_*` untracked, dziesiątki `scratch/*`, `scripts/ai-copilot-*`.
+**NIE commitujemy** (leftovers / nie-nasze): `public/stores/s-new/*`, `TODO_SPRINT6_STEP6.progress.md`, stare `docs/AI_*` untracked, dziesiątki `scratch/*` (poza bramkowym), `scripts/ai-copilot-*`, plik `$`.
 
 ### Push
 ```
 git push origin main
+→ a17a535..5606d5f  main -> main
 ```
+**`main == origin/main == 5606d5f`** ✅
 
 ### Deploy
 ```
 npx vercel deploy --prod --yes
+(bez --archive=tgz)
+→ ✓ Ready
+→ id:    dpl_3FkFbMbGwqJDuv2m6biEV65AXp2W
+→ url:   https://solospot-mrgq5e3d6-kreatywna-droga.vercel.app
+→ alias: https://www.solospot.pl  (+ solospot.pl, solospot.vercel.app)
+→ HTTP / i /api/health: 200
 ```
-(bez `--archive=tgz`)
 
 ### Prod verification
 ```
 $env:BASE_URL='https://www.solospot.pl'; node scratch/website-creation-gate-e2e.js
+→ === GATE SUMMARY: 15 PASS, 0 FAIL, 0 WARN (path=generation-complete, sections 1→8) ===
 ```
-Oczekiwane: `pathTaken=generation-complete`, **15 PASS / 0 FAIL / 0 WARN**, dentalHits>0, sections 1→8.
+| ID | Status | Evidence (prod) |
+|---|---|---|
+| A1–A3 | PASS | workspace, beforeCount=1, exact prompt |
+| B1 | PASS | `generation-complete`, complete=true, sections=8 |
+| B2 | PASS | generationUiSeen=true, copilotPosts=0 |
+| C1 | PASS | before=1 → after=8 |
+| C2 | PASS | 8 sections |
+| C3 | PASS | placeholders=0 |
+| C4 | PASS | **dentalHits=6/8** |
+| C5 | PASS | emptyish=0, overlaps=0 |
+| C6 | PASS | overlaps=0 |
+| D1 | PASS | honest, mutations>0 |
+| D2 | PASS | batch_execute leak=false |
+| D3 | PASS | prompts=1 |
+| E1 | PASS | console errors=0 |
+
+Proof: `scratch/website-creation-gate-proof/{result.json,01-prompt-sent.png,02-after-wait.png,03-final.png}` (baseUrl=`https://www.solospot.pl`).
 
 ---
 
 ## Podsumowanie
 
-Gate **HACP Professional Website Creation v1.0** przechodzi lokalnie **15/15**. Pierwszy break (dual trigger miss) i content failure (industry=other + library hardcoded children) naprawione przez shared intent SSOT, stem industry detection, purpose fallback i recursive content overlay na drzewie biblioteki. Zero fake SUCCESS, zero `batch_execute` leak, single prompt, zero interwencji usera.
+Gate **HACP Professional Website Creation v1.0 (DENTIST START→FINISH)** — **PASS 15/15, 0 FAIL, 0 WARN** zarówno lokalnie, jak i na prod (`https://www.solospot.pl`).
+
+- **FIRST BREAK:** dual trigger miss (UI substring + IntentClassifier contiguous) → shared `isSiteGenerationRequest` SSOT.
+- **Content failure:** industry stem (`dentyst`≠`dentysta`), purpose fallback, recursive `overlayChildTexts` na `inspect_children` (bare `CompactNode[]`).
+- **Commits:** `3a325e0` + `5606d5f` → pushed, `main == origin/main`.
+- **Deploy:** `dpl_3FkFbMbGwqJDuv2m6biEV65AXp2W` READY, aliased prod.
+- **Zero** fake SUCCESS, zero `batch_execute` leak, single prompt, zero interwencji usera, zero blokerów.
