@@ -19,6 +19,7 @@ import {
   Eye, Zap, X, Shield, Cpu, RefreshCw, Sliders, Info, CornerDownLeft,
   Copy, Check, Square, Wand2, Plus, Paperclip, FileText, Image as ImageIcon
 } from 'lucide-react'
+import { MiniInspectorCommandBus } from './MiniInspectorCommandBus'
 import { useBuilder, useBuilderHistory } from '../state/BuilderProvider'
 import { HacpBridge } from '@/lib/hacp/HacpBridge'
 import type {
@@ -37,8 +38,8 @@ import type { GenerationPhase } from '@/lib/ai/SitePlanTypes'
 import type { ChatMessageAttachment } from '@/lib/ai/AIProviderTypes'
 import { AiRobotMascot, type AiRobotState } from './AiRobotMascot'
 
-/** HacpMessage + local-only tool names (no HACP / HacpTypes changes). */
-export type AiContextMessage = HacpMessage & { toolNames?: string[] }
+/** HacpMessage + local-only tool names and Mini Inspector metadata. */
+export type AiContextMessage = HacpMessage & { toolNames?: string[]; source?: string; targetNodeId?: string }
 
 function normalizeToolName(name: string): string {
   return name.replace(/^AI Tool Call:\s*/i, '').trim()
@@ -109,6 +110,8 @@ export function AiCopilotWorkspace() {
   const [aiProviderStatus, setAiProviderStatus] = useState<'ONLINE' | 'OFFLINE' | 'NOT_CONFIGURED'>('OFFLINE')
   const [aiProviderName, setAiProviderName] = useState<string>('NONE')
   const [missingKeys, setMissingKeys] = useState<string[]>([])
+  const [miniInspectorExecuting, setMiniInspectorExecuting] = useState(false)
+  const [miniInspectorStatus, setMiniInspectorStatus] = useState<string>('IDLE')
 
   // Collapsible panels state
   const [showStatusModal, setShowStatusModal] = useState(false)
@@ -315,6 +318,115 @@ export function AiCopilotWorkspace() {
     })
     return () => unsubscribe()
   }, [bridge])
+
+  // Subscribe to Mini Inspector Command Bus
+  // Mini Inspector commands are processed through the SAME pipeline as main chat
+  useEffect(() => {
+    const unsubscribe = MiniInspectorCommandBus.subscribe(async (command: any) => {
+      if (isExecuting) return null
+
+      // Add Mini Inspector command to main chat as a user message
+      const miniUserMsg: AiContextMessage = {
+        id: `msg-mini-${Date.now()}`,
+        type: 'user',
+        text: `[Mini Inspector] ${command.prompt}`,
+        timestamp: new Date().toLocaleTimeString('pl-PL'),
+        source: 'mini-inspector',
+        targetNodeId: command.targetNodeId,
+      }
+      setMessages((prev) => [...prev, miniUserMsg])
+      setMiniInspectorExecuting(true)
+      setMiniInspectorStatus('EXECUTING')
+
+      try {
+        const result = await bridge.executePlan(
+          command.prompt,
+          command.context,
+          command.document,
+          conversationContext,
+          'AUTO',
+          undefined,
+          (phase) => setCurrentPhase(phase),
+          undefined
+        )
+
+        if (result) {
+          // Dispatch mutations if EXECUTE + commands
+          if (result.intent === 'EXECUTE' && result.commandsToDispatch.length > 0) {
+            result.commandsToDispatch.forEach((cmd: any) => dispatch(cmd))
+          }
+
+          // Update conversation memory
+          if (result.updatedConversationContext) {
+            setConversationContext((prev) => ({
+              ...prev,
+              ...result.updatedConversationContext,
+              history: [
+                ...prev.history,
+                { role: 'user' as const, text: command.prompt, timestamp: new Date().toLocaleTimeString('pl-PL') },
+                {
+                  role: 'ai' as const,
+                  text: result.message,
+                  intent: result.intent,
+                  timestamp: new Date().toLocaleTimeString('pl-PL'),
+                },
+              ].slice(-25),
+            }))
+          }
+
+          // Undo/Redo
+          if (result.shouldTriggerUndo || result.intent === 'UNDO') {
+            if (canUndo) undo()
+          }
+          if (result.shouldTriggerRedo || result.intent === 'REDO') {
+            if (canRedo) redo()
+          }
+
+          // Add AI response to main chat
+          const toolNames = (result.executionCard?.steps || [])
+            .map((s: any) => s.name.replace(/^AI Tool Call:\s*/i, '').trim())
+            .filter(Boolean)
+
+          const miniAiMsg: AiContextMessage = {
+            id: `msg-mini-ai-${Date.now()}`,
+            type: 'ai',
+            text: result.message && result.message.trim().length > 0
+              ? result.message.trim()
+              : 'Model nie zwrócił odpowiedzi.',
+            timestamp: new Date().toLocaleTimeString('pl-PL'),
+            intent: result.intent,
+            scope: result.scope,
+            isError: !result.success,
+            card: result.executionCard,
+            toolNames: toolNames.length > 0 ? toolNames : undefined,
+            source: 'mini-inspector',
+            targetNodeId: command.targetNodeId,
+          }
+          setMessages((prev) => [...prev, miniAiMsg])
+
+          setMiniInspectorStatus(result.success ? 'SUCCESS' : 'FAILED')
+          return result
+        }
+        return null
+      } catch (err: any) {
+        const errorMsg: AiContextMessage = {
+          id: `msg-mini-err-${Date.now()}`,
+          type: 'system',
+          text: `Nie udało się wykonać polecenia Mini Inspectora: ${err?.message || 'Błąd HACP'}`,
+          timestamp: new Date().toLocaleTimeString('pl-PL'),
+          isError: true,
+          source: 'mini-inspector',
+          targetNodeId: command.targetNodeId,
+        }
+        setMessages((prev) => [...prev, errorMsg])
+        setMiniInspectorStatus('FAILED')
+        return null
+      } finally {
+        setMiniInspectorExecuting(false)
+      }
+    })
+    return () => unsubscribe()
+  }, [bridge, conversationContext, dispatch, isExecuting, canUndo, canRedo, undo, redo])
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -992,6 +1104,11 @@ export function AiCopilotWorkspace() {
                 {msg.intent === 'UNDO' && (
                   <span className="px-1.5 py-0.2 rounded bg-[#D9A86C]/10 border border-[#D9A86C]/30 text-[#D9A86C] font-bold text-[8px]">
                     HISTORY REVERT
+                  </span>
+                )}
+                {(msg as any).source === 'mini-inspector' && (
+                  <span className="px-1.5 py-0.2 rounded bg-[#D9A86C]/15 border border-[#D9A86C]/40 text-[#F2C27F] font-bold text-[8px]">
+                    MINI INSPECTOR
                   </span>
                 )}
               </div>

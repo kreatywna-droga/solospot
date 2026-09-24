@@ -306,15 +306,18 @@ describe('Quick actions are real HACP prompts (§9)', () => {
 // ---------------------------------------------------------------------------
 
 describe('Architecture purity (§4, §15)', () => {
-  it('MiniInspectorAI module uses HacpBridge.executePlan only (read source)', async () => {
+  it('MiniInspectorAI uses MiniInspectorCommandBus, NOT direct HacpBridge.executePlan', async () => {
     const fs = await import('node:fs')
     const path = await import('node:path')
     const src = fs.readFileSync(
       path.resolve(__dirname, '../MiniInspectorAI.tsx'),
       'utf8'
     )
-    expect(src).toContain('HacpBridge')
-    expect(src).toContain('executePlan')
+    // Uses command bus for communication
+    expect(src).toContain('MiniInspectorCommandBus')
+    expect(src).toContain('submitCommand')
+    // Does NOT call executePlan directly
+    expect(src).not.toContain('bridge.executePlan')
     // No parallel provider / second execution pipeline
     expect(src).not.toMatch(/new\s+OpenAI\(/)
     expect(src).not.toMatch(/generateWithTools\s*\(/)
@@ -323,6 +326,35 @@ describe('Architecture purity (§4, §15)', () => {
     // Dispatch only when EXECUTE + commands
     expect(src).toContain("result.intent === 'EXECUTE'")
     expect(src).toContain('commandsToDispatch.length > 0')
+  })
+
+  it('MiniInspectorAI has NO conversation state (turns, conversation)', async () => {
+    const fs = await import('node:fs')
+    const path = await import('node:path')
+    const src = fs.readFileSync(
+      path.resolve(__dirname, '../MiniInspectorAI.tsx'),
+      'utf8'
+    )
+    // No chat history state
+    expect(src).not.toContain('setTurns')
+    expect(src).not.toContain('AiTurn')
+    expect(src).not.toContain('setConversation')
+    expect(src).not.toContain('useState<HacpConversationContext>')
+    // No chat rendering
+    expect(src).not.toContain('turns.map')
+    expect(src).not.toContain('mini-inspector-ai-turn')
+  })
+
+  it('MiniInspectorAI uses command bus for main chat integration', async () => {
+    const fs = await import('node:fs')
+    const path = await import('node:path')
+    const src = fs.readFileSync(
+      path.resolve(__dirname, '../MiniInspectorAI.tsx'),
+      'utf8'
+    )
+    expect(src).toContain('MiniInspectorCommandBus.submitCommand')
+    expect(src).toContain('source:')
+    expect(src).toContain('targetNodeId')
   })
 
   it('QuickToolbar and ContextualSettingsPanel both mount MiniInspectorAI', async () => {
