@@ -28,6 +28,7 @@ import {
   Layers, LayoutDashboard, Palette, Square, Sparkles, Minus, Move,
   Upload, ExternalLink,
 } from 'lucide-react'
+import { MiniInspectorAI, MiniInspectorAIButton } from '../ai/MiniInspectorAI'
 import { useBuilder, useSelectedSection } from '../state/BuilderProvider'
 import { usePanelPosition, type ElementRect } from './usePanelPosition'
 import { getProfileForNodeType, type SettingsGroup, type ElementSettingsProfile } from './elementProfiles'
@@ -735,6 +736,9 @@ export function ContextualSettingsPanel({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
 
+  // Mini Inspector AI window (shared path — gate §4/§5)
+  const [aiOpen, setAiOpen] = useState(false)
+
   if (!node) return null
 
   const renderGroup = (group: SettingsGroup) => {
@@ -807,14 +811,30 @@ export function ContextualSettingsPanel({
                 </span>
                 <span className="text-[10px] text-slate-600 font-mono truncate">{nodeType}</span>
               </div>
-              <button
-                onClick={onClose}
-                className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
-                title="Zamknij panel (ESC)"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <MiniInspectorAIButton
+                  onClick={() => setAiOpen((v) => !v)}
+                  active={aiOpen}
+                />
+                <button
+                  onClick={onClose}
+                  className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
+                  title="Zamknij panel (ESC)"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
+
+            {/* Shared Mini Inspector AI window — always one path (§4) */}
+            {aiOpen && (
+              <MiniInspectorAI
+                sectionId={sectionId}
+                pageId={pageId}
+                defaultOpen
+                onClose={() => setAiOpen(false)}
+              />
+            )}
 
             {/* Scrollable body */}
             <div className="flex-1 overflow-y-auto builder-canvas-scrollbar" style={{ maxHeight: position.maxHeight - 48 }}>

@@ -34,6 +34,7 @@ import { ColorControl } from '../../../../packages/authoring-studio/src/inspecto
 import { SmoothSlider } from '../inspector/SmoothSlider'
 import { applyAssetToNode } from '@/lib/assets/AssetResolver'
 import { SaveExperienceModal } from '../experience/SaveExperienceModal'
+import { MiniInspectorAI, MiniInspectorAIButton } from '../ai/MiniInspectorAI'
 
 interface QuickToolbarProps {
   position: ToolbarPositionResult
@@ -65,6 +66,7 @@ export function QuickToolbar({
   const [showLinkInput, setShowLinkInput] = useState(false)
   const [showAddMenu, setShowAddMenu] = useState(false)
   const [showSaveExperience, setShowSaveExperience] = useState(false)
+  const [showAi, setShowAi] = useState(false)
   const [linkVal, setLinkVal] = useState('')
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
@@ -834,6 +836,13 @@ export function QuickToolbar({
             <Copy className="w-3.5 h-3.5" />
           </button>
 
+          {/* Mini Inspector AI — visible access on every selection (gate §5) */}
+          <MiniInspectorAIButton
+            onClick={() => setShowAi((v) => !v)}
+            active={showAi}
+            label="AI"
+          />
+
           {node && (
             <button
               onClick={() => setShowSaveExperience(true)}
@@ -880,6 +889,16 @@ export function QuickToolbar({
           isOpen={showSaveExperience}
           onClose={() => setShowSaveExperience(false)}
           sectionNode={node}
+        />
+      )}
+
+      {/* Mini Inspector AI — same shared component as ContextualSettingsPanel */}
+      {showAi && (
+        <MiniInspectorAI
+          sectionId={sectionId}
+          pageId={pageId}
+          defaultOpen
+          onClose={() => setShowAi(false)}
         />
       )}
 
