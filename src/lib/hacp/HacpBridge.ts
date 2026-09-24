@@ -37,6 +37,7 @@ import type {
 } from './HacpTypes';
 import type { HacpToolCall, ChatMessageAttachment } from '../ai/AIProviderTypes';
 import { UserFacingResponseNormalizer } from '../ai/UserFacingResponseNormalizer';
+import { resolveTargetedEdit, type TargetedEditResolution } from './TargetedEditResolver';
 
 /**
  * Resolve the honest outcome of a tool-execution batch.
@@ -1579,6 +1580,130 @@ export class HacpBridge {
    * Otherwise falls back to honest deterministic execution with real verification.
    * NEVER claims success without verified BuilderDocument mutation.
    */
+  /**
+   * GATE v6 — DETERMINISTIC TARGETED-EDIT FALLBACK (LAST RESORT ONLY).
+   *
+   * PHASE 10 rule: when the operation is unambiguous on the selected target,
+   * execute it — never return a clarifying question / promise while the
+   * document stays unchanged ("NO RESPONSE WITHOUT ACTION").
+   *
+   * Runs ONLY when the normal flow produced ZERO BuilderCommands:
+   *   A) engine classified CLARIFY (deterministic engine gave up)
+   *   B) model returned a conversational reply with zero tool calls
+   *   C) model tool batch completed read-only (zero mutations)
+   * When a real model/engine EXECUTE already produced commands, this is never
+   * reached → existing behavior preserved.
+   *
+   * Verification: goes through executeToolCall → verifyCommandExecution.
+   * If verification fails → returns null (honest fall-through, no fake SUCCESS).
+   */
+  private async buildTargetedEditResult(
+    prompt: string,
+    context: HacpBuilderContext,
+    document: BuilderDocument,
+    activePageId: string,
+    startTime: string,
+    providerMeta: {
+      status?: HacpExecutionResult['aiProviderStatus'];
+      name?: string;
+      model?: string;
+      isFreeModel?: boolean;
+      routerMode?: string;
+    },
+    extraSteps?: HacpExecutionStep[]
+  ): Promise<HacpExecutionResult | null> {
+    const resolution: TargetedEditResolution | null = resolveTargetedEdit(prompt, context, document);
+    if (!resolution) return null;
+
+    let exec: Awaited<ReturnType<HacpBridge['executeToolCall']>>;
+    try {
+      exec = await this.executeToolCall(resolution.toolCall, document, activePageId);
+    } catch (err) {
+      console.warn('[HacpBridge] TargetedEdit tool threw:', err);
+      return null;
+    }
+    if (exec.status !== 'EXECUTED' || !exec.command) {
+      console.log('[HacpBridge] EXECUTION_TRACE:', {
+        phase: 'TARGETED_EDIT_NOT_APPLIED',
+        intent: resolution.intent,
+        toolName: resolution.toolCall.name,
+        status: exec.status,
+        message: exec.message,
+        timestamp: new Date().toISOString(),
+      });
+      return null;
+    }
+
+    const steps: HacpExecutionStep[] = [...(extraSteps || [])];
+    steps.push({
+      id: `step-targeted-${Date.now()}`,
+      name: `TargetedEdit: ${resolution.toolCall.name}`,
+      status: 'SUCCESS',
+      detail: exec.verification.diffSummary || JSON.stringify(resolution.toolCall.arguments),
+      timestamp: new Date().toLocaleTimeString('pl-PL'),
+    });
+
+    const card: HacpExecutionCard = {
+      id: `card-targeted-${Date.now()}`,
+      title: `HACP TARGETED EDIT [${resolution.intent}]`,
+      status: 'SUCCESS',
+      steps,
+      startedAt: startTime,
+      completedAt: new Date().toLocaleTimeString('pl-PL'),
+      validationResult: 'PASS',
+      appliedChanges: [
+        {
+          target: resolution.targetNodeId,
+          property: (resolution.toolCall.arguments as any)?.styles
+            ? Object.keys((resolution.toolCall.arguments as any).styles).join(', ')
+            : Object.keys((resolution.toolCall.arguments as any)?.props || {}).join(', ') || 'props',
+          newValue: (resolution.toolCall.arguments as any)?.styles || (resolution.toolCall.arguments as any)?.props,
+          summary: resolution.summary,
+        },
+      ],
+    };
+
+    console.log('[HacpBridge] EXECUTION_TRACE:', {
+      phase: 'TARGETED_EDIT_EXECUTED',
+      intent: resolution.intent,
+      domain: resolution.domain,
+      qualifier: resolution.qualifier,
+      toolName: resolution.toolCall.name,
+      targetNodeId: resolution.targetNodeId,
+      timestamp: new Date().toISOString(),
+    });
+
+    return {
+      success: true,
+      intent: 'EXECUTE',
+      scope: 'PAGE_DESIGN',
+      message: resolution.summary,
+      executionCard: card,
+      commandsToDispatch: [exec.command],
+      eventsToEmit: [],
+      executionStatus: 'EXECUTED',
+      executionEvidence: {
+        operation: resolution.toolCall.name,
+        target: resolution.targetNodeId,
+        before: exec.verification.beforeValue ?? null,
+        after: (resolution.toolCall.arguments as any)?.styles || (resolution.toolCall.arguments as any)?.props || resolution.toolCall.arguments,
+        changed: true,
+      },
+      verification: exec.verification,
+      aiProviderStatus: providerMeta.status,
+      aiProviderName: providerMeta.name,
+      selectedModel: providerMeta.model,
+      isFreeModel: providerMeta.isFreeModel,
+      routerMode: providerMeta.routerMode,
+      updatedConversationContext: {
+        lastIntent: 'EXECUTE',
+        lastTargetNodeId: resolution.targetNodeId,
+        lastModifiedNodeId: resolution.targetNodeId,
+        lastActionSummary: resolution.summary,
+      },
+    };
+  }
+
   public async executePlan(
     prompt: string,
     context: HacpBuilderContext,
@@ -1587,7 +1712,9 @@ export class HacpBridge {
     routerMode: 'AUTO' | 'FREE' | 'PAID' | 'MANUAL' = 'AUTO',
     selectedModelId?: string,
     onProgress?: (phase: 'REQUESTING_MODEL' | 'EXECUTING_TOOL' | 'WAITING_FOR_TOOL_RESULT' | 'GENERATING_FINAL_RESPONSE' | 'COMPLETED' | 'ERROR') => void,
-    attachments?: ChatMessageAttachment[]
+    attachments?: ChatMessageAttachment[],
+    /** GATE v6 — entry point that issued the command (prompt rules for Mini Inspector). */
+    source?: 'main-chat' | 'mini-inspector'
   ): Promise<HacpExecutionResult> {
     const startTime = new Date().toLocaleTimeString('pl-PL');
     const cleanPrompt = prompt.trim();
@@ -1620,6 +1747,7 @@ export class HacpBridge {
             routerMode,
             selectedModelId,
             attachments,
+            source,
           }),
         });
 
@@ -1798,6 +1926,28 @@ export class HacpBridge {
 
         let cleanToolMsg: string;
         if (commands.length === 0) {
+          // GATE v6 — NO RESPONSE WITHOUT ACTION: model ran read-only tools,
+          // but the command may be a deterministic targeted edit on the
+          // selection. Last-resort fallback (model tools had priority).
+          const targeted = await this.buildTargetedEditResult(
+            cleanPrompt,
+            context,
+            document,
+            activePageId,
+            startTime,
+            {
+              status: aiProviderStatus,
+              name: aiProviderName,
+              model: aiProviderResponse.model,
+              isFreeModel: aiProviderResponse.isFreeModel,
+              routerMode: aiProviderResponse.routerMode,
+            },
+            steps
+          );
+          if (targeted) {
+            onProgress?.('COMPLETED');
+            return targeted;
+          }
           // ARGUMENT INTEGRITY REPAIR — honest split of TOOL CALLED vs SUCCEEDED
           // vs MUTATION vs VERIFICATION. Never "Wykonałem narzędzia: X" when X FAILED.
           cleanToolMsg = buildNoMutationUserMessage(toolOutcomes);
@@ -1849,6 +1999,28 @@ export class HacpBridge {
             lastModifiedNodeId: commands[0]?.type === 'UPDATE_PROPS' ? (commands[0] as any).sectionId : undefined,
           },
         };
+      }
+
+      // GATE v6 — NO RESPONSE WITHOUT ACTION: model answered conversationally
+      // with zero tool calls. If the prompt is a deterministic targeted edit on
+      // the selection, execute it instead of returning an empty promise.
+      const targetedFromChat = await this.buildTargetedEditResult(
+        cleanPrompt,
+        context,
+        document,
+        activePageId,
+        startTime,
+        {
+          status: aiProviderStatus,
+          name: aiProviderName,
+          model: aiProviderResponse.model,
+          isFreeModel: aiProviderResponse.isFreeModel,
+          routerMode: aiProviderResponse.routerMode,
+        }
+      );
+      if (targetedFromChat) {
+        onProgress?.('COMPLETED');
+        return targetedFromChat;
       }
 
       // Real AI conversational turn (zero tools)
@@ -2150,6 +2322,22 @@ export class HacpBridge {
 
     // CASE 6: CLARIFY
     if (classification.intent === 'CLARIFY') {
+      // GATE v6 — PHASE 10: short commands ("zmień czcionkę", "zrób luxury")
+      // that the deterministic engine did not cover but that ARE unambiguous
+      // on the current selection must EXECUTE — not ask a clarifying question.
+      const targeted = await this.buildTargetedEditResult(
+        cleanPrompt,
+        context,
+        document,
+        activePageId,
+        startTime,
+        { status: aiProviderStatus, name: aiProviderName }
+      );
+      if (targeted) {
+        onProgress?.('COMPLETED');
+        return targeted;
+      }
+
       let message: string;
       if (aiProviderStatus === 'NOT_CONFIGURED') {
         message = `AI PROVIDER: NOT CONFIGURED\n\nModel językowy nie jest podłączony do SoloSpot.\nAby włączyć asystenta z rozumieniem naturalnego języka i kontekstu, skonfiguruj klucz:\n• OPENCODE_API_KEY (rekomendowany OpenCode Inference API)\n\nMożesz także wykonywać bezpośrednie polecenia HACP, np:\n• "Dodaj sekcję hero"\n• "Zmień nagłówek na X"\n• "Dodaj przycisk Kup teraz"\n• "Zmień kolor tła na czerwony"\n• "Cofnij" / "Ponów"`;

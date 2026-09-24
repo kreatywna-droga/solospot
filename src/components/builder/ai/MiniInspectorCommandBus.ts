@@ -1,25 +1,29 @@
 'use client'
 
 /**
- * MiniInspectorCommandBus — single source of truth for Mini Inspector → Main Chat communication.
+ * MiniInspectorCommandBus — Mini Inspector command channel + status source.
  *
- * Architecture:
- *   MiniInspectorAI  ──submitCommand()──→  MiniInspectorCommandBus
- *                                                  │
- *                                                  ▼
- *                                   AiCopilotWorkspace (subscriber)
- *                                                  │
- *                                                  ▼
- *                                           bridge.executePlan()
- *                                                  │
- *                                                  ▼
- *                                    Main Chat messages (recorded)
+ * Architecture (GATE v6 — INDEPENDENT EXECUTION FIX):
+ *   MiniInspectorAI ──submitCommand()──→ MiniInspectorCommandBus
+ *                                              │
+ *                                              ▼
+ *                              SharedExecutionService.execute()
+ *                              (runs HacpBridge.executePlan ALWAYS —
+ *                               independent of any UI subscriber / Main Chat state)
+ *                                              │
+ *                           ┌──────────────────┴──────────────────┐
+ *                           ▼                                     ▼
+ *                  service history entry              statusSubscribers (observers)
+ *                  (Main Chat history shows it)       (Mini Inspector status UI)
  *
- * Mini Inspector NEVER owns conversation state.
- * Main Chat is the source of truth for history.
+ * Subscribers are OBSERVERS ONLY — execution never depends on them
+ * (PHASE 1 ROOT CAUSE: previously Promise.allSettled([]) with Main Chat closed
+ *  returned null → FAILED with zero mutations).
+ * The bus NEVER dispatches; MiniInspectorAI dispatches commands once itself.
  */
 
 import type { HacpBuilderContext, HacpExecutionResult } from '@/lib/hacp/HacpTypes'
+import { SharedExecutionService } from '@/lib/ai/SharedExecutionService'
 import type { BuilderDocument } from '../../../../packages/builder-core/src'
 import type { InspectorAITargetLock } from './InspectorAIContext'
 
@@ -67,37 +71,52 @@ class MiniInspectorCommandBusClass {
   }
 
   /**
-   * Submit a command from Mini Inspector to the main chat pipeline.
-   * Returns the execution result or null on failure.
+   * Submit a command from Mini Inspector.
+   * Delegates to SharedExecutionService — executes even with 0 subscribers
+   * (Main Chat closed). Returns the execution result or null on failure.
    */
   async submitCommand(command: MiniInspectorCommand): Promise<HacpExecutionResult | null> {
     this.setStatus('EXECUTING', command.targetNodeId)
     this.executingCommand = command
 
     try {
-      const results = await Promise.allSettled(
-        Array.from(this.subscribers).map((sub) => sub(command))
-      )
+      const result = await SharedExecutionService.execute({
+        source: 'mini-inspector',
+        prompt: command.prompt,
+        context: command.context,
+        document: command.document,
+        selectedModelId:
+          (typeof window !== 'undefined' && window.sessionStorage?.getItem('solospot_ai_model')) ||
+          undefined,
+      })
 
-      // Use the first successful result
-      for (const result of results) {
-        if (result.status === 'fulfilled' && result.value) {
-          const execResult = result.value
-          const status = this.mapExecutionStatus(execResult)
-          this.setStatus(status, command.targetNodeId)
-          return execResult
-        }
+      if (!result) {
+        this.setStatus('FAILED', command.targetNodeId)
+        return null
       }
 
-      // No successful result
-      this.setStatus('FAILED', command.targetNodeId)
-      return null
+      const status = this.mapExecutionStatus(result)
+      this.setStatus(status, command.targetNodeId)
+      this.notifyObservers(command, result)
+      return result
     } catch (err: any) {
       this.setStatus('FAILED', command.targetNodeId)
       return null
     } finally {
       this.executingCommand = null
     }
+  }
+
+  /** Observers only — their return values are ignored (execution is done). */
+  private notifyObservers(command: MiniInspectorCommand, result: HacpExecutionResult): void {
+    this.subscribers.forEach((sub) => {
+      try {
+        void Promise.resolve(sub(command)).catch(() => undefined)
+      } catch (err) {
+        console.error('[MiniInspectorCommandBus] Observer error:', err)
+      }
+    })
+    void result
   }
 
   /**
@@ -174,6 +193,7 @@ class MiniInspectorCommandBusClass {
     const hasCommands = result.commandsToDispatch.length > 0
     const status = result.executionStatus
 
+    if (/timeout|przekrocz|czas odpowiedzi/i.test(result.errorReason || '')) return 'TIMEOUT'
     if (status === 'CLARIFY') return 'CLARIFY'
     if (status === 'FAILED' || status === 'ERROR' || status === 'BLOCKED') return 'FAILED'
     if (status === 'EXECUTED' && hasCommands) return 'SUCCESS'

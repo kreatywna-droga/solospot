@@ -17,7 +17,7 @@ import type { ChatMessage, AICopilotRequest } from '@/lib/ai/AIProviderTypes';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { prompt, messages = [], builderContext = {}, visualMetrics, routerMode, selectedModelId, attachments = [] } = body;
+    const { prompt, messages = [], builderContext = {}, visualMetrics, routerMode, selectedModelId, attachments = [], source } = body;
 
     const registry = AIProviderRegistry.getInstance();
 
@@ -266,7 +266,23 @@ ZASADY PROFESJONALNEJ KONWERSACJI:
    - Uzyj search_experiences aby znaleźć odpowiednie Experience.
    - Uzyj search_sections aby znaleźć odpowiednią sekcję z biblioteki.
    - Dobieraj Experience na podstawie: branży, nastroju, motion level, celu.
-   - NIGDY nie wstawiaj losowego Experience — zawsze uzasadnij wybór.`;
+   - NIGDY nie wstawiaj losowego Experience — zawsze uzasadnij wybór.
+
+8. KROTKIE POLECENIA I DOMYŚLNY CEL (GATE v6 — MINI INSPECTOR):
+   - Źródło polecenia: "${source === 'mini-inspector' ? 'Mini Inspector (pasek poleceń przy zaznaczeniu)' : 'Main Chat'}".
+   - Domyślnym celem JEST aktualnie zaznaczony element (selectedNodeId powyżej).
+     NIGDY nie pytaj "cała strona czy nagłówek?" ani "którą sekcję?" gdy istnieje zaznaczenie — pracuj na zaznaczeniu.
+   - KRÓTKIE polecenia bez kontekstu są normalne: "zmień czcionkę", "zrób luxury",
+     "granatowy", "wyśrodkuj", "zwiększ rozmiar", "zmień tekst na ..." — traktuj je jako
+     kompletne instrukcje i WYKONAJ je narzędziem na zaznaczeniu.
+   - QUALIFIERY SEMANTYCZNE → konkretne zmiany stylu na zaznaczeniu:
+     luxury/luksus/premium/elegancki → ekskluzywna typografia (np. Playfair Display, tracking)
+     nowoczesny/minimalistyczny → nowoczesna typografia (np. Inter/Space Grotesk)
+     widoczny/bold/mocniejszy →większ fontWeight / kontrast
+   - NO RESPONSE WITHOUT ACTION: jeśli intencja jest jednoznaczna na zaznaczeniu —
+     WYWOŁAJ TOOL CALL (set_node_styles / update_node_props). NIGDY nie odpowiadaj
+     samym tekstem obiecując zmianę, której nie wykonałeś.
+   - Pytania doprecyzowuj TYLKO gdy operacja jest naprawdę niejednoznaczna.`;
 
     const chatMessages: ChatMessage[] = [
       { role: 'system', content: systemPrompt },

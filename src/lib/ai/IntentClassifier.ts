@@ -80,6 +80,10 @@ const STYLE_KEYWORDS = [
   'czcionka', 'font', 'marginesy', 'margins', 'padding', 'odstępy',
   'spacings', 'zaokrąglenia', 'radius', 'cienie', 'shadows', 'border',
   'obramowanie', 'tło', 'background', 'kolor tła', 'background color',
+  // GATE v6 — short commands & semantic qualifiers (Mini Inspector repair)
+  'rozmiar', 'więks', 'mniejsz', 'powiększ', 'powieksz',
+  'wyśrodkuj', 'wysrodkuj', 'wyrównaj', 'wyrownaj',
+  'luxury', 'luksus', 'premium', 'elegan', 'nowoczesn', 'widoczn',
 ];
 
 const DESIGN_SYSTEM_KEYWORDS = [

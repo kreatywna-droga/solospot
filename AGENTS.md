@@ -19,3 +19,13 @@ Mandatory Protocol Rules:
 3. **Audit Authority Boundary**: Agent 2 issues ONLY `Recommendation: PASS` or `HOLD`. Formal ratification (`FORMALLY RATIFIED 🔒`) belongs strictly and exclusively to the Architect.
 4. **Post-HOLD Focused Delta Audit**: Following a `HOLD` decision, Agent 2 executes exclusively a targeted "Focused Delta Audit" covering only the fixed Finding IDs, avoiding full-scope re-audits.
 
+## Mini Inspector Gate v6 (INDEPENDENT EXECUTION + NATURAL LANGUAGE REPAIR)
+
+- **Test**: `npx vitest run src/lib/hacp/__tests__/TargetedEditResolver.test.ts src/components/builder/ai/__tests__/MiniInspectorIndependentExecution.test.ts src/lib/hacp/__tests__/HacpBridge.test.ts src/lib/hacp/__tests__/HacpDebug.test.ts src/lib/hacp/__tests__/HacpIntentEngine.test.ts src/lib/hacp/__tests__/MutationArgumentIntegrity.test.ts src/components/builder/ai/__tests__/MiniInspectorAI.test.ts src/lib/ai/__tests__/ToolInventoryVerification.test.ts src/lib/ai/__tests__/NoFakeSuccess.test.ts --exclude '.kilo/**'`
+- **Typecheck**: `npx tsc --noEmit`
+- **Build**: `npm run build > scratch\build-v6.log`
+- **Lint**: 15 pre-existing errors (authoring-studio/provision-engine/dashboard) — unchanged by v6.
+- **Known pre-existing failure**: `HacpIntentEngine.test.ts T37` (offline CLARIFY message in node env).
+- **Branch**: `main`. Untracked dirs to ignore: `public/stores/s-new/*`, `scratch/knowledge-gate-proof/*`, `docs/AI_*`, `docs/MINI_*`, `$`, `TODO_SPRINT6_STEP6.progress.md`, scratch files.
+- **Deploy**: `npx vercel deploy --prod --yes *> scratch\deployN.log`
+

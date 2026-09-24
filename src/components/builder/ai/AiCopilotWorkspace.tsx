@@ -22,13 +22,16 @@ import {
 import { MiniInspectorCommandBus } from './MiniInspectorCommandBus'
 import { useBuilder, useBuilderHistory } from '../state/BuilderProvider'
 import { HacpBridge } from '@/lib/hacp/HacpBridge'
+import {
+  SharedExecutionService,
+  type SharedAiHistoryEntry,
+} from '@/lib/ai/SharedExecutionService'
 import type {
   HacpMessage,
   HacpActivityEvent,
   HacpBuilderContext,
   HacpCapability,
   HacpStatus,
-  HacpConversationContext,
   HacpVisualMetrics,
 } from '@/lib/hacp/HacpTypes'
 import { findNode } from '../../../../packages/builder-core/src'
@@ -79,11 +82,64 @@ export function buildAiContextText(
   return lines.join('\n')
 }
 
+/** Map a shared history entry (recorded by SharedExecutionService) to a chat message. */
+function mapSharedEntryToMessage(entry: SharedAiHistoryEntry): AiContextMessage {
+  const timestamp = new Date(entry.timestamp).toLocaleTimeString('pl-PL')
+  if (entry.role === 'user') {
+    return {
+      id: entry.id,
+      type: 'user',
+      text: entry.source === 'mini-inspector' ? `[Mini Inspector] ${entry.text}` : entry.text,
+      timestamp,
+      source: entry.source,
+      targetNodeId: entry.targetNodeId || undefined,
+      attachments: entry.attachments,
+    }
+  }
+  if (entry.role === 'error') {
+    return {
+      id: entry.id,
+      type: 'system',
+      text: entry.text,
+      timestamp,
+      isError: true,
+      source: entry.source,
+      targetNodeId: entry.targetNodeId || undefined,
+    }
+  }
+  const toolNames = (entry.executionCard?.steps || [])
+    .map((s) => normalizeToolName(s.name))
+    .filter(Boolean)
+  const rawText = entry.text && entry.text.trim().length > 0 ? entry.text.trim() : ''
+  return {
+    id: entry.id,
+    type: 'ai',
+    text: rawText || 'Model nie zwrócił odpowiedzi.',
+    timestamp,
+    intent: entry.intent,
+    scope: entry.scope,
+    appliedChangeSummary: entry.executionCard?.appliedChanges?.[0]?.summary,
+    isError: rawText.length === 0,
+    card: entry.executionCard,
+    toolNames: toolNames.length > 0 ? toolNames : undefined,
+    source: entry.source,
+    targetNodeId: entry.targetNodeId || undefined,
+  }
+}
+
 export function AiCopilotWorkspace() {
   const { document: builderDoc, canvas, dispatch } = useBuilder()
   const { canUndo, canRedo, undo, redo } = useBuilderHistory()
 
-  const [messages, setMessages] = useState<AiContextMessage[]>([])
+  // GATE v6 — chat = HISTORY VIEW only. Seeded from shared history so Mini
+  // Inspector commands remain visible even after Main Chat is closed/reopened.
+  const initialSharedEntries = useMemo(() => SharedExecutionService.getEntries(), [])
+  const [messages, setMessages] = useState<AiContextMessage[]>(() =>
+    initialSharedEntries.map(mapSharedEntryToMessage)
+  )
+  const syncedSharedIdsRef = useRef<Set<string>>(
+    new Set(initialSharedEntries.map((e) => e.id))
+  )
   const [inputValue, setInputValue] = useState('')
   const [isExecuting, setIsExecuting] = useState(false)
   const [currentPhase, setCurrentPhase] = useState<
@@ -102,9 +158,8 @@ export function AiCopilotWorkspace() {
   const attachMenuRef = useRef<HTMLDivElement>(null)
   const quickMenuRef = useRef<HTMLDivElement>(null)
   const [activityEvents, setActivityEvents] = useState<HacpActivityEvent[]>([])
-  const [conversationContext, setConversationContext] = useState<HacpConversationContext>({
-    history: [],
-  })
+  // Conversation memory is owned by SharedExecutionService (shared across
+  // Main Chat + Mini Inspector). Local setConversationContext removed (GATE v6).
   const [visualMetrics, setVisualMetrics] = useState<HacpVisualMetrics | undefined>(undefined)
   const [recentMutation, setRecentMutation] = useState<string | undefined>(undefined)
   const [aiProviderStatus, setAiProviderStatus] = useState<'ONLINE' | 'OFFLINE' | 'NOT_CONFIGURED'>('OFFLINE')
@@ -319,114 +374,29 @@ export function AiCopilotWorkspace() {
     return () => unsubscribe()
   }, [bridge])
 
-  // Subscribe to Mini Inspector Command Bus
-  // Mini Inspector commands are processed through the SAME pipeline as main chat
+  // ── GATE v6 — SHARED EXECUTION ARCHITECTURE ─────────────────────────────
+  // The former MiniInspectorCommandBus SUBSCRIBER (which executed commands
+  // via bridge.executePlan) is REMOVED: execution now lives in
+  // SharedExecutionService and works even when Main Chat is CLOSED.
+  // This component only OBSERVES: shared history → chat messages.
   useEffect(() => {
-    const unsubscribe = MiniInspectorCommandBus.subscribe(async (command: any) => {
-      if (isExecuting) return null
-
-      // Add Mini Inspector command to main chat as a user message
-      const miniUserMsg: AiContextMessage = {
-        id: `msg-mini-${Date.now()}`,
-        type: 'user',
-        text: `[Mini Inspector] ${command.prompt}`,
-        timestamp: new Date().toLocaleTimeString('pl-PL'),
-        source: 'mini-inspector',
-        targetNodeId: command.targetNodeId,
-      }
-      setMessages((prev) => [...prev, miniUserMsg])
-      setMiniInspectorExecuting(true)
-      setMiniInspectorStatus('EXECUTING')
-
-      try {
-        const result = await bridge.executePlan(
-          command.prompt,
-          command.context,
-          command.document,
-          conversationContext,
-          'AUTO',
-          selectedModelId,
-          (phase) => setCurrentPhase(phase),
-          undefined
-        )
-
-        if (result) {
-          // Dispatch mutations if EXECUTE + commands
-          if (result.intent === 'EXECUTE' && result.commandsToDispatch.length > 0) {
-            result.commandsToDispatch.forEach((cmd: any) => dispatch(cmd))
-          }
-
-          // Update conversation memory
-          if (result.updatedConversationContext) {
-            setConversationContext((prev) => ({
-              ...prev,
-              ...result.updatedConversationContext,
-              history: [
-                ...prev.history,
-                { role: 'user' as const, text: command.prompt, timestamp: new Date().toLocaleTimeString('pl-PL') },
-                {
-                  role: 'ai' as const,
-                  text: result.message,
-                  intent: result.intent,
-                  timestamp: new Date().toLocaleTimeString('pl-PL'),
-                },
-              ].slice(-25),
-            }))
-          }
-
-          // Undo/Redo
-          if (result.shouldTriggerUndo || result.intent === 'UNDO') {
-            if (canUndo) undo()
-          }
-          if (result.shouldTriggerRedo || result.intent === 'REDO') {
-            if (canRedo) redo()
-          }
-
-          // Add AI response to main chat
-          const toolNames = (result.executionCard?.steps || [])
-            .map((s: any) => s.name.replace(/^AI Tool Call:\s*/i, '').trim())
-            .filter(Boolean)
-
-          const miniAiMsg: AiContextMessage = {
-            id: `msg-mini-ai-${Date.now()}`,
-            type: 'ai',
-            text: result.message && result.message.trim().length > 0
-              ? result.message.trim()
-              : 'Model nie zwrócił odpowiedzi.',
-            timestamp: new Date().toLocaleTimeString('pl-PL'),
-            intent: result.intent,
-            scope: result.scope,
-            isError: !result.success,
-            card: result.executionCard,
-            toolNames: toolNames.length > 0 ? toolNames : undefined,
-            source: 'mini-inspector',
-            targetNodeId: command.targetNodeId,
-          }
-          setMessages((prev) => [...prev, miniAiMsg])
-
-          setMiniInspectorStatus(result.success ? 'SUCCESS' : 'FAILED')
-          return result
-        }
-        return null
-      } catch (err: any) {
-        const errorMsg: AiContextMessage = {
-          id: `msg-mini-err-${Date.now()}`,
-          type: 'system',
-          text: `Nie udało się wykonać polecenia Mini Inspectora: ${err?.message || 'Błąd HACP'}`,
-          timestamp: new Date().toLocaleTimeString('pl-PL'),
-          isError: true,
-          source: 'mini-inspector',
-          targetNodeId: command.targetNodeId,
-        }
-        setMessages((prev) => [...prev, errorMsg])
-        setMiniInspectorStatus('FAILED')
-        return null
-      } finally {
-        setMiniInspectorExecuting(false)
-      }
+    const unsubscribe = SharedExecutionService.subscribeHistory((entries) => {
+      const fresh = entries.filter((e) => !syncedSharedIdsRef.current.has(e.id))
+      if (fresh.length === 0) return
+      fresh.forEach((e) => syncedSharedIdsRef.current.add(e.id))
+      setMessages((prev) => [...prev, ...fresh.map(mapSharedEntryToMessage)])
     })
-    return () => unsubscribe()
-  }, [bridge, conversationContext, dispatch, isExecuting, canUndo, canRedo, undo, redo])
+    return unsubscribe
+  }, [])
+
+  // Mini Inspector status mirror (bus is driven by SharedExecutionService now)
+  useEffect(() => {
+    const unsubscribe = MiniInspectorCommandBus.subscribeToStatus((status) => {
+      setMiniInspectorStatus(status)
+      setMiniInspectorExecuting(status === 'EXECUTING')
+    })
+    return unsubscribe
+  }, [])
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -772,15 +742,7 @@ export function AiCopilotWorkspace() {
     }
 
     setLastUserPrompt(text)
-    const userMessage: HacpMessage = {
-      id: `msg-user-${Date.now()}`,
-      type: 'user',
-      text,
-      timestamp: new Date().toLocaleTimeString('pl-PL'),
-      attachments: attachedFiles.length > 0 ? [...attachedFiles] : undefined,
-    }
-
-    setMessages((prev) => [...prev, userMessage])
+    const attachmentsToSend = attachedFiles.length > 0 ? [...attachedFiles] : undefined
     setInputValue('')
     setAttachedFiles([])
     setIsExecuting(true)
@@ -789,19 +751,25 @@ export function AiCopilotWorkspace() {
     abortControllerRef.current = controller
 
     try {
-      // Execute through Conversational Intent Engine & HACP Bridge with active router configuration
-      const result = await bridge.executePlan(
-        text,
-        currentContext,
-        builderDoc,
-        conversationContext,
+      // GATE v6 — execute through the SHARED service (chat is history only).
+      // The service records user/AI entries → history sync below renders them.
+      const result = await SharedExecutionService.execute({
+        source: 'main-chat',
+        prompt: text,
+        context: currentContext,
+        document: builderDoc,
         routerMode,
         selectedModelId,
-        (phase) => setCurrentPhase(phase),
-        userMessage.attachments
-      )
+        onProgress: (phase) => setCurrentPhase(phase),
+        attachments: attachmentsToSend,
+      })
 
       if (controller.signal.aborted) return
+
+      if (!result) {
+        // Service already recorded an honest error entry in shared history.
+        return
+      }
 
       // Update AI provider status from result
       if (result.aiProviderStatus) {
@@ -819,25 +787,6 @@ export function AiCopilotWorkspace() {
           setCurrentModelName(matched.name)
           setSupportsTools(matched.supportsTools)
         }
-      }
-
-      // Update conversation memory
-      if (result.updatedConversationContext) {
-        setConversationContext((prev) => ({
-          ...prev,
-          ...result.updatedConversationContext,
-          history: [
-            ...prev.history,
-            { role: 'user' as const, text, timestamp: new Date().toLocaleTimeString('pl-PL'), attachments: userMessage.attachments },
-            {
-              role: 'ai' as const,
-              text: result.message,
-              intent: result.intent,
-              scope: result.scope,
-              timestamp: new Date().toLocaleTimeString('pl-PL'),
-            },
-          ].slice(-25),
-        }))
       }
 
       // If action requested natural UNDO
@@ -882,42 +831,11 @@ export function AiCopilotWorkspace() {
           },
         ].slice(-30))
       }
-
-      // Empty response prevention (Section 26)
-      const hasContent = result.message && result.message.trim().length > 0
-      const finalMsgText = hasContent
-        ? result.message.trim()
-        : 'Model nie zwrócił odpowiedzi. Spróbuj ponownie lub wybierz inny model.'
-
-      const toolNames = (result.executionCard?.steps || [])
-        .map((s) => normalizeToolName(s.name))
-        .filter(Boolean)
-
-      const aiMessage: AiContextMessage = {
-        id: `msg-ai-${Date.now()}`,
-        type: 'ai',
-        text: finalMsgText,
-        timestamp: new Date().toLocaleTimeString('pl-PL'),
-        intent: result.intent,
-        scope: result.scope,
-        appliedChangeSummary: mutationSummary,
-        isError: !hasContent,
-        card: result.executionCard,
-        toolNames: toolNames.length > 0 ? toolNames : undefined,
-      }
-
-      setMessages((prev) => [...prev, aiMessage])
     } catch (err: any) {
       if (controller.signal.aborted) return
       setCurrentPhase('ERROR')
-      const errorMessage: HacpMessage = {
-        id: `msg-err-${Date.now()}`,
-        type: 'system',
-        text: `Nie udało się zrealizować zapytania: ${err?.message || 'Błąd wykonania w HACP Bridge.'}`,
-        timestamp: new Date().toLocaleTimeString('pl-PL'),
-        isError: true,
-      }
-      setMessages((prev) => [...prev, errorMessage])
+      // Service recorded the error entry in shared history; only mark phase.
+      console.error('[AiCopilotWorkspace] Execution failed:', err)
     } finally {
       abortControllerRef.current = null
       setIsExecuting(false)
