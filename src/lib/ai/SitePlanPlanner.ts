@@ -38,7 +38,7 @@ const INDUSTRY_KEYWORDS: Record<Industry, string[]> = {
   restaurant: ['restaurant', 'restauracja', 'jedzenie', 'menu', 'kuchnia', 'food', 'dining', 'pizza', 'burger', 'sushi', 'cafe', 'kawiarnia'],
   school: ['school', 'szkoła', 'nauka', 'education', 'kurs', 'course', 'szkolenie', 'lekcja', 'teacher', 'nauczyciel'],
   gym: ['gym', 'siłownia', 'fitness', 'trening', 'training', 'workout', 'exercise', 'crossfit', 'personal trainer'],
-  dentist: ['dentist', 'dentysta', 'stomatolog', 'dental', 'teeth', 'zęby', 'implant', 'orthodontist'],
+  dentist: ['dentist', 'dentyst', 'stomatolog', 'dental', 'teeth', 'zęb', 'implant', 'ortodoncj', 'wybielan', 'gabinet dentyst', 'gabinetu dentyst'],
   law: ['law', 'prawo', 'kancelaria', 'lawyer', 'adwokat', 'legal', 'attorney', 'radca prawny'],
   realestate: ['real estate', 'nieruchomości', 'mieszkanie', 'dom', 'property', 'housing', 'apartment', 'biuro nieruchomości'],
   saas: ['saas', 'software', 'aplikacja', 'app', 'platform', 'dashboard', 'analytics', 'tool', 'narzędzie', 'crm', 'erp'],
@@ -166,6 +166,27 @@ function generateHeroContent(analysis: BriefAnalysis): TextContent {
 
 function generateSections(analysis: BriefAnalysis): SectionPlan[] {
   const sections: SectionPlan[] = [];
+
+  // 0. Header / Navigation (PHASE 4 — professional site always needs nav)
+  sections.push({
+    id: 'navbar-1',
+    role: 'navbar',
+    label: 'Nawigacja',
+    templateType: 'navbar',
+    content: {
+      heading: analysis.title,
+      items: [
+        { label: 'Strona główna' },
+        { label: 'Usługi' },
+        { label: 'O nas' },
+        { label: 'Opinie' },
+        { label: 'Kontakt' },
+      ],
+      cta: analysis.purpose === 'booking' ? 'Umów wizytę' : 'Kontakt',
+    },
+    images: [],
+    styles: {},
+  });
 
   // 1. Hero
   sections.push({
@@ -372,32 +393,49 @@ function generateSections(analysis: BriefAnalysis): SectionPlan[] {
 
   // 4. Testimonials
   if (['restaurant', 'school', 'dentist', 'law', 'clinic', 'salon', 'gym', 'saas', 'agency'].includes(analysis.industry)) {
+    const dental = analysis.industry === 'dentist';
     sections.push({
       id: 'testimonials-1',
       role: 'testimonials',
-      label: 'Opinie klientów',
+      label: dental ? 'Opinie pacjentów' : 'Opinie klientów',
       templateType: 'testimonials',
       content: {
-        heading: 'Co mówią nasi klienci',
-        items: [
-          { label: 'Anna K.', description: 'Świetna obsługa! Polecam każdemu.' },
-          { label: 'Marek T.', description: 'Professionalna firma, szybka realizacja.' },
-          { label: 'Ewa M.', description: 'Najlepsza firma w okolicy. Wracam regularnie.' },
-        ],
+        heading: dental ? 'Co mówią nasi pacjenci' : 'Co mówią nasi klienci',
+        items: dental
+          ? [
+              { label: 'Anna K.', description: 'Bezbolesne leczenie i miła obsługa. Polecam gabinet.' },
+              { label: 'Marek T.', description: 'Profesjonalna implantologia — wróciłem do pełnego uśmiechu.' },
+              { label: 'Ewa M.', description: 'Nowoczesny gabinet, punktualnie i komfortowo.' },
+            ]
+          : [
+              { label: 'Anna K.', description: 'Świetna obsługa! Polecam każdemu.' },
+              { label: 'Marek T.', description: 'Profesjonalna firma, szybka realizacja.' },
+              { label: 'Ewa M.', description: 'Najlepsza firma w okolicy. Wracam regularnie.' },
+            ],
       },
       images: [],
       styles: {},
     });
   }
 
-  // 5. CTA
+  // 5. CTA (industry-aware heading)
+  const ctaHeadings: Partial<Record<Industry, string>> = {
+    dentist: 'Gotowy na zdrowy uśmiech?',
+    clinic: 'Zadbaj o swoje zdrowie',
+    restaurant: 'Zarezerwuj stolik już dziś',
+    gym: 'Zacznij trening jeszcze dziś',
+    law: 'Umów konsultację prawną',
+    school: 'Zapisz się na zajęcia',
+    ecommerce: 'Skorzystaj z oferty',
+    salon: 'Umów się na wizytę',
+  };
   sections.push({
     id: 'cta-1',
     role: 'cta',
     label: 'Wezwanie do działania',
     templateType: 'cta',
     content: {
-      heading: 'Gotowy na开始?',
+      heading: ctaHeadings[analysis.industry] || 'Skontaktuj się z nami',
       subheading: analysis.purpose === 'booking'
         ? 'Umów wizytę już dziś'
         : analysis.purpose === 'ecommerce'
@@ -432,10 +470,35 @@ function generateSections(analysis: BriefAnalysis): SectionPlan[] {
 
 // ── Main Planner ────────────────────────────────────────────────────
 
+/** Extract a clean brand/title from a brief (not the raw prompt). */
+function extractSiteTitle(brief: string, industry: Industry): string {
+  const industryTitles: Record<string, string> = {
+    dentist: 'Nowoczesny gabinet dentystyczny',
+    clinic: 'Klinika medyczna',
+    restaurant: 'Restauracja',
+    school: 'Szkoła',
+    gym: 'Siłownia',
+    law: 'Kancelaria prawna',
+    realestate: 'Biuro nieruchomości',
+    saas: 'Platforma SaaS',
+    agency: 'Agencja kreatywna',
+    ecommerce: 'Sklep internetowy',
+    salon: 'Salon beauty',
+  };
+  const dla = brief.match(/\bdla\s+(?:nowoczesn\w*\s+|profesjonaln\w*\s+)?(.+?)(?:\.|,|$)/i);
+  if (dla?.[1]) {
+    const phrase = dla[1].trim().replace(/\s+/g, ' ').slice(0, 48);
+    if (phrase.length >= 4) {
+      return phrase.charAt(0).toUpperCase() + phrase.slice(1);
+    }
+  }
+  return industryTitles[industry] || brief.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60) || 'Moja strona';
+}
+
 export function generateSitePlan(brief: string): SitePlan {
   const lowerBrief = brief.toLowerCase();
 
-  // Detect industry
+  // Detect industry (stem match: "dentyst" hits "dentystycznego")
   let detectedIndustry: Industry = 'other';
   let maxScore = 0;
   for (const [industry, keywords] of Object.entries(INDUSTRY_KEYWORDS)) {
@@ -446,7 +509,7 @@ export function generateSitePlan(brief: string): SitePlan {
     }
   }
 
-  // Detect purpose
+  // Detect purpose; fall back to industry default when brief has no purpose signal
   let detectedPurpose: SitePurpose = 'informational';
   let purposeScore = 0;
   for (const [purpose, keywords] of Object.entries(PURPOSE_KEYWORDS)) {
@@ -456,20 +519,18 @@ export function generateSitePlan(brief: string): SitePlan {
       detectedPurpose = purpose as SitePurpose;
     }
   }
+  if (purposeScore === 0) {
+    const industryDefault = INDUSTRY_DEFAULTS[detectedIndustry]?.purpose;
+    if (industryDefault) detectedPurpose = industryDefault;
+  }
 
-  // Generate title from brief
-  const title = brief
-    .replace(/\n/g, ' ')
-    .replace(/[^\w\sąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 60) || 'Moja strona';
+  const title = extractSiteTitle(brief, detectedIndustry);
 
   // Build analysis
   const analysis: BriefAnalysis = {
     industry: detectedIndustry,
     purpose: detectedPurpose,
-    language: lowerBrief.match(/\b(polish|polski|pl)\b/) ? 'pl' : 'pl',
+    language: 'pl',
     title,
     sections: [],
   };

@@ -2,9 +2,25 @@
  * IntentClassifier.test.ts — Unit tests for deterministic intent classification
  */
 import { describe, it, expect } from 'vitest';
-import { IntentClassifier } from '../IntentClassifier';
+import { IntentClassifier, isSiteGenerationRequest } from '../IntentClassifier';
 
 describe('IntentClassifier', () => {
+  describe('isSiteGenerationRequest (Website Creation Gate SSOT)', () => {
+    it('matches the exact gate prompt', () => {
+      expect(
+        isSiteGenerationRequest(
+          'Zbuduj mi profesjonalną stronę od start to finish dla nowoczesnego gabinetu dentystycznego.'
+        )
+      ).toBe(true);
+    });
+    it('does not match plain chat', () => {
+      expect(isSiteGenerationRequest('Cześć, jak się masz?')).toBe(false);
+    });
+    it('does not match insert-only prompts', () => {
+      expect(isSiteGenerationRequest('Dodaj sekcję testimonials')).toBe(false);
+    });
+  });
+
   describe('INSERT_SECTION', () => {
     it.each([
       'Dodaj sekcję testimonials',
@@ -101,6 +117,7 @@ describe('IntentClassifier', () => {
       'Build a website for my restaurant',
       'Stwórz landing page',
       'Zaprojektuj stronę',
+      'Zbuduj mi profesjonalną stronę od start to finish dla nowoczesnego gabinetu dentystycznego.',
     ])('classifies "%s" as SITE_GENERATION', (prompt) => {
       const result = IntentClassifier.classify(prompt);
       expect(result.category).toBe('SITE_GENERATION');

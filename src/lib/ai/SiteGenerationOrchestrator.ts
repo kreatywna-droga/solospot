@@ -60,6 +60,30 @@ const DEFAULT_CONFIG: OrchestratorConfig = {
   failFast: true,
 };
 
+/** Library category for a plan role (Website Creation Gate PHASE 3). */
+const ROLE_TO_LIBRARY_CATEGORY: Record<string, string> = {
+  navbar: 'navigation',
+  hero: 'hero',
+  features: 'features',
+  services: 'services',
+  about: 'about',
+  testimonials: 'testimonials',
+  cta: 'cta',
+  footer: 'footer',
+  faq: 'faq',
+  contact: 'contact',
+  team: 'team',
+  gallery: 'gallery',
+  stats: 'stats',
+  pricing: 'pricing',
+  newsletter: 'newsletter',
+  logos: 'logos',
+  portfolio: 'portfolio',
+  products: 'products',
+  blog: 'blog',
+  content: 'about',
+};
+
 /** Tools that can mutate BuilderDocument (aligned with ToolSurfaceSelector). */
 function isMutationClassTool(name: string): boolean {
   if (name === 'undo' || name === 'redo') return true;
@@ -256,33 +280,36 @@ export class SiteGenerationOrchestrator {
     assetQuery?: string
   ): Promise<void> {
     const templateType = SECTION_TEMPLATES[section.role] || section.templateType;
-
-    // Use asset strategy query if available and section has no specific image query
     const imageQuery = assetQuery || section.images?.[0]?.query;
 
-    // Step 1: Insert section
-    const insertCall: HacpToolCall = {
-      id: this.toolId(),
-      name: 'insert_section',
-      arguments: {
-        pageId,
-        sectionType: templateType,
-        atIndex: index,
-        label: section.label,
-        defaultProps: {
-          title: section.content.heading || '',
-          subtitle: section.content.subheading || '',
-          description: section.content.description || '',
-          cta: section.content.cta || '',
-          ctaText: section.content.cta || '',
-          ...section.content.items ? { items: section.content.items } : {},
-          ...imageQuery ? { imageQuery } : {},
-        },
-      },
-    };
+    // PHASE 3: prefer verified library corridor (search → insert_from_library)
+    // when a matching template category exists. Soft-fail → internal fallback.
+    let insertResult = await this.tryInsertFromLibrary(section, index, pageId, executeTool);
 
-    const insertResult = await this.execTool(insertCall, executeTool);
-    if (!insertResult) return;
+    if (!insertResult) {
+      // Step 1: Internal insert_section (engine path) — still HacpBridge-dispatched
+      const insertCall: HacpToolCall = {
+        id: this.toolId(),
+        name: 'insert_section',
+        arguments: {
+          pageId,
+          sectionType: templateType,
+          atIndex: index,
+          label: section.label,
+          defaultProps: {
+            title: section.content.heading || '',
+            subtitle: section.content.subheading || '',
+            description: section.content.description || '',
+            cta: section.content.cta || '',
+            ctaText: section.content.cta || '',
+            ...section.content.items ? { items: section.content.items } : {},
+            ...imageQuery ? { imageQuery } : {},
+          },
+        },
+      };
+      insertResult = await this.execTool(insertCall, executeTool);
+      if (!insertResult) return;
+    }
 
     // Phase 18 node ID integrity: follow-up calls must target the ACTUAL
     // created section ID, never the LLM-plan ID (the bridge generates IDs).
@@ -290,6 +317,9 @@ export class SiteGenerationOrchestrator {
     if (insertResult.createdNodeId) {
       this.nodeIdMap.set(section.id, insertResult.createdNodeId);
     }
+
+    // Content overlay: plan copy on top of library template defaults (PHASE 5)
+    await this.overlaySectionContent(section, actualSectionId, executeTool);
 
     // Step 2: Apply styles if any
     if (section.styles && Object.keys(section.styles).length > 0) {
@@ -507,11 +537,238 @@ export class SiteGenerationOrchestrator {
     await this.execTool(summaryCall, executeTool);
   }
 
+  // ── Library corridor (PHASE 3) ───────────────────────────────────
+
+  /**
+   * Prefer search_sections → insert_section_from_library when the role maps
+   * to a library category. Soft-fails (no throw) so caller can fall back.
+   */
+  private async tryInsertFromLibrary(
+    section: SectionPlan,
+    index: number,
+    pageId: string,
+    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string; createdNodeId?: string }>
+  ): Promise<ToolResult | null> {
+    const category = ROLE_TO_LIBRARY_CATEGORY[section.role];
+    if (!category) return null;
+
+    try {
+      const searchCall: HacpToolCall = {
+        id: this.toolId(),
+        name: 'search_sections',
+        arguments: { category, limit: 5 },
+      };
+      const searchResult = await this.execTool(searchCall, executeTool, { soft: true });
+      if (!searchResult?.success) return null;
+
+      let templateId: string | undefined;
+      try {
+        const parsed = JSON.parse(searchResult.message);
+        templateId = parsed?.sections?.[0]?.id;
+      } catch {
+        return null;
+      }
+      if (!templateId) return null;
+
+      const insertCall: HacpToolCall = {
+        id: this.toolId(),
+        name: 'insert_section_from_library',
+        arguments: {
+          sectionTemplateId: templateId,
+          pageId,
+          atIndex: index,
+          label: section.label,
+        },
+      };
+      const insertResult = await this.execTool(insertCall, executeTool, { soft: true });
+      if (insertResult?.success && insertResult.createdNodeId) {
+        return insertResult;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  /** Overlay plan copy onto the inserted section (library or internal).
+   * Library templates hardcode child heading/text props — walk the tree and
+   * replace with plan content so industry copy survives library structure. */
+  private async overlaySectionContent(
+    section: SectionPlan,
+    sectionId: string,
+    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string; createdNodeId?: string }>
+  ): Promise<void> {
+    const props: Record<string, unknown> = {};
+    if (section.content.heading) props.title = section.content.heading;
+    if (section.content.subheading) props.subtitle = section.content.subheading;
+    if (section.content.description) props.description = section.content.description;
+    if (section.content.cta) {
+      props.cta = section.content.cta;
+      props.ctaText = section.content.cta;
+    }
+    if (section.content.items?.length) props.items = section.content.items;
+    if (Object.keys(props).length > 0) {
+      const updateCall: HacpToolCall = {
+        id: this.toolId(),
+        name: 'update_node_props',
+        arguments: { sectionId, props },
+      };
+      await this.execTool(updateCall, executeTool, { soft: true });
+    }
+
+    await this.overlayChildTexts(section, sectionId, executeTool, 0);
+  }
+
+  /** Recursively replace hardcoded library child text with plan content. */
+  private async overlayChildTexts(
+    section: SectionPlan,
+    nodeId: string,
+    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string; createdNodeId?: string }>,
+    depth: number
+  ): Promise<void> {
+    if (depth > 6 || this.abortController?.signal.aborted) return;
+
+    const inspectCall: HacpToolCall = {
+      id: this.toolId(),
+      name: 'inspect_children',
+      arguments: { nodeId },
+    };
+    const inspectResult = await this.execTool(inspectCall, executeTool, { soft: true });
+    if (!inspectResult?.success) return;
+
+    let children: Array<{ id?: string; type?: string; label?: string; props?: Record<string, unknown>; childCount?: number }> = [];
+    try {
+      const parsed = JSON.parse(inspectResult.message);
+      if (Array.isArray(parsed)) children = parsed;
+      else children = parsed?.children || parsed?.nodes || [];
+      if (!Array.isArray(children)) children = [];
+    } catch {
+      return;
+    }
+
+    const content = section.content;
+    const role = section.role;
+    const itemLabels = (content.items || []).map((i) => i.label).filter(Boolean);
+    const itemDescriptions = (content.items || []).map((i) => i.description).filter(Boolean) as string[];
+    let headingUsed = false;
+    let subUsed = false;
+    let ctaUsed = false;
+    let itemIdx = 0;
+
+    for (const child of children) {
+      if (!child?.id) continue;
+      const type = child.type || '';
+      const label = (child.label || '').toLowerCase();
+
+      if (type === 'heading' || type === 'text' || type === 'button') {
+        let nextText: string | undefined;
+        const isLogo = label.includes('logo') || label.includes('brand');
+        const isMeta =
+          label.includes('year') ||
+          label.includes('number') ||
+          label.includes('label') ||
+          label.includes('meta') ||
+          label.includes('icon');
+
+        if (role === 'navbar') {
+          if (type === 'heading' && isLogo && content.heading) {
+            nextText = content.heading;
+            headingUsed = true;
+          } else if ((type === 'text' || type === 'heading') && !isLogo && itemIdx < itemLabels.length && !isMeta) {
+            nextText = itemLabels[itemIdx];
+            itemIdx++;
+          } else if (type === 'button' && content.cta && !ctaUsed) {
+            nextText = content.cta;
+            ctaUsed = true;
+          }
+        } else if (type === 'button' && content.cta && !ctaUsed) {
+          if (
+            label === 'primary cta' ||
+            label === 'primary' ||
+            label === 'cta' ||
+            label.includes('trial') ||
+            label.includes('start') ||
+            label.includes('get in touch') ||
+            label.includes('submit') ||
+            label.includes('book') ||
+            label.includes('contact') ||
+            label.includes('learn') ||
+            label.includes('watch') ||
+            label.includes('demo') ||
+            label === 'secondary cta' ||
+            label === 'secondary'
+          ) {
+            nextText = content.cta;
+            ctaUsed = true;
+          }
+        } else if (type === 'heading' && content.heading && !headingUsed && !isLogo && !isMeta) {
+          if (
+            label.includes('headline') ||
+            label.includes('title') ||
+            label === 'section title' ||
+            role === 'hero' ||
+            role === 'features' ||
+            role === 'about' ||
+            role === 'testimonials' ||
+            role === 'cta' ||
+            role === 'footer'
+          ) {
+            nextText = content.heading;
+            headingUsed = true;
+          }
+        } else if (type === 'heading' && role === 'footer' && isLogo && content.heading && !headingUsed) {
+          nextText = content.heading;
+          headingUsed = true;
+        }
+
+        if (!nextText && type === 'text' && content.subheading && !subUsed && !isMeta) {
+          if (label.includes('subtitle') || label.includes('description') || label.includes('sub') || label.includes('copy') || type === 'text') {
+            nextText = content.subheading;
+            subUsed = true;
+          }
+        }
+
+        if (!nextText && (type === 'heading' || type === 'text') && itemIdx < itemLabels.length && !isLogo && !isMeta) {
+          if (label.includes('title') || label.includes('name') || label === 'title' || type === 'heading') {
+            if (!label.includes('headline')) {
+              nextText = itemLabels[itemIdx];
+              itemIdx++;
+            }
+          } else if (type === 'text' && itemDescriptions.length > 0) {
+            const di = Math.min(itemIdx, itemDescriptions.length - 1);
+            nextText = itemDescriptions[di];
+            itemIdx++;
+          }
+        }
+
+        if (!nextText && type === 'button' && content.cta && !ctaUsed) {
+          nextText = content.cta;
+          ctaUsed = true;
+        }
+
+        if (nextText && nextText.trim()) {
+          const upd: HacpToolCall = {
+            id: this.toolId(),
+            name: 'update_node_props',
+            arguments: { sectionId: child.id, props: { text: nextText } },
+          };
+          const r = await this.execTool(upd, executeTool, { soft: true });
+          console.log(`[SiteGen] overlay node=${child.id} type=${type} label=${child.label} success=${r?.success}`);
+        }
+      }
+
+      if ((child.childCount ?? 0) > 0 || type === 'container' || type === 'section' || type === 'group') {
+        await this.overlayChildTexts(section, child.id, executeTool, depth + 1);
+      }
+    }
+  }
+
   // ── Helpers ──────────────────────────────────────────────────────
 
   private async execTool(
     call: HacpToolCall,
-    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string; createdNodeId?: string }>
+    executeTool: (call: HacpToolCall) => Promise<{ success: boolean; message: string; createdNodeId?: string }>,
+    opts?: { soft?: boolean }
   ): Promise<ToolResult | null> {
     if (this.abortController?.signal.aborted) return null;
     if (this.session.toolsExecuted >= this.config.maxTools) {
@@ -519,6 +776,7 @@ export class SiteGenerationOrchestrator {
       return null;
     }
 
+    const soft = opts?.soft === true;
     const start = Date.now();
     try {
       const result = await executeTool(call);
@@ -537,9 +795,10 @@ export class SiteGenerationOrchestrator {
         createdNodeId: result.createdNodeId,
       };
 
+      console.log(`[SiteGen] tool=${call.name} success=${result.success}`);
       this.callbacks.onToolExecuted(toolResult);
 
-      if (!result.success && this.config.failFast) {
+      if (!result.success && this.config.failFast && !soft) {
         throw new Error(`Tool ${call.name} failed: ${result.message}`);
       }
 
@@ -551,14 +810,16 @@ export class SiteGenerationOrchestrator {
       return toolResult;
     } catch (error) {
       const durationMs = Date.now() - start;
+      const message = error instanceof Error ? error.message : String(error);
+      console.log(`[SiteGen] tool=${call.name} success=false (${message})`);
       this.callbacks.onToolExecuted({
         toolName: call.name,
         success: false,
-        message: error instanceof Error ? error.message : String(error),
+        message,
         durationMs,
       });
 
-      if (this.config.failFast) {
+      if (this.config.failFast && !soft) {
         throw error;
       }
       return null;

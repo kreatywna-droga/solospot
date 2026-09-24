@@ -97,7 +97,25 @@ const SITE_GEN_KEYWORDS = [
   'postaw stronę', 'set up website',
   'zaprojektuj', 'design a website',
   'landing page', 'complete site', 'full website',
+  'start to finish', 'od start to finish',
 ];
+
+/**
+ * Shared SITE_GENERATION detector — single source of truth for the UI
+ * autonomous-generation gate and IntentClassifier (Website Creation Gate).
+ * Matches contiguous keywords PLUS non-contiguous verb+object forms:
+ * "zbuduj mi profesjonalną stronę od start to finish dla ... gabinetu dentystycznego."
+ */
+export function isSiteGenerationRequest(text: string): boolean {
+  const t = (text || '').toLowerCase();
+  if (SITE_GEN_KEYWORDS.some((kw) => t.includes(kw))) return true;
+  const verbs = [
+    'zbuduj', 'stwórz', 'stworz', 'zaprojektuj', 'wygeneruj', 'zrób',
+    'postaw', 'build', 'create', 'design', 'generate', 'set up',
+  ];
+  const objects = ['stron', 'website', 'landing page', 'landing', 'site'];
+  return verbs.some((v) => t.includes(v)) && objects.some((o) => t.includes(o));
+}
 
 const INSPECT_KEYWORDS = [
   'pokaż', 'show', 'wyświetl', 'display', 'sprawdź', 'check',
@@ -149,7 +167,7 @@ export class IntentClassifier {
     }
 
     // Priority 3: Site generation (must check BEFORE section and move)
-    if (this.matchesAny(normalized, SITE_GEN_KEYWORDS)) {
+    if (isSiteGenerationRequest(normalized) || this.matchesAny(normalized, SITE_GEN_KEYWORDS)) {
       return this.result('SITE_GENERATION', 0.95, [], {}, 'User wants to build a complete website');
     }
 

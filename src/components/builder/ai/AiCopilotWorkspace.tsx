@@ -32,6 +32,7 @@ import type {
 } from '@/lib/hacp/HacpTypes'
 import { findNode } from '../../../../packages/builder-core/src'
 import { useAutonomousGeneration } from '@/lib/ai/useAutonomousGeneration'
+import { isSiteGenerationRequest } from '@/lib/ai/IntentClassifier'
 import type { GenerationPhase } from '@/lib/ai/SitePlanTypes'
 import type { ChatMessageAttachment } from '@/lib/ai/AIProviderTypes'
 import { AiRobotMascot, type AiRobotState } from './AiRobotMascot'
@@ -627,17 +628,8 @@ export function AiCopilotWorkspace() {
     const text = (promptToSend || inputValue).trim()
     if ((!text && attachedFiles.length === 0) || isExecuting) return
 
-    // ── Autonomous Generation Detection ──
-    const lowerText = text.toLowerCase()
-    const isGenerationRequest = lowerText.includes('generuj stronę') ||
-      lowerText.includes('generate website') ||
-      lowerText.includes('stwórz stronę') ||
-      lowerText.includes('stwórz stronę internetową') ||
-      lowerText.includes('zrób stronę') ||
-      lowerText.includes('zbuduj stronę') ||
-      lowerText.includes('build website') ||
-      lowerText.includes('create website') ||
-      (lowerText.includes('stron') && lowerText.includes('internetow'))
+    // ── Autonomous Generation Detection (SSOT: IntentClassifier) ──
+    const isGenerationRequest = isSiteGenerationRequest(text)
 
     if (isGenerationRequest && !isExecuting) {
       // Trigger autonomous generation
