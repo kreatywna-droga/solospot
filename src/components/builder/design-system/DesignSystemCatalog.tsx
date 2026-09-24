@@ -79,14 +79,15 @@ function paletteOf(pack: any): { primary: string; secondary: string; bg: string 
 }
 
 export function DesignSystemCatalog() {
-  const { dispatch } = useBuilder()
+  const { dispatch, document: doc } = useBuilder() as { dispatch: (c: any) => void; document?: any }
   const [category, setCategory] = useState<CategoryId>('style-packs')
   const [query, setQuery] = useState('')
   const [industry, setIndustry] = useState('')
   const [mood, setMood] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [previewId, setPreviewId] = useState<string | null>(null)
-  const [appliedId, setAppliedId] = useState<string | null>(null)
+  // Badge derives from document theme so Ctrl+Z (undo) clears it — no local state.
+  const appliedId: string | null = doc?.theme?.appliedStylePackId ?? null
 
   const industries = useMemo(() => {
     const set = new Set<string>()
@@ -187,15 +188,16 @@ export function DesignSystemCatalog() {
       )
       if (!resolved || Object.keys(resolved.theme).length === 0) return
 
-      // Single UPDATE_THEME (theme + tokens in one payload) → one HistoryStack entry → undo works.
+      // Single UPDATE_THEME (theme + tokens + appliedStylePackId in one payload)
+      // → one HistoryStack entry → undo reverts theme AND clears badge.
       dispatch({
         type: 'UPDATE_THEME',
         theme: {
           ...resolved.theme,
           tokens: resolved.tokens,
+          appliedStylePackId: stylePackId,
         } as any,
       })
-      setAppliedId(stylePackId)
     },
     [dispatch]
   )
