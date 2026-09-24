@@ -197,3 +197,72 @@ describe('getViewportBounds', () => {
     expect(v.width).toBeGreaterThanOrEqual(0)
   })
 })
+
+// ---------------------------------------------------------------------------
+// Mini Inspector AI panel (360px) — anchor + collision edge cases
+// ---------------------------------------------------------------------------
+
+describe('computePanelPosition — Mini Inspector AI (panelWidth 360)', () => {
+  const AI_W = 360
+  const opts = { panelWidth: AI_W, panelMinHeight: 220, gap: 12, viewportMargin: 16 }
+
+  function expectInside(pos: { x: number; y: number; maxHeight: number }, b: WorkspaceBounds) {
+    expect(pos.x).toBeGreaterThanOrEqual(b.left + MARGIN)
+    expect(pos.x + AI_W).toBeLessThanOrEqual(b.right - MARGIN)
+    expect(pos.y).toBeGreaterThanOrEqual(b.top + MARGIN)
+    expect(pos.y + pos.maxHeight).toBeLessThanOrEqual(b.bottom - MARGIN)
+  }
+
+  it('anchors RIGHT of a large mid-canvas node when space allows', () => {
+    const ws = bounds(200, 56, 1600, 1040)
+    const pos = computePanelPosition(rect(400, 200, 500, 300), ws, opts)
+    expect(pos.placement).toBe('right')
+    expect(pos.x).toBe(900 + 12)
+    expect(pos.y).toBe(200)
+    expectInside(pos, ws)
+  })
+
+  it('flips LEFT when the right side cannot fit a 360px panel', () => {
+    // Element near right edge of a 700px workspace → right space ≪ 360
+    const ws = bounds(0, 0, 700, 900)
+    const pos = computePanelPosition(rect(400, 200, 200, 150), ws, opts)
+    expect(pos.placement).toBe('left')
+    expect(pos.x + AI_W).toBeLessThanOrEqual(400 - 12 + 0.5)
+    expectInside(pos, ws)
+  })
+
+  it('clamps RIGHT when neither side fits fully (shared engine prefers side clamp)', () => {
+    // Narrow workspace: element spans almost full width → no horizontal room.
+    // Existing computePanelPosition contract (also used by ContextualSettingsPanel):
+    // when neither side fully fits, clamp to the larger horizontal side — not below.
+    const ws = bounds(0, 0, 420, 900)
+    const pos = computePanelPosition(rect(20, 100, 380, 80), ws, opts)
+    expect(pos.placement).toBe('right')
+    expect(pos.x + AI_W).toBeLessThanOrEqual(ws.right - MARGIN)
+    expectInside(pos, ws)
+  })
+
+  it('falls ABOVE when the element sits near the workspace bottom', () => {
+    const ws = bounds(0, 0, 1600, 500)
+    const pos = computePanelPosition(rect(400, 400, 300, 80), ws, opts)
+    expect(pos.placement).toBe('above')
+    expect(pos.y + opts.panelMinHeight).toBeLessThanOrEqual(400 - 12 + 0.5)
+    expectInside(pos, ws)
+  })
+
+  it('clamps fully inside the workspace for a node flush against the left edge', () => {
+    const ws = bounds(320, 100, 1920, 1080)
+    const pos = computePanelPosition(rect(320, 400, 120, 60), ws, opts)
+    expect(pos.x).toBeGreaterThanOrEqual(ws.left + MARGIN)
+    expectInside(pos, ws)
+  })
+
+  it('stays finite when the workspace is smaller than the AI panel', () => {
+    const ws = bounds(0, 0, 300, 300)
+    const pos = computePanelPosition(rect(50, 80, 100, 60), ws, opts)
+    expect(Number.isFinite(pos.x)).toBe(true)
+    expect(Number.isFinite(pos.y)).toBe(true)
+    expect(pos.x).toBeGreaterThanOrEqual(ws.left + MARGIN)
+    expect(pos.y).toBeGreaterThanOrEqual(ws.top + MARGIN)
+  })
+})

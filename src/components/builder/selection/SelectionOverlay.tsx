@@ -91,6 +91,23 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
   const [settingsPanelOpen, setSettingsPanelOpen] = useState(false)
   const [settingsPanelRect, setSettingsPanelRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null)
 
+  // Live viewport rect of the selected node — feeds MiniInspectorAI anchor
+  // (and is refreshed whenever zoom / overlay geometry changes).
+  const selectedElementRect = useMemo(() => {
+    const rect = overlay.boundingRect
+    const container = containerRef.current
+    if (!rect || !container) return null
+    const zoomWrapper = container.parentElement
+    const actualScale = zoomWrapper ? readCurrentScale(zoomWrapper) : 1
+    const containerRect = container.getBoundingClientRect()
+    return {
+      x: containerRect.left + rect.x * actualScale,
+      y: containerRect.top + rect.y * actualScale,
+      width: rect.width * actualScale,
+      height: rect.height * actualScale,
+    }
+  }, [overlay.boundingRect, containerRef, canvas.zoom])
+
   // Refs for hot-path drag tracking (zero re-renders during pointermove)
   const dragRef = useMemo(() => ({ deltaX: 0, deltaY: 0 }), [])
   const resizeRef = useMemo(() => ({
@@ -1003,6 +1020,7 @@ export function SelectionOverlay({ containerRef, externalRects }: SelectionOverl
                     hidden={toolbarData.hidden}
                     index={toolbarData.index}
                     total={toolbarData.total}
+                    elementRect={selectedElementRect}
                     onSettingsOpen={() => {
                       // Convert canvas-local overlay rect to viewport coordinates
                       // because ContextualSettingsPanel renders with position:fixed.

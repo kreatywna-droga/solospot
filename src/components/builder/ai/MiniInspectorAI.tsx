@@ -37,6 +37,10 @@ import {
   type InspectorAITargetLock,
 } from './InspectorAIContext'
 import { getQuickActionsForNodeType } from './miniInspectorQuickActions'
+import {
+  usePanelPosition,
+  type ElementRect,
+} from '../contextual/usePanelPosition'
 
 export interface MiniInspectorAIProps {
   sectionId: string
@@ -44,6 +48,13 @@ export interface MiniInspectorAIProps {
   onClose?: () => void
   /** Force-open on mount (QuickToolbar → AI) */
   defaultOpen?: boolean
+  /**
+   * Viewport-space rect of the selected node (from SelectionOverlay).
+   * Used as fallback when live DOM measurement fails. Live measure by
+   * `[data-node-id]` / `[data-section-id]` is preferred so the window
+   * follows scroll/zoom even when this snapshot is stale.
+   */
+  elementRect?: ElementRect | null
 }
 
 type AiStatus = 'IDLE' | 'RUNNING' | 'SUCCESS' | 'PARTIAL' | 'FAILED' | 'CLARIFY'
@@ -75,6 +86,7 @@ export function MiniInspectorAI({
   pageId,
   onClose,
   defaultOpen = true,
+  elementRect,
 }: MiniInspectorAIProps) {
   const { document: builderDoc, dispatch, canvas } = useBuilder()
   const { canUndo, canRedo, undo, redo } = useBuilderHistory()
@@ -85,6 +97,9 @@ export function MiniInspectorAI({
   const [status, setStatus] = React.useState<AiStatus>('IDLE')
   const [turns, setTurns] = React.useState<AiTurn[]>([])
   const [mountEl, setMountEl] = React.useState<HTMLElement | null>(null)
+  const [anchorRect, setAnchorRect] = React.useState<ElementRect | null>(
+    elementRect ?? null
+  )
   const [conversation, setConversation] = React.useState<HacpConversationContext>({
     history: [],
   })
@@ -105,6 +120,52 @@ export function MiniInspectorAI({
     () => resolveInspectorAITarget(builderDoc, sectionId, pageId),
     [builderDoc, sectionId, pageId]
   )
+
+  // ANCHOR — live viewport rect of the selected node (§2 reuse geometry model)
+  const measureAnchor = React.useCallback(() => {
+    if (typeof document === 'undefined') return
+    const el =
+      document.querySelector<HTMLElement>(
+        `[data-node-id="${sectionId.replace(/"/g, '\\"')}"]`
+      ) ||
+      document.querySelector<HTMLElement>(
+        `[data-section-id="${sectionId.replace(/"/g, '\\"')}"]`
+      )
+    if (el) {
+      const r = el.getBoundingClientRect()
+      if (r.width > 0 && r.height > 0) {
+        setAnchorRect({ x: r.left, y: r.top, width: r.width, height: r.height })
+        return
+      }
+    }
+    if (elementRect) setAnchorRect(elementRect)
+  }, [sectionId, elementRect])
+
+  // Re-measure on open, selection change, zoom (canvas.zoom dep), element move
+  React.useLayoutEffect(() => {
+    if (!open) return
+    measureAnchor()
+  }, [open, measureAnchor, canvas.zoom, canvas.selectedSectionId])
+
+  // Follow window / workspace scroll + resize while open
+  React.useEffect(() => {
+    if (!open) return
+    const onViewportChange = () => measureAnchor()
+    window.addEventListener('scroll', onViewportChange, { passive: true })
+    window.addEventListener('resize', onViewportChange, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onViewportChange)
+      window.removeEventListener('resize', onViewportChange)
+    }
+  }, [open, measureAnchor])
+
+  // Collision placement — same engine as ContextualSettingsPanel (§2 REUSE)
+  const position = usePanelPosition(anchorRect, open, {
+    panelWidth: 360,
+    panelMinHeight: 220,
+    gap: 12,
+    viewportMargin: 16,
+  })
 
   // Selection change: keep panel bound to the LIVE selected node (gate §14)
   const liveSelectedId = canvas.selectedSectionId
@@ -297,11 +358,30 @@ export function MiniInspectorAI({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 8 }}
           transition={{ duration: 0.15 }}
-          className="fixed bottom-6 right-6 w-[360px] max-w-[calc(100vw-2rem)] z-[10000] pointer-events-auto"
+          className="fixed z-[10000] pointer-events-auto w-[360px] max-w-[calc(100vw-2rem)]"
+          style={
+            anchorRect
+              ? {
+                  left: position.x,
+                  top: position.y,
+                  maxHeight: position.maxHeight,
+                }
+              : // Fallback only when the selected node cannot be measured
+                // (removed from DOM) — never the default resting place.
+                { right: 24, bottom: 24 }
+          }
+          data-ai-placement={anchorRect ? position.placement : 'fallback'}
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
         >
-          <div className="bg-[#18181B] border border-[#44444B] rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[min(520px,70vh)]">
+          <div
+            className="bg-[#18181B] border border-[#44444B] rounded-xl shadow-2xl overflow-hidden flex flex-col"
+            style={
+              anchorRect
+                ? { maxHeight: position.maxHeight }
+                : { maxHeight: 'min(520px, 70vh)' }
+            }
+          >
             {/* Header — always visible AI access */}
             <div className="flex items-center justify-between px-3 py-2 bg-[#202024] border-b border-[#3A3A40] flex-shrink-0">
               <div className="flex items-center gap-2 min-w-0">

@@ -35,6 +35,7 @@ import { SmoothSlider } from '../inspector/SmoothSlider'
 import { applyAssetToNode } from '@/lib/assets/AssetResolver'
 import { SaveExperienceModal } from '../experience/SaveExperienceModal'
 import { MiniInspectorAI, MiniInspectorAIButton } from '../ai/MiniInspectorAI'
+import type { ElementRect } from '../contextual/usePanelPosition'
 
 interface QuickToolbarProps {
   position: ToolbarPositionResult
@@ -46,6 +47,8 @@ interface QuickToolbarProps {
   total: number
   /** Called when the Settings (gear) button is clicked */
   onSettingsOpen?: () => void
+  /** Viewport rect of the selected node — passed to MiniInspectorAI anchor */
+  elementRect?: ElementRect | null
 }
 
 export function QuickToolbar({
@@ -57,6 +60,7 @@ export function QuickToolbar({
   index,
   total,
   onSettingsOpen,
+  elementRect,
 }: QuickToolbarProps) {
   const { dispatch, document, canvas } = useBuilder()
   const [showColorPicker, setShowColorPicker] = useState(false)
@@ -899,6 +903,7 @@ export function QuickToolbar({
           pageId={pageId}
           defaultOpen
           onClose={() => setShowAi(false)}
+          elementRect={elementRect}
         />
       )}
 

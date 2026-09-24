@@ -833,6 +833,7 @@ export function ContextualSettingsPanel({
                 pageId={pageId}
                 defaultOpen
                 onClose={() => setAiOpen(false)}
+                elementRect={elementRect}
               />
             )}
 

@@ -344,6 +344,56 @@ describe('Architecture purity (§4, §15)', () => {
 })
 
 // ---------------------------------------------------------------------------
+// Contextual positioning (anchor-to-selected-component gate)
+// ---------------------------------------------------------------------------
+
+describe('Contextual positioning — anchor to selected component', () => {
+  it('MiniInspectorAI reuses usePanelPosition (no second geometry system)', async () => {
+    const fs = await import('node:fs')
+    const path = await import('node:path')
+    const src = fs.readFileSync(
+      path.resolve(__dirname, '../MiniInspectorAI.tsx'),
+      'utf8'
+    )
+    expect(src).toContain('usePanelPosition')
+    expect(src).toContain('elementRect')
+    // Must not hardcode the old stale bottom-right resting place as className
+    expect(src).not.toContain('bottom-6 right-6')
+    // Live measure of selected node for scroll/zoom follow
+    expect(src).toContain('data-node-id')
+    expect(src).toContain('data-section-id')
+    expect(src).toContain('getBoundingClientRect')
+    // Follows scroll + resize while open
+    expect(src).toContain("addEventListener('scroll'")
+    expect(src).toContain("addEventListener('resize'")
+    // Collision placement exposed for production E2E proof
+    expect(src).toContain('data-ai-placement')
+  })
+
+  it('both hosts pass elementRect into MiniInspectorAI', async () => {
+    const fs = await import('node:fs')
+    const path = await import('node:path')
+    const qt = fs.readFileSync(
+      path.resolve(__dirname, '../../selection/QuickToolbar.tsx'),
+      'utf8'
+    )
+    const csp = fs.readFileSync(
+      path.resolve(__dirname, '../../contextual/ContextualSettingsPanel.tsx'),
+      'utf8'
+    )
+    const so = fs.readFileSync(
+      path.resolve(__dirname, '../../selection/SelectionOverlay.tsx'),
+      'utf8'
+    )
+    expect(qt).toMatch(/elementRect=\{elementRect\}/)
+    expect(csp).toMatch(/elementRect=\{elementRect\}/)
+    // SelectionOverlay computes a live viewport rect for QuickToolbar
+    expect(so).toContain('selectedElementRect')
+    expect(so).toMatch(/elementRect=\{selectedElementRect\}/)
+  })
+})
+
+// ---------------------------------------------------------------------------
 // Builder document SSOT smoke (fixture only — no full context factory)
 // ---------------------------------------------------------------------------
 
