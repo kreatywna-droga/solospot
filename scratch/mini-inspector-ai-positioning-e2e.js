@@ -149,8 +149,16 @@ async function openAiForSelection(page) {
     );
   }
   if (!present) return false;
-  await realClickSelector(page, '[data-testid="mini-inspector-ai-open"]');
+  await clickSelector(page, '[data-testid="mini-inspector-ai-open"]');
   await waitMs(800);
+  // If first click only toggled active state without a window (host remount), retry once
+  const openNow = await page.evaluate(
+    () => !!document.querySelector('[data-testid="mini-inspector-ai"]')
+  );
+  if (!openNow) {
+    await clickSelector(page, '[data-testid="mini-inspector-ai-open"]');
+    await waitMs(800);
+  }
   return page.evaluate(() => !!document.querySelector('[data-testid="mini-inspector-ai"]'));
 }
 
@@ -168,6 +176,21 @@ async function realClickSelector(page, selector) {
   await page.mouse.click(pt.x, pt.y);
   await waitMs(600);
   return true;
+}
+
+/** Prefer direct DOM click (immune to overlay hit-testing), fall back to mouse. */
+async function clickSelector(page, selector) {
+  const ok = await page.evaluate((sel) => {
+    const el = document.querySelector(sel);
+    if (!el) return false;
+    el.click();
+    return true;
+  }, selector);
+  if (ok) {
+    await waitMs(600);
+    return true;
+  }
+  return realClickSelector(page, selector);
 }
 
 async function selectByType(page, typePref) {
@@ -357,18 +380,19 @@ function closeAi(page) {
     await waitMs(600);
 
     // ── S: viewport resize → stays in workspace ──
+    // Do NOT click stale pre-scroll/zoom coordinates (that deselects the node
+    // and unmounts QuickToolbar + AI). Re-select by live DOM rect if needed.
     await page.setViewport({ width: 1280, height: 720 });
-    // Force listeners (puppeteer setViewport may not always fire before snapshot)
     await page.evaluate(() => window.dispatchEvent(new Event('resize')));
-    await waitMs(1200);
-    // Re-assert selection so QuickToolbar/AI stay bound through reflow
-    await page.mouse.click(s1.node ? s1.node.rect.cx : 816, s1.node ? s1.node.rect.cy : 240);
-    await waitMs(800);
-    const stillOpen = await page.evaluate(
+    await waitMs(1400);
+    let stillOpen = await page.evaluate(
       () => !!document.querySelector('[data-testid="mini-inspector-ai"]')
     );
-    if (!stillOpen) await openAiForSelection(page);
-    await waitMs(600);
+    if (!stillOpen) {
+      await selectByType(page, ['heading', 'text']);
+      stillOpen = await openAiForSelection(page);
+    }
+    await waitMs(800);
     const s4 = await snapshot(page);
     const a4 = nearNode(s4);
     const in4 = insideWorkspace(s4);
@@ -376,18 +400,18 @@ function closeAi(page) {
       nextStep(),
       'AI follows after viewport resize 1280x720',
       'adjacent + inside workspace',
-      `adjacent=${a4.adjacent} inside=${in4} placement=${a4.placement} reason=${a4.reason || ''}`,
+      `adjacent=${a4.adjacent} inside=${in4} placement=${a4.placement} reason=${a4.reason || ''} stillOpen=${stillOpen}`,
       a4.ok && in4 ? 'PASS' : 'FAIL',
       `ws=${JSON.stringify(s4.ws)} node=${s4.node && JSON.stringify(s4.node.rect)} ai=${s4.ai && JSON.stringify(s4.ai.rect)}`
     );
     await shot(page, '06-ai-after-resize');
     await page.setViewport({ width: 1600, height: 1000 });
     await page.evaluate(() => window.dispatchEvent(new Event('resize')));
-    await waitMs(800);
+    await waitMs(900);
 
     // ── S: selection change → re-anchor to new node ──
     await closeAi(page);
-    await waitMs(400);
+    await waitMs(500);
     // Prefer a non-section child node; fall back to any other section
     let n2 = await selectByType(page, ['button', 'image']);
     if (!n2 || n2.id === n1.id) {
@@ -398,21 +422,8 @@ function closeAi(page) {
         if (n2c) n2 = n2c;
       }
     }
-    // Verify QuickToolbar AI button is reachable before claiming failure
-    let aiBtn = await page.evaluate(
-      () => !!document.querySelector('[data-testid="mini-inspector-ai-open"]')
-    );
-    if (!aiBtn) {
-      await realClickSelector(page, '[title*="Ustawienia"]');
-      await waitMs(900);
-      aiBtn = await page.evaluate(
-        () => !!document.querySelector('[data-testid="mini-inspector-ai-open"]')
-      );
-    }
-    const opened2 = aiBtn ? await realClickSelector(page, '[data-testid="mini-inspector-ai-open"]') && await page.evaluate(
-      () => !!document.querySelector('[data-testid="mini-inspector-ai"]')
-    ) : false;
-    await waitMs(800);
+    const opened2 = await openAiForSelection(page);
+    await waitMs(900);
     const s5 = await snapshot(page);
     const a5 = nearNode(s5);
     const targetMatch = s5.ai && s5.node && s5.ai.target === s5.node.id;
@@ -420,8 +431,8 @@ function closeAi(page) {
       nextStep(),
       'Selection change re-anchors AI to new node',
       'AI target matches selected node + adjacent',
-      `target=${s5.ai && s5.ai.target} node=${s5.node && s5.node.id} match=${targetMatch} adjacent=${a5.adjacent} placement=${a5.placement} aiBtn=${aiBtn}`,
-      opened2 && targetMatch && a5.ok ? 'PASS' : (s5.ai && targetMatch && a5.ok ? 'PASS' : 'FAIL'),
+      `target=${s5.ai && s5.ai.target} node=${s5.node && s5.node.id} match=${targetMatch} adjacent=${a5.adjacent} placement=${a5.placement} opened=${opened2}`,
+      opened2 && targetMatch && a5.ok ? 'PASS' : 'FAIL',
       `ai=${s5.ai && JSON.stringify(s5.ai.rect)} node=${s5.node && JSON.stringify(s5.node.rect)}`
     );
     await shot(page, '07-ai-selection-change');

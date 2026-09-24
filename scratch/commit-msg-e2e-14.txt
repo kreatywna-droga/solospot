@@ -1,0 +1,4 @@
+test(e2e): positioning suite 14/0 — no stale re-click after resize, JS click for AI open
+
+- S10: do not click pre-scroll/zoom coords (deselect unmounts AI); re-select via live DOM only if closed
+- openAiForSelection: prefer el.click() (hit-test proof) with one retry
