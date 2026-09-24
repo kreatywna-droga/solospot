@@ -122,16 +122,29 @@ PASS E1 Console errors = 0
 
 ---
 
-## 7. Deploy & Production
+## 7. Deploy & Production (PHASE 10)
 
 | Item | Value |
 |---|---|
-| Commit | *(uzupełnij po push — `git rev-parse --short HEAD`)* |
-| Push | `origin/main` |
-| Vercel | `npx vercel deploy --prod --yes` **bez** `--archive=tgz` → READY |
-| Production URL | `https://www.solospot.pl` |
-| Prod E2E | `BASE_URL=https://www.solospot.pl node scratch/dual-path-dentist-e2e.js` → **11/11 PASS** |
-| Prod health | HTTP 200 `/` · `/api/builder/copilot` GET ONLINE |
+| Commit | `5011f31` (`5011f31baf3a94509beacfeffca9350f5918616b`) — `fix(ai): dual-path unification — request.tools ⊆ selectedToolSurface, remove full-builder fallback` |
+| Push | `f35e905..5011f31  main -> main` on `origin/main` |
+| Vercel CLI | 54.18.6 · `npx vercel deploy --prod --yes` **bez** `--archive=tgz` |
+| Deployment ID | `dpl_G62KFtDuXz5h3u7M4PHRZ7zVkGuv` |
+| Deployment URL | `https://solospot-b40zkefme-kreatywna-droga.vercel.app` |
+| Status | ● **Ready** in 2m (iad1 · Next.js 16.2.9 · TypeScript OK · 55/55 pages) |
+| Aliases | `https://www.solospot.pl` · `https://solospot.pl` · `https://solospot.vercel.app` |
+| Prod E2E | `BASE_URL=https://www.solospot.pl node scratch/dual-path-dentist-e2e.js` → **11/11 PASS** (phase=complete, before=1 → after=5) |
+| Prod D2 | toolCalls ⊆ surface — **0 × `batch_execute`** · `ORCHESTRATED_AUTO` · `AgentOrchestrator` (probe `insert_section_from_library`) |
+| Prod health | HTTP 200 `/` · GET `/api/builder/copilot` → `{"status":"ONLINE","provider":"OpenCode","configured":true}` |
+| Proof | `scratch/dual-path-dentist-proof/result.json` + `01-generation-start.png` / `02-generation-end.png` |
+
+**PHASE 9 local gate (re-run after commit):**
+```
+npx tsc --noEmit                 → TSC_OK
+npx vitest run src/lib/ai        → 52 files, 934 tests, 0 fail
+npx vitest run DualPathUnification → 1 file, 24 tests, 0 fail
+npm run build                    → OK (local + Vercel)
+```
 
 ---
 
