@@ -387,6 +387,8 @@ export function DesignSystemCatalog() {
       // REPAIR GATE v3.0 — FONT PERSISTENCE for Visual Languages.
       // Apply the VL heading/body font to every typography node via
       // SET_NODE_STYLES so node.styles.fontFamily can't override theme.font.
+      // (Declaration completed for commit 144eebd's batch edit — see SCROLLBAR gate report.)
+      const batchCommands: any[] = [];
       const headingFont = (typography as any)?.headingFont
       const bodyFont = (typography as any)?.bodyFont || headingFont
       if (headingFont) {
@@ -490,7 +492,7 @@ export function DesignSystemCatalog() {
       </div>
 
       {/* List */}
-      <div className="flex-1 overflow-y-auto p-2.5 space-y-2" data-testid="ds-catalog-list">
+      <div className="flex-1 overflow-y-auto p-2.5 space-y-2 builder-canvas-scrollbar" data-testid="ds-catalog-list">
         {items.length === 0 && (
           <p className="text-xs text-zinc-500 text-center py-6">Brak wyników dla „{query}”.</p>
         )}
