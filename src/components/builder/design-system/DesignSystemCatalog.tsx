@@ -13,6 +13,7 @@ import { DesignSystem } from '../../../../packages/design-system/src/index'
 import { resolveStylePackApplication, resolveDesignApplication, designApplicationToCommandPayload } from '../../../../packages/design-system/src/builder'
 import type { DesignApplicationKind } from '../../../../packages/design-system/src/builder'
 import { useBuilder } from '../state/BuilderProvider'
+import { VISUAL_LANGUAGES, buildVisualLanguageCommandPlan } from '../../../../src/lib/design-brain'
 
 type CategoryId =
   | 'style-packs'
@@ -35,6 +36,7 @@ type CategoryId =
   | 'spacing'
   | 'industry-presets'
   | 'themes'
+  | 'visual-languages'
 
 const CATEGORIES: { id: CategoryId; label: string }[] = [
   { id: 'style-packs', label: 'Style Packs' },
@@ -57,6 +59,7 @@ const CATEGORIES: { id: CategoryId; label: string }[] = [
   { id: 'spacing', label: 'Odstępy' },
   { id: 'industry-presets', label: 'Branże' },
   { id: 'themes', label: 'Motywy' },
+  { id: 'visual-languages', label: 'Języki wizualne' },
 ]
 
 function matchQ(item: any, q: string): boolean {
@@ -166,6 +169,8 @@ export function DesignSystemCatalog() {
         return DesignSystem.spacingStyles.filter((s: any) => matchQ(s, q))
       case 'themes':
         return DesignSystem.designThemes.filter((t: any) => matchQ(t, q))
+      case 'visual-languages':
+        return VISUAL_LANGUAGES.filter((l) => matchQ(l, q))
       default:
         return []
     }
@@ -192,6 +197,7 @@ export function DesignSystemCatalog() {
     'spacing': 'spacing',
     'industry-presets': 'industry-preset',
     'themes': 'theme',
+    'visual-languages': 'visual-language',
   }
 
   const CAN_APPLY: Record<CategoryId, boolean> = {
@@ -215,6 +221,7 @@ export function DesignSystemCatalog() {
     'spacing': true,
     'industry-presets': true,
     'themes': false,
+    'visual-languages': true,
   }
 
   const applyDesignSystemItem = useCallback(
@@ -263,6 +270,53 @@ export function DesignSystemCatalog() {
       } as any)
     },
     [dispatch, DesignSystem, doc]
+  )
+
+  const applyVisualLanguage = useCallback(
+    (visualLanguageId: string) => {
+      const language = VISUAL_LANGUAGES.find((l) => l.id === visualLanguageId)
+      if (!language || !doc) return
+
+      const plan = buildVisualLanguageCommandPlan(language, doc, doc.pages?.[0]?.id)
+      const colors = language.tokens.colors || {}
+      const typography = language.tokens.typography || {}
+      const radius = language.tokens.radius || {}
+      const spacing = language.tokens.spacing || {}
+      const shadows = language.tokens.shadows || {}
+      const theme: Record<string, unknown> = {
+        primaryColor: (colors as any).primary,
+        secondaryColor: (colors as any).secondary,
+        backgroundColor: (colors as any).background,
+        text: (colors as any).text,
+        accent: (colors as any).accent,
+        cta: (colors as any).cta,
+        font: (typography as any).headingFont || (typography as any).bodyFont,
+        borderRadius: (radius as any).default || (radius as any).button || (radius as any).card,
+      }
+      const tokens = {
+        colors,
+        typography,
+        radius,
+        spacing,
+        shadows,
+        components: language.tokens.components,
+        composition: language.tokens.composition,
+      }
+
+      dispatch({
+        type: 'UPDATE_THEME',
+        theme: {
+          ...theme,
+          tokens,
+          appliedStylePackId: `visual-language:${visualLanguageId}`,
+        } as any,
+      } as any)
+
+      for (const command of plan.compositionCommands) {
+        dispatch(command as any)
+      }
+    },
+    [dispatch, doc]
   )
 
   const previewPack = previewId
@@ -420,7 +474,7 @@ export function DesignSystemCatalog() {
                   </button>
                   {canApply && (
                     <button
-                      onClick={() => applyDesignSystemItem(item.id, category)}
+                      onClick={() => category === 'visual-languages' ? applyVisualLanguage(item.id) : applyDesignSystemItem(item.id, category)}
                       data-testid="ds-btn-apply"
                       className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold bg-[#D9A86C] text-white hover:bg-[#c4965a]"
                     >
@@ -487,18 +541,22 @@ export function DesignSystemCatalog() {
                 >
                   Zamknij
                 </button>
-                {CAN_APPLY[category] && (
-                  <button
-                    onClick={() => {
-                      applyDesignSystemItem(previewItem.id, category)
-                      setPreviewId(null)
-                    }}
-                    data-testid="ds-btn-apply-from-preview"
-                    className="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-[#D9A86C] text-white hover:bg-[#c4965a]"
-                  >
-                    Zastosuj
-                  </button>
-                )}
+                 {CAN_APPLY[category] && (
+                   <button
+                     onClick={() => {
+                       if (category === 'visual-languages') {
+                         applyVisualLanguage(previewItem.id)
+                       } else {
+                         applyDesignSystemItem(previewItem.id, category)
+                       }
+                       setPreviewId(null)
+                     }}
+                     data-testid="ds-btn-apply-from-preview"
+                     className="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-[#D9A86C] text-white hover:bg-[#c4965a]"
+                   >
+                     Zastosuj
+                   </button>
+                 )}
               </div>
             </div>
           </div>

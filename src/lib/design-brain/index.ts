@@ -58,6 +58,17 @@ export {
   VISUAL_LANGUAGES, VISUAL_LANGUAGE_IDS, getVisualLanguage, mapNaturalLanguageToVisualDNA,
 } from './VisualLanguages';
 export type { VisualLanguage, VisualDNA, AntiPattern } from './types';
+export {
+  buildCompositionDecisions, compositionDecisionsToCommands,
+} from './CompositionIntelligence';
+// CompositionInput is already re-exported from './CompositionEngines' above —
+// exporting it again here made the name ambiguous (duplicate export) and broke
+// `next build`. The CompositionIntelligence variant stays module-internal.
+export type { CompositionDecision } from './CompositionIntelligence';
+export {
+  buildVisualLanguageCommandPlan,
+} from './VisualLanguageApplication';
+export type { VisualLanguageCommandPlan } from './VisualLanguageApplication';
 export { validateBusinessGoal } from './BusinessGoalValidation';
 export type { BusinessGoalInput } from './BusinessGoalValidation';
 export { resolveRoleForPhase, allRoles, describeRole } from './RoleModel';
