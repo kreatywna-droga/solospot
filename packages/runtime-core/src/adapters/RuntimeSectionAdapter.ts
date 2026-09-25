@@ -1,10 +1,12 @@
-import { RuntimeSection as CoreRuntimeSection } from '../RuntimeSection';
+﻿import { RuntimeSection as CoreRuntimeSection } from '../RuntimeSection';
 
 interface LegacyRuntimeSection {
   readonly id: string;
   readonly type: string;
   readonly label: string;
   readonly config: Record<string, unknown>;
+  readonly styles?: Record<string, unknown>;
+  readonly responsive?: Record<string, Record<string, unknown>>;
 }
 
 interface LegacyPageSection {
@@ -13,6 +15,8 @@ interface LegacyPageSection {
   readonly label: string;
   readonly config: Record<string, unknown>;
   readonly order: number;
+  readonly styles?: Record<string, unknown>;
+  readonly responsive?: Record<string, Record<string, unknown>>;
 }
 
 /**
@@ -37,6 +41,8 @@ export class RuntimeSectionAdapter {
       props: (legacy as any).props ?? legacy.config ?? {},
       order: (legacy as any).order ?? 0,
       visible: (legacy as any).visible ?? true,
+      ...(legacy.styles ? { styles: legacy.styles } : {}),
+      ...(legacy.responsive ? { responsive: legacy.responsive } : {}),
     };
   }
 
@@ -54,6 +60,8 @@ export class RuntimeSectionAdapter {
       props: pageSection.config,
       order: pageSection.order,
       visible: true,
+      ...(pageSection.styles ? { styles: pageSection.styles } : {}),
+      ...(pageSection.responsive ? { responsive: pageSection.responsive } : {}),
     };
   }
 
@@ -72,6 +80,8 @@ export class RuntimeSectionAdapter {
       type: core.type,
       label: core.label,
       config: core.props,
+      ...(core.styles ? { styles: core.styles } : {}),
+      ...(core.responsive ? { responsive: core.responsive } : {}),
     };
   }
 

@@ -1,4 +1,4 @@
-import { StoreRepository } from '@/lib/store/StoreRepository';
+﻿import { StoreRepository } from '@/lib/store/StoreRepository';
 import { ProductRepository } from '@/lib/product/ProductRepository';
 import { RuntimeResolver } from './RuntimeResolver';
 import { RuntimeValidator } from './RuntimeValidator';
@@ -23,7 +23,7 @@ import {
 } from '../../../packages/runtime-core/src';
 
 /**
- * Adapter: legacy StoreRepository → StoreRepositoryLike (for DefaultRuntimeCompositionEngine).
+ * Adapter: legacy StoreRepository â†’ StoreRepositoryLike (for DefaultRuntimeCompositionEngine).
  */
 function createStoreRepoAdapter(): { getStoreBySlug(slug: string): Promise<StoreRecord | null> } {
   const repo = new StoreRepository();
@@ -37,7 +37,7 @@ function createStoreRepoAdapter(): { getStoreBySlug(slug: string): Promise<Store
 }
 
 /**
- * Adapter: legacy ProductRepository → ProductRepositoryLike.
+ * Adapter: legacy ProductRepository â†’ ProductRepositoryLike.
  */
 function createProductRepoAdapter(): { getProductsByStore(tenantId: string, storeId: string): Promise<ProductRecord[]> } {
   const repo = new ProductRepository();
@@ -52,7 +52,7 @@ function createProductRepoAdapter(): { getProductsByStore(tenantId: string, stor
 export type RenderMode = 'LIVE' | 'PREVIEW' | 'EXPORT';
 
 /**
- * RuntimeBackend — Sprint 6 Step 5 Feature Flag.
+ * RuntimeBackend â€” Sprint 6 Step 5 Feature Flag.
  *
  * Controls which runtime implementation renderStore() uses:
  *   - LEGACY:   legacy RuntimeResolver path only (no pipeline)
@@ -64,7 +64,7 @@ export type RenderMode = 'LIVE' | 'PREVIEW' | 'EXPORT';
 export type RuntimeBackend = 'LEGACY' | 'PIPELINE' | 'AUTO';
 
 /**
- * RenderContext — future-proof context for partial rendering.
+ * RenderContext â€” future-proof context for partial rendering.
  * Added now to avoid breaking the API surface later.
  */
 export interface RenderContext {
@@ -120,6 +120,8 @@ export interface RenderStoreResult {
       props: Record<string, unknown>;
       order: number;
       visible: boolean;
+      styles?: Record<string, unknown>;
+      responsive?: Record<string, Record<string, unknown>>;
     }>;
   };
   sections: Array<{
@@ -129,6 +131,8 @@ export interface RenderStoreResult {
     props: Record<string, unknown>;
     order: number;
     visible: boolean;
+    styles?: Record<string, unknown>;
+    responsive?: Record<string, Record<string, unknown>>;
   }>;
   products: Array<{
     id: string;
@@ -299,7 +303,7 @@ async function resolveViaPipeline(options: RenderStoreOptions): Promise<RuntimeR
       timestamp: new Date().toISOString(),
     }),
     buildRuntimeResult: (params) => {
-      // Create mutable copy of sections to satisfy LegacyRuntimePage contract (readonly → mutable)
+      // Create mutable copy of sections to satisfy LegacyRuntimePage contract (readonly â†’ mutable)
       // Create mutable copy with type-safe cast for the bridge between RuntimeSection and LegacyRuntimeSection
       const mutableSections = params.page.sections.map((s) => ({
         id: s.id,
@@ -308,6 +312,9 @@ async function resolveViaPipeline(options: RenderStoreOptions): Promise<RuntimeR
         props: { ...s.props },
         order: s.order,
         visible: s.visible,
+        ...(s.styles ? { styles: { ...s.styles } } : {}),
+        ...(s.responsive ? { responsive: { ...s.responsive } } : {}),
+
       }));
       const mutablePage = { id: params.page.id, slug: params.page.slug, name: params.page.name, sections: mutableSections };
 
@@ -368,7 +375,7 @@ async function resolveViaPipeline(options: RenderStoreOptions): Promise<RuntimeR
     buildTenantContext: (request) => buildTenantContextFromRequest(request),
     createComposedRuntimeContext: (snapshot, request) => createComposedRuntimeContext(snapshot, request),
 
-    // legacy-fallback stage (last resort — returns core RuntimeResult)
+    // legacy-fallback stage (last resort â€” returns core RuntimeResult)
     legacyFallback: async (request) =>
       resolveViaLegacyCore({ ...options, slug: request.slug, mode: request.mode as RenderMode }),
   };
@@ -557,6 +564,8 @@ function buildResultFromCore(
         props: s.props,
         order: s.order,
         visible: s.visible,
+        ...(s.styles ? { styles: s.styles } : {}),
+      ...(s.responsive ? { responsive: s.responsive } : {}),
       })),
     },
     sections: coreResult.sections.map((s) => ({
@@ -566,6 +575,8 @@ function buildResultFromCore(
       props: s.props,
       order: s.order,
       visible: s.visible,
+      ...(s.styles ? { styles: s.styles } : {}),
+      ...(s.responsive ? { responsive: s.responsive } : {}),
     })),
     products: legacyProducts.map((p) => ({ id: p.id, name: p.name, description: p.description, price: p.price, currency: p.currency, images: p.images })),
     navigation: legacyNavigation.map((n) => ({ label: n.label, href: n.href, children: n.children?.map((c) => ({ label: c.label, href: c.href })) })),
@@ -584,12 +595,12 @@ function buildResultFromCore(
  *
  * ARCHITECTURE (per Sprint 6 Step 5 corrections):
  *   renderStore()
- *     ↓
- *   RuntimeCache (owner of cache decision)  ← cache-check before pipeline
- *     ↓
+ *     â†“
+ *   RuntimeCache (owner of cache decision)  â† cache-check before pipeline
+ *     â†“
  *   DefaultRuntimePipeline (deterministic stages only)
- *     ↓
- *   catch → LegacyRuntime (fallback OUTSIDE pipeline)
+ *     â†“
+ *   catch â†’ LegacyRuntime (fallback OUTSIDE pipeline)
  *
  * @param options - Render options including slug, mode, locale, currency
  * @returns Unified render result
@@ -650,17 +661,17 @@ async function renderWithCache(
  *
  * ARCHITECTURE (per Sprint 6 Step 5 corrections):
  *   renderStore()
- *     ↓
- *   RuntimeCache (owner of cache decision)  ← cache-check before pipeline
- *     ↓
+ *     â†“
+ *   RuntimeCache (owner of cache decision)  â† cache-check before pipeline
+ *     â†“
  *   DefaultRuntimePipeline (deterministic stages only)
- *     ↓
- *   catch → LegacyRuntime (fallback OUTSIDE pipeline)
+ *     â†“
+ *   catch â†’ LegacyRuntime (fallback OUTSIDE pipeline)
  *
  * Backend selector (Feature Flag):
- *   - runtime: 'LEGACY'   → legacy RuntimeResolver only
- *   - runtime: 'PIPELINE' → DefaultRuntimePipeline only (no fallback)
- *   - runtime: 'AUTO'     → pipeline primary + legacy fallback (default)
+ *   - runtime: 'LEGACY'   â†’ legacy RuntimeResolver only
+ *   - runtime: 'PIPELINE' â†’ DefaultRuntimePipeline only (no fallback)
+ *   - runtime: 'AUTO'     â†’ pipeline primary + legacy fallback (default)
  *
  * @param options - Render options including slug, mode, locale, currency
  * @returns Unified render result
@@ -669,7 +680,7 @@ export async function renderStore(options: RenderStoreOptions): Promise<RenderSt
   const { mode = 'LIVE' } = options;
   const backend: RuntimeBackend = options.runtime ?? 'AUTO';
 
-  // LEGACY mode — old resolver only.
+  // LEGACY mode â€” old resolver only.
   if (backend === 'LEGACY') {
     try {
       return await resolveViaLegacy(options);
@@ -679,7 +690,7 @@ export async function renderStore(options: RenderStoreOptions): Promise<RenderSt
     }
   }
 
-  // PIPELINE mode — pipeline only, no fallback.
+  // PIPELINE mode â€” pipeline only, no fallback.
   if (backend === 'PIPELINE') {
     try {
       return await renderWithCache(options, () => resolveViaPipeline(options));
@@ -689,7 +700,7 @@ export async function renderStore(options: RenderStoreOptions): Promise<RenderSt
     }
   }
 
-  // AUTO mode (default) — pipeline primary, legacy fallback.
+  // AUTO mode (default) â€” pipeline primary, legacy fallback.
   try {
     return await renderWithCache(options, () => resolveViaPipeline(options));
   } catch (pipelineErr) {
@@ -765,7 +776,7 @@ export async function renderStoreSection(
 }
 
 /**
- * Render a partial store — only the sections affected by changed fields.
+ * Render a partial store â€” only the sections affected by changed fields.
  *
  * Uses a lightweight dependency heuristic: if a section's props reference any
  * changed field, it is re-rendered. If the dependency is inconclusive,
@@ -801,7 +812,7 @@ export async function renderStorePartial(
     return changedFields.some((field) => propsJson.includes(field));
   });
 
-  // Inconclusive (e.g. theme change affects everything) → full re-render.
+  // Inconclusive (e.g. theme change affects everything) â†’ full re-render.
   if (affected.length === 0 || changedFields.some((f) => f.startsWith('theme.') || f.startsWith('store.'))) {
     return full;
   }

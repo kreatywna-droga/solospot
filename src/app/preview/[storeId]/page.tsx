@@ -65,7 +65,7 @@ export default async function PreviewPage({ params }: Props) {
       {result.sections.map((section) => (
         <SectionRenderer
           key={section.id}
-          section={{ id: section.id, type: section.type, label: section.label, config: section.props }}
+          section={{ id: section.id, type: section.type, label: section.label, config: section.props, styles: section.styles, responsive: section.responsive }}
           theme={{
             primaryColor: result.theme.primaryColor,
             secondaryColor: result.theme.secondaryColor,

@@ -1,4 +1,4 @@
-import { RuntimeResult } from '../RuntimeResult';
+﻿import { RuntimeResult } from '../RuntimeResult';
 import { RuntimePage, RuntimeSection as CoreRuntimeSection } from '../RuntimeSection';
 import { RuntimeTheme, RuntimeProduct, RuntimeNavigation, RuntimeSEO } from '../RuntimeContext';
 import { RuntimeSectionAdapter } from './RuntimeSectionAdapter';
@@ -34,6 +34,8 @@ interface LegacyRuntimeSection {
   readonly type: string;
   readonly label: string;
   readonly config: Record<string, unknown>;
+  readonly styles?: Record<string, unknown>;
+  readonly responsive?: Record<string, Record<string, unknown>>;
 }
 
 interface LegacyRuntimeProduct {
@@ -150,7 +152,7 @@ export class RuntimeResultAdapter {
     };
   }
 
-  // --- Legacy → Core mappers ---
+  // --- Legacy â†’ Core mappers ---
 
   private static mapSection(legacy: LegacyRuntimeSection): CoreRuntimeSection {
     return RuntimeSectionAdapter.toRuntimeSection(legacy);
@@ -206,7 +208,7 @@ export class RuntimeResultAdapter {
     };
   }
 
-  // --- Core → Legacy mappers (transitional) ---
+  // --- Core â†’ Legacy mappers (transitional) ---
 
   private static mapSectionToLegacy(core: CoreRuntimeSection): LegacyRuntimeSection {
     return RuntimeSectionAdapter.toLegacySection(core);

@@ -28,6 +28,8 @@ interface SectionData {
   order: number
   visible: boolean
   children?: Array<unknown>
+  styles?: Record<string, unknown>
+  responsive?: Record<string, Record<string, unknown>>
 }
 
 interface ThemeData {
@@ -220,6 +222,8 @@ export default function PreviewFramePage({ params }: Props) {
                 type: section.type,
                 label: section.label,
                 config: section.props,
+                styles: section.styles,
+                responsive: section.responsive,
               }}
               theme={{
                 primaryColor: theme.primaryColor,

@@ -1,8 +1,10 @@
-export interface RuntimeSection {
+﻿export interface RuntimeSection {
   id: string
   type: string
   label: string
   config: Record<string, unknown>
+  styles?: Record<string, unknown>
+  responsive?: Record<string, Record<string, unknown>>
 }
 
 export interface RuntimePage {

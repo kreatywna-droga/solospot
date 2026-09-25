@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import type { SectionComponentProps } from '@/lib/runtime/RuntimeTypes'
+import type { SectionComponentProps, RuntimeSection } from '@/lib/runtime/RuntimeTypes'
 import { HeroSection } from './HeroSection'
 import { ProductGridSection } from './ProductGridSection'
 import { GallerySection } from './GallerySection'
@@ -97,6 +97,72 @@ class SectionErrorBoundary extends React.Component<
 }
 
 // ---------------------------------------------------------------------------
+// P0 GATE — section transform parity (live site == builder canvas)
+//
+// The builder persists node position in `styles.translateX/Y/rotate/scale`
+// (base = DESKTOP) plus `responsive.tablet/mobile` overrides (cascade:
+// TABLET = base+tablet, MOBILE = base+tablet+mobile — mirrors
+// BuilderCanvas.resolveEffectiveStyles). This helper renders the exact same
+// cascade on the live site via media queries. Sections without transform
+// styles render completely unchanged (zero DOM delta).
+// ---------------------------------------------------------------------------
+
+function cssLength(value: unknown): string {
+  if (value === undefined || value === null || value === '') return '0px'
+  return typeof value === 'number' ? `${value}px` : String(value)
+}
+
+export function sectionTransform(styles: Record<string, any> | undefined): string | undefined {
+  if (!styles) return undefined
+  const parts: string[] = []
+  if (styles.translateX || styles.translateY) {
+    parts.push(`translate(${cssLength(styles.translateX || '0px')}, ${cssLength(styles.translateY || '0px')})`)
+  }
+  if (styles.rotate !== undefined && styles.rotate !== 0) {
+    parts.push(`rotate(${styles.rotate}deg)`)
+  }
+  if (styles.scale !== undefined && styles.scale !== 1) {
+    parts.push(`scale(${styles.scale})`)
+  }
+  if (styles.transform) {
+    parts.push(String(styles.transform))
+  }
+  return parts.length > 0 ? parts.join(' ') : undefined
+}
+
+// Breakpoints mirror the builder's viewport presets (DESKTOP 1280 / TABLET 768 /
+// MOBILE 375): <=1024 receives TABLET overrides, <=640 additionally MOBILE.
+const TABLET_MAX_WIDTH = 1024
+const MOBILE_MAX_WIDTH = 640
+
+function applySectionTransform(section: RuntimeSection, node: React.ReactNode): React.ReactNode {
+  const baseStyles = (section.styles || undefined) as Record<string, any> | undefined
+  const resp = (section.responsive || undefined) as Record<string, any> | undefined
+  const baseT = sectionTransform(baseStyles)
+  const tabT = resp?.tablet ? sectionTransform({ ...baseStyles, ...resp.tablet }) : undefined
+  const mobT = resp?.mobile ? sectionTransform({ ...baseStyles, ...resp.tablet, ...resp.mobile }) : undefined
+  if (!baseT && !tabT && !mobT) return node
+
+  const hasMedia = Boolean((resp?.tablet && tabT) || (resp?.mobile && mobT))
+  if (!hasMedia) {
+    if (!baseT) return node
+    return <div style={{ transform: baseT }}>{node}</div>
+  }
+
+  const anchor = `sst-${String(section.id).replace(/[^a-zA-Z0-9_-]/g, '_')}`
+  const rules: string[] = []
+  if (baseT) rules.push(`#${anchor}{transform:${baseT}}`)
+  if (resp?.tablet && tabT) rules.push(`@media (max-width:${TABLET_MAX_WIDTH}px){#${anchor}{transform:${tabT}}}`)
+  if (resp?.mobile && mobT) rules.push(`@media (max-width:${MOBILE_MAX_WIDTH}px){#${anchor}{transform:${mobT}}}`)
+  return (
+    <div id={anchor}>
+      <style dangerouslySetInnerHTML={{ __html: rules.join('') }} />
+      {node}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // SectionRenderer
 // ---------------------------------------------------------------------------
 
@@ -153,7 +219,8 @@ export function SectionRenderer(props: SectionComponentProps) {
     <Component {...normalizedProps} />
   );
 
-  return (
+  return applySectionTransform(
+    props.section,
     <SectionErrorBoundary type={props.section.type}>
       {rawConfig.experienceConfig ? (
         <ExperienceRuntimeScene

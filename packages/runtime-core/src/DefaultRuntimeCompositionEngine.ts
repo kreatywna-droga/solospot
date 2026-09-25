@@ -1,4 +1,4 @@
-import type { RuntimeCompositionEngine, TenantContext } from './RuntimeEngine';
+﻿import type { RuntimeCompositionEngine, TenantContext } from './RuntimeEngine';
 import { createRuntimePage, createRuntimeSection, RuntimePage, RuntimeSection } from './RuntimeSection';
 import type {
   RuntimeNavigation,
@@ -17,9 +17,9 @@ import type {
  * This replaces the legacy `RuntimeResolver` in `src/lib/runtime/RuntimeResolver.ts`.
  *
  * Pipeline stages:
- *   1. Resolve tenant info (slug → tenantId, domains, plan, capabilities)
+ *   1. Resolve tenant info (slug â†’ tenantId, domains, plan, capabilities)
  *   2. Resolve store config (theme, branding, pages, publicationStatus)
- *   3. Normalize pages/sections (legacy `config` → core `props`)
+ *   3. Normalize pages/sections (legacy `config` â†’ core `props`)
  *   4. Resolve products list
  *   5. Resolve navigation + SEO
  *   6. Assemble StoreRuntimeSnapshot with a core `StoreConfig` in `configuration`
@@ -65,13 +65,13 @@ export class DefaultRuntimeCompositionEngine implements RuntimeCompositionEngine
       images: [...(p.images || [])],
     }));
 
-    // 3. Normalize pages (legacy `config` → core `props`)
+    // 3. Normalize pages (legacy `config` â†’ core `props`)
     let pages: RuntimePage[] = (rawConfig.pages || []).map(normalizePage);
 
     // Default home page when no pages are defined
     if (pages.length === 0) {
       pages = [
-        createRuntimePage('home', '', 'Strona główna', [
+        createRuntimePage('home', '', 'Strona gĹ‚Ăłwna', [
           createRuntimeSection(
             'hero-1',
             'hero',
@@ -107,7 +107,7 @@ export class DefaultRuntimeCompositionEngine implements RuntimeCompositionEngine
     // 5. Assemble core StoreConfig
     const storeConfig: StoreConfig = {
       storeId: store.id,
-      storeName: rawConfig.name || store.name || 'Mój Sklep',
+      storeName: rawConfig.name || store.name || 'MĂłj Sklep',
       publicationStatus: rawConfig.publicationStatus || 'DRAFT',
       template: rawConfig.template,
       branding: {
@@ -157,7 +157,7 @@ export class DefaultRuntimeCompositionEngine implements RuntimeCompositionEngine
   }
 }
 
-// ---- Normalization helpers (legacy → core) ----
+// ---- Normalization helpers (legacy â†’ core) ----
 
 function normalizeSection(raw: LegacySectionLike, index: number): RuntimeSection | null {
   if (!raw || typeof raw !== 'object') return null;
@@ -172,6 +172,10 @@ function normalizeSection(raw: LegacySectionLike, index: number): RuntimeSection
     props,
     order: typeof raw.order === 'number' ? raw.order : index,
     visible: raw.visible !== false,
+    // P0 GATE â€” keep node styles (section position) through normalization so
+    // the live site can render saved translateX/Y / rotate / scale.
+    ...(raw.styles ? { styles: { ...raw.styles } } : {}),
+    ...(raw.responsive ? { responsive: { ...raw.responsive } } : {}),
   };
 }
 
@@ -185,7 +189,7 @@ function normalizePage(raw: LegacyPageLike): RuntimePage {
   return {
     id: raw?.id || `page_${Date.now()}`,
     slug: raw?.slug || '',
-    name: raw?.name || 'Strona główna',
+    name: raw?.name || 'Strona gĹ‚Ăłwna',
     sections,
   };
 }
@@ -201,6 +205,8 @@ export interface LegacySectionLike {
   order?: number;
   visible?: boolean;
   children?: Array<unknown>;
+  styles?: Record<string, unknown>;
+  responsive?: Record<string, Record<string, unknown>>;
 }
 
 export interface LegacyPageLike {

@@ -1,10 +1,17 @@
-export interface RuntimeSection {
+﻿export interface RuntimeSection {
   readonly id: string;
   readonly type: string;
   readonly label: string;
   readonly props: Record<string, unknown>;
   readonly order: number;
   readonly visible: boolean;
+  /**
+   * P0 GATE â€” node styles (translateX/translateY, rotate, scaleâ€¦) authored in
+   * the Builder persist on section nodes; the runtime must carry them so the
+   * live site renders the same section position as the builder canvas.
+   */
+  readonly styles?: Record<string, unknown>;
+  readonly responsive?: Record<string, Record<string, unknown>>;
 }
 
 export interface RuntimePage {
@@ -35,7 +42,8 @@ export function createRuntimeSection(
   label: string,
   props: Record<string, unknown> = {},
   order: number = 0,
-  visible: boolean = true
+  visible: boolean = true,
+  styles?: Record<string, unknown>
 ): RuntimeSection {
   return {
     id,
@@ -44,6 +52,7 @@ export function createRuntimeSection(
     props,
     order,
     visible,
+    ...(styles ? { styles } : {}),
   };
 }
 

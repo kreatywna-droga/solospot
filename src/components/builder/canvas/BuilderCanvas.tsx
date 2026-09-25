@@ -107,8 +107,11 @@ function sectionHeight(type: string): number {
 function formatTransform(styles: Record<string, any>): string | undefined {
   if (!styles) return undefined
   const parts: string[] = []
+  // P0 GATE — coerce numeric offsets to px so hand-set values render the same
+  // on canvas and on the live site (runtime sectionTransform mirrors this).
+  const len = (v: any): string => (typeof v === 'number' ? `${v}px` : v || '0px')
   if (styles.translateX || styles.translateY) {
-    parts.push(`translate(${styles.translateX || '0px'}, ${styles.translateY || '0px'})`)
+    parts.push(`translate(${len(styles.translateX)}, ${len(styles.translateY)})`)
   }
   if (styles.rotate !== undefined && styles.rotate !== 0) {
     parts.push(`rotate(${styles.rotate}deg)`)
@@ -2846,6 +2849,16 @@ export function BuilderCanvas({ onAddSection }: BuilderCanvasProps) {
                     data-section-anchor={String((node.props as any)?.anchorId || (node.metadata as any)?.anchorId || '')}
                     style={{ 
                       opacity: isDragSource ? 0.3 : 1,
+                      // P0 GATE — saved section position must render on mount:
+                      // BuilderDocument holds styles.translateX/Y (drag commits,
+                      // persisted) but without this transform the offset was only
+                      // visible through the drag engine's imperative style and
+                      // vanished on viewport remount / reload. Child nodes already
+                      // apply formatTransform; sections now use the same source,
+                      // with the active breakpoint merged (matches drag startTx).
+                      transform: formatTransform(
+                        resolveEffectiveStyles(node, canvas.viewport.label, document?.theme)
+                      ),
                     }}
                     className="relative w-full scroll-mt-16"
                   >
