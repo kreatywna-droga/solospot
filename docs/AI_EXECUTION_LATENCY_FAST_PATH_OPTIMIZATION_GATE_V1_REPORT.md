@@ -320,12 +320,81 @@ Known pre-existing failure unchanged: `HacpIntentEngine.test.ts:337`
 | verification fails | honest `FAILED`, 0 commands, no fake `SUCCESS` | `FastPathExecution`, `FastPathRouting` |
 | tool throws | honest `FAILED`, 0 commands | `FastPathExecution` |
 
-## 17. PHASE 21 — COMMIT / DEPLOY / PRODUCTION VERIFICATION
+## 17. PHASE 21/24 — COMMIT / DEPLOY / PRODUCTION VERIFICATION ✅
 
-- Commit: `perf(ai): add deterministic fast path for simple builder commands`
-- Push: `origin main`
-- Deploy: `npx vercel deploy --prod --yes` → production `https://www.solospot.pl`
-- Production verification evidence: appended to this report after deploy.
+### Commit & push
+```
+2205c71 perf(ai): add deterministic fast path for simple builder commands
+pushed: 1296ca4..2205c71  main -> main
+HEAD == origin/main == 2205c716b9392180d3acc06baa1b316c7d088a82
+```
+Staged files (16, nothing else touched):
+```
+M  src/app/api/builder/copilot/route.ts
+M  src/components/builder/ai/AiCopilotWorkspace.tsx
+M  src/components/builder/ai/MiniInspectorAI.tsx
+M  src/components/builder/ai/MiniInspectorCommandBus.ts
+A  src/components/builder/ai/__tests__/FastPathRouting.test.ts
+M  src/lib/ai/AIProviderTypes.ts
+M  src/lib/ai/AgentOrchestrator.ts
+A  src/lib/ai/LatencyTrace.ts
+M  src/lib/ai/OpenCodeProvider.ts
+M  src/lib/ai/SharedExecutionService.ts
+A  src/lib/hacp/FastPathEligibility.ts
+M  src/lib/hacp/HacpBridge.ts
+M  src/lib/hacp/TargetedEditResolver.ts
+A  src/lib/hacp/__tests__/FastPathEligibility.test.ts
+A  src/lib/hacp/__tests__/FastPathExecution.test.ts
+A  docs/AI_EXECUTION_LATENCY_FAST_PATH_OPTIMIZATION_GATE_V1_REPORT.md
+2315 insertions(+), 20 deletions(-)
+```
+
+### Deploy
+```
+npx vercel deploy --prod --yes   → scratch/deploy-fastpath.log
+Build Completed in /vercel/output [60s] · ✓ Ready in 3m
+Production  https://solospot-qeqqjaq07-kreatywna-droga.vercel.app
+Aliased     https://www.solospot.pl
+```
+
+### Production verification (live, real browser, real click, real dispatch)
+
+**1. HTTP**: `GET https://www.solospot.pl/studio` → **200 OK** (9 121 bytes).
+
+**2. End-to-end fast path on production** (`scratch/fastpath-canvas-proof.js`,
+`BASE=https://www.solospot.pl`, prompt `zmień kolor tła na czerwony`):
+
+| Probe | BEFORE | AFTER |
+|---|---|---|
+| selected target (`data-ai-target`) | `sec-hero-init` | `sec-hero-init` |
+| Mini Inspector status | `IDLE` | **`SUCCESS`** |
+| elements with `rgb(255, 0, 0)` background | **0** | **3** (`SECTION.relative.overflow-hidden.py-24…` + 2 DIVs) |
+| trace `path` | — | **`FAST_PATH`** |
+| trace `executionStatus` | — | **`EXECUTED`** |
+| `trace.totalMs` (engine) | — | **31.3 ms** |
+
+**3. Full benchmark on production** (`REPS=1 CMDS=A SURFACES=mini-inspector`,
+`scratch/latency-bench-PROD.json`):
+```
+[mini-inspector][A][1] ok=true wall=731ms path=FAST_PATH total=34
+stages=UI:0.2, QUEUE:1.9, RESOLVER:1.2, BUILDER_COMMAND:1.9, VERIFICATION:0.6,
+       FAST_PATH:3.9, DISPATCH:0.1, RESPONSE:0, CANVAS:14
+status=EXECUTED  intent=EXECUTE  notes=[]
+```
+
+**Production verdict: PASS** — the fast path ships, runs, dispatches, verifies
+and repaints the canvas on `https://www.solospot.pl` with **no model call**
+(`PROVIDER`/`LLM` absent from the trace).
+
+### Honest note on the benchmark's canvas snapshot probe
+`snapshotCanvas()` in `scratch/latency-bench.js` reads only the
+`[data-section-id]` wrapper element's own `backgroundColor/color/fontFamily/
+fontSize/textAlign/innerText`. Mutations applied to child nodes (and even to the
+nested `<section>` that actually paints the background) are therefore invisible
+to it. This is **identical in BEFORE and AFTER** (in BEFORE, all 3 `A:EXECUTED`
+and all 14 `B/C/E:EXECUTED` runs also showed an empty snapshot diff), i.e. it is
+a harness blind spot, not a behavioural change. The dedicated canvas proof above
+(which scans all rendered elements) shows the background **does** repaint.
 
 ## 18. PHASE 22/23 — WHAT WAS **NOT** CHANGED (by design)
 
