@@ -222,7 +222,7 @@ export function SectionRenderer(props: SectionComponentProps) {
   return applySectionTransform(
     props.section,
     <SectionErrorBoundary type={props.section.type}>
-      <div className="transition-all duration-300 ease-out">
+      <div>
         {rawConfig.experienceConfig ? (
           <ExperienceRuntimeScene
             config={rawConfig.experienceConfig}
