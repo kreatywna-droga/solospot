@@ -89,6 +89,9 @@ export function MiniInspectorAI({
   const [open, setOpen] = React.useState(defaultOpen)
   const [prompt, setPrompt] = React.useState('')
   const [status, setStatus] = React.useState<MiniInspectorStatus>('IDLE')
+  // Honest CLARIFY detail — verbatim bridge reason (never a generic string),
+  // e.g. "…nie zmienia tekstu…" for TEXT_VALUE_REJECTED.
+  const [clarifyDetail, setClarifyDetail] = React.useState('')
   const [mountEl, setMountEl] = React.useState<HTMLElement | null>(null)
   const [anchorRect, setAnchorRect] = React.useState<ElementRect | null>(
     elementRect ?? null
@@ -175,6 +178,7 @@ export function MiniInspectorAI({
   const liveSelectedId = canvas.selectedSectionId
   React.useEffect(() => {
     setStatus((prev) => (prev === 'SUCCESS' || prev === 'FAILED' ? 'IDLE' : prev))
+    setClarifyDetail('')
   }, [sectionId, liveSelectedId])
 
   const quickActions = React.useMemo(
@@ -196,6 +200,7 @@ export function MiniInspectorAI({
 
     setPrompt('')
     setStatus('EXECUTING')
+    setClarifyDetail('')
 
     try {
       const context: HacpBuilderContext = buildHacpContextForTarget(
@@ -235,6 +240,7 @@ export function MiniInspectorAI({
       if (result) {
         const nextStatus = mapResultStatus(result)
         setStatus(nextStatus)
+        setClarifyDetail(nextStatus === 'CLARIFY' ? result.message || '' : '')
 
         // Honest dispatch gate — same as AiCopilotWorkspace
         if (result.intent === 'EXECUTE' && result.commandsToDispatch.length > 0) {
@@ -419,9 +425,14 @@ export function MiniInspectorAI({
                 )}
 
                 {status === 'CLARIFY' && (
-                  <div className="px-3 py-2 flex items-center gap-1.5 text-[10px] text-sky-300 flex-shrink-0">
-                    <Clock className="w-3 h-3" />
-                    Potrzebuję więcej informacji
+                  <div
+                    data-testid="mini-inspector-ai-clarify"
+                    className="px-3 py-2 flex items-start gap-1.5 text-[10px] leading-relaxed text-sky-300 flex-shrink-0"
+                  >
+                    <Clock className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                    <span className="min-w-0 break-words">
+                      {clarifyDetail || 'Potrzebuję więcej informacji'}
+                    </span>
                   </div>
                 )}
 
