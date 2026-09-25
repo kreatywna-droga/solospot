@@ -54,6 +54,10 @@ export {
 export type {
   StyleRetrievalQuery, StyleRetrievalResult, StyleDecision, StyleApplicationPlan, StyleVerification,
 } from './StyleSystemIntelligence';
+export {
+  VISUAL_LANGUAGES, VISUAL_LANGUAGE_IDS, getVisualLanguage, mapNaturalLanguageToVisualDNA,
+} from './VisualLanguages';
+export type { VisualLanguage, VisualDNA, AntiPattern } from './types';
 export { validateBusinessGoal } from './BusinessGoalValidation';
 export type { BusinessGoalInput } from './BusinessGoalValidation';
 export { resolveRoleForPhase, allRoles, describeRole } from './RoleModel';

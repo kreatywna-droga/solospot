@@ -10,6 +10,9 @@ import type {
   DesignDirection,
   DesignDirectionInputs,
   DecisionTrace,
+  VisualDNA,
+  AntiPattern,
+  VisualLanguage,
 } from './types';
 import { emitObservability } from './Observability';
 
@@ -343,6 +346,13 @@ export function createDesignDirection(
     iconDirection: archetype.iconDirection!,
     motionDirection: archetype.motionDirection!,
     density: archetype.density!,
+    contrast: archetype.contrast || 'medium',
+    geometry: archetype.geometry || 'mixed',
+    typographyCharacter: archetype.typographyCharacter || 'humanist',
+    layoutCharacter: archetype.layoutCharacter || 'grid',
+    imageCharacter: archetype.imageCharacter || 'product',
+    decorationLevel: archetype.decorationLevel || 'restrained',
+    motionCharacter: archetype.motionCharacter || 'subtle',
     compositionRules,
     sourceTrace: traces,
   };

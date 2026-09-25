@@ -44,6 +44,13 @@ export interface DesignDirection {
   motionDirection: string;
   density: 'lean' | 'moderate' | 'rich';
   compositionRules: string[];
+  contrast: 'low' | 'medium' | 'high';
+  geometry: 'sharp' | 'soft' | 'rounded' | 'mixed';
+  typographyCharacter: 'editorial' | 'geometric' | 'humanist' | 'grotesk' | 'serif' | 'expressive' | 'technical';
+  layoutCharacter: 'centered' | 'asymmetric' | 'editorial' | 'modular' | 'grid' | 'full-bleed';
+  imageCharacter: 'documentary' | 'editorial' | 'cinematic' | 'product' | 'lifestyle' | 'abstract';
+  decorationLevel: 'minimal' | 'restrained' | 'expressive';
+  motionCharacter: 'static' | 'subtle' | 'dynamic' | 'cinematic';
   /** Which knowledge / pattern / blueprint informed this direction. */
   sourceTrace: DecisionTrace[];
 }
@@ -471,4 +478,45 @@ export interface ObservabilityEvent {
   message: string;
   data?: Record<string, unknown>;
   timestamp: string;
+}
+
+// ── Visual Language / Visual DNA (Gate v1.0) ──────────────────────────
+
+export interface VisualDNA {
+  mood: string;
+  density: 'sparse' | 'balanced' | 'dense';
+  contrast: 'low' | 'medium' | 'high';
+  geometry: 'sharp' | 'soft' | 'rounded' | 'mixed';
+  typographyCharacter: 'editorial' | 'geometric' | 'humanist' | 'grotesk' | 'serif' | 'expressive' | 'technical';
+  layoutCharacter: 'centered' | 'asymmetric' | 'editorial' | 'modular' | 'grid' | 'full-bleed';
+  imageCharacter: 'documentary' | 'editorial' | 'cinematic' | 'product' | 'lifestyle' | 'abstract';
+  decorationLevel: 'minimal' | 'restrained' | 'expressive';
+  motionCharacter: 'static' | 'subtle' | 'dynamic' | 'cinematic';
+}
+
+export interface AntiPattern {
+  id: string;
+  label: string;
+  description: string;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'BLOCKING';
+  repairHint: string;
+}
+
+export interface VisualLanguage {
+  id: string;
+  name: string;
+  description: string;
+  visualDNA: VisualDNA;
+  principles: string[];
+  antiPatterns: AntiPattern[];
+  designDecisions: string[];
+  tokens: {
+    typography?: Record<string, unknown>;
+    colors?: Record<string, unknown>;
+    spacing?: Record<string, unknown>;
+    radius?: Record<string, unknown>;
+    shadows?: Record<string, unknown>;
+    components?: Record<string, unknown>;
+    composition?: Record<string, unknown>;
+  };
 }
