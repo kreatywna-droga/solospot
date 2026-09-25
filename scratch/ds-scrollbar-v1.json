@@ -1,0 +1,190 @@
+{
+  "base": "https://www.solospot.pl",
+  "catalog": {
+    "hasSharedClass": true,
+    "hasOverflowY": true,
+    "className": "flex-1 overflow-y-auto p-2.5 space-y-2 builder-canvas-scrollbar",
+    "scrollHeight": 8185,
+    "clientHeight": 499,
+    "scrollTop": 0,
+    "items": 70,
+    "rect": {
+      "x": 36,
+      "y": 361,
+      "w": 283,
+      "h": 499,
+      "right": 319
+    }
+  },
+  "cssRules": [
+    ".builder-canvas-scrollbar::-webkit-scrollbar { width: 6px; }",
+    ".builder-canvas-scrollbar::-webkit-scrollbar-track { background: 0px 0px; }",
+    ".builder-canvas-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.22); border-radius: 999px; }",
+    ".builder-canvas-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.38); }",
+    ".builder-canvas-scrollbar { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.22) transparent; }"
+  ],
+  "reference": [
+    {
+      "className": "flex-1 overflow-y-auto p-2.5 space-y-2 builder-canvas-scrollbar",
+      "isCatalog": true
+    },
+    {
+      "className": "flex-1 flex flex-col items-center justify-start overflow-y-auto overflow-x-hidden bg-[#202024] p-0 relative w-full h-full select-none builder-canvas-scrollbar",
+      "isCatalog": false
+    }
+  ],
+  "wheel": {
+    "before": 0,
+    "after": 400,
+    "scrolled": true
+  },
+  "thumbDrag": {
+    "before": 400,
+    "after": 400,
+    "dragged": true
+  },
+  "hoverProbe": {
+    "thumbWidth": "auto",
+    "thumbBackground": "rgba(255, 255, 255, 0.38)",
+    "thumbRadius": "999px",
+    "scrollbarWidth": "6px"
+  },
+  "categories": [
+    {
+      "category": "style-packs",
+      "clicked": true,
+      "hasSharedClass": true,
+      "items": 70,
+      "scrollable": true
+    },
+    {
+      "category": "design-combinations",
+      "clicked": true,
+      "hasSharedClass": true,
+      "items": 100,
+      "scrollable": true
+    },
+    {
+      "category": "fonts",
+      "clicked": true,
+      "hasSharedClass": true,
+      "items": 200,
+      "scrollable": true
+    },
+    {
+      "category": "font-pairings",
+      "clicked": true,
+      "hasSharedClass": true,
+      "items": 110,
+      "scrollable": true
+    },
+    {
+      "category": "typography",
+      "clicked": true,
+      "hasSharedClass": true,
+      "items": 30,
+      "scrollable": true
+    },
+    {
+      "category": "colors",
+      "clicked": true,
+      "hasSharedClass": true,
+      "items": 100,
+      "scrollable": true
+    },
+    {
+      "category": "color-combinations",
+      "clicked": true,
+      "hasSharedClass": true,
+      "items": 106,
+      "scrollable": true
+    },
+    {
+      "category": "buttons",
+      "clicked": true,
+      "hasSharedClass": true,
+      "items": 13,
+      "scrollable": true
+    },
+    {
+      "category": "cards",
+      "clicked": true,
+      "hasSharedClass": true,
+      "items": 20,
+      "scrollable": true
+    },
+    {
+      "category": "backgrounds",
+      "clicked": true,
+      "hasSharedClass": true,
+      "items": 20,
+      "scrollable": true
+    },
+    {
+      "category": "hero",
+      "clicked": true,
+      "hasSharedClass": true,
+      "items": 15,
+      "scrollable": true
+    },
+    {
+      "category": "sections",
+      "clicked": true,
+      "hasSharedClass": true,
+      "items": 21,
+      "scrollable": true
+    },
+    {
+      "category": "images",
+      "clicked": true,
+      "hasSharedClass": true,
+      "items": 15,
+      "scrollable": true
+    },
+    {
+      "category": "icons",
+      "clicked": true,
+      "hasSharedClass": true,
+      "items": 15,
+      "scrollable": true
+    }
+  ],
+  "responsive": [
+    {
+      "width": 1920,
+      "hasSharedClass": true,
+      "scrollable": true,
+      "items": 15
+    },
+    {
+      "width": 1440,
+      "hasSharedClass": true,
+      "scrollable": true,
+      "items": 15
+    },
+    {
+      "width": 1280,
+      "hasSharedClass": true,
+      "scrollable": true,
+      "items": 15
+    },
+    {
+      "width": 1024,
+      "hasSharedClass": true,
+      "scrollable": true,
+      "items": 15
+    },
+    {
+      "width": 768,
+      "hasSharedClass": true,
+      "scrollable": true,
+      "items": 15
+    }
+  ],
+  "longCatalog": {
+    "before": 0,
+    "after": 400,
+    "scrolled": true
+  },
+  "jsErrors": []
+}

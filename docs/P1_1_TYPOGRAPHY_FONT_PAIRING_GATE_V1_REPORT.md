@@ -27,19 +27,20 @@ Execute and verify a professional, production-ready typography capability includ
 - **PARY FONTÓW FIRST BREAK:** `packages/design-system/src/builder/index.ts` (L541-542). Resolver `resolveDesignApplication` szukał właściwości `headingFont` / `primaryFont` / `fontFamily`, podczas gdy baza font pairing z `fontPairings.ts` definiuje je pod kluczami obiektowymi `displayFont.family` i `bodyFont.family`. W rezultacie zmienne `headingFont` i `bodyFont` miały wartość pustego ciągu `""`, co powodowało odrzucenie zaaplikowania pary fontów ze skróconym wyjściem (`ok: false`) bez wygenerowania komend.
 - **PARY FONTÓW REPAIR:** Zaktualizowano matcher w `packages/design-system/src/builder/index.ts` o bezpieczny odczyt `pairing.displayFont?.family || pairing.displayFont?.name` oraz `pairing.bodyFont?.family || pairing.bodyFont?.name`. Przycisk **Apply** w zakładce Pary Fontów poprawnie generuje atomową komendę `BATCH_EXECUTE` zawierającą zarówno `UPDATE_THEME` z `font` i `bodyFont`, jak i komendy `SET_NODE_STYLES` dopasowane do ról typograficznych.
 - **PREVIEW FIRST BREAK:** `src/lib/runtime/renderStore.ts` (L367: `RuntimeValidator.isPubliclyAccessible(status)` wewnątrz `validateAccess`).
-- **PREVIEW ROOT CAUSE:** `(B) Poprawny stan odrzucany błędnie przez tryb LIVE/Public w kanale PREVIEW` gdy podgląd uruchamiany jest na sklepie w stanie `DRAFT`. Tryb `PREVIEW` prawidłowo wyłącza walidację dostępności publicznej (`validateAccess` aktywne wyłącznie dla `context.mode === 'LIVE'`), zatem wszelkie opublikowane oraz szkicowe wersje podglądu z naniesionymi parami fontów renderują się bez błędu.
+- **PREVIEW ROOT CAUSE & REPAIR:** Linia 367 w `src/lib/runtime/renderStore.ts` wywoływała `validator.isPubliclyAccessible(status)` bez sprawdzenia trybu wywołania, przez co sklepy w stanie `DRAFT` były odrzucane również w trybie `PREVIEW`. Naprawiono poprzez warunek `if (request.mode === 'LIVE' && !validator.isPubliclyAccessible(status))`. W trybie `PREVIEW` sklepy `DRAFT` oraz `PUBLISHED` są teraz poprawnie przepuszczane, podczas gdy w trybie `LIVE` publiczny dostęp do szkiców pozostaje bezpiecznie zablokowany.
 - **GHOSTING REPAIR:** Usunięto zbędny `transition-all duration-300` z wrappera w `src/components/runtime/SectionRenderer.tsx`.
 
 ## 7. Deployment & Recovery Status
-- **Local Commit:** `f71913c`
+- **Local Commit:** `4371bdc`
 - **Git Push Status:** `BLOCKED — GIT PUSH` (`schannel: SEC_E_UNTRUSTED_ROOT` / `403 Forbidden` w środowisku lokalnym).
 - **Vercel CLI Status:** `BLOCKED — VERCEL CLI` (`EPERM` na pliku `vc.js`).
 
 ## 8. Final Verdict
 **BLOCKED — ENVIRONMENT DEPLOYMENT RESTRICTION**
 
-- **Local Code & Canvas & Font Pairing & Preview & Ghosting:** PASS (Wyjaśniono FIRST BREAK dla Par Fontów oraz Preview, naprawiono pobieranie `displayFont`/`bodyFont`, usunięto opóźnienie CSS transition, komenda `BATCH_EXECUTE` generuje prawidłowy payload).
-- **Vercel Production Deployment:** BLOCKED ze względu na lokalny błąd certyfikatów SSL/Git Push i brak możliwości wykonania deploymentu CLI.
+- **Local Code & Canvas & Font Pairing & Preview & Ghosting:** PASS (Precyzyjnie naprawiono `validateAccess` w `renderStore.ts` dla trybu `PREVIEW`, zachowując pełną blokadę dostępności publicznej dla `LIVE`).
+- **Vercel Production Deployment:** BLOCKED ze względu na błąd certyfikatów SSL/Git Push oraz brak uprawnień systemowych do uruchomienia Vercel CLI.
+
 
 
 
