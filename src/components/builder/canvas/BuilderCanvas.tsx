@@ -1334,6 +1334,20 @@ function SectionBlock({
   // Resolved styles (base + responsive overrides for active viewport) —
   // applied to the section wrapper so Design Inspector changes are visible.
   const resolvedStyles = resolveEffectiveStyles(node, canvas.viewport.label, document?.theme)
+  // FONT GATE v1 — node-level fontFamily (set_node_styles on a hero/section
+  // headline) must reach the canvas. Runtime sections render their headline
+  // with theme.font, so without consuming resolvedStyles.fontFamily the
+  // BuilderDocument changes while the canvas keeps the previous font.
+  // Only a node-DECLARED font (≠ theme default) is applied, so documents
+  // without node-level typography render exactly as before.
+  const themeFontFamily = document?.theme?.font || 'Inter'
+  const sectionFontFamily =
+    resolvedStyles.fontFamily && resolvedStyles.fontFamily !== themeFontFamily
+      ? (resolvedStyles.fontFamily as string)
+      : undefined
+  if (sectionFontFamily) {
+    loadGoogleFont(sectionFontFamily)
+  }
 
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -1835,7 +1849,9 @@ function SectionBlock({
                 theme={{
                   primaryColor: document.theme?.primaryColor || '#B8893A',
                   secondaryColor: document.theme?.secondaryColor || '#ec4899',
-                  font: document.theme?.font || 'Inter',
+                  // FONT GATE v1 — headline font of THIS section: node-level
+                  // fontFamily (set_node_styles) wins over the global theme font.
+                  font: sectionFontFamily || document.theme?.font || 'Inter',
                   logo: document.theme?.logo,
                 }}
                 storeName={document.metadata?.storeName || 'Store'}
