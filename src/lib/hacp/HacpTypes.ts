@@ -112,6 +112,16 @@ export interface HacpConversationContext {
   lastTargetNodeId?: string;
   lastActionSummary?: string;
   lastModifiedNodeId?: string;
+  /**
+   * GATE v8 PHASE 5 — the last executed targeted edit, so a follow-up like
+   * "jeszcze bardziej" can inherit the intent/operation (never a guess).
+   */
+  lastEdit?: {
+    intent?: import('./nl/IntentTaxonomy').NlIntentClass;
+    operation?: import('./nl/IntentTaxonomy').NlOperation;
+    targetNodeId?: string;
+    value?: string;
+  };
   history: Array<{
     role: 'user' | 'ai';
     text: string;

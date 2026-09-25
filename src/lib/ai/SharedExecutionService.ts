@@ -116,7 +116,7 @@ class SharedExecutionServiceClass {
       // entry). Returns null when PHASE 7 eligibility fails → we fall through
       // to the normal AI path below. Same bridge, same dispatch, same history.
       const fastResult = await withLatencyTraceAsync(trace, () =>
-        bridge.executeFastPath(opts.prompt, opts.context, opts.document)
+        bridge.executeFastPath(opts.prompt, opts.context, opts.document, this.conversationContext)
       );
 
       let result: HacpExecutionResult;

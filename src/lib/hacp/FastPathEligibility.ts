@@ -1,5 +1,5 @@
 /**
- * FastPathEligibility.ts — GATE v1.0 PHASE 6/7/11
+ * FastPathEligibility.ts — GATE v1.0 PHASE 6/7/11 + GATE v8.0 PHASE 11/15.
  *
  * DECIDES whether a prompt may skip the LLM round trip and go straight to the
  * EXISTING BuilderCommand → BuilderDocument → Canvas → Verification pipeline.
@@ -14,6 +14,10 @@
  *   6. no creative decision is required
  *   7. no choice among many Design System assets is required
  *
+ * GATE v8 PHASE 11 — the gate no longer re-implements parsing: it reads the
+ * SAME reject reasons the compiler produced (TEXT_VALUE_REJECTED, LOW_CONFIDENCE,
+ * …), so "rozciągnij tytuł na boki" can never be re-interpreted as text here.
+ *
  * PHASE 11: a QUALIFIER ("luksusowy", "nowoczesny", "bardziej widoczny") is a
  * design decision → DESIGN_INTELLIGENCE_REQUIRED → AI PATH. Only a font name
  * written literally ("na Inter") that EXISTS in the Design System qualifies.
@@ -25,14 +29,28 @@
 
 import { findNode, type BuilderDocument } from '../../../packages/builder-core/src';
 import {
-  resolveTargetedEdit,
+  explainTargetedEdit,
   type TargetedEditResolution,
 } from './TargetedEditResolver';
-import type { HacpBuilderContext } from './HacpTypes';
+import type { HacpBuilderContext, HacpConversationContext } from './HacpTypes';
 import { isSiteGenerationRequest } from '../ai/IntentClassifier';
+import {
+  CONFIDENCE_THRESHOLD,
+  fold,
+  type EditRejectReason,
+} from './nl/IntentTaxonomy';
+import { isStyleResetPrompt } from './nl/IntentParser';
 
 /** PHASE 6 — the domains we are allowed to execute without a model call. */
-export type FastPathDomain = 'COLOR' | 'FONT' | 'SIZE' | 'TEXT' | 'ALIGN' | 'MOVE';
+export type FastPathDomain =
+  | 'COLOR'
+  | 'FONT'
+  | 'SIZE'
+  | 'TEXT'
+  | 'ALIGN'
+  | 'MOVE'
+  /** GATE v8 — opacity / border-radius appearance edits. */
+  | 'STYLE';
 
 /** PHASE 7.4 — only commands the BuilderCommand engine already understands. */
 export const FAST_PATH_INTENTS: ReadonlySet<TargetedEditResolution['intent']> = new Set([
@@ -42,6 +60,8 @@ export const FAST_PATH_INTENTS: ReadonlySet<TargetedEditResolution['intent']> = 
   'ALIGN',
   'MOVE',
   'CHANGE_TYPOGRAPHY',
+  /** GATE v8 — opacity / border-radius (canvas-supported style keys). */
+  'CHANGE_APPEARANCE',
 ]);
 
 /** PHASE 7 — short, surgical commands only. Long prose goes to the model. */
@@ -61,7 +81,11 @@ export type FastPathReason =
   | 'PARAMETERS_INCOMPLETE'
   /** GATE v7.0 — prompt carries no concrete value/target → honest CLARIFY. */
   | 'INSUFFICIENT_DATA'
-  | 'DESIGN_INTELLIGENCE_REQUIRED';
+  | 'DESIGN_INTELLIGENCE_REQUIRED'
+  /** GATE v8 — parsed, but ambiguous (conf < threshold) → honest CLARIFY. */
+  | 'LOW_CONFIDENCE'
+  /** GATE v8 — "value" is a direction, not text (anti-BOKI) → honest CLARIFY. */
+  | 'TEXT_VALUE_REJECTED';
 
 export interface FastPathVerdict {
   eligible: boolean;
@@ -86,20 +110,8 @@ const INTENT_DOMAIN: Record<string, FastPathDomain> = {
   ALIGN: 'ALIGN',
   MOVE: 'MOVE',
   CHANGE_TYPOGRAPHY: 'FONT',
+  CHANGE_APPEARANCE: 'STYLE',
 };
-
-function fold(s: string): string {
-  return s
-    .toLowerCase()
-    // GATE v7.0 — 'ł' is not decomposed by NFD, so ASCII aliases never matched
-    // 'nagłówek' / 'tytuł' / 'tło'. Map it explicitly.
-    .replace(/[łŁ]/g, 'l')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[.,!?;:"'`]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
 
 /**
  * GATE v7.0 PHASE 16 — prompts that carry NO concrete value and NO concrete
@@ -112,6 +124,30 @@ const INSUFFICIENT_DATA_RE =
 
 const reject = (reason: FastPathReason): FastPathVerdict => ({ eligible: false, reason });
 
+/** GATE v8 — compiler reject reason → user-facing fast-path reason. */
+function mapReject(reason: EditRejectReason, text: string): FastPathReason {
+  switch (reason) {
+    case 'TEXT_VALUE_REJECTED':
+      return 'TEXT_VALUE_REJECTED';
+    case 'PARAMETERS_INCOMPLETE':
+      return 'PARAMETERS_INCOMPLETE';
+    case 'LOW_CONFIDENCE':
+      return 'LOW_CONFIDENCE';
+    case 'NOT_APPLICABLE':
+      return 'NO_TARGET';
+    case 'UNRESOLVED':
+    default:
+      return INSUFFICIENT_DATA_RE.test(text) ? 'INSUFFICIENT_DATA' : 'UNRESOLVED';
+  }
+}
+
+/** GATE v8 PHASE 5 — continuation state carried from the previous turn. */
+function previousFrom(conversation?: HacpConversationContext | null) {
+  const last = conversation?.lastEdit;
+  if (!last?.intent) return null;
+  return { intent: last.intent, operation: last.operation, targetNodeId: last.targetNodeId };
+}
+
 /**
  * GATE v1.0 PHASE 7 — the single source of truth for fast-path eligibility.
  * Read-only: touches the document for lookups only, never mutates.
@@ -119,14 +155,16 @@ const reject = (reason: FastPathReason): FastPathVerdict => ({ eligible: false, 
 export function evaluateFastPath(
   rawPrompt: string,
   context: HacpBuilderContext,
-  document: BuilderDocument
+  document: BuilderDocument,
+  conversation?: HacpConversationContext | null
 ): FastPathVerdict {
   const prompt = (rawPrompt || '').trim();
   if (!prompt) return reject('EMPTY_PROMPT');
 
   const text = fold(prompt);
   if (text.length > FAST_PATH_MAX_PROMPT_LENGTH) return reject('PROMPT_TOO_LONG');
-  if (UNDO_REDO_RE.test(text)) return reject('UNDO_REDO_RESERVED');
+  // GATE v8 — "przywróć domyślny rozmiar" is a STYLE reset, never an undo.
+  if (UNDO_REDO_RE.test(text) && !isStyleResetPrompt(text)) return reject('UNDO_REDO_RESERVED');
   if (isSiteGenerationRequest(prompt)) return reject('GENERATION_REQUEST');
   if (MULTI_STEP_RE.test(text)) return reject('MULTI_STEP');
 
@@ -136,14 +174,12 @@ export function evaluateFastPath(
   if (!targetId) return reject('NO_TARGET');
   if (!findNode(document, targetId)) return reject('TARGET_NOT_FOUND');
 
-  const resolution = resolveTargetedEdit(prompt, context, document);
-  if (!resolution) {
-    // GATE v7.0 PHASE 16 — an indefinite request is answered with an honest,
-    // deterministic CLARIFY instead of an LLM round trip that times out and
-    // reports "Nie udało się wykonać polecenia".
-    if (INSUFFICIENT_DATA_RE.test(text)) return reject('INSUFFICIENT_DATA');
-    return reject('UNRESOLVED');
-  }
+  // GATE v8 — ONE parser + ONE compiler, exactly as Main Chat uses them.
+  const outcome = explainTargetedEdit(prompt, context, document, {
+    previous: previousFrom(conversation),
+  });
+  if (outcome.kind === 'reject') return reject(mapReject(outcome.reason, text));
+  const resolution = outcome.resolution;
 
   // PHASE 7.4/6 — known BuilderCommand only.
   if (!FAST_PATH_INTENTS.has(resolution.intent)) return reject('NON_DETERMINISTIC_INTENT');
@@ -154,6 +190,10 @@ export function evaluateFastPath(
 
   // PHASE 7.3 — parameters complete: the value came literally from the prompt.
   if (resolution.explicitValue !== true) return reject('PARAMETERS_INCOMPLETE');
+
+  // GATE v8 PHASE 11 — confidence gate: an ambiguous interpretation
+  // ("zmień tekst na grubszy") is CLARIFIED, never dispatched.
+  if ((resolution.confidence ?? 1) < CONFIDENCE_THRESHOLD) return reject('LOW_CONFIDENCE');
 
   const domain = INTENT_DOMAIN[resolution.intent];
   if (!domain) return reject('NON_DETERMINISTIC_INTENT');

@@ -1655,6 +1655,13 @@ export class HacpBridge {
       ? trace.stageSync('RESOLVER', () => resolveTargetedEdit(prompt, context, document))
       : resolveTargetedEdit(prompt, context, document);
     if (!resolution) return null;
+    // NOTE (GATE v8): no extra qualifier/confidence guard here — GATE v6
+    // PHASE 10 contracts that this LAST-RESORT fallback executes a resolution
+    // the deterministic engine owns (including Design-System pairing picks),
+    // while the FAST PATH stays strict (FastPathEligibility). Safety comes
+    // from the shared compiler gates upstream: refused text values, unknown
+    // colours/fonts and unsupported capabilities never produce a resolution
+    // at all (resolveTargetedEdit → null → honest fall-through).
 
     let exec: Awaited<ReturnType<HacpBridge['executeToolCall']>>;
     try {
@@ -1747,6 +1754,12 @@ export class HacpBridge {
         lastTargetNodeId: resolution.targetNodeId,
         lastModifiedNodeId: resolution.targetNodeId,
         lastActionSummary: resolution.summary,
+        lastEdit: {
+          intent: resolution.intentClass,
+          operation: resolution.operation,
+          targetNodeId: resolution.targetNodeId,
+          value: resolution.value,
+        },
       },
     };
   }
@@ -1770,14 +1783,20 @@ export class HacpBridge {
   public async executeFastPath(
     prompt: string,
     context: HacpBuilderContext,
-    document: BuilderDocument
+    document: BuilderDocument,
+    /** GATE v8 PHASE 5 — previous turn state for "jeszcze bardziej". */
+    conversation?: HacpConversationContext | null
   ): Promise<HacpExecutionResult | null> {
     const trace = currentLatencyTrace();
     trace?.stageStart('FAST_PATH');
     try {
       const verdict: FastPathVerdict = trace
-        ? trace.stageSync('RESOLVER', () => evaluateFastPath(prompt, context, document), 'eligibility+resolver')
-        : evaluateFastPath(prompt, context, document);
+        ? trace.stageSync(
+            'RESOLVER',
+            () => evaluateFastPath(prompt, context, document, conversation),
+            'eligibility+resolver'
+          )
+        : evaluateFastPath(prompt, context, document, conversation);
 
       if (!verdict.eligible || !verdict.resolution) {
         trace?.note(`fast-path-rejected:${verdict.reason}`);
@@ -1787,7 +1806,14 @@ export class HacpBridge {
         // that aborts at the provider timeout and surfaces
         // "Nie udało się wykonać polecenia". Every OTHER rejection reason still
         // returns null → the caller runs the normal AI path below.
-        if (verdict.reason === 'INSUFFICIENT_DATA' || verdict.reason === 'PARAMETERS_INCOMPLETE') {
+        // GATE v8 — LOW_CONFIDENCE / TEXT_VALUE_REJECTED are the same class of
+        // answer: the prompt was understood, but it is not safe to mutate.
+        if (
+          verdict.reason === 'INSUFFICIENT_DATA' ||
+          verdict.reason === 'PARAMETERS_INCOMPLETE' ||
+          verdict.reason === 'LOW_CONFIDENCE' ||
+          verdict.reason === 'TEXT_VALUE_REJECTED'
+        ) {
           trace?.setPath('FAST_PATH');
           trace?.setResultMeta({ intent: 'CLARIFY', executionStatus: 'CLARIFY', ok: true });
           return this.fastPathClarify(verdict.reason);
@@ -1898,6 +1924,12 @@ export class HacpBridge {
           lastTargetNodeId: resolution.targetNodeId,
           lastModifiedNodeId: resolution.targetNodeId,
           lastActionSummary: resolution.summary,
+          lastEdit: {
+            intent: resolution.intentClass,
+            operation: resolution.operation,
+            targetNodeId: resolution.targetNodeId,
+            value: resolution.value,
+          },
         },
       };
     } finally {
@@ -1914,7 +1946,11 @@ export class HacpBridge {
     const message =
       reason === 'PARAMETERS_INCOMPLETE'
         ? 'Potrzebuję więcej informacji — podaj wartość, którą mam ustawić (np. „zmień kolor na czerwony"). Dokument nie został zmieniony.'
-        : 'Potrzebuję więcej informacji — napisz, co dokładnie zmienić i na jaką wartość. Dokument nie został zmieniony.';
+        : reason === 'TEXT_VALUE_REJECTED'
+          ? 'To polecenie nie zmienia tekstu — opisz kierunek zmianą stylu albo podaj nową treść (np. „rozciągnij tytuł na boki" zwiększy odstęp liter, „zmień tytuł na …" podmieni treść). Dokument nie został zmieniony.'
+          : reason === 'LOW_CONFIDENCE'
+            ? 'Nie jestem pewien, co dokładnie zmienić — sprecyzuj właściwość i wartość (np. „zmień czcionkę na Inter", „zwiększ rozmiar o 20%"). Dokument nie został zmieniony.'
+            : 'Potrzebuję więcej informacji — napisz, co dokładnie zmienić i na jaką wartość. Dokument nie został zmieniony.';
 
     return {
       success: true,
