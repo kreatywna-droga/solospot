@@ -183,4 +183,47 @@ describe('HacpBridge — Live Dispatch for Design System', () => {
     expect(result.verification.passed).toBe(false);
     expect(liveDispatch).not.toHaveBeenCalled();
   });
+
+  it('REPAIR GATE v3.0 — HACP/UI parity: font apply also writes node-level fontFamily (SET_NODE_STYLES)', async () => {
+    // A document WITH a typography node whose font differs from the applied one.
+    const docWithHeading = {
+      ...mockDoc,
+      pages: [
+        {
+          id: 'page-1',
+          sections: [
+            {
+              id: 'heading-1',
+              type: 'heading',
+              label: 'Hero Headline',
+              styles: { fontFamily: '__SENTINEL__' },
+              props: {},
+              children: [],
+              order: 0,
+              visible: true,
+            },
+          ],
+        },
+      ],
+    };
+
+    const toolCall = {
+      id: 'tool-8',
+      name: 'apply_font',
+      arguments: { fontId: 'inter' },
+    };
+
+    const result = await bridge.executeToolCall(toolCall, docWithHeading, 'page-1');
+    expect(result.status).toBe('EXECUTED');
+
+    // First dispatch is UPDATE_THEME with the font.
+    expect(liveDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'UPDATE_THEME', theme: expect.objectContaining({ font: 'Inter' }) })
+    );
+    // Then node-level SET_NODE_STYLES updates the heading's fontFamily — same
+    // single source of truth the UI uses (no separate HACP style set).
+    const nodeCmds = liveDispatch.mock.calls.map((c: any) => c[0]).filter((c: any) => c.type === 'SET_NODE_STYLES');
+    expect(nodeCmds.length).toBeGreaterThan(0);
+    expect(nodeCmds.some((c: any) => c.nodeId === 'heading-1' && c.styles.fontFamily === 'Inter')).toBe(true);
+  });
 });

@@ -27,6 +27,36 @@ vi.mock('../../state/BuilderProvider', () => ({
         appliedStylePackId: null,
         tokens: {},
       },
+      pages: [
+        {
+          id: 'page-1',
+          slug: '/',
+          name: 'Home',
+          sections: [
+            {
+              id: 'hero-1',
+              type: 'hero',
+              label: 'Hero Section',
+              styles: { fontFamily: 'Inter' },
+              props: {},
+              children: [
+                {
+                  id: 'heading-1',
+                  type: 'heading',
+                  label: 'Hero Headline',
+                  styles: { fontFamily: '__SENTINEL__' },
+                  props: {},
+                  children: [],
+                  order: 0,
+                  visible: true,
+                },
+              ],
+              order: 0,
+              visible: true,
+            },
+          ],
+        },
+      ],
     },
   }),
 }))
@@ -37,37 +67,45 @@ afterEach(() => {
 })
 
 describe('DesignSystemCatalog — Apply button regression', () => {
-  it('Style Pack Apply dispatches UPDATE_THEME', () => {
+  it('Style Pack Apply dispatches UPDATE_THEME + node-level SET_NODE_STYLES', () => {
     const { container } = render(<DesignSystemCatalog />)
     const applyBtn = container.querySelector('[data-category="style-packs"] [data-testid="ds-btn-apply"]') as HTMLButtonElement
     fireEvent.click(applyBtn)
-    expect(mockDispatch).toHaveBeenCalledTimes(1)
+    expect(mockDispatch).toHaveBeenCalled()
     const cmd = mockDispatch.mock.calls[0][0]
     expect(cmd.type).toBe('UPDATE_THEME')
     expect(cmd.theme.appliedStylePackId).toBeTruthy()
     expect(cmd.theme.primaryColor).toBeDefined()
+    // FONT PERSISTENCE: node-level fontFamily is also written so the canvas reflects it.
+    const nodeCmds = mockDispatch.mock.calls.map((c) => c[0]).filter((c) => c.type === 'SET_NODE_STYLES')
+    expect(nodeCmds.length).toBeGreaterThan(0)
+    expect(nodeCmds.some((c: any) => c.styles.fontFamily)).toBe(true)
   })
 
-  it('Typography Apply dispatches UPDATE_THEME', () => {
+  it('Typography Apply dispatches UPDATE_THEME + node SET_NODE_STYLES', () => {
     const { container } = render(<DesignSystemCatalog />)
     fireEvent.click(container.querySelector('[data-testid="ds-cat-typography"]') as Element)
     const applyBtn = container.querySelector('[data-category="typography"] [data-testid="ds-btn-apply"]') as HTMLButtonElement
     fireEvent.click(applyBtn)
-    expect(mockDispatch).toHaveBeenCalledTimes(1)
+    expect(mockDispatch).toHaveBeenCalled()
     const cmd = mockDispatch.mock.calls[0][0]
     expect(cmd.type).toBe('UPDATE_THEME')
     expect(cmd.theme.font).toBeDefined()
+    const nodeCmds = mockDispatch.mock.calls.map((c) => c[0]).filter((c) => c.type === 'SET_NODE_STYLES')
+    expect(nodeCmds.length).toBeGreaterThan(0)
   })
 
-  it('Font Apply dispatches UPDATE_THEME', () => {
+  it('Font Apply dispatches UPDATE_THEME + node SET_NODE_STYLES', () => {
     const { container } = render(<DesignSystemCatalog />)
     fireEvent.click(container.querySelector('[data-testid="ds-cat-fonts"]') as Element)
     const applyBtn = container.querySelector('[data-category="fonts"] [data-testid="ds-btn-apply"]') as HTMLButtonElement
     fireEvent.click(applyBtn)
-    expect(mockDispatch).toHaveBeenCalledTimes(1)
+    expect(mockDispatch).toHaveBeenCalled()
     const cmd = mockDispatch.mock.calls[0][0]
     expect(cmd.type).toBe('UPDATE_THEME')
     expect(cmd.theme.font).toBeDefined()
+    const nodeCmds = mockDispatch.mock.calls.map((c) => c[0]).filter((c) => c.type === 'SET_NODE_STYLES')
+    expect(nodeCmds.length).toBeGreaterThan(0)
   })
 
   it('Color Palette Apply dispatches UPDATE_THEME', () => {
@@ -146,7 +184,7 @@ describe('DesignSystemCatalog — Apply button regression', () => {
     fireEvent.click(container.querySelector('[data-testid="ds-cat-industry-presets"]') as Element)
     const applyBtn = container.querySelector('[data-category="industry-presets"] [data-testid="ds-btn-apply"]') as HTMLButtonElement
     fireEvent.click(applyBtn)
-    expect(mockDispatch).toHaveBeenCalledTimes(1)
+    expect(mockDispatch).toHaveBeenCalled()
     const cmd = mockDispatch.mock.calls[0][0]
     expect(cmd.type).toBe('UPDATE_THEME')
   })
@@ -156,7 +194,7 @@ describe('DesignSystemCatalog — Apply button regression', () => {
     fireEvent.click(container.querySelector('[data-testid="ds-cat-design-combinations"]') as Element)
     const applyBtn = container.querySelector('[data-category="design-combinations"] [data-testid="ds-btn-apply"]') as HTMLButtonElement
     fireEvent.click(applyBtn)
-    expect(mockDispatch).toHaveBeenCalledTimes(1)
+    expect(mockDispatch).toHaveBeenCalled()
     const cmd = mockDispatch.mock.calls[0][0]
     expect(cmd.type).toBe('UPDATE_THEME')
   })

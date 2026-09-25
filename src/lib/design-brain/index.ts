@@ -69,6 +69,24 @@ export {
   buildVisualLanguageCommandPlan,
 } from './VisualLanguageApplication';
 export type { VisualLanguageCommandPlan } from './VisualLanguageApplication';
+export {
+  collectAllNodes,
+  collectTypographyNodes,
+  collectCardNodes,
+  collectSectionNodes,
+  buildTypographyApplicationPlan,
+  resolveSemanticRoles,
+  validateRoleContrast,
+  validatePalettePair,
+  buildFullCompositionPlan,
+} from './DesignApplyRepair';
+export type {
+  TypographyPlan,
+  SemanticColorRoles,
+  ContrastValidationResult,
+  CompositionPlan,
+} from './DesignApplyRepair';
+export { validateDesignQuality, DESIGN_QUALITY_RULES, checkReadableText } from './DesignQualityRules';
 export { validateBusinessGoal } from './BusinessGoalValidation';
 export type { BusinessGoalInput } from './BusinessGoalValidation';
 export { resolveRoleForPhase, allRoles, describeRole } from './RoleModel';

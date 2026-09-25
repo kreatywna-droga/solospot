@@ -14,6 +14,8 @@ import { resolveStylePackApplication, resolveDesignApplication, designApplicatio
 import type { DesignApplicationKind } from '../../../../packages/design-system/src/builder'
 import { useBuilder } from '../state/BuilderProvider'
 import { VISUAL_LANGUAGES, buildVisualLanguageCommandPlan } from '../../../../src/lib/design-brain'
+import { buildTypographyApplicationPlan } from '../../../../src/lib/design-brain'
+import { buildFullCompositionPlan } from '../../../../src/lib/design-brain'
 
 type CategoryId =
   | 'style-packs'
@@ -268,6 +270,70 @@ export function DesignSystemCatalog() {
               : (doc?.theme?.appliedStylePackId || undefined),
         } as any,
       } as any)
+
+      // REPAIR GATE v3.0 — FONT PERSISTENCE.
+      // A font/typography apply that only writes theme.font is silently
+      // overridden on the canvas because each section carries its own
+      // node.styles.fontFamily (default "Inter"). We ALSO write the resolved
+      // font to every typography node via SET_NODE_STYLES so the canvas
+      // reflects it and the change persists across reload.
+      const affectsTypography = [
+        'font', 'typography', 'font-pairing', 'style-pack', 'industry-preset', 'design-combination',
+      ].includes(kind as string)
+      if (affectsTypography && doc) {
+        const headingFont =
+          (designResult.theme as any)?.font ||
+          (designResult.tokens as any)?.typography?.headingFont ||
+          undefined
+        const bodyFont =
+          (designResult.tokens as any)?.typography?.bodyFont ||
+          headingFont ||
+          undefined
+        if (headingFont || bodyFont) {
+          const typePlan = buildTypographyApplicationPlan(doc, {
+            heading: headingFont,
+            body: bodyFont,
+          })
+          for (const command of typePlan.nodeCommands) dispatch(command as any)
+        }
+      }
+
+      // REPAIR GATE v3.0 — CARD CONTRAST + REAL COMPOSITION.
+      // Applying a Style Pack / Industry Preset must change the REAL page, not
+      // just the theme. Build a full composition plan that writes contrast-safe
+      // card backgrounds/text, CTA button colors, section spacing, and radius
+      // via SET_NODE_STYLES (relational semantic roles — no light-on-light).
+      const affectsComposition = ['style-pack', 'industry-preset'].includes(kind as string)
+      if (affectsComposition && doc) {
+        const theme = (designResult.theme || {}) as any
+        const tokens = (designResult.tokens || {}) as any
+        const colors = tokens?.colors || {}
+        const compPlan = buildFullCompositionPlan(
+          doc,
+          {
+            font: {
+              heading: theme.font || tokens?.typography?.headingFont || undefined,
+              body: tokens?.typography?.bodyFont || theme.font || undefined,
+            },
+            colors: {
+              primary: colors.primary || theme.primaryColor,
+              background: colors.background || theme.backgroundColor,
+              surface: colors.surface || colors.background || theme.backgroundColor,
+              textPrimary: colors.text || colors.textPrimary,
+              textMuted: colors.muted,
+              accent: colors.accent || colors.primary || theme.primaryColor,
+              buttonBackground: colors.cta || colors.buttonBackground,
+              border: colors.border,
+            },
+            radius: tokens?.radius?.default || theme.borderRadius || undefined,
+            shadow: tokens?.shadows?.default || undefined,
+          }
+        )
+        // Contrast violations are surfaced as warnings — the plan is still
+        // applied but never silently produces unreadable text (roles guarantee
+        // readable pairs via resolveSemanticRoles).
+        for (const command of compPlan.nodeCommands) dispatch(command as any)
+      }
     },
     [dispatch, DesignSystem, doc]
   )
@@ -314,6 +380,19 @@ export function DesignSystemCatalog() {
 
       for (const command of plan.compositionCommands) {
         dispatch(command as any)
+      }
+
+      // REPAIR GATE v3.0 — FONT PERSISTENCE for Visual Languages.
+      // Apply the VL heading/body font to every typography node via
+      // SET_NODE_STYLES so node.styles.fontFamily can't override theme.font.
+      const headingFont = (typography as any)?.headingFont
+      const bodyFont = (typography as any)?.bodyFont || headingFont
+      if (headingFont) {
+        const typePlan = buildTypographyApplicationPlan(doc, {
+          heading: headingFont,
+          body: bodyFont,
+        })
+        for (const command of typePlan.nodeCommands) dispatch(command as any)
       }
     },
     [dispatch, doc]

@@ -1351,6 +1351,20 @@ export class HacpBridge {
       if (result.verification.passed && this.liveDispatch) {
         try {
           this.liveDispatch(cmd);
+          // REPAIR GATE v3.0 — HACP/UI parity for FONT PERSISTENCE.
+          // Also write the resolved font to every typography node so the
+          // canvas reflects the new font and it persists across reload.
+          const { buildTypographyApplicationPlan } = await import('../design-brain');
+          const headingFont = (resolved.theme.font as string) || undefined;
+          const bodyFont =
+            (resolved.tokens.typography as any)?.bodyFont || headingFont || undefined;
+          if (headingFont) {
+            const typePlan = buildTypographyApplicationPlan(document, {
+              heading: headingFont,
+              body: bodyFont,
+            });
+            for (const nodeCmd of typePlan.nodeCommands) this.liveDispatch(nodeCmd);
+          }
         } catch (err) {
           // Live dispatch failed, but verification passed on snapshot
         }
@@ -1419,6 +1433,24 @@ export class HacpBridge {
       if (result.verification.passed && this.liveDispatch) {
         try {
           this.liveDispatch(cmd);
+          // REPAIR GATE v3.0 — HACP/UI parity for FONT PERSISTENCE.
+          // font / typography / design-combination applies also write the
+          // resolved font to every typography node (SET_NODE_STYLES).
+          const affectsTypography =
+            kind === 'font' || kind === 'typography' || kind === 'design-combination';
+          if (affectsTypography) {
+            const { buildTypographyApplicationPlan } = await import('../design-brain');
+            const headingFont = (resolved.theme.font as string) || undefined;
+            const bodyFont =
+              (resolved.tokens as any)?.typography?.bodyFont || headingFont || undefined;
+            if (headingFont) {
+              const typePlan = buildTypographyApplicationPlan(document, {
+                heading: headingFont,
+                body: bodyFont,
+              });
+              for (const nodeCmd of typePlan.nodeCommands) this.liveDispatch(nodeCmd);
+            }
+          }
         } catch (err) {
           // Live dispatch failed, but verification passed on snapshot
         }
