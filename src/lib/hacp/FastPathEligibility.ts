@@ -59,6 +59,8 @@ export type FastPathReason =
   | 'UNRESOLVED'
   | 'NON_DETERMINISTIC_INTENT'
   | 'PARAMETERS_INCOMPLETE'
+  /** GATE v7.0 — prompt carries no concrete value/target → honest CLARIFY. */
+  | 'INSUFFICIENT_DATA'
   | 'DESIGN_INTELLIGENCE_REQUIRED';
 
 export interface FastPathVerdict {
@@ -89,12 +91,24 @@ const INTENT_DOMAIN: Record<string, FastPathDomain> = {
 function fold(s: string): string {
   return s
     .toLowerCase()
+    // GATE v7.0 — 'ł' is not decomposed by NFD, so ASCII aliases never matched
+    // 'nagłówek' / 'tytuł' / 'tło'. Map it explicitly.
+    .replace(/[łŁ]/g, 'l')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[.,!?;:"'`]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
+
+/**
+ * GATE v7.0 PHASE 16 — prompts that carry NO concrete value and NO concrete
+ * target ("zmień coś", "zrób to ładniej"). The model used to answer these by
+ * guessing; the honest deterministic answer is a CLARIFY with zero mutations.
+ * Evaluated on folded text, so write aliases in ASCII.
+ */
+const INSUFFICIENT_DATA_RE =
+  /\bcos\b|\bcos tam\b|\bjakis\b|\bjakie\b|\bjakies\b|\bjakiej\b|\bjakas\b|\bjakakolwiek\b|\bktos\b|\bgdzies\b|\bladniej\b|\bfajniej\b|\batrakcyjniej\b|\bciekawiej\b|\bsmaczniej\b/;
 
 const reject = (reason: FastPathReason): FastPathVerdict => ({ eligible: false, reason });
 
@@ -123,7 +137,13 @@ export function evaluateFastPath(
   if (!findNode(document, targetId)) return reject('TARGET_NOT_FOUND');
 
   const resolution = resolveTargetedEdit(prompt, context, document);
-  if (!resolution) return reject('UNRESOLVED');
+  if (!resolution) {
+    // GATE v7.0 PHASE 16 — an indefinite request is answered with an honest,
+    // deterministic CLARIFY instead of an LLM round trip that times out and
+    // reports "Nie udało się wykonać polecenia".
+    if (INSUFFICIENT_DATA_RE.test(text)) return reject('INSUFFICIENT_DATA');
+    return reject('UNRESOLVED');
+  }
 
   // PHASE 7.4/6 — known BuilderCommand only.
   if (!FAST_PATH_INTENTS.has(resolution.intent)) return reject('NON_DETERMINISTIC_INTENT');

@@ -83,15 +83,23 @@ export interface TargetedEditResolution {
 // Helpers
 // ---------------------------------------------------------------------------
 
-/** Lowercase + strip diacritics so PL commands match without keyword variants. */
+/**
+ * Lowercase + strip diacritics so PL commands match without keyword variants.
+ *
+ * GATE v7.0 — 'ł' (U+0142) has NO canonical decomposition, so NFD keeps it and
+ * every ASCII alias below ('naglowek', 'tytul', 'tlo') silently missed the real
+ * words 'nagłówek', 'tytuł', 'tło'. Map it explicitly BEFORE normalize.
+ */
 function fold(s: string): string {
   return s
     .toLowerCase()
+    .replace(/[łŁ]/g, 'l')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
 }
 
-const COLOR_RE = /\bkolor|\bcolour|\bcolor|\bbarw/;
+/** GATE v7.0 — 'tło/tła/background' IS colour phrasing (was the FIRST BREAK). */
+const COLOR_RE = /\bkolor|\bcolour|\bcolor|\bbarw|\btlo\b|\btla\b|\bbackground\b/;
 const SIZE_RE = /\bwieksz|\bmniejsz|\bpowieksz|\bpomniejsz|\bzmniejsz|\brozmiar|\bsize\b|\bbigger|\bsmaller|\bzwieksz/;
 const BIGGER_RE = /\bwieksz|\bpowieksz|\bzwieksz|\bbigger|\bincrease/;
 const MOVE_RE = /\bprzesun|\bprzenies|\bshift\b/;

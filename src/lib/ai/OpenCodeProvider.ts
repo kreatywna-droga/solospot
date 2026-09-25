@@ -182,6 +182,13 @@ export class OpenCodeProvider implements AIProvider {
       } catch (fetchErr: any) {
         console.warn(`[OpenCodeProvider] Primary fetch failed on ${activeModelId}:`, fetchErr?.message);
         errorBodyText = String(fetchErr?.message || fetchErr);
+        // GATE v7.0 — FIRST BREAK (terminal): an AbortSignal timeout raised
+        // WHILE reading the body left `response` assigned and `ok === true`,
+        // so the failover guard below evaluated to false and the request died
+        // with llmRequestCount:1, fallbackUsed:false. Clear both so the
+        // fallback chain actually runs.
+        response = null;
+        data = null;
       }
 
       console.log(
@@ -196,9 +203,20 @@ export class OpenCodeProvider implements AIProvider {
         })
       );
 
-      // If initial request failed (HTTP error e.g. 429 rate limit or JSON error payload)
-      if (!response || !response.ok || data?.error) {
+      // If initial request failed (HTTP error e.g. 429 rate limit or JSON error payload,
+      // abort/timeout, or a 200 body without any choice) → try the fallback chain.
+      if (
+        !response ||
+        !response.ok ||
+        data?.error ||
+        !Array.isArray(data?.choices) ||
+        data.choices.length === 0
+      ) {
         console.warn(`[OpenCodeProvider] Upstream error/status ${response?.status} on ${activeModelId}, attempting fallback`);
+        // GATE v7.0 — deadline-bounded failover: primary may burn the whole
+        // 15s abort window, so the fallback chain gets whatever is left of the
+        // budget instead of adding up to 6 × 15s to one request.
+        const failoverDeadline = requestStartedAt + 25000;
         const fallbackCandidates = [
           'nex-agi/nex-n2.5-pro:free',
           'nex-agi/nex-n2.5-mini:free',
@@ -209,6 +227,8 @@ export class OpenCodeProvider implements AIProvider {
         ].filter((id) => id !== activeModelId);
 
         for (const candidateId of fallbackCandidates) {
+          const remainingMs = failoverDeadline - Date.now();
+          if (remainingMs < 2000) break;
           try {
             console.log(`[OpenCodeProvider] Retrying with fallback candidate: ${candidateId}`);
             bodyPayload.model = candidateId;
@@ -222,7 +242,7 @@ export class OpenCodeProvider implements AIProvider {
             llmRequestCount += 1;
             const retryRes = await fetch(endpoint, {
               method: 'POST',
-              signal: AbortSignal.timeout(15000),
+              signal: AbortSignal.timeout(Math.min(15000, remainingMs)),
               headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${cleanApiKey}`,

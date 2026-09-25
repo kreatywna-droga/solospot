@@ -38,7 +38,7 @@ import type {
 import type { HacpToolCall, ChatMessageAttachment } from '../ai/AIProviderTypes';
 import { UserFacingResponseNormalizer } from '../ai/UserFacingResponseNormalizer';
 import { resolveTargetedEdit, type TargetedEditResolution } from './TargetedEditResolver';
-import { evaluateFastPath, type FastPathVerdict } from './FastPathEligibility';
+import { evaluateFastPath, type FastPathVerdict, type FastPathReason } from './FastPathEligibility';
 import { currentLatencyTrace } from '../ai/LatencyTrace';
 
 /**
@@ -1781,6 +1781,17 @@ export class HacpBridge {
 
       if (!verdict.eligible || !verdict.resolution) {
         trace?.note(`fast-path-rejected:${verdict.reason}`);
+        // GATE v7.0 PHASE 16 — "not enough information to act on" is a real,
+        // deterministic answer. Reply with an honest CLARIFY (zero mutations,
+        // zero model calls) instead of falling through to an LLM round trip
+        // that aborts at the provider timeout and surfaces
+        // "Nie udało się wykonać polecenia". Every OTHER rejection reason still
+        // returns null → the caller runs the normal AI path below.
+        if (verdict.reason === 'INSUFFICIENT_DATA' || verdict.reason === 'PARAMETERS_INCOMPLETE') {
+          trace?.setPath('FAST_PATH');
+          trace?.setResultMeta({ intent: 'CLARIFY', executionStatus: 'CLARIFY', ok: true });
+          return this.fastPathClarify(verdict.reason);
+        }
         return null;
       }
 
@@ -1892,6 +1903,39 @@ export class HacpBridge {
     } finally {
       trace?.stageEnd('FAST_PATH', undefined, 'eligibility+resolver+dispatch');
     }
+  }
+
+  /**
+   * GATE v7.0 — honest CLARIFY produced DETERMINISTICALLY by the fast-path
+   * entry point (no model, no mutation). Used when the prompt simply does not
+   * carry enough information to build a BuilderCommand.
+   */
+  private fastPathClarify(reason: FastPathReason): HacpExecutionResult {
+    const message =
+      reason === 'PARAMETERS_INCOMPLETE'
+        ? 'Potrzebuję więcej informacji — podaj wartość, którą mam ustawić (np. „zmień kolor na czerwony"). Dokument nie został zmieniony.'
+        : 'Potrzebuję więcej informacji — napisz, co dokładnie zmienić i na jaką wartość. Dokument nie został zmieniony.';
+
+    return {
+      success: true,
+      intent: 'CLARIFY',
+      scope: 'PAGE_DESIGN',
+      message,
+      executionCard: {
+        id: `card-fastpath-clarify-${Date.now()}`,
+        title: `FAST PATH CLARIFY [${reason}]`,
+        status: 'WAITING',
+        steps: [],
+        startedAt: new Date().toLocaleTimeString('pl-PL'),
+        completedAt: new Date().toLocaleTimeString('pl-PL'),
+        validationResult: 'WARN',
+      },
+      commandsToDispatch: [],
+      eventsToEmit: [],
+      executionStatus: 'CLARIFY',
+      errorReason: `fast-path:${reason}`,
+      updatedConversationContext: { lastIntent: 'CLARIFY', lastActionSummary: message },
+    };
   }
 
   /** PHASE 13 — honest FAILED outcome (no fallback, no fabricated success). */
