@@ -26,6 +26,6 @@ export const executePipeline = (intent: string, context: Partial<DesignContext>,
   const decision = makeDecision(ctx, 'visual hierarchy', `build for ${intent}`, 'use ' + cap.name, cap);
   if (!decision) return { state: 'INSUFFICIENT_EVIDENCE', note: 'decision null (cap missing)' };
   const quality = checkDecisionQuality(decision, cap);
-  if (quality) return { state: 'FAIL', note: quality };
+  if (quality) return { state: 'FAILED', note: quality };
   return { state: 'PLANNED', note: `decision=${decision.capabilityId}; execution must use BuilderDocuments/commands; HACP does not execute mutation` };
 };
