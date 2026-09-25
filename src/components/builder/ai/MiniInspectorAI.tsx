@@ -50,6 +50,7 @@ import {
   type ElementRect,
 } from '../contextual/usePanelPosition'
 import { MiniInspectorCommandBus, type MiniInspectorCommandStatus } from './MiniInspectorCommandBus'
+import { beginLatencyTrace, finishTraceWithCanvas } from '@/lib/ai/LatencyTrace'
 
 export interface MiniInspectorAIProps {
   sectionId: string
@@ -189,6 +190,10 @@ export function MiniInspectorAI({
     const clean = text.trim()
     if (!clean || !target) return
 
+    // GATE v1.0 PHASE 1 — controlled latency instrumentation (no-op when off).
+    const trace = beginLatencyTrace({ source: 'mini-inspector', prompt: clean })
+    trace.stageStart('UI')
+
     setPrompt('')
     setStatus('EXECUTING')
 
@@ -223,7 +228,9 @@ export function MiniInspectorAI({
         timestamp: Date.now(),
       }
 
-      const result = await MiniInspectorCommandBus.submitCommand(command)
+      trace.stageEnd('UI')
+
+      const result = await MiniInspectorCommandBus.submitCommand(command, trace)
 
       if (result) {
         const nextStatus = mapResultStatus(result)
@@ -231,9 +238,11 @@ export function MiniInspectorAI({
 
         // Honest dispatch gate — same as AiCopilotWorkspace
         if (result.intent === 'EXECUTE' && result.commandsToDispatch.length > 0) {
+          trace.stageStart('DISPATCH')
           for (const cmd of result.commandsToDispatch) {
             dispatch(cmd)
           }
+          trace.stageEnd('DISPATCH')
         }
 
         if (result.shouldTriggerUndo || result.intent === 'UNDO') {
@@ -242,11 +251,18 @@ export function MiniInspectorAI({
         if (result.shouldTriggerRedo || result.intent === 'REDO') {
           if (canRedo) redo()
         }
+        trace.stageStart('RESPONSE')
+        trace.stageEnd('RESPONSE')
       } else {
         setStatus('FAILED')
       }
     } catch (err: any) {
       setStatus('FAILED')
+      trace.note('exception')
+    } finally {
+      // CANVAS = dispatch → commit → paint. Measured on the next frames so a
+      // disabled trace still returns immediately (finish() is a no-op then).
+      finishTraceWithCanvas(trace)
     }
   }, [
     bridge,

@@ -16,6 +16,7 @@ import type { ChatMessage, AICopilotRequest } from '@/lib/ai/AIProviderTypes';
 
 export async function POST(req: NextRequest) {
   try {
+    const routeStartedAt = Date.now();
     const body = await req.json();
     const { prompt, messages = [], builderContext = {}, visualMetrics, routerMode, selectedModelId, attachments = [], source } = body;
 
@@ -318,11 +319,13 @@ ZASADY PROFESJONALNEJ KONWERSACJI:
     // DUAL-PATH UNIFICATION GATE — classify once; every subsequent path
     // must send request.tools ⊆ selectedToolSurface. Full BUILDER_TOOL_DEFINITIONS
     // (including batch_execute) is REPO-only and must never reach the model.
+    const surfaceStartedAt = Date.now();
     const surface = selectRequestTools(aiRequest.prompt, {
       hasSelection: Boolean(builderContext.selectedNodeId),
       selectedNodeType: builderContext.selectedNodeType,
       documentNodeCount: builderContext.documentNodeCount ?? 0,
     });
+    const toolSelectionMs = Date.now() - surfaceStartedAt;
     // Defense-in-depth: even if surface.tools were wrong, keep only names on surface.
     const allowedNames = new Set(surface.toolNames);
     const surfaceTools = surface.tools.filter((t) => allowedNames.has(t.name));
@@ -370,6 +373,17 @@ ZASADY PROFESJONALNEJ KONWERSACJI:
             isFreeModel: true,
             routerMode: `ORCHESTRATED_${aiRequest.routerMode}`,
             durationMs: orchResult.durationMs,
+            latency: {
+              totalMs: Date.now() - routeStartedAt,
+              toolSelectionMs,
+              intentClassifierMs: orchResult.classifyMs,
+              routerMs: orchResult.routerMs,
+              modelMs: orchResult.modelMs,
+              llmMs: orchResult.modelMs,
+              llmRequestCount: orchResult.llmRequestCount,
+              fallbackUsed: orchResult.fallbackUsed,
+              controllerInjected: orchResult.controllerInjected,
+            },
           };
 
           return NextResponse.json(result, {
@@ -397,7 +411,17 @@ ZASADY PROFESJONALNEJ KONWERSACJI:
       tools: surfaceTools.length > 0 ? surfaceTools : undefined,
     };
     const result = await registry.execute(controlledRequest);
-    return NextResponse.json(result, {
+    const latency = {
+      totalMs: Date.now() - routeStartedAt,
+      toolSelectionMs,
+      intentClassifierMs: (result as any).classifyMs,
+      routerMs: (result as any).routerMs,
+      modelMs: (result as any).modelMs ?? (result as any).durationMs,
+      llmMs: (result as any).modelMs ?? (result as any).durationMs,
+      llmRequestCount: (result as any).llmRequestCount,
+      fallbackUsed: (result as any).fallbackUsed,
+    };
+    return NextResponse.json({ ...result, latency }, {
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
       },

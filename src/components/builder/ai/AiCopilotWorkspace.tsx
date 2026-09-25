@@ -26,6 +26,7 @@ import {
   SharedExecutionService,
   type SharedAiHistoryEntry,
 } from '@/lib/ai/SharedExecutionService'
+import { beginLatencyTrace, finishTraceWithCanvas } from '@/lib/ai/LatencyTrace'
 import type {
   HacpMessage,
   HacpActivityEvent,
@@ -750,9 +751,15 @@ export function AiCopilotWorkspace() {
     const controller = new AbortController()
     abortControllerRef.current = controller
 
+    // GATE v1.0 PHASE 1 — controlled latency instrumentation (no-op when off).
+    const trace = beginLatencyTrace({ source: 'main-chat', prompt: text })
+    let traceEnded = false
+    trace.stageStart('UI')
+
     try {
       // GATE v6 — execute through the SHARED service (chat is history only).
       // The service records user/AI entries → history sync below renders them.
+      trace.stageEnd('UI')
       const result = await SharedExecutionService.execute({
         source: 'main-chat',
         prompt: text,
@@ -762,12 +769,14 @@ export function AiCopilotWorkspace() {
         selectedModelId,
         onProgress: (phase) => setCurrentPhase(phase),
         attachments: attachmentsToSend,
+        latencyTrace: trace,
       })
 
       if (controller.signal.aborted) return
 
       if (!result) {
         // Service already recorded an honest error entry in shared history.
+        trace.finish()
         return
       }
 
@@ -808,14 +817,17 @@ export function AiCopilotWorkspace() {
       // ONLY dispatch mutations if intent is EXECUTE and commands are present
       let mutationSummary: string | undefined = undefined
       if (result.intent === 'EXECUTE' && result.commandsToDispatch.length > 0) {
+        trace.stageStart('DISPATCH')
         result.commandsToDispatch.forEach((cmd) => {
           dispatch(cmd)
         })
+        trace.stageEnd('DISPATCH')
         mutationSummary = result.executionCard?.appliedChanges?.[0]?.summary
         if (mutationSummary) {
           setRecentMutation(mutationSummary)
         }
       }
+      trace.stageStart('RESPONSE')
 
       // Log execution card to dedicated Activity Stream (separate from conversation bubble)
       if (result.executionCard) {
@@ -831,12 +843,17 @@ export function AiCopilotWorkspace() {
           },
         ].slice(-30))
       }
+      trace.stageEnd('RESPONSE')
+      finishTraceWithCanvas(trace)
+      traceEnded = true
     } catch (err: any) {
       if (controller.signal.aborted) return
       setCurrentPhase('ERROR')
       // Service recorded the error entry in shared history; only mark phase.
       console.error('[AiCopilotWorkspace] Execution failed:', err)
+      trace.note('exception')
     } finally {
+      if (!traceEnded) trace.finish()
       abortControllerRef.current = null
       setIsExecuting(false)
       setCurrentPhase('IDLE')

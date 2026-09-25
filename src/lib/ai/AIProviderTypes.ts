@@ -79,10 +79,28 @@ export interface AICopilotResponse {
   routerMode?: string;
   durationMs?: number;
   requestId?: string;
+  /** GATE v1.0 PHASE 5 — number of upstream LLM round trips (primary + fallback + continuation). */
+  llmRequestCount?: number;
+  /** GATE v1.0 PHASE 5 — ms spent inside provider.generateWithTools (excludes routing/classification). */
+  modelMs?: number;
+  /** GATE v1.0 PHASE 5 — ms spent in model routing/selection. */
+  routerMs?: number;
   rawUsage?: {
     promptTokens?: number;
     completionTokens?: number;
     totalTokens?: number;
+  };
+  /** GATE v1.0 PHASE 1/2 — server-side stage timings for latency forensics. */
+  latency?: {
+    totalMs?: number;
+    toolSelectionMs?: number;
+    intentClassifierMs?: number;
+    routerMs?: number;
+    modelMs?: number;
+    llmMs?: number;
+    llmRequestCount?: number;
+    fallbackUsed?: boolean;
+    controllerInjected?: boolean;
   };
 }
 

@@ -59,11 +59,13 @@ export class OpenCodeProvider implements AIProvider {
 
     try {
       const requiresTools = Boolean(request.tools && request.tools.length > 0);
+      const routerStartedAt = Date.now();
       const resolution = await this.router.resolveModel(
         request.routerMode || 'AUTO',
         request.modelId,
         requiresTools
       );
+      const routerMs = Date.now() - routerStartedAt;
 
       if (!resolution.selectedModel) {
         return {
@@ -75,6 +77,7 @@ export class OpenCodeProvider implements AIProvider {
           requestId: `req-${Date.now().toString(36)}`,
           isFreeModel: false,
           routerMode: resolution.mode,
+          routerMs,
           durationMs: 0,
         };
       }
@@ -145,6 +148,8 @@ export class OpenCodeProvider implements AIProvider {
       const requestId = `req-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
       const requestStartedAt = Date.now();
       let fallbackUsed = false;
+      /** GATE v1.0 PHASE 5 — real upstream round-trip counter (primary + fallback + continuation). */
+      let llmRequestCount = 0;
 
       console.log(
         JSON.stringify({
@@ -157,6 +162,7 @@ export class OpenCodeProvider implements AIProvider {
       );
 
       try {
+        llmRequestCount += 1;
         response = await fetch(endpoint, {
           method: 'POST',
           signal: AbortSignal.timeout(15000),
@@ -213,6 +219,7 @@ export class OpenCodeProvider implements AIProvider {
               bodyPayload.tool_choice = 'auto';
             }
             const retryStartedAt = Date.now();
+            llmRequestCount += 1;
             const retryRes = await fetch(endpoint, {
               method: 'POST',
               signal: AbortSignal.timeout(15000),
@@ -313,7 +320,9 @@ export class OpenCodeProvider implements AIProvider {
           requestId,
           isFreeModel: activeModelId.includes('free'),
           routerMode: resolution.mode,
+          routerMs,
           durationMs: Date.now() - requestStartedAt,
+          llmRequestCount,
         };
       }
 
@@ -659,6 +668,7 @@ export class OpenCodeProvider implements AIProvider {
           let nextChoice: any = null;
           for (const candidateId of continuationCandidates) {
             try {
+              llmRequestCount += 1;
               const nextResponse = await fetch(endpoint, {
                 method: 'POST',
                 signal: AbortSignal.timeout(15000),
@@ -793,7 +803,9 @@ export class OpenCodeProvider implements AIProvider {
         isFreeModel: resolution.selectedModel.isFree,
         finishReason,
         routerMode: resolution.mode,
+        routerMs,
         durationMs: Date.now() - startTime,
+        llmRequestCount,
         rawUsage: data.usage
           ? {
               promptTokens: data.usage.prompt_tokens,

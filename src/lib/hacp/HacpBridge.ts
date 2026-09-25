@@ -38,6 +38,8 @@ import type {
 import type { HacpToolCall, ChatMessageAttachment } from '../ai/AIProviderTypes';
 import { UserFacingResponseNormalizer } from '../ai/UserFacingResponseNormalizer';
 import { resolveTargetedEdit, type TargetedEditResolution } from './TargetedEditResolver';
+import { evaluateFastPath, type FastPathVerdict } from './FastPathEligibility';
+import { currentLatencyTrace } from '../ai/LatencyTrace';
 
 /**
  * Resolve the honest outcome of a tool-execution batch.
@@ -235,8 +237,25 @@ export class HacpBridge {
   /**
    * Rigorous BEFORE → EXECUTION → AFTER → VERIFY protocol.
    * Compares the document state before and after command application.
+   *
+   * GATE v1.0 PHASE 1: the public entry is a timing wrapper so the VERIFY
+   * stage can be measured without touching the verification logic itself.
    */
   public verifyCommandExecution(
+    command: BuilderCommand,
+    docBefore: BuilderDocument,
+    expectedChange: { targetId: string; property?: string; expectedValue?: unknown }
+  ): { nextDoc: BuilderDocument; verification: ExecutionVerification; changed: boolean } {
+    const trace = currentLatencyTrace();
+    if (!trace) return this.verifyCommandExecutionInner(command, docBefore, expectedChange);
+    return trace.stageSync(
+      'VERIFICATION',
+      () => this.verifyCommandExecutionInner(command, docBefore, expectedChange),
+      command.type
+    );
+  }
+
+  private verifyCommandExecutionInner(
     command: BuilderCommand,
     docBefore: BuilderDocument,
     expectedChange: { targetId: string; property?: string; expectedValue?: unknown }
@@ -1631,12 +1650,21 @@ export class HacpBridge {
     },
     extraSteps?: HacpExecutionStep[]
   ): Promise<HacpExecutionResult | null> {
-    const resolution: TargetedEditResolution | null = resolveTargetedEdit(prompt, context, document);
+    const trace = currentLatencyTrace();
+    const resolution: TargetedEditResolution | null = trace
+      ? trace.stageSync('RESOLVER', () => resolveTargetedEdit(prompt, context, document))
+      : resolveTargetedEdit(prompt, context, document);
     if (!resolution) return null;
 
     let exec: Awaited<ReturnType<HacpBridge['executeToolCall']>>;
     try {
-      exec = await this.executeToolCall(resolution.toolCall, document, activePageId);
+      exec = trace
+        ? await trace.stageAsync(
+            'BUILDER_COMMAND',
+            () => this.executeToolCall(resolution.toolCall, document, activePageId),
+            resolution.toolCall.name
+          )
+        : await this.executeToolCall(resolution.toolCall, document, activePageId);
     } catch (err) {
       console.warn('[HacpBridge] TargetedEdit tool threw:', err);
       return null;
@@ -1723,6 +1751,181 @@ export class HacpBridge {
     };
   }
 
+  /**
+   * GATE v1.0 PHASE 8–13 — DETERMINISTIC FAST PATH.
+   *
+   * Returns `null` when the prompt is NOT fast-path eligible (PHASE 7) → the
+   * caller MUST continue on the normal AI path. Nothing is skipped silently.
+   *
+   * When eligible, execution reuses the SAME engine as the AI path:
+   *   evaluateFastPath (pure) → executeToolCall → verifyCommandExecution →
+   *   BuilderCommand → [caller dispatch] → BuilderDocument → Canvas → Verification.
+   * No second execution engine, no requestAnimationFrame, no history bypass —
+   * HACP and the fast path are one engine with two entry points.
+   *
+   * PHASE 13 (NO FAKE SUCCESS): verification runs BEFORE the result is built.
+   * A failed verification yields an honest FAILED result — never a fabricated
+   * SUCCESS, never a retry loop, never a guessed target.
+   */
+  public async executeFastPath(
+    prompt: string,
+    context: HacpBuilderContext,
+    document: BuilderDocument
+  ): Promise<HacpExecutionResult | null> {
+    const trace = currentLatencyTrace();
+    trace?.stageStart('FAST_PATH');
+    try {
+      const verdict: FastPathVerdict = trace
+        ? trace.stageSync('RESOLVER', () => evaluateFastPath(prompt, context, document), 'eligibility+resolver')
+        : evaluateFastPath(prompt, context, document);
+
+      if (!verdict.eligible || !verdict.resolution) {
+        trace?.note(`fast-path-rejected:${verdict.reason}`);
+        return null;
+      }
+
+      const resolution = verdict.resolution;
+      // PHASE 8 — mark the trace so the report can split the two paths.
+      trace?.setPath('FAST_PATH');
+
+      const activePageId = context.pageId || document.pages[0]?.id || 'page-home';
+      const startedAt = new Date().toLocaleTimeString('pl-PL');
+
+      let exec: Awaited<ReturnType<HacpBridge['executeToolCall']>>;
+      try {
+        exec = trace
+          ? await trace.stageAsync(
+              'BUILDER_COMMAND',
+              () => this.executeToolCall(resolution.toolCall, document, activePageId),
+              resolution.toolCall.name
+            )
+          : await this.executeToolCall(resolution.toolCall, document, activePageId);
+      } catch (err) {
+        console.warn('[HacpBridge] FastPath tool threw:', err);
+        trace?.setResultMeta({ intent: 'CLARIFY', executionStatus: 'FAILED', ok: false });
+        return this.fastPathFailure(resolution, startedAt, 'FAST_PATH_EXCEPTION');
+      }
+
+      if (exec.status !== 'EXECUTED' || !exec.command) {
+        console.log('[HacpBridge] EXECUTION_TRACE:', {
+          phase: 'FAST_PATH_NOT_APPLIED',
+          intent: resolution.intent,
+          toolName: resolution.toolCall.name,
+          status: exec.status,
+          message: exec.message,
+          timestamp: new Date().toISOString(),
+        });
+        trace?.note(`fast-path-verification:${exec.status}`);
+        trace?.setResultMeta({ intent: 'CLARIFY', executionStatus: 'FAILED', ok: false });
+        return this.fastPathFailure(resolution, startedAt, exec.status);
+      }
+
+      const steps: HacpExecutionStep[] = [
+        {
+          id: `step-fastpath-${Date.now()}`,
+          name: `FastPath: ${resolution.toolCall.name}`,
+          status: 'SUCCESS',
+          detail: exec.verification.diffSummary || JSON.stringify(resolution.toolCall.arguments),
+          timestamp: new Date().toLocaleTimeString('pl-PL'),
+        },
+      ];
+
+      const card: HacpExecutionCard = {
+        id: `card-fastpath-${Date.now()}`,
+        title: `FAST PATH [${resolution.intent}]`,
+        status: 'SUCCESS',
+        steps,
+        startedAt,
+        completedAt: new Date().toLocaleTimeString('pl-PL'),
+        validationResult: 'PASS',
+        appliedChanges: [
+          {
+            target: resolution.targetNodeId,
+            property: (resolution.toolCall.arguments as any)?.styles
+              ? Object.keys((resolution.toolCall.arguments as any).styles).join(', ')
+              : Object.keys((resolution.toolCall.arguments as any)?.props || {}).join(', ') || 'props',
+            newValue:
+              (resolution.toolCall.arguments as any)?.styles ||
+              (resolution.toolCall.arguments as any)?.props,
+            summary: resolution.summary,
+          },
+        ],
+      };
+
+      console.log('[HacpBridge] EXECUTION_TRACE:', {
+        phase: 'FAST_PATH_EXECUTED',
+        intent: resolution.intent,
+        domain: resolution.domain,
+        targetNodeId: resolution.targetNodeId,
+        timestamp: new Date().toISOString(),
+      });
+
+      trace?.setResultMeta({ intent: 'EXECUTE', executionStatus: 'EXECUTED', ok: true });
+
+      return {
+        success: true,
+        intent: 'EXECUTE',
+        scope: 'PAGE_DESIGN',
+        message: resolution.summary,
+        executionCard: card,
+        commandsToDispatch: [exec.command],
+        eventsToEmit: [],
+        executionStatus: 'EXECUTED',
+        executionEvidence: {
+          operation: resolution.toolCall.name,
+          target: resolution.targetNodeId,
+          before: exec.verification.beforeValue ?? null,
+          after:
+            (resolution.toolCall.arguments as any)?.styles ||
+            (resolution.toolCall.arguments as any)?.props ||
+            resolution.toolCall.arguments,
+          changed: true,
+        },
+        verification: exec.verification,
+        updatedConversationContext: {
+          lastIntent: 'EXECUTE',
+          lastTargetNodeId: resolution.targetNodeId,
+          lastModifiedNodeId: resolution.targetNodeId,
+          lastActionSummary: resolution.summary,
+        },
+      };
+    } finally {
+      trace?.stageEnd('FAST_PATH', undefined, 'eligibility+resolver+dispatch');
+    }
+  }
+
+  /** PHASE 13 — honest FAILED outcome (no fallback, no fabricated success). */
+  private fastPathFailure(
+    resolution: TargetedEditResolution,
+    startedAt: string,
+    reason: string
+  ): HacpExecutionResult {
+    return {
+      success: false,
+      intent: 'CLARIFY',
+      scope: 'PAGE_DESIGN',
+      message:
+        'Nie udało się zastosować tej zmiany na zaznaczeniu — dokument nie został zmieniony. Wybierz element i spróbuj ponownie.',
+      executionCard: {
+        id: `card-fastpath-fail-${Date.now()}`,
+        title: `FAST PATH FAILED [${resolution.intent}]`,
+        status: 'FAILED',
+        steps: [],
+        startedAt,
+        completedAt: new Date().toLocaleTimeString('pl-PL'),
+        validationResult: 'FAIL',
+      },
+      commandsToDispatch: [],
+      eventsToEmit: [],
+      executionStatus: 'FAILED',
+      errorReason: `fast-path:${reason}`,
+      updatedConversationContext: {
+        lastIntent: 'CLARIFY',
+        lastActionSummary: resolution.summary,
+      },
+    };
+  }
+
   public async executePlan(
     prompt: string,
     context: HacpBuilderContext,
@@ -1736,6 +1939,7 @@ export class HacpBridge {
     source?: 'main-chat' | 'mini-inspector'
   ): Promise<HacpExecutionResult> {
     const startTime = new Date().toLocaleTimeString('pl-PL');
+    const trace = currentLatencyTrace();
     const cleanPrompt = prompt.trim();
     const activePageId = context.pageId || document.pages[0]?.id || 'page-home';
     const activePage = document.pages.find((p) => p.id === activePageId) || document.pages[0];
@@ -1751,6 +1955,7 @@ export class HacpBridge {
 
     if (typeof window !== 'undefined' && typeof window.fetch === 'function') {
       try {
+        trace?.stageStart('PROVIDER');
         const res = await fetch('/api/builder/copilot', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1796,7 +2001,14 @@ export class HacpBridge {
         }
       } catch (err) {
         console.warn('[HacpBridge] AI Provider request skipped or offline:', err);
+      } finally {
+        trace?.stageEnd('PROVIDER');
       }
+    }
+
+    // GATE v1.0 PHASE 1/2 — merge server-side stage timings into the trace.
+    if (aiProviderResponse?.latency) {
+      trace?.setServerStages(aiProviderResponse.latency);
     }
 
     // ========================================================================

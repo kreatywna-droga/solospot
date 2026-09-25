@@ -26,6 +26,7 @@ import type { HacpBuilderContext, HacpExecutionResult } from '@/lib/hacp/HacpTyp
 import { SharedExecutionService } from '@/lib/ai/SharedExecutionService'
 import type { BuilderDocument } from '../../../../packages/builder-core/src'
 import type { InspectorAITargetLock } from './InspectorAIContext'
+import type { LatencyTraceHandle } from '@/lib/ai/LatencyTrace'
 
 export type MiniInspectorCommandStatus = 'IDLE' | 'EXECUTING' | 'SUCCESS' | 'FAILED' | 'TIMEOUT' | 'BLOCKED' | 'CLARIFY'
 
@@ -75,7 +76,10 @@ class MiniInspectorCommandBusClass {
    * Delegates to SharedExecutionService — executes even with 0 subscribers
    * (Main Chat closed). Returns the execution result or null on failure.
    */
-  async submitCommand(command: MiniInspectorCommand): Promise<HacpExecutionResult | null> {
+  async submitCommand(
+    command: MiniInspectorCommand,
+    latencyTrace?: LatencyTraceHandle
+  ): Promise<HacpExecutionResult | null> {
     this.setStatus('EXECUTING', command.targetNodeId)
     this.executingCommand = command
 
@@ -88,6 +92,7 @@ class MiniInspectorCommandBusClass {
         selectedModelId:
           (typeof window !== 'undefined' && window.sessionStorage?.getItem('solospot_ai_model')) ||
           undefined,
+        latencyTrace,
       })
 
       if (!result) {

@@ -34,6 +34,16 @@ export interface OrchestratorResult {
   message: string;
   modelUsed: string;
   durationMs: number;
+  /** GATE v1.0 PHASE 1/2 — ms spent in intent classification + tool surface selection. */
+  classifyMs?: number;
+  /** GATE v1.0 PHASE 1/2 — ms spent inside the provider LLM request itself. */
+  modelMs?: number;
+  /** GATE v1.0 PHASE 5 — real upstream LLM round trips reported by the provider. */
+  llmRequestCount?: number;
+  /** GATE v1.0 PHASE 5 — ms spent in model routing/selection. */
+  routerMs?: number;
+  /** GATE v1.0 PHASE 5 — true only when a fallback model actually served the request. */
+  fallbackUsed?: boolean;
   error?: string;
   /**
    * If the model didn't generate a tool call but the controller
@@ -96,12 +106,14 @@ export class AgentOrchestrator {
 
     // 1–2. CLASSIFY INTENT + SELECT TOOL SURFACE (shared selectRequestTools)
     // Multi-intent merge (FAZA 6): primary + secondaryIntents → union of surfaces.
+    const classifyStartedAt = Date.now();
     const surface = selectRequestTools(request.prompt, {
       hasSelection: context.hasSelection,
       selectedNodeType: context.selectedNodeType,
       documentNodeCount: context.documentNodeCount,
       conversationHistory: context.conversationHistory,
     });
+    const classifyMs = Date.now() - classifyStartedAt;
     const classifiedCategory = surface.intent;
     const tools = surface.tools;
     const toolNames = surface.toolNames;
@@ -122,9 +134,19 @@ export class AgentOrchestrator {
     };
 
     let modelResponse: AICopilotResponse;
+    let modelMs = 0;
+    let llmRequestCount: number | undefined;
+    let routerMs: number | undefined;
+    let fallbackUsed: boolean | undefined;
+    const modelStartedAt = Date.now();
     try {
       modelResponse = await this.provider.generateWithTools(minimalRequest);
+      modelMs = Date.now() - modelStartedAt;
+      llmRequestCount = modelResponse.llmRequestCount;
+      routerMs = modelResponse.routerMs;
+      fallbackUsed = modelResponse.fallbackUsed;
     } catch (err: any) {
+      modelMs = Date.now() - modelStartedAt;
       return {
         status: 'FAILED',
         intent: classifiedCategory,
@@ -133,6 +155,11 @@ export class AgentOrchestrator {
         message: `Model request failed: ${err?.message || 'Unknown error'}`,
         modelUsed: 'unknown',
         durationMs: Date.now() - startTime,
+        classifyMs,
+        modelMs,
+        llmRequestCount,
+        routerMs,
+        fallbackUsed,
         error: err?.message,
         toolSurface: toolNames,
       };
@@ -149,6 +176,11 @@ export class AgentOrchestrator {
         message: modelResponse.message || `AI provider error: ${providerError}`,
         modelUsed: modelResponse.model,
         durationMs: Date.now() - startTime,
+        classifyMs,
+        modelMs,
+        llmRequestCount,
+        routerMs,
+        fallbackUsed,
         error: providerError,
         toolSurface: toolNames,
       };
@@ -162,6 +194,11 @@ export class AgentOrchestrator {
         message: modelResponse.message || 'AI provider is not configured.',
         modelUsed: modelResponse.model,
         durationMs: Date.now() - startTime,
+        classifyMs,
+        modelMs,
+        llmRequestCount,
+        routerMs,
+        fallbackUsed,
         error: modelResponse.error || 'AI_PROVIDER = NOT_CONFIGURED',
         toolSurface: toolNames,
       };
@@ -191,6 +228,11 @@ export class AgentOrchestrator {
         message: modelResponse.message || '',
         modelUsed: modelResponse.model,
         durationMs: Date.now() - startTime,
+        classifyMs,
+        modelMs,
+        llmRequestCount,
+        routerMs,
+        fallbackUsed,
         toolSurface: toolNames,
       };
     }
@@ -214,6 +256,11 @@ export class AgentOrchestrator {
           message: modelResponse.message || '',
           modelUsed: modelResponse.model,
           durationMs: Date.now() - startTime,
+        classifyMs,
+        modelMs,
+        llmRequestCount,
+        routerMs,
+        fallbackUsed,
           controllerInjected: true,
           toolSurface: toolNames,
         };

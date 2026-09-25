@@ -71,6 +71,12 @@ export interface TargetedEditResolution {
   toolCall: HacpToolCall;
   /** Honest Polish summary — only rendered AFTER verification passes */
   summary: string;
+  /**
+   * GATE v1.0 PHASE 7 — FAST-PATH ELIGIBILITY SIGNAL.
+   * true  → the new value came LITERALLY from the user prompt (deterministic).
+   * false → the value was derived/defaulted (design decision) → AI PATH only.
+   */
+  explicitValue?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -211,6 +217,47 @@ function pickPairingFont(
   return distinct[0];
 }
 
+/**
+ * GATE v1.0 PHASE 11 — resolve an EXPLICIT font name against the Design System
+ * catalog (real existing fonts only). Returns null for unknown fonts so the
+ * caller can stay honest instead of inventing a name.
+ */
+export function resolveDesignSystemFont(rawName: string): { name: string } | null {
+  const wanted = fold(rawName.trim());
+  if (!wanted) return null;
+  const names: string[] = [];
+  for (const f of (DesignSystem.fonts || []) as Array<{ name?: string }>) {
+    if (f?.name) names.push(f.name);
+  }
+  for (const p of (DesignSystem.fontPairings || []) as any[]) {
+    if (p?.displayFont?.name) names.push(p.displayFont.name);
+    if (p?.bodyFont?.name) names.push(p.bodyFont.name);
+  }
+  const distinct = names.filter((n, i) => names.indexOf(n) === i);
+  const exact = distinct.find((n) => fold(n) === wanted);
+  if (exact) return { name: exact };
+  if (wanted.length >= 3) {
+    const prefix = distinct.find((n) => fold(n).startsWith(wanted));
+    if (prefix) return { name: prefix };
+  }
+  return null;
+}
+
+/**
+ * GATE v1.0 PHASE 11 — the font name written literally after "na".
+ * Semantic qualifiers ("luksusowa", "nowoczesny") are NOT font names: they are
+ * deferred to Design Intelligence / AI PATH.
+ */
+function extractExplicitFont(rawPrompt: string): string | undefined {
+  const v = extractValueAfterNa(rawPrompt);
+  if (!v) return undefined;
+  if (looksLikeQualifierPhrase(v)) return undefined;
+  const cleaned = v.replace(/[.!?,;:]+$/, '').trim();
+  if (cleaned.length < 2 || cleaned.length > 40) return undefined;
+  if (!/^[A-Za-z0-9 .'\-]+$/.test(cleaned)) return undefined;
+  return cleaned;
+}
+
 const TEXTUAL_TYPES = new Set([
   'heading',
   'text',
@@ -256,7 +303,9 @@ export function resolveTargetedEdit(
 
   // ── 1. CHANGE_COLOR ──────────────────────────────────────────────────────
   if (COLOR_RE.test(text)) {
-    let color = extractColor(raw);
+    // GATE v1.0 PHASE 7 — value written literally by the user (hex / name).
+    const explicitColor = extractColor(raw);
+    let color = explicitColor;
     if (!color) {
       // User explicitly named a color value we do not know
       // ("...na seledynowy nieokreślony") → honest: do NOT substitute a
@@ -297,6 +346,7 @@ export function resolveTargetedEdit(
           domain: 'COLOR',
           qualifier,
           targetNodeId: targetId,
+          explicitValue: Boolean(explicitColor),
           toolCall: tc('set_node_styles', { nodeId: targetId, pageId, styles }),
           summary: `Zmieniłem kolor ${wantsBg ? 'tła' : 'elementu'} zaznaczenia **${targetLabel}** na **${color}**.`,
         };
@@ -314,9 +364,24 @@ export function resolveTargetedEdit(
     const props = (node.props as Record<string, unknown> | undefined) || {};
     const currentRaw = (styles.fontSize as string) || (props.fontSize as string);
     const currentPx = parsePx(currentRaw) ?? defaultFontSizePx(node);
-    let nextPx = dir > 0 ? Math.round(currentPx * 1.25) : Math.round(currentPx * 0.8);
-    if (dir > 0 && nextPx <= currentPx) nextPx = currentPx + 4;
-    if (dir < 0 && nextPx >= currentPx) nextPx = Math.max(8, currentPx - 4);
+    // GATE v1.0 PHASE 11 — honor an amount written literally in the prompt
+    // ("o 20%" → exactly 20%, "o 10px" → exactly 10px). No amount → documented
+    // default step (×1.25 / ×0.8).
+    const amountMatch = raw.match(/\bo\s+(-?\d+(?:[.,]\d+)?)\s*(%|px|pt)?/i);
+    let nextPx: number;
+    if (amountMatch) {
+      const amount = Math.abs(parseFloat(amountMatch[1].replace(',', '.')));
+      const unit = (amountMatch[2] || '%').toLowerCase();
+      if (unit === 'px') nextPx = Math.round(currentPx + dir * amount);
+      else if (unit === 'pt') nextPx = Math.round(currentPx + dir * (amount * 4) / 3);
+      else nextPx = Math.round(currentPx * (1 + (dir * amount) / 100));
+      if (dir > 0 && nextPx <= currentPx) nextPx = currentPx + 4;
+      if (dir < 0 && nextPx >= currentPx) nextPx = Math.max(8, currentPx - 4);
+    } else {
+      nextPx = dir > 0 ? Math.round(currentPx * 1.25) : Math.round(currentPx * 0.8);
+      if (dir > 0 && nextPx <= currentPx) nextPx = currentPx + 4;
+      if (dir < 0 && nextPx >= currentPx) nextPx = Math.max(8, currentPx - 4);
+    }
     nextPx = Math.min(240, Math.max(8, nextPx));
     if (nextPx !== currentPx || !currentRaw) {
       const fontSize = `${nextPx}px`;
@@ -325,6 +390,7 @@ export function resolveTargetedEdit(
         domain: 'SIZE',
         qualifier,
         targetNodeId: targetId,
+        explicitValue: true,
         toolCall: tc('set_node_styles', { nodeId: targetId, pageId, styles: { fontSize } }),
         summary: `Zmieniłem rozmiar tekstu zaznaczenia **${targetLabel}** na **${fontSize}**.`,
       };
@@ -356,8 +422,9 @@ export function resolveTargetedEdit(
         domain: 'TEXT',
         qualifier,
         targetNodeId: targetId,
+        explicitValue: true,
         toolCall: tc('update_node_props', { sectionId: targetId, pageId, props }),
-        summary: `Zmieniłem tekst zaznaczenia **${targetLabel}** na **„${value}”**.`,
+        summary: `Zmieniłem tekst zaznaczenia **${targetLabel}** na „${value}”.`,
       };
     }
   }
@@ -365,6 +432,24 @@ export function resolveTargetedEdit(
   // ── 4. CHANGE_TYPOGRAPHY ─────────────────────────────────────────────────
   if (/\bczcionk|\bfont|\btypografi|\bkroj pisma|\bfont-family/.test(text)) {
     const currentFont = currentNodeFont(node);
+    // GATE v1.0 PHASE 11 — EXPLICIT font name ("zmień czcionkę na Inter").
+    // Only a real Design System font may be applied; unknown names are refused
+    // (null → AI PATH / CLARIFY), never invented.
+    const explicitFont = extractExplicitFont(raw);
+    if (explicitFont) {
+      const match = resolveDesignSystemFont(explicitFont);
+      if (!match) return null;
+      if (match.name === currentFont) return null;
+      return {
+        intent: 'CHANGE_TYPOGRAPHY',
+        domain: 'TYPOGRAPHY',
+        qualifier,
+        targetNodeId: targetId,
+        explicitValue: true,
+        toolCall: tc('set_node_styles', { nodeId: targetId, pageId, styles: { fontFamily: match.name } }),
+        summary: `Zmieniłem czcionkę zaznaczenia **${targetLabel}** na **${match.name}**.`,
+      };
+    }
     const styles: Record<string, unknown> = {};
     if (qualifier === 'BOLD') {
       const curWeight =
@@ -407,6 +492,8 @@ export function resolveTargetedEdit(
         domain: 'TYPOGRAPHY',
         qualifier,
         targetNodeId: targetId,
+        // Derived from Design Intelligence pairing — NOT a literal user value.
+        explicitValue: false,
         toolCall: tc('set_node_styles', { nodeId: targetId, pageId, styles }),
         summary: `Zastosowałem ${qualifierWord ? `${qualifierWord} ` : ''}typografię na zaznaczeniu **${targetLabel}** (${applied}).`,
       };
@@ -427,6 +514,7 @@ export function resolveTargetedEdit(
           domain: 'ALIGN',
           qualifier,
           targetNodeId: targetId,
+          explicitValue: true,
           toolCall: tc('set_node_styles', { nodeId: targetId, pageId, styles: { textAlign: align } }),
           summary: `Wyrównałem zaznaczenie **${targetLabel}** do: **${align}**.`,
         };
@@ -447,6 +535,7 @@ export function resolveTargetedEdit(
         domain: 'LAYOUT',
         qualifier,
         targetNodeId: targetId,
+        explicitValue: true,
         toolCall: tc('set_node_styles', { nodeId: targetId, pageId, styles }),
         summary: `Przesunąłem zaznaczenie **${targetLabel}** o ${axis === 'X+' ? '24px w prawo' : '24px w lewo'}.`,
       };
@@ -502,6 +591,8 @@ export function resolveTargetedEdit(
         domain: 'STYLE',
         qualifier,
         targetNodeId: targetId,
+        // Creative / Design-System choice → AI PATH only (PHASE 7).
+        explicitValue: false,
         toolCall: tc('set_node_styles', { nodeId: targetId, pageId, styles }),
         summary: `Nadałem zaznaczeniu **${targetLabel}** bardziej ${word} charakter (${Object.keys(styles).join(', ')}).`,
       };

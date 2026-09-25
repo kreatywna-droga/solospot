@@ -30,6 +30,11 @@ import type {
 import type { HacpBridge } from '@/lib/hacp/HacpBridge';
 import type { BuilderDocument } from '../../../packages/builder-core/src';
 import type { ChatMessageAttachment } from '@/lib/ai/AIProviderTypes';
+import {
+  beginLatencyTrace,
+  withLatencyTraceAsync,
+  type LatencyTraceHandle,
+} from '@/lib/ai/LatencyTrace';
 
 export type SharedAiSource = 'main-chat' | 'mini-inspector';
 
@@ -57,6 +62,8 @@ export interface SharedExecuteOptions {
   selectedModelId?: string;
   onProgress?: Parameters<HacpBridge['executePlan']>[6];
   attachments?: ChatMessageAttachment[];
+  /** GATE v1.0 PHASE 1 — controlled latency instrumentation handle (no-op when disabled). */
+  latencyTrace?: LatencyTraceHandle;
 }
 
 export type SharedHistoryListener = (entries: SharedAiHistoryEntry[]) => void;
@@ -87,7 +94,12 @@ class SharedExecutionServiceClass {
 
   /** Execution is independent of UI mount state (PHASE 2). */
   async execute(opts: SharedExecuteOptions): Promise<HacpExecutionResult | null> {
+    // GATE v1.0 PHASE 1 — instrumented only when the controlled switch is on.
+    const trace = opts.latencyTrace ?? beginLatencyTrace({ source: opts.source, prompt: opts.prompt });
+
+    trace.stageStart('QUEUE');
     await this.acquireSlot();
+    trace.stageEnd('QUEUE');
 
     this.record({
       role: 'user',
@@ -99,17 +111,43 @@ class SharedExecutionServiceClass {
     try {
       const { HacpBridge } = await import('@/lib/hacp/HacpBridge');
       const bridge = HacpBridge.getInstance();
-      const result = await bridge.executePlan(
-        opts.prompt,
-        opts.context,
-        opts.document,
-        this.conversationContext,
-        opts.routerMode || 'AUTO',
-        opts.selectedModelId,
-        opts.onProgress,
-        opts.attachments,
-        opts.source
+
+      // GATE v1.0 PHASE 8 — DETERMINISTIC FAST PATH (single pipeline, fast
+      // entry). Returns null when PHASE 7 eligibility fails → we fall through
+      // to the normal AI path below. Same bridge, same dispatch, same history.
+      const fastResult = await withLatencyTraceAsync(trace, () =>
+        bridge.executeFastPath(opts.prompt, opts.context, opts.document)
       );
+
+      let result: HacpExecutionResult;
+      if (fastResult) {
+        result = fastResult;
+      } else {
+        trace.stageStart('HACP_BRIDGE');
+        result = await withLatencyTraceAsync(trace, () =>
+          bridge.executePlan(
+            opts.prompt,
+            opts.context,
+            opts.document,
+            this.conversationContext,
+            opts.routerMode || 'AUTO',
+            opts.selectedModelId,
+            opts.onProgress,
+            opts.attachments,
+            opts.source
+          )
+        );
+        trace.stageEnd('HACP_BRIDGE');
+      }
+
+      trace.setResultMeta({
+        intent: result.intent,
+        executionStatus: result.executionStatus,
+        ok: result.success && result.executionStatus !== 'ERROR' && result.executionStatus !== 'BLOCKED',
+      });
+      if (result.commandsToDispatch.length === 0 && !result.shouldTriggerUndo && !result.shouldTriggerRedo) {
+        trace.note(`no-dispatch:${result.executionStatus || result.intent}`);
+      }
 
       this.mergeConversation(opts.prompt, result);
       this.record({
@@ -126,6 +164,8 @@ class SharedExecutionServiceClass {
       return result;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
+      trace.stageEnd('HACP_BRIDGE');
+      trace.note(`error:${message}`);
       this.mergeConversation(opts.prompt, null, message);
       this.record({
         role: 'error',
