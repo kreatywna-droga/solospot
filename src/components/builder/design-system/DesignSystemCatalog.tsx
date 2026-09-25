@@ -64,6 +64,21 @@ const CATEGORIES: { id: CategoryId; label: string }[] = [
   { id: 'visual-languages', label: 'Języki wizualne' },
 ]
 
+function getPreviewDescription(item: any): string {
+  if (typeof item?.description === 'string' && item.description) return item.description
+  if (typeof item?.style === 'string' && item.style) return item.style
+  if (typeof item?.character === 'string' && item.character) return item.character
+  if (typeof item?.character?.personality === 'string' && item.character.personality) return item.character.personality
+  if (typeof item?.preview === 'string' && item.preview) return item.preview
+  if (item?.preview && typeof item.preview === 'object') {
+    if (typeof item.preview.sample === 'string' && item.preview.sample) return item.preview.sample
+    if (typeof item.preview.body === 'string' && item.preview.body) return item.preview.body
+    if (typeof item.preview.heading === 'string' && item.preview.heading) return item.preview.heading
+    if (typeof item.preview.h1 === 'string' && item.preview.h1) return item.preview.h1
+  }
+  return 'Podgląd'
+}
+
 function matchQ(item: any, q: string): boolean {
   if (!q) return true
   const hay = [
@@ -597,11 +612,8 @@ export function DesignSystemCatalog() {
               </div>
               <div className="p-4 space-y-3" data-testid="ds-preview-content">
                 <div className="rounded-xl p-4 border border-white/10">
-                  <div className="text-lg font-bold mb-1 text-white">
-                    {previewItem.name || previewItem.id}
-                  </div>
                   <div className="text-sm mb-2 text-zinc-300">
-                    {previewItem.description || previewItem.style || previewItem.preview || 'Podgląd'}
+                    {getPreviewDescription(previewItem)}
                   </div>
                   {previewItem.values && (
                     <div className="text-[11px] text-zinc-400 space-y-1">

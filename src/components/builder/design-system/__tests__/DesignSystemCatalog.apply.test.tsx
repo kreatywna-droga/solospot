@@ -198,4 +198,28 @@ describe('DesignSystemCatalog — Apply button regression', () => {
     const cmd = mockDispatch.mock.calls[0][0]
     expect(cmd.type).toBe('UPDATE_THEME')
   })
+
+  it('Font and Font Pairing preview modal renders without React child object error #31', () => {
+    const { container, getByTestId } = render(<DesignSystemCatalog />)
+    
+    // Switch to Fonts category
+    fireEvent.click(container.querySelector('[data-testid="ds-cat-fonts"]') as Element)
+    const fontPreviewBtn = container.querySelector('[data-category="fonts"] [data-testid="ds-btn-preview"]') as HTMLButtonElement
+    fireEvent.click(fontPreviewBtn)
+    
+    // Preview modal should be rendered without throwing React #31
+    expect(getByTestId('ds-preview-modal')).toBeDefined()
+    expect(getByTestId('ds-preview-content')).toBeDefined()
+    
+    // Close preview modal
+    fireEvent.click(getByTestId('ds-preview-modal').querySelector('button[aria-label="Zamknij"]') as Element)
+
+    // Switch to Font Pairings category
+    fireEvent.click(container.querySelector('[data-testid="ds-cat-font-pairings"]') as Element)
+    const pairingPreviewBtn = container.querySelector('[data-category="font-pairings"] [data-testid="ds-btn-preview"]') as HTMLButtonElement
+    fireEvent.click(pairingPreviewBtn)
+
+    expect(getByTestId('ds-preview-modal')).toBeDefined()
+    expect(getByTestId('ds-preview-content')).toBeDefined()
+  })
 })
