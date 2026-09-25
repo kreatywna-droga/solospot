@@ -538,8 +538,19 @@ export function resolveDesignApplication(
   if (req.kind === 'font-pairing') {
     const pairing = findIn(designSystem.fontPairings, req.id);
     if (!pairing) return fail(req.id, [], `Para fontów "${req.id}" nie istnieje.`);
-    const headingFont = pairing.headingFont || pairing.primaryFont || (pairing as any).fontFamily || '';
-    const bodyFont = pairing.bodyFont || pairing.secondaryFont || (pairing as any).secondaryFontFamily || headingFont;
+    const headingFont =
+      pairing.displayFont?.family ||
+      pairing.displayFont?.name ||
+      pairing.headingFont ||
+      pairing.primaryFont ||
+      (pairing as any).fontFamily ||
+      '';
+    const bodyFont =
+      pairing.bodyFont?.family ||
+      pairing.bodyFont?.name ||
+      pairing.secondaryFont ||
+      (pairing as any).secondaryFontFamily ||
+      headingFont;
     if (!headingFont && !bodyFont) return fail(pairing.name || req.id, [], 'Para fontów nie ma zdefiniowanych fontów.');
     const theme: Record<string, string | undefined> = {};
     if (headingFont || bodyFont) theme.font = headingFont || bodyFont;

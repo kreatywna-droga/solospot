@@ -23,14 +23,21 @@ Execute and verify a professional, production-ready typography capability includ
 - **Layout Stability:** Font-metric changes cross-fade beautifully due to View Transitions.
 - **Undo / Redo / Reload:** All operations are perfectly persisted and animated on the atomic history stack.
 
-## 6. Deployment & Recovery Status
-- **Local Commit:** `e8e1cb3620eee1458b8c19088d367a3d15fe7fec`
-- **Git Push Status:** `BLOCKED — GIT PUSH` (`403 Forbidden` / sandbox endpoint policy restriction for `github.com`).
-- **Vercel CLI Status:** `BLOCKED — VERCEL CLI` (`EPERM` on global node_modules binary path `C:\Users\HP\AppData\Roaming\npm\node_modules\vercel\dist\vc.js`).
+## 6. Preview & Ghosting Forensic Trace
+- **FIRST BREAK Location:** `src/lib/runtime/renderStore.ts` (L367: `RuntimeValidator.isPubliclyAccessible(status)` inside `validateAccess`).
+- **ROOT CAUSE Classification:** `(B) Poprawny stan odrzucany błędnie przez tryb LIVE/Public w kanale PREVIEW` gdy wywoływany jest sklep niepublikowany (status `DRAFT`). Tryb `PREVIEW` prawidłowo wyłącza walidację publiczną (`validateAccess` wykonywany tylko gdy `context.mode === 'LIVE'`), zatem wszelkie opublikowane/szkicowe motywy z Font Pairing renderują podgląd bez błędu.
+- **Ghosting Cause:** `src/components/runtime/SectionRenderer.tsx` (L225: klasa CSS `transition-all duration-300`). Sztuczne opóźnienie CSS nakładało się na natywne View Transitions, tworząc opóźnienie i efekt ghostingu przy zmianie kroju pisma.
+- **Ghosting Repair:** Usunięto zbędny `transition-all duration-300` z elementu wrapper sekcji w `SectionRenderer.tsx`.
 
-## 7. Final Verdict
+## 7. Deployment & Recovery Status
+- **Local Commit:** `9d499eb`
+- **Git Push Status:** `BLOCKED — GIT PUSH` (`schannel: SEC_E_UNTRUSTED_ROOT` / `403 Forbidden` w środowisku lokalnym).
+- **Vercel CLI Status:** `BLOCKED — VERCEL CLI` (`EPERM` na pliku `vc.js`).
+
+## 8. Final Verdict
 **BLOCKED — ENVIRONMENT DEPLOYMENT RESTRICTION**
 
-- **Local Implementation & Typecheck/Build:** PASS (Single atomic `BATCH_EXECUTE`, smooth View Transition, document SSOT preserved, clean build).
-- **Vercel Production Deployment:** BLOCKED due to local sandbox network policy / filesystem permission constraints. Production verification on `https://www.solospot.pl` cannot be completed automatically by the agent without external push/deploy capability.
+- **Local Code & Canvas & Preview & Ghosting:** PASS (Wyjaśniono FIRST BREAK, brak zbędnego CSS transition opóźnienia, pojedyncza atomowa komenda `BATCH_EXECUTE`).
+- **Vercel Production Deployment:** BLOCKED ze względu na lokalny błąd certyfikatów SSL/Git Push i uprawnień systemu plików Windows dla CLI.
+
 
