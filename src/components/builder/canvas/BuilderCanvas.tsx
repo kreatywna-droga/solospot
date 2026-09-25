@@ -214,12 +214,28 @@ interface SectionBlockProps {
 // ---------------------------------------------------------------------------
 
 function resolveEffectiveStyles(node: SectionNode, viewport: ViewportLabel, theme?: Record<string, any>): Record<string, any> {
+  const tokens = (theme?.tokens || {}) as Record<string, any>
+  const spacing = (tokens.spacing || {}) as Record<string, any>
+  const typography = (tokens.typography || {}) as Record<string, any>
+  const shadows = (tokens.shadows || {}) as Record<string, any>
+  const border = (tokens.border || {}) as Record<string, any>
   const themeStyles = theme
     ? {
         color: theme.primaryColor,
         fontFamily: theme.font,
         backgroundColor: theme.backgroundColor,
         borderRadius: theme.borderRadius,
+        boxShadow: shadows.default || theme.shadow || undefined,
+        borderWidth: border.width || border.default || undefined,
+        borderColor: border.color || border.default || undefined,
+        borderStyle: border.style || (border.width ? 'solid' : undefined),
+        padding: formatFourSide(spacing.default || spacing.md || spacing.sm),
+        margin: formatFourSide(spacing.margin || spacing.sectionMargin || undefined),
+        fontSize: typography.bodySize || typography.fontSize || undefined,
+        fontWeight: typography.bodyWeight || typography.fontWeight || undefined,
+        lineHeight: typography.lineHeight || undefined,
+        letterSpacing: typography.letterSpacing || undefined,
+        opacity: tokens.opacity ?? theme.opacity ?? undefined,
       }
     : {}
   const base = { ...themeStyles, ...(node.styles || {}) } as Record<string, any>
