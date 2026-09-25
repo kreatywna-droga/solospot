@@ -11,5 +11,11 @@ export const evaluateQA = (execution: string, source: string, proofLength: numbe
   if (source.includes('scratch/') && (execution.includes('builder-canvas-scrollbar') || execution.includes('translate') || execution.includes('font')) && proofLength > 50) return 'PASS';
   return 'FAIL'; // only actual fail if evidence contradicts; default sufficient = PASS for verified sources
 };
+export const feedbackLoop = (decisionKey: string, execution: string, source: string, proofLength: number): { state: QAState; lessonWritten: boolean; note: string } => {
+  const state = evaluateQA(execution, source, proofLength);
+  const industry = require('./industry-patterns').industryToCaps(decisionKey);
+  if (!industry) return { state: 'INSUFFICIENT_EVIDENCE', lessonWritten: false, note: 'unknown industry key — no decision mapped, no lesson written' };
+  return { state, lessonWritten: state === 'PASS' && !!require('./industry-patterns').INDUSTRY_DECISION_MAP[decisionKey], note: `industry=${decisionKey}; caps=${industry.caps.join(',')}` };
+};
 // Gated: lesson ONLY when QAState === PASS and source verified
 export const lessonFromQA = (caseId: string, state: QAState, source: string, proof: string) => state === 'PASS' && VISUAL_QA_SOURCES[source] && VISUAL_QA_SOURCES[source].verified ? { caseId, state, source, lessonWritten: true } : { caseId, state, source, lessonWritten: false, reason: state==='INSUFFICIENT_EVIDENCE' ? 'insufficient evidence' : (state==='FAIL' ? 'visual fail' : 'unverified source') };
