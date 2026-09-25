@@ -100,8 +100,35 @@ export function BuilderProvider({
   ctxRef.current = ctx
 
   // dispatch — the single mutation gateway
-  const dispatch = useCallback((command: BuilderCommand) => {
-    setCtx(prev => prev.dispatch(command))
+  const dispatch = useCallback(async (command: BuilderCommand) => {
+    let fontToLoad: string | undefined;
+
+    if (command.type === 'UPDATE_THEME' && command.theme?.font) {
+      fontToLoad = command.theme.font;
+    } else if (command.type === 'BATCH_EXECUTE') {
+      const themeCmd = command.commands.find((c: any) => c.type === 'UPDATE_THEME' && c.theme?.font);
+      if (themeCmd) {
+        fontToLoad = (themeCmd as any).theme.font;
+      }
+    }
+
+    if (fontToLoad) {
+      const { loadGoogleFont } = await import('../../../../packages/builder-core/src/fonts/FontCatalog');
+      await loadGoogleFont(fontToLoad);
+    }
+
+    const shouldAnimate = command.type === 'UPDATE_THEME' || command.type === 'BATCH_EXECUTE' || command.type === 'SET_NODE_STYLES';
+
+    if (shouldAnimate && typeof document !== 'undefined' && 'startViewTransition' in document) {
+      const { flushSync } = await import('react-dom');
+      (document as any).startViewTransition(() => {
+        flushSync(() => {
+          setCtx(prev => prev.dispatch(command));
+        });
+      });
+    } else {
+      setCtx(prev => prev.dispatch(command));
+    }
   }, [])
 
   // HACP live dispatch — enables HACP write tools to mutate live BuilderContext

@@ -1,0 +1,140 @@
+{
+  "base": "https://www.solospot.pl",
+  "jsErrors": [],
+  "steps": {
+    "load": {
+      "studio": true,
+      "jsErrors": [
+        "console: Failed to load resource: the server responded with a status of 401 ()",
+        "console: Failed to load resource: the server responded with a status of 401 ()",
+        "console: Failed to load resource: the server responded with a status of 401 ()",
+        "console: Failed to load resource: the server responded with a status of 404 ()",
+        "console: Failed to load resource: the server responded with a status of 401 ()",
+        "console: Failed to load resource: the server responded with a status of 401 ()",
+        "console: Failed to load resource: the server responded with a status of 401 ()",
+        "console: Failed to load resource: the server responded with a status of 404 ()"
+      ]
+    },
+    "select": {
+      "selected": false,
+      "jsErrors": []
+    },
+    "designSystem": {
+      "opened": true,
+      "applied": true,
+      "tab": "Styl (Ctrl+5)",
+      "item": "Inter | inter | popular",
+      "before": {
+        "doc": {
+          "theme": {
+            "primaryColor": "#7c3aed",
+            "secondaryColor": "#f1f5f9",
+            "font": "Inter"
+          },
+          "nodes": {
+            "sec-hero-init": {
+              "styles": {},
+              "props": {
+                "title": "SoloSpot Visual Builder v2.0",
+                "subtitle": "Biblioteka",
+                "cta": "Rozpocznij zakupy"
+              }
+            }
+          }
+        },
+        "canvas": {
+          "sectionFont": "Inter",
+          "headlineFont": "Inter",
+          "headlineText": "SoloSpot Visual Builder v2.0",
+          "sectionBg": "rgba(0, 0, 0, 0)",
+          "canvasBpAttr": null
+        }
+      },
+      "after": {
+        "doc": {
+          "theme": {
+            "primaryColor": "#7c3aed",
+            "secondaryColor": "#f1f5f9",
+            "font": "Inter"
+          },
+          "nodes": {
+            "sec-hero-init": {
+              "styles": {},
+              "props": {
+                "title": "SoloSpot Visual Builder v2.0",
+                "subtitle": "Biblioteka",
+                "cta": "Rozpocznij zakupy"
+              }
+            }
+          }
+        },
+        "canvas": {
+          "sectionFont": "Inter",
+          "headlineFont": "Inter",
+          "headlineText": "SoloSpot Visual Builder v2.0",
+          "sectionBg": "rgba(0, 0, 0, 0)",
+          "canvasBpAttr": null
+        }
+      },
+      "themeFontChanged": false,
+      "canvasFontChanged": false,
+      "jsErrors": []
+    },
+    "undo": {
+      "themeFont": "Inter",
+      "->": "Inter",
+      "canvasFont": "Inter",
+      "->2": "Inter",
+      "undoChangedDoc": false,
+      "jsErrors": []
+    },
+    "miniInspector": {
+      "opened": true,
+      "executed": "SUCCESS",
+      "bgBefore": "rgba(0, 0, 0, 0)",
+      "bgAfter": "rgb(0, 255, 0)",
+      "bgChanged": true,
+      "jsErrors": []
+    },
+    "persistence": {
+      "savedThemeFont": "Inter",
+      "reloadedThemeFont": "Inter",
+      "themeSurvived": true,
+      "savedCanvasFont": "Inter",
+      "reloadedCanvasFont": "Inter",
+      "canvasFontSurvived": true,
+      "headlineSurvived": "SoloSpot Visual Builder v2.0",
+      "jsErrors": [
+        "console: Failed to load resource: the server responded with a status of 401 ()",
+        "console: Failed to load resource: the server responded with a status of 401 ()",
+        "console: Failed to load resource: the server responded with a status of 401 ()",
+        "console: Failed to load resource: the server responded with a status of 401 ()",
+        "console: Failed to load resource: the server responded with a status of 404 ()"
+      ]
+    },
+    "responsive": {
+      "Tablet": {
+        "viewportW": 1440,
+        "heroWidth": 824,
+        "hasIframe": false,
+        "iframeW": null,
+        "jsErrors": []
+      },
+      "Mobile": {
+        "viewportW": 1440,
+        "heroWidth": 824,
+        "hasIframe": false,
+        "iframeW": null,
+        "jsErrors": []
+      },
+      "Desktop": {
+        "viewportW": 1440,
+        "heroWidth": 530,
+        "hasIframe": false,
+        "iframeW": null,
+        "jsErrors": []
+      }
+    }
+  },
+  "totalJsErrors": 0
+}

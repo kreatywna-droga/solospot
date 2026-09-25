@@ -1,0 +1,136 @@
+{
+  "baseUrl": "https://www.solospot.pl",
+  "results": [
+    {
+      "id": "S01",
+      "action": "Open prod URL",
+      "expected": "reachable",
+      "actual": "https://www.solospot.pl",
+      "status": "PASS",
+      "evidence": "https://www.solospot.pl"
+    },
+    {
+      "id": "S02",
+      "action": "Builder workspace present",
+      "expected": "[data-builder-workspace]",
+      "actual": "present",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S03",
+      "action": "Select node on canvas",
+      "expected": "click succeeded",
+      "actual": "section:sec-hero-init",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S04",
+      "action": "Mini Inspector [AI] button visible",
+      "expected": "mini-inspector-ai-open present",
+      "actual": "present",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S05",
+      "action": "Mini Inspector AI window opens",
+      "expected": "data-testid=mini-inspector-ai visible",
+      "actual": "visible status=IDLE",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S06",
+      "action": "Target lock strip shows locked node",
+      "expected": "TARGET: <nodeType> <nodeId>",
+      "actual": "TARGET:hero sec-hero-init (page page-home)",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S07",
+      "action": "Quick actions present and non-empty",
+      "expected": ">= 3 enabled actions",
+      "actual": "4 total, 0 disabled: Modernize | Change typography | Change background | Apply hero style",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S08",
+      "action": "Initial status is honest (not SUCCESS)",
+      "expected": "GOTOWY / IDLE / RUNNING",
+      "actual": "GOTOWY",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S09",
+      "action": "HACP prompt returns honest terminal status",
+      "expected": "SUCCESS | PARTIAL | FAILED | CLARIFY (not stuck RUNNING)",
+      "actual": "FAILED · user=1 ai=1",
+      "status": "PASS",
+      "evidence": "Nie udało się uzyskać odpowiedzi z wybranego modelu (nvidia/nemotron-3.5-lightning:free). Spróbuj ponownie lub wybierz inny model w menu powyżej. FAILED"
+    },
+    {
+      "id": "S10",
+      "action": "No contradictory insert_section SUCCESS claim",
+      "expected": "hasFakeClaim=false",
+      "actual": "false",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S11",
+      "action": "Undo/Redo controls present in AI window",
+      "expected": "undo+redo buttons",
+      "actual": "{\"undo\":true,\"redo\":true,\"undoDisabled\":true,\"redoDisabled\":true}",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S12",
+      "action": "Selection change re-resolves target lock (§14)",
+      "expected": "data-ai-target updates or matches new selection",
+      "actual": "before=sec-hero-init after=sec-hero-init strip=TARGET:hero sec-hero-init (page page-home)",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S13",
+      "action": "After reload: AI window reopens with fresh honest status",
+      "expected": "window open + GOTOWY + target resolved",
+      "actual": "{\"windowOpen\":true,\"status\":\"GOTOWY\",\"target\":\"TARGET:hero sec-hero-init (page page-home)\",\"hasQuickActions\":true}",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S14",
+      "action": "New console errors after baseline = 0",
+      "expected": "0",
+      "actual": "0",
+      "status": "PASS",
+      "evidence": ""
+    }
+  ],
+  "evidence": {
+    "consoleErrors": [],
+    "node1": {
+      "id": "sec-hero-init",
+      "type": "section",
+      "x": 816,
+      "y": 238
+    },
+    "node2": {
+      "id": "sec-hero-init",
+      "type": "section",
+      "x": 816,
+      "y": 238
+    }
+  },
+  "summary": {
+    "pass": 14,
+    "fail": 0
+  }
+}

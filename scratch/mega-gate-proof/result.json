@@ -1,0 +1,245 @@
+{
+  "baseUrl": "https://www.solospot.pl",
+  "at": "2026-09-24T18:15:10.116Z",
+  "counts": {
+    "style-packs": 70,
+    "design-combinations": 100,
+    "fonts": 200,
+    "font-pairings": 110,
+    "typography": 30,
+    "colors": 100,
+    "color-combinations": 106,
+    "buttons": 13,
+    "cards": 20,
+    "backgrounds": 20,
+    "hero": 15,
+    "sections": 21,
+    "images": 15,
+    "icons": 15,
+    "effects": 15,
+    "shadows": 19,
+    "radius": 20,
+    "spacing": 20,
+    "industry-presets": 20,
+    "themes": 15
+  },
+  "results": [
+    {
+      "id": "S01",
+      "action": "Open https://www.solospot.pl/studio/test-store",
+      "expected": "reachable",
+      "actual": "https://www.solospot.pl",
+      "status": "PASS",
+      "evidence": "https://www.solospot.pl"
+    },
+    {
+      "id": "S02",
+      "action": "Design System catalog open",
+      "expected": "ds-catalog-root",
+      "actual": "present",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S03",
+      "action": "20 category chips present",
+      "expected": "20 chips: style-packs,design-combinations,fonts,font-pairings,typography,colors,color-combinations,buttons,cards,backgrounds,hero,sections,images,icons,effects,shadows,radius,spacing,industry-presets,themes",
+      "actual": "found=20 missing=[]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S04",
+      "action": "Category style-packs routes to its dataset",
+      "expected": "count >= 70",
+      "actual": "active=ds-cat-style-packs count=70 first=[sp-modern-dental-premium,sp-medical-clean,sp-dental-wellness]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S05",
+      "action": "Category design-combinations routes to its dataset",
+      "expected": "count >= 100",
+      "actual": "active=ds-cat-design-combinations count=100 first=[comb-001,comb-002,comb-003]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S06",
+      "action": "Category fonts routes to its dataset",
+      "expected": "count >= 196",
+      "actual": "active=ds-cat-fonts count=200 first=[inter,space-grotesk,outfit]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S07",
+      "action": "Category font-pairings routes to its dataset",
+      "expected": "count >= 110",
+      "actual": "active=ds-cat-font-pairings count=110 first=[modern-inter-outfit,modern-space-outfit,modern-epilogue-raleway]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S08",
+      "action": "Category typography routes to its dataset",
+      "expected": "count > 0 or empty message",
+      "actual": "active=ds-cat-typography count=30 first=[typography-modern-minimal,typography-luxury-editorial,typography-premium-corporate]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S09",
+      "action": "Category colors routes to its dataset",
+      "expected": "count >= 100",
+      "actual": "active=ds-cat-colors count=100 first=[mono-black-white,mono-charcoal,mono-cream]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S10",
+      "action": "Category color-combinations routes to its dataset",
+      "expected": "count > 0 or empty message",
+      "actual": "active=ds-cat-color-combinations count=106 first=[cc-mono-clean,cc-graphite-docs,cc-stone-editorial]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S11",
+      "action": "Category buttons routes to its dataset",
+      "expected": "count > 0 or empty message",
+      "actual": "active=ds-cat-buttons count=13 first=[buttons-solid,buttons-outline,buttons-ghost]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S12",
+      "action": "Category cards routes to its dataset",
+      "expected": "count > 0 or empty message",
+      "actual": "active=ds-cat-cards count=20 first=[cards-minimal,cards-bordered,cards-elevated]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S13",
+      "action": "Category backgrounds routes to its dataset",
+      "expected": "count > 0 or empty message",
+      "actual": "active=ds-cat-backgrounds count=20 first=[background-solid,background-gradient,background-dark]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S14",
+      "action": "Category hero routes to its dataset",
+      "expected": "count > 0 or empty message",
+      "actual": "active=ds-cat-hero count=15 first=[hero-centered,hero-left,hero-right]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S15",
+      "action": "Category sections routes to its dataset",
+      "expected": "count > 0 or empty message",
+      "actual": "active=ds-cat-sections count=21 first=[section-clean,section-hero,section-compact]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S16",
+      "action": "Category images routes to its dataset",
+      "expected": "count > 0 or empty message",
+      "actual": "active=ds-cat-images count=15 first=[image-natural,image-rounded,image-full-bleed]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S17",
+      "action": "Category icons routes to its dataset",
+      "expected": "count > 0 or empty message",
+      "actual": "active=ds-cat-icons count=15 first=[icon-outline,icon-filled,icon-duotone]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S18",
+      "action": "Category effects routes to its dataset",
+      "expected": "count > 0 or empty message",
+      "actual": "active=ds-cat-effects count=15 first=[effect-none,effect-fade,effect-slide]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S19",
+      "action": "Category shadows routes to its dataset",
+      "expected": "count > 0 or empty message",
+      "actual": "active=ds-cat-shadows count=19 first=[shadow-none,shadow-soft,shadow-medium]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S20",
+      "action": "Category radius routes to its dataset",
+      "expected": "count > 0 or empty message",
+      "actual": "active=ds-cat-radius count=20 first=[radius-rounded,radius-sharp,radius-pill]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S21",
+      "action": "Category spacing routes to its dataset",
+      "expected": "count > 0 or empty message",
+      "actual": "active=ds-cat-spacing count=20 first=[spacing-compact,spacing-balanced,spacing-airy]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S22",
+      "action": "Category industry-presets routes to its dataset",
+      "expected": "count >= 20",
+      "actual": "active=ds-cat-industry-presets count=20 first=[ind-dental,ind-medical,ind-law]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S23",
+      "action": "Category themes routes to its dataset",
+      "expected": "count > 0 or empty message",
+      "actual": "active=ds-cat-themes count=15 first=[theme-modern-minimal,theme-luxury-editorial,theme-medical-clean]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S24",
+      "action": "Apply style pack → ZASTOSOWANY badge",
+      "expected": "badge",
+      "actual": "badge",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S25",
+      "action": "Undo (Ctrl+Z) clears applied state",
+      "expected": "badge cleared",
+      "actual": "cleared",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S26",
+      "action": "Rapid switch ×50 across 20 categories",
+      "expected": "active chip == wanted, no hang",
+      "actual": "samples=11 mismatches=0",
+      "status": "PASS",
+      "evidence": "[]"
+    },
+    {
+      "id": "S27",
+      "action": "Console errors = 0",
+      "expected": "0",
+      "actual": "0",
+      "status": "PASS",
+      "evidence": ""
+    }
+  ],
+  "consoleErrors": []
+}

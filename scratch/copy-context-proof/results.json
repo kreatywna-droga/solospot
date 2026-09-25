@@ -1,0 +1,115 @@
+{
+  "RESULTS": [
+    {
+      "id": "A1",
+      "action": "AI workspace",
+      "expected": "SOLOSPOT AI",
+      "actual": "found",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "A2",
+      "action": "COPY CONTEXT button",
+      "expected": "present",
+      "actual": "found",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "B1",
+      "action": "Conversation select-text",
+      "expected": "text",
+      "actual": "text",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "C1",
+      "action": "AI reply + per-message copy button",
+      "expected": "Kopiuj odpowiedź",
+      "actual": "found",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "B2",
+      "action": "Mouse drag selects text",
+      "expected": "non-empty",
+      "actual": "\"Przeanalizuj a\"",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "B5",
+      "action": "Right-click contextmenu not blocked",
+      "expected": "not prevented",
+      "actual": "{\"blocked\":false,\"sel\":\"Przeanalizuj a\"}",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "B3",
+      "action": "Ctrl+A in conversation",
+      "expected": "non-empty",
+      "actual": "\"Ty\\n•\\n22:23:05\\nPrzeanalizuj aktualną stronę i powie\"",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "B4",
+      "action": "Ctrl+C copies",
+      "expected": "clipboard text",
+      "actual": "\r\nTy\r\n•\r\n22:23:05\r\nPrzeanalizuj aktualną stronę i powiedz mi",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "D1",
+      "action": "COPY CONTEXT markers",
+      "expected": "headers",
+      "actual": "=== SOLOSPOT AI CONTEXT ===\r\n\r\n[USER]\r\nPrzeanalizuj aktualną stronę i powiedz mi",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "D2",
+      "action": "Role blocks",
+      "expected": "[USER]/[AI]/[SYSTEM]/[TOOL]",
+      "actual": "=== SOLOSPOT AI CONTEXT ===\r\n\r\n[USER]\r\nPrzeanalizuj aktualną stronę i powiedz mi, jakie sekcje się na niej znajdują.\r\n\r\n[AI]\r\nPróba wykonania insert_section_from_library nie powiodła się: Nie znaleziono szablonu sekcji o ID \"sec-hero-init\" w bibliote",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "D3",
+      "action": "Feedback",
+      "expected": "Skopiowano cały kontekst",
+      "actual": "Skopiowano cały kontekst",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "E1",
+      "action": "Single message copy",
+      "expected": "non-empty clipboard",
+      "actual": "{\"ok\":true,\"len\":220,\"text\":\"Próba wykonania insert_section_from_library nie powiodła się\"}",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "F1",
+      "action": "No JS page errors from this change",
+      "expected": "0",
+      "actual": "0",
+      "status": "PASS",
+      "evidence": ""
+    }
+  ],
+  "clipboard": "=== SOLOSPOT AI CONTEXT ===\r\n\r\n[USER]\r\nPrzeanalizuj aktualną stronę i powiedz mi, jakie sekcje się na niej znajdują.\r\n\r\n[AI]\r\nPróba wykonania insert_section_from_library nie powiodła się: Nie znaleziono szablonu sekcji o ID \"sec-hero-init\" w bibliotece. Użyj search_sections aby znaleźć dostępne szablony. Nie wprowadzono zmian w BuilderDocument.\r\n[TOOL] insert_section_from_library\r\n\r\n=== END CONTEXT ===",
+  "httpNoise": [
+    "HTTP 401 https://www.solospot.pl/api/stores/test-store",
+    "HTTP 401 https://www.solospot.pl/api/stores/test-store",
+    "HTTP 404 https://www.solospot.pl/api/preview/test-store?mode=LIVE&noCache=true"
+  ],
+  "relevant": []
+}

@@ -1,0 +1,369 @@
+{
+  "base": "https://www.solospot.pl",
+  "positive": [
+    {
+      "id": "P1",
+      "wallMs": 1551,
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "ok": true,
+      "notes": [],
+      "panel": {
+        "target": "node-heading-a",
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "message": "Polecenie wykonane pomyślnie",
+        "full": "AI\nNagłówek · node-heading-a\nSUCCESS\nTARGET:\nheading node-heading-a (page page-home)\nPolecenie wykonane pomyślnie\nImprove copy\nShorten\nMake professional\nChange typography\nChange color"
+      },
+      "changedDoc": [
+        "node-heading-a"
+      ],
+      "traceTool": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "CHANGE_TYPOGRAPHY",
+            "domain": "TYPOGRAPHY",
+            "targetNodeId": "node-heading-a",
+            "timestamp": "2026-09-25T11:08:51.057Z"
+          }
+        ]
+      ],
+      "api": [],
+      "headingBefore": {
+        "type": "heading",
+        "styles": {
+          "color": "#ffffff"
+        },
+        "props": {
+          "text": "Naglowek A"
+        }
+      },
+      "headingAfter": {
+        "type": "heading",
+        "styles": {
+          "color": "#ffffff",
+          "letterSpacing": "0.04em"
+        },
+        "props": {
+          "text": "Naglowek A"
+        }
+      },
+      "styleOk": true,
+      "textUntouched": true,
+      "apiEmpty": true,
+      "prompt": "rozciągnij tytuł na boki"
+    },
+    {
+      "id": "P2",
+      "wallMs": 1721,
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "ok": true,
+      "notes": [],
+      "panel": {
+        "target": "node-heading-a",
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "message": "Polecenie wykonane pomyślnie",
+        "full": "AI\nNagłówek · node-heading-a\nSUCCESS\nTARGET:\nheading node-heading-a (page page-home)\nPolecenie wykonane pomyślnie\nImprove copy\nShorten\nMake professional\nChange typography\nChange color"
+      },
+      "changedDoc": [
+        "node-heading-a"
+      ],
+      "traceTool": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "CHANGE_TEXT",
+            "domain": "TEXT",
+            "targetNodeId": "node-heading-a",
+            "timestamp": "2026-09-25T11:08:54.596Z"
+          }
+        ]
+      ],
+      "api": [],
+      "headingBefore": {
+        "type": "heading",
+        "styles": {
+          "color": "#ffffff",
+          "letterSpacing": "0.04em"
+        },
+        "props": {
+          "text": "Naglowek A"
+        }
+      },
+      "headingAfter": {
+        "type": "heading",
+        "styles": {
+          "color": "#ffffff",
+          "letterSpacing": "0.04em"
+        },
+        "props": {
+          "text": "MARCIN BERNATOWICZ AI CREATIVE"
+        }
+      },
+      "propOk": true,
+      "apiEmpty": true,
+      "prompt": "napisz MARCIN BERNATOWICZ AI CREATIVE"
+    },
+    {
+      "id": "P3",
+      "wallMs": 1547,
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "ok": true,
+      "notes": [],
+      "panel": {
+        "target": "node-heading-a",
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "message": "Polecenie wykonane pomyślnie",
+        "full": "AI\nNagłówek · node-heading-a\nSUCCESS\nTARGET:\nheading node-heading-a (page page-home)\nPolecenie wykonane pomyślnie\nImprove copy\nShorten\nMake professional\nChange typography\nChange color"
+      },
+      "changedDoc": [
+        "node-heading-a"
+      ],
+      "traceTool": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "CHANGE_APPEARANCE",
+            "domain": "STYLE",
+            "targetNodeId": "node-heading-a",
+            "timestamp": "2026-09-25T11:08:57.925Z"
+          }
+        ]
+      ],
+      "api": [],
+      "headingBefore": {
+        "type": "heading",
+        "styles": {
+          "color": "#ffffff",
+          "letterSpacing": "0.04em"
+        },
+        "props": {
+          "text": "MARCIN BERNATOWICZ AI CREATIVE"
+        }
+      },
+      "headingAfter": {
+        "type": "heading",
+        "styles": {
+          "color": "#ffffff",
+          "letterSpacing": "0.04em",
+          "opacity": 0.9
+        },
+        "props": {
+          "text": "MARCIN BERNATOWICZ AI CREATIVE"
+        }
+      },
+      "styleOk": true,
+      "apiEmpty": true,
+      "prompt": "zrób bardziej przezroczysty"
+    },
+    {
+      "id": "P4",
+      "wallMs": 1548,
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "ok": true,
+      "notes": [],
+      "panel": {
+        "target": "node-heading-a",
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "message": "Polecenie wykonane pomyślnie",
+        "full": "AI\nNagłówek · node-heading-a\nSUCCESS\nTARGET:\nheading node-heading-a (page page-home)\nPolecenie wykonane pomyślnie\nImprove copy\nShorten\nMake professional\nChange typography\nChange color"
+      },
+      "changedDoc": [
+        "node-heading-a"
+      ],
+      "traceTool": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "CHANGE_APPEARANCE",
+            "domain": "STYLE",
+            "targetNodeId": "node-heading-a",
+            "timestamp": "2026-09-25T11:09:01.262Z"
+          }
+        ]
+      ],
+      "api": [],
+      "headingBefore": {
+        "type": "heading",
+        "styles": {
+          "color": "#ffffff",
+          "letterSpacing": "0.04em",
+          "opacity": 0.9
+        },
+        "props": {
+          "text": "MARCIN BERNATOWICZ AI CREATIVE"
+        }
+      },
+      "headingAfter": {
+        "type": "heading",
+        "styles": {
+          "color": "#ffffff",
+          "letterSpacing": "0.04em",
+          "opacity": 0.9,
+          "borderRadius": "12px"
+        },
+        "props": {
+          "text": "MARCIN BERNATOWICZ AI CREATIVE"
+        }
+      },
+      "styleOk": true,
+      "apiEmpty": true,
+      "prompt": "zwiększ zaokrąglenie rogów"
+    },
+    {
+      "id": "P5",
+      "wallMs": 1477,
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "ok": true,
+      "notes": [],
+      "panel": {
+        "target": "node-heading-a",
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "message": "Polecenie wykonane pomyślnie",
+        "full": "AI\nNagłówek · node-heading-a\nSUCCESS\nTARGET:\nheading node-heading-a (page page-home)\nPolecenie wykonane pomyślnie\nImprove copy\nShorten\nMake professional\nChange typography\nChange color"
+      },
+      "changedDoc": [
+        "node-heading-a"
+      ],
+      "traceTool": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "MOVE",
+            "domain": "LAYOUT",
+            "targetNodeId": "node-heading-a",
+            "timestamp": "2026-09-25T11:09:04.531Z"
+          }
+        ]
+      ],
+      "api": [],
+      "headingBefore": {
+        "type": "heading",
+        "styles": {
+          "color": "#ffffff",
+          "letterSpacing": "0.04em",
+          "opacity": 0.9,
+          "borderRadius": "12px"
+        },
+        "props": {
+          "text": "MARCIN BERNATOWICZ AI CREATIVE"
+        }
+      },
+      "headingAfter": {
+        "type": "heading",
+        "styles": {
+          "color": "#ffffff",
+          "letterSpacing": "0.04em",
+          "opacity": 0.9,
+          "borderRadius": "12px",
+          "translateX": "32px"
+        },
+        "props": {
+          "text": "MARCIN BERNATOWICZ AI CREATIVE"
+        }
+      },
+      "styleOk": true,
+      "apiEmpty": true,
+      "prompt": "przesuń w prawo o 32px"
+    }
+  ],
+  "negative": [
+    {
+      "id": "N1",
+      "prompt": "zmień tytuł na boki",
+      "path": "FAST_PATH",
+      "exec": "CLARIFY",
+      "intent": "CLARIFY",
+      "notes": [
+        "fast-path-rejected:TEXT_VALUE_REJECTED",
+        "no-dispatch:CLARIFY"
+      ],
+      "panel": {
+        "target": "node-heading-a",
+        "status": "CLARIFY",
+        "badge": "CLARIFY",
+        "message": "Potrzebuję więcej informacji",
+        "full": "AI\nNagłówek · node-heading-a\nCLARIFY\nTARGET:\nheading node-heading-a (page page-home)\nPotrzebuję więcej informacji\nImprove copy\nShorten\nMake professional\nChange typography\nChange color"
+      },
+      "tr": [],
+      "api": [],
+      "mutated": [],
+      "msgOk": false,
+      "apiEmpty": true
+    },
+    {
+      "id": "N2",
+      "prompt": "zmień tekst na grubszy",
+      "path": "FAST_PATH",
+      "exec": "CLARIFY",
+      "intent": "CLARIFY",
+      "notes": [
+        "fast-path-rejected:LOW_CONFIDENCE",
+        "no-dispatch:CLARIFY"
+      ],
+      "panel": {
+        "target": "node-heading-a",
+        "status": "CLARIFY",
+        "badge": "CLARIFY",
+        "message": "Potrzebuję więcej informacji",
+        "full": "AI\nNagłówek · node-heading-a\nCLARIFY\nTARGET:\nheading node-heading-a (page page-home)\nPotrzebuję więcej informacji\nImprove copy\nShorten\nMake professional\nChange typography\nChange color"
+      },
+      "tr": [],
+      "api": [],
+      "mutated": [],
+      "msgOk": false,
+      "apiEmpty": true
+    },
+    {
+      "id": "N3",
+      "prompt": "zmień kolor",
+      "path": "FAST_PATH",
+      "exec": "CLARIFY",
+      "intent": "CLARIFY",
+      "notes": [
+        "fast-path-rejected:PARAMETERS_INCOMPLETE",
+        "no-dispatch:CLARIFY"
+      ],
+      "panel": {
+        "target": "node-heading-a",
+        "status": "CLARIFY",
+        "badge": "CLARIFY",
+        "message": "Potrzebuję więcej informacji",
+        "full": "AI\nNagłówek · node-heading-a\nCLARIFY\nTARGET:\nheading node-heading-a (page page-home)\nPotrzebuję więcej informacji\nImprove copy\nShorten\nMake professional\nChange typography\nChange color"
+      },
+      "tr": [],
+      "api": [],
+      "mutated": [],
+      "msgOk": true,
+      "apiEmpty": true
+    }
+  ],
+  "continuation": {
+    "prompt1": "zwiększ rozmiar",
+    "path1": "FAST_PATH",
+    "exec1": "EXECUTED",
+    "size1": 35,
+    "prompt2": "jeszcze bardziej",
+    "path2": "FAST_PATH",
+    "exec2": "EXECUTED",
+    "size2": 44,
+    "grew": false,
+    "startSize": null,
+    "api": []
+  },
+  "zeroLlm": true
+}

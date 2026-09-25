@@ -1,0 +1,48 @@
+{
+  "base": "https://www.solospot.pl",
+  "freshMount": {
+    "x": 535,
+    "transform": "translate(100px, 40px)",
+    "expectedX": 535
+  },
+  "dragTransform": "translate(220px, 41px)",
+  "stylesAfterDrag": {
+    "styles": {
+      "translateX": "100px",
+      "translateY": "40px"
+    },
+    "responsive": {
+      "tablet": {
+        "translateX": "60px",
+        "translateY": "0px"
+      }
+    }
+  },
+  "stylesAfterSave": {
+    "styles": {
+      "translateX": "220px",
+      "translateY": "41px"
+    },
+    "responsive": {
+      "tablet": {
+        "translateX": "60px",
+        "translateY": "0px"
+      }
+    }
+  },
+  "afterReload": {
+    "x": 612,
+    "transform": "translate(220px, 41px)"
+  },
+  "tabletBtn": "Tablet (768px)",
+  "tablet": {
+    "x": 384,
+    "transform": "translate(60px, 0px)"
+  },
+  "desktopBtn": "Desktop (1280px)",
+  "backDesktop": {
+    "x": 612,
+    "transform": "translate(220px, 41px)"
+  },
+  "jsErrors": []
+}

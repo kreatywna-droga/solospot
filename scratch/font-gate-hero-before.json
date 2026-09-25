@@ -1,0 +1,270 @@
+{
+  "base": "https://www.solospot.pl",
+  "steps": [
+    {
+      "id": "B",
+      "prompt": "zmień czcionkę na Playfair Display",
+      "wallMs": 2292,
+      "target": "sec-hero-init",
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "notes": [],
+      "consoleTrace": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "CHANGE_TYPOGRAPHY",
+            "domain": "TYPOGRAPHY",
+            "targetNodeId": "sec-hero-init",
+            "timestamp": "2026-09-25T13:49:11.187Z"
+          }
+        ]
+      ],
+      "panelAfter": {
+        "target": "sec-hero-init",
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "full": "AI\nHero Banner · sec-hero-init\nSUCCESS\nTARGET:\nhero sec-hero-init (page page-home)\nPolecenie wykonane pomyślnie\nModernize\nChange typography\nChange background\nApply hero style"
+      },
+      "docStylesBefore": {},
+      "docStylesAfter": {
+        "translateX": "0px",
+        "translateY": "0px",
+        "fontFamily": "Playfair Display"
+      },
+      "docFontAfter": "Playfair Display",
+      "docFontChanged": true,
+      "canvasBefore": {
+        "titleText": "SoloSpot Visual Builder v2.0",
+        "titleFontFamily": "Inter",
+        "titleFontSize": "36px",
+        "sectionFontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "inlineStyle": "color: white; transition: none !important;",
+        "sectionInline": "opacity: 1;",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      "canvasAfter": {
+        "titleText": "SoloSpot Visual Builder v2.0",
+        "titleFontFamily": "Inter",
+        "titleFontSize": "36px",
+        "sectionFontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "inlineStyle": "color: white; transition: none !important;",
+        "sectionInline": "opacity: 1;",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      "canvasFontChanged": false,
+      "canvasBgChanged": false,
+      "theme": {
+        "primaryColor": "#7c3aed",
+        "secondaryColor": "#f1f5f9",
+        "font": "Inter"
+      }
+    },
+    {
+      "id": "E",
+      "prompt": "zmień kolor na czerwony",
+      "wallMs": 2094,
+      "target": "sec-hero-init",
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "notes": [],
+      "consoleTrace": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "CHANGE_COLOR",
+            "domain": "COLOR",
+            "targetNodeId": "sec-hero-init",
+            "timestamp": "2026-09-25T13:49:17.042Z"
+          }
+        ]
+      ],
+      "panelAfter": {
+        "target": "sec-hero-init",
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "full": "AI\nHero Banner · sec-hero-init\nSUCCESS\nTARGET:\nhero sec-hero-init (page page-home)\nPolecenie wykonane pomyślnie\nModernize\nChange typography\nChange background\nApply hero style"
+      },
+      "docStylesBefore": {
+        "translateX": "0px",
+        "translateY": "0px",
+        "fontFamily": "Playfair Display"
+      },
+      "docStylesAfter": {
+        "translateX": "0px",
+        "translateY": "0px",
+        "fontFamily": "Playfair Display",
+        "backgroundColor": "#FF0000"
+      },
+      "docFontAfter": "Playfair Display",
+      "docFontChanged": true,
+      "canvasBefore": {
+        "titleText": "SoloSpot Visual Builder v2.0",
+        "titleFontFamily": "Inter",
+        "titleFontSize": "36px",
+        "sectionFontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "inlineStyle": "color: white; transition: none !important;",
+        "sectionInline": "opacity: 1;",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      "canvasAfter": {
+        "titleText": "SoloSpot Visual Builder v2.0",
+        "titleFontFamily": "Inter",
+        "titleFontSize": "36px",
+        "sectionFontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "inlineStyle": "color: white; transition: none !important;",
+        "sectionInline": "opacity: 1;",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      "canvasFontChanged": false,
+      "canvasBgChanged": false,
+      "theme": {
+        "primaryColor": "#7c3aed",
+        "secondaryColor": "#f1f5f9",
+        "font": "Inter"
+      }
+    },
+    {
+      "id": "A",
+      "prompt": "zmień czcionkę na inną",
+      "wallMs": 19646,
+      "target": "sec-hero-init",
+      "path": "AI_PATH",
+      "exec": "CLARIFY",
+      "intent": "CHAT",
+      "notes": [
+        "fast-path-rejected:UNRESOLVED",
+        "no-dispatch:CLARIFY"
+      ],
+      "consoleTrace": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "TOOL_CALLS_RECEIVED",
+            "toolCallCount": 0,
+            "toolNames": [],
+            "toolArgs": [],
+            "aiMessage": "Jaką czcionkę chciałbyś ustawić? Mogę zaproponować kilka popularnych alternatyw:\n\n- **Inter** – nowo",
+            "timestamp": "2026-09-25T13:49:40.598Z"
+          }
+        ]
+      ],
+      "panelAfter": {
+        "target": "sec-hero-init",
+        "status": "CLARIFY",
+        "badge": "CLARIFY",
+        "full": "AI\nHero Banner · sec-hero-init\nCLARIFY\nTARGET:\nhero sec-hero-init (page page-home)\nJaką czcionkę chciałbyś ustawić? Mogę zaproponować kilka popularnych alternatyw: - **Inter** – nowoczesna, czytelna, świetna do UI - **Space Grotesk** – geometryczna, techniczna, z charakterem - **DM Sans** – przyjazna, nowoczesna, uniwersalna - **Outfit** – geometryczna, nowoczesna, z dużą gamą wag - **Plus Jakarta"
+      },
+      "docStylesBefore": {
+        "translateX": "0px",
+        "translateY": "0px",
+        "fontFamily": "Playfair Display",
+        "backgroundColor": "#FF0000"
+      },
+      "docStylesAfter": {
+        "translateX": "0px",
+        "translateY": "0px",
+        "fontFamily": "Playfair Display",
+        "backgroundColor": "#FF0000"
+      },
+      "docFontAfter": "Playfair Display",
+      "docFontChanged": false,
+      "canvasBefore": {
+        "titleText": "SoloSpot Visual Builder v2.0",
+        "titleFontFamily": "Inter",
+        "titleFontSize": "36px",
+        "sectionFontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "inlineStyle": "color: white; transition: none !important;",
+        "sectionInline": "opacity: 1;",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      "canvasAfter": {
+        "titleText": "SoloSpot Visual Builder v2.0",
+        "titleFontFamily": "Inter",
+        "titleFontSize": "36px",
+        "sectionFontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "inlineStyle": "color: white; transition: none !important;",
+        "sectionInline": "opacity: 1;",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      "canvasFontChanged": false,
+      "canvasBgChanged": false,
+      "theme": {
+        "primaryColor": "#7c3aed",
+        "secondaryColor": "#f1f5f9",
+        "font": "Inter"
+      }
+    },
+    {
+      "id": "D",
+      "prompt": "zmień czcionkę na Cormorant Garamond",
+      "wallMs": 2304,
+      "target": "sec-hero-init",
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "notes": [],
+      "consoleTrace": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "CHANGE_TYPOGRAPHY",
+            "domain": "TYPOGRAPHY",
+            "targetNodeId": "sec-hero-init",
+            "timestamp": "2026-09-25T13:49:46.490Z"
+          }
+        ]
+      ],
+      "panelAfter": {
+        "target": "sec-hero-init",
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "full": "AI\nHero Banner · sec-hero-init\nSUCCESS\nTARGET:\nhero sec-hero-init (page page-home)\nPolecenie wykonane pomyślnie\nModernize\nChange typography\nChange background\nApply hero style"
+      },
+      "docStylesBefore": {
+        "translateX": "0px",
+        "translateY": "0px",
+        "fontFamily": "Playfair Display",
+        "backgroundColor": "#FF0000"
+      },
+      "docStylesAfter": {
+        "translateX": "0px",
+        "translateY": "0px",
+        "fontFamily": "Cormorant Garamond",
+        "backgroundColor": "#FF0000"
+      },
+      "docFontAfter": "Cormorant Garamond",
+      "docFontChanged": true,
+      "canvasBefore": {
+        "titleText": "SoloSpot Visual Builder v2.0",
+        "titleFontFamily": "Inter",
+        "titleFontSize": "36px",
+        "sectionFontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "inlineStyle": "color: white; transition: none !important;",
+        "sectionInline": "opacity: 1;",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      "canvasAfter": {
+        "titleText": "SoloSpot Visual Builder v2.0",
+        "titleFontFamily": "Inter",
+        "titleFontSize": "36px",
+        "sectionFontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "inlineStyle": "color: white; transition: none !important;",
+        "sectionInline": "opacity: 1;",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      "canvasFontChanged": false,
+      "canvasBgChanged": false,
+      "theme": {
+        "primaryColor": "#7c3aed",
+        "secondaryColor": "#f1f5f9",
+        "font": "Inter"
+      }
+    }
+  ]
+}

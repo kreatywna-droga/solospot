@@ -1,5 +1,5 @@
 {
-  "baseUrl": "http://localhost:3000",
+  "baseUrl": "https://www.solospot.pl",
   "prompt": "Zbuduj profesjonalną stronę dla nowoczesnego gabinetu dentystycznego specjalizującego się w implantologii i stomatologii estetycznej. Głównym celem strony jest zachęcenie pacjenta do umówienia wizyty.",
   "results": [
     {
@@ -112,7 +112,7 @@
       "expected": "0 errors",
       "actual": "3",
       "status": "WARN",
-      "evidence": "Failed to load resource: the server responded with a status of 401 (Unauthorized) | Failed to load resource: the server responded with a status of 401 (Unauthorized) | Failed to load resource: the server responded with a status of 404 (Not Found)"
+      "evidence": "Failed to load resource: the server responded with a status of 401 () | Failed to load resource: the server responded with a status of 401 () | Failed to load resource: the server responded with a status of 404 ()"
     },
     {
       "id": "A12",
@@ -149,19 +149,19 @@
   },
   "trace": [
     {
-      "t": "2026-09-24T08:26:16.805Z",
+      "t": "2026-09-24T08:43:59.431Z",
       "step": "loaded",
-      "url": "http://localhost:3000/studio/test-store",
+      "url": "https://www.solospot.pl/studio/test-store",
       "aiOpen": true
     },
     {
-      "t": "2026-09-24T08:26:16.896Z",
+      "t": "2026-09-24T08:43:59.437Z",
       "step": "before",
       "canvasLen": 464,
       "beforeCount": 1
     },
     {
-      "t": "2026-09-24T08:26:32.680Z",
+      "t": "2026-09-24T08:44:02.702Z",
       "step": "prompt_sent",
       "prompt": "Zbuduj profesjonalną stronę dla nowoczesnego gabinetu dentystycznego specjalizującego się w implantologii i stomatologii"
     }

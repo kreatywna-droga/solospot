@@ -1,0 +1,28 @@
+{
+  "base": "https://www.solospot.pl",
+  "sequence": {
+    "xInitial": 471,
+    "desktopDrag": {
+      "xAfter": 471,
+      "node": {
+        "styles": {},
+        "responsive": {}
+      }
+    },
+    "tabletDrag": {
+      "xBefore": 324,
+      "xAfter": 324,
+      "node": {
+        "styles": {},
+        "responsive": {}
+      }
+    },
+    "xMobile": 324,
+    "xBackDesktop": 471,
+    "afterReload": {
+      "styles": {},
+      "responsive": {}
+    },
+    "jsErrors": []
+  }
+}

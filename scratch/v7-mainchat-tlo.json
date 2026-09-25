@@ -1,0 +1,157 @@
+{
+  "base": "https://www.solospot.pl",
+  "prompt": "zmień tło na niebieski",
+  "wallMs": 17819,
+  "trace": {
+    "id": "lat-mugkqx6i-yzakfw",
+    "source": "main-chat",
+    "prompt": "zmień tło na niebieski",
+    "path": "AI_PATH",
+    "startedAtIso": "2026-09-25T06:23:07.386Z",
+    "totalMs": 15289.5,
+    "stages": [
+      {
+        "stage": "UI",
+        "startMs": 8528.10000000149,
+        "endMs": 8528.200000001118,
+        "durationMs": 0.09999999962747097
+      },
+      {
+        "stage": "QUEUE",
+        "startMs": 8528.300000000745,
+        "endMs": 8534.700000001118,
+        "durationMs": 6.400000000372529
+      },
+      {
+        "stage": "RESOLVER",
+        "startMs": 8538.900000000373,
+        "endMs": 8540.10000000149,
+        "durationMs": 1.200000001117587,
+        "detail": "eligibility+resolver"
+      },
+      {
+        "stage": "FAST_PATH",
+        "startMs": 8538.900000000373,
+        "endMs": 8540.300000000745,
+        "durationMs": 1.400000000372529,
+        "detail": "eligibility+resolver+dispatch"
+      },
+      {
+        "stage": "PROVIDER",
+        "startMs": 8541.200000001118,
+        "endMs": 23785.900000000373,
+        "durationMs": 15244.699999999255
+      },
+      {
+        "stage": "TOOL_SELECTION",
+        "startMs": 0,
+        "endMs": 0,
+        "durationMs": 0,
+        "detail": "server"
+      },
+      {
+        "stage": "INTENT_CLASSIFIER",
+        "startMs": 0,
+        "endMs": 0,
+        "durationMs": 0,
+        "detail": "server"
+      },
+      {
+        "stage": "ROUTER",
+        "startMs": 0,
+        "endMs": 0,
+        "durationMs": 0,
+        "detail": "server"
+      },
+      {
+        "stage": "LLM",
+        "startMs": 0,
+        "endMs": 15002,
+        "durationMs": 15002,
+        "detail": "server"
+      },
+      {
+        "stage": "HACP_BRIDGE",
+        "startMs": 8540.300000000745,
+        "endMs": 23787.10000000149,
+        "durationMs": 15246.800000000745
+      },
+      {
+        "stage": "RESPONSE",
+        "startMs": 23787.400000000373,
+        "endMs": 23787.400000000373,
+        "durationMs": 0
+      },
+      {
+        "stage": "CANVAS",
+        "startMs": 23787.400000000373,
+        "endMs": 23817.200000001118,
+        "durationMs": 29.800000000745058
+      }
+    ],
+    "server": {
+      "totalMs": 15003,
+      "toolSelectionMs": 0,
+      "intentClassifierMs": 0,
+      "routerMs": 0,
+      "modelMs": 15002,
+      "llmMs": 15002,
+      "llmRequestCount": 1
+    },
+    "notes": [
+      "fast-path-rejected:UNRESOLVED",
+      "no-dispatch:ERROR"
+    ],
+    "ok": false,
+    "intent": "CLARIFY",
+    "executionStatus": "ERROR"
+  },
+  "chat": {
+    "msgs": [],
+    "visible": "SOLOSPOT AI v1.0 Builder Copilot COPY CONTEXT Ty • 08:23:07 zmień tło na niebieski SoloSpot AI • 08:23:22 Nie udało się uzyskać odpowiedzi z wybranego modelu (nvidia/nemotron-3.5-lightning:free). Spróbuj ponownie lub wybierz inny model w menu powyżej. NVIDIA: Nemotron 3.5 Lightning (free) Szybkie akcje NVIDIA: Nemotron 3.5 Lightning (free) FREE Enter: Wyślij • Shift+Enter: Nowa linia HACP Direct Live Bridge",
+    "promptEcho": ""
+  },
+  "miniInspectorMirror": null,
+  "api": [
+    {
+      "url": "/api/builder/copilot",
+      "method": "GET",
+      "status": 200,
+      "statusField": "ONLINE",
+      "message": "",
+      "keys": [
+        "status",
+        "provider",
+        "configured",
+        "missingKeys"
+      ]
+    },
+    {
+      "url": "/api/builder/copilot",
+      "method": "POST",
+      "status": 200,
+      "statusField": "ERROR",
+      "message": "Nie udało się uzyskać odpowiedzi z wybranego modelu (nvidia/nemotron-3.5-lightning:free). Spróbuj ponownie lub wybierz inny model w menu powyżej.",
+      "keys": [
+        "status",
+        "provider",
+        "model",
+        "message",
+        "error",
+        "isFreeModel",
+        "routerMode",
+        "durationMs",
+        "latency"
+      ]
+    }
+  ],
+  "consoleTail": [
+    "Failed to load resource: the server responded with a status of 401 ()",
+    "Font catalog contains 200 unique fonts",
+    "Failed to load resource: the server responded with a status of 401 ()",
+    "Failed to load resource: the server responded with a status of 401 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "[HacpBridge] Upstream model error, returning honest ERROR (no fake CHAT): The operation was aborted due to timeout",
+    "[LATENCY_TRACE] {\"id\":\"lat-mugkqx6i-yzakfw\",\"source\":\"main-chat\",\"prompt\":\"zmień tło na niebieski\",\"path\":\"AI_PATH\",\"startedAtIso\":\"2026-09-25T06:23:07.386Z\",\"totalMs\":15289.5,\"stages\":[{\"stage\":\"UI\",\"startMs\":8528.10000000149,\"endMs\":8528.200000001118,\"durationMs\":0.09999999962747097},{\"stage\":\"QUE"
+  ]
+}

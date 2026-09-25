@@ -1,0 +1,107 @@
+{
+  "base": "https://www.solospot.pl",
+  "prompt": "zmieĹ„ kolor tĹ‚a na czerwony",
+  "before": {
+    "sectionId": "sec-hero-init",
+    "aiTarget": "sec-hero-init",
+    "aiStatus": "IDLE",
+    "inlineBg": null,
+    "computedBg": "rgba(0, 0, 0, 0)",
+    "version": null,
+    "inlineAttrs": "opacity: 1;",
+    "redElements": [],
+    "anyRedText": 0
+  },
+  "after": {
+    "sectionId": "sec-hero-init",
+    "aiTarget": "sec-hero-init",
+    "aiStatus": "SUCCESS",
+    "inlineBg": null,
+    "computedBg": "rgba(0, 0, 0, 0)",
+    "version": null,
+    "inlineAttrs": "opacity: 1;",
+    "redElements": [
+      "DIV#.w-full relative pointer-events-none over",
+      "SECTION#.relative overflow-hidden py-24 lg:py-32 ",
+      "DIV#.w-7 h-7 rounded-lg border border-white/2"
+    ],
+    "anyRedText": 0
+  },
+  "trace": {
+    "id": "lat-mugj6yda-avpcat",
+    "source": "mini-inspector",
+    "prompt": "zmieĹ„ kolor tĹ‚a na czerwony",
+    "path": "FAST_PATH",
+    "startedAtIso": "2026-09-25T05:39:36.190Z",
+    "totalMs": 32.40000000037253,
+    "stages": [
+      {
+        "stage": "UI",
+        "startMs": 9641.900000000373,
+        "endMs": 9642.200000000186,
+        "durationMs": 0.2999999998137355
+      },
+      {
+        "stage": "QUEUE",
+        "startMs": 9642.799999999814,
+        "endMs": 9644,
+        "durationMs": 1.2000000001862645
+      },
+      {
+        "stage": "RESOLVER",
+        "startMs": 9644.5,
+        "endMs": 9645.799999999814,
+        "durationMs": 1.2999999998137355,
+        "detail": "eligibility+resolver"
+      },
+      {
+        "stage": "VERIFICATION",
+        "startMs": 9647.100000000559,
+        "endMs": 9647.700000000186,
+        "durationMs": 0.599999999627471,
+        "detail": "SET_NODE_STYLES"
+      },
+      {
+        "stage": "BUILDER_COMMAND",
+        "startMs": 9645.900000000373,
+        "endMs": 9647.700000000186,
+        "durationMs": 1.7999999998137355,
+        "detail": "set_node_styles"
+      },
+      {
+        "stage": "FAST_PATH",
+        "startMs": 9644.5,
+        "endMs": 9648.299999999814,
+        "durationMs": 3.7999999998137355,
+        "detail": "eligibility+resolver+dispatch"
+      },
+      {
+        "stage": "DISPATCH",
+        "startMs": 9649.400000000373,
+        "endMs": 9649.600000000559,
+        "durationMs": 0.20000000018626451
+      },
+      {
+        "stage": "RESPONSE",
+        "startMs": 9649.600000000559,
+        "endMs": 9649.600000000559,
+        "durationMs": 0
+      },
+      {
+        "stage": "CANVAS",
+        "startMs": 9649.700000000186,
+        "endMs": 9673.900000000373,
+        "durationMs": 24.200000000186265
+      }
+    ],
+    "notes": [],
+    "ok": true,
+    "intent": "EXECUTE",
+    "executionStatus": "EXECUTED"
+  },
+  "canvasChanged": {
+    "bg": false,
+    "version": false,
+    "targetMatches": true
+  }
+}

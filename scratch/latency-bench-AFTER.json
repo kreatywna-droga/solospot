@@ -1,0 +1,5158 @@
+{
+  "tag": "AFTER",
+  "base": "http://localhost:3000",
+  "startedAt": "2026-09-25T05:17:07.544Z",
+  "finishedAt": "2026-09-25T05:23:48.296Z",
+  "results": [
+    {
+      "surface": "mini-inspector",
+      "key": "A",
+      "text": "zmień kolor na czerwony",
+      "rep": 1,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugie7nm-h0nbxk",
+        "source": "mini-inspector",
+        "prompt": "zmień kolor na czerwony",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:17:15.202Z",
+        "totalMs": 36.89999999944121,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 7650.200000000186,
+            "endMs": 7650.399999999441,
+            "durationMs": 0.19999999925494194
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 7650.700000000186,
+            "endMs": 7652.700000000186,
+            "durationMs": 2
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 7659.799999999814,
+            "endMs": 7661,
+            "durationMs": 1.2000000001862645,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 7662.299999999814,
+            "endMs": 7663,
+            "durationMs": 0.7000000001862645,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 7661.200000000186,
+            "endMs": 7663,
+            "durationMs": 1.7999999998137355,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 7659.700000000186,
+            "endMs": 7663.700000000186,
+            "durationMs": 4,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 7669.700000000186,
+            "endMs": 7669.899999999441,
+            "durationMs": 0.19999999925494194
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 7669.899999999441,
+            "endMs": 7669.899999999441,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 7670,
+            "endMs": 7686.700000000186,
+            "durationMs": 16.700000000186265
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 744,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "A",
+      "text": "zmień kolor na czerwony",
+      "rep": 2,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugieef8-ueojtz",
+        "source": "mini-inspector",
+        "prompt": "zmień kolor na czerwony",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:17:23.972Z",
+        "totalMs": 23.5,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 7793.700000000186,
+            "endMs": 7793.799999999814,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 7793.799999999814,
+            "endMs": 7795.799999999814,
+            "durationMs": 2
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 7799.799999999814,
+            "endMs": 7799.799999999814,
+            "durationMs": 0,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 7799.9000000003725,
+            "endMs": 7800,
+            "durationMs": 0.09999999962747097,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 7799.9000000003725,
+            "endMs": 7800,
+            "durationMs": 0.09999999962747097,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 7799.799999999814,
+            "endMs": 7800.299999999814,
+            "durationMs": 0.5,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 7803.9000000003725,
+            "endMs": 7804,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 7804,
+            "endMs": 7804,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 7804,
+            "endMs": 7817.200000000186,
+            "durationMs": 13.200000000186265
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 729,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "A",
+      "text": "zmień kolor na czerwony",
+      "rep": 3,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugiel51-pksjbp",
+        "source": "mini-inspector",
+        "prompt": "zmień kolor na czerwony",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:17:32.677Z",
+        "totalMs": 31.90000000037253,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 7747.200000000186,
+            "endMs": 7747.299999999814,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 7747.299999999814,
+            "endMs": 7749.5999999996275,
+            "durationMs": 2.2999999998137355
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 7753.5999999996275,
+            "endMs": 7753.799999999814,
+            "durationMs": 0.20000000018626451,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 7753.899999999441,
+            "endMs": 7754,
+            "durationMs": 0.10000000055879354,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 7753.899999999441,
+            "endMs": 7754,
+            "durationMs": 0.10000000055879354,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 7753.5999999996275,
+            "endMs": 7754.299999999814,
+            "durationMs": 0.7000000001862645,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 7758.0999999996275,
+            "endMs": 7758.299999999814,
+            "durationMs": 0.20000000018626451
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 7758.299999999814,
+            "endMs": 7758.299999999814,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 7758.299999999814,
+            "endMs": 7779,
+            "durationMs": 20.700000000186265
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 975,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "A",
+      "text": "zmień kolor na czerwony",
+      "rep": 4,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugiermk-yi68pk",
+        "source": "mini-inspector",
+        "prompt": "zmień kolor na czerwony",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:17:41.084Z",
+        "totalMs": 24.399999999441206,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 7196.4000000003725,
+            "endMs": 7196.5,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 7196.5,
+            "endMs": 7198.5,
+            "durationMs": 2
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 7202.4000000003725,
+            "endMs": 7202.9000000003725,
+            "durationMs": 0.5,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 7202.9000000003725,
+            "endMs": 7202.9000000003725,
+            "durationMs": 0,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 7202.9000000003725,
+            "endMs": 7203,
+            "durationMs": 0.09999999962747097,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 7202.4000000003725,
+            "endMs": 7203.299999999814,
+            "durationMs": 0.8999999994412065,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 7206.700000000186,
+            "endMs": 7206.799999999814,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 7206.799999999814,
+            "endMs": 7206.799999999814,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 7206.799999999814,
+            "endMs": 7220.799999999814,
+            "durationMs": 14
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 729,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "A",
+      "text": "zmień kolor na czerwony",
+      "rep": 5,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugieytq-uhmgw3",
+        "source": "mini-inspector",
+        "prompt": "zmień kolor na czerwony",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:17:50.414Z",
+        "totalMs": 29.799999999813735,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 8370.599999999627,
+            "endMs": 8370.699999999255,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 8370.699999999255,
+            "endMs": 8372.699999999255,
+            "durationMs": 2
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 8376.599999999627,
+            "endMs": 8377,
+            "durationMs": 0.40000000037252903,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 8377,
+            "endMs": 8377.099999999627,
+            "durationMs": 0.09999999962747097,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 8377,
+            "endMs": 8377.099999999627,
+            "durationMs": 0.09999999962747097,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 8376.599999999627,
+            "endMs": 8377.399999999441,
+            "durationMs": 0.7999999998137355,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 8380.399999999441,
+            "endMs": 8380.5,
+            "durationMs": 0.10000000055879354
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 8380.599999999627,
+            "endMs": 8380.599999999627,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 8380.599999999627,
+            "endMs": 8400.299999999814,
+            "durationMs": 19.700000000186265
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 982,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "B",
+      "text": "zmień czcionkę na Inter",
+      "rep": 1,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugif6cb-a26499",
+        "source": "mini-inspector",
+        "prompt": "zmień czcionkę na Inter",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:18:00.155Z",
+        "totalMs": 23.40000000037253,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 8535.700000000186,
+            "endMs": 8535.800000000745,
+            "durationMs": 0.10000000055879354
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 8535.800000000745,
+            "endMs": 8537.800000000745,
+            "durationMs": 2
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 8541.600000000559,
+            "endMs": 8542.700000000186,
+            "durationMs": 1.099999999627471,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 8542.700000000186,
+            "endMs": 8542.800000000745,
+            "durationMs": 0.10000000055879354,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 8542.700000000186,
+            "endMs": 8542.800000000745,
+            "durationMs": 0.10000000055879354,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 8541.600000000559,
+            "endMs": 8543,
+            "durationMs": 1.3999999994412065,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 8546.600000000559,
+            "endMs": 8546.700000000186,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 8546.700000000186,
+            "endMs": 8546.700000000186,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 8546.700000000186,
+            "endMs": 8559.100000000559,
+            "durationMs": 12.400000000372529
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 703,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "B",
+      "text": "zmień czcionkę na Inter",
+      "rep": 2,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugifcn2-a481jg",
+        "source": "mini-inspector",
+        "prompt": "zmień czcionkę na Inter",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:18:08.318Z",
+        "totalMs": 25.40000000037253,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 7217.9000000003725,
+            "endMs": 7218,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 7218.100000000559,
+            "endMs": 7220.100000000559,
+            "durationMs": 2
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 7224.600000000559,
+            "endMs": 7224.9000000003725,
+            "durationMs": 0.2999999998137355,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 7225,
+            "endMs": 7225,
+            "durationMs": 0,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 7224.9000000003725,
+            "endMs": 7225.100000000559,
+            "durationMs": 0.20000000018626451,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 7224.600000000559,
+            "endMs": 7225.300000000745,
+            "durationMs": 0.7000000001862645,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 7229.700000000186,
+            "endMs": 7229.9000000003725,
+            "durationMs": 0.20000000018626451
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 7229.9000000003725,
+            "endMs": 7229.9000000003725,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 7229.9000000003725,
+            "endMs": 7243.200000000186,
+            "durationMs": 13.299999999813735
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 715,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "B",
+      "text": "zmień czcionkę na Inter",
+      "rep": 3,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugifiyf-7h6kxr",
+        "source": "mini-inspector",
+        "prompt": "zmień czcionkę na Inter",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:18:16.503Z",
+        "totalMs": 22.100000000558794,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 7228.5,
+            "endMs": 7228.600000000559,
+            "durationMs": 0.10000000055879354
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 7228.600000000559,
+            "endMs": 7230.700000000186,
+            "durationMs": 2.099999999627471
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 7234.4000000003725,
+            "endMs": 7234.700000000186,
+            "durationMs": 0.2999999998137355,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 7234.700000000186,
+            "endMs": 7234.800000000745,
+            "durationMs": 0.10000000055879354,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 7234.700000000186,
+            "endMs": 7234.800000000745,
+            "durationMs": 0.10000000055879354,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 7234.4000000003725,
+            "endMs": 7235,
+            "durationMs": 0.599999999627471,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 7238.4000000003725,
+            "endMs": 7238.5,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 7238.5,
+            "endMs": 7238.600000000559,
+            "durationMs": 0.10000000055879354
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 7238.600000000559,
+            "endMs": 7250.600000000559,
+            "durationMs": 12
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 701,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "B",
+      "text": "zmień czcionkę na Inter",
+      "rep": 4,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugifpap-h8lhok",
+        "source": "mini-inspector",
+        "prompt": "zmień czcionkę na Inter",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:18:24.721Z",
+        "totalMs": 24.59999999962747,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 7269,
+            "endMs": 7269.0999999996275,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 7269.0999999996275,
+            "endMs": 7271.299999999814,
+            "durationMs": 2.2000000001862645
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 7274.899999999441,
+            "endMs": 7275.5,
+            "durationMs": 0.6000000005587935,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 7275.5,
+            "endMs": 7275.5999999996275,
+            "durationMs": 0.09999999962747097,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 7275.5,
+            "endMs": 7275.5999999996275,
+            "durationMs": 0.09999999962747097,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 7274.899999999441,
+            "endMs": 7275.899999999441,
+            "durationMs": 1,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 7279.299999999814,
+            "endMs": 7279.399999999441,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 7279.399999999441,
+            "endMs": 7279.399999999441,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 7279.399999999441,
+            "endMs": 7293.5999999996275,
+            "durationMs": 14.200000000186265
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 701,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "B",
+      "text": "zmień czcionkę na Inter",
+      "rep": 5,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugifvll-gi060j",
+        "source": "mini-inspector",
+        "prompt": "zmień czcionkę na Inter",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:18:32.889Z",
+        "totalMs": 32.40000000037253,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 7224.5999999996275,
+            "endMs": 7224.5999999996275,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 7224.700000000186,
+            "endMs": 7226.5999999996275,
+            "durationMs": 1.8999999994412065
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 7230.399999999441,
+            "endMs": 7230.899999999441,
+            "durationMs": 0.5,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 7231,
+            "endMs": 7231.0999999996275,
+            "durationMs": 0.09999999962747097,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 7230.899999999441,
+            "endMs": 7231.0999999996275,
+            "durationMs": 0.20000000018626451,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 7230.399999999441,
+            "endMs": 7231.399999999441,
+            "durationMs": 1,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 7234.700000000186,
+            "endMs": 7234.799999999814,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 7234.799999999814,
+            "endMs": 7234.799999999814,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 7234.799999999814,
+            "endMs": 7257,
+            "durationMs": 22.200000000186265
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 978,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "C",
+      "text": "zwiększ czcionkę o 20%",
+      "rep": 1,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugig2dg-alk31s",
+        "source": "mini-inspector",
+        "prompt": "zwiększ czcionkę o 20%",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:18:41.668Z",
+        "totalMs": 24.700000000186265,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 7571.5,
+            "endMs": 7571.700000000186,
+            "durationMs": 0.20000000018626451
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 7571.700000000186,
+            "endMs": 7573.799999999814,
+            "durationMs": 2.099999999627471
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 7577.5,
+            "endMs": 7577.799999999814,
+            "durationMs": 0.2999999998137355,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 7577.899999999441,
+            "endMs": 7577.899999999441,
+            "durationMs": 0,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 7577.899999999441,
+            "endMs": 7577.899999999441,
+            "durationMs": 0,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 7577.5,
+            "endMs": 7578.200000000186,
+            "durationMs": 0.7000000001862645,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 7582.799999999814,
+            "endMs": 7582.899999999441,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 7582.899999999441,
+            "endMs": 7582.899999999441,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 7582.899999999441,
+            "endMs": 7596.200000000186,
+            "durationMs": 13.300000000745058
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 717,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "C",
+      "text": "zwiększ czcionkę o 20%",
+      "rep": 2,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugig8q4-hgosfm",
+        "source": "mini-inspector",
+        "prompt": "zwiększ czcionkę o 20%",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:18:49.900Z",
+        "totalMs": 22.799999999813735,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 7273.9000000003725,
+            "endMs": 7273.9000000003725,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 7274.0999999996275,
+            "endMs": 7276.200000000186,
+            "durationMs": 2.1000000005587935
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 7279.9000000003725,
+            "endMs": 7280.4000000003725,
+            "durationMs": 0.5,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 7280.5,
+            "endMs": 7280.5999999996275,
+            "durationMs": 0.09999999962747097,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 7280.4000000003725,
+            "endMs": 7280.5999999996275,
+            "durationMs": 0.19999999925494194,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 7279.9000000003725,
+            "endMs": 7280.799999999814,
+            "durationMs": 0.8999999994412065,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 7284.200000000186,
+            "endMs": 7284.200000000186,
+            "durationMs": 0
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 7284.200000000186,
+            "endMs": 7284.200000000186,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 7284.200000000186,
+            "endMs": 7296.700000000186,
+            "durationMs": 12.5
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 703,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "C",
+      "text": "zwiększ czcionkę o 20%",
+      "rep": 3,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugigf1q-exnjas",
+        "source": "mini-inspector",
+        "prompt": "zwiększ czcionkę o 20%",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:18:58.094Z",
+        "totalMs": 28.899999999441206,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 7249.800000000745,
+            "endMs": 7249.9000000003725,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 7249.9000000003725,
+            "endMs": 7251.800000000745,
+            "durationMs": 1.900000000372529
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 7255.5,
+            "endMs": 7255.9000000003725,
+            "durationMs": 0.40000000037252903,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 7255.9000000003725,
+            "endMs": 7256,
+            "durationMs": 0.09999999962747097,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 7255.9000000003725,
+            "endMs": 7256.100000000559,
+            "durationMs": 0.20000000018626451,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 7255.5,
+            "endMs": 7256.300000000745,
+            "durationMs": 0.8000000007450581,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 7259.600000000559,
+            "endMs": 7259.800000000745,
+            "durationMs": 0.20000000018626451
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 7259.800000000745,
+            "endMs": 7259.800000000745,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 7259.800000000745,
+            "endMs": 7278.700000000186,
+            "durationMs": 18.899999999441206
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 960,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "C",
+      "text": "zwiększ czcionkę o 20%",
+      "rep": 4,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugigll8-u4f75g",
+        "source": "mini-inspector",
+        "prompt": "zwiększ czcionkę o 20%",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:19:06.572Z",
+        "totalMs": 30.90000000037253,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 7270.5999999996275,
+            "endMs": 7270.799999999814,
+            "durationMs": 0.20000000018626451
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 7270.799999999814,
+            "endMs": 7272.9000000003725,
+            "durationMs": 2.1000000005587935
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 7276.5999999996275,
+            "endMs": 7276.799999999814,
+            "durationMs": 0.20000000018626451,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 7276.799999999814,
+            "endMs": 7277,
+            "durationMs": 0.20000000018626451,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 7276.799999999814,
+            "endMs": 7277,
+            "durationMs": 0.20000000018626451,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 7276.5999999996275,
+            "endMs": 7277.200000000186,
+            "durationMs": 0.6000000005587935,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 7280.700000000186,
+            "endMs": 7280.799999999814,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 7280.799999999814,
+            "endMs": 7280.799999999814,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 7280.799999999814,
+            "endMs": 7301.5,
+            "durationMs": 20.700000000186265
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 963,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "C",
+      "text": "zwiększ czcionkę o 20%",
+      "rep": 5,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugigs4q-80zf7z",
+        "source": "mini-inspector",
+        "prompt": "zwiększ czcionkę o 20%",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:19:15.050Z",
+        "totalMs": 25.09999999962747,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 7275.799999999814,
+            "endMs": 7275.899999999441,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 7275.899999999441,
+            "endMs": 7278,
+            "durationMs": 2.1000000005587935
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 7281.899999999441,
+            "endMs": 7282.399999999441,
+            "durationMs": 0.5,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 7282.5,
+            "endMs": 7282.5,
+            "durationMs": 0,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 7282.5,
+            "endMs": 7282.5,
+            "durationMs": 0,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 7281.899999999441,
+            "endMs": 7282.699999999255,
+            "durationMs": 0.7999999998137355,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 7286.699999999255,
+            "endMs": 7286.799999999814,
+            "durationMs": 0.10000000055879354
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 7286.799999999814,
+            "endMs": 7286.799999999814,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 7286.799999999814,
+            "endMs": 7300.899999999441,
+            "durationMs": 14.099999999627471
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 716,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "D",
+      "text": "zmień tekst na TEST MINI AI",
+      "rep": 1,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "TEST MINI AI Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo TEST MINI AI Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugigyih-st7ig9",
+        "source": "mini-inspector",
+        "prompt": "zmień tekst na TEST MINI AI",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:19:23.321Z",
+        "totalMs": 31.09999999962747,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 7313.100000000559,
+            "endMs": 7313.200000000186,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 7313.200000000186,
+            "endMs": 7315.299999999814,
+            "durationMs": 2.099999999627471
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 7318.9000000003725,
+            "endMs": 7319.4000000003725,
+            "durationMs": 0.5,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 7319.4000000003725,
+            "endMs": 7319.600000000559,
+            "durationMs": 0.20000000018626451,
+            "detail": "UPDATE_PROPS"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 7319.4000000003725,
+            "endMs": 7319.600000000559,
+            "durationMs": 0.20000000018626451,
+            "detail": "update_node_props"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 7318.9000000003725,
+            "endMs": 7319.9000000003725,
+            "durationMs": 1,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 7323.299999999814,
+            "endMs": 7323.299999999814,
+            "durationMs": 0
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 7323.299999999814,
+            "endMs": 7323.299999999814,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 7323.299999999814,
+            "endMs": 7344.100000000559,
+            "durationMs": 20.800000000745058
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 1043,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "D",
+      "text": "zmień tekst na TEST MINI AI",
+      "rep": 2,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "TEST MINI AI Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo TEST MINI AI Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugih56e-buq674",
+        "source": "mini-inspector",
+        "prompt": "zmień tekst na TEST MINI AI",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:19:31.958Z",
+        "totalMs": 31,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 7432.0999999996275,
+            "endMs": 7432.200000000186,
+            "durationMs": 0.10000000055879354
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 7432.200000000186,
+            "endMs": 7434.200000000186,
+            "durationMs": 2
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 7438,
+            "endMs": 7438.5999999996275,
+            "durationMs": 0.599999999627471,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 7438.5999999996275,
+            "endMs": 7438.700000000186,
+            "durationMs": 0.10000000055879354,
+            "detail": "UPDATE_PROPS"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 7438.5999999996275,
+            "endMs": 7438.700000000186,
+            "durationMs": 0.10000000055879354,
+            "detail": "update_node_props"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 7438,
+            "endMs": 7438.899999999441,
+            "durationMs": 0.8999999994412065,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 7442.399999999441,
+            "endMs": 7442.5,
+            "durationMs": 0.10000000055879354
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 7442.5,
+            "endMs": 7442.5,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 7442.5,
+            "endMs": 7463.0999999996275,
+            "durationMs": 20.59999999962747
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 1048,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "D",
+      "text": "zmień tekst na TEST MINI AI",
+      "rep": 3,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "TEST MINI AI Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo TEST MINI AI Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugihbuj-11kv1k",
+        "source": "mini-inspector",
+        "prompt": "zmień tekst na TEST MINI AI",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:19:40.603Z",
+        "totalMs": 32.700000000186265,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 7428.9000000003725,
+            "endMs": 7429,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 7429.100000000559,
+            "endMs": 7431,
+            "durationMs": 1.8999999994412065
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 7434.700000000186,
+            "endMs": 7435.299999999814,
+            "durationMs": 0.599999999627471,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 7435.299999999814,
+            "endMs": 7435.4000000003725,
+            "durationMs": 0.10000000055879354,
+            "detail": "UPDATE_PROPS"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 7435.299999999814,
+            "endMs": 7435.4000000003725,
+            "durationMs": 0.10000000055879354,
+            "detail": "update_node_props"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 7434.700000000186,
+            "endMs": 7435.799999999814,
+            "durationMs": 1.099999999627471,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 7439,
+            "endMs": 7439,
+            "durationMs": 0
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 7439,
+            "endMs": 7439,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 7439,
+            "endMs": 7461.5,
+            "durationMs": 22.5
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 1042,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "D",
+      "text": "zmień tekst na TEST MINI AI",
+      "rep": 4,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "TEST MINI AI Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo TEST MINI AI Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugihio5-w5owr4",
+        "source": "mini-inspector",
+        "prompt": "zmień tekst na TEST MINI AI",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:19:49.445Z",
+        "totalMs": 23.700000000186265,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 7634.9000000003725,
+            "endMs": 7634.9000000003725,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 7635,
+            "endMs": 7637.100000000559,
+            "durationMs": 2.1000000005587935
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 7640.700000000186,
+            "endMs": 7641.5,
+            "durationMs": 0.7999999998137355,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 7641.5,
+            "endMs": 7641.600000000559,
+            "durationMs": 0.10000000055879354,
+            "detail": "UPDATE_PROPS"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 7641.5,
+            "endMs": 7641.600000000559,
+            "durationMs": 0.10000000055879354,
+            "detail": "update_node_props"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 7640.700000000186,
+            "endMs": 7641.799999999814,
+            "durationMs": 1.099999999627471,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 7645.100000000559,
+            "endMs": 7645.200000000186,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 7645.200000000186,
+            "endMs": 7645.200000000186,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 7645.200000000186,
+            "endMs": 7658.600000000559,
+            "durationMs": 13.400000000372529
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 765,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "D",
+      "text": "zmień tekst na TEST MINI AI",
+      "rep": 5,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "TEST MINI AI Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo TEST MINI AI Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugihp13-gfmg20",
+        "source": "mini-inspector",
+        "prompt": "zmień tekst na TEST MINI AI",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:19:57.687Z",
+        "totalMs": 33.200000000186265,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 7291.899999999441,
+            "endMs": 7292,
+            "durationMs": 0.10000000055879354
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 7292,
+            "endMs": 7294.899999999441,
+            "durationMs": 2.8999999994412065
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 7299.0999999996275,
+            "endMs": 7299.699999999255,
+            "durationMs": 0.599999999627471,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 7299.799999999814,
+            "endMs": 7299.799999999814,
+            "durationMs": 0,
+            "detail": "UPDATE_PROPS"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 7299.799999999814,
+            "endMs": 7299.899999999441,
+            "durationMs": 0.09999999962747097,
+            "detail": "update_node_props"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 7299.0999999996275,
+            "endMs": 7300.0999999996275,
+            "durationMs": 1,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 7303.799999999814,
+            "endMs": 7303.899999999441,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 7303.899999999441,
+            "endMs": 7303.899999999441,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 7304,
+            "endMs": 7325.0999999996275,
+            "durationMs": 21.09999999962747
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 1048,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "E",
+      "text": "wyśrodkuj",
+      "rep": 1,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugihvry-4u0rzg",
+        "source": "mini-inspector",
+        "prompt": "wyśrodkuj",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:20:06.430Z",
+        "totalMs": 23.700000000186265,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 7532.399999999441,
+            "endMs": 7532.5,
+            "durationMs": 0.10000000055879354
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 7532.5,
+            "endMs": 7535.200000000186,
+            "durationMs": 2.7000000001862645
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 7539,
+            "endMs": 7539.399999999441,
+            "durationMs": 0.39999999944120646,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 7539.5,
+            "endMs": 7539.5999999996275,
+            "durationMs": 0.09999999962747097,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 7539.5,
+            "endMs": 7539.5999999996275,
+            "durationMs": 0.09999999962747097,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 7539,
+            "endMs": 7539.799999999814,
+            "durationMs": 0.7999999998137355,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 7543.5,
+            "endMs": 7543.5999999996275,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 7543.5999999996275,
+            "endMs": 7543.5999999996275,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 7543.5999999996275,
+            "endMs": 7556,
+            "durationMs": 12.400000000372529
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 509,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "E",
+      "text": "wyśrodkuj",
+      "rep": 2,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugii1zt-g7zf29",
+        "source": "mini-inspector",
+        "prompt": "wyśrodkuj",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:20:14.489Z",
+        "totalMs": 29.199999999254942,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 7099.200000000186,
+            "endMs": 7099.299999999814,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 7099.399999999441,
+            "endMs": 7101.399999999441,
+            "durationMs": 2
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 7105,
+            "endMs": 7105.5999999996275,
+            "durationMs": 0.599999999627471,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 7105.700000000186,
+            "endMs": 7105.700000000186,
+            "durationMs": 0,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 7105.700000000186,
+            "endMs": 7105.700000000186,
+            "durationMs": 0,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 7105,
+            "endMs": 7106,
+            "durationMs": 1,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 7109.5999999996275,
+            "endMs": 7109.5999999996275,
+            "durationMs": 0
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 7109.5999999996275,
+            "endMs": 7109.5999999996275,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 7109.5999999996275,
+            "endMs": 7128.399999999441,
+            "durationMs": 18.799999999813735
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 762,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "E",
+      "text": "wyśrodkuj",
+      "rep": 3,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugii8fk-79x3sa",
+        "source": "mini-inspector",
+        "prompt": "wyśrodkuj",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:20:22.832Z",
+        "totalMs": 21.700000000186265,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 7133.5999999996275,
+            "endMs": 7133.699999999255,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 7133.699999999255,
+            "endMs": 7135.5,
+            "durationMs": 1.800000000745058
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 7139.199999999255,
+            "endMs": 7139.199999999255,
+            "durationMs": 0,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 7139.299999999814,
+            "endMs": 7139.399999999441,
+            "durationMs": 0.09999999962747097,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 7139.199999999255,
+            "endMs": 7139.399999999441,
+            "durationMs": 0.20000000018626451,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 7139.199999999255,
+            "endMs": 7139.699999999255,
+            "durationMs": 0.5,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 7142.699999999255,
+            "endMs": 7142.899999999441,
+            "durationMs": 0.20000000018626451
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 7142.899999999441,
+            "endMs": 7142.899999999441,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 7142.899999999441,
+            "endMs": 7155.299999999814,
+            "durationMs": 12.400000000372529
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 493,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "E",
+      "text": "wyśrodkuj",
+      "rep": 4,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugiieip-9it7na",
+        "source": "mini-inspector",
+        "prompt": "wyśrodkuj",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:20:30.721Z",
+        "totalMs": 29.299999999813735,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6944.4000000003725,
+            "endMs": 6944.5,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6944.5,
+            "endMs": 6946.600000000559,
+            "durationMs": 2.1000000005587935
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6950.300000000745,
+            "endMs": 6950.9000000003725,
+            "durationMs": 0.599999999627471,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6950.9000000003725,
+            "endMs": 6950.9000000003725,
+            "durationMs": 0,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6950.9000000003725,
+            "endMs": 6951,
+            "durationMs": 0.09999999962747097,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6950.300000000745,
+            "endMs": 6951.200000000186,
+            "durationMs": 0.8999999994412065,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6954.700000000186,
+            "endMs": 6954.800000000745,
+            "durationMs": 0.10000000055879354
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6954.800000000745,
+            "endMs": 6954.800000000745,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6954.800000000745,
+            "endMs": 6973.700000000186,
+            "durationMs": 18.899999999441206
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 764,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "key": "E",
+      "text": "wyśrodkuj",
+      "rep": 5,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugiikup-5mtxk5",
+        "source": "mini-inspector",
+        "prompt": "wyśrodkuj",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:20:38.929Z",
+        "totalMs": 22,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6997.700000000186,
+            "endMs": 6997.799999999814,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6997.799999999814,
+            "endMs": 6999.799999999814,
+            "durationMs": 2
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 7003.5,
+            "endMs": 7003.600000000559,
+            "durationMs": 0.10000000055879354,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 7003.700000000186,
+            "endMs": 7003.700000000186,
+            "durationMs": 0,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 7003.600000000559,
+            "endMs": 7003.700000000186,
+            "durationMs": 0.09999999962747097,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 7003.5,
+            "endMs": 7004,
+            "durationMs": 0.5,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 7007.299999999814,
+            "endMs": 7007.299999999814,
+            "durationMs": 0
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 7007.299999999814,
+            "endMs": 7007.4000000003725,
+            "durationMs": 0.10000000055879354
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 7007.4000000003725,
+            "endMs": 7019.700000000186,
+            "durationMs": 12.299999999813735
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 493,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "A",
+      "text": "zmień kolor na czerwony",
+      "rep": 1,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugiiqq6-endfw0",
+        "source": "main-chat",
+        "prompt": "zmień kolor na czerwony",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:20:46.542Z",
+        "totalMs": 23,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6657,
+            "endMs": 6657,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6657,
+            "endMs": 6662.0999999996275,
+            "durationMs": 5.099999999627471
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6664,
+            "endMs": 6664.5,
+            "durationMs": 0.5,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6664.5,
+            "endMs": 6664.5,
+            "durationMs": 0,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6664.5,
+            "endMs": 6664.5,
+            "durationMs": 0,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6664,
+            "endMs": 6664.799999999814,
+            "durationMs": 0.7999999998137355,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6666.799999999814,
+            "endMs": 6666.899999999441,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6666.899999999441,
+            "endMs": 6666.899999999441,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6666.899999999441,
+            "endMs": 6679.899999999441,
+            "durationMs": 13
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 983,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "A",
+      "text": "zmień kolor na czerwony",
+      "rep": 2,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugiiwm3-i94nfw",
+        "source": "main-chat",
+        "prompt": "zmień kolor na czerwony",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:20:54.171Z",
+        "totalMs": 27.300000000745058,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6419.199999999255,
+            "endMs": 6419.299999999814,
+            "durationMs": 0.10000000055879354
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6419.299999999814,
+            "endMs": 6423.5999999996275,
+            "durationMs": 4.2999999998137355
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6425.5,
+            "endMs": 6425.799999999814,
+            "durationMs": 0.2999999998137355,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6425.799999999814,
+            "endMs": 6425.899999999441,
+            "durationMs": 0.09999999962747097,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6425.799999999814,
+            "endMs": 6425.899999999441,
+            "durationMs": 0.09999999962747097,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6425.5,
+            "endMs": 6426.199999999255,
+            "durationMs": 0.6999999992549419,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6428.199999999255,
+            "endMs": 6428.199999999255,
+            "durationMs": 0
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6428.299999999814,
+            "endMs": 6428.299999999814,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6428.299999999814,
+            "endMs": 6446.5,
+            "durationMs": 18.200000000186265
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 986,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "A",
+      "text": "zmień kolor na czerwony",
+      "rep": 3,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugij2ha-vqmrx8",
+        "source": "main-chat",
+        "prompt": "zmień kolor na czerwony",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:21:01.774Z",
+        "totalMs": 24.299999999813735,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6391.200000000186,
+            "endMs": 6391.200000000186,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6391.299999999814,
+            "endMs": 6395.299999999814,
+            "durationMs": 4
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6397.200000000186,
+            "endMs": 6397.299999999814,
+            "durationMs": 0.09999999962747097,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6397.299999999814,
+            "endMs": 6397.399999999441,
+            "durationMs": 0.09999999962747097,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6397.299999999814,
+            "endMs": 6397.399999999441,
+            "durationMs": 0.09999999962747097,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6397.200000000186,
+            "endMs": 6397.700000000186,
+            "durationMs": 0.5,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6399.700000000186,
+            "endMs": 6399.799999999814,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6399.799999999814,
+            "endMs": 6399.799999999814,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6399.799999999814,
+            "endMs": 6415.5,
+            "durationMs": 15.700000000186265
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 983,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "A",
+      "text": "zmień kolor na czerwony",
+      "rep": 4,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugij8ek-m0xp42",
+        "source": "main-chat",
+        "prompt": "zmień kolor na czerwony",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:21:09.452Z",
+        "totalMs": 29.299999999813735,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6470.4000000003725,
+            "endMs": 6470.4000000003725,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6470.5,
+            "endMs": 6474.4000000003725,
+            "durationMs": 3.900000000372529
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6476.299999999814,
+            "endMs": 6476.4000000003725,
+            "durationMs": 0.10000000055879354,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6476.5,
+            "endMs": 6476.5,
+            "durationMs": 0,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6476.4000000003725,
+            "endMs": 6476.5,
+            "durationMs": 0.09999999962747097,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6476.299999999814,
+            "endMs": 6476.799999999814,
+            "durationMs": 0.5,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6478.700000000186,
+            "endMs": 6478.799999999814,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6478.799999999814,
+            "endMs": 6478.799999999814,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6478.799999999814,
+            "endMs": 6499.600000000559,
+            "durationMs": 20.800000000745058
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 968,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "A",
+      "text": "zmień kolor na czerwony",
+      "rep": 5,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugijedt-83brfx",
+        "source": "main-chat",
+        "prompt": "zmień kolor na czerwony",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:21:17.201Z",
+        "totalMs": 30.299999999813735,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6539.5999999996275,
+            "endMs": 6539.5999999996275,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6539.5999999996275,
+            "endMs": 6543.5999999996275,
+            "durationMs": 4
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6545.399999999441,
+            "endMs": 6545.5999999996275,
+            "durationMs": 0.20000000018626451,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6545.699999999255,
+            "endMs": 6545.699999999255,
+            "durationMs": 0,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6545.699999999255,
+            "endMs": 6545.699999999255,
+            "durationMs": 0,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6545.399999999441,
+            "endMs": 6546,
+            "durationMs": 0.6000000005587935,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6547.899999999441,
+            "endMs": 6548,
+            "durationMs": 0.10000000055879354
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6548,
+            "endMs": 6548,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6548,
+            "endMs": 6569.799999999814,
+            "durationMs": 21.799999999813735
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 986,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "B",
+      "text": "zmień czcionkę na Inter",
+      "rep": 1,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugijk9g-et8atk",
+        "source": "main-chat",
+        "prompt": "zmień czcionkę na Inter",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:21:24.820Z",
+        "totalMs": 27.899999999441206,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6411.9000000003725,
+            "endMs": 6411.9000000003725,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6412,
+            "endMs": 6416.4000000003725,
+            "durationMs": 4.400000000372529
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6418.5,
+            "endMs": 6419.200000000186,
+            "durationMs": 0.7000000001862645,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6419.200000000186,
+            "endMs": 6419.200000000186,
+            "durationMs": 0,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6419.200000000186,
+            "endMs": 6419.299999999814,
+            "durationMs": 0.09999999962747097,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6418.5,
+            "endMs": 6419.5,
+            "durationMs": 1,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6421.600000000559,
+            "endMs": 6421.600000000559,
+            "durationMs": 0
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6421.600000000559,
+            "endMs": 6421.600000000559,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6421.600000000559,
+            "endMs": 6439.799999999814,
+            "durationMs": 18.199999999254942
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 990,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "B",
+      "text": "zmień czcionkę na Inter",
+      "rep": 2,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugijq54-qiyos4",
+        "source": "main-chat",
+        "prompt": "zmień czcionkę na Inter",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:21:32.440Z",
+        "totalMs": 24.700000000186265,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6402,
+            "endMs": 6402,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6402.0999999996275,
+            "endMs": 6406.0999999996275,
+            "durationMs": 4
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6408.200000000186,
+            "endMs": 6408.5,
+            "durationMs": 0.2999999998137355,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6408.5999999996275,
+            "endMs": 6408.5999999996275,
+            "durationMs": 0,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6408.5,
+            "endMs": 6408.5999999996275,
+            "durationMs": 0.09999999962747097,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6408.200000000186,
+            "endMs": 6408.9000000003725,
+            "durationMs": 0.7000000001862645,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6410.9000000003725,
+            "endMs": 6411,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6411,
+            "endMs": 6411,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6411,
+            "endMs": 6426.700000000186,
+            "durationMs": 15.700000000186265
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 983,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "B",
+      "text": "zmień czcionkę na Inter",
+      "rep": 3,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugijvy0-0698m1",
+        "source": "main-chat",
+        "prompt": "zmień czcionkę na Inter",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:21:39.960Z",
+        "totalMs": 20.399999999441206,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6306,
+            "endMs": 6306,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6306,
+            "endMs": 6310.299999999814,
+            "durationMs": 4.2999999998137355
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6312.299999999814,
+            "endMs": 6312.899999999441,
+            "durationMs": 0.599999999627471,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6312.899999999441,
+            "endMs": 6313,
+            "durationMs": 0.10000000055879354,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6312.899999999441,
+            "endMs": 6313,
+            "durationMs": 0.10000000055879354,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6312.299999999814,
+            "endMs": 6313.299999999814,
+            "durationMs": 1,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6315.299999999814,
+            "endMs": 6315.399999999441,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6315.5,
+            "endMs": 6315.5,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6315.5,
+            "endMs": 6326.299999999814,
+            "durationMs": 10.799999999813735
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 703,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "B",
+      "text": "zmień czcionkę na Inter",
+      "rep": 4,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugik1mt-rccc68",
+        "source": "main-chat",
+        "prompt": "zmień czcionkę na Inter",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:21:47.333Z",
+        "totalMs": 29.399999999441206,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6429.600000000559,
+            "endMs": 6429.600000000559,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6429.600000000559,
+            "endMs": 6433.9000000003725,
+            "durationMs": 4.2999999998137355
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6435.9000000003725,
+            "endMs": 6436.5,
+            "durationMs": 0.599999999627471,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6436.600000000559,
+            "endMs": 6436.600000000559,
+            "durationMs": 0,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6436.5,
+            "endMs": 6436.700000000186,
+            "durationMs": 0.20000000018626451,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6435.9000000003725,
+            "endMs": 6436.9000000003725,
+            "durationMs": 1,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6439.200000000186,
+            "endMs": 6439.5,
+            "durationMs": 0.2999999998137355
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6439.5,
+            "endMs": 6439.5,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6439.5,
+            "endMs": 6459,
+            "durationMs": 19.5
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 969,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "B",
+      "text": "zmień czcionkę na Inter",
+      "rep": 5,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugik7n8-cxjbvi",
+        "source": "main-chat",
+        "prompt": "zmień czcionkę na Inter",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:21:55.124Z",
+        "totalMs": 22.5,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6581.299999999814,
+            "endMs": 6581.299999999814,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6581.4000000003725,
+            "endMs": 6585.0999999996275,
+            "durationMs": 3.699999999254942
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6586.799999999814,
+            "endMs": 6587.0999999996275,
+            "durationMs": 0.2999999998137355,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6587.0999999996275,
+            "endMs": 6587.200000000186,
+            "durationMs": 0.10000000055879354,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6587.0999999996275,
+            "endMs": 6587.200000000186,
+            "durationMs": 0.10000000055879354,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6586.799999999814,
+            "endMs": 6587.5999999996275,
+            "durationMs": 0.7999999998137355,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6589.4000000003725,
+            "endMs": 6589.5,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6589.5999999996275,
+            "endMs": 6589.5999999996275,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6589.5999999996275,
+            "endMs": 6603.700000000186,
+            "durationMs": 14.100000000558794
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 966,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "C",
+      "text": "zwiększ czcionkę o 20%",
+      "rep": 1,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugikdk9-q2smh2",
+        "source": "main-chat",
+        "prompt": "zwiększ czcionkę o 20%",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:22:02.793Z",
+        "totalMs": 20,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6457.0999999996275,
+            "endMs": 6457.0999999996275,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6457.0999999996275,
+            "endMs": 6461.0999999996275,
+            "durationMs": 4
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6463.0999999996275,
+            "endMs": 6463.399999999441,
+            "durationMs": 0.2999999998137355,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6463.399999999441,
+            "endMs": 6463.5,
+            "durationMs": 0.10000000055879354,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6463.399999999441,
+            "endMs": 6463.5999999996275,
+            "durationMs": 0.20000000018626451,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6463.0999999996275,
+            "endMs": 6463.799999999814,
+            "durationMs": 0.7000000001862645,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6465.799999999814,
+            "endMs": 6465.899999999441,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6465.899999999441,
+            "endMs": 6465.899999999441,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6465.899999999441,
+            "endMs": 6477.0999999996275,
+            "durationMs": 11.200000000186265
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 955,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "C",
+      "text": "zwiększ czcionkę o 20%",
+      "rep": 2,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugikjeg-rkoqtp",
+        "source": "main-chat",
+        "prompt": "zwiększ czcionkę o 20%",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:22:10.360Z",
+        "totalMs": 20.200000000186265,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6353.299999999814,
+            "endMs": 6353.299999999814,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6353.4000000003725,
+            "endMs": 6357.600000000559,
+            "durationMs": 4.2000000001862645
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6359.600000000559,
+            "endMs": 6359.700000000186,
+            "durationMs": 0.09999999962747097,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6359.700000000186,
+            "endMs": 6359.799999999814,
+            "durationMs": 0.09999999962747097,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6359.700000000186,
+            "endMs": 6359.799999999814,
+            "durationMs": 0.09999999962747097,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6359.600000000559,
+            "endMs": 6360.100000000559,
+            "durationMs": 0.5,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6362.100000000559,
+            "endMs": 6362.100000000559,
+            "durationMs": 0
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6362.100000000559,
+            "endMs": 6362.200000000186,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6362.200000000186,
+            "endMs": 6373.4000000003725,
+            "durationMs": 11.200000000186265
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 949,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "C",
+      "text": "zwiększ czcionkę o 20%",
+      "rep": 3,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugikp8v-ejtzhb",
+        "source": "main-chat",
+        "prompt": "zwiększ czcionkę o 20%",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:22:17.935Z",
+        "totalMs": 27.59999999962747,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6364.299999999814,
+            "endMs": 6364.299999999814,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6364.399999999441,
+            "endMs": 6368.0999999996275,
+            "durationMs": 3.7000000001862645
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6369.899999999441,
+            "endMs": 6370.200000000186,
+            "durationMs": 0.30000000074505806,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6370.299999999814,
+            "endMs": 6370.299999999814,
+            "durationMs": 0,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6370.200000000186,
+            "endMs": 6370.299999999814,
+            "durationMs": 0.09999999962747097,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6369.899999999441,
+            "endMs": 6370.5,
+            "durationMs": 0.6000000005587935,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6372.5999999996275,
+            "endMs": 6372.700000000186,
+            "durationMs": 0.10000000055879354
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6372.700000000186,
+            "endMs": 6372.700000000186,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6372.700000000186,
+            "endMs": 6391.799999999814,
+            "durationMs": 19.09999999962747
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 968,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "C",
+      "text": "zwiększ czcionkę o 20%",
+      "rep": 4,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugikv3f-t4s5fm",
+        "source": "main-chat",
+        "prompt": "zwiększ czcionkę o 20%",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:22:25.515Z",
+        "totalMs": 29.799999999813735,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6374.0999999996275,
+            "endMs": 6374.0999999996275,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6374.0999999996275,
+            "endMs": 6378.0999999996275,
+            "durationMs": 4
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6380.199999999255,
+            "endMs": 6380.5999999996275,
+            "durationMs": 0.40000000037252903,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6380.5999999996275,
+            "endMs": 6380.5999999996275,
+            "durationMs": 0,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6380.5999999996275,
+            "endMs": 6380.699999999255,
+            "durationMs": 0.09999999962747097,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6380.199999999255,
+            "endMs": 6380.899999999441,
+            "durationMs": 0.7000000001862645,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6383,
+            "endMs": 6383,
+            "durationMs": 0
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6383,
+            "endMs": 6383,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6383,
+            "endMs": 6403.899999999441,
+            "durationMs": 20.899999999441206
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 964,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "C",
+      "text": "zwiększ czcionkę o 20%",
+      "rep": 5,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugil0x4-jk3k7x",
+        "source": "main-chat",
+        "prompt": "zwiększ czcionkę o 20%",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:22:33.064Z",
+        "totalMs": 30.200000000186265,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6341,
+            "endMs": 6341,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6341,
+            "endMs": 6345,
+            "durationMs": 4
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6347,
+            "endMs": 6347.0999999996275,
+            "durationMs": 0.09999999962747097,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6347.0999999996275,
+            "endMs": 6347.0999999996275,
+            "durationMs": 0,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6347.0999999996275,
+            "endMs": 6347.0999999996275,
+            "durationMs": 0,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6347,
+            "endMs": 6347.5,
+            "durationMs": 0.5,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6349.399999999441,
+            "endMs": 6349.5999999996275,
+            "durationMs": 0.20000000018626451
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6349.5999999996275,
+            "endMs": 6349.5999999996275,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6349.5999999996275,
+            "endMs": 6371,
+            "durationMs": 21.40000000037253
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 949,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "D",
+      "text": "zmień tekst na TEST MINI AI",
+      "rep": 1,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "TEST MINI AI Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo TEST MINI AI Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugil6tv-dqf2un",
+        "source": "main-chat",
+        "prompt": "zmień tekst na TEST MINI AI",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:22:40.723Z",
+        "totalMs": 21.100000000558794,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6446.299999999814,
+            "endMs": 6446.299999999814,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6446.299999999814,
+            "endMs": 6450.5,
+            "durationMs": 4.2000000001862645
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6452.5,
+            "endMs": 6453,
+            "durationMs": 0.5,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6453,
+            "endMs": 6453.100000000559,
+            "durationMs": 0.10000000055879354,
+            "detail": "UPDATE_PROPS"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6453,
+            "endMs": 6453.100000000559,
+            "durationMs": 0.10000000055879354,
+            "detail": "update_node_props"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6452.5,
+            "endMs": 6453.299999999814,
+            "durationMs": 0.7999999998137355,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6455.299999999814,
+            "endMs": 6455.4000000003725,
+            "durationMs": 0.10000000055879354
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6455.4000000003725,
+            "endMs": 6455.4000000003725,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6455.4000000003725,
+            "endMs": 6467.4000000003725,
+            "durationMs": 12
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 766,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "D",
+      "text": "zmień tekst na TEST MINI AI",
+      "rep": 2,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "TEST MINI AI Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo TEST MINI AI Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugilcjw-17gli5",
+        "source": "main-chat",
+        "prompt": "zmień tekst na TEST MINI AI",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:22:48.140Z",
+        "totalMs": 19.5,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6469.5999999996275,
+            "endMs": 6469.5999999996275,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6469.5999999996275,
+            "endMs": 6473.700000000186,
+            "durationMs": 4.1000000005587935
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6475.899999999441,
+            "endMs": 6476.399999999441,
+            "durationMs": 0.5,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6476.399999999441,
+            "endMs": 6476.5,
+            "durationMs": 0.10000000055879354,
+            "detail": "UPDATE_PROPS"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6476.399999999441,
+            "endMs": 6476.5,
+            "durationMs": 0.10000000055879354,
+            "detail": "update_node_props"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6475.899999999441,
+            "endMs": 6476.799999999814,
+            "durationMs": 0.900000000372529,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6478.700000000186,
+            "endMs": 6478.899999999441,
+            "durationMs": 0.19999999925494194
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6478.899999999441,
+            "endMs": 6478.899999999441,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6478.899999999441,
+            "endMs": 6489.0999999996275,
+            "durationMs": 10.200000000186265
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 799,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "D",
+      "text": "zmień tekst na TEST MINI AI",
+      "rep": 3,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "TEST MINI AI Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo TEST MINI AI Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugili9z-mj7ofm",
+        "source": "main-chat",
+        "prompt": "zmień tekst na TEST MINI AI",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:22:55.559Z",
+        "totalMs": 19.100000000558794,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6469.699999999255,
+            "endMs": 6469.699999999255,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6469.799999999814,
+            "endMs": 6474.0999999996275,
+            "durationMs": 4.2999999998137355
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6476,
+            "endMs": 6476.0999999996275,
+            "durationMs": 0.09999999962747097,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6476.0999999996275,
+            "endMs": 6476.299999999814,
+            "durationMs": 0.20000000018626451,
+            "detail": "UPDATE_PROPS"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6476.0999999996275,
+            "endMs": 6476.299999999814,
+            "durationMs": 0.20000000018626451,
+            "detail": "update_node_props"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6476,
+            "endMs": 6476.5,
+            "durationMs": 0.5,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6478.399999999441,
+            "endMs": 6478.5,
+            "durationMs": 0.10000000055879354
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6478.5,
+            "endMs": 6478.5,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6478.5,
+            "endMs": 6488.699999999255,
+            "durationMs": 10.199999999254942
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 778,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "D",
+      "text": "zmień tekst na TEST MINI AI",
+      "rep": 4,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "TEST MINI AI Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo TEST MINI AI Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugilnz9-292go8",
+        "source": "main-chat",
+        "prompt": "zmień tekst na TEST MINI AI",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:23:02.949Z",
+        "totalMs": 27.40000000037253,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6445.799999999814,
+            "endMs": 6445.799999999814,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6445.799999999814,
+            "endMs": 6450,
+            "durationMs": 4.2000000001862645
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6451.700000000186,
+            "endMs": 6451.899999999441,
+            "durationMs": 0.19999999925494194,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6451.899999999441,
+            "endMs": 6451.899999999441,
+            "durationMs": 0,
+            "detail": "UPDATE_PROPS"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6451.899999999441,
+            "endMs": 6451.899999999441,
+            "durationMs": 0,
+            "detail": "update_node_props"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6451.700000000186,
+            "endMs": 6452.299999999814,
+            "durationMs": 0.599999999627471,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6454.0999999996275,
+            "endMs": 6454.200000000186,
+            "durationMs": 0.10000000055879354
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6454.200000000186,
+            "endMs": 6454.200000000186,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6454.200000000186,
+            "endMs": 6473.200000000186,
+            "durationMs": 19
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 1050,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "D",
+      "text": "zmień tekst na TEST MINI AI",
+      "rep": 5,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "TEST MINI AI Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo TEST MINI AI Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugilu2m-tjtksm",
+        "source": "main-chat",
+        "prompt": "zmień tekst na TEST MINI AI",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:23:10.846Z",
+        "totalMs": 29.59999999962747,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6681.0999999996275,
+            "endMs": 6681.0999999996275,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6681.0999999996275,
+            "endMs": 6685.200000000186,
+            "durationMs": 4.1000000005587935
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6687.0999999996275,
+            "endMs": 6687.200000000186,
+            "durationMs": 0.10000000055879354,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6687.299999999814,
+            "endMs": 6687.399999999441,
+            "durationMs": 0.09999999962747097,
+            "detail": "UPDATE_PROPS"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6687.200000000186,
+            "endMs": 6687.399999999441,
+            "durationMs": 0.19999999925494194,
+            "detail": "update_node_props"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6687.0999999996275,
+            "endMs": 6687.700000000186,
+            "durationMs": 0.6000000005587935,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6689.700000000186,
+            "endMs": 6689.700000000186,
+            "durationMs": 0
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6689.700000000186,
+            "endMs": 6689.700000000186,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6689.700000000186,
+            "endMs": 6710.5999999996275,
+            "durationMs": 20.899999999441206
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 1043,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "E",
+      "text": "wyśrodkuj",
+      "rep": 1,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugim04j-hts3dp",
+        "source": "main-chat",
+        "prompt": "wyśrodkuj",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:23:18.691Z",
+        "totalMs": 18.899999999441206,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6641.299999999814,
+            "endMs": 6641.299999999814,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6641.299999999814,
+            "endMs": 6645.200000000186,
+            "durationMs": 3.900000000372529
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6647.5,
+            "endMs": 6647.799999999814,
+            "durationMs": 0.2999999998137355,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6647.799999999814,
+            "endMs": 6647.9000000003725,
+            "durationMs": 0.10000000055879354,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6647.799999999814,
+            "endMs": 6648,
+            "durationMs": 0.20000000018626451,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6647.5,
+            "endMs": 6648.200000000186,
+            "durationMs": 0.7000000001862645,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6650.200000000186,
+            "endMs": 6650.4000000003725,
+            "durationMs": 0.20000000018626451
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6650.4000000003725,
+            "endMs": 6650.4000000003725,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6650.4000000003725,
+            "endMs": 6660.0999999996275,
+            "durationMs": 9.699999999254942
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 497,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "E",
+      "text": "wyśrodkuj",
+      "rep": 2,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugim5kr-sh13gt",
+        "source": "main-chat",
+        "prompt": "wyśrodkuj",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:23:25.755Z",
+        "totalMs": 20.40000000037253,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6117.0999999996275,
+            "endMs": 6117.0999999996275,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6117.0999999996275,
+            "endMs": 6121,
+            "durationMs": 3.900000000372529
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6123.0999999996275,
+            "endMs": 6123.399999999441,
+            "durationMs": 0.2999999998137355,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6123.5,
+            "endMs": 6123.5,
+            "durationMs": 0,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6123.5,
+            "endMs": 6123.5,
+            "durationMs": 0,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6123.0999999996275,
+            "endMs": 6123.700000000186,
+            "durationMs": 0.6000000005587935,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6125.899999999441,
+            "endMs": 6126,
+            "durationMs": 0.10000000055879354
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6126,
+            "endMs": 6126,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6126,
+            "endMs": 6137.5,
+            "durationMs": 11.5
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 506,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "E",
+      "text": "wyśrodkuj",
+      "rep": 3,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugimb3f-a41g1x",
+        "source": "main-chat",
+        "prompt": "wyśrodkuj",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:23:32.907Z",
+        "totalMs": 18.899999999441206,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6190.4000000003725,
+            "endMs": 6190.4000000003725,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6190.4000000003725,
+            "endMs": 6194.600000000559,
+            "durationMs": 4.2000000001862645
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6196.600000000559,
+            "endMs": 6197,
+            "durationMs": 0.39999999944120646,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6197,
+            "endMs": 6197.200000000186,
+            "durationMs": 0.20000000018626451,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6197,
+            "endMs": 6197.200000000186,
+            "durationMs": 0.20000000018626451,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6196.600000000559,
+            "endMs": 6197.4000000003725,
+            "durationMs": 0.7999999998137355,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6199.5,
+            "endMs": 6199.5,
+            "durationMs": 0
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6199.600000000559,
+            "endMs": 6199.600000000559,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6199.600000000559,
+            "endMs": 6209.200000000186,
+            "durationMs": 9.599999999627471
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 502,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "E",
+      "text": "wyśrodkuj",
+      "rep": 4,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugimgqn-dva379",
+        "source": "main-chat",
+        "prompt": "wyśrodkuj",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:23:40.223Z",
+        "totalMs": 19.399999999441206,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6373.600000000559,
+            "endMs": 6373.600000000559,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6373.700000000186,
+            "endMs": 6377.9000000003725,
+            "durationMs": 4.2000000001862645
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6379.700000000186,
+            "endMs": 6379.799999999814,
+            "durationMs": 0.09999999962747097,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6379.799999999814,
+            "endMs": 6379.9000000003725,
+            "durationMs": 0.10000000055879354,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6379.799999999814,
+            "endMs": 6379.9000000003725,
+            "durationMs": 0.10000000055879354,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6379.700000000186,
+            "endMs": 6380.200000000186,
+            "durationMs": 0.5,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6382.200000000186,
+            "endMs": 6382.299999999814,
+            "durationMs": 0.09999999962747097
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6382.299999999814,
+            "endMs": 6382.299999999814,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6382.299999999814,
+            "endMs": 6392.9000000003725,
+            "durationMs": 10.600000000558794
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 485,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    },
+    {
+      "surface": "main-chat",
+      "key": "E",
+      "text": "wyśrodkuj",
+      "rep": 5,
+      "ok": true,
+      "error": null,
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": {
+        "id": "lat-mugimm8u-fizgzn",
+        "source": "main-chat",
+        "prompt": "wyśrodkuj",
+        "path": "FAST_PATH",
+        "startedAtIso": "2026-09-25T05:23:47.358Z",
+        "totalMs": 19.90000000037253,
+        "stages": [
+          {
+            "stage": "UI",
+            "startMs": 6189.699999999255,
+            "endMs": 6189.699999999255,
+            "durationMs": 0
+          },
+          {
+            "stage": "QUEUE",
+            "startMs": 6189.799999999814,
+            "endMs": 6193.899999999441,
+            "durationMs": 4.099999999627471
+          },
+          {
+            "stage": "RESOLVER",
+            "startMs": 6195.799999999814,
+            "endMs": 6196.0999999996275,
+            "durationMs": 0.2999999998137355,
+            "detail": "eligibility+resolver"
+          },
+          {
+            "stage": "VERIFICATION",
+            "startMs": 6196.0999999996275,
+            "endMs": 6196.199999999255,
+            "durationMs": 0.09999999962747097,
+            "detail": "SET_NODE_STYLES"
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "startMs": 6196.0999999996275,
+            "endMs": 6196.199999999255,
+            "durationMs": 0.09999999962747097,
+            "detail": "set_node_styles"
+          },
+          {
+            "stage": "FAST_PATH",
+            "startMs": 6195.799999999814,
+            "endMs": 6196.399999999441,
+            "durationMs": 0.599999999627471,
+            "detail": "eligibility+resolver+dispatch"
+          },
+          {
+            "stage": "DISPATCH",
+            "startMs": 6198.699999999255,
+            "endMs": 6198.799999999814,
+            "durationMs": 0.10000000055879354
+          },
+          {
+            "stage": "RESPONSE",
+            "startMs": 6198.799999999814,
+            "endMs": 6198.799999999814,
+            "durationMs": 0
+          },
+          {
+            "stage": "CANVAS",
+            "startMs": 6198.799999999814,
+            "endMs": 6209.5999999996275,
+            "durationMs": 10.799999999813735
+          }
+        ],
+        "notes": [],
+        "ok": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "wallMs": 482,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": false
+      }
+    }
+  ]
+}

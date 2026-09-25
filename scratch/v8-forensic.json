@@ -1,0 +1,542 @@
+{
+  "base": "https://www.solospot.pl",
+  "target": "node-heading-a",
+  "runs": [
+    {
+      "input": "zmień czcionkę",
+      "path": "FAST_PATH",
+      "intent": "CLARIFY",
+      "exec": "CLARIFY",
+      "notes": [
+        "fast-path-rejected:PARAMETERS_INCOMPLETE",
+        "no-dispatch:CLARIFY"
+      ],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:2",
+        "FAST_PATH:2",
+        "RESPONSE:0",
+        "CANVAS:10"
+      ],
+      "wallMs": 1352,
+      "resolverTrace": [],
+      "api": [],
+      "mutated": [],
+      "nodeAfter": {
+        "type": "heading",
+        "styles": {
+          "color": "#ffffff",
+          "fontSize": "34px"
+        },
+        "props": {
+          "text": "The Art of Living Well"
+        }
+      },
+      "panel": {
+        "status": "CLARIFY",
+        "target": "node-heading-a",
+        "message": "Potrzebuję więcej informacji"
+      }
+    },
+    {
+      "input": "zmień czcionkę na większą",
+      "path": "FAST_PATH",
+      "intent": "EXECUTE",
+      "exec": "EXECUTED",
+      "notes": [],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:0",
+        "VERIFICATION:1",
+        "BUILDER_COMMAND:2",
+        "FAST_PATH:3",
+        "DISPATCH:0",
+        "RESPONSE:0",
+        "CANVAS:18"
+      ],
+      "wallMs": 1545,
+      "resolverTrace": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "RESIZE",
+            "domain": "SIZE",
+            "targetNodeId": "node-heading-a",
+            "timestamp": "2026-09-25T09:35:33.087Z"
+          }
+        ]
+      ],
+      "api": [],
+      "mutated": [
+        "node-heading-a"
+      ],
+      "nodeAfter": {
+        "type": "heading",
+        "styles": {
+          "color": "#ffffff",
+          "fontSize": "43px"
+        },
+        "props": {
+          "text": "The Art of Living Well"
+        }
+      },
+      "panel": {
+        "status": "SUCCESS",
+        "target": "node-heading-a",
+        "message": "Polecenie wykonane pomyślnie"
+      }
+    },
+    {
+      "input": "powiększ jeszcze",
+      "path": "FAST_PATH",
+      "intent": "EXECUTE",
+      "exec": "EXECUTED",
+      "notes": [],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:0",
+        "VERIFICATION:0",
+        "BUILDER_COMMAND:0",
+        "FAST_PATH:0",
+        "DISPATCH:0",
+        "RESPONSE:0",
+        "CANVAS:30"
+      ],
+      "wallMs": 1382,
+      "resolverTrace": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "RESIZE",
+            "domain": "SIZE",
+            "targetNodeId": "node-heading-a",
+            "timestamp": "2026-09-25T09:35:36.255Z"
+          }
+        ]
+      ],
+      "api": [],
+      "mutated": [
+        "node-heading-a"
+      ],
+      "nodeAfter": {
+        "type": "heading",
+        "styles": {
+          "color": "#ffffff",
+          "fontSize": "54px"
+        },
+        "props": {
+          "text": "The Art of Living Well"
+        }
+      },
+      "panel": {
+        "status": "SUCCESS",
+        "target": "node-heading-a",
+        "message": "Polecenie wykonane pomyślnie"
+      }
+    },
+    {
+      "input": "zmień kolor czcionki na żółty",
+      "path": "FAST_PATH",
+      "intent": "EXECUTE",
+      "exec": "EXECUTED",
+      "notes": [],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:1",
+        "VERIFICATION:0",
+        "BUILDER_COMMAND:0",
+        "FAST_PATH:1",
+        "DISPATCH:0",
+        "RESPONSE:0",
+        "CANVAS:27"
+      ],
+      "wallMs": 1586,
+      "resolverTrace": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "CHANGE_COLOR",
+            "domain": "COLOR",
+            "targetNodeId": "node-heading-a",
+            "timestamp": "2026-09-25T09:35:39.625Z"
+          }
+        ]
+      ],
+      "api": [],
+      "mutated": [
+        "node-heading-a"
+      ],
+      "nodeAfter": {
+        "type": "heading",
+        "styles": {
+          "color": "#FFFF00",
+          "fontSize": "54px"
+        },
+        "props": {
+          "text": "The Art of Living Well"
+        }
+      },
+      "panel": {
+        "status": "SUCCESS",
+        "target": "node-heading-a",
+        "message": "Polecenie wykonane pomyślnie"
+      }
+    },
+    {
+      "input": "napisz marcin bernatowicz ai creative",
+      "path": "AI_PATH",
+      "intent": "CLARIFY",
+      "exec": "ERROR",
+      "notes": [
+        "fast-path-rejected:UNRESOLVED",
+        "no-dispatch:ERROR"
+      ],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:0",
+        "FAST_PATH:0",
+        "PROVIDER:25248",
+        "TOOL_SELECTION:1",
+        "INTENT_CLASSIFIER:0",
+        "ROUTER:0",
+        "LLM:25001",
+        "HACP_BRIDGE:25251",
+        "RESPONSE:0",
+        "CANVAS:19"
+      ],
+      "wallMs": 26854,
+      "resolverTrace": [],
+      "api": [
+        {
+          "status": "ERROR",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "durationMs": 25001,
+          "llm": 2,
+          "error": "The operation was aborted due to timeout",
+          "message": "Upłynął limit czasu oczekiwania na odpowiedź modelu (nvidia/nemotron-3.5-lightning:free) (15s). Spróbuj ponownie lub wybierz szybszy model w menu powyżej.",
+          "toolCalls": []
+        }
+      ],
+      "mutated": [],
+      "nodeAfter": {
+        "type": "heading",
+        "styles": {
+          "color": "#FFFF00",
+          "fontSize": "54px"
+        },
+        "props": {
+          "text": "The Art of Living Well"
+        }
+      },
+      "panel": {
+        "status": "FAILED",
+        "target": "node-heading-a",
+        "message": "Nie udało się wykonać polecenia"
+      }
+    },
+    {
+      "input": "zmień napis na MARCIN BERNATOWICZ AI CREATIVE",
+      "path": "AI_PATH",
+      "intent": "CLARIFY",
+      "exec": "ERROR",
+      "notes": [
+        "fast-path-rejected:UNRESOLVED",
+        "no-dispatch:ERROR"
+      ],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:1",
+        "FAST_PATH:1",
+        "PROVIDER:25281",
+        "TOOL_SELECTION:0",
+        "INTENT_CLASSIFIER:0",
+        "ROUTER:0",
+        "LLM:25002",
+        "HACP_BRIDGE:25281",
+        "RESPONSE:0",
+        "CANVAS:25"
+      ],
+      "wallMs": 27116,
+      "resolverTrace": [],
+      "api": [
+        {
+          "status": "ERROR",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "durationMs": 25002,
+          "llm": 2,
+          "error": "The operation was aborted due to timeout",
+          "message": "Upłynął limit czasu oczekiwania na odpowiedź modelu (nvidia/nemotron-3.5-lightning:free) (15s). Spróbuj ponownie lub wybierz szybszy model w menu powyżej.",
+          "toolCalls": []
+        }
+      ],
+      "mutated": [],
+      "nodeAfter": {
+        "type": "heading",
+        "styles": {
+          "color": "#FFFF00",
+          "fontSize": "54px"
+        },
+        "props": {
+          "text": "The Art of Living Well"
+        }
+      },
+      "panel": {
+        "status": "FAILED",
+        "target": "node-heading-a",
+        "message": "Nie udało się wykonać polecenia"
+      }
+    },
+    {
+      "input": "zmień kolor na czarny",
+      "path": "FAST_PATH",
+      "intent": "EXECUTE",
+      "exec": "EXECUTED",
+      "notes": [],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:0",
+        "VERIFICATION:0",
+        "BUILDER_COMMAND:0",
+        "FAST_PATH:1",
+        "DISPATCH:0",
+        "RESPONSE:0",
+        "CANVAS:14"
+      ],
+      "wallMs": 1462,
+      "resolverTrace": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "CHANGE_COLOR",
+            "domain": "COLOR",
+            "targetNodeId": "node-heading-a",
+            "timestamp": "2026-09-25T09:36:40.404Z"
+          }
+        ]
+      ],
+      "api": [],
+      "mutated": [
+        "node-heading-a"
+      ],
+      "nodeAfter": {
+        "type": "heading",
+        "styles": {
+          "color": "#000000",
+          "fontSize": "54px"
+        },
+        "props": {
+          "text": "The Art of Living Well"
+        }
+      },
+      "panel": {
+        "status": "SUCCESS",
+        "target": "node-heading-a",
+        "message": "Polecenie wykonane pomyślnie"
+      }
+    },
+    {
+      "input": "rozciągnij czcionkę mocniej",
+      "path": "FAST_PATH",
+      "intent": "CLARIFY",
+      "exec": "CLARIFY",
+      "notes": [
+        "fast-path-rejected:PARAMETERS_INCOMPLETE",
+        "no-dispatch:CLARIFY"
+      ],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:0",
+        "FAST_PATH:0",
+        "RESPONSE:0",
+        "CANVAS:25"
+      ],
+      "wallMs": 1565,
+      "resolverTrace": [],
+      "api": [],
+      "mutated": [],
+      "nodeAfter": {
+        "type": "heading",
+        "styles": {
+          "color": "#000000",
+          "fontSize": "54px"
+        },
+        "props": {
+          "text": "The Art of Living Well"
+        }
+      },
+      "panel": {
+        "status": "CLARIFY",
+        "target": "node-heading-a",
+        "message": "Potrzebuję więcej informacji"
+      }
+    },
+    {
+      "input": "rozciągnij czcionkę na boki",
+      "path": "AI_PATH",
+      "intent": "CLARIFY",
+      "exec": "ERROR",
+      "notes": [
+        "fast-path-rejected:UNRESOLVED",
+        "no-dispatch:ERROR"
+      ],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:1",
+        "FAST_PATH:1",
+        "PROVIDER:25241",
+        "TOOL_SELECTION:0",
+        "INTENT_CLASSIFIER:0",
+        "ROUTER:0",
+        "LLM:25001",
+        "HACP_BRIDGE:25241",
+        "RESPONSE:0",
+        "CANVAS:19"
+      ],
+      "wallMs": 26698,
+      "resolverTrace": [],
+      "api": [
+        {
+          "status": "ERROR",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "durationMs": 25001,
+          "llm": 2,
+          "error": "The operation was aborted due to timeout",
+          "message": "Upłynął limit czasu oczekiwania na odpowiedź modelu (nvidia/nemotron-3.5-lightning:free) (15s). Spróbuj ponownie lub wybierz szybszy model w menu powyżej.",
+          "toolCalls": []
+        }
+      ],
+      "mutated": [],
+      "nodeAfter": {
+        "type": "heading",
+        "styles": {
+          "color": "#000000",
+          "fontSize": "54px"
+        },
+        "props": {
+          "text": "The Art of Living Well"
+        }
+      },
+      "panel": {
+        "status": "FAILED",
+        "target": "node-heading-a",
+        "message": "Nie udało się wykonać polecenia"
+      }
+    },
+    {
+      "input": "rozciągnij tytuł na boki",
+      "path": "FAST_PATH",
+      "intent": "EXECUTE",
+      "exec": "EXECUTED",
+      "notes": [],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:0",
+        "VERIFICATION:0",
+        "BUILDER_COMMAND:0",
+        "FAST_PATH:1",
+        "DISPATCH:0",
+        "RESPONSE:0",
+        "CANVAS:26"
+      ],
+      "wallMs": 1524,
+      "resolverTrace": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "CHANGE_TEXT",
+            "domain": "TEXT",
+            "targetNodeId": "node-heading-a",
+            "timestamp": "2026-09-25T09:37:15.526Z"
+          }
+        ]
+      ],
+      "api": [],
+      "mutated": [
+        "node-heading-a"
+      ],
+      "nodeAfter": {
+        "type": "heading",
+        "styles": {
+          "color": "#000000",
+          "fontSize": "54px"
+        },
+        "props": {
+          "text": "boki"
+        }
+      },
+      "panel": {
+        "status": "SUCCESS",
+        "target": "node-heading-a",
+        "message": "Polecenie wykonane pomyślnie"
+      }
+    },
+    {
+      "input": "napisz MARCIN BERNATOWICZ AI CREATIVE",
+      "path": "AI_PATH",
+      "intent": "CLARIFY",
+      "exec": "ERROR",
+      "notes": [
+        "fast-path-rejected:UNRESOLVED",
+        "no-dispatch:ERROR"
+      ],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:0",
+        "FAST_PATH:1",
+        "PROVIDER:25515",
+        "TOOL_SELECTION:0",
+        "INTENT_CLASSIFIER:0",
+        "ROUTER:0",
+        "LLM:25001",
+        "HACP_BRIDGE:25515",
+        "RESPONSE:0",
+        "CANVAS:32"
+      ],
+      "wallMs": 27211,
+      "resolverTrace": [],
+      "api": [
+        {
+          "status": "ERROR",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "durationMs": 25001,
+          "llm": 2,
+          "error": "The operation was aborted due to timeout",
+          "message": "Upłynął limit czasu oczekiwania na odpowiedź modelu (nvidia/nemotron-3.5-lightning:free) (15s). Spróbuj ponownie lub wybierz szybszy model w menu powyżej.",
+          "toolCalls": []
+        }
+      ],
+      "mutated": [],
+      "nodeAfter": {
+        "type": "heading",
+        "styles": {
+          "color": "#000000",
+          "fontSize": "54px"
+        },
+        "props": {
+          "text": "boki"
+        }
+      },
+      "panel": {
+        "status": "FAILED",
+        "target": "node-heading-a",
+        "message": "Nie udało się wykonać polecenia"
+      }
+    }
+  ]
+}

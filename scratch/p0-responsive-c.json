@@ -1,0 +1,16 @@
+{
+  "base": "https://www.solospot.pl",
+  "freshLoad": {
+    "xFresh": 535,
+    "naturalExpected": 471,
+    "renderedExpected": 535,
+    "node": {
+      "styles": {
+        "translateX": "100px",
+        "translateY": "40px"
+      },
+      "responsive": {}
+    },
+    "jsErrors": []
+  }
+}

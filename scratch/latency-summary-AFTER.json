@@ -1,0 +1,588 @@
+{
+  "tag": "AFTER",
+  "generatedAt": "2026-09-25T05:24:03.979Z",
+  "totalRuns": 50,
+  "groups": [
+    {
+      "surface": "mini-inspector",
+      "cmd": "A",
+      "prompt": "zmień kolor na czerwony",
+      "runs": 5,
+      "ok": 5,
+      "wallMs": {
+        "n": 5,
+        "min": 729,
+        "max": 982,
+        "avg": 831.8,
+        "median": 744
+      },
+      "totalMs": {
+        "n": 5,
+        "min": 23.5,
+        "max": 36.89999999944121,
+        "avg": 29.3,
+        "median": 29.799999999813735
+      },
+      "paths": {
+        "FAST_PATH": 5
+      },
+      "executionStatus": {
+        "EXECUTED": 5
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "cmd": "B",
+      "prompt": "zmień czcionkę na Inter",
+      "runs": 5,
+      "ok": 5,
+      "wallMs": {
+        "n": 5,
+        "min": 701,
+        "max": 978,
+        "avg": 759.6,
+        "median": 703
+      },
+      "totalMs": {
+        "n": 5,
+        "min": 22.100000000558794,
+        "max": 32.40000000037253,
+        "avg": 25.6,
+        "median": 24.59999999962747
+      },
+      "paths": {
+        "FAST_PATH": 5
+      },
+      "executionStatus": {
+        "EXECUTED": 5
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "cmd": "C",
+      "prompt": "zwiększ czcionkę o 20%",
+      "runs": 5,
+      "ok": 5,
+      "wallMs": {
+        "n": 5,
+        "min": 703,
+        "max": 963,
+        "avg": 811.8,
+        "median": 717
+      },
+      "totalMs": {
+        "n": 5,
+        "min": 22.799999999813735,
+        "max": 30.90000000037253,
+        "avg": 26.5,
+        "median": 25.09999999962747
+      },
+      "paths": {
+        "FAST_PATH": 5
+      },
+      "executionStatus": {
+        "EXECUTED": 5
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "cmd": "D",
+      "prompt": "zmień tekst na TEST MINI AI",
+      "runs": 5,
+      "ok": 5,
+      "wallMs": {
+        "n": 5,
+        "min": 765,
+        "max": 1048,
+        "avg": 989.2,
+        "median": 1043
+      },
+      "totalMs": {
+        "n": 5,
+        "min": 23.700000000186265,
+        "max": 33.200000000186265,
+        "avg": 30.3,
+        "median": 31.09999999962747
+      },
+      "paths": {
+        "FAST_PATH": 5
+      },
+      "executionStatus": {
+        "EXECUTED": 5
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "cmd": "E",
+      "prompt": "wyśrodkuj",
+      "runs": 5,
+      "ok": 5,
+      "wallMs": {
+        "n": 5,
+        "min": 493,
+        "max": 764,
+        "avg": 604.2,
+        "median": 509
+      },
+      "totalMs": {
+        "n": 5,
+        "min": 21.700000000186265,
+        "max": 29.299999999813735,
+        "avg": 25.2,
+        "median": 23.700000000186265
+      },
+      "paths": {
+        "FAST_PATH": 5
+      },
+      "executionStatus": {
+        "EXECUTED": 5
+      }
+    },
+    {
+      "surface": "main-chat",
+      "cmd": "A",
+      "prompt": "zmień kolor na czerwony",
+      "runs": 5,
+      "ok": 5,
+      "wallMs": {
+        "n": 5,
+        "min": 968,
+        "max": 986,
+        "avg": 981.2,
+        "median": 983
+      },
+      "totalMs": {
+        "n": 5,
+        "min": 23,
+        "max": 30.299999999813735,
+        "avg": 26.8,
+        "median": 27.300000000745058
+      },
+      "paths": {
+        "FAST_PATH": 5
+      },
+      "executionStatus": {
+        "EXECUTED": 5
+      }
+    },
+    {
+      "surface": "main-chat",
+      "cmd": "B",
+      "prompt": "zmień czcionkę na Inter",
+      "runs": 5,
+      "ok": 5,
+      "wallMs": {
+        "n": 5,
+        "min": 703,
+        "max": 990,
+        "avg": 922.2,
+        "median": 969
+      },
+      "totalMs": {
+        "n": 5,
+        "min": 20.399999999441206,
+        "max": 29.399999999441206,
+        "avg": 25,
+        "median": 24.700000000186265
+      },
+      "paths": {
+        "FAST_PATH": 5
+      },
+      "executionStatus": {
+        "EXECUTED": 5
+      }
+    },
+    {
+      "surface": "main-chat",
+      "cmd": "C",
+      "prompt": "zwiększ czcionkę o 20%",
+      "runs": 5,
+      "ok": 5,
+      "wallMs": {
+        "n": 5,
+        "min": 949,
+        "max": 968,
+        "avg": 957,
+        "median": 955
+      },
+      "totalMs": {
+        "n": 5,
+        "min": 20,
+        "max": 30.200000000186265,
+        "avg": 25.6,
+        "median": 27.59999999962747
+      },
+      "paths": {
+        "FAST_PATH": 5
+      },
+      "executionStatus": {
+        "EXECUTED": 5
+      }
+    },
+    {
+      "surface": "main-chat",
+      "cmd": "D",
+      "prompt": "zmień tekst na TEST MINI AI",
+      "runs": 5,
+      "ok": 5,
+      "wallMs": {
+        "n": 5,
+        "min": 766,
+        "max": 1050,
+        "avg": 887.2,
+        "median": 799
+      },
+      "totalMs": {
+        "n": 5,
+        "min": 19.100000000558794,
+        "max": 29.59999999962747,
+        "avg": 23.3,
+        "median": 21.100000000558794
+      },
+      "paths": {
+        "FAST_PATH": 5
+      },
+      "executionStatus": {
+        "EXECUTED": 5
+      }
+    },
+    {
+      "surface": "main-chat",
+      "cmd": "E",
+      "prompt": "wyśrodkuj",
+      "runs": 5,
+      "ok": 5,
+      "wallMs": {
+        "n": 5,
+        "min": 482,
+        "max": 506,
+        "avg": 494.4,
+        "median": 497
+      },
+      "totalMs": {
+        "n": 5,
+        "min": 18.899999999441206,
+        "max": 20.40000000037253,
+        "avg": 19.5,
+        "median": 19.399999999441206
+      },
+      "paths": {
+        "FAST_PATH": 5
+      },
+      "executionStatus": {
+        "EXECUTED": 5
+      }
+    }
+  ],
+  "overall": {
+    "wallMs": {
+      "n": 50,
+      "min": 482,
+      "max": 1050,
+      "avg": 823.9,
+      "median": 874
+    },
+    "totalMs": {
+      "n": 50,
+      "min": 18.899999999441206,
+      "max": 36.89999999944121,
+      "avg": 25.7,
+      "median": 25
+    },
+    "paths": {
+      "FAST_PATH": 50
+    },
+    "executionStatus": {
+      "EXECUTED": 50
+    },
+    "ok": {
+      "true": 50,
+      "false": 0
+    },
+    "stageTable": [
+      {
+        "stage": "UI",
+        "count": 50,
+        "n": 50,
+        "min": 0,
+        "max": 0.20000000018626451,
+        "avg": 0.1,
+        "median": 0
+      },
+      {
+        "stage": "QUEUE",
+        "count": 50,
+        "n": 50,
+        "min": 1.800000000745058,
+        "max": 5.099999999627471,
+        "avg": 3.1,
+        "median": 3
+      },
+      {
+        "stage": "FAST_PATH",
+        "count": 50,
+        "n": 50,
+        "min": 0.5,
+        "max": 4,
+        "avg": 0.8,
+        "median": 1
+      },
+      {
+        "stage": "RESOLVER",
+        "count": 50,
+        "n": 50,
+        "min": 0,
+        "max": 1.2000000001862645,
+        "avg": 0.4,
+        "median": 0
+      },
+      {
+        "stage": "BUILDER_COMMAND",
+        "count": 50,
+        "n": 50,
+        "min": 0,
+        "max": 1.7999999998137355,
+        "avg": 0.1,
+        "median": 0
+      },
+      {
+        "stage": "VERIFICATION",
+        "count": 50,
+        "n": 50,
+        "min": 0,
+        "max": 0.7000000001862645,
+        "avg": 0.1,
+        "median": 0
+      },
+      {
+        "stage": "DISPATCH",
+        "count": 50,
+        "n": 50,
+        "min": 0,
+        "max": 0.2999999998137355,
+        "avg": 0.1,
+        "median": 0
+      },
+      {
+        "stage": "RESPONSE",
+        "count": 50,
+        "n": 50,
+        "min": 0,
+        "max": 0.10000000055879354,
+        "avg": 0,
+        "median": 0
+      },
+      {
+        "stage": "CANVAS",
+        "count": 50,
+        "n": 50,
+        "min": 9.599999999627471,
+        "max": 22.5,
+        "avg": 15.7,
+        "median": 14
+      }
+    ],
+    "bySurface": {
+      "mini-inspector": {
+        "runs": 25,
+        "wallMs": {
+          "n": 25,
+          "min": 493,
+          "max": 1048,
+          "avg": 799.3,
+          "median": 744
+        },
+        "totalMs": {
+          "n": 25,
+          "min": 21.700000000186265,
+          "max": 36.89999999944121,
+          "avg": 27.4,
+          "median": 25.40000000037253
+        },
+        "stageTable": [
+          {
+            "stage": "UI",
+            "count": 25,
+            "n": 25,
+            "min": 0,
+            "max": 0.20000000018626451,
+            "avg": 0.1,
+            "median": 0.09999999962747097
+          },
+          {
+            "stage": "QUEUE",
+            "count": 25,
+            "n": 25,
+            "min": 1.800000000745058,
+            "max": 2.8999999994412065,
+            "avg": 2.1,
+            "median": 2
+          },
+          {
+            "stage": "FAST_PATH",
+            "count": 25,
+            "n": 25,
+            "min": 0.5,
+            "max": 4,
+            "avg": 1,
+            "median": 0.8999999994412065
+          },
+          {
+            "stage": "RESOLVER",
+            "count": 25,
+            "n": 25,
+            "min": 0,
+            "max": 1.2000000001862645,
+            "avg": 0.5,
+            "median": 0.5
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "count": 25,
+            "n": 25,
+            "min": 0,
+            "max": 1.7999999998137355,
+            "avg": 0.2,
+            "median": 0.10000000055879354
+          },
+          {
+            "stage": "VERIFICATION",
+            "count": 25,
+            "n": 25,
+            "min": 0,
+            "max": 0.7000000001862645,
+            "avg": 0.1,
+            "median": 0.09999999962747097
+          },
+          {
+            "stage": "DISPATCH",
+            "count": 25,
+            "n": 25,
+            "min": 0,
+            "max": 0.20000000018626451,
+            "avg": 0.1,
+            "median": 0.09999999962747097
+          },
+          {
+            "stage": "RESPONSE",
+            "count": 25,
+            "n": 25,
+            "min": 0,
+            "max": 0.10000000055879354,
+            "avg": 0,
+            "median": 0
+          },
+          {
+            "stage": "CANVAS",
+            "count": 25,
+            "n": 25,
+            "min": 12,
+            "max": 22.5,
+            "avg": 16.4,
+            "median": 14.200000000186265
+          }
+        ]
+      },
+      "main-chat": {
+        "runs": 25,
+        "wallMs": {
+          "n": 25,
+          "min": 482,
+          "max": 1050,
+          "avg": 848.4,
+          "median": 964
+        },
+        "totalMs": {
+          "n": 25,
+          "min": 18.899999999441206,
+          "max": 30.299999999813735,
+          "avg": 24,
+          "median": 23
+        },
+        "stageTable": [
+          {
+            "stage": "UI",
+            "count": 25,
+            "n": 25,
+            "min": 0,
+            "max": 0.10000000055879354,
+            "avg": 0,
+            "median": 0
+          },
+          {
+            "stage": "QUEUE",
+            "count": 25,
+            "n": 25,
+            "min": 3.699999999254942,
+            "max": 5.099999999627471,
+            "avg": 4.1,
+            "median": 4.1000000005587935
+          },
+          {
+            "stage": "FAST_PATH",
+            "count": 25,
+            "n": 25,
+            "min": 0.5,
+            "max": 1,
+            "avg": 0.7,
+            "median": 0.6999999992549419
+          },
+          {
+            "stage": "RESOLVER",
+            "count": 25,
+            "n": 25,
+            "min": 0.09999999962747097,
+            "max": 0.7000000001862645,
+            "avg": 0.3,
+            "median": 0.2999999998137355
+          },
+          {
+            "stage": "BUILDER_COMMAND",
+            "count": 25,
+            "n": 25,
+            "min": 0,
+            "max": 0.20000000018626451,
+            "avg": 0.1,
+            "median": 0.09999999962747097
+          },
+          {
+            "stage": "VERIFICATION",
+            "count": 25,
+            "n": 25,
+            "min": 0,
+            "max": 0.20000000018626451,
+            "avg": 0.1,
+            "median": 0.09999999962747097
+          },
+          {
+            "stage": "DISPATCH",
+            "count": 25,
+            "n": 25,
+            "min": 0,
+            "max": 0.2999999998137355,
+            "avg": 0.1,
+            "median": 0.09999999962747097
+          },
+          {
+            "stage": "RESPONSE",
+            "count": 25,
+            "n": 25,
+            "min": 0,
+            "max": 0.09999999962747097,
+            "avg": 0,
+            "median": 0
+          },
+          {
+            "stage": "CANVAS",
+            "count": 25,
+            "n": 25,
+            "min": 9.599999999627471,
+            "max": 21.799999999813735,
+            "avg": 15,
+            "median": 14.100000000558794
+          }
+        ]
+      }
+    }
+  }
+}

@@ -260,7 +260,8 @@ export function DesignSystemCatalog() {
       const payload = designApplicationToCommandPayload(designResult)
       if (!payload) return
 
-      dispatch({
+      const batchCommands: any[] = [];
+      batchCommands.push({
         ...payload,
         theme: {
           ...(payload.theme || {}),
@@ -294,7 +295,7 @@ export function DesignSystemCatalog() {
             heading: headingFont,
             body: bodyFont,
           })
-          for (const command of typePlan.nodeCommands) dispatch(command as any)
+          batchCommands.push(...typePlan.nodeCommands)
         }
       }
 
@@ -332,8 +333,9 @@ export function DesignSystemCatalog() {
         // Contrast violations are surfaced as warnings — the plan is still
         // applied but never silently produces unreadable text (roles guarantee
         // readable pairs via resolveSemanticRoles).
-        for (const command of compPlan.nodeCommands) dispatch(command as any)
+        batchCommands.push(...compPlan.nodeCommands)
       }
+      if (batchCommands.length > 0) dispatch({ type: 'BATCH_EXECUTE', commands: batchCommands } as any)
     },
     [dispatch, DesignSystem, doc]
   )
@@ -392,8 +394,9 @@ export function DesignSystemCatalog() {
           heading: headingFont,
           body: bodyFont,
         })
-        for (const command of typePlan.nodeCommands) dispatch(command as any)
+        batchCommands.push(...typePlan.nodeCommands)
       }
+      if (batchCommands.length > 0) dispatch({ type: 'BATCH_EXECUTE', commands: batchCommands } as any)
     },
     [dispatch, doc]
   )

@@ -1,0 +1,594 @@
+{
+  "base": "https://www.solospot.pl",
+  "mainOpen": false,
+  "runs": [
+    {
+      "prompt": "zmień kolor na czerwony",
+      "wallMs": 1790,
+      "panel": {
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "target": "sec-hero-init",
+        "body": "AI Hero Banner · sec-hero-init SUCCESS TARGET: hero sec-hero-init (page page-home) Polecenie wykonane pomyślnie Modernize Change typography Change background Apply hero style",
+        "message": "Polecenie wykonane pomyślnie"
+      },
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "ok": true,
+      "notes": [],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:1",
+        "VERIFICATION:0",
+        "BUILDER_COMMAND:2",
+        "FAST_PATH:3",
+        "DISPATCH:0",
+        "RESPONSE:0",
+        "CANVAS:17"
+      ],
+      "execTraces": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "CHANGE_COLOR",
+            "domain": "COLOR",
+            "targetNodeId": "sec-hero-init",
+            "timestamp": "2026-09-25T06:36:24.056Z"
+          }
+        ]
+      ],
+      "api": [],
+      "canvasChanges": {
+        "redPixelsHint": {
+          "before": 0,
+          "after": 2
+        }
+      },
+      "docChanges": [
+        {
+          "id": "sec-hero-init",
+          "before": {
+            "styles": {},
+            "props": {
+              "title": "SoloSpot Visual Builder v2.0",
+              "subtitle": "Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo",
+              "cta": "Rozpocznij zakupy"
+            }
+          },
+          "after": {
+            "styles": {
+              "backgroundColor": "#FF0000"
+            },
+            "props": {
+              "title": "SoloSpot Visual Builder v2.0",
+              "subtitle": "Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo",
+              "cta": "Rozpocznij zakupy"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "prompt": "zmień czcionkę na Inter",
+      "wallMs": 1770,
+      "panel": {
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "target": "sec-hero-init",
+        "body": "AI Hero Banner · sec-hero-init SUCCESS TARGET: hero sec-hero-init (page page-home) Polecenie wykonane pomyślnie Modernize Change typography Change background Apply hero style",
+        "message": "Polecenie wykonane pomyślnie"
+      },
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "ok": true,
+      "notes": [],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:1",
+        "VERIFICATION:0",
+        "BUILDER_COMMAND:0",
+        "FAST_PATH:1",
+        "DISPATCH:0",
+        "RESPONSE:0",
+        "CANVAS:22"
+      ],
+      "execTraces": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "CHANGE_TYPOGRAPHY",
+            "domain": "TYPOGRAPHY",
+            "targetNodeId": "sec-hero-init",
+            "timestamp": "2026-09-25T06:36:27.545Z"
+          }
+        ]
+      ],
+      "api": [],
+      "canvasChanges": {},
+      "docChanges": [
+        {
+          "id": "sec-hero-init",
+          "before": {
+            "styles": {
+              "backgroundColor": "#FF0000"
+            },
+            "props": {
+              "title": "SoloSpot Visual Builder v2.0",
+              "subtitle": "Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo",
+              "cta": "Rozpocznij zakupy"
+            }
+          },
+          "after": {
+            "styles": {
+              "backgroundColor": "#FF0000",
+              "fontFamily": "Inter"
+            },
+            "props": {
+              "title": "SoloSpot Visual Builder v2.0",
+              "subtitle": "Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo",
+              "cta": "Rozpocznij zakupy"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "prompt": "powiększ czcionkę o 20 procent",
+      "wallMs": 1780,
+      "panel": {
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "target": "sec-hero-init",
+        "body": "AI Hero Banner · sec-hero-init SUCCESS TARGET: hero sec-hero-init (page page-home) Polecenie wykonane pomyślnie Modernize Change typography Change background Apply hero style",
+        "message": "Polecenie wykonane pomyślnie"
+      },
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "ok": true,
+      "notes": [],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:0",
+        "VERIFICATION:0",
+        "BUILDER_COMMAND:0",
+        "FAST_PATH:1",
+        "DISPATCH:0",
+        "RESPONSE:0",
+        "CANVAS:27"
+      ],
+      "execTraces": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "RESIZE",
+            "domain": "SIZE",
+            "targetNodeId": "sec-hero-init",
+            "timestamp": "2026-09-25T06:36:31.131Z"
+          }
+        ]
+      ],
+      "api": [],
+      "canvasChanges": {},
+      "docChanges": [
+        {
+          "id": "sec-hero-init",
+          "before": {
+            "styles": {
+              "backgroundColor": "#FF0000",
+              "fontFamily": "Inter"
+            },
+            "props": {
+              "title": "SoloSpot Visual Builder v2.0",
+              "subtitle": "Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo",
+              "cta": "Rozpocznij zakupy"
+            }
+          },
+          "after": {
+            "styles": {
+              "backgroundColor": "#FF0000",
+              "fontFamily": "Inter",
+              "fontSize": "19px"
+            },
+            "props": {
+              "title": "SoloSpot Visual Builder v2.0",
+              "subtitle": "Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo",
+              "cta": "Rozpocznij zakupy"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "prompt": "zmień tekst na TEST",
+      "wallMs": 1768,
+      "panel": {
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "target": "sec-hero-init",
+        "body": "AI Hero Banner · sec-hero-init SUCCESS TARGET: hero sec-hero-init (page page-home) Polecenie wykonane pomyślnie Modernize Change typography Change background Apply hero style",
+        "message": "Polecenie wykonane pomyślnie"
+      },
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "ok": true,
+      "notes": [],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:0",
+        "VERIFICATION:0",
+        "BUILDER_COMMAND:0",
+        "FAST_PATH:1",
+        "DISPATCH:0",
+        "RESPONSE:0",
+        "CANVAS:25"
+      ],
+      "execTraces": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "CHANGE_TEXT",
+            "domain": "TEXT",
+            "targetNodeId": "sec-hero-init",
+            "timestamp": "2026-09-25T06:36:34.555Z"
+          }
+        ]
+      ],
+      "api": [],
+      "canvasChanges": {
+        "headingText": {
+          "before": "SoloSpot Visual Builder v2.0",
+          "after": "TEST"
+        }
+      },
+      "docChanges": [
+        {
+          "id": "sec-hero-init",
+          "before": {
+            "styles": {
+              "backgroundColor": "#FF0000",
+              "fontFamily": "Inter",
+              "fontSize": "19px"
+            },
+            "props": {
+              "title": "SoloSpot Visual Builder v2.0",
+              "subtitle": "Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo",
+              "cta": "Rozpocznij zakupy"
+            }
+          },
+          "after": {
+            "styles": {
+              "backgroundColor": "#FF0000",
+              "fontFamily": "Inter",
+              "fontSize": "19px"
+            },
+            "props": {
+              "title": "TEST",
+              "subtitle": "Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo",
+              "cta": "TEST",
+              "ctaText": "TEST"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "prompt": "wyśrodkuj tekst",
+      "wallMs": 1766,
+      "panel": {
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "target": "sec-hero-init",
+        "body": "AI Hero Banner · sec-hero-init SUCCESS TARGET: hero sec-hero-init (page page-home) Polecenie wykonane pomyślnie Modernize Change typography Change background Apply hero style",
+        "message": "Polecenie wykonane pomyślnie"
+      },
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "ok": true,
+      "notes": [],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:0",
+        "VERIFICATION:0",
+        "BUILDER_COMMAND:0",
+        "FAST_PATH:1",
+        "DISPATCH:0",
+        "RESPONSE:0",
+        "CANVAS:21"
+      ],
+      "execTraces": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "ALIGN",
+            "domain": "ALIGN",
+            "targetNodeId": "sec-hero-init",
+            "timestamp": "2026-09-25T06:36:37.897Z"
+          }
+        ]
+      ],
+      "api": [],
+      "canvasChanges": {},
+      "docChanges": [
+        {
+          "id": "sec-hero-init",
+          "before": {
+            "styles": {
+              "backgroundColor": "#FF0000",
+              "fontFamily": "Inter",
+              "fontSize": "19px"
+            },
+            "props": {
+              "title": "TEST",
+              "subtitle": "Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo",
+              "cta": "TEST",
+              "ctaText": "TEST"
+            }
+          },
+          "after": {
+            "styles": {
+              "backgroundColor": "#FF0000",
+              "fontFamily": "Inter",
+              "fontSize": "19px",
+              "textAlign": "center"
+            },
+            "props": {
+              "title": "TEST",
+              "subtitle": "Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo",
+              "cta": "TEST",
+              "ctaText": "TEST"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "prompt": "zmień coś",
+      "wallMs": 17192,
+      "panel": {
+        "status": "FAILED",
+        "badge": "FAILED",
+        "target": "sec-hero-init",
+        "body": "AI Hero Banner · sec-hero-init FAILED TARGET: hero sec-hero-init (page page-home) Nie udało się wykonać polecenia Modernize Change typography Change background Apply hero style",
+        "message": "Nie udało się wykonać polecenia"
+      },
+      "path": "AI_PATH",
+      "exec": "ERROR",
+      "intent": "CLARIFY",
+      "ok": false,
+      "notes": [
+        "fast-path-rejected:UNRESOLVED",
+        "no-dispatch:ERROR"
+      ],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:0",
+        "FAST_PATH:0",
+        "PROVIDER:15450",
+        "TOOL_SELECTION:1",
+        "INTENT_CLASSIFIER:0",
+        "ROUTER:109",
+        "LLM:15116",
+        "HACP_BRIDGE:15452",
+        "RESPONSE:0",
+        "CANVAS:29"
+      ],
+      "execTraces": [],
+      "api": [
+        {
+          "status": 200,
+          "statusField": "ERROR",
+          "message": "Nie udało się uzyskać odpowiedzi z wybranego modelu (nvidia/nemotron-3.5-lightning:free). Spróbuj ponownie lub wybierz inny model w menu powyżej.",
+          "latency": {
+            "totalMs": 15120,
+            "toolSelectionMs": 1,
+            "intentClassifierMs": 0,
+            "routerMs": 109,
+            "modelMs": 15116,
+            "llmMs": 15116,
+            "llmRequestCount": 1
+          }
+        }
+      ],
+      "canvasChanges": {},
+      "docChanges": []
+    },
+    {
+      "prompt": "zmień kolor",
+      "wallMs": 16870,
+      "panel": {
+        "status": "FAILED",
+        "badge": "FAILED",
+        "target": "sec-hero-init",
+        "body": "AI Hero Banner · sec-hero-init FAILED TARGET: hero sec-hero-init (page page-home) Nie udało się wykonać polecenia Modernize Change typography Change background Apply hero style",
+        "message": "Nie udało się wykonać polecenia"
+      },
+      "path": "AI_PATH",
+      "exec": "ERROR",
+      "intent": "CLARIFY",
+      "ok": false,
+      "notes": [
+        "fast-path-rejected:PARAMETERS_INCOMPLETE",
+        "no-dispatch:ERROR"
+      ],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:0",
+        "FAST_PATH:0",
+        "PROVIDER:15264",
+        "TOOL_SELECTION:1",
+        "INTENT_CLASSIFIER:0",
+        "ROUTER:0",
+        "LLM:15002",
+        "HACP_BRIDGE:15265",
+        "RESPONSE:0",
+        "CANVAS:31"
+      ],
+      "execTraces": [],
+      "api": [
+        {
+          "status": 200,
+          "statusField": "ERROR",
+          "message": "Nie udało się uzyskać odpowiedzi z wybranego modelu (nvidia/nemotron-3.5-lightning:free). Spróbuj ponownie lub wybierz inny model w menu powyżej.",
+          "latency": {
+            "totalMs": 15003,
+            "toolSelectionMs": 1,
+            "intentClassifierMs": 0,
+            "routerMs": 0,
+            "modelMs": 15002,
+            "llmMs": 15002,
+            "llmRequestCount": 1
+          }
+        }
+      ],
+      "canvasChanges": {},
+      "docChanges": []
+    },
+    {
+      "prompt": "użyj jakiejś czcionki",
+      "wallMs": 16987,
+      "panel": {
+        "status": "FAILED",
+        "badge": "FAILED",
+        "target": "sec-hero-init",
+        "body": "AI Hero Banner · sec-hero-init FAILED TARGET: hero sec-hero-init (page page-home) Nie udało się wykonać polecenia Modernize Change typography Change background Apply hero style",
+        "message": "Nie udało się wykonać polecenia"
+      },
+      "path": "AI_PATH",
+      "exec": "ERROR",
+      "intent": "CLARIFY",
+      "ok": false,
+      "notes": [
+        "fast-path-rejected:PARAMETERS_INCOMPLETE",
+        "no-dispatch:ERROR"
+      ],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:1",
+        "FAST_PATH:1",
+        "PROVIDER:15402",
+        "TOOL_SELECTION:0",
+        "INTENT_CLASSIFIER:0",
+        "ROUTER:0",
+        "LLM:15002",
+        "HACP_BRIDGE:15403",
+        "RESPONSE:0",
+        "CANVAS:21"
+      ],
+      "execTraces": [],
+      "api": [
+        {
+          "status": 200,
+          "statusField": "ERROR",
+          "message": "Nie udało się uzyskać odpowiedzi z wybranego modelu (nvidia/nemotron-3.5-lightning:free). Spróbuj ponownie lub wybierz inny model w menu powyżej.",
+          "latency": {
+            "totalMs": 15002,
+            "toolSelectionMs": 0,
+            "intentClassifierMs": 0,
+            "routerMs": 0,
+            "modelMs": 15002,
+            "llmMs": 15002,
+            "llmRequestCount": 1
+          }
+        }
+      ],
+      "canvasChanges": {},
+      "docChanges": []
+    },
+    {
+      "prompt": "zrób to ładniej",
+      "wallMs": 16983,
+      "panel": {
+        "status": "FAILED",
+        "badge": "FAILED",
+        "target": "sec-hero-init",
+        "body": "AI Hero Banner · sec-hero-init FAILED TARGET: hero sec-hero-init (page page-home) Nie udało się wykonać polecenia Modernize Change typography Change background Apply hero style",
+        "message": "Nie udało się wykonać polecenia"
+      },
+      "path": "AI_PATH",
+      "exec": "ERROR",
+      "intent": "CLARIFY",
+      "ok": false,
+      "notes": [
+        "fast-path-rejected:UNRESOLVED",
+        "no-dispatch:ERROR"
+      ],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:1",
+        "FAST_PATH:1",
+        "PROVIDER:15269",
+        "TOOL_SELECTION:0",
+        "INTENT_CLASSIFIER:0",
+        "ROUTER:0",
+        "LLM:15003",
+        "HACP_BRIDGE:15269",
+        "RESPONSE:0",
+        "CANVAS:27"
+      ],
+      "execTraces": [],
+      "api": [
+        {
+          "status": 200,
+          "statusField": "ERROR",
+          "message": "Nie udało się uzyskać odpowiedzi z wybranego modelu (nvidia/nemotron-3.5-lightning:free). Spróbuj ponownie lub wybierz inny model w menu powyżej.",
+          "latency": {
+            "totalMs": 15003,
+            "toolSelectionMs": 0,
+            "intentClassifierMs": 0,
+            "routerMs": 0,
+            "modelMs": 15003,
+            "llmMs": 15003,
+            "llmRequestCount": 1
+          }
+        }
+      ],
+      "canvasChanges": {},
+      "docChanges": []
+    }
+  ],
+  "canvasInitial": {
+    "nodeId": "sec-hero-init",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "fontFamily": "Inter",
+    "fontSize": "16px",
+    "textAlign": "start",
+    "headingText": "SoloSpot Visual Builder v2.0",
+    "headingFont": "Inter",
+    "headingSize": "36px",
+    "headingAlign": "center",
+    "headingColor": "rgb(255, 255, 255)",
+    "redPixelsHint": 0
+  },
+  "docInitial": [
+    {
+      "id": "sec-hero-init",
+      "type": "hero",
+      "styles": {},
+      "props": {
+        "title": "SoloSpot Visual Builder v2.0",
+        "subtitle": "Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo",
+        "cta": "Rozpocznij zakupy"
+      }
+    }
+  ]
+}

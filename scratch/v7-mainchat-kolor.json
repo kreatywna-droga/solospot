@@ -1,0 +1,107 @@
+{
+  "base": "https://www.solospot.pl",
+  "prompt": "zmień kolor na czerwony",
+  "wallMs": 2810,
+  "trace": {
+    "id": "lat-mugkrr5d-etgu3u",
+    "source": "main-chat",
+    "prompt": "zmień kolor na czerwony",
+    "path": "FAST_PATH",
+    "startedAtIso": "2026-09-25T06:23:46.225Z",
+    "totalMs": 34.90000000037253,
+    "stages": [
+      {
+        "stage": "UI",
+        "startMs": 8621.799999998882,
+        "endMs": 8621.900000000373,
+        "durationMs": 0.10000000149011612
+      },
+      {
+        "stage": "QUEUE",
+        "startMs": 8622.099999999627,
+        "endMs": 8628.5,
+        "durationMs": 6.400000000372529
+      },
+      {
+        "stage": "RESOLVER",
+        "startMs": 8633,
+        "endMs": 8634,
+        "durationMs": 1,
+        "detail": "eligibility+resolver"
+      },
+      {
+        "stage": "VERIFICATION",
+        "startMs": 8635.400000000373,
+        "endMs": 8636,
+        "durationMs": 0.599999999627471,
+        "detail": "SET_NODE_STYLES"
+      },
+      {
+        "stage": "BUILDER_COMMAND",
+        "startMs": 8634.099999999627,
+        "endMs": 8636,
+        "durationMs": 1.900000000372529,
+        "detail": "set_node_styles"
+      },
+      {
+        "stage": "FAST_PATH",
+        "startMs": 8632.900000000373,
+        "endMs": 8636.599999999627,
+        "durationMs": 3.699999999254942,
+        "detail": "eligibility+resolver+dispatch"
+      },
+      {
+        "stage": "DISPATCH",
+        "startMs": 8642.699999999255,
+        "endMs": 8643,
+        "durationMs": 0.30000000074505806
+      },
+      {
+        "stage": "RESPONSE",
+        "startMs": 8643,
+        "endMs": 8643,
+        "durationMs": 0
+      },
+      {
+        "stage": "CANVAS",
+        "startMs": 8643.099999999627,
+        "endMs": 8656.299999998882,
+        "durationMs": 13.199999999254942
+      }
+    ],
+    "notes": [],
+    "ok": true,
+    "intent": "EXECUTE",
+    "executionStatus": "EXECUTED"
+  },
+  "chat": {
+    "msgs": [],
+    "visible": "SOLOSPOT AI v1.0 Builder Copilot COPY CONTEXT Ty • 08:23:46 zmień kolor na czerwony SoloSpot AI • 08:23:46 Zmieniłem kolor tła zaznaczenia **Hero** na **#FF0000**. Zastosowano: Zmieniłem kolor tła zaznaczenia **Hero** na **#FF0000**. Cofnij NVIDIA: Nemotron 3.5 Lightning (free) Szybkie akcje NVIDIA: Nemotron 3.5 Lightning (free) FREE Enter: Wyślij • Shift+Enter: Nowa linia HACP Direct Live Bridge",
+    "promptEcho": ""
+  },
+  "miniInspectorMirror": null,
+  "api": [
+    {
+      "url": "/api/builder/copilot",
+      "method": "GET",
+      "status": 200,
+      "statusField": "ONLINE",
+      "message": "",
+      "keys": [
+        "status",
+        "provider",
+        "configured",
+        "missingKeys"
+      ]
+    }
+  ],
+  "consoleTail": [
+    "Failed to load resource: the server responded with a status of 401 ()",
+    "Font catalog contains 200 unique fonts",
+    "Failed to load resource: the server responded with a status of 401 ()",
+    "Failed to load resource: the server responded with a status of 401 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "[HacpBridge] EXECUTION_TRACE: [object Object]",
+    "[LATENCY_TRACE] {\"id\":\"lat-mugkrr5d-etgu3u\",\"source\":\"main-chat\",\"prompt\":\"zmień kolor na czerwony\",\"path\":\"FAST_PATH\",\"startedAtIso\":\"2026-09-25T06:23:46.225Z\",\"totalMs\":34.90000000037253,\"stages\":[{\"stage\":\"UI\",\"startMs\":8621.799999998882,\"endMs\":8621.900000000373,\"durationMs\":0.10000000149011612}"
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "prompt": "dobierz mi elegancką szeryfową czcionkę do tego nagłówka",
+  "path": null,
+  "exec": null,
+  "intent": null,
+  "notes": null,
+  "beforeNode": {
+    "styles": {},
+    "props": {
+      "title": "SoloSpot Visual Builder v2.0",
+      "subtitle": "Biblioteka",
+      "cta": "Rozpocznij zakupy"
+    }
+  },
+  "afterNode": {
+    "styles": {},
+    "props": {
+      "title": "SoloSpot Visual Builder v2.0",
+      "subtitle": "Biblioteka",
+      "cta": "Rozpocznij zakupy"
+    }
+  },
+  "beforeCanvas": {
+    "sectionFontFamily": "Inter",
+    "declared": "Inter",
+    "headline": "SoloSpot Visual Builder v2.0",
+    "faces": [],
+    "textWidth": 366.9
+  },
+  "afterCanvas": {
+    "sectionFontFamily": "Inter",
+    "declared": "Inter",
+    "headline": "SoloSpot Visual Builder v2.0",
+    "faces": [],
+    "textWidth": 366.9
+  },
+  "panel": {
+    "target": "sec-hero-init",
+    "status": "EXECUTING",
+    "message": "hero sec-hero-init (page page-home) | Wykonuję polecenie na hero… | Modernize | Change typography"
+  },
+  "consoleTrace": [],
+  "canvasFontChanged": false,
+  "docFontChanged": false
+}

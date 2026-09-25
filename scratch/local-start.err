@@ -1,0 +1,34 @@
+Stripe not configured for webhook
+[renderStore] Pipeline failed, falling back to legacy: StoreRepository.getStoreBySlug failed: TypeError: fetch failed; StoreRepository.getStoreBySlug failed: TypeError: fetch failed
+[renderStore] Legacy fallback also failed: StoreRepository.getStoreBySlug failed: TypeError: fetch failed
+[renderStore] Pipeline failed, falling back to legacy: StoreRepository.getStoreBySlug failed: TypeError: fetch failed; StoreRepository.getStoreBySlug failed: TypeError: fetch failed
+[renderStore] Legacy fallback also failed: StoreRepository.getStoreBySlug failed: TypeError: fetch failed
+[renderStore] Pipeline failed, falling back to legacy: StoreRepository.getStoreBySlug failed: TypeError: fetch failed; StoreRepository.getStoreBySlug failed: TypeError: fetch failed
+[renderStore] Legacy fallback also failed: StoreRepository.getStoreBySlug failed: TypeError: fetch failed
+[renderStore] Pipeline failed, falling back to legacy: StoreRepository.getStoreBySlug failed: TypeError: fetch failed; StoreRepository.getStoreBySlug failed: TypeError: fetch failed
+[renderStore] Legacy fallback also failed: StoreRepository.getStoreBySlug failed: TypeError: fetch failed
+[renderStore] Pipeline failed, falling back to legacy: StoreRepository.getStoreBySlug failed: TypeError: fetch failed; StoreRepository.getStoreBySlug failed: TypeError: fetch failed
+[renderStore] Legacy fallback also failed: StoreRepository.getStoreBySlug failed: TypeError: fetch failed
+[AgentOrchestrator] Dropped tool calls outside surface: [ 'set_node_styles' ]
+[OpenCodeProvider] Primary fetch failed on nvidia/nemotron-3.5-lightning:free: The operation was aborted due to timeout
+[OpenCodeProvider] Upstream error/status undefined on nvidia/nemotron-3.5-lightning:free, attempting fallback
+[OpenCodeProvider] Candidate nex-agi/nex-n2.5-pro:free failed: The operation was aborted due to timeout
+[OpenCodeProvider] Continuation candidate nvidia/nemotron-3.5-lightning:free failed: The operation was aborted due to timeout
+[OpenCodeProvider] Continuation candidate nex-agi/nex-n2.5-pro:free failed: The operation was aborted due to timeout
+[OpenCodeProvider] Primary fetch failed on nvidia/nemotron-3.5-lightning:free: The operation was aborted due to timeout
+[OpenCodeProvider] Upstream error/status undefined on nvidia/nemotron-3.5-lightning:free, attempting fallback
+[OpenCodeProvider] Continuation candidate nex-agi/nex-n2.5-pro:free failed: The operation was aborted due to timeout
+[OpenCodeProvider] Continuation candidate nex-agi/nex-n2.5-mini:free failed: The operation was aborted due to timeout
+[OpenCodeProvider] Continuation candidate nvidia/nemotron-3.5-lightning:free failed: The operation was aborted due to timeout
+[OpenCodeProvider] Continuation candidate nex-agi/nex-n2.5-pro:free failed: The operation was aborted due to timeout
+[OpenCodeProvider] Continuation candidate nex-agi/nex-n2.5-mini:free failed: The operation was aborted due to timeout
+[OpenCodeProvider] Primary fetch failed on nvidia/nemotron-3.5-lightning:free: The operation was aborted due to timeout
+[OpenCodeProvider] Upstream error/status undefined on nvidia/nemotron-3.5-lightning:free, attempting fallback
+[OpenCodeProvider] Candidate nex-agi/nex-n2.5-pro:free failed: The operation was aborted due to timeout
+[OpenCodeProvider] Primary fetch failed on nvidia/nemotron-3.5-lightning:free: The operation was aborted due to timeout
+[OpenCodeProvider] Upstream error/status undefined on nvidia/nemotron-3.5-lightning:free, attempting fallback
+[OpenCodeProvider] Candidate nvidia/nemotron-3-ultra-550b-a55b:free failed: The operation was aborted due to timeout
+[OpenCodeProvider] Primary fetch failed on nvidia/nemotron-3.5-lightning:free: The operation was aborted due to timeout
+[OpenCodeProvider] Upstream error/status undefined on nvidia/nemotron-3.5-lightning:free, attempting fallback
+[OpenCodeProvider] Primary fetch failed on nvidia/nemotron-3.5-lightning:free: The operation was aborted due to timeout
+[OpenCodeProvider] Upstream error/status undefined on nvidia/nemotron-3.5-lightning:free, attempting fallback

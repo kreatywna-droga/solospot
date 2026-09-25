@@ -1,0 +1,275 @@
+{
+  "base": "https://www.solospot.pl",
+  "prompt": "zmień kolor na czerwony",
+  "targetKind": "heading",
+  "mainOpen": false,
+  "steps": [
+    {
+      "name": "inventory",
+      "sectionId": "sec-hero-init",
+      "nodeCount": 2,
+      "nodes": [
+        {
+          "id": "sec-hero-init",
+          "tag": "DIV",
+          "cls": "relative w-full scroll-mt-16",
+          "text": "SoloSpot Visual Builder v2.0 Biblioteka ",
+          "rect": [
+            438,
+            56,
+            756,
+            364
+          ]
+        },
+        {
+          "id": "sec-hero-init",
+          "tag": "DIV",
+          "cls": "relative group cursor-pointer transition-colors du",
+          "text": "SoloSpot Visual Builder v2.0 Biblioteka ",
+          "rect": [
+            438,
+            56,
+            756,
+            364
+          ]
+        }
+      ],
+      "miniOpen": false,
+      "mainChatTextarea": false
+    },
+    {
+      "name": "selected",
+      "id": "sec-hero-init",
+      "x": 815.9999694824219,
+      "y": 237.8093719482422,
+      "w": 756.449951171875,
+      "h": 363.6187438964844
+    },
+    {
+      "name": "miniInspectorOpen",
+      "present": true,
+      "target": "sec-hero-init",
+      "status": "IDLE",
+      "placement": "below",
+      "header": "AI Hero Banner · sec-hero-init GOTOWY TARGET: hero sec-hero-init (page page-home) Modernize Change typography Change background Apply hero style",
+      "hasInput": true
+    }
+  ],
+  "typed": "zmień kolor na czerwony",
+  "wallMs": 257,
+  "trace": {
+    "id": "lat-mugk7mrf-u8pzxd",
+    "source": "mini-inspector",
+    "prompt": "zmień kolor na czerwony",
+    "path": "FAST_PATH",
+    "startedAtIso": "2026-09-25T06:08:07.419Z",
+    "totalMs": 22.300000000745058,
+    "stages": [
+      {
+        "stage": "UI",
+        "startMs": 10139.599999999627,
+        "endMs": 10139.900000000373,
+        "durationMs": 0.30000000074505806
+      },
+      {
+        "stage": "QUEUE",
+        "startMs": 10140.599999999627,
+        "endMs": 10141.800000000745,
+        "durationMs": 1.200000001117587
+      },
+      {
+        "stage": "RESOLVER",
+        "startMs": 10142.300000000745,
+        "endMs": 10143.5,
+        "durationMs": 1.199999999254942,
+        "detail": "eligibility+resolver"
+      },
+      {
+        "stage": "VERIFICATION",
+        "startMs": 10144.900000000373,
+        "endMs": 10145.5,
+        "durationMs": 0.599999999627471,
+        "detail": "SET_NODE_STYLES"
+      },
+      {
+        "stage": "BUILDER_COMMAND",
+        "startMs": 10143.5,
+        "endMs": 10145.5,
+        "durationMs": 2,
+        "detail": "set_node_styles"
+      },
+      {
+        "stage": "FAST_PATH",
+        "startMs": 10142.200000001118,
+        "endMs": 10146.099999999627,
+        "durationMs": 3.899999998509884,
+        "detail": "eligibility+resolver+dispatch"
+      },
+      {
+        "stage": "DISPATCH",
+        "startMs": 10147.300000000745,
+        "endMs": 10147.400000000373,
+        "durationMs": 0.09999999962747097
+      },
+      {
+        "stage": "RESPONSE",
+        "startMs": 10147.400000000373,
+        "endMs": 10147.400000000373,
+        "durationMs": 0
+      },
+      {
+        "stage": "CANVAS",
+        "startMs": 10147.5,
+        "endMs": 10161.5,
+        "durationMs": 14
+      }
+    ],
+    "notes": [],
+    "ok": true,
+    "intent": "EXECUTE",
+    "executionStatus": "EXECUTED"
+  },
+  "apiCalls": [],
+  "consoleLog": [
+    "Failed to load resource: the server responded with a status of 401 ()",
+    "Failed to load resource: the server responded with a status of 401 ()",
+    "Failed to load resource: the server responded with a status of 401 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "[HacpBridge] EXECUTION_TRACE: [object Object]"
+  ],
+  "panel": {
+    "status": "SUCCESS",
+    "target": "sec-hero-init",
+    "text": "AI Hero Banner · sec-hero-init SUCCESS TARGET: hero sec-hero-init (page page-home) Polecenie wykonane pomyślnie Modernize Change typography Change background Apply hero style",
+    "badge": "SUCCESS"
+  },
+  "canvasDiff": [
+    {
+      "id": "H1",
+      "before": {
+        "id": "H1",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "ff": "Inter",
+        "fs": "36px",
+        "ta": "center",
+        "text": "SoloSpot Visual Builder v2.0"
+      },
+      "after": {
+        "id": "H1",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "ff": "Inter",
+        "fs": "14px",
+        "ta": "start",
+        "text": "SoloSpot Visual Builder"
+      }
+    },
+    {
+      "id": "P",
+      "before": {
+        "id": "P",
+        "color": "oklab(0.999994 0.0000455677 0.0000200868 / 0.8)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "ff": "Inter",
+        "fs": "20px",
+        "ta": "center",
+        "text": "Biblioteka gotowych doświadczeń, sekcji i interakcji z podgl"
+      },
+      "after": {
+        "id": "P",
+        "color": "lab(47.8878 1.65477 -5.77283)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "ff": "ui-monospace",
+        "fs": "11px",
+        "ta": "start",
+        "text": "s-demo"
+      }
+    },
+    {
+      "id": "BUTTON",
+      "before": {
+        "id": "BUTTON",
+        "color": "rgb(24, 24, 27)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "ff": "Inter",
+        "fs": "12px",
+        "ta": "center",
+        "text": "Experiences"
+      },
+      "after": {
+        "id": "BUTTON",
+        "color": "lab(84.9837 0.601262 -2.17986)",
+        "bg": "rgb(32, 32, 36)",
+        "ff": "Inter",
+        "fs": "10px",
+        "ta": "center",
+        "text": "Sklep"
+      }
+    },
+    {
+      "id": "BUTTON",
+      "before": {
+        "id": "BUTTON",
+        "color": "lab(84.9837 0.601262 -2.17986)",
+        "bg": "rgb(32, 32, 36)",
+        "ff": "Inter",
+        "fs": "10px",
+        "ta": "center",
+        "text": "Sklep"
+      },
+      "after": {
+        "id": "BUTTON",
+        "color": "rgb(24, 24, 27)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "ff": "Inter",
+        "fs": "12px",
+        "ta": "center",
+        "text": "Experiences"
+      }
+    },
+    {
+      "id": "BUTTON",
+      "before": {
+        "id": "BUTTON",
+        "color": "lab(84.9837 0.601262 -2.17986)",
+        "bg": "rgb(32, 32, 36)",
+        "ff": "Inter",
+        "fs": "10px",
+        "ta": "center",
+        "text": "Sklep"
+      },
+      "after": {
+        "id": "BUTTON",
+        "color": "rgb(242, 194, 127)",
+        "bg": "lab(72.5074 13.339 38.114 / 0.12)",
+        "ff": "Inter",
+        "fs": "12px",
+        "ta": "center",
+        "text": "Szablony"
+      }
+    },
+    {
+      "id": "BUTTON",
+      "before": {
+        "id": "BUTTON",
+        "color": "lab(84.9837 0.601262 -2.17986)",
+        "bg": "rgb(32, 32, 36)",
+        "ff": "Inter",
+        "fs": "10px",
+        "ta": "center",
+        "text": "Sklep"
+      },
+      "after": {
+        "id": "BUTTON",
+        "color": "lab(84.9837 0.601262 -2.17986)",
+        "bg": "rgb(32, 32, 36)",
+        "ff": "Inter",
+        "fs": "12px",
+        "ta": "center",
+        "text": "Podgląd"
+      }
+    }
+  ],
+  "canvasDiffCount": 79
+}

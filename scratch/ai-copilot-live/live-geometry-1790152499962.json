@@ -1,0 +1,322 @@
+{
+ "base": "https://www.solospot.pl",
+ "email": "aigeo.bot+1790152499962@solospot-test.pl",
+ "empty": {
+  "found": true,
+  "textareaRect": {
+   "left": 57,
+   "top": 891.5,
+   "right": 294,
+   "bottom": 986,
+   "width": 237,
+   "height": 94.5
+  },
+  "computed": {
+   "paddingTop": "8px",
+   "paddingRight": "4px",
+   "paddingBottom": "28px",
+   "paddingLeft": "36px",
+   "lineHeight": "19.5px",
+   "fontSize": "12px",
+   "height": "94.5px",
+   "minHeight": "60px",
+   "maxHeight": "130px",
+   "display": "block",
+   "verticalAlign": "baseline",
+   "position": "static",
+   "transform": "none",
+   "overflowY": "auto",
+   "overflowX": "auto",
+   "textAlign": "start",
+   "whiteSpace": "pre-wrap",
+   "boxSizing": "border-box",
+   "borderTopWidth": "0px",
+   "alignItems": "normal",
+   "justifyContent": "normal",
+   "alignContent": "normal",
+   "resize": "none"
+  },
+  "classAttr": "flex-1 bg-transparent text-xs text-white placeholder-zinc-500 focus:outline-none resize-none min-h-[60px] max-h-[130px] py-2 pl-9 pr-1 pb-7 leading-relaxed",
+  "value": "",
+  "valueLen": 0,
+  "lineCount": 0,
+  "scrollWidth": 237,
+  "clientWidth": 237,
+  "scrollHeight": 95,
+  "clientHeight": 95,
+  "scrollTop": 0,
+  "parent": {
+   "classAttr": "relative flex items-start gap-2 bg-[#18181B] border border-white/10 focus-within:border-[#D9A86C]/50 rounded-2xl p-2 transition-all",
+   "display": "flex",
+   "alignItems": "flex-start",
+   "justifyContent": "normal",
+   "alignContent": "normal",
+   "position": "relative",
+   "rect": {
+    "left": 48,
+    "top": 882.5,
+    "right": 347,
+    "bottom": 995,
+    "width": 299,
+    "height": 112.5
+   }
+  },
+  "caretNote": "empty caret rect (collapsed range has no box)",
+  "toolbar": [
+   {
+    "title": "Dodaj załącznik",
+    "text": "",
+    "rect": {
+     "left": 57,
+     "top": 962,
+     "right": 81,
+     "bottom": 986,
+     "width": 24,
+     "height": 24
+    },
+    "gapFromTextareaBottom": -24,
+    "overlapsTextareaVertically": true
+   },
+   {
+    "title": "Wybierz model AI",
+    "text": "NVIDIA: Nemotron 3.5 Lightning (free)FRE",
+    "rect": {
+     "left": 85,
+     "top": 962,
+     "right": 258.4,
+     "bottom": 986,
+     "width": 173.4,
+     "height": 24
+    },
+    "gapFromTextareaBottom": -24,
+    "overlapsTextareaVertically": true
+   },
+   {
+    "title": "Wyślij (Enter)",
+    "text": "",
+    "rect": {
+     "left": 302,
+     "top": 891.5,
+     "right": 338,
+     "bottom": 927.5,
+     "width": 36,
+     "height": 36
+    },
+    "gapFromTextareaBottom": -94.5,
+    "overlapsTextareaVertically": true
+   }
+  ]
+ },
+ "single": {
+  "found": true,
+  "textareaRect": {
+   "left": 57,
+   "top": 891.5,
+   "right": 294,
+   "bottom": 986,
+   "width": 237,
+   "height": 94.5
+  },
+  "computed": {
+   "paddingTop": "8px",
+   "paddingRight": "4px",
+   "paddingBottom": "28px",
+   "paddingLeft": "36px",
+   "lineHeight": "19.5px",
+   "fontSize": "12px",
+   "height": "94.5px",
+   "minHeight": "60px",
+   "maxHeight": "130px",
+   "display": "block",
+   "verticalAlign": "baseline",
+   "position": "static",
+   "transform": "none",
+   "overflowY": "auto",
+   "overflowX": "auto",
+   "textAlign": "start",
+   "whiteSpace": "pre-wrap",
+   "boxSizing": "border-box",
+   "borderTopWidth": "0px",
+   "alignItems": "normal",
+   "justifyContent": "normal",
+   "alignContent": "normal",
+   "resize": "none"
+  },
+  "classAttr": "flex-1 bg-transparent text-xs text-white placeholder-zinc-500 focus:outline-none resize-none min-h-[60px] max-h-[130px] py-2 pl-9 pr-1 pb-7 leading-relaxed",
+  "value": "JESTEŚ UUUUUU!",
+  "valueLen": 14,
+  "lineCount": 1,
+  "scrollWidth": 237,
+  "clientWidth": 237,
+  "scrollHeight": 95,
+  "clientHeight": 95,
+  "scrollTop": 0,
+  "parent": {
+   "classAttr": "relative flex items-start gap-2 bg-[#18181B] border border-white/10 focus-within:border-[#D9A86C]/50 rounded-2xl p-2 transition-all",
+   "display": "flex",
+   "alignItems": "flex-start",
+   "justifyContent": "normal",
+   "alignContent": "normal",
+   "position": "relative",
+   "rect": {
+    "left": 48,
+    "top": 882.5,
+    "right": 347,
+    "bottom": 995,
+    "width": 299,
+    "height": 112.5
+   }
+  },
+  "caretNote": "empty caret rect (collapsed range has no box)",
+  "toolbar": [
+   {
+    "title": "Dodaj załącznik",
+    "text": "",
+    "rect": {
+     "left": 57,
+     "top": 962,
+     "right": 81,
+     "bottom": 986,
+     "width": 24,
+     "height": 24
+    },
+    "gapFromTextareaBottom": -24,
+    "overlapsTextareaVertically": true
+   },
+   {
+    "title": "Wybierz model AI",
+    "text": "NVIDIA: Nemotron 3.5 Lightning (free)FRE",
+    "rect": {
+     "left": 85,
+     "top": 962,
+     "right": 258.4,
+     "bottom": 986,
+     "width": 173.4,
+     "height": 24
+    },
+    "gapFromTextareaBottom": -24,
+    "overlapsTextareaVertically": true
+   },
+   {
+    "title": "Wyślij (Enter)",
+    "text": "",
+    "rect": {
+     "left": 302,
+     "top": 891.5,
+     "right": 338,
+     "bottom": 927.5,
+     "width": 36,
+     "height": 36
+    },
+    "gapFromTextareaBottom": -94.5,
+    "overlapsTextareaVertically": true
+   }
+  ]
+ },
+ "multi": {
+  "found": true,
+  "textareaRect": {
+   "left": 57,
+   "top": 891.5,
+   "right": 294,
+   "bottom": 986,
+   "width": 237,
+   "height": 94.5
+  },
+  "computed": {
+   "paddingTop": "8px",
+   "paddingRight": "4px",
+   "paddingBottom": "28px",
+   "paddingLeft": "36px",
+   "lineHeight": "19.5px",
+   "fontSize": "12px",
+   "height": "94.5px",
+   "minHeight": "60px",
+   "maxHeight": "130px",
+   "display": "block",
+   "verticalAlign": "baseline",
+   "position": "static",
+   "transform": "none",
+   "overflowY": "auto",
+   "overflowX": "auto",
+   "textAlign": "start",
+   "whiteSpace": "pre-wrap",
+   "boxSizing": "border-box",
+   "borderTopWidth": "0px",
+   "alignItems": "normal",
+   "justifyContent": "normal",
+   "alignContent": "normal",
+   "resize": "none"
+  },
+  "classAttr": "flex-1 bg-transparent text-xs text-white placeholder-zinc-500 focus:outline-none resize-none min-h-[60px] max-h-[130px] py-2 pl-9 pr-1 pb-7 leading-relaxed",
+  "value": "Linia pierwsza testowa\nDruga linia tekstu\nTrzecia linia i jeszcze troche tekstu",
+  "valueLen": 79,
+  "lineCount": 3,
+  "scrollWidth": 237,
+  "clientWidth": 237,
+  "scrollHeight": 114,
+  "clientHeight": 95,
+  "scrollTop": 0,
+  "parent": {
+   "classAttr": "relative flex items-start gap-2 bg-[#18181B] border border-white/10 focus-within:border-[#D9A86C]/50 rounded-2xl p-2 transition-all",
+   "display": "flex",
+   "alignItems": "flex-start",
+   "justifyContent": "normal",
+   "alignContent": "normal",
+   "position": "relative",
+   "rect": {
+    "left": 48,
+    "top": 882.5,
+    "right": 347,
+    "bottom": 995,
+    "width": 299,
+    "height": 112.5
+   }
+  },
+  "caretNote": "empty caret rect (collapsed range has no box)",
+  "toolbar": [
+   {
+    "title": "Dodaj załącznik",
+    "text": "",
+    "rect": {
+     "left": 57,
+     "top": 962,
+     "right": 81,
+     "bottom": 986,
+     "width": 24,
+     "height": 24
+    },
+    "gapFromTextareaBottom": -24,
+    "overlapsTextareaVertically": true
+   },
+   {
+    "title": "Wybierz model AI",
+    "text": "NVIDIA: Nemotron 3.5 Lightning (free)FRE",
+    "rect": {
+     "left": 85,
+     "top": 962,
+     "right": 258.4,
+     "bottom": 986,
+     "width": 173.4,
+     "height": 24
+    },
+    "gapFromTextareaBottom": -24,
+    "overlapsTextareaVertically": true
+   },
+   {
+    "title": "Wyślij (Enter)",
+    "text": "",
+    "rect": {
+     "left": 302,
+     "top": 891.5,
+     "right": 338,
+     "bottom": 927.5,
+     "width": 36,
+     "height": 36
+    },
+    "gapFromTextareaBottom": -94.5,
+    "overlapsTextareaVertically": true
+   }
+  ]
+ }
+}

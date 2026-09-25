@@ -1,0 +1,684 @@
+{
+  "tag": "BEFORE",
+  "generatedAt": "2026-09-25T05:10:50.955Z",
+  "totalRuns": 50,
+  "groups": [
+    {
+      "surface": "mini-inspector",
+      "cmd": "A",
+      "prompt": "zmień kolor na czerwony",
+      "runs": 5,
+      "ok": 5,
+      "wallMs": {
+        "n": 5,
+        "min": 15761,
+        "max": 42960,
+        "avg": 25720.2,
+        "median": 15854
+      },
+      "totalMs": {
+        "n": 5,
+        "min": 15039.799999999814,
+        "max": 42221.39999999991,
+        "avg": 24922.5,
+        "median": 15062.599999999627
+      },
+      "paths": {
+        "AI_PATH": 5
+      },
+      "executionStatus": {
+        "ERROR": 3,
+        "EXECUTED": 2
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "cmd": "B",
+      "prompt": "zmień czcionkę na Inter",
+      "runs": 5,
+      "ok": 5,
+      "wallMs": {
+        "n": 5,
+        "min": 15835,
+        "max": 36518,
+        "avg": 20025.2,
+        "median": 15918
+      },
+      "totalMs": {
+        "n": 5,
+        "min": 15043.400000000373,
+        "max": 35580.89999999991,
+        "avg": 19155.2,
+        "median": 15049.600000000093
+      },
+      "paths": {
+        "AI_PATH": 5
+      },
+      "executionStatus": {
+        "ERROR": 4,
+        "EXECUTED": 1
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "cmd": "C",
+      "prompt": "zwiększ czcionkę o 20%",
+      "runs": 5,
+      "ok": 4,
+      "wallMs": {
+        "n": 5,
+        "min": 15807,
+        "max": 60415,
+        "avg": 39077,
+        "median": 46822
+      },
+      "totalMs": {
+        "n": 4,
+        "min": 15041.799999999814,
+        "max": 55557.5,
+        "avg": 32932.7,
+        "median": 30566
+      },
+      "paths": {
+        "AI_PATH": 4,
+        "UNKNOWN": 1
+      },
+      "executionStatus": {
+        "EXECUTED": 2,
+        "ERROR": 2,
+        "UNKNOWN": 1
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "cmd": "D",
+      "prompt": "zmień tekst na TEST MINI AI",
+      "runs": 5,
+      "ok": 5,
+      "wallMs": {
+        "n": 5,
+        "min": 15900,
+        "max": 47607,
+        "avg": 31335.2,
+        "median": 34014
+      },
+      "totalMs": {
+        "n": 5,
+        "min": 15043,
+        "max": 46742.299999999814,
+        "avg": 30411.8,
+        "median": 33031.60000000009
+      },
+      "paths": {
+        "AI_PATH": 5
+      },
+      "executionStatus": {
+        "ERROR": 2,
+        "EXECUTED": 3
+      }
+    },
+    {
+      "surface": "mini-inspector",
+      "cmd": "E",
+      "prompt": "wyśrodkuj",
+      "runs": 5,
+      "ok": 5,
+      "wallMs": {
+        "n": 5,
+        "min": 8380,
+        "max": 18685,
+        "avg": 13242.8,
+        "median": 11922
+      },
+      "totalMs": {
+        "n": 5,
+        "min": 7833.399999999907,
+        "max": 18044.600000000093,
+        "avg": 12603.5,
+        "median": 11363.5
+      },
+      "paths": {
+        "AI_PATH": 5
+      },
+      "executionStatus": {
+        "EXECUTED": 4,
+        "ERROR": 1
+      }
+    },
+    {
+      "surface": "main-chat",
+      "cmd": "A",
+      "prompt": "zmień kolor na czerwony",
+      "runs": 5,
+      "ok": 5,
+      "wallMs": {
+        "n": 5,
+        "min": 13174,
+        "max": 15885,
+        "avg": 15303,
+        "median": 15800
+      },
+      "totalMs": {
+        "n": 5,
+        "min": 12429.200000000186,
+        "max": 15070.299999999814,
+        "avg": 14529.9,
+        "median": 15050.899999999907
+      },
+      "paths": {
+        "AI_PATH": 5
+      },
+      "executionStatus": {
+        "EXECUTED": 1,
+        "ERROR": 4
+      }
+    },
+    {
+      "surface": "main-chat",
+      "cmd": "B",
+      "prompt": "zmień czcionkę na Inter",
+      "runs": 5,
+      "ok": 5,
+      "wallMs": {
+        "n": 5,
+        "min": 8272,
+        "max": 39416,
+        "avg": 16228.4,
+        "median": 9272
+      },
+      "totalMs": {
+        "n": 5,
+        "min": 7527.100000000093,
+        "max": 38686.59999999963,
+        "avg": 15419.5,
+        "median": 8446
+      },
+      "paths": {
+        "AI_PATH": 5
+      },
+      "executionStatus": {
+        "EXECUTED": 5
+      }
+    },
+    {
+      "surface": "main-chat",
+      "cmd": "C",
+      "prompt": "zwiększ czcionkę o 20%",
+      "runs": 5,
+      "ok": 4,
+      "wallMs": {
+        "n": 5,
+        "min": 15832,
+        "max": 60584,
+        "avg": 37151.6,
+        "median": 44633
+      },
+      "totalMs": {
+        "n": 4,
+        "min": 15055.799999999814,
+        "max": 48059.89999999944,
+        "avg": 30482.7,
+        "median": 29408
+      },
+      "paths": {
+        "UNKNOWN": 1,
+        "AI_PATH": 4
+      },
+      "executionStatus": {
+        "UNKNOWN": 1,
+        "EXECUTED": 2,
+        "ERROR": 2
+      }
+    },
+    {
+      "surface": "main-chat",
+      "cmd": "D",
+      "prompt": "zmień tekst na TEST MINI AI",
+      "runs": 5,
+      "ok": 5,
+      "wallMs": {
+        "n": 5,
+        "min": 15369,
+        "max": 51785,
+        "avg": 37631.2,
+        "median": 38101
+      },
+      "totalMs": {
+        "n": 5,
+        "min": 14413.800000000745,
+        "max": 50843.799999999814,
+        "avg": 36674.6,
+        "median": 37137
+      },
+      "paths": {
+        "AI_PATH": 5
+      },
+      "executionStatus": {
+        "EXECUTED": 5
+      }
+    },
+    {
+      "surface": "main-chat",
+      "cmd": "E",
+      "prompt": "wyśrodkuj",
+      "runs": 5,
+      "ok": 5,
+      "wallMs": {
+        "n": 5,
+        "min": 15647,
+        "max": 45578,
+        "avg": 26944.6,
+        "median": 15720
+      },
+      "totalMs": {
+        "n": 5,
+        "min": 15048,
+        "max": 45079.5,
+        "avg": 26337,
+        "median": 15058.700000000186
+      },
+      "paths": {
+        "AI_PATH": 5
+      },
+      "executionStatus": {
+        "ERROR": 3,
+        "EXECUTED": 2
+      }
+    }
+  ],
+  "overall": {
+    "wallMs": {
+      "n": 50,
+      "min": 8272,
+      "max": 60584,
+      "avg": 26265.9,
+      "median": 15898
+    },
+    "totalMs": {
+      "n": 48,
+      "min": 7527.100000000093,
+      "max": 55557.5,
+      "avg": 24040.2,
+      "median": 15057
+    },
+    "paths": {
+      "AI_PATH": 48,
+      "UNKNOWN": 2
+    },
+    "executionStatus": {
+      "ERROR": 21,
+      "EXECUTED": 27,
+      "UNKNOWN": 2
+    },
+    "ok": {
+      "true": 48,
+      "false": 2
+    },
+    "stageTable": [
+      {
+        "stage": "UI",
+        "count": 48,
+        "n": 48,
+        "min": 0,
+        "max": 0.20000000018626451,
+        "avg": 0.1,
+        "median": 0
+      },
+      {
+        "stage": "QUEUE",
+        "count": 48,
+        "n": 48,
+        "min": 1.7000000001862645,
+        "max": 7.399999999906868,
+        "avg": 3.3,
+        "median": 3
+      },
+      {
+        "stage": "PROVIDER",
+        "count": 48,
+        "n": 48,
+        "min": 7503.700000000186,
+        "max": 55528,
+        "avg": 24006.7,
+        "median": 15020
+      },
+      {
+        "stage": "TOOL_SELECTION",
+        "count": 48,
+        "n": 48,
+        "min": 0,
+        "max": 1,
+        "avg": 0.1,
+        "median": 0
+      },
+      {
+        "stage": "INTENT_CLASSIFIER",
+        "count": 48,
+        "n": 48,
+        "min": 0,
+        "max": 1,
+        "avg": 0.1,
+        "median": 0
+      },
+      {
+        "stage": "ROUTER",
+        "count": 48,
+        "n": 48,
+        "min": 0,
+        "max": 809,
+        "avg": 16.9,
+        "median": 0
+      },
+      {
+        "stage": "LLM",
+        "count": 48,
+        "n": 48,
+        "min": 7497,
+        "max": 55520,
+        "avg": 23999.2,
+        "median": 15013
+      },
+      {
+        "stage": "HACP_BRIDGE",
+        "count": 48,
+        "n": 48,
+        "min": 7504.5,
+        "max": 55529.39999999991,
+        "avg": 24007.9,
+        "median": 15022
+      },
+      {
+        "stage": "VERIFICATION",
+        "count": 27,
+        "n": 27,
+        "min": 0,
+        "max": 0.6000000000931323,
+        "avg": 0.1,
+        "median": 0.10000000009313226
+      },
+      {
+        "stage": "DISPATCH",
+        "count": 27,
+        "n": 27,
+        "min": 0,
+        "max": 0.20000000018626451,
+        "avg": 0.1,
+        "median": 0.10000000009313226
+      },
+      {
+        "stage": "RESPONSE",
+        "count": 48,
+        "n": 48,
+        "min": 0,
+        "max": 0.10000000009313226,
+        "avg": 0,
+        "median": 0
+      },
+      {
+        "stage": "CANVAS",
+        "count": 48,
+        "n": 48,
+        "min": 16.399999999906868,
+        "max": 32.6999999997206,
+        "avg": 25.6,
+        "median": 26
+      }
+    ],
+    "bySurface": {
+      "mini-inspector": {
+        "runs": 25,
+        "wallMs": {
+          "n": 25,
+          "min": 8380,
+          "max": 60415,
+          "avg": 25880.1,
+          "median": 15954
+        },
+        "totalMs": {
+          "n": 24,
+          "min": 7833.399999999907,
+          "max": 55557.5,
+          "avg": 23633.2,
+          "median": 15053
+        },
+        "stageTable": [
+          {
+            "stage": "UI",
+            "count": 24,
+            "n": 24,
+            "min": 0,
+            "max": 0.20000000018626451,
+            "avg": 0.1,
+            "median": 0
+          },
+          {
+            "stage": "QUEUE",
+            "count": 24,
+            "n": 24,
+            "min": 1.7000000001862645,
+            "max": 3,
+            "avg": 2.2,
+            "median": 2
+          },
+          {
+            "stage": "PROVIDER",
+            "count": 24,
+            "n": 24,
+            "min": 7795.5999999996275,
+            "max": 55528,
+            "avg": 23599.4,
+            "median": 15021
+          },
+          {
+            "stage": "TOOL_SELECTION",
+            "count": 24,
+            "n": 24,
+            "min": 0,
+            "max": 1,
+            "avg": 0,
+            "median": 0
+          },
+          {
+            "stage": "INTENT_CLASSIFIER",
+            "count": 24,
+            "n": 24,
+            "min": 0,
+            "max": 1,
+            "avg": 0.2,
+            "median": 0
+          },
+          {
+            "stage": "ROUTER",
+            "count": 24,
+            "n": 24,
+            "min": 0,
+            "max": 0,
+            "avg": 0,
+            "median": 0
+          },
+          {
+            "stage": "LLM",
+            "count": 24,
+            "n": 24,
+            "min": 7789,
+            "max": 55520,
+            "avg": 23591.7,
+            "median": 15015
+          },
+          {
+            "stage": "HACP_BRIDGE",
+            "count": 24,
+            "n": 24,
+            "min": 7797.100000000093,
+            "max": 55529.39999999991,
+            "avg": 23600.7,
+            "median": 15023
+          },
+          {
+            "stage": "VERIFICATION",
+            "count": 12,
+            "n": 12,
+            "min": 0,
+            "max": 0.6000000000931323,
+            "avg": 0.1,
+            "median": 0
+          },
+          {
+            "stage": "DISPATCH",
+            "count": 12,
+            "n": 12,
+            "min": 0,
+            "max": 0.19999999972060323,
+            "avg": 0.1,
+            "median": 0
+          },
+          {
+            "stage": "RESPONSE",
+            "count": 24,
+            "n": 24,
+            "min": 0,
+            "max": 0.10000000009313226,
+            "avg": 0,
+            "median": 0
+          },
+          {
+            "stage": "CANVAS",
+            "count": 24,
+            "n": 24,
+            "min": 16.899999999906868,
+            "max": 32.6999999997206,
+            "avg": 25.7,
+            "median": 26
+          }
+        ]
+      },
+      "main-chat": {
+        "runs": 25,
+        "wallMs": {
+          "n": 25,
+          "min": 8272,
+          "max": 60584,
+          "avg": 26651.8,
+          "median": 15875
+        },
+        "totalMs": {
+          "n": 24,
+          "min": 7527.100000000093,
+          "max": 50843.799999999814,
+          "avg": 24447.3,
+          "median": 15058
+        },
+        "stageTable": [
+          {
+            "stage": "UI",
+            "count": 24,
+            "n": 24,
+            "min": 0,
+            "max": 0,
+            "avg": 0,
+            "median": 0
+          },
+          {
+            "stage": "QUEUE",
+            "count": 24,
+            "n": 24,
+            "min": 3.900000000372529,
+            "max": 7.399999999906868,
+            "avg": 4.5,
+            "median": 4
+          },
+          {
+            "stage": "PROVIDER",
+            "count": 24,
+            "n": 24,
+            "min": 7503.700000000186,
+            "max": 50813,
+            "avg": 24414,
+            "median": 15020
+          },
+          {
+            "stage": "TOOL_SELECTION",
+            "count": 24,
+            "n": 24,
+            "min": 0,
+            "max": 1,
+            "avg": 0.1,
+            "median": 0
+          },
+          {
+            "stage": "INTENT_CLASSIFIER",
+            "count": 24,
+            "n": 24,
+            "min": 0,
+            "max": 1,
+            "avg": 0,
+            "median": 0
+          },
+          {
+            "stage": "ROUTER",
+            "count": 24,
+            "n": 24,
+            "min": 0,
+            "max": 809,
+            "avg": 33.8,
+            "median": 0
+          },
+          {
+            "stage": "LLM",
+            "count": 24,
+            "n": 24,
+            "min": 7497,
+            "max": 50807,
+            "avg": 24406.7,
+            "median": 15012
+          },
+          {
+            "stage": "HACP_BRIDGE",
+            "count": 24,
+            "n": 24,
+            "min": 7504.5,
+            "max": 50814.40000000037,
+            "avg": 24415.1,
+            "median": 15021
+          },
+          {
+            "stage": "VERIFICATION",
+            "count": 15,
+            "n": 15,
+            "min": 0,
+            "max": 0.2999999998137355,
+            "avg": 0.1,
+            "median": 0.10000000009313226
+          },
+          {
+            "stage": "DISPATCH",
+            "count": 15,
+            "n": 15,
+            "min": 0,
+            "max": 0.20000000018626451,
+            "avg": 0.1,
+            "median": 0.09999999962747097
+          },
+          {
+            "stage": "RESPONSE",
+            "count": 24,
+            "n": 24,
+            "min": 0,
+            "max": 0,
+            "avg": 0,
+            "median": 0
+          },
+          {
+            "stage": "CANVAS",
+            "count": 24,
+            "n": 24,
+            "min": 16.399999999906868,
+            "max": 32.40000000037253,
+            "avg": 25.5,
+            "median": 26
+          }
+        ]
+      }
+    }
+  }
+}

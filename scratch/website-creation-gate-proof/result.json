@@ -1,0 +1,343 @@
+{
+  "gate": "HACP_PROFESSIONAL_WEBSITE_CREATION_GATE_V1",
+  "baseUrl": "https://www.solospot.pl",
+  "prompt": "Zbuduj mi profesjonalną stronę od start to finish dla nowoczesnego gabinetu dentystycznego.",
+  "pathTaken": "generation-complete",
+  "pass": 15,
+  "fail": 0,
+  "warn": 0,
+  "beforeCount": 1,
+  "afterCount": 8,
+  "phaseSamples": [
+    {
+      "t": 0,
+      "sectionCount": 2,
+      "generating": true,
+      "complete": false,
+      "genError": false,
+      "progress": "10"
+    },
+    {
+      "t": 1,
+      "sectionCount": 3,
+      "generating": true,
+      "complete": false,
+      "genError": false,
+      "progress": "20"
+    },
+    {
+      "t": 2,
+      "sectionCount": 4,
+      "generating": true,
+      "complete": false,
+      "genError": false,
+      "progress": "30"
+    },
+    {
+      "t": 3,
+      "sectionCount": 4,
+      "generating": true,
+      "complete": false,
+      "genError": false,
+      "progress": "30"
+    },
+    {
+      "t": 4,
+      "sectionCount": 5,
+      "generating": true,
+      "complete": false,
+      "genError": false,
+      "progress": "40"
+    },
+    {
+      "t": 5,
+      "sectionCount": 6,
+      "generating": true,
+      "complete": false,
+      "genError": false,
+      "progress": "50"
+    },
+    {
+      "t": 6,
+      "sectionCount": 6,
+      "generating": true,
+      "complete": false,
+      "genError": false,
+      "progress": "50"
+    },
+    {
+      "t": 7,
+      "sectionCount": 6,
+      "generating": true,
+      "complete": false,
+      "genError": false,
+      "progress": "50"
+    },
+    {
+      "t": 8,
+      "sectionCount": 7,
+      "generating": true,
+      "complete": false,
+      "genError": false,
+      "progress": "60"
+    },
+    {
+      "t": 9,
+      "sectionCount": 8,
+      "generating": true,
+      "complete": false,
+      "genError": false,
+      "progress": "70"
+    },
+    {
+      "t": 10,
+      "sectionCount": 8,
+      "generating": true,
+      "complete": false,
+      "genError": false,
+      "progress": "70"
+    },
+    {
+      "t": 11,
+      "sectionCount": 8,
+      "generating": true,
+      "complete": true,
+      "genError": false,
+      "progress": "100"
+    }
+  ],
+  "structural": {
+    "sectionCount": 8,
+    "placeholders": [],
+    "dentalHits": 6,
+    "emptyish": 0,
+    "overlaps": 0,
+    "texts": [
+      "Gabinetu dentystycznego Strona główna Usługi O nas Opinie Strona główna Umów wizytę",
+      "Twój uśmiech to nasza pasja Nowoczesna stomatologia i komfortowe leczenie Umów wizytę Watch Demo",
+      "Nowoczesne implanty stomatologiczne Nasza oferta Ortodoncja ⚡ Nasza oferta Nowoczesne implanty stoma",
+      "OUR STORY O nas In 2018, two engineers sat in a cramped garage with one shared frustration: building",
+      "Bezbolesne leczenie i miła obsługa. Polecam gabinet. Co mówią nasi pacjenci Marek T. Bezbolesne lecz",
+      "Gotowy na zdrowy uśmiech? Umów wizytę już dziś Umów wizytę Talk to Sales",
+      "Gabinetu dentystycznego Building the future of digital experiences, one component at a time. Gabinet",
+      "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żyw"
+    ]
+  },
+  "copilotRequests": [],
+  "results": [
+    {
+      "id": "A1",
+      "action": "AI workspace open",
+      "expected": "SOLOSPOT AI",
+      "actual": "found",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "A2",
+      "action": "Canvas sections BEFORE",
+      "expected": "baseline captured",
+      "actual": "1",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "A3",
+      "action": "Exact gate prompt sent",
+      "expected": "start-to-finish dentist prompt",
+      "actual": "sent",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "B1",
+      "action": "Execution path",
+      "expected": "autonomous generation START→FINISH",
+      "actual": "generation-complete",
+      "status": "PASS",
+      "evidence": "{\"complete\":true,\"genError\":false,\"generating\":true,\"sections\":8}"
+    },
+    {
+      "id": "B2",
+      "action": "Intent → architecture → execution UI",
+      "expected": "planning/execution phases visible",
+      "actual": "generation-ui",
+      "status": "PASS",
+      "evidence": "{\"pathTaken\":\"generation-complete\",\"generationUiSeen\":true,\"copilotPosts\":0,\"prompts\":[]}"
+    },
+    {
+      "id": "C1",
+      "action": "BuilderDocument/Canvas mutation",
+      "expected": "after > before (1)",
+      "actual": "after=8",
+      "status": "PASS",
+      "evidence": "before=1 after=8"
+    },
+    {
+      "id": "C2",
+      "action": "More than single section",
+      "expected": ">1 section",
+      "actual": "8",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "C3",
+      "action": "No placeholders",
+      "expected": "0 placeholder texts",
+      "actual": "count=0",
+      "status": "PASS",
+      "evidence": "[]"
+    },
+    {
+      "id": "C4",
+      "action": "Dental content coherence",
+      "expected": "dental-related section texts",
+      "actual": "hits=6/8",
+      "status": "PASS",
+      "evidence": "[\"Gabinetu dentystycznego Strona główna Usługi O nas Opinie Strona główna Umów wizytę\",\"Twój uśmiech to nasza pasja Nowoczesna stomatologia i komfortowe leczenie Umów wizytę Watch Demo\",\"Nowoczesne implanty stomatologiczne Nasza oferta Ortodoncja ⚡ Nasza oferta Nowoczesne implanty stoma\",\"OUR STORY O nas In 2018, two engineers sat in a cramped garage with one shared frustration: building\",\"Bezbolesne leczenie i miła obsługa. Polecam gabinet. Co mówią nasi pacjenci Marek T. Bezbolesne lecz\",\"Gotowy na zdrowy uśmiech? Umów wizytę już dziś Umów wizytę Talk to Sales\"]"
+    },
+    {
+      "id": "C5",
+      "action": "Structural sanity (visible sections, few empties)",
+      "expected": "sections present, empties low",
+      "actual": "sections=8 emptyish=0 overlaps=0",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "C6",
+      "action": "Visual layout evidence (DOM rects)",
+      "expected": "sections have non-zero height, limited overlap",
+      "actual": "overlaps=0",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "D1",
+      "action": "No fake SUCCESS without mutation",
+      "expected": "no success claim if no mutation",
+      "actual": "honest",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "D2",
+      "action": "No batch_execute in request.tools",
+      "expected": "0 leaks",
+      "actual": "requests=0 leak=false",
+      "status": "PASS",
+      "evidence": "[]"
+    },
+    {
+      "id": "D3",
+      "action": "Single prompt, no manual WYKONAJ",
+      "expected": "exactly 1 user prompt",
+      "actual": "prompts=1 (1 chat + 0 posts)",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "E1",
+      "action": "Console errors",
+      "expected": "0 real errors",
+      "actual": "0",
+      "status": "PASS",
+      "evidence": ""
+    }
+  ],
+  "trace": [
+    {
+      "t": "2026-09-24T04:33:57.623Z",
+      "step": "baseline",
+      "beforeCount": 1
+    },
+    {
+      "t": "2026-09-24T04:33:59.797Z",
+      "step": "prompt_sent",
+      "prompt": "Zbuduj mi profesjonalną stronę od start to finish dla nowoczesnego gabinetu dentystycznego."
+    },
+    {
+      "t": "2026-09-24T04:34:12.383Z",
+      "step": "path_taken",
+      "pathTaken": "generation-complete",
+      "snap": {
+        "sectionCount": 8,
+        "nodeCount": 118,
+        "texts": [
+          "Gabinetu dentystycznego Strona główna Usługi O nas Opinie Strona główna Umów wizytę",
+          "Twój uśmiech to nasza pasja Nowoczesna stomatologia i komfortowe leczenie Umów wizytę Watch Demo",
+          "Nowoczesne implanty stomatologiczne Nasza oferta Ortodoncja ⚡ Nasza oferta Nowoczesne implanty stoma",
+          "OUR STORY O nas In 2018, two engineers sat in a cramped garage with one shared frustration: building",
+          "Bezbolesne leczenie i miła obsługa. Polecam gabinet. Co mówią nasi pacjenci Marek T. Bezbolesne lecz",
+          "Gotowy na zdrowy uśmiech? Umów wizytę już dziś Umów wizytę Talk to Sales",
+          "Gabinetu dentystycznego Building the future of digital experiences, one component at a time. Gabinet",
+          "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żyw"
+        ],
+        "placeholders": [],
+        "emptyish": 0,
+        "dentalHits": 6,
+        "overlaps": 0,
+        "generating": true,
+        "complete": true,
+        "genError": false,
+        "chatOnly": false,
+        "bodySnippet": "SoloSpot Visual Builder\nUnsaved\n\ntest-store\n\nSklep\nExperiences\nSzablony\nPodgląd\nInspektor\nSave\nPublish\nK\nSOLOSPOT AI\nv1.0\n\nBuilder Copilot\n\nCOPY CONTEXT\nTy\n•\n06:33:59\nZbuduj mi profesjonalną stronę od start to finish dla nowoczesnego gabinetu dentystycznego.\nSystem\n•\n06:33:59\nGeneruję stronę na podstawie briefu...\nSystem\n•\n06:34:12\nStrona wygenerowana pomyślnie! Wykonano 115 operacji (67 mutacji BuilderDocument). Strona jest gotowa do podglądu.\nSzybkie akcje\nNVIDIA: Nemotron 3.5 Lightning (free)",
+        "progressMatch": "100"
+      }
+    }
+  ],
+  "consoleLogs": [
+    "[LLMSitePlanner] No AI provider available, falling back to deterministic planner",
+    "[SiteGen] tool=update_theme success=true",
+    "[SiteGen] tool=search_sections success=true",
+    "[SiteGen] tool=insert_section_from_library success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] tool=inspect_children success=true",
+    "[SiteGen] tool=inspect_children success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] tool=inspect_children success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] tool=inspect_children success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] tool=search_sections success=true",
+    "[SiteGen] tool=insert_section_from_library success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] tool=inspect_children success=true",
+    "[SiteGen] tool=inspect_children success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] tool=inspect_children success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] tool=search_sections success=true",
+    "[SiteGen] tool=insert_section_from_library success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] tool=inspect_children success=true",
+    "[SiteGen] tool=inspect_children success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] overlay node=heading_muf1esiv_h2hxc type=heading label=Section Title success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] overlay node=text_muf1esiv_kfc26 type=text label=Section Subtitle success=true",
+    "[SiteGen] tool=inspect_children success=true",
+    "[SiteGen] tool=inspect_children success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] tool=inspect_children success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] tool=inspect_children success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] tool=search_sections success=true",
+    "[SiteGen] tool=insert_section_from_library success=true",
+    "[SiteGen] tool=update_node_props success=true",
+    "[SiteGen] tool=inspect_children success=true",
+    "[SiteGen] tool=inspect_children success=true"
+  ],
+  "timestamp": "2026-09-24T04:34:12.561Z"
+}

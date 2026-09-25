@@ -1,0 +1,76 @@
+{
+  "status": "VERIFIED",
+  "pathUsed": "C3_react_dispatch_dom",
+  "evidence": {
+    "c1": {
+      "openedLib": "+ Dodaj Sekcję z Biblioteki",
+      "inserted": null,
+      "newIds": [],
+      "uniqueBefore": 1,
+      "uniqueAfter": 1
+    },
+    "c2": {
+      "selected": "sec-hero-init",
+      "uiMut": {
+        "ok": true,
+        "colorInputs": 3,
+        "hexish": 6,
+        "val": "#ff0000"
+      },
+      "redCount": 0,
+      "red": []
+    },
+    "c3": {
+      "fiberResult": {
+        "ok": true,
+        "source": "props.value",
+        "keys": [
+          "ctx",
+          "dispatch",
+          "document",
+          "canvas",
+          "history",
+          "previewChannel",
+          "isDirty"
+        ],
+        "versionBefore": 2,
+        "dispatched": [
+          "SET_NODE_STYLES:ok",
+          "UPDATE_PROPS:ok",
+          "ADD_SECTION:ok"
+        ],
+        "versionAfterDispatch": 2,
+        "sectionIdsAfter": [
+          "sec-hero-init"
+        ],
+        "pageId": "page-home",
+        "visited": 60
+      },
+      "redCount": 0,
+      "textHasMarcin": true,
+      "newIds": [
+        "section_mueb9z5v_vc5l1"
+      ],
+      "uniqueAfter": 2,
+      "docChanged": false,
+      "sectionsGrew": true
+    },
+    "errors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "pathUsed": "C3_react_dispatch_dom",
+    "status": "VERIFIED",
+    "beforeUnique": [
+      "sec-hero-init"
+    ],
+    "afterUnique": [
+      "sec-hero-init",
+      "section_mueb9z5v_vc5l1"
+    ],
+    "afterRed": []
+  },
+  "at": "2026-09-23T16:22:30.019Z"
+}

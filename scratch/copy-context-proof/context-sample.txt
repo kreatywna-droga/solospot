@@ -1,0 +1,10 @@
+=== SOLOSPOT AI CONTEXT ===
+
+[USER]
+Przeanalizuj aktualną stronę i powiedz mi, jakie sekcje się na niej znajdują.
+
+[AI]
+Próba wykonania insert_section_from_library nie powiodła się: Nie znaleziono szablonu sekcji o ID "sec-hero-init" w bibliotece. Użyj search_sections aby znaleźć dostępne szablony. Nie wprowadzono zmian w BuilderDocument.
+[TOOL] insert_section_from_library
+
+=== END CONTEXT ===

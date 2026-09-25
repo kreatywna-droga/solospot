@@ -1,0 +1,8 @@
+feat(builder): Mini Inspector AI avoidOverlap — place window beside wide nodes, capture-scroll follow
+
+- computePanelPosition: optional avoidOverlap (default false keeps CSP clamp contract)
+- When side-clamp would cover the selected node, prefer ABOVE then BELOW
+- MiniInspectorAI enables avoidOverlap + document capture scroll listeners
+- usePanelPosition: scroll capture so inner canvas containers recompute position
+- E2E: real zoom controls, scroll capture, fix const n2 crash
+- Tests: wide-section below/above placements + legacy side-clamp regression

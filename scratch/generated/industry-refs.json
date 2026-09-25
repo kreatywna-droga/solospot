@@ -1,0 +1,162 @@
+[
+  {
+    "industry": "dental",
+    "stylePackIds": [
+      "sp-dental-1",
+      "sp-dental-2",
+      "sp-dental-3"
+    ]
+  },
+  {
+    "industry": "medical",
+    "stylePackIds": [
+      "sp-medical-1",
+      "sp-medical-2",
+      "sp-medical-3"
+    ]
+  },
+  {
+    "industry": "law",
+    "stylePackIds": [
+      "sp-law-1",
+      "sp-law-2",
+      "sp-law-3"
+    ]
+  },
+  {
+    "industry": "real-estate",
+    "stylePackIds": [
+      "sp-realestate-1",
+      "sp-realestate-2",
+      "sp-realestate-3"
+    ]
+  },
+  {
+    "industry": "restaurant",
+    "stylePackIds": [
+      "sp-restaurant-1",
+      "sp-restaurant-2",
+      "sp-restaurant-3"
+    ]
+  },
+  {
+    "industry": "hotel",
+    "stylePackIds": [
+      "sp-hotel-1",
+      "sp-hotel-2",
+      "sp-hotel-3"
+    ]
+  },
+  {
+    "industry": "architecture",
+    "stylePackIds": [
+      "sp-architecture-1",
+      "sp-architecture-2",
+      "sp-architecture-3"
+    ]
+  },
+  {
+    "industry": "photography",
+    "stylePackIds": [
+      "sp-photography-1",
+      "sp-photography-2",
+      "sp-photography-3"
+    ]
+  },
+  {
+    "industry": "creative-agency",
+    "stylePackIds": [
+      "sp-creativeagency-1",
+      "sp-creativeagency-2",
+      "sp-creativeagency-3"
+    ]
+  },
+  {
+    "industry": "marketing-agency",
+    "stylePackIds": [
+      "sp-marketingagency-1",
+      "sp-marketingagency-2",
+      "sp-marketingagency-3"
+    ]
+  },
+  {
+    "industry": "saas",
+    "stylePackIds": [
+      "sp-saas-1",
+      "sp-saas-2",
+      "sp-saas-3"
+    ]
+  },
+  {
+    "industry": "technology",
+    "stylePackIds": [
+      "sp-technology-1",
+      "sp-technology-2",
+      "sp-technology-3"
+    ]
+  },
+  {
+    "industry": "construction",
+    "stylePackIds": [
+      "sp-construction-1",
+      "sp-construction-2",
+      "sp-construction-3"
+    ]
+  },
+  {
+    "industry": "beauty",
+    "stylePackIds": [
+      "sp-beauty-1",
+      "sp-beauty-2",
+      "sp-beauty-3"
+    ]
+  },
+  {
+    "industry": "fitness",
+    "stylePackIds": [
+      "sp-fitness-1",
+      "sp-fitness-2",
+      "sp-fitness-3"
+    ]
+  },
+  {
+    "industry": "fashion",
+    "stylePackIds": [
+      "sp-fashion-1",
+      "sp-fashion-2",
+      "sp-fashion-3"
+    ]
+  },
+  {
+    "industry": "travel",
+    "stylePackIds": [
+      "sp-travel-1",
+      "sp-travel-2",
+      "sp-travel-3"
+    ]
+  },
+  {
+    "industry": "finance",
+    "stylePackIds": [
+      "sp-finance-1",
+      "sp-finance-2",
+      "sp-finance-3"
+    ]
+  },
+  {
+    "industry": "education",
+    "stylePackIds": [
+      "sp-education-1",
+      "sp-education-2",
+      "sp-education-3"
+    ]
+  },
+  {
+    "industry": "local-services",
+    "stylePackIds": [
+      "sp-localservices-1",
+      "sp-localservices-2",
+      "sp-localservices-3"
+    ]
+  }
+]

@@ -1,0 +1,1309 @@
+{
+  "base": "https://www.solospot.pl",
+  "mainOpen": false,
+  "commands": [
+    {
+      "k": "A",
+      "prompt": "zmień kolor na czerwony",
+      "wallMs": 2473,
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "ok": true,
+      "notes": [],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:1",
+        "VERIFICATION:1",
+        "BUILDER_COMMAND:2",
+        "FAST_PATH:4",
+        "DISPATCH:0",
+        "RESPONSE:0",
+        "CANVAS:13"
+      ],
+      "panel": {
+        "status": "SUCCESS",
+        "target": "sec-hero-init",
+        "badge": "SUCCESS",
+        "text": "AI Hero Banner · sec-hero-init SUCCESS TARGET: hero sec-hero-init (page page-home) Polecenie wykonane pomyślnie Modernize Change typography Change background Apply hero style",
+        "hasFailMsg": false,
+        "hasOkMsg": true,
+        "hasClarifyMsg": false
+      },
+      "netDelta": [],
+      "canvasDiffCount": 28,
+      "canvasDiff": [
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "rgb(242, 194, 127)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "lab(47.8878 1.65477 -5.77283)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "lab(47.8878 1.65477 -5.77283)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "w"
+          ],
+          "before": [
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "w",
+              26
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "k": "B",
+      "prompt": "zmień czcionkę na Inter",
+      "wallMs": 2468,
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "ok": true,
+      "notes": [],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:2",
+        "VERIFICATION:0",
+        "BUILDER_COMMAND:0",
+        "FAST_PATH:2",
+        "DISPATCH:0",
+        "RESPONSE:0",
+        "CANVAS:15"
+      ],
+      "panel": {
+        "status": "SUCCESS",
+        "target": "sec-hero-init",
+        "badge": "SUCCESS",
+        "text": "AI Hero Banner · sec-hero-init SUCCESS TARGET: hero sec-hero-init (page page-home) Polecenie wykonane pomyślnie Modernize Change typography Change background Apply hero style",
+        "hasFailMsg": false,
+        "hasOkMsg": true,
+        "hasClarifyMsg": false
+      },
+      "netDelta": [],
+      "canvasDiffCount": 28,
+      "canvasDiff": [
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "rgb(242, 194, 127)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "lab(47.8878 1.65477 -5.77283)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "lab(47.8878 1.65477 -5.77283)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "w"
+          ],
+          "before": [
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "w",
+              26
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "k": "C",
+      "prompt": "powiększ czcionkę o 20 procent",
+      "wallMs": 2478,
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "ok": true,
+      "notes": [],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:0",
+        "VERIFICATION:0",
+        "BUILDER_COMMAND:0",
+        "FAST_PATH:1",
+        "DISPATCH:0",
+        "RESPONSE:0",
+        "CANVAS:17"
+      ],
+      "panel": {
+        "status": "SUCCESS",
+        "target": "sec-hero-init",
+        "badge": "SUCCESS",
+        "text": "AI Hero Banner · sec-hero-init SUCCESS TARGET: hero sec-hero-init (page page-home) Polecenie wykonane pomyślnie Modernize Change typography Change background Apply hero style",
+        "hasFailMsg": false,
+        "hasOkMsg": true,
+        "hasClarifyMsg": false
+      },
+      "netDelta": [],
+      "canvasDiffCount": 28,
+      "canvasDiff": [
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "rgb(242, 194, 127)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "lab(47.8878 1.65477 -5.77283)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "lab(47.8878 1.65477 -5.77283)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "w"
+          ],
+          "before": [
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "w",
+              26
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "k": "D",
+      "prompt": "zmień tekst na TEST",
+      "wallMs": 2469,
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "ok": true,
+      "notes": [],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:0",
+        "VERIFICATION:0",
+        "BUILDER_COMMAND:0",
+        "FAST_PATH:1",
+        "DISPATCH:0",
+        "RESPONSE:0",
+        "CANVAS:23"
+      ],
+      "panel": {
+        "status": "SUCCESS",
+        "target": "sec-hero-init",
+        "badge": "SUCCESS",
+        "text": "AI Hero Banner · sec-hero-init SUCCESS TARGET: hero sec-hero-init (page page-home) Polecenie wykonane pomyślnie Modernize Change typography Change background Apply hero style",
+        "hasFailMsg": false,
+        "hasOkMsg": true,
+        "hasClarifyMsg": false
+      },
+      "netDelta": [],
+      "canvasDiffCount": 28,
+      "canvasDiff": [
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "rgb(242, 194, 127)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "lab(47.8878 1.65477 -5.77283)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "lab(47.8878 1.65477 -5.77283)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "w"
+          ],
+          "before": [
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "w",
+              26
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "k": "E",
+      "prompt": "wyśrodkuj tekst",
+      "wallMs": 2469,
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "ok": true,
+      "notes": [],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:0",
+        "VERIFICATION:0",
+        "BUILDER_COMMAND:0",
+        "FAST_PATH:1",
+        "DISPATCH:0",
+        "RESPONSE:0",
+        "CANVAS:20"
+      ],
+      "panel": {
+        "status": "SUCCESS",
+        "target": "sec-hero-init",
+        "badge": "SUCCESS",
+        "text": "AI Hero Banner · sec-hero-init SUCCESS TARGET: hero sec-hero-init (page page-home) Polecenie wykonane pomyślnie Modernize Change typography Change background Apply hero style",
+        "hasFailMsg": false,
+        "hasOkMsg": true,
+        "hasClarifyMsg": false
+      },
+      "netDelta": [],
+      "canvasDiffCount": 28,
+      "canvasDiff": [
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "rgb(242, 194, 127)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "lab(47.8878 1.65477 -5.77283)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "lab(47.8878 1.65477 -5.77283)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "w"
+          ],
+          "before": [
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "w",
+              26
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "k": "AI",
+      "prompt": "zmień tło sekcji na delikatny gradient",
+      "wallMs": 17819,
+      "path": "AI_PATH",
+      "exec": "ERROR",
+      "intent": "CLARIFY",
+      "ok": false,
+      "notes": [
+        "fast-path-rejected:UNRESOLVED",
+        "no-dispatch:ERROR"
+      ],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:0",
+        "FAST_PATH:1",
+        "PROVIDER:15528",
+        "TOOL_SELECTION:0",
+        "INTENT_CLASSIFIER:0",
+        "ROUTER:0",
+        "LLM:15002",
+        "HACP_BRIDGE:15530",
+        "RESPONSE:0",
+        "CANVAS:26"
+      ],
+      "panel": {
+        "status": "FAILED",
+        "target": "sec-hero-init",
+        "badge": "FAILED",
+        "text": "AI Hero Banner · sec-hero-init FAILED TARGET: hero sec-hero-init (page page-home) Nie udało się wykonać polecenia Modernize Change typography Change background Apply hero style",
+        "hasFailMsg": true,
+        "hasOkMsg": false,
+        "hasClarifyMsg": false
+      },
+      "netDelta": [
+        {
+          "url": "/api/builder/copilot",
+          "status": 200,
+          "method": "POST",
+          "keys": [
+            "status",
+            "provider",
+            "model",
+            "message",
+            "error",
+            "isFreeModel",
+            "routerMode",
+            "durationMs",
+            "latency"
+          ],
+          "statusField": "ERROR",
+          "message": "Nie udało się uzyskać odpowiedzi z wybranego modelu (nvidia/nemotron-3.5-lightning:free). Spróbuj ponownie lub wybierz inny model w menu powyżej.",
+          "provider": "AgentOrchestrator"
+        }
+      ],
+      "canvasDiffCount": 28,
+      "canvasDiff": [
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "rgb(242, 194, 127)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "lab(47.8878 1.65477 -5.77283)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "lab(47.8878 1.65477 -5.77283)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "w"
+          ],
+          "before": [
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "w",
+              26
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "k": "NEG1",
+      "prompt": "zmień coś",
+      "wallMs": 17570,
+      "path": "AI_PATH",
+      "exec": "ERROR",
+      "intent": "CLARIFY",
+      "ok": false,
+      "notes": [
+        "fast-path-rejected:UNRESOLVED",
+        "no-dispatch:ERROR"
+      ],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:0",
+        "FAST_PATH:0",
+        "PROVIDER:15268",
+        "TOOL_SELECTION:1",
+        "INTENT_CLASSIFIER:0",
+        "ROUTER:0",
+        "LLM:15001",
+        "HACP_BRIDGE:15269",
+        "RESPONSE:0",
+        "CANVAS:27"
+      ],
+      "panel": {
+        "status": "FAILED",
+        "target": "sec-hero-init",
+        "badge": "FAILED",
+        "text": "AI Hero Banner · sec-hero-init FAILED TARGET: hero sec-hero-init (page page-home) Nie udało się wykonać polecenia Modernize Change typography Change background Apply hero style",
+        "hasFailMsg": true,
+        "hasOkMsg": false,
+        "hasClarifyMsg": false
+      },
+      "netDelta": [
+        {
+          "url": "/api/builder/copilot",
+          "status": 200,
+          "method": "POST",
+          "keys": [
+            "status",
+            "provider",
+            "model",
+            "message",
+            "error",
+            "isFreeModel",
+            "routerMode",
+            "durationMs",
+            "latency"
+          ],
+          "statusField": "ERROR",
+          "message": "Nie udało się uzyskać odpowiedzi z wybranego modelu (nvidia/nemotron-3.5-lightning:free). Spróbuj ponownie lub wybierz inny model w menu powyżej.",
+          "provider": "AgentOrchestrator"
+        }
+      ],
+      "canvasDiffCount": 28,
+      "canvasDiff": [
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "rgb(242, 194, 127)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "lab(47.8878 1.65477 -5.77283)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "lab(47.8878 1.65477 -5.77283)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "w"
+          ],
+          "before": [
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "w",
+              26
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "k": "NEG2",
+      "prompt": "zrób to ładniej",
+      "wallMs": 17723,
+      "path": "AI_PATH",
+      "exec": "ERROR",
+      "intent": "CLARIFY",
+      "ok": false,
+      "notes": [
+        "fast-path-rejected:UNRESOLVED",
+        "no-dispatch:ERROR"
+      ],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:0",
+        "FAST_PATH:0",
+        "PROVIDER:15297",
+        "TOOL_SELECTION:0",
+        "INTENT_CLASSIFIER:0",
+        "ROUTER:0",
+        "LLM:15002",
+        "HACP_BRIDGE:15297",
+        "RESPONSE:0",
+        "CANVAS:26"
+      ],
+      "panel": {
+        "status": "FAILED",
+        "target": "sec-hero-init",
+        "badge": "FAILED",
+        "text": "AI Hero Banner · sec-hero-init FAILED TARGET: hero sec-hero-init (page page-home) Nie udało się wykonać polecenia Modernize Change typography Change background Apply hero style",
+        "hasFailMsg": true,
+        "hasOkMsg": false,
+        "hasClarifyMsg": false
+      },
+      "netDelta": [
+        {
+          "url": "/api/builder/copilot",
+          "status": 200,
+          "method": "POST",
+          "keys": [
+            "status",
+            "provider",
+            "model",
+            "message",
+            "error",
+            "isFreeModel",
+            "routerMode",
+            "durationMs",
+            "latency"
+          ],
+          "statusField": "ERROR",
+          "message": "Nie udało się uzyskać odpowiedzi z wybranego modelu (nvidia/nemotron-3.5-lightning:free). Spróbuj ponownie lub wybierz inny model w menu powyżej.",
+          "provider": "AgentOrchestrator"
+        }
+      ],
+      "canvasDiffCount": 28,
+      "canvasDiff": [
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "rgb(242, 194, 127)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "lab(47.8878 1.65477 -5.77283)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "color",
+            "w"
+          ],
+          "before": [
+            [
+              "color",
+              "lab(65.6464 1.53497 -5.42429)"
+            ],
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "color",
+              "lab(47.8878 1.65477 -5.77283)"
+            ],
+            [
+              "w",
+              26
+            ]
+          ]
+        },
+        {
+          "id": "TXT:BUTTON|",
+          "changed": [
+            "w"
+          ],
+          "before": [
+            [
+              "w",
+              22
+            ]
+          ],
+          "after": [
+            [
+              "w",
+              26
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "netAll": [
+    {
+      "url": "/studio",
+      "status": 304
+    },
+    {
+      "url": "/api/stores",
+      "status": 401
+    },
+    {
+      "url": "/api/stores",
+      "status": 401,
+      "method": "GET",
+      "keys": [
+        "success",
+        "error"
+      ],
+      "message": ""
+    },
+    {
+      "url": "/dashboard/stores?_rsc=1xkjR6qovEdN5-_9",
+      "status": 304
+    },
+    {
+      "url": "/dashboard/stores?_rsc=ieEaHQMitZUrKUKD",
+      "status": 304
+    },
+    {
+      "url": "/dashboard/stores?_rsc=M9rw1lH6ym3fCOF1",
+      "status": 304
+    },
+    {
+      "url": "/dashboard/stores?_rsc=VqFi5BscK6jJ0Hkl",
+      "status": 304
+    },
+    {
+      "url": "/dashboard/stores?_rsc=0E0ktD19yx-hpC9A",
+      "status": 304
+    },
+    {
+      "url": "/api/stores/s-demo",
+      "status": 401
+    },
+    {
+      "url": "/api/stores/s-demo",
+      "status": 401
+    },
+    {
+      "url": "/api/stores/s-demo",
+      "status": 401,
+      "method": "GET",
+      "keys": [
+        "success",
+        "error"
+      ],
+      "message": ""
+    },
+    {
+      "url": "/api/stores/s-demo",
+      "status": 401,
+      "method": "GET",
+      "keys": [
+        "success",
+        "error"
+      ],
+      "message": ""
+    },
+    {
+      "url": "/api/preview/s-demo?mode=LIVE&noCache=true",
+      "status": 404
+    },
+    {
+      "url": "/api/preview/s-demo?mode=LIVE&noCache=true",
+      "status": 404,
+      "method": "GET",
+      "keys": [
+        "error"
+      ],
+      "message": ""
+    },
+    {
+      "url": "/api/builder/copilot",
+      "status": 200,
+      "method": "POST",
+      "keys": [
+        "status",
+        "provider",
+        "model",
+        "message",
+        "error",
+        "isFreeModel",
+        "routerMode",
+        "durationMs",
+        "latency"
+      ],
+      "statusField": "ERROR",
+      "message": "Nie udało się uzyskać odpowiedzi z wybranego modelu (nvidia/nemotron-3.5-lightning:free). Spróbuj ponownie lub wybierz inny model w menu powyżej.",
+      "provider": "AgentOrchestrator"
+    },
+    {
+      "url": "/api/builder/copilot",
+      "status": 200,
+      "method": "POST",
+      "keys": [
+        "status",
+        "provider",
+        "model",
+        "message",
+        "error",
+        "isFreeModel",
+        "routerMode",
+        "durationMs",
+        "latency"
+      ],
+      "statusField": "ERROR",
+      "message": "Nie udało się uzyskać odpowiedzi z wybranego modelu (nvidia/nemotron-3.5-lightning:free). Spróbuj ponownie lub wybierz inny model w menu powyżej.",
+      "provider": "AgentOrchestrator"
+    },
+    {
+      "url": "/api/builder/copilot",
+      "status": 200,
+      "method": "POST",
+      "keys": [
+        "status",
+        "provider",
+        "model",
+        "message",
+        "error",
+        "isFreeModel",
+        "routerMode",
+        "durationMs",
+        "latency"
+      ],
+      "statusField": "ERROR",
+      "message": "Nie udało się uzyskać odpowiedzi z wybranego modelu (nvidia/nemotron-3.5-lightning:free). Spróbuj ponownie lub wybierz inny model w menu powyżej.",
+      "provider": "AgentOrchestrator"
+    }
+  ],
+  "consoleTail": [
+    "Failed to load resource: the server responded with a status of 401 ()",
+    "Font catalog contains 200 unique fonts",
+    "Failed to load resource: the server responded with a status of 401 ()",
+    "Failed to load resource: the server responded with a status of 401 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "[HacpBridge] EXECUTION_TRACE: [object Object]",
+    "[LATENCY_TRACE] {\"id\":\"lat-mugkbn64-n3fobt\",\"source\":\"mini-inspector\",\"prompt\":\"zmień kolor na czerwony\",\"path\":\"FAST_PATH\",\"startedAtIso\":\"2026-09-25T06:11:14.572Z\",\"totalMs\":20.799999998882413,\"stages\":[{\"stage\":\"UI\",\"startMs\":8939.699999999255,\"endMs\":8939.799999998882,\"durationMs\":0.09999999962747097},{\"stage\":\"QUEUE\",\"startMs\":8940.5,\"endMs\":8941.699999999255,\"durationMs\":1.199999999254942},{",
+    "[HacpBridge] EXECUTION_TRACE: [object Object]",
+    "[LATENCY_TRACE] {\"id\":\"lat-mugkbpd7-j3ap2g\",\"source\":\"mini-inspector\",\"prompt\":\"zmień czcionkę na Inter\",\"path\":\"FAST_PATH\",\"startedAtIso\":\"2026-09-25T06:11:17.419Z\",\"totalMs\":19.700000001117587,\"stages\":[{\"stage\":\"UI\",\"startMs\":11786.799999998882,\"endMs\":11786.900000000373,\"durationMs\":0.10000000149011612},{\"stage\":\"QUEUE\",\"startMs\":11786.900000000373,\"endMs\":11787.900000000373,\"durationMs\":1},{\"",
+    "[HacpBridge] EXECUTION_TRACE: [object Object]",
+    "[LATENCY_TRACE] {\"id\":\"lat-mugkbrn6-8a1joq\",\"source\":\"mini-inspector\",\"prompt\":\"powiększ czcionkę o 20 procent\",\"path\":\"FAST_PATH\",\"startedAtIso\":\"2026-09-25T06:11:20.370Z\",\"totalMs\":19.699999999254942,\"stages\":[{\"stage\":\"UI\",\"startMs\":14737,\"endMs\":14737.199999999255,\"durationMs\":0.19999999925494194},{\"stage\":\"QUEUE\",\"startMs\":14737.199999999255,\"endMs\":14738.199999999255,\"durationMs\":1},{\"stage\"",
+    "[HacpBridge] EXECUTION_TRACE: [object Object]",
+    "[LATENCY_TRACE] {\"id\":\"lat-mugkbtss-frbfb6\",\"source\":\"mini-inspector\",\"prompt\":\"zmień tekst na TEST\",\"path\":\"FAST_PATH\",\"startedAtIso\":\"2026-09-25T06:11:23.164Z\",\"totalMs\":25.299999998882413,\"stages\":[{\"stage\":\"UI\",\"startMs\":17531.5,\"endMs\":17531.5,\"durationMs\":0},{\"stage\":\"QUEUE\",\"startMs\":17531.5,\"endMs\":17532.400000000373,\"durationMs\":0.900000000372529},{\"stage\":\"RESOLVER\",\"startMs\":17532.5,\"en",
+    "[HacpBridge] EXECUTION_TRACE: [object Object]",
+    "[LATENCY_TRACE] {\"id\":\"lat-mugkbvwc-2n52u3\",\"source\":\"mini-inspector\",\"prompt\":\"wyśrodkuj tekst\",\"path\":\"FAST_PATH\",\"startedAtIso\":\"2026-09-25T06:11:25.884Z\",\"totalMs\":22.09999999962747,\"stages\":[{\"stage\":\"UI\",\"startMs\":20251.099999999627,\"endMs\":20251.099999999627,\"durationMs\":0},{\"stage\":\"QUEUE\",\"startMs\":20251.199999999255,\"endMs\":20252.199999999255,\"durationMs\":1},{\"stage\":\"RESOLVER\",\"startMs\"",
+    "[HacpBridge] Upstream model error, returning honest ERROR (no fake CHAT): The operation was aborted due to timeout",
+    "[LATENCY_TRACE] {\"id\":\"lat-mugkby9x-rjkn4o\",\"source\":\"mini-inspector\",\"prompt\":\"zmień tło sekcji na delikatny gradient\",\"path\":\"AI_PATH\",\"startedAtIso\":\"2026-09-25T06:11:28.965Z\",\"totalMs\":15557.60000000149,\"stages\":[{\"stage\":\"UI\",\"startMs\":23332.299999998882,\"endMs\":23332.400000000373,\"durationMs\":0.10000000149011612},{\"stage\":\"QUEUE\",\"startMs\":23332.400000000373,\"endMs\":23333.299999998882,\"durat",
+    "[HacpBridge] Upstream model error, returning honest ERROR (no fake CHAT): The operation was aborted due to timeout",
+    "[LATENCY_TRACE] {\"id\":\"lat-mugkcc5b-ioc4ik\",\"source\":\"mini-inspector\",\"prompt\":\"zmień coś\",\"path\":\"AI_PATH\",\"startedAtIso\":\"2026-09-25T06:11:46.943Z\",\"totalMs\":15296.599999999627,\"stages\":[{\"stage\":\"UI\",\"startMs\":41310.09999999963,\"endMs\":41310.09999999963,\"durationMs\":0},{\"stage\":\"QUEUE\",\"startMs\":41310.09999999963,\"endMs\":41310.79999999888,\"durationMs\":0.6999999992549419},{\"stage\":\"RESOLVER\",\"st",
+    "[HacpBridge] Upstream model error, returning honest ERROR (no fake CHAT): The operation was aborted due to timeout",
+    "[LATENCY_TRACE] {\"id\":\"lat-mugkcpwc-5p8wrs\",\"source\":\"mini-inspector\",\"prompt\":\"zrób to ładniej\",\"path\":\"AI_PATH\",\"startedAtIso\":\"2026-09-25T06:12:04.764Z\",\"totalMs\":15324.900000000373,\"stages\":[{\"stage\":\"UI\",\"startMs\":59131.79999999888,\"endMs\":59131.79999999888,\"durationMs\":0},{\"stage\":\"QUEUE\",\"startMs\":59131.79999999888,\"endMs\":59132.699999999255,\"durationMs\":0.900000000372529},{\"stage\":\"RESOLVE"
+  ]
+}

@@ -1,0 +1,733 @@
+{
+  "base": "http://localhost:3000",
+  "mainOpen": false,
+  "positive": [
+    {
+      "prompt": "zmień kolor na czerwony",
+      "wallMs": 1526,
+      "target": "node-heading-a",
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "ok": true,
+      "notes": [],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:1",
+        "VERIFICATION:1",
+        "BUILDER_COMMAND:2",
+        "FAST_PATH:4",
+        "DISPATCH:0",
+        "RESPONSE:0",
+        "CANVAS:21"
+      ],
+      "traceTool": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "CHANGE_COLOR",
+            "domain": "COLOR",
+            "targetNodeId": "node-heading-a",
+            "timestamp": "2026-09-25T07:20:13.398Z"
+          }
+        ]
+      ],
+      "panel": {
+        "target": "node-heading-a",
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "message": "Polecenie wykonane pomyślnie"
+      },
+      "changedDoc": [
+        "node-heading-a"
+      ],
+      "changedCanvas": [
+        "sec-hero-init",
+        "node-heading-a"
+      ],
+      "api": [],
+      "docAfter": {
+        "heading": {
+          "type": "heading",
+          "styles": {
+            "color": "#FF0000"
+          },
+          "props": {
+            "text": "Naglowek A"
+          }
+        },
+        "button": {
+          "type": "button",
+          "styles": {
+            "color": "#ffffff"
+          },
+          "props": {
+            "label": "Kliknij"
+          }
+        }
+      },
+      "canvasAfter": {
+        "sec-hero-init": {
+          "text": "SoloSpot Visual Builder v2.0 Biblioteka Rozpocznij",
+          "innerColor": "rgb(255, 255, 255)",
+          "innerBg": "rgba(0, 0, 0, 0)",
+          "innerFont": "Inter",
+          "innerSize": "36px",
+          "innerAlign": "center",
+          "wrapBg": "rgba(0, 0, 0, 0)",
+          "wrapFont": "Inter",
+          "redInside": 1
+        },
+        "node-heading-a": {
+          "text": "Naglowek A",
+          "innerColor": "rgb(255, 0, 0)",
+          "innerBg": "rgba(0, 0, 0, 0)",
+          "innerFont": "Inter",
+          "innerSize": "28px",
+          "innerAlign": "left",
+          "wrapBg": "rgba(0, 0, 0, 0)",
+          "wrapFont": "Inter",
+          "redInside": 1
+        },
+        "node-button-b": {
+          "text": "Kliknij",
+          "innerColor": "rgb(255, 255, 255)",
+          "innerBg": "rgb(184, 137, 58)",
+          "innerFont": "Inter",
+          "innerSize": "14px",
+          "innerAlign": "center",
+          "wrapBg": "rgba(0, 0, 0, 0)",
+          "wrapFont": "Inter",
+          "redInside": 0
+        }
+      }
+    },
+    {
+      "prompt": "zmień czcionkę na Inter",
+      "wallMs": 1512,
+      "target": "node-heading-a",
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "ok": true,
+      "notes": [],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:1",
+        "VERIFICATION:0",
+        "BUILDER_COMMAND:0",
+        "FAST_PATH:1",
+        "DISPATCH:0",
+        "RESPONSE:0",
+        "CANVAS:19"
+      ],
+      "traceTool": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "CHANGE_TYPOGRAPHY",
+            "domain": "TYPOGRAPHY",
+            "targetNodeId": "node-heading-a",
+            "timestamp": "2026-09-25T07:20:16.711Z"
+          }
+        ]
+      ],
+      "panel": {
+        "target": "node-heading-a",
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "message": "Polecenie wykonane pomyślnie"
+      },
+      "changedDoc": [
+        "node-heading-a"
+      ],
+      "changedCanvas": [],
+      "api": [],
+      "docAfter": {
+        "heading": {
+          "type": "heading",
+          "styles": {
+            "color": "#FF0000",
+            "fontFamily": "Inter"
+          },
+          "props": {
+            "text": "Naglowek A"
+          }
+        },
+        "button": {
+          "type": "button",
+          "styles": {
+            "color": "#ffffff"
+          },
+          "props": {
+            "label": "Kliknij"
+          }
+        }
+      },
+      "canvasAfter": {
+        "sec-hero-init": {
+          "text": "SoloSpot Visual Builder v2.0 Biblioteka Rozpocznij",
+          "innerColor": "rgb(255, 255, 255)",
+          "innerBg": "rgba(0, 0, 0, 0)",
+          "innerFont": "Inter",
+          "innerSize": "36px",
+          "innerAlign": "center",
+          "wrapBg": "rgba(0, 0, 0, 0)",
+          "wrapFont": "Inter",
+          "redInside": 1
+        },
+        "node-heading-a": {
+          "text": "Naglowek A",
+          "innerColor": "rgb(255, 0, 0)",
+          "innerBg": "rgba(0, 0, 0, 0)",
+          "innerFont": "Inter",
+          "innerSize": "28px",
+          "innerAlign": "left",
+          "wrapBg": "rgba(0, 0, 0, 0)",
+          "wrapFont": "Inter",
+          "redInside": 1
+        },
+        "node-button-b": {
+          "text": "Kliknij",
+          "innerColor": "rgb(255, 255, 255)",
+          "innerBg": "rgb(184, 137, 58)",
+          "innerFont": "Inter",
+          "innerSize": "14px",
+          "innerAlign": "center",
+          "wrapBg": "rgba(0, 0, 0, 0)",
+          "wrapFont": "Inter",
+          "redInside": 0
+        }
+      }
+    },
+    {
+      "prompt": "powiększ czcionkę o 20 procent",
+      "wallMs": 1616,
+      "target": "node-heading-a",
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "ok": true,
+      "notes": [],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:0",
+        "VERIFICATION:0",
+        "BUILDER_COMMAND:0",
+        "FAST_PATH:1",
+        "DISPATCH:0",
+        "RESPONSE:0",
+        "CANVAS:23"
+      ],
+      "traceTool": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "RESIZE",
+            "domain": "SIZE",
+            "targetNodeId": "node-heading-a",
+            "timestamp": "2026-09-25T07:20:20.091Z"
+          }
+        ]
+      ],
+      "panel": {
+        "target": "node-heading-a",
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "message": "Polecenie wykonane pomyślnie"
+      },
+      "changedDoc": [
+        "node-heading-a"
+      ],
+      "changedCanvas": [
+        "node-heading-a"
+      ],
+      "api": [],
+      "docAfter": {
+        "heading": {
+          "type": "heading",
+          "styles": {
+            "color": "#FF0000",
+            "fontFamily": "Inter",
+            "fontSize": "34px"
+          },
+          "props": {
+            "text": "Naglowek A"
+          }
+        },
+        "button": {
+          "type": "button",
+          "styles": {
+            "color": "#ffffff"
+          },
+          "props": {
+            "label": "Kliknij"
+          }
+        }
+      },
+      "canvasAfter": {
+        "sec-hero-init": {
+          "text": "SoloSpot Visual Builder v2.0 Biblioteka Rozpocznij",
+          "innerColor": "rgb(255, 255, 255)",
+          "innerBg": "rgba(0, 0, 0, 0)",
+          "innerFont": "Inter",
+          "innerSize": "36px",
+          "innerAlign": "center",
+          "wrapBg": "rgba(0, 0, 0, 0)",
+          "wrapFont": "Inter",
+          "redInside": 1
+        },
+        "node-heading-a": {
+          "text": "Naglowek A",
+          "innerColor": "rgb(255, 0, 0)",
+          "innerBg": "rgba(0, 0, 0, 0)",
+          "innerFont": "Inter",
+          "innerSize": "34px",
+          "innerAlign": "left",
+          "wrapBg": "rgba(0, 0, 0, 0)",
+          "wrapFont": "Inter",
+          "redInside": 1
+        },
+        "node-button-b": {
+          "text": "Kliknij",
+          "innerColor": "rgb(255, 255, 255)",
+          "innerBg": "rgb(184, 137, 58)",
+          "innerFont": "Inter",
+          "innerSize": "14px",
+          "innerAlign": "center",
+          "wrapBg": "rgba(0, 0, 0, 0)",
+          "wrapFont": "Inter",
+          "redInside": 0
+        }
+      }
+    },
+    {
+      "prompt": "zmień tekst na TEST",
+      "wallMs": 1434,
+      "target": "node-heading-a",
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "ok": true,
+      "notes": [],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:0",
+        "VERIFICATION:0",
+        "BUILDER_COMMAND:0",
+        "FAST_PATH:1",
+        "DISPATCH:0",
+        "RESPONSE:0",
+        "CANVAS:17"
+      ],
+      "traceTool": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "CHANGE_TEXT",
+            "domain": "TEXT",
+            "targetNodeId": "node-heading-a",
+            "timestamp": "2026-09-25T07:20:23.316Z"
+          }
+        ]
+      ],
+      "panel": {
+        "target": "node-heading-a",
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "message": "Polecenie wykonane pomyślnie"
+      },
+      "changedDoc": [
+        "node-heading-a"
+      ],
+      "changedCanvas": [
+        "node-heading-a"
+      ],
+      "api": [],
+      "docAfter": {
+        "heading": {
+          "type": "heading",
+          "styles": {
+            "color": "#FF0000",
+            "fontFamily": "Inter",
+            "fontSize": "34px"
+          },
+          "props": {
+            "text": "TEST"
+          }
+        },
+        "button": {
+          "type": "button",
+          "styles": {
+            "color": "#ffffff"
+          },
+          "props": {
+            "label": "Kliknij"
+          }
+        }
+      },
+      "canvasAfter": {
+        "sec-hero-init": {
+          "text": "SoloSpot Visual Builder v2.0 Biblioteka Rozpocznij",
+          "innerColor": "rgb(255, 255, 255)",
+          "innerBg": "rgba(0, 0, 0, 0)",
+          "innerFont": "Inter",
+          "innerSize": "36px",
+          "innerAlign": "center",
+          "wrapBg": "rgba(0, 0, 0, 0)",
+          "wrapFont": "Inter",
+          "redInside": 1
+        },
+        "node-heading-a": {
+          "text": "TEST",
+          "innerColor": "rgb(255, 0, 0)",
+          "innerBg": "rgba(0, 0, 0, 0)",
+          "innerFont": "Inter",
+          "innerSize": "34px",
+          "innerAlign": "left",
+          "wrapBg": "rgba(0, 0, 0, 0)",
+          "wrapFont": "Inter",
+          "redInside": 1
+        },
+        "node-button-b": {
+          "text": "Kliknij",
+          "innerColor": "rgb(255, 255, 255)",
+          "innerBg": "rgb(184, 137, 58)",
+          "innerFont": "Inter",
+          "innerSize": "14px",
+          "innerAlign": "center",
+          "wrapBg": "rgba(0, 0, 0, 0)",
+          "wrapFont": "Inter",
+          "redInside": 0
+        }
+      }
+    },
+    {
+      "prompt": "wyśrodkuj tekst",
+      "wallMs": 1385,
+      "target": "node-heading-a",
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "ok": true,
+      "notes": [],
+      "stages": [
+        "UI:0",
+        "QUEUE:1",
+        "RESOLVER:0",
+        "VERIFICATION:0",
+        "BUILDER_COMMAND:0",
+        "FAST_PATH:1",
+        "DISPATCH:0",
+        "RESPONSE:0",
+        "CANVAS:31"
+      ],
+      "traceTool": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "ALIGN",
+            "domain": "ALIGN",
+            "targetNodeId": "node-heading-a",
+            "timestamp": "2026-09-25T07:20:26.494Z"
+          }
+        ]
+      ],
+      "panel": {
+        "target": "node-heading-a",
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "message": "Polecenie wykonane pomyślnie"
+      },
+      "changedDoc": [
+        "node-heading-a"
+      ],
+      "changedCanvas": [
+        "node-heading-a"
+      ],
+      "api": [],
+      "docAfter": {
+        "heading": {
+          "type": "heading",
+          "styles": {
+            "color": "#FF0000",
+            "fontFamily": "Inter",
+            "fontSize": "34px",
+            "textAlign": "center"
+          },
+          "props": {
+            "text": "TEST"
+          }
+        },
+        "button": {
+          "type": "button",
+          "styles": {
+            "color": "#ffffff"
+          },
+          "props": {
+            "label": "Kliknij"
+          }
+        }
+      },
+      "canvasAfter": {
+        "sec-hero-init": {
+          "text": "SoloSpot Visual Builder v2.0 Biblioteka Rozpocznij",
+          "innerColor": "rgb(255, 255, 255)",
+          "innerBg": "rgba(0, 0, 0, 0)",
+          "innerFont": "Inter",
+          "innerSize": "36px",
+          "innerAlign": "center",
+          "wrapBg": "rgba(0, 0, 0, 0)",
+          "wrapFont": "Inter",
+          "redInside": 1
+        },
+        "node-heading-a": {
+          "text": "TEST",
+          "innerColor": "rgb(255, 0, 0)",
+          "innerBg": "rgba(0, 0, 0, 0)",
+          "innerFont": "Inter",
+          "innerSize": "34px",
+          "innerAlign": "center",
+          "wrapBg": "rgba(0, 0, 0, 0)",
+          "wrapFont": "Inter",
+          "redInside": 1
+        },
+        "node-button-b": {
+          "text": "Kliknij",
+          "innerColor": "rgb(255, 255, 255)",
+          "innerBg": "rgb(184, 137, 58)",
+          "innerFont": "Inter",
+          "innerSize": "14px",
+          "innerAlign": "center",
+          "wrapBg": "rgba(0, 0, 0, 0)",
+          "wrapFont": "Inter",
+          "redInside": 0
+        }
+      }
+    }
+  ],
+  "negative": [
+    {
+      "prompt": "zmień coś",
+      "wallMs": 16198,
+      "path": "AI_PATH",
+      "exec": "ERROR",
+      "intent": "CLARIFY",
+      "notes": [
+        "fast-path-rejected:UNRESOLVED",
+        "no-dispatch:ERROR"
+      ],
+      "panel": {
+        "target": "node-button-b",
+        "status": "FAILED",
+        "badge": "FAILED",
+        "message": "Nie udało się wykonać polecenia"
+      },
+      "mutated": [],
+      "traceTool": [],
+      "api": [
+        {
+          "statusField": "ERROR",
+          "message": "Nie udało się uzyskać odpowiedzi z wybranego modelu (nvidia/nemotron-3.5-lightning:free). Spróbuj ponownie lub wybierz inny model w menu pow",
+          "llm": 1
+        }
+      ]
+    },
+    {
+      "prompt": "zmień kolor",
+      "wallMs": 16158,
+      "path": "AI_PATH",
+      "exec": "ERROR",
+      "intent": "CLARIFY",
+      "notes": [
+        "fast-path-rejected:PARAMETERS_INCOMPLETE",
+        "no-dispatch:ERROR"
+      ],
+      "panel": {
+        "target": "node-button-b",
+        "status": "FAILED",
+        "badge": "FAILED",
+        "message": "Nie udało się wykonać polecenia"
+      },
+      "mutated": [],
+      "traceTool": [],
+      "api": [
+        {
+          "statusField": "ERROR",
+          "message": "Nie udało się uzyskać odpowiedzi z wybranego modelu (nvidia/nemotron-3.5-lightning:free). Spróbuj ponownie lub wybierz inny model w menu pow",
+          "llm": 1
+        }
+      ]
+    },
+    {
+      "prompt": "użyj jakiejś czcionki",
+      "wallMs": 16370,
+      "path": "AI_PATH",
+      "exec": "ERROR",
+      "intent": "CLARIFY",
+      "notes": [
+        "fast-path-rejected:PARAMETERS_INCOMPLETE",
+        "no-dispatch:ERROR"
+      ],
+      "panel": {
+        "target": "node-button-b",
+        "status": "FAILED",
+        "badge": "FAILED",
+        "message": "Nie udało się wykonać polecenia"
+      },
+      "mutated": [],
+      "traceTool": [],
+      "api": [
+        {
+          "statusField": "ERROR",
+          "message": "Nie udało się uzyskać odpowiedzi z wybranego modelu (nvidia/nemotron-3.5-lightning:free). Spróbuj ponownie lub wybierz inny model w menu pow",
+          "llm": 1
+        }
+      ]
+    },
+    {
+      "prompt": "zrób to ładniej",
+      "wallMs": 16264,
+      "path": "AI_PATH",
+      "exec": "ERROR",
+      "intent": "CLARIFY",
+      "notes": [
+        "fast-path-rejected:UNRESOLVED",
+        "no-dispatch:ERROR"
+      ],
+      "panel": {
+        "target": "node-button-b",
+        "status": "FAILED",
+        "badge": "FAILED",
+        "message": "Nie udało się wykonać polecenia"
+      },
+      "mutated": [],
+      "traceTool": [],
+      "api": [
+        {
+          "statusField": "ERROR",
+          "message": "Nie udało się uzyskać odpowiedzi z wybranego modelu (nvidia/nemotron-3.5-lightning:free). Spróbuj ponownie lub wybierz inny model w menu pow",
+          "llm": 1
+        }
+      ]
+    }
+  ],
+  "targetLock": {
+    "targetAtSubmit": "node-heading-a",
+    "path": "FAST_PATH",
+    "exec": "EXECUTED",
+    "headingChanged": true,
+    "buttonChanged": false,
+    "headingAfter": {
+      "type": "heading",
+      "styles": {
+        "color": "#0000FF",
+        "fontFamily": "Inter",
+        "fontSize": "34px",
+        "textAlign": "center"
+      },
+      "props": {
+        "text": "TEST"
+      }
+    },
+    "buttonAfter": {
+      "type": "button",
+      "styles": {
+        "color": "#ffffff"
+      },
+      "props": {
+        "label": "Kliknij"
+      }
+    },
+    "panelAfter": {
+      "target": "node-button-b",
+      "status": "IDLE",
+      "badge": "GOTOWY",
+      "message": null
+    }
+  },
+  "undoRedo": {
+    "prePath": "FAST_PATH",
+    "preExec": "EXECUTED",
+    "undoClicked": true,
+    "redoClicked": true,
+    "appliedText": "UNDO_STEP",
+    "undoneText": "TEST",
+    "redoneText": "UNDO_STEP",
+    "undoWorked": true,
+    "redoWorked": true
+  },
+  "persistence": {
+    "path": "FAST_PATH",
+    "exec": "EXECUTED",
+    "survived": true,
+    "headingSaved": {
+      "type": "heading",
+      "styles": {
+        "color": "#0000FF",
+        "fontFamily": "Inter",
+        "fontSize": "34px",
+        "textAlign": "center"
+      },
+      "props": {
+        "text": "PERSIST"
+      }
+    },
+    "headingReloaded": {
+      "type": "heading",
+      "styles": {
+        "color": "#0000FF",
+        "fontFamily": "Inter",
+        "fontSize": "34px",
+        "textAlign": "center"
+      },
+      "props": {
+        "text": "PERSIST"
+      }
+    },
+    "canvasAfterReload": {
+      "sec-hero-init": {
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka Rozpocznij",
+        "innerColor": "rgb(255, 255, 255)",
+        "innerBg": "rgba(0, 0, 0, 0)",
+        "innerFont": "Inter",
+        "innerSize": "36px",
+        "innerAlign": "center",
+        "wrapBg": "rgba(0, 0, 0, 0)",
+        "wrapFont": "Inter",
+        "redInside": 0
+      },
+      "node-heading-a": {
+        "text": "PERSIST",
+        "innerColor": "rgb(0, 0, 255)",
+        "innerBg": "rgba(0, 0, 0, 0)",
+        "innerFont": "Inter",
+        "innerSize": "34px",
+        "innerAlign": "center",
+        "wrapBg": "rgba(0, 0, 0, 0)",
+        "wrapFont": "Inter",
+        "redInside": 0
+      },
+      "node-button-b": {
+        "text": "Kliknij",
+        "innerColor": "rgb(255, 255, 255)",
+        "innerBg": "rgb(184, 137, 58)",
+        "innerFont": "Inter",
+        "innerSize": "14px",
+        "innerAlign": "center",
+        "wrapBg": "rgba(0, 0, 0, 0)",
+        "wrapFont": "Inter",
+        "redInside": 0
+      }
+    }
+  }
+}

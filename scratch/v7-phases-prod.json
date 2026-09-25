@@ -1,0 +1,136 @@
+{
+  "base": "https://www.solospot.pl",
+  "steps": [
+    {
+      "name": "inventory",
+      "nodes": [
+        {
+          "id": "sec-hero-init",
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "text": "SoloSpot Visual Builder v2.0 Biblioteka "
+        },
+        {
+          "id": "sec-hero-init",
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "text": "SoloSpot Visual Builder v2.0 Biblioteka "
+        },
+        {
+          "id": "node-heading-a",
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "text": "Naglowek A"
+        },
+        {
+          "id": "node-button-b",
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "text": "Kliknij"
+        }
+      ],
+      "mini": null,
+      "selectedMarker": []
+    },
+    {
+      "name": "targetLock",
+      "clickedA": true,
+      "tracePath": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "headingChanged": false,
+      "buttonChanged": false,
+      "headingStyles": {
+        "color": "#ffffff"
+      },
+      "buttonStyles": {
+        "color": "#ffffff"
+      },
+      "miniPanel": {
+        "target": "node-button-b",
+        "status": "IDLE",
+        "head": "AI Przycisk · node-button-b GOTOWY TARGET: button node-button-b (page page-home) Make premium Change style Change radius Change color Improve hierarchy"
+      }
+    },
+    {
+      "name": "undoRedo",
+      "undoOk": false,
+      "redoOk": false,
+      "undoChanged": false,
+      "redoRestored": false,
+      "beforeUndo": {
+        "type": "heading",
+        "styles": {
+          "color": "#ffffff"
+        },
+        "props": {
+          "text": "Naglowek A"
+        }
+      },
+      "afterUndo": {
+        "type": "heading",
+        "styles": {
+          "color": "#ffffff"
+        },
+        "props": {
+          "text": "Naglowek A"
+        }
+      },
+      "afterRedo": {
+        "type": "heading",
+        "styles": {
+          "color": "#ffffff"
+        },
+        "props": {
+          "text": "Naglowek A"
+        }
+      }
+    },
+    {
+      "name": "persistence",
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "saved": false,
+      "survivedReload": true,
+      "headingAfterReload": {
+        "type": "heading",
+        "styles": {
+          "color": "#FF0000"
+        },
+        "props": {
+          "text": "PERSIST"
+        }
+      },
+      "inventory": {
+        "nodes": [
+          {
+            "id": "sec-hero-init",
+            "color": "rgb(255, 255, 255)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "text": "SoloSpot Visual Builder v2.0 Biblioteka "
+          },
+          {
+            "id": "sec-hero-init",
+            "color": "rgb(255, 255, 255)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "text": "SoloSpot Visual Builder v2.0 Biblioteka "
+          },
+          {
+            "id": "node-heading-a",
+            "color": "rgb(255, 255, 255)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "text": "PERSIST"
+          },
+          {
+            "id": "node-button-b",
+            "color": "rgb(255, 255, 255)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "text": "Kliknij"
+          }
+        ],
+        "mini": null,
+        "selectedMarker": []
+      }
+    }
+  ]
+}

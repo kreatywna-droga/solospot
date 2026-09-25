@@ -1,0 +1,272 @@
+{
+  "at": "2026-09-23T16:34:21.233Z",
+  "scenarios": [
+    {
+      "label": "S1_insert_no_templateId",
+      "exactSymptom": true,
+      "commandCount": 0,
+      "executionStatus": "CLARIFY",
+      "intent": "CHAT",
+      "documentUnchanged": true,
+      "before": {
+        "docId": "doc_mutation_regression",
+        "version": 1,
+        "pageIds": [
+          "page_home_doc_mutation_regression"
+        ],
+        "sectionCount": 0,
+        "nodeCount": 0,
+        "sectionIds": []
+      },
+      "after": {
+        "docId": "doc_mutation_regression",
+        "version": 1,
+        "pageIds": [
+          "page_home_doc_mutation_regression"
+        ],
+        "sectionCount": 0,
+        "nodeCount": 0,
+        "sectionIds": []
+      },
+      "finalMessage": "Wykonałem narzędzia: insert_section_from_library. Nie wprowadziłem zmian w BuilderDocument — liczba sekcji bez zmian, brak nowego węzła. Brakuje kroku mutacji (np. insert_section_from_library). Spróbuj ponownie lub wskaż konkretny szablon z wyników wyszukiwania.",
+      "verification": {
+        "passed": false,
+        "operation": "insert_section_from_library",
+        "target": "none"
+      }
+    },
+    {
+      "label": "S2_insert_unknown_template",
+      "exactSymptom": true,
+      "commandCount": 0,
+      "executionStatus": "CLARIFY",
+      "intent": "CHAT",
+      "documentUnchanged": true,
+      "before": {
+        "docId": "doc_mutation_regression",
+        "version": 1,
+        "pageIds": [
+          "page_home_doc_mutation_regression"
+        ],
+        "sectionCount": 0,
+        "nodeCount": 0,
+        "sectionIds": []
+      },
+      "after": {
+        "docId": "doc_mutation_regression",
+        "version": 1,
+        "pageIds": [
+          "page_home_doc_mutation_regression"
+        ],
+        "sectionCount": 0,
+        "nodeCount": 0,
+        "sectionIds": []
+      },
+      "finalMessage": "Wykonałem narzędzia: insert_section_from_library. Nie wprowadziłem zmian w BuilderDocument — liczba sekcji bez zmian, brak nowego węzła. Brakuje kroku mutacji (np. insert_section_from_library). Spróbuj ponownie lub wskaż konkretny szablon z wyników wyszukiwania.",
+      "verification": {
+        "passed": false,
+        "operation": "insert_section_from_library",
+        "target": "testimonials-pricing-xyz"
+      }
+    },
+    {
+      "label": "S3_search_only",
+      "exactSymptom": true,
+      "commandCount": 0,
+      "executionStatus": "CLARIFY",
+      "intent": "CHAT",
+      "documentUnchanged": true,
+      "before": {
+        "docId": "doc_mutation_regression",
+        "version": 1,
+        "pageIds": [
+          "page_home_doc_mutation_regression"
+        ],
+        "sectionCount": 0,
+        "nodeCount": 0,
+        "sectionIds": []
+      },
+      "after": {
+        "docId": "doc_mutation_regression",
+        "version": 1,
+        "pageIds": [
+          "page_home_doc_mutation_regression"
+        ],
+        "sectionCount": 0,
+        "nodeCount": 0,
+        "sectionIds": []
+      },
+      "finalMessage": "Wykonałem narzędzia: search_sections. Nie wprowadziłem zmian w BuilderDocument — liczba sekcji bez zmian, brak nowego węzła. Brakuje kroku mutacji (np. insert_section_from_library). Spróbuj ponownie lub wskaż konkretny szablon z wyników wyszukiwania.",
+      "verification": {
+        "passed": true,
+        "operation": "search_sections",
+        "target": "section-library"
+      }
+    },
+    {
+      "label": "S4_search_then_insert_no_templateId",
+      "exactSymptom": true,
+      "commandCount": 0,
+      "executionStatus": "CLARIFY",
+      "intent": "CHAT",
+      "documentUnchanged": true,
+      "before": {
+        "docId": "doc_mutation_regression",
+        "version": 1,
+        "pageIds": [
+          "page_home_doc_mutation_regression"
+        ],
+        "sectionCount": 0,
+        "nodeCount": 0,
+        "sectionIds": []
+      },
+      "after": {
+        "docId": "doc_mutation_regression",
+        "version": 1,
+        "pageIds": [
+          "page_home_doc_mutation_regression"
+        ],
+        "sectionCount": 0,
+        "nodeCount": 0,
+        "sectionIds": []
+      },
+      "finalMessage": "Wykonałem narzędzia: search_sections, insert_section_from_library. Nie wprowadziłem zmian w BuilderDocument — liczba sekcji bez zmian, brak nowego węzła. Brakuje kroku mutacji (np. insert_section_from_library). Spróbuj ponownie lub wskaż konkretny szablon z wyników wyszukiwania.",
+      "verification": {
+        "passed": false,
+        "operation": "insert_section_from_library",
+        "target": "none"
+      }
+    },
+    {
+      "label": "S5_valid_insert_contrast",
+      "exactSymptom": false,
+      "commandCount": 1,
+      "executionStatus": "FAILED",
+      "intent": "EXECUTE",
+      "documentUnchanged": false,
+      "before": {
+        "docId": "doc_mutation_regression",
+        "version": 1,
+        "pageIds": [
+          "page_home_doc_mutation_regression"
+        ],
+        "sectionCount": 0,
+        "nodeCount": 0,
+        "sectionIds": []
+      },
+      "after": {
+        "docId": "doc_mutation_regression",
+        "version": 2,
+        "pageIds": [
+          "page_home_doc_mutation_regression"
+        ],
+        "sectionCount": 0,
+        "nodeCount": 0,
+        "sectionIds": []
+      },
+      "finalMessage": "Wstawiłem sekcję testimonials.",
+      "verification": {
+        "passed": false,
+        "operation": "ADD_SECTION",
+        "target": "page_home_doc_trace",
+        "beforeValue": 0,
+        "afterValue": 0,
+        "diffSummary": "Weryfikacja nieudana: brak potwierdzonej zmiany w BuilderDocument."
+      }
+    },
+    {
+      "label": "S6_search_then_valid_insert",
+      "exactSymptom": false,
+      "commandCount": 1,
+      "executionStatus": "FAILED",
+      "intent": "EXECUTE",
+      "documentUnchanged": false,
+      "before": {
+        "docId": "doc_mutation_regression",
+        "version": 1,
+        "pageIds": [
+          "page_home_doc_mutation_regression"
+        ],
+        "sectionCount": 0,
+        "nodeCount": 0,
+        "sectionIds": []
+      },
+      "after": {
+        "docId": "doc_mutation_regression",
+        "version": 2,
+        "pageIds": [
+          "page_home_doc_mutation_regression"
+        ],
+        "sectionCount": 0,
+        "nodeCount": 0,
+        "sectionIds": []
+      },
+      "finalMessage": "Gotowe.",
+      "verification": {
+        "passed": false,
+        "operation": "ADD_SECTION",
+        "target": "page_home_doc_trace",
+        "beforeValue": 0,
+        "afterValue": 0,
+        "diffSummary": "Weryfikacja nieudana: brak potwierdzonej zmiany w BuilderDocument."
+      }
+    },
+    {
+      "label": "S7_insert_empty_templateId",
+      "exactSymptom": true,
+      "commandCount": 0,
+      "executionStatus": "CLARIFY",
+      "intent": "CHAT",
+      "documentUnchanged": true,
+      "before": {
+        "docId": "doc_mutation_regression",
+        "version": 1,
+        "pageIds": [
+          "page_home_doc_mutation_regression"
+        ],
+        "sectionCount": 0,
+        "nodeCount": 0,
+        "sectionIds": []
+      },
+      "after": {
+        "docId": "doc_mutation_regression",
+        "version": 1,
+        "pageIds": [
+          "page_home_doc_mutation_regression"
+        ],
+        "sectionCount": 0,
+        "nodeCount": 0,
+        "sectionIds": []
+      },
+      "finalMessage": "Wykonałem narzędzia: insert_section_from_library. Nie wprowadziłem zmian w BuilderDocument — liczba sekcji bez zmian, brak nowego węzła. Brakuje kroku mutacji (np. insert_section_from_library). Spróbuj ponownie lub wskaż konkretny szablon z wyników wyszukiwania.",
+      "verification": {
+        "passed": false,
+        "operation": "insert_section_from_library",
+        "target": "none"
+      }
+    }
+  ],
+  "classification": {
+    "CHAIN": "FAIL",
+    "FIRST_BREAK": "HACP insert_section_from_library handler → BuilderCommand (no command emitted)",
+    "ROOT_CAUSE": "Model (or synthetic toolCalls) invoked insert_section_from_library WITHOUT a resolvable sectionTemplateId | Handler HacpBridge.executeToolCall (lines 609-628) returns status FAILED and NO command when sectionTemplateId missing/unknown/empty | executePlan collects zero commands → resolveToolExecutionOutcome → CLARIFY | Message generator (lines 1559-1565) lists executed tool names AND static suffix \"Brakuje kroku mutacji (np. insert_section_from_library)\" → contradictory UX | AiCopilotWorkspace skips dispatch (intent CLARIFY / empty commands) → BuilderDocument BEFORE==AFTER",
+    "REGRESSION": "YES",
+    "categories": {
+      "A_model_did_not_call_mutation_tool": false,
+      "B_mutation_tool_called_but_no_command": true,
+      "C_command_not_dispatched": false,
+      "D_dispatched_but_document_unchanged": false,
+      "E_document_changed_but_verification_missed": false,
+      "F_mutation_ok_but_response_lies": false,
+      "G_other": false
+    },
+    "selected": "B",
+    "evidenceForB": [
+      "trace A/B/S7: executeToolCall insert → status FAILED, hasCommand false",
+      "trace C/S5: same handler with valid testimonials-cards → EXECUTED + ADD_SECTION",
+      "executePlan S1/S2/S7: commandCount 0, exactSymptom true, documentUnchanged true"
+    ],
+    "noteOnA": "If the REAL model omitted the mutation tool entirely, that would be A; but the user-facing message literally lists insert_section_from_library in executedNames, proving toolCalls contained it → not pure A. In production the same symptom occurs when model calls insert with bad/missing templateId.",
+    "noteOnF": "Message is honest about no mutation (CLARIFY) but poorly worded — lists tool as \"executed\" and hardcodes example insert_section_from_library even when only search ran (S3)."
+  }
+}

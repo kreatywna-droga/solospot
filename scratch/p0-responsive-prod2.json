@@ -1,0 +1,50 @@
+{
+  "base": "https://www.solospot.pl",
+  "sequence": {
+    "xInitial": 471,
+    "desktopDrag": {
+      "diag": {
+        "x": 735.9999694824219,
+        "y": 86,
+        "rx": 471,
+        "hitTag": "DIV",
+        "hitClass": "flex items-center gap-1 px-2 py-1.5 bg-[#18181B]/95 backdrop-blur-md border border-[#1F1F24] rounded",
+        "hitPath": "DIV<DIV<DIV<DIV<DIV",
+        "midTransform": null,
+        "finalTransform": null,
+        "dragEvents": 0
+      },
+      "xAfter": 471,
+      "node": {
+        "styles": {},
+        "responsive": {}
+      }
+    },
+    "tabletDrag": {
+      "diag": {
+        "x": 736,
+        "y": 86,
+        "rx": 324,
+        "hitTag": "svg",
+        "hitClass": "[object SVGAnimatedString]",
+        "hitPath": "svg<BUTTON<DIV<DIV<DIV",
+        "midTransform": null,
+        "finalTransform": null,
+        "dragEvents": 0
+      },
+      "xBefore": 324,
+      "xAfter": 324,
+      "node": {
+        "styles": {},
+        "responsive": {}
+      }
+    },
+    "xMobile": 324,
+    "xBackDesktop": 471,
+    "afterReload": {
+      "styles": {},
+      "responsive": {}
+    },
+    "jsErrors": []
+  }
+}

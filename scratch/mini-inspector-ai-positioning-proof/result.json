@@ -1,0 +1,119 @@
+{
+  "pass": 14,
+  "fail": 0,
+  "total": 14,
+  "results": [
+    {
+      "id": "S01",
+      "action": "Open prod URL",
+      "expected": "reachable",
+      "actual": "https://www.solospot.pl",
+      "status": "PASS",
+      "evidence": "https://www.solospot.pl"
+    },
+    {
+      "id": "S02",
+      "action": "Builder workspace present",
+      "expected": "[data-builder-workspace]",
+      "actual": "present",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S03",
+      "action": "Select heading",
+      "expected": "click succeeded",
+      "actual": "section:sec-hero-init",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S04",
+      "action": "Open Mini Inspector AI for heading",
+      "expected": "window present",
+      "actual": "open",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S05",
+      "action": "AI anchored next to selected heading (not stale bottom-right)",
+      "expected": "adjacent + not viewport corner",
+      "actual": "placement=below adjacent=true staleCorner=false gaps={\"leftOfNode\":-360,\"rightOfNode\":-756.45,\"aboveNode\":-680.11,\"belowNode\":11.990000000000009}",
+      "status": "PASS",
+      "evidence": "node=sec-hero-init ai={\"left\":437.77,\"top\":431.61,\"right\":797.77,\"bottom\":736.11,\"width\":360,\"height\":304.5,\"cx\":617.77,\"cy\":583.86}"
+    },
+    {
+      "id": "S06",
+      "action": "AI window fully inside builder workspace (16px margin)",
+      "expected": "inside workspace",
+      "actual": "inside",
+      "status": "PASS",
+      "evidence": "ws={\"left\":324,\"top\":56,\"right\":1308,\"bottom\":960,\"width\":984,\"height\":904,\"cx\":816,\"cy\":508} ai={\"left\":437.77,\"top\":431.61,\"right\":797.77,\"bottom\":736.11,\"width\":360,\"height\":304.5,\"cx\":617.77,\"cy\":583.86}"
+    },
+    {
+      "id": "S07",
+      "action": "AI uses anchored left/top style (not bottom/right corner classes)",
+      "expected": "left+top style set, placement attr present",
+      "actual": "left=437.775px top=431.619px right=null bottom=null placement=below",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S08",
+      "action": "AI follows after workspace/page scroll",
+      "expected": "still adjacent to node (and tracks if node moved)",
+      "actual": "placement=below adjacent=true nodeMoved=true aiTop 431.61→335.61",
+      "status": "PASS",
+      "evidence": "node={\"left\":437.77,\"top\":-40,\"right\":1194.22,\"bottom\":323.62,\"width\":756.45,\"height\":363.62,\"cx\":816,\"cy\":141.81} ai={\"left\":437.77,\"top\":335.61,\"right\":797.77,\"bottom\":640.11,\"width\":360,\"height\":304.5,\"cx\":617.77,\"cy\":487.86}"
+    },
+    {
+      "id": "S09",
+      "action": "AI follows after canvas zoom out",
+      "expected": "still adjacent to node",
+      "actual": "placement=below adjacent=true via=button",
+      "status": "PASS",
+      "evidence": "node={\"left\":447,\"top\":-40,\"right\":1185,\"bottom\":314.75,\"width\":738,\"height\":354.75,\"cx\":816,\"cy\":137.38} ai={\"left\":447,\"top\":326.75,\"right\":807,\"bottom\":631.25,\"width\":360,\"height\":304.5,\"cx\":627,\"cy\":479}"
+    },
+    {
+      "id": "S10",
+      "action": "AI follows after viewport resize 1280x720",
+      "expected": "adjacent + inside workspace",
+      "actual": "adjacent=true inside=true placement=below reason= stillOpen=true",
+      "status": "PASS",
+      "evidence": "ws={\"left\":324,\"top\":56,\"right\":988,\"bottom\":680,\"width\":664,\"height\":624,\"cx\":656,\"cy\":368} node={\"left\":483.77,\"top\":-40,\"right\":828.22,\"bottom\":205.37,\"width\":344.45,\"height\":245.37,\"cx\":656,\"cy\":82.68} ai={\"left\":483.77,\"top\":217.36,\"right\":843.77,\"bottom\":521.86,\"width\":360,\"height\":304.5,\"cx\":663.77,\"cy\":369.61}"
+    },
+    {
+      "id": "S11",
+      "action": "Selection change re-anchors AI to new node",
+      "expected": "AI target matches selected node + adjacent",
+      "actual": "target=sec-hero-init node=sec-hero-init match=true adjacent=true placement=below opened=true",
+      "status": "PASS",
+      "evidence": "ai={\"left\":437.77,\"top\":335.61,\"right\":797.77,\"bottom\":640.11,\"width\":360,\"height\":304.5,\"cx\":617.77,\"cy\":487.86} node={\"left\":437.77,\"top\":-40,\"right\":1194.22,\"bottom\":323.62,\"width\":756.45,\"height\":363.62,\"cx\":816,\"cy\":141.81}"
+    },
+    {
+      "id": "S12",
+      "action": "Large section/hero node: AI still anchored (not corner)",
+      "expected": "adjacent + not stale corner",
+      "actual": "placement=below adjacent=true staleCorner=false opened=true",
+      "status": "PASS",
+      "evidence": "node={\"left\":437.77,\"top\":-40,\"right\":1194.22,\"bottom\":323.62,\"width\":756.45,\"height\":363.62,\"cx\":816,\"cy\":141.81} ai={\"left\":437.77,\"top\":335.61,\"right\":797.77,\"bottom\":640.11,\"width\":360,\"height\":304.5,\"cx\":617.77,\"cy\":487.86}"
+    },
+    {
+      "id": "S13",
+      "action": "Regression: target lock strip present",
+      "expected": "TARGET: <type> <id>",
+      "actual": "TARGET:hero sec-hero-init (page page-home)",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S14",
+      "action": "No console errors during positioning E2E",
+      "expected": "0 errors",
+      "actual": "0 errors",
+      "status": "PASS",
+      "evidence": ""
+    }
+  ]
+}

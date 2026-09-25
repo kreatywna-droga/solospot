@@ -1,0 +1,1029 @@
+{
+  "runtimeAI": [
+    {
+      "prompt": "Dodaj sekcję testimonials.",
+      "modelUsed": "nex-agi/nex-n2.5-mini:free",
+      "orchestratorStatus": "SUCCESS",
+      "toolsActuallyCalled": [
+        {
+          "name": "insert_section_from_library",
+          "arguments": {
+            "atIndex": 2,
+            "label": "Testimonials",
+            "pageId": "page-home",
+            "sectionTemplateId": "testimonials-grid-4"
+          }
+        }
+      ],
+      "messagePreview": "Zastosowałem wskazaną zmianę na stronie."
+    },
+    {
+      "prompt": "Dodaj experience mesh gradient na Hero.",
+      "modelUsed": "nex-agi/nex-n2.5-mini:free",
+      "orchestratorStatus": "SUCCESS",
+      "toolsActuallyCalled": [
+        {
+          "name": "insert_experience_from_library",
+          "arguments": {
+            "experienceId": "hero-gradient-mesh"
+          }
+        }
+      ],
+      "messagePreview": "Znaleziono dokładne dopasowanie: **Gradient Mesh Hero**. Wstawiam ten efekt w aktualnie zaznaczonym Hero."
+    },
+    {
+      "prompt": "Zmień tytuł istniejącego Hero na MARCIN BERNATOWICZ.",
+      "modelUsed": "nex-agi/nex-n2.5-mini:free",
+      "orchestratorStatus": "SUCCESS",
+      "toolsActuallyCalled": [
+        {
+          "name": "update_node_props",
+          "arguments": {
+            "pageId": "page-home",
+            "sectionId": "sec_hero",
+            "props": {
+              "title": "MARCIN BERNATOWICZ"
+            }
+          }
+        }
+      ],
+      "messagePreview": "Znalazłem istniejący Hero i zmodyfikuję jego istniejący tytuł, zachowując pozostałe właściwości bez zmian."
+    },
+    {
+      "prompt": "Zmień kolor tła istniejącego Hero na czerwony.",
+      "modelUsed": "nex-agi/nex-n2.5-mini:free",
+      "orchestratorStatus": "SUCCESS",
+      "toolsActuallyCalled": [
+        {
+          "name": "update_node_props",
+          "arguments": {
+            "pageId": "page-home",
+            "props": {
+              "backgroundColor": "#FF0000"
+            },
+            "sectionId": "sec_hero"
+          }
+        }
+      ],
+      "messagePreview": "Zaktualizuję właściwość `backgroundColor` sekcji Hero na `#FF0000`."
+    }
+  ],
+  "chains": [
+    {
+      "label": "I1_INSERT_SECTION",
+      "prompt": "Dodaj sekcję testimonials.",
+      "intent": "INSERT_SECTION",
+      "tools": [
+        "search_sections",
+        "insert_section_from_library"
+      ],
+      "commands": [
+        {
+          "type": "ADD_SECTION",
+          "pageId": "page-home",
+          "sectionType": "section",
+          "defaultProps": {},
+          "label": "Testimonials: 3 Star Cards",
+          "sectionId": "section_muecjz1l_avu1z",
+          "children": [
+            {
+              "id": "container_muecjz1m_mfj8h",
+              "type": "container",
+              "label": "Header",
+              "parentId": null,
+              "props": {},
+              "styles": {
+                "display": "flex",
+                "flexDirection": "column",
+                "alignItems": "center",
+                "gap": "12px",
+                "maxWidth": "600px",
+                "margin": {
+                  "top": "0px",
+                  "right": "auto",
+                  "bottom": "48px",
+                  "left": "auto"
+                }
+              },
+              "children": [
+                {
+                  "id": "text_muecjz1m_jdffk",
+                  "type": "text",
+                  "label": "Eyebrow",
+                  "parentId": null,
+                  "props": {
+                    "text": "TESTIMONIALS"
+                  },
+                  "styles": {
+                    "fontSize": "12px",
+                    "fontWeight": "700",
+                    "color": "#7c3aed",
+                    "letterSpacing": "2px"
+                  },
+                  "children": [],
+                  "visible": true,
+                  "hidden": false,
+                  "locked": false,
+                  "order": 0
+                },
+                {
+                  "id": "heading_muecjz1m_2bdco",
+                  "type": "heading",
+                  "label": "Headline",
+                  "parentId": null,
+                  "props": {
+                    "text": "Loved by Teams Worldwide"
+                  },
+                  "styles": {
+                    "fontSize": "38px",
+                    "fontWeight": "800",
+                    "color": "#ffffff",
+                    "lineHeight": "1.2"
+                  },
+                  "children": [],
+                  "visible": true,
+                  "hidden": false,
+                  "locked": false,
+                  "order": 0
+                },
+                {
+                  "id": "text_muecjz1m_sdu6p",
+                  "type": "text",
+                  "label": "Subtitle",
+                  "parentId": null,
+                  "props": {
+                    "text": "See why thousands of teams choose us to power their growth."
+                  },
+                  "styles": {
+                    "fontSize": "16px",
+                    "color": "#94a3b8"
+                  },
+                  "children": [],
+                  "visible": true,
+                  "hidden": false,
+                  "locked": false,
+                  "order": 0
+                }
+              ],
+              "visible": true,
+              "hidden": false,
+              "locked": false,
+              "order": 0
+            },
+            {
+              "id": "container_muecjz1l_pf38w",
+              "type": "container",
+              "label": "Cards Grid",
+              "parentId": null,
+              "props": {},
+              "styles": {
+                "display": "flex",
+                "flexDirection": "row",
+                "gap": "24px",
+                "maxWidth": "1200px",
+                "margin": {
+                  "top": "0px",
+                  "right": "auto",
+                  "bottom": "0px",
+                  "left": "auto"
+                }
+              },
+              "children": [
+                {
+                  "id": "container_muecjz1m_o81ns",
+                  "type": "container",
+                  "label": "Testimonial: Sarah Mitchell",
+                  "parentId": null,
+                  "props": {},
+                  "styles": {
+                    "width": "33.33%",
+                    "padding": {
+                      "top": "28px",
+                      "right": "24px",
+                      "bottom": "28px",
+                      "left": "24px"
+                    },
+                    "backgroundColor": "rgba(255,255,255,0.03)",
+                    "borderRadius": "16px",
+                    "borderWidth": "1px",
+                    "borderColor": "rgba(255,255,255,0.08)",
+                    "display": "flex",
+                    "flexDirection": "column",
+                    "gap": "16px",
+                    "textAlign": "left"
+                  },
+                  "children": [
+                    {
+                      "id": "text_muecjz1m_svns1",
+                      "type": "text",
+                      "label": "Stars",
+                      "parentId": null,
+                      "props": {
+                        "text": "★★★★★"
+                      },
+                      "styles": {
+                        "fontSize": "18px",
+                        "color": "#fbbf24"
+                      },
+                      "children": [],
+                      "visible": true,
+                      "hidden": false,
+                      "locked": false,
+                      "order": 0
+                    },
+                    {
+                      "id": "text_muecjz1m_kwruq",
+                      "type": "text",
+                      "label": "Quote",
+                      "parentId": null,
+                      "props": {
+                        "text": "\"This platform transformed our entire development workflow. We shipped 3x faster in the first quarter alone.\""
+                      },
+                      "styles": {
+                        "fontSize": "15px",
+                        "lineHeight": "1.6",
+                        "color": "#e2e8f0",
+                        "fontStyle": "italic"
+                      },
+                      "children": [],
+                      "visible": true,
+                      "hidden": false,
+                      "locked": false,
+                      "order": 0
+                    },
+                    {
+                      "id": "container_muecjz1m_2sizs",
+                      "type": "container",
+                      "label": "Author Row",
+                      "parentId": null,
+                      "props": {},
+                      "styles": {
+                        "display": "flex",
+                        "alignItems": "center",
+                        "gap": "12px",
+                        "marginTop": "8px"
+                      },
+                      "children": [
+                        {
+                          "id": "image_muecjz1m_j7xz8",
+                          "type": "image",
+                          "label": "Avatar",
+                          "parentId": null,
+                          "props": {
+                            "src": "https://i.pravatar.cc/80?img=1",
+                            "alt": "Sarah Mitchell"
+                          },
+                          "styles": {
+                            "width": "44px",
+                            "height": "44px",
+                            "borderRadius": "9999px"
+                          },
+                          "children": [],
+                          "visible": true,
+                          "hidden": false,
+                          "locked": false,
+                          "order": 0
+                        },
+                        {
+                          "id": "container_muecjz1m_1y22i",
+                          "type": "container",
+                          "label": "Author Info",
+                          "parentId": null,
+                          "props": {},
+                          "styles": {
+                            "display": "flex",
+                            "flexDirection": "column",
+                            "gap": "2px"
+                          },
+                          "children": [
+                            {
+                              "id": "text_muecjz1m_44ya1",
+                              "type": "text",
+                              "label": "Name",
+                              "parentId": null,
+                              "props": {
+                                "text": "Sarah Mitchell"
+                              },
+                              "styles": {
+                                "fontSize": "14px",
+                                "fontWeight": "700",
+                                "color": "#ffffff"
+                              },
+                              "children": [],
+                              "visible": true,
+                              "hidden": false,
+                              "locked": false,
+                              "order": 0
+                            },
+                            {
+                              "id": "text_muecjz1m_oizi1",
+                              "type": "text",
+                              "label": "Role",
+                              "parentId": null,
+                              "props": {
+                                "text": "CTO, Brightwave"
+                              },
+                              "styles": {
+                                "fontSize": "12px",
+                                "color": "#94a3b8"
+                              },
+                              "children": [],
+                              "visible": true,
+                              "hidden": false,
+                              "locked": false,
+                              "order": 0
+                            }
+                          ],
+                          "visible": true,
+                          "hidden": false,
+                          "locked": false,
+                          "order": 0
+                        }
+                      ],
+                      "visible": true,
+                      "hidden": false,
+                      "locked": false,
+                      "order": 0
+                    }
+                  ],
+                  "visible": true,
+                  "hidden": false,
+                  "locked": false,
+                  "order": 0
+                },
+                {
+                  "id": "container_muecjz1m_8lo5d",
+                  "type": "container",
+                  "label": "Testimonial: David Park",
+                  "parentId": null,
+                  "props": {},
+                  "styles": {
+                    "width": "33.33%",
+                    "padding": {
+                      "top": "28px",
+                      "right": "24px",
+                      "bottom": "28px",
+                      "left": "24px"
+                    },
+                    "backgroundColor": "rgba(255,255,255,0.03)",
+                    "borderRadius": "16px",
+                    "borderWidth": "1px",
+                    "borderColor": "rgba(255,255,255,0.08)",
+                    "display": "flex",
+                    "flexDirection": "column",
+                    "gap": "16px",
+                    "textAlign": "left"
+                  },
+                  "children": [
+                    {
+                      "id": "text_muecjz1m_69flg",
+                      "type": "text",
+                      "label": "Stars",
+                      "parentId": null,
+                      "props": {
+                        "text": "★★★★★"
+                      },
+                      "styles": {
+                        "fontSize": "18px",
+                        "color": "#fbbf24"
+                      },
+                      "children": [],
+                      "visible": true,
+                      "hidden": false,
+                      "locked": false,
+                      "order": 0
+                    },
+                    {
+                      "id": "text_muecjz1m_b74lx",
+                      "type": "text",
+                      "label": "Quote",
+                      "parentId": null,
+                      "props": {
+                        "text": "\"The best investment we made this year. Our team productivity increased by 280% after onboarding.\""
+                      },
+                      "styles": {
+                        "fontSize": "15px",
+                        "lineHeight": "1.6",
+                        "color": "#e2e8f0",
+                        "fontStyle": "italic"
+                      },
+                      "children": [],
+                      "visible": true,
+                      "hidden": false,
+                      "locked": false,
+                      "order": 0
+                    },
+                    {
+                      "id": "container_muecjz1m_2rpkm",
+                      "type": "container",
+                      "label": "Author Row",
+                      "parentId": null,
+                      "props": {},
+                      "styles": {
+                        "display": "flex",
+                        "alignItems": "center",
+                        "gap": "12px",
+                        "marginTop": "8px"
+                      },
+                      "children": [
+                        {
+                          "id": "image_muecjz1m_e4ee6",
+                          "type": "image",
+                          "label": "Avatar",
+                          "parentId": null,
+                          "props": {
+                            "src": "https://i.pravatar.cc/80?img=3",
+                            "alt": "David Park"
+                          },
+                          "styles": {
+                            "width": "44px",
+                            "height": "44px",
+                            "borderRadius": "9999px"
+                          },
+                          "children": [],
+                          "visible": true,
+                          "hidden": false,
+                          "locked": false,
+                          "order": 0
+                        },
+                        {
+                          "id": "container_muecjz1m_2gasc",
+                          "type": "container",
+                          "label": "Author Info",
+                          "parentId": null,
+                          "props": {},
+                          "styles": {
+                            "display": "flex",
+                            "flexDirection": "column",
+                            "gap": "2px"
+                          },
+                          "children": [
+                            {
+                              "id": "text_muecjz1m_9az7w",
+                              "type": "text",
+                              "label": "Name",
+                              "parentId": null,
+                              "props": {
+                                "text": "David Park"
+                              },
+                              "styles": {
+                                "fontSize": "14px",
+                                "fontWeight": "700",
+                                "color": "#ffffff"
+                              },
+                              "children": [],
+                              "visible": true,
+                              "hidden": false,
+                              "locked": false,
+                              "order": 0
+                            },
+                            {
+                              "id": "text_muecjz1m_l78we",
+                              "type": "text",
+                              "label": "Role",
+                              "parentId": null,
+                              "props": {
+                                "text": "Founder, Nexora"
+                              },
+                              "styles": {
+                                "fontSize": "12px",
+                                "color": "#94a3b8"
+                              },
+                              "children": [],
+                              "visible": true,
+                              "hidden": false,
+                              "locked": false,
+                              "order": 0
+                            }
+                          ],
+                          "visible": true,
+                          "hidden": false,
+                          "locked": false,
+                          "order": 0
+                        }
+                      ],
+                      "visible": true,
+                      "hidden": false,
+                      "locked": false,
+                      "order": 0
+                    }
+                  ],
+                  "visible": true,
+                  "hidden": false,
+                  "locked": false,
+                  "order": 0
+                },
+                {
+                  "id": "container_muecjz1m_0sg2y",
+                  "type": "container",
+                  "label": "Testimonial: Emily Rodriguez",
+                  "parentId": null,
+                  "props": {},
+                  "styles": {
+                    "width": "33.33%",
+                    "padding": {
+                      "top": "28px",
+                      "right": "24px",
+                      "bottom": "28px",
+                      "left": "24px"
+                    },
+                    "backgroundColor": "rgba(255,255,255,0.03)",
+                    "borderRadius": "16px",
+                    "borderWidth": "1px",
+                    "borderColor": "rgba(255,255,255,0.08)",
+                    "display": "flex",
+                    "flexDirection": "column",
+                    "gap": "16px",
+                    "textAlign": "left"
+                  },
+                  "children": [
+                    {
+                      "id": "text_muecjz1m_0g6jy",
+                      "type": "text",
+                      "label": "Stars",
+                      "parentId": null,
+                      "props": {
+                        "text": "★★★★★"
+                      },
+                      "styles": {
+                        "fontSize": "18px",
+                        "color": "#fbbf24"
+                      },
+                      "children": [],
+                      "visible": true,
+                      "hidden": false,
+                      "locked": false,
+                      "order": 0
+                    },
+                    {
+                      "id": "text_muecjz1m_lobsj",
+                      "type": "text",
+                      "label": "Quote",
+                      "parentId": null,
+                      "props": {
+                        "text": "\"Incredible reliability and speed. We haven't had a single deployment issue in eight months.\""
+                      },
+                      "styles": {
+                        "fontSize": "15px",
+                        "lineHeight": "1.6",
+                        "color": "#e2e8f0",
+                        "fontStyle": "italic"
+                      },
+                      "children": [],
+                      "visible": true,
+                      "hidden": false,
+                      "locked": false,
+                      "order": 0
+                    },
+                    {
+                      "id": "container_muecjz1m_ebtar",
+                      "type": "container",
+                      "label": "Author Row",
+                      "parentId": null,
+                      "props": {},
+                      "styles": {
+                        "display": "flex",
+                        "alignItems": "center",
+                        "gap": "12px",
+                        "marginTop": "8px"
+                      },
+                      "children": [
+                        {
+                          "id": "image_muecjz1m_hc588",
+                          "type": "image",
+                          "label": "Avatar",
+                          "parentId": null,
+                          "props": {
+                            "src": "https://i.pravatar.cc/80?img=5",
+                            "alt": "Emily Rodriguez"
+                          },
+                          "styles": {
+                            "width": "44px",
+                            "height": "44px",
+                            "borderRadius": "9999px"
+                          },
+                          "children": [],
+                          "visible": true,
+                          "hidden": false,
+                          "locked": false,
+                          "order": 0
+                        },
+                        {
+                          "id": "container_muecjz1m_ewo8k",
+                          "type": "container",
+                          "label": "Author Info",
+                          "parentId": null,
+                          "props": {},
+                          "styles": {
+                            "display": "flex",
+                            "flexDirection": "column",
+                            "gap": "2px"
+                          },
+                          "children": [
+                            {
+                              "id": "text_muecjz1m_wao5a",
+                              "type": "text",
+                              "label": "Name",
+                              "parentId": null,
+                              "props": {
+                                "text": "Emily Rodriguez"
+                              },
+                              "styles": {
+                                "fontSize": "14px",
+                                "fontWeight": "700",
+                                "color": "#ffffff"
+                              },
+                              "children": [],
+                              "visible": true,
+                              "hidden": false,
+                              "locked": false,
+                              "order": 0
+                            },
+                            {
+                              "id": "text_muecjz1m_kx1td",
+                              "type": "text",
+                              "label": "Role",
+                              "parentId": null,
+                              "props": {
+                                "text": "VP Engineering, Strata"
+                              },
+                              "styles": {
+                                "fontSize": "12px",
+                                "color": "#94a3b8"
+                              },
+                              "children": [],
+                              "visible": true,
+                              "hidden": false,
+                              "locked": false,
+                              "order": 0
+                            }
+                          ],
+                          "visible": true,
+                          "hidden": false,
+                          "locked": false,
+                          "order": 0
+                        }
+                      ],
+                      "visible": true,
+                      "hidden": false,
+                      "locked": false,
+                      "order": 0
+                    }
+                  ],
+                  "visible": true,
+                  "hidden": false,
+                  "locked": false,
+                  "order": 0
+                }
+              ],
+              "visible": true,
+              "hidden": false,
+              "locked": false,
+              "order": 0
+            }
+          ],
+          "styles": {
+            "padding": {
+              "top": "80px",
+              "right": "24px",
+              "bottom": "80px",
+              "left": "24px"
+            },
+            "backgroundColor": "#06060c",
+            "textAlign": "center"
+          }
+        }
+      ],
+      "before": {
+        "version": 1,
+        "sectionCount": 2,
+        "nodeCount": 3
+      },
+      "after": {
+        "version": 2,
+        "sectionCount": 3,
+        "nodeCount": 33
+      },
+      "outcome": {
+        "success": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "documentChanged": true,
+      "chainComplete": true,
+      "execResults": [
+        {
+          "tool": "search_sections",
+          "args": {
+            "query": "testimonials",
+            "limit": 5
+          },
+          "status": "EXECUTED",
+          "hasCommand": false,
+          "verificationPassed": true,
+          "message": "{\n  \"count\": 5,\n  \"sections\": [\n    {\n      \"id\": \"testimonials-cards\",\n      \"name\": \"Testimonials: 3 Star Cards\",\n      \"category\": \"testimonials\",\n      \"description\": \"Three testimonial cards with star ratings, author avatars, and attri"
+        },
+        {
+          "tool": "insert_section_from_library",
+          "args": {
+            "sectionTemplateId": "testimonials-cards",
+            "pageId": "page-home"
+          },
+          "status": "EXECUTED",
+          "hasCommand": true,
+          "verificationPassed": true,
+          "message": "Wstawiłem sekcję **Testimonials: 3 Star Cards** (testimonials) z biblioteki do strony."
+        }
+      ]
+    },
+    {
+      "label": "I2_INSERT_EXPERIENCE",
+      "prompt": "Dodaj experience mesh gradient na Hero.",
+      "intent": "INSERT_EXPERIENCE",
+      "tools": [
+        "search_experiences",
+        "insert_experience_from_library"
+      ],
+      "commands": [
+        {
+          "type": "UPDATE_PROPS",
+          "pageId": "page-home",
+          "sectionId": "sec_hero",
+          "props": {
+            "experienceConfig": {
+              "background": {
+                "type": "mesh-gradient",
+                "colors": [
+                  "#D9A86C",
+                  "#F2C27F",
+                  "#1A1813",
+                  "#080B10"
+                ]
+              },
+              "motion": {
+                "type": "float",
+                "speed": 0.85
+              }
+            },
+            "experienceId": "background-aurora-mesh",
+            "experienceName": "Aurora Borealis Mesh"
+          }
+        }
+      ],
+      "before": {
+        "version": 1,
+        "sectionCount": 2,
+        "nodeCount": 3
+      },
+      "after": {
+        "version": 2,
+        "sectionCount": 2,
+        "nodeCount": 3
+      },
+      "outcome": {
+        "success": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "documentChanged": true,
+      "chainComplete": true,
+      "execResults": [
+        {
+          "tool": "search_experiences",
+          "args": {
+            "query": "mesh gradient",
+            "limit": 5
+          },
+          "status": "EXECUTED",
+          "hasCommand": false,
+          "verificationPassed": true,
+          "message": "{\n  \"count\": 0,\n  \"experiences\": []\n}"
+        },
+        {
+          "tool": "insert_experience_from_library",
+          "args": {
+            "experienceId": "background-aurora-mesh",
+            "sectionId": "sec_hero",
+            "pageId": "page-home"
+          },
+          "status": "EXECUTED",
+          "hasCommand": true,
+          "verificationPassed": true,
+          "message": "Zastosowałem Experience **Aurora Borealis Mesh** (background) na sekcji `sec_hero`."
+        }
+      ]
+    },
+    {
+      "label": "I3_EDIT_NODE_TITLE",
+      "prompt": "Zmień tytuł istniejącego Hero na MARCIN BERNATOWICZ.",
+      "intent": "EDIT_NODE",
+      "tools": [
+        "resolve_target",
+        "update_node_props"
+      ],
+      "commands": [
+        {
+          "type": "UPDATE_PROPS",
+          "pageId": "page-home",
+          "sectionId": "sec_hero",
+          "props": {
+            "title": "MARCIN BERNATOWICZ"
+          }
+        }
+      ],
+      "before": {
+        "version": 1,
+        "sectionCount": 2,
+        "nodeCount": 3
+      },
+      "after": {
+        "version": 2,
+        "sectionCount": 2,
+        "nodeCount": 3
+      },
+      "outcome": {
+        "success": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "documentChanged": true,
+      "chainComplete": true,
+      "execResults": [
+        {
+          "tool": "resolve_target",
+          "args": {
+            "prompt": "hero"
+          },
+          "status": "EXECUTED",
+          "hasCommand": false,
+          "verificationPassed": true,
+          "message": "{\n  \"nodeId\": \"sec_hero\",\n  \"nodeType\": \"hero\",\n  \"nodeLabel\": \"Hero\",\n  \"sectionId\": \"sec_hero\",\n  \"sectionLabel\": \"Hero\",\n  \"confidence\": 0.8,\n  \"resolutionMethod\": \"direct-name-match\"\n}"
+        },
+        {
+          "tool": "update_node_props",
+          "args": {
+            "pageId": "page-home",
+            "sectionId": "sec_hero",
+            "props": {
+              "title": "MARCIN BERNATOWICZ"
+            }
+          },
+          "status": "EXECUTED",
+          "hasCommand": true,
+          "verificationPassed": true,
+          "message": "Zmieniłem nagłówek na „MARCIN BERNATOWICZ”."
+        }
+      ]
+    },
+    {
+      "label": "I4_EDIT_NODE_BG",
+      "prompt": "Zmień kolor tła istniejącego Hero na czerwony.",
+      "intent": "EDIT_NODE",
+      "tools": [
+        "resolve_target",
+        "update_node_props"
+      ],
+      "commands": [
+        {
+          "type": "UPDATE_PROPS",
+          "pageId": "page-home",
+          "sectionId": "sec_hero",
+          "props": {
+            "backgroundColor": "#FF0000",
+            "background": "#FF0000"
+          }
+        }
+      ],
+      "before": {
+        "version": 1,
+        "sectionCount": 2,
+        "nodeCount": 3
+      },
+      "after": {
+        "version": 2,
+        "sectionCount": 2,
+        "nodeCount": 3
+      },
+      "outcome": {
+        "success": true,
+        "intent": "EXECUTE",
+        "executionStatus": "EXECUTED"
+      },
+      "documentChanged": true,
+      "chainComplete": true,
+      "execResults": [
+        {
+          "tool": "resolve_target",
+          "args": {
+            "prompt": "hero"
+          },
+          "status": "EXECUTED",
+          "hasCommand": false,
+          "verificationPassed": true,
+          "message": "{\n  \"nodeId\": \"sec_hero\",\n  \"nodeType\": \"hero\",\n  \"nodeLabel\": \"Hero\",\n  \"sectionId\": \"sec_hero\",\n  \"sectionLabel\": \"Hero\",\n  \"confidence\": 0.8,\n  \"resolutionMethod\": \"direct-name-match\"\n}"
+        },
+        {
+          "tool": "update_node_props",
+          "args": {
+            "pageId": "page-home",
+            "sectionId": "sec_hero",
+            "props": {
+              "backgroundColor": "#FF0000",
+              "background": "#FF0000"
+            }
+          },
+          "status": "EXECUTED",
+          "hasCommand": true,
+          "verificationPassed": true,
+          "message": "Zmieniłem kolor tła sekcji na #FF0000. Zmiana jest widoczna na Canvasie."
+        }
+      ]
+    }
+  ],
+  "injections": [
+    {
+      "case": "MISSING",
+      "status": "FAILED",
+      "hasCommand": false,
+      "threw": false,
+      "documentUnchanged": true,
+      "outcome": "CLARIFY",
+      "userMessage": "Próba wykonania insert_section_from_library nie powiodła się: wymaga parametru sectionTemplateId (ID szablonu z biblioteki). Nie wprowadzono zmian w BuilderDocument.",
+      "pass": true
+    },
+    {
+      "case": "EMPTY",
+      "status": "FAILED",
+      "hasCommand": false,
+      "threw": false,
+      "documentUnchanged": true,
+      "outcome": "CLARIFY",
+      "userMessage": "Próba wykonania insert_section_from_library nie powiodła się: wymaga parametru sectionTemplateId (ID szablonu z biblioteki). Nie wprowadzono zmian w BuilderDocument.",
+      "pass": true
+    },
+    {
+      "case": "NULL",
+      "status": "FAILED",
+      "hasCommand": false,
+      "threw": false,
+      "documentUnchanged": true,
+      "outcome": "CLARIFY",
+      "userMessage": "Próba wykonania insert_section_from_library nie powiodła się: wymaga parametru sectionTemplateId (ID szablonu z biblioteki). Nie wprowadzono zmian w BuilderDocument.",
+      "pass": true
+    },
+    {
+      "case": "UNDEFINED",
+      "status": "FAILED",
+      "hasCommand": false,
+      "threw": false,
+      "documentUnchanged": true,
+      "outcome": "CLARIFY",
+      "userMessage": "Próba wykonania insert_section_from_library nie powiodła się: wymaga parametru sectionTemplateId (ID szablonu z biblioteki). Nie wprowadzono zmian w BuilderDocument.",
+      "pass": true
+    },
+    {
+      "case": "NUMBER",
+      "status": "FAILED",
+      "hasCommand": false,
+      "threw": false,
+      "documentUnchanged": true,
+      "outcome": "CLARIFY",
+      "userMessage": "Próba wykonania insert_section_from_library nie powiodła się: wymaga parametru sectionTemplateId jako string (ID z search_sections). Nieprawidłowy typ argumentu. Nie wprowadzono zmian w BuilderDocument.",
+      "pass": true
+    },
+    {
+      "case": "OBJECT",
+      "status": "FAILED",
+      "hasCommand": false,
+      "threw": false,
+      "documentUnchanged": true,
+      "outcome": "CLARIFY",
+      "userMessage": "Próba wykonania insert_section_from_library nie powiodła się: wymaga parametru sectionTemplateId jako string (ID z search_sections). Nieprawidłowy typ argumentu. Nie wprowadzono zmian w BuilderDocument.",
+      "pass": true
+    },
+    {
+      "case": "UNKNOWN",
+      "status": "FAILED",
+      "hasCommand": false,
+      "threw": false,
+      "documentUnchanged": true,
+      "outcome": "CLARIFY",
+      "userMessage": "Próba wykonania insert_section_from_library nie powiodła się: Nie znaleziono szablonu sekcji o ID \"nope-xyz\" w bibliotece. Użyj search_sections aby znaleźć dostępne szablony. Nie wprowadzono zmian w BuilderDocument.",
+      "pass": true
+    },
+    {
+      "case": "WHITESPACE",
+      "status": "FAILED",
+      "hasCommand": false,
+      "threw": false,
+      "documentUnchanged": true,
+      "outcome": "CLARIFY",
+      "userMessage": "Próba wykonania insert_section_from_library nie powiodła się: wymaga parametru sectionTemplateId (ID szablonu z biblioteki). Nie wprowadzono zmian w BuilderDocument.",
+      "pass": true
+    }
+  ],
+  "validOk": true,
+  "failMsg": "Próba wykonania insert_section_from_library nie powiodła się: wymaga parametru sectionTemplateId (ID szablonu z biblioteki). Nie wprowadzono zmian w BuilderDocument.",
+  "msgPass": true,
+  "verdict": true
+}

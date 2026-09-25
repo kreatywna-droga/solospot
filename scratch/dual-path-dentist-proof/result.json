@@ -1,0 +1,109 @@
+{
+  "baseUrl": "https://www.solospot.pl",
+  "pass": 11,
+  "fail": 0,
+  "phase": "complete",
+  "beforeCount": 1,
+  "afterCount": 5,
+  "results": [
+    {
+      "id": "A1",
+      "action": "AI workspace open",
+      "expected": "SOLOSPOT AI",
+      "actual": "found",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "A2",
+      "action": "Canvas sections BEFORE",
+      "expected": "baseline captured",
+      "actual": "1",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "A3",
+      "action": "Generation prompt sent",
+      "expected": "dentist prompt",
+      "actual": "sent",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "B1",
+      "action": "Generation phase",
+      "expected": "complete|error with reason",
+      "actual": "complete",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "B2",
+      "action": "Plan/execution UI evidence",
+      "expected": "plan or ops visible",
+      "actual": "visible",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "C1",
+      "action": "Canvas mutation",
+      "expected": "after > before (1)",
+      "actual": "after=5",
+      "status": "PASS",
+      "evidence": "before=1 after=5"
+    },
+    {
+      "id": "C2",
+      "action": "Section text sample",
+      "expected": "real content on canvas",
+      "actual": "[\"Witamy na naszej stronie Poznaj naszą ofertę Dowiedz się wię\",\"Nasza oferta Wysoka jakość Starannie wybrane produkty od spr\",\"Nieznana sekcja: cta\",\"SoloSpot Visual Builder © 2026 SoloSpot Visual Builder. Wsze\",\"SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń\"]",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "D1",
+      "action": "No batch_execute in client request.tools",
+      "expected": "0 leaks",
+      "actual": "requests=0 leaks=0",
+      "status": "PASS",
+      "evidence": "[]"
+    },
+    {
+      "id": "D2",
+      "action": "API toolCalls free of batch_execute",
+      "expected": "no batch_execute",
+      "actual": "{\"status\":\"ERROR\",\"toolNames\":[],\"routerMode\":\"ORCHESTRATED_AUTO\",\"provider\":\"AgentOrchestrator\"}",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "D3",
+      "action": "CHAT path status",
+      "expected": "CHAT or PARTIAL (no fake SUCCESS mutation)",
+      "actual": "CHAT",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "E1",
+      "action": "Console errors",
+      "expected": "0 real errors",
+      "actual": "0",
+      "status": "PASS",
+      "evidence": ""
+    }
+  ],
+  "copilotRequests": [
+    {
+      "prompt": "Dodaj sekcję testimonials",
+      "routerMode": "AUTO"
+    },
+    {
+      "prompt": "Cześć, jak się masz?",
+      "routerMode": "AUTO"
+    }
+  ],
+  "timestamp": "2026-09-24T03:33:42.058Z"
+}

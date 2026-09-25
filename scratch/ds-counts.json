@@ -1,15 +1,15 @@
-fonts total: 97 unique: 97 dupes: []
-colors total: 78
+fonts total: 200 unique: 200 dupes: []
+colors total: 100
 industry total: 20
-stylePacks total: 10
+stylePacks total: 70
 typography total: 30
 buttons total: 13
 cards total: 20
 backgrounds total: 20
-fonts: len=97 unique=97 dupIds=[]
-colors: len=78 unique=78 dupIds=[]
+fonts: len=200 unique=200 dupIds=[]
+colors: len=100 unique=100 dupIds=[]
 industries: len=20 unique=20 dupIds=[]
-packs: len=10 unique=10 dupIds=[]
+packs: len=70 unique=70 dupIds=[]
 typo: len=30 unique=30 dupIds=[]
 buttons: len=13 unique=13 dupIds=[]
 cards: len=20 unique=20 dupIds=[]

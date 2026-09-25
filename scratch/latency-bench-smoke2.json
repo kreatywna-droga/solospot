@@ -1,0 +1,40 @@
+{
+  "tag": "smoke2",
+  "base": "http://localhost:3000",
+  "startedAt": "2026-09-25T04:26:00.219Z",
+  "finishedAt": "2026-09-25T04:27:08.735Z",
+  "results": [
+    {
+      "surface": "mini-inspector",
+      "key": "A",
+      "text": "zmień kolor na czerwony",
+      "rep": 1,
+      "ok": false,
+      "error": "no trace within timeout",
+      "before": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "after": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Inter, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "textAlign": "start",
+        "text": "SoloSpot Visual Builder v2.0 Biblioteka gotowych doświadczeń, sekcji i interakcji z podglądem na żywo Rozpocznij zakupy Łapka Zapisz Experience Dodaj sekcję",
+        "version": null
+      },
+      "trace": null,
+      "wallMs": 60651,
+      "context": {
+        "mainOpen": true,
+        "miniOpen": true
+      }
+    }
+  ]
+}

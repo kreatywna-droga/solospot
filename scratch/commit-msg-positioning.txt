@@ -1,0 +1,8 @@
+feat(builder): Mini Inspector AI contextual anchor — position window next to selected node via shared usePanelPosition
+
+- MiniInspectorAI: remove stale fixed bottom-6 right-6 resting place
+- Reuse computePanelPosition/usePanelPosition (RIGHT/LEFT/ABOVE clamp, workspace bounds)
+- Live DOM measure of [data-node-id]/[data-section-id] + elementRect fallback
+- Follow scroll/zoom/resize/selection-change while open (data-ai-placement proof attr)
+- Wire elementRect from SelectionOverlay → QuickToolbar and ContextualSettingsPanel
+- Tests: anchor/collision edge cases (panelWidth 360), source purity (no second geometry system)

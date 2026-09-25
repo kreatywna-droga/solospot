@@ -1,0 +1,288 @@
+{
+  "baseUrl": "https://www.solospot.pl",
+  "results": [
+    {
+      "id": "S01",
+      "action": "Open prod URL",
+      "expected": "reachable",
+      "actual": "https://www.solospot.pl",
+      "status": "PASS",
+      "evidence": "https://www.solospot.pl"
+    },
+    {
+      "id": "S02",
+      "action": "Builder shell loaded",
+      "expected": "canvas present",
+      "actual": "checked",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S03",
+      "action": "Open Styl tab → Design System catalog",
+      "expected": "ds-catalog-root present",
+      "actual": "present",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S04",
+      "action": "Style Packs listed",
+      "expected": "> 0 catalog items",
+      "actual": "10",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S05",
+      "action": "Search \"dental\"",
+      "expected": "> 0 results",
+      "actual": "3",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S06",
+      "action": "Industry filter visible after toggle",
+      "expected": "ds-filter-industry present",
+      "actual": "present",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S07",
+      "action": "Industry filter = dental applied",
+      "expected": "> 0 items",
+      "actual": "3",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S08",
+      "action": "Mood filter = bold",
+      "expected": ">= 0 items",
+      "actual": "0",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S09",
+      "action": "Filters reset → full list restored",
+      "expected": "> 0 items",
+      "actual": "3",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S10",
+      "action": "Fonts category lists items",
+      "expected": "> 0",
+      "actual": "137",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S11",
+      "action": "Colors category lists items",
+      "expected": "> 0",
+      "actual": "118",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S12",
+      "action": "Typography category lists items",
+      "expected": "> 0",
+      "actual": "70",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S13",
+      "action": "Industry presets category lists items",
+      "expected": "> 0",
+      "actual": "60",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S14",
+      "action": "Buttons category lists items",
+      "expected": "> 0",
+      "actual": "53",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S15",
+      "action": "Cards category lists items",
+      "expected": "> 0",
+      "actual": "60",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S16",
+      "action": "Backgrounds category lists items",
+      "expected": "> 0",
+      "actual": "60",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S17",
+      "action": "Style Packs + dental query after category hops",
+      "expected": "> 0",
+      "actual": "43",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S18",
+      "action": "Preview modal opens",
+      "expected": "ds-preview-modal present",
+      "actual": "present",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S19",
+      "action": "Preview closed without mutation",
+      "expected": "modal closed",
+      "actual": "closed",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S20",
+      "action": "Apply style pack → theme mutated (ZASTOSOWANY badge)",
+      "expected": "badge present",
+      "actual": "badge",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S21",
+      "action": "Undo after apply (Ctrl+Z)",
+      "expected": "history undo dispatched",
+      "actual": "sent",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S22",
+      "action": "Redo after undo (Ctrl+Y)",
+      "expected": "history redo dispatched",
+      "actual": "sent",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S23",
+      "action": "AI workspace open",
+      "expected": "SOLOSPOT AI",
+      "actual": "found",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S24",
+      "action": "HACP prompt 1 sent (site build)",
+      "expected": "premium dental clinic site",
+      "actual": "Zbuduj premium stronę dla kliniki dentystycznej.",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S25",
+      "action": "Prompt 1 produced site mutation",
+      "expected": "sections grew",
+      "actual": "before=1 after=8 complete=true",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S26",
+      "action": "HACP prompt 2 sent (premium dental style)",
+      "expected": "style applied or honest tool use",
+      "actual": "Nadaj tej stronie styl premium dental.",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S27",
+      "action": "Prompt 2 completed (style response)",
+      "expected": "style/theme response or mutation",
+      "actual": "response-seen",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S28",
+      "action": "HACP prompt 3 sent (Luxury Dental switch)",
+      "expected": "style switch",
+      "actual": "Zmień styl strony na Luxury Dental.",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S29",
+      "action": "Prompt 3 completed (style switch)",
+      "expected": "switch response or mutation",
+      "actual": "response-seen",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S30",
+      "action": "Catalog still available after HACP",
+      "expected": "ds-catalog-root",
+      "actual": "present",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S31",
+      "action": "Post-HACP search \"luxury\"",
+      "expected": "> 0 results",
+      "actual": "3",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S32",
+      "action": "UI step count",
+      "expected": ">= 31 steps",
+      "actual": "31",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "id": "S33",
+      "action": "New console errors = 0",
+      "expected": "0",
+      "actual": "0",
+      "status": "PASS",
+      "evidence": ""
+    }
+  ],
+  "evidence": {
+    "baseUrl": "https://www.solospot.pl",
+    "uiSteps": 31,
+    "consoleErrors": [],
+    "sections": {
+      "beforeSections": 1,
+      "afterSections1": 8
+    },
+    "prompts": [
+      "Zbuduj premium stronę dla kliniki dentystycznej.",
+      "Nadaj tej stronie styl premium dental.",
+      "Zmień styl strony na Luxury Dental."
+    ],
+    "result": {
+      "pass": 33,
+      "fail": 0,
+      "warn": 0
+    }
+  }
+}

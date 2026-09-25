@@ -1,0 +1,110 @@
+[
+  {
+    "kind": "PLACEHOLDER(empty)",
+    "computed": {
+      "paddingTop": "8px",
+      "paddingRight": "4px",
+      "paddingBottom": "28px",
+      "paddingLeft": "8px",
+      "lineHeight": "19.5px",
+      "fontSize": "12px",
+      "height": "94.5px",
+      "minHeight": "60px",
+      "maxHeight": "130px",
+      "display": "block",
+      "verticalAlign": "baseline",
+      "alignItems": "normal",
+      "justifyContent": "normal",
+      "transform": "none",
+      "position": "static",
+      "boxSizing": "border-box",
+      "overflowY": "auto",
+      "whiteSpace": "pre-wrap",
+      "textAlign": "start",
+      "borderTop": "0px",
+      "borderBottom": "0px"
+    },
+    "rect": {
+      "x": 89,
+      "y": 89,
+      "w": 298,
+      "h": 94.5
+    },
+    "scrollHeight": 95,
+    "clientHeight": 95,
+    "parentAlignItems": "flex-start",
+    "parentJustify": "normal"
+  },
+  {
+    "kind": "SINGLE_LINE",
+    "computed": {
+      "paddingTop": "8px",
+      "paddingRight": "4px",
+      "paddingBottom": "28px",
+      "paddingLeft": "8px",
+      "lineHeight": "19.5px",
+      "fontSize": "12px",
+      "height": "94.5px",
+      "minHeight": "60px",
+      "maxHeight": "130px",
+      "display": "block",
+      "verticalAlign": "baseline",
+      "alignItems": "normal",
+      "justifyContent": "normal",
+      "transform": "none",
+      "position": "static",
+      "boxSizing": "border-box",
+      "overflowY": "auto",
+      "whiteSpace": "pre-wrap",
+      "textAlign": "start",
+      "borderTop": "0px",
+      "borderBottom": "0px"
+    },
+    "rect": {
+      "x": 89,
+      "y": 89,
+      "w": 298,
+      "h": 94.5
+    },
+    "scrollHeight": 95,
+    "clientHeight": 95,
+    "parentAlignItems": "flex-start",
+    "parentJustify": "normal"
+  },
+  {
+    "kind": "MULTILINE",
+    "computed": {
+      "paddingTop": "8px",
+      "paddingRight": "4px",
+      "paddingBottom": "28px",
+      "paddingLeft": "8px",
+      "lineHeight": "19.5px",
+      "fontSize": "12px",
+      "height": "94.5px",
+      "minHeight": "60px",
+      "maxHeight": "130px",
+      "display": "block",
+      "verticalAlign": "baseline",
+      "alignItems": "normal",
+      "justifyContent": "normal",
+      "transform": "none",
+      "position": "static",
+      "boxSizing": "border-box",
+      "overflowY": "auto",
+      "whiteSpace": "pre-wrap",
+      "textAlign": "start",
+      "borderTop": "0px",
+      "borderBottom": "0px"
+    },
+    "rect": {
+      "x": 89,
+      "y": 89,
+      "w": 298,
+      "h": 94.5
+    },
+    "scrollHeight": 95,
+    "clientHeight": 95,
+    "parentAlignItems": "flex-start",
+    "parentJustify": "normal"
+  }
+]

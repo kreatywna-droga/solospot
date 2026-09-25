@@ -83,6 +83,8 @@ export type BuilderCommandType =
   | 'MARK_PUBLISHED'
   // Canvas (non-mutating document, just canvas state)
   | 'CANVAS'
+  // Batch processing
+  | 'BATCH_EXECUTE'
   // History
   | 'UNDO'
   | 'REDO';
@@ -293,6 +295,10 @@ export type BuilderCommand =
       readonly type: 'CANVAS';
       readonly action: CanvasAction;
     }
+  | {
+      readonly type: 'BATCH_EXECUTE';
+      readonly commands: BuilderCommand[];
+    }
   | { readonly type: 'UNDO' }
   | { readonly type: 'REDO' };
 
@@ -335,6 +341,7 @@ export function commandLabel(cmd: BuilderCommand): string {
     case 'UPDATE_DESIGN_TOKENS': return `Update design tokens`;
     case 'MARK_PUBLISHED':    return `Mark as published`;
     case 'CANVAS':            return `Canvas: ${cmd.action.type}`;
+    case 'BATCH_EXECUTE':     return `Batch update (${cmd.commands.length} actions)`;
     case 'UNDO':              return `Undo`;
     case 'REDO':              return `Redo`;
   }
@@ -726,6 +733,14 @@ export function applyCommandToDocument(
 
     case 'MARK_PUBLISHED': {
       return { ...doc, isDirty: false, version: doc.version };
+    }
+
+    case 'BATCH_EXECUTE': {
+      let currentDoc = doc;
+      for (const c of command.commands) {
+        currentDoc = applyCommandToDocument(currentDoc, c);
+      }
+      return currentDoc;
     }
 
     // These are handled by BuilderReducer, not here:

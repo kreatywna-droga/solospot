@@ -1,0 +1,45 @@
+{
+  "base": "https://www.solospot.pl",
+  "picked": "Space Grotesk",
+  "afterApply": {
+    "doc": {
+      "themeFont": "Space Grotesk",
+      "nodeFonts": {}
+    },
+    "canvas": {
+      "section": "\"Space Grotesk\"",
+      "headline": "Inter, \"Segoe UI\", Arial, sans-serif"
+    }
+  },
+  "afterUndo": {
+    "doc": {
+      "themeFont": "Inter",
+      "nodeFonts": {}
+    },
+    "canvas": {
+      "section": "Inter",
+      "headline": "Inter, \"Segoe UI\", Arial, sans-serif"
+    }
+  },
+  "afterRedo": {
+    "doc": {
+      "themeFont": "Space Grotesk",
+      "nodeFonts": {}
+    },
+    "canvas": {
+      "section": "\"Space Grotesk\"",
+      "headline": "Inter, \"Segoe UI\", Arial, sans-serif"
+    }
+  },
+  "afterReload": {
+    "doc": {
+      "themeFont": "Space Grotesk",
+      "nodeFonts": {}
+    },
+    "canvas": {
+      "section": "\"Space Grotesk\"",
+      "headline": "\"Space Grotesk\""
+    }
+  },
+  "jsErrors": []
+}

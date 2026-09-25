@@ -1,0 +1,137 @@
+{
+  "base": "https://www.solospot.pl",
+  "cases": [
+    {
+      "prompt": "zmień nagłówek na TEST",
+      "node": "node-heading-a",
+      "wallMs": 1495,
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "notes": [],
+      "mutated": [
+        "node-heading-a"
+      ],
+      "panel": {
+        "status": "SUCCESS",
+        "message": "Polecenie wykonane pomyślnie"
+      },
+      "after": {
+        "type": "heading",
+        "styles": {
+          "color": "#ffffff"
+        },
+        "props": {
+          "text": "TEST"
+        }
+      }
+    },
+    {
+      "prompt": "zmień tytuł na Witaj świecie",
+      "node": "node-heading-a",
+      "wallMs": 1593,
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "notes": [],
+      "mutated": [
+        "node-heading-a"
+      ],
+      "panel": {
+        "status": "SUCCESS",
+        "message": "Polecenie wykonane pomyślnie"
+      },
+      "after": {
+        "type": "heading",
+        "styles": {
+          "color": "#ffffff"
+        },
+        "props": {
+          "text": "Witaj świecie"
+        }
+      }
+    },
+    {
+      "prompt": "zmień tło na niebieski",
+      "node": "sec-hero-init",
+      "wallMs": 1478,
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "notes": [],
+      "mutated": [
+        "sec-hero-init"
+      ],
+      "panel": {
+        "status": "SUCCESS",
+        "message": "Polecenie wykonane pomyślnie"
+      },
+      "after": {
+        "type": "hero",
+        "styles": {
+          "backgroundColor": "#0000FF"
+        },
+        "props": {
+          "title": "SoloSpot Visual Builder v2.0",
+          "subtitle": "Biblioteka",
+          "cta": "Rozpocznij zakupy"
+        }
+      }
+    },
+    {
+      "prompt": "ustaw tło sekcji na czerwony",
+      "node": "sec-hero-init",
+      "wallMs": 1568,
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "notes": [],
+      "mutated": [
+        "sec-hero-init"
+      ],
+      "panel": {
+        "status": "SUCCESS",
+        "message": "Polecenie wykonane pomyślnie"
+      },
+      "after": {
+        "type": "hero",
+        "styles": {
+          "backgroundColor": "#FF0000"
+        },
+        "props": {
+          "title": "SoloSpot Visual Builder v2.0",
+          "subtitle": "Biblioteka",
+          "cta": "Rozpocznij zakupy"
+        }
+      }
+    },
+    {
+      "prompt": "zmień tło na gradient",
+      "node": "sec-hero-init",
+      "wallMs": 26809,
+      "path": "AI_PATH",
+      "exec": "ERROR",
+      "intent": "CLARIFY",
+      "notes": [
+        "fast-path-rejected:UNRESOLVED",
+        "no-dispatch:ERROR"
+      ],
+      "mutated": [],
+      "panel": {
+        "status": "FAILED",
+        "message": "Nie udało się wykonać polecenia"
+      },
+      "after": {
+        "type": "hero",
+        "styles": {
+          "backgroundColor": "#FF0000"
+        },
+        "props": {
+          "title": "SoloSpot Visual Builder v2.0",
+          "subtitle": "Biblioteka",
+          "cta": "Rozpocznij zakupy"
+        }
+      }
+    }
+  ]
+}

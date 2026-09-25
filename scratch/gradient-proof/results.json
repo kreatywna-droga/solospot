@@ -1,0 +1,99 @@
+{
+  "base": "https://www.solospot.pl",
+  "email": "grad.bot+712219132@solospot-test.pl",
+  "results": [
+    {
+      "name": "register test account",
+      "ok": true
+    },
+    {
+      "name": "login via UI",
+      "ok": true
+    },
+    {
+      "name": "onboard tenant (starter)",
+      "ok": true
+    },
+    {
+      "name": "create test store",
+      "ok": true
+    },
+    {
+      "name": "open studio store",
+      "ok": true
+    },
+    {
+      "name": "add Section via library",
+      "ok": true
+    },
+    {
+      "name": "click section node",
+      "ok": true
+    },
+    {
+      "name": "activate Gradient background mode",
+      "ok": true
+    },
+    {
+      "name": "GradientControl rendered",
+      "ok": false
+    },
+    {
+      "name": "set gradient angle to 45deg",
+      "ok": false
+    },
+    {
+      "name": "add gradient stop",
+      "ok": false
+    },
+    {
+      "name": "canvas renders linear-gradient (not url-wrapped)",
+      "ok": false
+    },
+    {
+      "name": "gradient preview strip shows linear-gradient",
+      "ok": false
+    },
+    {
+      "name": "undo gradient change",
+      "ok": false
+    },
+    {
+      "name": "redo restores gradient change",
+      "ok": false
+    },
+    {
+      "name": "switch to Tablet",
+      "ok": true
+    },
+    {
+      "name": "set gradient angle 90 in Tablet",
+      "ok": false
+    },
+    {
+      "name": "switch back to Desktop",
+      "ok": true
+    },
+    {
+      "name": "responsive isolation: Desktop unchanged by Tablet edit",
+      "ok": true
+    },
+    {
+      "name": "save document",
+      "ok": true
+    },
+    {
+      "name": "reload → GradientControl restored",
+      "ok": false
+    },
+    {
+      "name": "reload → linear-gradient persisted on canvas",
+      "ok": false
+    },
+    {
+      "name": "API store config contains linear-gradient",
+      "ok": false
+    }
+  ],
+  "consoleErrors": []
+}

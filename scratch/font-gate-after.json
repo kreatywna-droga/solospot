@@ -1,0 +1,790 @@
+{
+  "base": "https://www.solospot.pl",
+  "steps": [
+    {
+      "id": "A",
+      "prompt": "zmień czcionkę na inną",
+      "wallMs": 32869,
+      "target": "sec-hero-init",
+      "path": "AI_PATH",
+      "exec": "CLARIFY",
+      "intent": "CHAT",
+      "notes": [
+        "fast-path-rejected:UNRESOLVED",
+        "no-dispatch:CLARIFY"
+      ],
+      "consoleTrace": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "TOOL_CALLS_RECEIVED",
+            "toolCallCount": 0,
+            "toolNames": [],
+            "toolArgs": [],
+            "aiMessage": "Masz hero z nagłówkiem \"SoloSpot Visual Builder v2.0\". Obecnie używa domyślnej czcionki systemowej. ",
+            "timestamp": "2026-09-25T14:16:12.776Z"
+          }
+        ]
+      ],
+      "api": [
+        {
+          "status": "PARTIAL",
+          "message": "Masz hero z nagłówkiem \"SoloSpot Visual Builder v2.0\". Obecnie używa domyślnej czcionki systemowej. Oto 3 świetne alternatywne kierunki:\n\n1. **Space Grotesk** ("
+        }
+      ],
+      "panelAfter": {
+        "target": "sec-hero-init",
+        "status": "CLARIFY",
+        "badge": "CLARIFY",
+        "message": "hero sec-hero-init (page page-home) | Masz hero z nagłówkiem \"SoloSpot Visual Builder v2.0\". Obecnie używa domyślnej czcionki systemowej. Oto 3 świetne alternatywne kierunki: 1. **Space Grotesk** (Tech Modern) – geometryczna, nowoczesna, idealna do produktów technologicznych i builderów 2. **Playfai",
+        "full": "AI\nHero Banner · sec-hero-init\nCLARIFY\nTARGET:\nhero sec-hero-init (page page-home)\nMasz hero z nagłówkiem \"SoloSpot Visual Builder v2.0\". Obecnie używa domyślnej czcionki systemowej. Oto 3 świetne alternatywne kierunki: 1. **Space Grotesk** (Tech Modern) – geometryczna, nowoczesna, idealna do produktów technologicznych i builderów 2. **Playfair Display** (Luxury Editorial) – elegancka serifowa, nadaje prestiż i wyróżnia markę 3. **Inter** (Modern Minimal) – czysta, neutralna, najwyższa czytelnoś"
+      },
+      "nodeBefore": {
+        "type": "hero",
+        "styles": {},
+        "props": {
+          "title": "SoloSpot Visual Builder v2.0",
+          "subtitle": "Biblioteka",
+          "cta": "Rozpocznij zakupy"
+        }
+      },
+      "nodeAfter": {
+        "type": "hero",
+        "styles": {
+          "translateX": "0px",
+          "translateY": "0px"
+        },
+        "props": {
+          "title": "SoloSpot Visual Builder v2.0",
+          "subtitle": "Biblioteka",
+          "cta": "Rozpocznij zakupy"
+        }
+      },
+      "docChanged": true,
+      "docTitleAfter": "SoloSpot Visual Builder v2.0",
+      "canvasBefore": {
+        "sectionFontFamily": "Inter",
+        "declaredFamily": "Inter",
+        "headlineFontFamily": "Inter",
+        "headlineText": "SoloSpot Visual Builder v2.0",
+        "headlineInline": "color: white; transition: none !important;",
+        "sectionBg": "rgba(0, 0, 0, 0)",
+        "textWidth": 366.9,
+        "faces": [],
+        "fontsCheck": true
+      },
+      "canvasAfter": {
+        "sectionFontFamily": "Inter",
+        "declaredFamily": "Inter",
+        "headlineFontFamily": "Inter",
+        "headlineText": "SoloSpot Visual Builder v2.0",
+        "headlineInline": "color: white; transition: none !important;",
+        "sectionBg": "rgba(0, 0, 0, 0)",
+        "textWidth": 366.9,
+        "faces": [],
+        "fontsCheck": true
+      },
+      "canvasFontChanged": false,
+      "canvasBgChanged": false,
+      "textWidthBefore": 366.9,
+      "textWidthAfter": 366.9,
+      "fontFaceLoaded": false
+    },
+    {
+      "id": "B",
+      "prompt": "zmień czcionkę na Playfair Display",
+      "wallMs": 1966,
+      "target": "sec-hero-init",
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "notes": [],
+      "consoleTrace": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "CHANGE_TYPOGRAPHY",
+            "domain": "TYPOGRAPHY",
+            "targetNodeId": "sec-hero-init",
+            "timestamp": "2026-09-25T14:16:25.306Z"
+          }
+        ]
+      ],
+      "api": [],
+      "panelAfter": {
+        "target": "sec-hero-init",
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "message": "hero sec-hero-init (page page-home) | Polecenie wykonane pomyślnie | Modernize | Change typography",
+        "full": "AI\nHero Banner · sec-hero-init\nSUCCESS\nTARGET:\nhero sec-hero-init (page page-home)\nPolecenie wykonane pomyślnie\nModernize\nChange typography\nChange background\nApply hero style"
+      },
+      "nodeBefore": {
+        "type": "hero",
+        "styles": {
+          "translateX": "0px",
+          "translateY": "0px"
+        },
+        "props": {
+          "title": "SoloSpot Visual Builder v2.0",
+          "subtitle": "Biblioteka",
+          "cta": "Rozpocznij zakupy"
+        }
+      },
+      "nodeAfter": {
+        "type": "hero",
+        "styles": {
+          "translateX": "0px",
+          "translateY": "0px",
+          "fontFamily": "Playfair Display"
+        },
+        "props": {
+          "title": "SoloSpot Visual Builder v2.0",
+          "subtitle": "Biblioteka",
+          "cta": "Rozpocznij zakupy"
+        }
+      },
+      "docChanged": true,
+      "docFontAfter": "Playfair Display",
+      "docTitleAfter": "SoloSpot Visual Builder v2.0",
+      "canvasBefore": {
+        "sectionFontFamily": "Inter",
+        "declaredFamily": "Inter",
+        "headlineFontFamily": "Inter",
+        "headlineText": "SoloSpot Visual Builder v2.0",
+        "headlineInline": "color: white; transition: none !important;",
+        "sectionBg": "rgba(0, 0, 0, 0)",
+        "textWidth": 366.9,
+        "faces": [],
+        "fontsCheck": true
+      },
+      "canvasAfter": {
+        "sectionFontFamily": "\"Playfair Display\"",
+        "declaredFamily": "Playfair Display",
+        "headlineFontFamily": "\"Playfair Display\"",
+        "headlineText": "SoloSpot Visual Builder v2.0",
+        "headlineInline": "color: white; transition: none !important;",
+        "sectionBg": "rgba(0, 0, 0, 0)",
+        "textWidth": 358.7,
+        "faces": [
+          "400:unloaded",
+          "400:unloaded",
+          "400:unloaded",
+          "400:loaded",
+          "500:unloaded",
+          "500:unloaded",
+          "500:unloaded",
+          "500:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "700:unloaded",
+          "700:unloaded",
+          "700:unloaded",
+          "700:loaded",
+          "800:unloaded",
+          "800:unloaded",
+          "800:unloaded",
+          "800:unloaded",
+          "900:unloaded",
+          "900:unloaded",
+          "900:unloaded",
+          "900:unloaded"
+        ],
+        "fontsCheck": true
+      },
+      "canvasFontChanged": true,
+      "canvasBgChanged": false,
+      "textWidthBefore": 366.9,
+      "textWidthAfter": 358.7,
+      "fontFaceLoaded": true
+    },
+    {
+      "id": "C",
+      "prompt": "zmień czcionkę na Inter",
+      "wallMs": 1795,
+      "target": "sec-hero-init",
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "notes": [],
+      "consoleTrace": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "CHANGE_TYPOGRAPHY",
+            "domain": "TYPOGRAPHY",
+            "targetNodeId": "sec-hero-init",
+            "timestamp": "2026-09-25T14:16:31.506Z"
+          }
+        ]
+      ],
+      "api": [],
+      "panelAfter": {
+        "target": "sec-hero-init",
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "message": "hero sec-hero-init (page page-home) | Polecenie wykonane pomyślnie | Modernize | Change typography",
+        "full": "AI\nHero Banner · sec-hero-init\nSUCCESS\nTARGET:\nhero sec-hero-init (page page-home)\nPolecenie wykonane pomyślnie\nModernize\nChange typography\nChange background\nApply hero style"
+      },
+      "nodeBefore": {
+        "type": "hero",
+        "styles": {
+          "translateX": "0px",
+          "translateY": "0px",
+          "fontFamily": "Playfair Display"
+        },
+        "props": {
+          "title": "SoloSpot Visual Builder v2.0",
+          "subtitle": "Biblioteka",
+          "cta": "Rozpocznij zakupy"
+        }
+      },
+      "nodeAfter": {
+        "type": "hero",
+        "styles": {
+          "translateX": "0px",
+          "translateY": "0px",
+          "fontFamily": "Inter"
+        },
+        "props": {
+          "title": "SoloSpot Visual Builder v2.0",
+          "subtitle": "Biblioteka",
+          "cta": "Rozpocznij zakupy"
+        }
+      },
+      "docChanged": true,
+      "docFontAfter": "Inter",
+      "docTitleAfter": "SoloSpot Visual Builder v2.0",
+      "canvasBefore": {
+        "sectionFontFamily": "\"Playfair Display\"",
+        "declaredFamily": "Playfair Display",
+        "headlineFontFamily": "\"Playfair Display\"",
+        "headlineText": "SoloSpot Visual Builder v2.0",
+        "headlineInline": "color: white; transition: none !important;",
+        "sectionBg": "rgba(0, 0, 0, 0)",
+        "textWidth": 358.7,
+        "faces": [
+          "400:unloaded",
+          "400:unloaded",
+          "400:unloaded",
+          "400:loaded",
+          "500:unloaded",
+          "500:unloaded",
+          "500:unloaded",
+          "500:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "700:unloaded",
+          "700:unloaded",
+          "700:unloaded",
+          "700:loaded",
+          "800:unloaded",
+          "800:unloaded",
+          "800:unloaded",
+          "800:unloaded",
+          "900:unloaded",
+          "900:unloaded",
+          "900:unloaded",
+          "900:unloaded"
+        ],
+        "fontsCheck": true
+      },
+      "canvasAfter": {
+        "sectionFontFamily": "Inter",
+        "declaredFamily": "Inter",
+        "headlineFontFamily": "Inter",
+        "headlineText": "SoloSpot Visual Builder v2.0",
+        "headlineInline": "color: white; transition: none !important;",
+        "sectionBg": "rgba(0, 0, 0, 0)",
+        "textWidth": 366.9,
+        "faces": [],
+        "fontsCheck": true
+      },
+      "canvasFontChanged": true,
+      "canvasBgChanged": false,
+      "textWidthBefore": 358.7,
+      "textWidthAfter": 366.9,
+      "fontFaceLoaded": false
+    },
+    {
+      "id": "D",
+      "prompt": "zmień czcionkę na Cormorant Garamond",
+      "wallMs": 2011,
+      "target": "sec-hero-init",
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "notes": [],
+      "consoleTrace": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "CHANGE_TYPOGRAPHY",
+            "domain": "TYPOGRAPHY",
+            "targetNodeId": "sec-hero-init",
+            "timestamp": "2026-09-25T14:16:42.576Z"
+          }
+        ]
+      ],
+      "api": [],
+      "panelAfter": {
+        "target": "sec-hero-init",
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "message": "hero sec-hero-init (page page-home) | Polecenie wykonane pomyślnie | Modernize | Change typography",
+        "full": "AI\nHero Banner · sec-hero-init\nSUCCESS\nTARGET:\nhero sec-hero-init (page page-home)\nPolecenie wykonane pomyślnie\nModernize\nChange typography\nChange background\nApply hero style"
+      },
+      "nodeBefore": {
+        "type": "hero",
+        "styles": {
+          "translateX": "0px",
+          "translateY": "0px",
+          "fontFamily": "Inter"
+        },
+        "props": {
+          "title": "SoloSpot Visual Builder v2.0",
+          "subtitle": "Biblioteka",
+          "cta": "Rozpocznij zakupy"
+        }
+      },
+      "nodeAfter": {
+        "type": "hero",
+        "styles": {
+          "translateX": "0px",
+          "translateY": "0px",
+          "fontFamily": "Cormorant Garamond"
+        },
+        "props": {
+          "title": "SoloSpot Visual Builder v2.0",
+          "subtitle": "Biblioteka",
+          "cta": "Rozpocznij zakupy"
+        }
+      },
+      "docChanged": true,
+      "docFontAfter": "Cormorant Garamond",
+      "docTitleAfter": "SoloSpot Visual Builder v2.0",
+      "canvasBefore": {
+        "sectionFontFamily": "Inter",
+        "declaredFamily": "Inter",
+        "headlineFontFamily": "Inter",
+        "headlineText": "SoloSpot Visual Builder v2.0",
+        "headlineInline": "color: white; transition: none !important;",
+        "sectionBg": "rgba(0, 0, 0, 0)",
+        "textWidth": 366.9,
+        "faces": [],
+        "fontsCheck": true
+      },
+      "canvasAfter": {
+        "sectionFontFamily": "\"Cormorant Garamond\"",
+        "declaredFamily": "Cormorant Garamond",
+        "headlineFontFamily": "\"Cormorant Garamond\"",
+        "headlineText": "SoloSpot Visual Builder v2.0",
+        "headlineInline": "color: white; transition: none !important;",
+        "sectionBg": "rgba(0, 0, 0, 0)",
+        "textWidth": 310.1,
+        "faces": [
+          "300:unloaded",
+          "300:unloaded",
+          "300:unloaded",
+          "300:unloaded",
+          "300:unloaded",
+          "400:unloaded",
+          "400:unloaded",
+          "400:unloaded",
+          "400:unloaded",
+          "400:loaded",
+          "500:unloaded",
+          "500:unloaded",
+          "500:unloaded",
+          "500:unloaded",
+          "500:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "700:unloaded",
+          "700:unloaded",
+          "700:unloaded",
+          "700:unloaded",
+          "700:loaded"
+        ],
+        "fontsCheck": true
+      },
+      "canvasFontChanged": true,
+      "canvasBgChanged": false,
+      "textWidthBefore": 366.9,
+      "textWidthAfter": 310.1,
+      "fontFaceLoaded": true
+    },
+    {
+      "id": "E",
+      "prompt": "zmień kolor na czerwony",
+      "wallMs": 1802,
+      "target": "sec-hero-init",
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "notes": [],
+      "consoleTrace": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "CHANGE_COLOR",
+            "domain": "COLOR",
+            "targetNodeId": "sec-hero-init",
+            "timestamp": "2026-09-25T14:16:48.799Z"
+          }
+        ]
+      ],
+      "api": [],
+      "panelAfter": {
+        "target": "sec-hero-init",
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "message": "hero sec-hero-init (page page-home) | Polecenie wykonane pomyślnie | Modernize | Change typography",
+        "full": "AI\nHero Banner · sec-hero-init\nSUCCESS\nTARGET:\nhero sec-hero-init (page page-home)\nPolecenie wykonane pomyślnie\nModernize\nChange typography\nChange background\nApply hero style"
+      },
+      "nodeBefore": {
+        "type": "hero",
+        "styles": {
+          "translateX": "0px",
+          "translateY": "0px",
+          "fontFamily": "Cormorant Garamond"
+        },
+        "props": {
+          "title": "SoloSpot Visual Builder v2.0",
+          "subtitle": "Biblioteka",
+          "cta": "Rozpocznij zakupy"
+        }
+      },
+      "nodeAfter": {
+        "type": "hero",
+        "styles": {
+          "translateX": "0px",
+          "translateY": "0px",
+          "fontFamily": "Cormorant Garamond",
+          "backgroundColor": "#FF0000"
+        },
+        "props": {
+          "title": "SoloSpot Visual Builder v2.0",
+          "subtitle": "Biblioteka",
+          "cta": "Rozpocznij zakupy"
+        }
+      },
+      "docChanged": true,
+      "docFontAfter": "Cormorant Garamond",
+      "docColorAfter": "#FF0000",
+      "docTitleAfter": "SoloSpot Visual Builder v2.0",
+      "canvasBefore": {
+        "sectionFontFamily": "\"Cormorant Garamond\"",
+        "declaredFamily": "Cormorant Garamond",
+        "headlineFontFamily": "\"Cormorant Garamond\"",
+        "headlineText": "SoloSpot Visual Builder v2.0",
+        "headlineInline": "color: white; transition: none !important;",
+        "sectionBg": "rgba(0, 0, 0, 0)",
+        "textWidth": 310.1,
+        "faces": [
+          "300:unloaded",
+          "300:unloaded",
+          "300:unloaded",
+          "300:unloaded",
+          "300:unloaded",
+          "400:unloaded",
+          "400:unloaded",
+          "400:unloaded",
+          "400:unloaded",
+          "400:loaded",
+          "500:unloaded",
+          "500:unloaded",
+          "500:unloaded",
+          "500:unloaded",
+          "500:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "700:unloaded",
+          "700:unloaded",
+          "700:unloaded",
+          "700:unloaded",
+          "700:loaded"
+        ],
+        "fontsCheck": true
+      },
+      "canvasAfter": {
+        "sectionFontFamily": "\"Cormorant Garamond\"",
+        "declaredFamily": "Cormorant Garamond",
+        "headlineFontFamily": "\"Cormorant Garamond\"",
+        "headlineText": "SoloSpot Visual Builder v2.0",
+        "headlineInline": "color: white; transition: none !important;",
+        "sectionBg": "rgb(255, 0, 0)",
+        "textWidth": 310.1,
+        "faces": [
+          "300:unloaded",
+          "300:unloaded",
+          "300:unloaded",
+          "300:unloaded",
+          "300:unloaded",
+          "400:unloaded",
+          "400:unloaded",
+          "400:unloaded",
+          "400:unloaded",
+          "400:loaded",
+          "500:unloaded",
+          "500:unloaded",
+          "500:unloaded",
+          "500:unloaded",
+          "500:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "700:unloaded",
+          "700:unloaded",
+          "700:unloaded",
+          "700:unloaded",
+          "700:loaded"
+        ],
+        "fontsCheck": true
+      },
+      "canvasFontChanged": false,
+      "canvasBgChanged": true,
+      "textWidthBefore": 310.1,
+      "textWidthAfter": 310.1,
+      "fontFaceLoaded": true
+    },
+    {
+      "id": "F",
+      "prompt": "zmień napis na MARCIN BERNATOWICZ",
+      "wallMs": 1941,
+      "target": "sec-hero-init",
+      "path": "FAST_PATH",
+      "exec": "EXECUTED",
+      "intent": "EXECUTE",
+      "notes": [],
+      "consoleTrace": [
+        [
+          "[HacpBridge] EXECUTION_TRACE:",
+          {
+            "phase": "FAST_PATH_EXECUTED",
+            "intent": "CHANGE_TEXT",
+            "domain": "TEXT",
+            "targetNodeId": "sec-hero-init",
+            "timestamp": "2026-09-25T14:16:53.609Z"
+          }
+        ]
+      ],
+      "api": [],
+      "panelAfter": {
+        "target": "sec-hero-init",
+        "status": "SUCCESS",
+        "badge": "SUCCESS",
+        "message": "hero sec-hero-init (page page-home) | Polecenie wykonane pomyślnie | Modernize | Change typography",
+        "full": "AI\nHero Banner · sec-hero-init\nSUCCESS\nTARGET:\nhero sec-hero-init (page page-home)\nPolecenie wykonane pomyślnie\nModernize\nChange typography\nChange background\nApply hero style"
+      },
+      "nodeBefore": {
+        "type": "hero",
+        "styles": {
+          "translateX": "0px",
+          "translateY": "0px",
+          "fontFamily": "Cormorant Garamond",
+          "backgroundColor": "#FF0000"
+        },
+        "props": {
+          "title": "SoloSpot Visual Builder v2.0",
+          "subtitle": "Biblioteka",
+          "cta": "Rozpocznij zakupy"
+        }
+      },
+      "nodeAfter": {
+        "type": "hero",
+        "styles": {
+          "translateX": "0px",
+          "translateY": "0px",
+          "fontFamily": "Cormorant Garamond",
+          "backgroundColor": "#FF0000"
+        },
+        "props": {
+          "title": "MARCIN BERNATOWICZ",
+          "subtitle": "Biblioteka",
+          "cta": "Rozpocznij zakupy"
+        }
+      },
+      "docChanged": true,
+      "docFontAfter": "Cormorant Garamond",
+      "docColorAfter": "#FF0000",
+      "docTitleAfter": "MARCIN BERNATOWICZ",
+      "canvasBefore": {
+        "sectionFontFamily": "\"Cormorant Garamond\"",
+        "declaredFamily": "Cormorant Garamond",
+        "headlineFontFamily": "\"Cormorant Garamond\"",
+        "headlineText": "SoloSpot Visual Builder v2.0",
+        "headlineInline": "color: white; transition: none !important;",
+        "sectionBg": "rgb(255, 0, 0)",
+        "textWidth": 310.1,
+        "faces": [
+          "300:unloaded",
+          "300:unloaded",
+          "300:unloaded",
+          "300:unloaded",
+          "300:unloaded",
+          "400:unloaded",
+          "400:unloaded",
+          "400:unloaded",
+          "400:unloaded",
+          "400:loaded",
+          "500:unloaded",
+          "500:unloaded",
+          "500:unloaded",
+          "500:unloaded",
+          "500:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "700:unloaded",
+          "700:unloaded",
+          "700:unloaded",
+          "700:unloaded",
+          "700:loaded"
+        ],
+        "fontsCheck": true
+      },
+      "canvasAfter": {
+        "sectionFontFamily": "\"Cormorant Garamond\"",
+        "declaredFamily": "Cormorant Garamond",
+        "headlineFontFamily": "\"Cormorant Garamond\"",
+        "headlineText": "MARCIN BERNATOWICZ",
+        "headlineInline": "color: white; transition: none !important;",
+        "sectionBg": "rgb(255, 0, 0)",
+        "textWidth": 314.1,
+        "faces": [
+          "300:unloaded",
+          "300:unloaded",
+          "300:unloaded",
+          "300:unloaded",
+          "300:unloaded",
+          "400:unloaded",
+          "400:unloaded",
+          "400:unloaded",
+          "400:unloaded",
+          "400:loaded",
+          "500:unloaded",
+          "500:unloaded",
+          "500:unloaded",
+          "500:unloaded",
+          "500:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "600:unloaded",
+          "700:unloaded",
+          "700:unloaded",
+          "700:unloaded",
+          "700:unloaded",
+          "700:loaded"
+        ],
+        "fontsCheck": true
+      },
+      "canvasFontChanged": false,
+      "canvasBgChanged": false,
+      "textWidthBefore": 310.1,
+      "textWidthAfter": 314.1,
+      "fontFaceLoaded": true
+    }
+  ],
+  "undoRedo": {
+    "path": "FAST_PATH",
+    "exec": "EXECUTED",
+    "undoClicked": true,
+    "redoClicked": true,
+    "tr": [
+      [
+        "[HacpBridge] EXECUTION_TRACE:",
+        {
+          "phase": "FAST_PATH_EXECUTED",
+          "intent": "CHANGE_TYPOGRAPHY",
+          "domain": "TYPOGRAPHY",
+          "targetNodeId": "sec-hero-init",
+          "timestamp": "2026-09-25T14:16:58.421Z"
+        }
+      ]
+    ],
+    "preFont": "Cormorant Garamond",
+    "appliedFont": "Playfair Display",
+    "undoneFont": "Cormorant Garamond",
+    "redoFont": "Playfair Display",
+    "preCanvasFont": "\"Cormorant Garamond\"",
+    "appliedCanvasFont": "\"Playfair Display\"",
+    "undoneCanvasFont": "\"Cormorant Garamond\"",
+    "redoCanvasFont": "\"Playfair Display\"",
+    "undoWorked": true,
+    "redoWorked": false,
+    "undoCanvasWorked": true,
+    "redoCanvasWorked": false
+  },
+  "persistence": {
+    "savedFont": "Playfair Display",
+    "reloadedFont": "Playfair Display",
+    "docSurvived": true,
+    "savedCanvasFont": "\"Playfair Display\"",
+    "reloadedCanvasFont": "\"Playfair Display\"",
+    "canvasSurvived": true,
+    "headlineText": "MARCIN BERNATOWICZ",
+    "faces": [
+      "400:unloaded",
+      "400:unloaded",
+      "400:unloaded",
+      "400:loaded",
+      "500:unloaded",
+      "500:unloaded",
+      "500:unloaded",
+      "500:unloaded",
+      "600:unloaded",
+      "600:unloaded",
+      "600:unloaded",
+      "600:unloaded",
+      "700:unloaded",
+      "700:unloaded",
+      "700:unloaded",
+      "700:loaded",
+      "800:unloaded",
+      "800:unloaded",
+      "800:unloaded",
+      "800:unloaded",
+      "900:unloaded",
+      "900:unloaded",
+      "900:unloaded",
+      "900:unloaded"
+    ]
+  },
+  "final": {
+    "consoleResourceErrors": 20,
+    "jsErrors": 0,
+    "jsErrorList": [],
+    "resourceErrorList": [
+      "Failed to load resource: the server responded with a status of 401 ()",
+      "Failed to load resource: the server responded with a status of 401 ()",
+      "Failed to load resource: the server responded with a status of 401 ()",
+      "Failed to load resource: the server responded with a status of 401 ()",
+      "Failed to load resource: the server responded with a status of 401 ()",
+      "Failed to load resource: the server responded with a status of 401 ()",
+      "Failed to load resource: the server responded with a status of 404 ()",
+      "Failed to load resource: the server responded with a status of 401 ()",
+      "Failed to load resource: the server responded with a status of 401 ()",
+      "Failed to load resource: the server responded with a status of 401 ()"
+    ]
+  }
+}
