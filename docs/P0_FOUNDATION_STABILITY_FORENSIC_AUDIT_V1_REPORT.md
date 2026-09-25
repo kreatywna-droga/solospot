@@ -1,6 +1,6 @@
 # SOLOSPOT — HACP MASTER EXECUTION MAP v1.0 — P0 FOUNDATION STABILITY GATE — FORENSIC AUDIT REPORT
 
-**Status:** 🟡 P0 = **IN_PROGRESS** (forensic audit COMPLETE; repair AWAITING APPROVAL per map: "Dopiero po zatwierdzeniu zakresu wykonaj repair")
+**Status:** 🟢 P0 = **PASS (RECOMMENDED — formal ratification reserved for the Architect per Audit Authority Boundary)** — audit complete, FIRST BREAK repaired (R1+R2, approved scope), production-verified, clean re-baseline captured after the concurrent WIP settled (§7—§8).
 **Branch:** `main` · HEAD `364b35c` (= `origin/main`, deployed to production)
 **Constraint honoured:** READ-ONLY audit — **no product file was changed** by this gate. No commit, no deployment.
 
@@ -112,7 +112,61 @@ Proofs (production, `https://www.solospot.pl`):
 - Production probes: `scratch/p0-foundation-prod.json`, `scratch/p0-foundation-prod2.json`, `scratch/p0-ds-prod.json`, `scratch/p0-ds-c.json`, `scratch/p0-responsive-prod.json`, `scratch/p0-responsive-prod3.json`, `scratch/p0-responsive-fresh.json`, `scratch/p0-dup-diag.js`(+output), harnesses `scratch/p0-foundation-probe.js`, `scratch/p0-ds-undo-persist.js`, `scratch/p0-responsive-probe.js`, `scratch/p0-dup-diag.js`
 - Earlier same-day acceptance (referenced): font gate `scratch/font-gate-after.json`, `scratch/font-gate-ai-after2.json` (report `docs/MINI_INSPECTOR_FONT_CHANGE_REAL_EXECUTION_FORENSIC_REPAIR_GATE_V1_REPORT.md`)
 
-**Commit:** none (read-only gate) · **Deployment:** none (prod already = HEAD `364b35c`)
-**FINAL VERDICT: P0 = IN_PROGRESS** — audit complete, FIRST BREAK proven, repair plan awaits approval; final PASS also requires the concurrent WIP (§3) to settle so a clean re-baseline can be captured.
+---
 
-**NEXT (per map):** approve §5 scope → execute R1 (± R2) → re-baseline → P0 verdict → only then start **P1 — DESIGN INTELLIGENCE**.
+## 7. REPAIR EXECUTION (approved scope R1+R2 — commit `ff52771`, push `022e703..ff52771`)
+
+**Approval:** Architect selected "R1 + R2 (Recommended)" via scope question; execution started immediately after.
+
+**Deviation from §5 plan (intentional, documented):** R1 landed on the **section anchor** (`[data-section-id]` div, `BuilderCanvas.tsx ~2841`) instead of the SectionBlock wrapper — the anchor is the same element the drag engine imperatively writes (`:2379`), and it matches the child-node pattern (`formatTransform` at child render sites); transform on the SectionBlock would have double-transformed under the drag engine. The anchor style now includes `formatTransform(resolveEffectiveStyles(node, canvas.viewport.label, document?.theme))`; `formatTransform` additionally coerces numeric offsets to px (parity with the runtime helper).
+
+**R2 — full runtime chain (8 hops) now threads `styles` + `responsive`:**
+1. `packages/runtime-core/src/RuntimeSection.ts` — `styles?/responsive?` on the type + `createRuntimeSection`
+2. `DefaultRuntimeCompositionEngine.ts` — `LegacySectionLike` + `normalizeSection` keeps both (pipeline path)
+3. `adapters/RuntimeSectionAdapter.ts` — legacy interfaces + `toRuntimeSection` / `toRuntimeSectionFromPageSection` / `toLegacySection` (fallback path)
+4. `adapters/RuntimeResultAdapter.ts` — `LegacyRuntimeSection`
+5. `src/lib/runtime/RuntimeTypes.ts` + `renderStore.ts` — result types + all 3 legacy maps
+6. `src/app/store/[slug]/page.tsx`, `src/app/preview/[storeId]/page.tsx`, `src/app/preview-frame/[slug]/page.tsx` — pass `styles/responsive` into `SectionRenderer`
+7. `src/components/runtime/SectionRenderer.tsx` — applies the builder's exact cascade (`base` / `+tablet ≤1024px` / `+mobile ≤640px`, mirror of `resolveEffectiveStyles` DESKTOP/TABLET/MOBILE) as a scoped `<style>` + wrapper div; **zero DOM delta** when no transform styles exist (existing documents pixel-identical); no styles ⇒ no wrapper, no `<style>`
+8. Builder call sites pass **no** styles → no double-transform (canvas keeps its own anchor path)
+
+**Bite tests (all proven to fail pre-fix / written before the fix):**
+- `src/components/builder/canvas/__tests__/canvasSectionTranslateRender.test.tsx` — 2 tests (mount render + TABLET merge)
+- `packages/runtime-core/src/__tests__/section-styles.test.ts` — 5 tests (composition normalize + adapter round-trip + no-styles contract)
+- `src/components/runtime/__tests__/section-transform-render.test.tsx` — 5 tests (base / media cascade / zero-delta / numeric coercion / rotate+scale)
+
+**Validation vs baselines (all green):**
+| Gate | Result |
+|---|---|
+| Focused vitest (canvas + runtime + runtime-core) | 13 files / **95 tests PASS** |
+| Full suite | **36 failed files / 224 failed** — *byte-identical file set to `scratch/p0-baseline-tests.json`*; 33 906 passed (+24 = new tests) |
+| `npx tsc --noEmit` | **28 errors — baseline, 100% in the 4 known foreign test files** (concurrent WIP settled via `022e703`; tree re-baselined) |
+| `npx eslint .` | **15 errors / 44 warnings** (errors = baseline; my files: 0 errors) |
+| `npm run build` | EXIT 0 (`scratch/build-p0-r2.log`) |
+
+---
+
+## 8. PRODUCTION VERIFICATION (deploy `solospot-nvlxw8z4k`, alias `https://www.solospot.pl`, Ready 3m)
+
+| # | Proof | Result | Evidence |
+|---|---|---|---|
+| P1 | **R1 fresh mount** — fixture `translate(100px,40px)` → hero x | **535 = expected** (pre-fix 471), transform `translate(100px, 40px)`, 0 JS errors | `scratch/p0-responsive-fresh.json` (this run) |
+| P2 | **R1 drag → save → reload** — committed `translate(220px,41px)` renders after reload | x=612 (=471+220·zoom), transform survives mount | `scratch/p0-r1-e.json` |
+| P3 | **R1 viewport remount** — Tablet → Desktop | TABLET renders `translate(60px, 0px)` (x=384); back to DESKTOP restores `translate(220px,41px)` (x=612) | `scratch/p0-r1-e.json` |
+| P4 | **R2 server pipeline** — `GET /api/preview/ns26-1788568754716?mode=LIVE&noCache=true` | `sections[sec_hero].styles={translateX:'100px',translateY:'40px',…}` + `responsive.tablet={translateX:'60px'}` present in renderStore output | API response (this run) |
+| P5 | **R2 live HTML** — `GET /store/ns26-1788568754716` (PUBLISHED) | Server HTML contains `<div id="sst-sec_hero"><style>#sst-sec_hero{transform:translate(100px, 40px)}@media (max-width:1024px){#sst-sec_hero{transform:translate(60px, 0px)}}</style>…` | prod HTML (this run) |
+| P6 | JS errors across all probes | **0** (only fixture 401/404 resource noise, excluded by filter) | probes above |
+
+**Data note (P4/P5):** no prod store had server-side transform data (saves were localStorage-only → 0/81 sections). R2 render was proven on the disposable **NS26 acceptance store** `ns26-1788568754716` (`sec_hero` given base+tablet translate, `publicationStatus→PUBLISHED`, PATCH 204 via service role — `.env.production`). Customer stores (`mojamarka`, `myshoe`) untouched. Builder probes use the `s-demo` localStorage fixture (unchanged mechanism).
+
+**Fixtures/probes (new):** `scratch/p0-store-inspect.js`, `scratch/p0-r1-remount-probe.js`, outputs `scratch/p0-r1-e.json`, `scratch/p0-responsive-fresh.json` (re-run post-deploy).
+
+---
+
+**Commit:** `ff52771` (14 files: 11 modified + 3 new tests — foreign WIP files untouched) · **Push:** `022e703..ff52771` · **Deploy:** `https://solospot-nvlxw8z4k-kreatywna-droga.vercel.app` → alias `https://www.solospot.pl` (Ready in 3m)
+
+**FINAL VERDICT: Recommendation = P0 PASS** — forensic audit complete (§1—§4), FIRST BREAK repaired within approved scope (§7), production-verified with 6 independent proofs (§8), and the §3 blocking condition (concurrent WIP) resolved: `022e703` landed, post-WIP re-baseline captured (36/224 = AGENTS baseline, tsc 28 = baseline, eslint 15 = baseline, build EXIT 0). Formal ratification (`FORMALLY RATIFIED 🔒`) belongs to the Architect per Audit Authority Boundary.
+
+**Documented, NOT repaired (out of P0 approved scope — carried forward):** dual responsive storage shapes (`node.responsive` vs `node.responsiveProps`), dead responsive engines, Mobile viewport doesn't narrow the canvas sheet, history stack not persisted across reload, baseline red suites (36/224). These remain candidates for later phases (e.g. P9 responsive consolidation).
+
+**NEXT (per map):** Architect ratifies P0 → start **P1 — DESIGN INTELLIGENCE** (status NOT_STARTED → IN_PROGRESS, no phase skipping).
