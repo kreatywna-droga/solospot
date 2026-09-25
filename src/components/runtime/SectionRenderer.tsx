@@ -222,17 +222,19 @@ export function SectionRenderer(props: SectionComponentProps) {
   return applySectionTransform(
     props.section,
     <SectionErrorBoundary type={props.section.type}>
-      {rawConfig.experienceConfig ? (
-        <ExperienceRuntimeScene
-          config={rawConfig.experienceConfig}
-          isPlaying={true}
-          isInteractive={true}
-        >
-          {content}
-        </ExperienceRuntimeScene>
-      ) : (
-        content
-      )}
+      <div className="transition-all duration-300 ease-out">
+        {rawConfig.experienceConfig ? (
+          <ExperienceRuntimeScene
+            config={rawConfig.experienceConfig}
+            isPlaying={true}
+            isInteractive={true}
+          >
+            {content}
+          </ExperienceRuntimeScene>
+        ) : (
+          content
+        )}
+      </div>
     </SectionErrorBoundary>
   );
 }

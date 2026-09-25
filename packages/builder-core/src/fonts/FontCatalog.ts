@@ -162,14 +162,26 @@ export function getFontsByCategory(category: FontCategory): readonly FontItem[] 
 /**
  * Dynamically injects a Google Fonts <link> into document.head if running in browser.
  */
-export function loadGoogleFont(fontFamily: string): void {
-  if (typeof document === 'undefined' || !fontFamily) return;
+export function loadGoogleFont(fontFamily: string): Promise<boolean> {
+  if (typeof document === 'undefined' || !fontFamily) return Promise.resolve(true);
   const id = `solospot-font-${fontFamily.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
-  if (document.getElementById(id)) return;
+  const existingLink = document.getElementById(id) as HTMLLinkElement | null;
 
-  const link = document.createElement('link');
-  link.id = id;
-  link.rel = 'stylesheet';
-  link.href = getGoogleFontUrl(fontFamily);
-  document.head.appendChild(link);
+  if (!existingLink) {
+    const link = document.createElement('link');
+    link.id = id;
+    link.rel = 'stylesheet';
+    link.href = getGoogleFontUrl(fontFamily);
+    document.head.appendChild(link);
+  }
+
+  // Wait for font readiness via document.fonts if available
+  if ('fonts' in document && typeof (document as any).fonts.load === 'function') {
+    return (document as any).fonts.load(`16px "${fontFamily}"`)
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  return Promise.resolve(true);
 }
+
