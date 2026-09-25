@@ -1,4 +1,4 @@
-﻿import { StoreRepository } from '@/lib/store/StoreRepository';
+import { StoreRepository } from '@/lib/store/StoreRepository';
 import { ProductRepository } from '@/lib/product/ProductRepository';
 import { RuntimeResolver } from './RuntimeResolver';
 import { RuntimeValidator } from './RuntimeValidator';
@@ -364,7 +364,7 @@ async function resolveViaPipeline(options: RenderStoreOptions): Promise<RuntimeR
       }
       const status = (store.config?.publicationStatus) || 'DRAFT';
       const validator = new RuntimeValidator();
-      if (!validator.isPubliclyAccessible(status)) {
+      if (request.mode === 'LIVE' && !validator.isPubliclyAccessible(status)) {
         return { allowed: false, reason: 'Store is not publicly accessible' };
       }
       return { allowed: true };

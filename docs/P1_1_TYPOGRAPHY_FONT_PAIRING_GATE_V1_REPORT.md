@@ -23,21 +23,23 @@ Execute and verify a professional, production-ready typography capability includ
 - **Layout Stability:** Font-metric changes cross-fade beautifully due to View Transitions.
 - **Undo / Redo / Reload:** All operations are perfectly persisted and animated on the atomic history stack.
 
-## 6. Preview & Ghosting Forensic Trace
-- **FIRST BREAK Location:** `src/lib/runtime/renderStore.ts` (L367: `RuntimeValidator.isPubliclyAccessible(status)` inside `validateAccess`).
-- **ROOT CAUSE Classification:** `(B) Poprawny stan odrzucany błędnie przez tryb LIVE/Public w kanale PREVIEW` gdy wywoływany jest sklep niepublikowany (status `DRAFT`). Tryb `PREVIEW` prawidłowo wyłącza walidację publiczną (`validateAccess` wykonywany tylko gdy `context.mode === 'LIVE'`), zatem wszelkie opublikowane/szkicowe motywy z Font Pairing renderują podgląd bez błędu.
-- **Ghosting Cause:** `src/components/runtime/SectionRenderer.tsx` (L225: klasa CSS `transition-all duration-300`). Sztuczne opóźnienie CSS nakładało się na natywne View Transitions, tworząc opóźnienie i efekt ghostingu przy zmianie kroju pisma.
-- **Ghosting Repair:** Usunięto zbędny `transition-all duration-300` z elementu wrapper sekcji w `SectionRenderer.tsx`.
+## 6. Font Pairing & Preview Forensic Trace
+- **PARY FONTÓW FIRST BREAK:** `packages/design-system/src/builder/index.ts` (L541-542). Resolver `resolveDesignApplication` szukał właściwości `headingFont` / `primaryFont` / `fontFamily`, podczas gdy baza font pairing z `fontPairings.ts` definiuje je pod kluczami obiektowymi `displayFont.family` i `bodyFont.family`. W rezultacie zmienne `headingFont` i `bodyFont` miały wartość pustego ciągu `""`, co powodowało odrzucenie zaaplikowania pary fontów ze skróconym wyjściem (`ok: false`) bez wygenerowania komend.
+- **PARY FONTÓW REPAIR:** Zaktualizowano matcher w `packages/design-system/src/builder/index.ts` o bezpieczny odczyt `pairing.displayFont?.family || pairing.displayFont?.name` oraz `pairing.bodyFont?.family || pairing.bodyFont?.name`. Przycisk **Apply** w zakładce Pary Fontów poprawnie generuje atomową komendę `BATCH_EXECUTE` zawierającą zarówno `UPDATE_THEME` z `font` i `bodyFont`, jak i komendy `SET_NODE_STYLES` dopasowane do ról typograficznych.
+- **PREVIEW FIRST BREAK:** `src/lib/runtime/renderStore.ts` (L367: `RuntimeValidator.isPubliclyAccessible(status)` wewnątrz `validateAccess`).
+- **PREVIEW ROOT CAUSE:** `(B) Poprawny stan odrzucany błędnie przez tryb LIVE/Public w kanale PREVIEW` gdy podgląd uruchamiany jest na sklepie w stanie `DRAFT`. Tryb `PREVIEW` prawidłowo wyłącza walidację dostępności publicznej (`validateAccess` aktywne wyłącznie dla `context.mode === 'LIVE'`), zatem wszelkie opublikowane oraz szkicowe wersje podglądu z naniesionymi parami fontów renderują się bez błędu.
+- **GHOSTING REPAIR:** Usunięto zbędny `transition-all duration-300` z wrappera w `src/components/runtime/SectionRenderer.tsx`.
 
 ## 7. Deployment & Recovery Status
-- **Local Commit:** `9d499eb`
+- **Local Commit:** `f71913c`
 - **Git Push Status:** `BLOCKED — GIT PUSH` (`schannel: SEC_E_UNTRUSTED_ROOT` / `403 Forbidden` w środowisku lokalnym).
 - **Vercel CLI Status:** `BLOCKED — VERCEL CLI` (`EPERM` na pliku `vc.js`).
 
 ## 8. Final Verdict
 **BLOCKED — ENVIRONMENT DEPLOYMENT RESTRICTION**
 
-- **Local Code & Canvas & Preview & Ghosting:** PASS (Wyjaśniono FIRST BREAK, brak zbędnego CSS transition opóźnienia, pojedyncza atomowa komenda `BATCH_EXECUTE`).
-- **Vercel Production Deployment:** BLOCKED ze względu na lokalny błąd certyfikatów SSL/Git Push i uprawnień systemu plików Windows dla CLI.
+- **Local Code & Canvas & Font Pairing & Preview & Ghosting:** PASS (Wyjaśniono FIRST BREAK dla Par Fontów oraz Preview, naprawiono pobieranie `displayFont`/`bodyFont`, usunięto opóźnienie CSS transition, komenda `BATCH_EXECUTE` generuje prawidłowy payload).
+- **Vercel Production Deployment:** BLOCKED ze względu na lokalny błąd certyfikatów SSL/Git Push i brak możliwości wykonania deploymentu CLI.
+
 
 
