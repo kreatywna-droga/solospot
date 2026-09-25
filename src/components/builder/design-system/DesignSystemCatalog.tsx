@@ -11,6 +11,7 @@ import { useMemo, useState, useCallback } from 'react'
 import { Search, Filter, Check, Eye, Sparkles, X } from 'lucide-react'
 import { DesignSystem } from '../../../../packages/design-system/src/index'
 import { resolveStylePackApplication, resolveDesignApplication, designApplicationToCommandPayload } from '../../../../packages/design-system/src/builder'
+import type { DesignApplicationKind } from '../../../../packages/design-system/src/builder'
 import { useBuilder } from '../state/BuilderProvider'
 
 type CategoryId =
@@ -170,6 +171,29 @@ export function DesignSystemCatalog() {
     }
   }, [category, query, industry, mood])
 
+  const CATEGORY_KIND_MAP: Record<CategoryId, string> = {
+    'style-packs': 'style-pack',
+    'design-combinations': 'design-combination',
+    'fonts': 'font',
+    'font-pairings': 'font-pairing',
+    'typography': 'typography',
+    'colors': 'color-palette',
+    'color-combinations': 'color-combination',
+    'buttons': 'button',
+    'cards': 'card',
+    'backgrounds': 'background',
+    'hero': 'hero',
+    'sections': 'section',
+    'images': 'image',
+    'icons': 'icon',
+    'effects': 'effect',
+    'shadows': 'shadow',
+    'radius': 'radius',
+    'spacing': 'spacing',
+    'industry-presets': 'industry-preset',
+    'themes': 'theme',
+  }
+
   const CAN_APPLY: Record<CategoryId, boolean> = {
     'style-packs': true,
     'design-combinations': true,
@@ -195,9 +219,9 @@ export function DesignSystemCatalog() {
 
   const applyDesignSystemItem = useCallback(
     (itemId: string, itemCategory: CategoryId) => {
-      const kind = itemCategory as any
+      const kind = (CATEGORY_KIND_MAP[itemCategory] || itemCategory) as DesignApplicationKind
       const raw =
-        kind === 'style-packs'
+        kind === 'style-pack'
           ? resolveStylePackApplication(
               itemId,
               {
@@ -218,7 +242,7 @@ export function DesignSystemCatalog() {
       if (!resolved) return
 
       const designResult =
-        kind === 'style-packs'
+        kind === 'style-pack'
           ? { ok: Object.keys(resolved.theme).length > 0, ...resolved }
           : resolved
 
@@ -232,7 +256,7 @@ export function DesignSystemCatalog() {
         theme: {
           ...(payload.theme || {}),
           appliedStylePackId:
-            kind === 'style-packs' || kind === 'industry-presets'
+            kind === 'style-pack' || kind === 'industry-preset'
               ? itemId
               : (doc?.theme?.appliedStylePackId || undefined),
         } as any,
@@ -374,6 +398,16 @@ export function DesignSystemCatalog() {
                           {String(t)}
                         </span>
                       ))}
+                    {category === 'style-packs' && (() => {
+                      const colors = paletteOf(item)
+                      return (
+                        <div className="flex gap-1 pt-0.5">
+                          <span className="w-4 h-4 rounded border border-white/20" style={{ backgroundColor: colors.primary }} />
+                          <span className="w-4 h-4 rounded border border-white/20" style={{ backgroundColor: colors.secondary }} />
+                          <span className="w-4 h-4 rounded border border-white/20" style={{ backgroundColor: colors.bg }} />
+                        </div>
+                      )
+                    })()}
                   </div>
                 </div>
                 <div className="flex flex-col gap-1.5 flex-shrink-0">
