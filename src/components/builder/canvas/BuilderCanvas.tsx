@@ -50,7 +50,7 @@ import { SelectionOverlay } from '../selection/SelectionOverlay'
 import { useRuntimePreview } from './useRuntimePreview'
 import { SectionRenderer } from '@/components/runtime/SectionRenderer'
 import { CartProvider } from '@/lib/cart/CartStore'
-import { loadGoogleFont } from '../../../../packages/builder-core/src/fonts/FontCatalog'
+import { loadGoogleFont, fontStack } from '../../../../packages/builder-core/src/fonts/FontCatalog'
 import { ExperienceLibraryModal, SaveExperienceModal, ExperienceRuntimeScene } from '../experience'
 import { insertComponent } from '@/lib/experience/ComponentInsertionEngine'
 import { WebsiteTemplatePickerModal } from '../templates/WebsiteTemplatePickerModal'
@@ -561,7 +561,7 @@ function CanvasNode({
             fontWeight,
             lineHeight,
             letterSpacing,
-            fontFamily,
+            fontFamily: fontStack(fontFamily),
           }}
         />
       </div>
@@ -640,7 +640,7 @@ function CanvasNode({
             fontWeight,
             lineHeight,
             letterSpacing,
-            fontFamily,
+            fontFamily: fontStack(fontFamily),
           }}
         />
       </div>
@@ -713,7 +713,7 @@ function CanvasNode({
             opacity,
             fontSize,
             fontWeight,
-            fontFamily,
+            fontFamily: fontStack(fontFamily),
             textAlign,
             padding,
             width: '100%',
@@ -1344,10 +1344,22 @@ function SectionBlock({
   // Only a node-DECLARED font (≠ theme default) is applied, so documents
   // without node-level typography render exactly as before.
   const themeFontFamily = document?.theme?.font || 'Inter'
+  // A node that DECLARES its own fontFamily (set_node_styles from a font apply)
+  // is authoritative and must reach the runtime section even when it equals
+  // theme.font — otherwise sections that render their headline from the explicit
+  // `theme.font` prop (and ignore the global default) keep their stale baked
+  // font and the change appears to "revert". Fall back to the resolved style
+  // only for a responsive override; a node WITHOUT a declared font still yields
+  // undefined so theme.font drives it exactly as before.
+  const declaredFont =
+    ((node.styles as any)?.fontFamily as string | undefined) ||
+    ((node.responsive?.tablet as any)?.fontFamily as string | undefined) ||
+    ((node.responsive?.mobile as any)?.fontFamily as string | undefined)
   const sectionFontFamily =
-    resolvedStyles.fontFamily && resolvedStyles.fontFamily !== themeFontFamily
+    declaredFont ||
+    (resolvedStyles.fontFamily && resolvedStyles.fontFamily !== themeFontFamily
       ? (resolvedStyles.fontFamily as string)
-      : undefined
+      : undefined)
   if (sectionFontFamily) {
     loadGoogleFont(sectionFontFamily)
   }
@@ -1854,7 +1866,7 @@ function SectionBlock({
                   secondaryColor: document.theme?.secondaryColor || '#ec4899',
                   // FONT GATE v1 — headline font of THIS section: node-level
                   // fontFamily (set_node_styles) wins over the global theme font.
-                  font: sectionFontFamily || document.theme?.font || 'Inter',
+                  font: fontStack(sectionFontFamily || document.theme?.font || 'Inter') || 'Inter',
                   logo: document.theme?.logo,
                 }}
                 storeName={document.metadata?.storeName || 'Store'}

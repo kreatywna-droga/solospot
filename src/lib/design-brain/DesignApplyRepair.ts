@@ -51,11 +51,13 @@ export function collectAllNodes(document: BuilderDocument): BuilderNode[] {
   return out;
 }
 
-/** Collect only nodes that carry typography (headings + generic text labels). */
+/** Collect nodes that carry typography or can override section-runtime fonts. */
 export function collectTypographyNodes(document: BuilderDocument): BuilderNode[] {
   return collectAllNodes(document).filter((n) =>
     n.type === 'heading' ||
     n.type === 'text' ||
+    Boolean(n.styles?.fontFamily) ||
+    Boolean((n.props as Record<string, unknown> | undefined)?.fontFamily) ||
     /heading|h1|h2|h3|title|headline/i.test(n.label || '')
   );
 }
@@ -130,7 +132,9 @@ export function buildTypographyApplicationPlan(
   let skipped = 0;
   for (const node of targets) {
     const targetFont =
-      node.type === 'heading' || /h1|h2|h3|heading|title|headline/i.test(node.label || '')
+      node.type === 'heading' ||
+      node.type === 'hero' ||
+      /hero|h1|h2|h3|heading|title|headline/i.test(node.label || '')
         ? heading
         : body;
     if (!targetFont) {

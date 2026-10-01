@@ -137,6 +137,10 @@ describe('DesignApplyRepair — FONT PERSISTENCE (Phase 1–4)', () => {
     // Heading nodes get the heading font; the plan is deterministic.
     const headingTargets = collectTypographyNodes(doc).filter((n) => n.type === 'heading');
     expect(plan.nodeCommands.some((c: any) => c.nodeId === headingTargets[0].id)).toBe(true);
+
+    // Runtime sections can carry their own stale fontFamily; update those too,
+    // otherwise BuilderCanvas passes the old section font back into SectionRenderer.
+    expect(plan.nodeCommands.some((c: any) => c.nodeId === 'hero-1' && c.styles.fontFamily === 'Playfair Display')).toBe(true);
   });
 
   it('plan skips nodes that already match (idempotent, deterministic)', () => {
@@ -146,6 +150,75 @@ describe('DesignApplyRepair — FONT PERSISTENCE (Phase 1–4)', () => {
     // Re-run on the same unchanged document — same commands (deterministic).
     const plan2 = buildTypographyApplicationPlan(doc, { heading: 'Playfair Display' });
     expect(plan1.nodeCommands.length).toBe(plan2.nodeCommands.length);
+  });
+});
+
+describe('DesignApplyRepair — FONT DOES NOT REVERT (end-to-end: apply → execute → document → priority → round-trip)', () => {
+  // Mirror of BuilderCanvas.resolveEffectiveStyles: node.styles wins over theme.
+  // This is the exact merge that caused the revert when a node kept a stale font.
+  const effectiveFont = (node: any, theme: any): string =>
+    ({ fontFamily: theme?.font, ...(node.styles || {}) } as any).fontFamily;
+
+  const findNode = (doc: any, id: string): any => {
+    for (const page of doc.pages) {
+      const stack = [...(page.sections || [])];
+      while (stack.length) {
+        const n = stack.shift();
+        if (n.id === id) return n;
+        if (n.children?.length) stack.push(...n.children);
+      }
+    }
+    return undefined;
+  };
+
+  it('applying a new font rewrites every stale node.styles.fontFamily so it never reverts', () => {
+    let ctx = makeDoc();
+    const NEW = 'Playfair Display';
+
+    // Precondition: every typography node is still the stale "Inter".
+    for (const n of collectTypographyNodes(ctx.document)) {
+      expect(n.styles?.fontFamily).toBe('Inter');
+    }
+
+    const plan = buildTypographyApplicationPlan(ctx.document, { heading: NEW, body: NEW });
+
+    // Execute the real command stream through BuilderContext (SSOT path).
+    ctx = ctx.dispatch({ type: 'UPDATE_THEME', theme: plan.theme } as any);
+    for (const cmd of plan.nodeCommands) ctx = ctx.dispatch(cmd as any);
+
+    const doc = ctx.document;
+
+    // Theme SSOT updated.
+    expect((doc.theme as any).font).toBe(NEW);
+
+    // Every node that carried its own fontFamily now agrees with the theme —
+    // including the runtime hero/section nodes that previously overrode it.
+    for (const id of ['hero-1', 'section-1', 'heading-1', 'card-1']) {
+      const node = findNode(doc, id);
+      expect(node, `node ${id} exists`).toBeDefined();
+      expect(node.styles.fontFamily, `node ${id} fontFamily`).toBe(NEW);
+      // Priority check: theme vs node-level — the effective (rendered) font is NEW,
+      // not the old "Inter". This is what reverted before the fix.
+      expect(effectiveFont(node, doc.theme)).toBe(NEW);
+    }
+  });
+
+  it('font survives a document save/reload round-trip (JSON serialize → parse)', () => {
+    let ctx = makeDoc();
+    const NEW = 'Lora';
+    const plan = buildTypographyApplicationPlan(ctx.document, { heading: NEW, body: NEW });
+    ctx = ctx.dispatch({ type: 'UPDATE_THEME', theme: plan.theme } as any);
+    for (const cmd of plan.nodeCommands) ctx = ctx.dispatch(cmd as any);
+
+    // Simulate persistence: the document is saved and read back.
+    const reloaded = JSON.parse(JSON.stringify(ctx.document));
+
+    expect(reloaded.theme.font).toBe(NEW);
+    for (const id of ['hero-1', 'section-1', 'heading-1', 'card-1']) {
+      const node = findNode(reloaded, id);
+      expect(node.styles.fontFamily).toBe(NEW);
+      expect(effectiveFont(node, reloaded.theme)).toBe(NEW);
+    }
   });
 });
 
@@ -216,7 +289,7 @@ describe('DesignApplyRepair — COMPOSITION COMPLETENESS (Phase 7–10)', () => 
 
     // Card gets relational bg + text (light card → dark text).
     const cardCmd = plan.nodeCommands.find(
-      (c: any) => c.nodeId === 'card-1'
+      (c: any) => c.nodeId === 'card-1' && c.styles.backgroundColor
     ) as any;
     expect(cardCmd).toBeDefined();
     expect(cardCmd.styles.color).toBeDefined();

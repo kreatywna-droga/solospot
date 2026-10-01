@@ -132,14 +132,40 @@ export const GOOGLE_FONTS_CATALOG: readonly FontItem[] = [
 ];
 
 /**
+ * Extract the bare family name from a possibly-stacked CSS font-family value.
+ * Idempotent: `'"Playfair Display", serif'` → `Playfair Display`.
+ */
+export function primaryFamily(value: string | undefined | null): string {
+  return (value || '').split(',')[0].trim().replace(/^["']|["']$/g, '');
+}
+
+/**
+ * Build a safe CSS font-family stack: the requested family followed by the
+ * catalog's generic fallback (`"Playfair Display", serif`). This removes the
+ * FOUT where a bare family name flashes the browser's default font while the
+ * webfont downloads, then "jumps" to the real font — the interim glyphs now
+ * render in the correct generic class so the swap is visually negligible.
+ * SSOT stays the bare family; only the RENDERED value carries the stack.
+ */
+export function fontStack(value: string | undefined | null): string | undefined {
+  const fam = primaryFamily(value);
+  if (!fam) return undefined;
+  const item = GOOGLE_FONTS_CATALOG.find((f) => f.family.toLowerCase() === fam.toLowerCase());
+  const fallback = item?.fallback || 'sans-serif';
+  const quoted = /[\s]/.test(fam) ? `"${fam}"` : fam;
+  return `${quoted}, ${fallback}`;
+}
+
+/**
  * Generates the Google Fonts CSS2 URL for a given font family.
  */
 export function getGoogleFontUrl(fontFamily: string): string {
+  const family = primaryFamily(fontFamily);
   const font = GOOGLE_FONTS_CATALOG.find(
-    (f) => f.family.toLowerCase() === fontFamily.toLowerCase()
+    (f) => f.family.toLowerCase() === family.toLowerCase()
   );
   const weights = font ? font.weights.join(';') : '400;700';
-  const encodedName = encodeURIComponent(fontFamily.trim());
+  const encodedName = encodeURIComponent(family);
   return `https://fonts.googleapis.com/css2?family=${encodedName}:wght@${weights}&display=swap`;
 }
 
@@ -163,21 +189,23 @@ export function getFontsByCategory(category: FontCategory): readonly FontItem[] 
  * Dynamically injects a Google Fonts <link> into document.head if running in browser.
  */
 export function loadGoogleFont(fontFamily: string): Promise<boolean> {
-  if (typeof document === 'undefined' || !fontFamily) return Promise.resolve(true);
-  const id = `solospot-font-${fontFamily.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+  // Accept either a bare family or a full CSS stack ("Playfair Display, serif").
+  const family = primaryFamily(fontFamily);
+  if (typeof document === 'undefined' || !family) return Promise.resolve(true);
+  const id = `solospot-font-${family.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
   const existingLink = document.getElementById(id) as HTMLLinkElement | null;
 
   if (!existingLink) {
     const link = document.createElement('link');
     link.id = id;
     link.rel = 'stylesheet';
-    link.href = getGoogleFontUrl(fontFamily);
+    link.href = getGoogleFontUrl(family);
     document.head.appendChild(link);
   }
 
   // Wait for font readiness via document.fonts if available
   if ('fonts' in document && typeof (document as any).fonts.load === 'function') {
-    return (document as any).fonts.load(`16px "${fontFamily}"`)
+    return (document as any).fonts.load(`16px "${family}"`)
       .then(() => true)
       .catch(() => false);
   }

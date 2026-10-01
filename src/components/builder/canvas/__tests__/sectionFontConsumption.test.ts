@@ -45,8 +45,9 @@ describe('canvas consumes node-level fontFamily for section/hero headlines', () 
     // node-declared font (≠ theme default) is computed and loaded
     expect(CANVAS_SRC).toContain('const sectionFontFamily =')
     expect(CANVAS_SRC).toContain('loadGoogleFont(sectionFontFamily)')
-    // ...and is the value passed into SectionRenderer's theme
-    expect(CANVAS_SRC).toContain('font: sectionFontFamily || document.theme?.font || \'Inter\'')
+    // ...and is the value passed into SectionRenderer's theme (wrapped in a
+    // safe fallback stack to avoid the FOUT flash while the webfont loads)
+    expect(CANVAS_SRC).toContain('font: fontStack(sectionFontFamily || document.theme?.font || \'Inter\')')
     // never hardcoded to the global theme only
     expect(CANVAS_SRC).not.toMatch(/theme=\{\{\s*primaryColor:[^}]*font: document\.theme\?\.font \|\| 'Inter',\s*logo:/)
   })

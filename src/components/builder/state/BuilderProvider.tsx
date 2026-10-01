@@ -62,6 +62,36 @@ export interface BuilderContextValue {
 
 const BuilderCtx = createContext<BuilderContextValue | null>(null)
 
+/**
+ * Extract every font family referenced by a command so the right webfonts are
+ * requested — the theme font AND any node-level fontFamily (font pairings apply
+ * a heading + a body font, and style packs set node fonts directly).
+ */
+function collectFontsFromCommand(command: BuilderCommand): string[] {
+  const fonts = new Set<string>();
+  const addFromTheme = (theme: any) => {
+    if (theme?.font) fonts.add(String(theme.font));
+    if (theme?.bodyFont) fonts.add(String(theme.bodyFont));
+    const typo = theme?.tokens?.typography;
+    if (typo?.headingFont) fonts.add(String(typo.headingFont));
+    if (typo?.bodyFont) fonts.add(String(typo.bodyFont));
+  };
+  const addFromStyles = (styles: any) => {
+    if (styles?.fontFamily) fonts.add(String(styles.fontFamily));
+  };
+  const visit = (cmd: any) => {
+    if (!cmd || typeof cmd !== 'object') return;
+    if (cmd.type === 'UPDATE_THEME') addFromTheme(cmd.theme);
+    if (cmd.type === 'SET_NODE_STYLES') addFromStyles(cmd.styles);
+    if (cmd.type === 'BATCH_EXECUTE' && Array.isArray(cmd.commands)) cmd.commands.forEach(visit);
+  };
+  visit(command);
+  // Strip any CSS fallback suffix ("Playfair Display, serif" → "Playfair Display").
+  return Array.from(fonts)
+    .map((f) => f.split(',')[0].trim().replace(/^["']|["']$/g, ''))
+    .filter(Boolean);
+}
+
 // ---------------------------------------------------------------------------
 // Provider
 // ---------------------------------------------------------------------------
@@ -100,35 +130,30 @@ export function BuilderProvider({
   ctxRef.current = ctx
 
   // dispatch — the single mutation gateway
-  const dispatch = useCallback(async (command: BuilderCommand) => {
-    let fontToLoad: string | undefined;
+  const dispatch = useCallback((command: BuilderCommand) => {
+    // SPEED: apply the document mutation IMMEDIATELY. The old code awaited the
+    // Google Font network request BEFORE mutating, so a font change only became
+    // visible after the webfont finished downloading — and the await + view
+    // transition window produced a perceptible "change then settle" flicker.
+    // We now mutate first (instant) and load the font in the background; the
+    // Google Fonts stylesheet uses display=swap, so the glyphs repaint on their
+    // own when the face arrives — no await and no view-transition crossfade
+    // (that crossfade was itself the visible "change then settle" flicker).
+    setCtx(prev => prev.dispatch(command));
 
-    if (command.type === 'UPDATE_THEME' && command.theme?.font) {
-      fontToLoad = command.theme.font;
-    } else if (command.type === 'BATCH_EXECUTE') {
-      const themeCmd = command.commands.find((c: any) => c.type === 'UPDATE_THEME' && c.theme?.font);
-      if (themeCmd) {
-        fontToLoad = (themeCmd as any).theme.font;
-      }
-    }
+    // Collect every font referenced by this command (theme font + any
+    // node-level fontFamily in a SET_NODE_STYLES / BATCH_EXECUTE) so the right
+    // webfonts are requested even for font pairings (heading ≠ body).
+    const fonts = collectFontsFromCommand(command);
+    if (fonts.length === 0) return;
 
-    if (fontToLoad) {
+    // Fire-and-forget: request all referenced webfonts in parallel. The
+    // stylesheet's display=swap repaints glyphs when each face arrives — no
+    // React re-render (and no await) is needed for the visual swap.
+    void (async () => {
       const { loadGoogleFont } = await import('../../../../packages/builder-core/src/fonts/FontCatalog');
-      await loadGoogleFont(fontToLoad);
-    }
-
-    const shouldAnimate = command.type === 'UPDATE_THEME' || command.type === 'BATCH_EXECUTE' || command.type === 'SET_NODE_STYLES';
-
-    if (shouldAnimate && typeof document !== 'undefined' && 'startViewTransition' in document) {
-      const { flushSync } = await import('react-dom');
-      (document as any).startViewTransition(() => {
-        flushSync(() => {
-          setCtx(prev => prev.dispatch(command));
-        });
-      });
-    } else {
-      setCtx(prev => prev.dispatch(command));
-    }
+      await Promise.all(fonts.map((f) => loadGoogleFont(f).catch(() => false)));
+    })();
   }, [])
 
   // HACP live dispatch — enables HACP write tools to mutate live BuilderContext

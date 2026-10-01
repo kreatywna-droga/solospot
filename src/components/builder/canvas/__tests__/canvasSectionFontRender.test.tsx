@@ -80,7 +80,29 @@ describe('BuilderCanvas renders node-level section fontFamily', () => {
     // HeroSection's own <section> is the headline container (h1 inherits it).
     const runtimeSection = hero!.querySelector('section')
     expect(runtimeSection).not.toBeNull()
+    // Rendered value is a safe stack ("Playfair Display", serif) to avoid the
+    // FOUT flash; assert the requested family leads the stack.
     const font = (runtimeSection as HTMLElement).style.fontFamily.replace(/"/g, '')
-    expect(font).toBe('Playfair Display')
+    expect(font.startsWith('Playfair Display')).toBe(true)
+    expect(font).toContain('serif')
+  })
+
+  it('node-declared font reaches the section even when it equals theme.font (no revert)', async () => {
+    // After a font apply, the node declares fontFamily === theme.font. FONT GATE
+    // must still forward it so sections that ignore the global default keep the
+    // applied font instead of reverting to a stale baked one.
+    const equalDoc: any = JSON.parse(JSON.stringify(doc))
+    equalDoc.theme.font = 'Playfair Display'
+    equalDoc.pages[0].sections[0].styles.fontFamily = 'Playfair Display'
+
+    const { container } = render(
+      <BuilderProvider document={equalDoc}>
+        <BuilderCanvas />
+      </BuilderProvider>
+    )
+    const hero = container.querySelector('[data-section-id="sec-hero-init"]')
+    const runtimeSection = hero!.querySelector('section')
+    const font = (runtimeSection as HTMLElement).style.fontFamily.replace(/"/g, '')
+    expect(font.startsWith('Playfair Display')).toBe(true)
   })
 })
