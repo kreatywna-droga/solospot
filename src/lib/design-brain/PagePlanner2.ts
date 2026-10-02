@@ -19,6 +19,7 @@ import type {
 import type { WebsiteBlueprintDecision } from './BlueprintEngine';
 import type { StyleDecision, StyleApplicationPlan } from './StyleSystemIntelligence';
 import { emitObservability } from './Observability';
+import { classifyExperienceIntent, enrichPlanWithExperiences } from './ExperienceIntelligence';
 
 export interface PagePlanner2Input {
   brief: string;
@@ -276,7 +277,7 @@ function roleItems(role: SectionRole, industry: string): Array<{ label: string; 
 export function planPage2(input: PagePlanner2Input): SitePlan {
   emitObservability('decision', 'page-planner-2', `Planning enriched SitePlan for ${input.direction.visualStyle}`);
 
-  const plan = generateSitePlan(input.brief);
+  let plan = generateSitePlan(input.brief);
   applyDirection(plan, input);
   applyDesignSystem(plan, input);
   applyResponsive(plan, input);
@@ -312,6 +313,10 @@ export function planPage2(input: PagePlanner2Input): SitePlan {
     knowledge: plan.metadata.knowledge,
   };
 
+  // Experience Intelligence overlay: enrich sections with tailored creative experiences
+  const expProfile = classifyExperienceIntent(input.brief, input.direction.visualStyle, input.direction);
+  plan = enrichPlanWithExperiences(plan, expProfile);
+
   // Attach design-brain provenance without breaking SitePlan consumers
   plan.metadata = {
     ...plan.metadata,
@@ -324,9 +329,10 @@ export function planPage2(input: PagePlanner2Input): SitePlan {
       stylePackId: input.styleDecision?.stylePack?.id ?? null,
       traceCount: input.traces?.length ?? 0,
       sectionCount: plan.sections.length,
+      experienceArchetype: expProfile.archetype,
     },
   };
 
-  emitObservability('decision', 'page-planner-2', `sections=${plan.sections.length} pages=${plan.pages.length}`);
+  emitObservability('decision', 'page-planner-2', `sections=${plan.sections.length} pages=${plan.pages.length} expArchetype=${expProfile.archetype}`);
   return plan;
 }

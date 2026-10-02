@@ -93,5 +93,78 @@ export { resolveRoleForPhase, allRoles, describeRole } from './RoleModel';
 export type { RoleAssignment } from './RoleModel';
 export { planPage2, toVisualDirection } from './PagePlanner2';
 export type { PagePlanner2Input } from './PagePlanner2';
+export {
+  classifyExperienceIntent,
+  scoreExperienceItem,
+  scoreExperiencesForRole,
+  choreographPageExperiences,
+  enrichPlanWithExperiences,
+} from './ExperienceIntelligence';
+export type {
+  ExperienceArchetype,
+  ExperienceBriefProfile,
+  ExperienceRecommendation,
+  ExperienceChoreographyPlan,
+} from './ExperienceIntelligence';
+export {
+  analyzeDocumentVisualQuality,
+  applyVisualCriticRepair,
+} from './VisualCritic';
+export type {
+  VisualCriticCategory,
+  VisualCriticSeverity,
+  EvidenceSource,
+  VisualCriticEvidence,
+  VisualCriticTarget,
+  VisualCriticRepairProposal,
+  VisualCriticFinding,
+  VisualCriticReport,
+  VisualCriticOptions,
+  RenderObservation,
+  ApplyRepairResult,
+} from './VisualCritic';
+export {
+  createBuildIntent,
+  validateBuildIntent,
+} from './BuildIntent';
+export type {
+  BuildIntent,
+  BusinessGoal,
+  BrandProfile,
+  PageRequirement,
+  MotionConstraints,
+  BuildConstraints,
+  BuildIntentInference,
+} from './BuildIntent';
+export {
+  buildMultiPageWebsiteBlueprint,
+  validateMultiPageBlueprint,
+} from './MultiPageBlueprintEngine';
+export type {
+  MultiPageWebsiteBlueprint,
+  BlueprintPagePlan,
+  BlueprintSectionPlan,
+  NarrativeStage,
+  SiteInformationArchitecture,
+  NavigationItem,
+} from './MultiPageBlueprintEngine';
+export {
+  generateMultiPageDocument,
+} from './MultiPageDocumentGenerator';
+export type {
+  GenerationResult,
+  DocumentGeneratorOptions,
+} from './MultiPageDocumentGenerator';
+export {
+  runAutonomousExperienceWebsiteBuilder,
+} from './AutonomousWebsiteBuilder';
+export type {
+  PipelinePhase,
+  PipelineProgressEvent,
+  AutonomousBuildOptions,
+  AutonomousBuildOutput,
+} from './AutonomousWebsiteBuilder';
 export { runDesignBrain, summarizeDesignBrain } from './DesignBrain';
 export type { DesignBrainOptions } from './DesignBrain';
+
+

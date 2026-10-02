@@ -196,4 +196,79 @@ describe('HACP Experience Capability Integration (Gate 10)', () => {
     expect(result.verification.passed).toBe(true);
     expect(result.command?.type).toBe('UPDATE_PROPS');
   });
+
+  it('recommends tailored experiences for a brief and section role via recommend_experiences', async () => {
+    const doc = createTestDoc();
+
+    const result = await bridge.executeToolCall(
+      {
+        id: 'call-8',
+        name: 'recommend_experiences',
+        arguments: {
+          brief: 'Luxury 3D watch brand with cinematic hero and subtle particles',
+          industry: 'luxury',
+          role: 'hero',
+        },
+      },
+      doc,
+      'page-home'
+    );
+
+    expect(result.status).toBe('EXECUTED');
+    expect(result.verification.passed).toBe(true);
+    const data = JSON.parse(result.message || '{}');
+    expect(data.archetype).toBe('cinematic-showcase');
+    expect(data.recommendations.length).toBeGreaterThan(0);
+  });
+
+  it('runs visual critique and returns structured findings via run_visual_critic', async () => {
+    const doc = createTestDoc();
+    const pageId = doc.pages[0].id;
+
+    const result = await bridge.executeToolCall(
+      {
+        id: 'call-9',
+        name: 'run_visual_critic',
+        arguments: { pageId, viewport: 'desktop' },
+      },
+      doc,
+      pageId
+    );
+
+    expect(result.status).toBe('EXECUTED');
+    expect(result.verification.passed).toBe(true);
+    const report = JSON.parse(result.message || '{}');
+    expect(report.findings).toBeDefined();
+    expect(report.summary).toBeDefined();
+  });
+
+  it('applies an automated repair proposal safely via apply_critic_repair', async () => {
+    const doc = createTestDoc();
+    const pageId = doc.pages[0].id;
+
+    // Run critic to get a finding
+    const criticRes = await bridge.executeToolCall(
+      { id: 'call-10', name: 'run_visual_critic', arguments: { pageId } },
+      doc,
+      pageId
+    );
+    const report = JSON.parse(criticRes.message || '{}');
+    const repairableFinding = report.findings.find((f: any) => f.proposal);
+
+    if (repairableFinding) {
+      const repairRes = await bridge.executeToolCall(
+        {
+          id: 'call-11',
+          name: 'apply_critic_repair',
+          arguments: { findingId: repairableFinding.id },
+        },
+        doc,
+        pageId
+      );
+
+      expect(repairRes.status).toBe('EXECUTED');
+      expect(repairRes.verification.passed).toBe(true);
+      expect(repairRes.command).toBeDefined();
+    }
+  });
 });

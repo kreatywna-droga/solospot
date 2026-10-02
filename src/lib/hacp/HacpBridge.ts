@@ -735,6 +735,82 @@ export class HacpBridge {
       };
     }
 
+    if (name === 'recommend_experiences') {
+      const brief = (args.brief as string) || (args.query as string) || '';
+      const industry = (args.industry as string) || 'general';
+      const role = (args.role as string) || 'hero';
+      const { classifyExperienceIntent, scoreExperiencesForRole } = await import('../design-brain/ExperienceIntelligence');
+      const profile = classifyExperienceIntent(brief, industry);
+      const recommendations = scoreExperiencesForRole(role as any, profile);
+      return {
+        status: 'EXECUTED',
+        verification: { passed: true, operation: name, target: role },
+        message: JSON.stringify({ archetype: profile.archetype, mood: profile.mood, role, count: recommendations.length, recommendations }, null, 2),
+      };
+    }
+
+    if (name === 'run_visual_critic') {
+      const pageId = (args.pageId as string) || activePageId;
+      const viewport = (args.viewport as 'desktop' | 'tablet' | 'mobile') || 'desktop';
+      const prefersReducedMotion = Boolean(args.prefersReducedMotion);
+      const { analyzeDocumentVisualQuality } = await import('../design-brain/VisualCritic');
+      const report = analyzeDocumentVisualQuality(document, { pageId, viewport, prefersReducedMotion });
+      return {
+        status: 'EXECUTED',
+        verification: { passed: true, operation: name, target: pageId },
+        message: JSON.stringify(report, null, 2),
+      };
+    }
+
+    if (name === 'apply_critic_repair') {
+      const findingId = args.findingId as string;
+      if (!findingId) {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: 'none' },
+          message: 'apply_critic_repair wymaga parametru findingId.',
+        };
+      }
+      const { analyzeDocumentVisualQuality, applyVisualCriticRepair } = await import('../design-brain/VisualCritic');
+      const report = analyzeDocumentVisualQuality(document, { pageId: activePageId });
+      const finding = report.findings.find(f => f.id === findingId);
+      if (!finding) {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: findingId },
+          message: `Nie znaleziono aktywnego problemu o ID "${findingId}".`,
+        };
+      }
+      if (!finding.proposal) {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: findingId },
+          message: `Problem "${findingId}" nie posiada automatycznej propozycji naprawy (wymaga ręcznej decyzji projektowej).`,
+        };
+      }
+
+      const result = applyVisualCriticRepair(document, finding);
+      if (!result.resolved && result.error) {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: findingId },
+          message: `Nie udało się zastosować naprawy: ${result.error}`,
+        };
+      }
+
+      return {
+        command: result.commandDispatched,
+        status: 'EXECUTED',
+        verification: { passed: true, operation: name, target: findingId },
+        message: `Zastosowano naprawę dla "${finding.title}": ${finding.proposal.description}`,
+        appliedChange: {
+          target: finding.target.sectionId || activePageId,
+          property: Object.keys(finding.proposal.fieldDiff).join(', '),
+          summary: finding.proposal.description,
+        },
+      };
+    }
+
     if (name === 'search_sections') {
       const { searchSectionLibrary } = await import('../ai/LibraryIntelligence');
       const results = searchSectionLibrary({
