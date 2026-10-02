@@ -183,10 +183,13 @@ export const PhaseThreeInspector: React.FC<PhaseThreeInspectorProps> = ({
         {/* ============================================================= */}
         {/* EXPERIENCE RUNTIME CONTROLS (v2.0)                             */}
         {/* ============================================================= */}
-        {(props as any).experienceConfig && (
+        {((props as any).experienceConfig || (props as any).experienceId || nodeType === 'experience') && (
           <ExperienceInspectorControls
             config={(props as any).experienceConfig}
+            experienceId={(props as any).experienceId}
+            experienceTitle={selectedNode.label}
             onChange={(newConfig) => onPropChange('experienceConfig', newConfig)}
+            onReset={() => onPropChange('experienceConfig', undefined)}
           />
         )}
 
