@@ -17,10 +17,11 @@ describe('SoloSpot Flagship Experiences v3.0 Parity & Schema Test', () => {
     'flagship-interactive-bento',
     'flagship-product-reveal',
     'flagship-perspective-3d-scene',
+    'flagship-cinematic-spatial-reveal',
   ];
 
-  it('contains exactly 10 flagship experiences', () => {
-    expect(FLAGSHIP_EXPERIENCES.length).toBe(10);
+  it('contains exactly 11 flagship experiences including composable v3.0 flagship', () => {
+    expect(FLAGSHIP_EXPERIENCES.length).toBe(11);
   });
 
   it('registers all 10 flagship experiences in the central ExperienceCatalog', () => {

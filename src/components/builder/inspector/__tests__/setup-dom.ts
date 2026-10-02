@@ -9,8 +9,16 @@ const dom = new JSDOM('<!doctype html><html><body></body></html>', {
 globalThis.window = dom.window;
 // @ts-ignore
 globalThis.document = dom.window.document;
-// @ts-ignore
-globalThis.navigator = dom.window.navigator;
+try {
+  Object.defineProperty(globalThis, 'navigator', {
+    value: dom.window.navigator,
+    configurable: true,
+    writable: true,
+  });
+} catch {
+  // @ts-ignore
+  globalThis.navigator = dom.window.navigator;
+}
 // @ts-ignore
 globalThis.HTMLElement = dom.window.HTMLElement;
 // @ts-ignore

@@ -238,8 +238,36 @@ export type VisualEffectType =
 export type PerformanceTier = 'high' | 'medium' | 'low';
 
 // ---------------------------------------------------------------------------
-// Composition Layer (v2.0)
+// Composable Scene Layers (v3.0)
 // ---------------------------------------------------------------------------
+
+export type SceneLayerRole =
+  | 'background'
+  | 'atmosphere'
+  | 'particles'
+  | 'spatial-3d'
+  | 'content'
+  | 'overlay';
+
+export interface SceneLayerDefinition {
+  id: string;
+  name: string;
+  role: SceneLayerRole;
+  zIndex: number;
+  visible: boolean;
+  opacity?: number;
+  blendMode?: 'normal' | 'screen' | 'overlay' | 'multiply' | 'plus-lighter';
+  background?: BackgroundConfig;
+  particles?: ParticleConfig;
+  scene3d?: Scene3DConfig;
+  motion?: MotionConfig;
+  pointer?: PointerConfig;
+  responsive?: {
+    mobile?: { visible?: boolean; opacity?: number };
+    tablet?: { visible?: boolean; opacity?: number };
+  };
+  performanceTier?: PerformanceTier;
+}
 
 export interface CompositionLayer {
   id: string;
@@ -257,11 +285,11 @@ export interface CompositionLayer {
 }
 
 // ---------------------------------------------------------------------------
-// Scene Config (v2.0)
+// Scene Config (v3.0)
 // ---------------------------------------------------------------------------
 
 export interface ExperienceSceneConfig {
-  version: '1.0.0' | '2.0.0';
+  version: '1.0.0' | '2.0.0' | '3.0.0';
   motion?: MotionConfig;
   pointer?: PointerConfig;
   scroll?: ScrollDriverConfig;
@@ -269,10 +297,21 @@ export interface ExperienceSceneConfig {
   scene3d?: Scene3DConfig;
   carousel?: CarouselConfig;
   particles?: ParticleConfig;
+  layers?: SceneLayerDefinition[];
   composition?: CompositionLayer[];
   effects?: VisualEffectType[];
   reducedMotionFallback?: boolean;
   performanceTier?: PerformanceTier;
+}
+
+export interface ExperienceRuntimeSceneProps {
+  config?: Partial<ExperienceSceneConfig>;
+  isPlaying?: boolean;
+  isInteractive?: boolean;
+  scrollProgress?: number;
+  children?: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
 // ---------------------------------------------------------------------------

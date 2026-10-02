@@ -112,7 +112,7 @@ describe('ExperienceInspectorControls', () => {
       />
     );
 
-    const particleToggle = getByText(/Cząsteczki \(GPU Particles\)/i).closest('div')?.parentElement?.querySelector('button');
+    const particleToggle = getByText(/(?:Cząsteczki|System Cząsteczek)/i).closest('div')?.parentElement?.querySelector('button');
     expect(particleToggle).toBeDefined();
     if (particleToggle) {
       fireEvent.click(particleToggle);

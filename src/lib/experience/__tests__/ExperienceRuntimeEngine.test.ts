@@ -50,12 +50,12 @@ describe('Experience Runtime Engine v2.0 — Architecture & Contract Tests', () 
     expect(badges).toContain('Effect: glass');
   });
 
-  it('verifies all 10 flagship experiences define complete runtimeConfig', () => {
-    expect(FLAGSHIP_EXPERIENCES.length).toBe(10);
+  it('verifies all flagship experiences define complete runtimeConfig', () => {
+    expect(FLAGSHIP_EXPERIENCES.length).toBeGreaterThanOrEqual(10);
 
     for (const flagship of FLAGSHIP_EXPERIENCES) {
       expect(flagship.runtimeConfig).toBeDefined();
-      expect(flagship.runtimeConfig?.version).toBe('1.0.0');
+      expect(['1.0.0', '2.0.0', '3.0.0']).toContain(flagship.runtimeConfig?.version);
     }
   });
 
@@ -143,7 +143,7 @@ describe('Experience Runtime Engine v2.0 — Architecture & Contract Tests', () 
     for (const flagship of FLAGSHIP_EXPERIENCES) {
       const node = flagship.createNode();
       expect(node.props?.experienceConfig).toBeDefined();
-      expect((node.props?.experienceConfig as any).version).toBe('1.0.0');
+      expect(['1.0.0', '2.0.0', '3.0.0']).toContain((node.props?.experienceConfig as any).version);
     }
   });
 

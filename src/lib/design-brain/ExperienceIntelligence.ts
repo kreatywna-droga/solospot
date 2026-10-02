@@ -262,6 +262,12 @@ export function scoreExperienceItem(
     matchReasons.push('Flagship verified tier');
   }
 
+  // Composable multi-layer architecture bonus (v3.0)
+  if (item.runtimeConfig?.layers && item.runtimeConfig.layers.length >= 3) {
+    score += 8;
+    matchReasons.push(`Multi-layer composable architecture (${item.runtimeConfig.layers.length} layers)`);
+  }
+
   return {
     score: Math.max(0, Math.min(100, score)),
     matchReasons,

@@ -99,7 +99,7 @@ export const DEFAULT_GRADIENT_CONFIG: InteractiveGradientConfig = {
 };
 
 /**
- * Validates and normalizes an ExperienceSceneConfig to v2.0.
+ * Validates and normalizes an ExperienceSceneConfig to v3.0.
  */
 export function normalizeSceneConfig(raw?: Partial<ExperienceSceneConfig> | null): ExperienceSceneConfig {
   if (!raw) {
@@ -115,8 +115,26 @@ export function normalizeSceneConfig(raw?: Partial<ExperienceSceneConfig> | null
     };
   }
 
+  // If layers are defined, sort them deterministically by zIndex
+  const normalizedLayers = raw.layers
+    ? [...raw.layers]
+        .filter(l => l && typeof l.id === 'string')
+        .sort((a, b) => a.zIndex - b.zIndex)
+        .map(l => ({
+          ...l,
+          name: l.name || l.role || 'Layer',
+          visible: l.visible !== false,
+          opacity: typeof l.opacity === 'number' ? Math.max(0, Math.min(1, l.opacity)) : 1,
+          background: l.background ? normalizeBackgroundConfig(l.background) : undefined,
+          particles: l.particles ? { ...DEFAULT_PARTICLE_CONFIG, ...l.particles } : undefined,
+          scene3d: l.scene3d ? { ...DEFAULT_SCENE3D_CONFIG, ...l.scene3d } : undefined,
+          motion: l.motion ? { ...DEFAULT_MOTION_CONFIG, ...l.motion } : undefined,
+          pointer: l.pointer ? { ...DEFAULT_POINTER_CONFIG, ...l.pointer } : undefined,
+        }))
+    : undefined;
+
   return {
-    version: '2.0.0',
+    version: raw.version || (normalizedLayers ? '3.0.0' : '2.0.0'),
     motion: raw.motion ? { ...DEFAULT_MOTION_CONFIG, ...raw.motion } : undefined,
     pointer: raw.pointer ? { ...DEFAULT_POINTER_CONFIG, ...raw.pointer } : undefined,
     scroll: raw.scroll ? { ...DEFAULT_SCROLL_CONFIG, ...raw.scroll } : undefined,
@@ -124,6 +142,7 @@ export function normalizeSceneConfig(raw?: Partial<ExperienceSceneConfig> | null
     scene3d: raw.scene3d ? { ...DEFAULT_SCENE3D_CONFIG, ...raw.scene3d } : undefined,
     carousel: raw.carousel ? { ...DEFAULT_CAROUSEL_CONFIG, ...raw.carousel } : undefined,
     particles: raw.particles ? { ...DEFAULT_PARTICLE_CONFIG, ...raw.particles } : undefined,
+    layers: normalizedLayers,
     composition: raw.composition,
     effects: raw.effects || [],
     reducedMotionFallback: raw.reducedMotionFallback ?? true,
@@ -147,7 +166,23 @@ function normalizeBackgroundConfig(raw: Partial<BackgroundConfig>): BackgroundCo
  */
 export function getActiveCapabilityNames(config: ExperienceSceneConfig): string[] {
   const caps: string[] = [];
-  if (config.background && config.background.type !== 'none') {
+
+  if (config.layers && config.layers.length > 0) {
+    caps.push(`Layers: ${config.layers.length}`);
+    for (const l of config.layers) {
+      if (l.visible !== false) {
+        if (l.role === 'background' && l.background) {
+          caps.push(`BG: ${l.background.type}`);
+        } else if (l.role === 'particles' && l.particles) {
+          caps.push(`Particles: ${l.particles.count}`);
+        } else if (l.role === 'spatial-3d') {
+          caps.push('Spatial 3D');
+        }
+      }
+    }
+  }
+
+  if (config.background && config.background.type !== 'none' && (!config.layers || !config.layers.some(l => l.role === 'background'))) {
     caps.push(`Background: ${config.background.type}`);
   }
   if (config.pointer && config.pointer.type !== 'none') {
@@ -165,10 +200,10 @@ export function getActiveCapabilityNames(config: ExperienceSceneConfig): string[
   if (config.scroll && config.scroll.type !== 'none') {
     caps.push(`Scroll: ${config.scroll.type}`);
   }
-  if (config.particles && config.particles.count > 0) {
+  if (config.particles && config.particles.count > 0 && (!config.layers || !config.layers.some(l => l.role === 'particles'))) {
     caps.push(`Particles: ${config.particles.count}`);
   }
-  if (config.background?.type === 'shader') {
+  if (config.background?.type === 'shader' && (!config.layers || !config.layers.some(l => l.background?.type === 'shader'))) {
     caps.push('WebGL Shader');
   }
   if (config.background?.type === 'interactive-gradient') {

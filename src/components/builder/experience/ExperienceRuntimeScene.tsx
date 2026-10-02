@@ -13,7 +13,7 @@
  */
 
 import React, { createContext, useContext, useRef, useState, useEffect } from 'react';
-import type { ExperienceSceneConfig } from '@/lib/experience/ExperienceRuntimeTypes';
+import type { ExperienceSceneConfig, ExperienceRuntimeSceneProps } from '@/lib/experience/ExperienceRuntimeTypes';
 import { normalizeSceneConfig } from '@/lib/experience/runtime/CapabilityEngine';
 import { usePointerEngine } from '@/lib/experience/runtime/usePointerEngine';
 import { usePointerSignal } from '@/lib/experience/runtime/usePointerSignal';
@@ -82,14 +82,50 @@ class ExperienceErrorBoundary extends React.Component<
   }
 }
 
-export interface ExperienceRuntimeSceneProps {
-  config?: Partial<ExperienceSceneConfig> | null;
-  isPlaying?: boolean;
-  isInteractive?: boolean;
-  scrollProgress?: number; // 0 to 100 from simulated slider
-  children: React.ReactNode;
-  className?: string;
-  style?: React.CSSProperties;
+// Sub-components for isolated layer canvas lifecycles
+function LayerShaderBackground({
+  config,
+  pointerSignal,
+  isPlaying,
+  reducedMotion,
+}: {
+  config?: import('@/lib/experience/ExperienceRuntimeTypes').ShaderConfig;
+  pointerSignal: React.RefObject<import('@/lib/experience/ExperienceRuntimeTypes').PointerSignal>;
+  isPlaying: boolean;
+  reducedMotion: boolean;
+}) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  useShaderEngine({
+    containerRef,
+    config,
+    pointerX: pointerSignal.current.x,
+    pointerY: pointerSignal.current.y,
+    isPlaying: isPlaying && !!config,
+    reducedMotion,
+  });
+  return <div ref={containerRef} className="absolute inset-0 w-full h-full" />;
+}
+
+function LayerParticleField({
+  config,
+  pointerSignal,
+  isPlaying,
+  reducedMotion,
+}: {
+  config?: import('@/lib/experience/ExperienceRuntimeTypes').ParticleConfig;
+  pointerSignal: React.RefObject<import('@/lib/experience/ExperienceRuntimeTypes').PointerSignal>;
+  isPlaying: boolean;
+  reducedMotion: boolean;
+}) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  useParticleEngine({
+    containerRef,
+    config,
+    pointerSignal,
+    isPlaying,
+    reducedMotion,
+  });
+  return <div ref={containerRef} className="absolute inset-0 w-full h-full pointer-events-none" />;
 }
 
 export function ExperienceRuntimeScene({
@@ -107,6 +143,23 @@ export function ExperienceRuntimeScene({
 
   // Normalize config with safe defaults
   const config = normalizeSceneConfig(rawConfig);
+  const hasComposableLayers = Boolean(config.layers && config.layers.length > 0);
+
+  // Composable layer resolvers (v3.0)
+  const bgLayer = config.layers?.find(l => l.role === 'background' && l.visible !== false);
+  const effectiveBackground = bgLayer?.background || config.background;
+
+  const particleLayer = config.layers?.find(l => l.role === 'particles' && l.visible !== false);
+  const effectiveParticles = particleLayer?.particles || config.particles;
+
+  const spatialLayer = config.layers?.find(l => l.role === 'spatial-3d' && l.visible !== false);
+  const effectiveScene3D = spatialLayer?.scene3d || config.scene3d;
+
+  const motionLayer = config.layers?.find(l => l.motion && l.visible !== false);
+  const effectiveMotion = motionLayer?.motion || config.motion;
+
+  const pointerLayer = config.layers?.find(l => l.pointer && l.visible !== false);
+  const effectivePointer = pointerLayer?.pointer || config.pointer;
 
   // Check prefers-reduced-motion
   useEffect(() => {
@@ -119,25 +172,25 @@ export function ExperienceRuntimeScene({
     return () => mediaQuery.removeEventListener('change', handler);
   }, []);
 
-  // 0. Shared pointer signal (v2.0 — feeds shader, gradient, particles without React state)
+  // 0. Shared pointer signal (v2.0 / v3.0 — feeds shader, gradient, particles without React state)
   const { signal: pointerSignal } = usePointerSignal({
     containerRef,
-    config: config.pointer,
+    config: effectivePointer,
     isInteractive,
     reducedMotion,
   });
 
-  // 1. Legacy pointer interaction engine (tilt, spotlight, cursor variables)
+  // 1. Pointer interaction engine (tilt, spotlight, cursor variables)
   usePointerEngine({
     containerRef,
-    config: config.pointer,
+    config: effectivePointer,
     isInteractive,
     reducedMotion,
   });
 
   // 2. Motion engine (keyframe styles & animation states)
   const { motionStyles } = useMotionEngine({
-    config: config.motion,
+    config: effectiveMotion,
     isPlaying,
     reducedMotion,
   });
@@ -151,7 +204,7 @@ export function ExperienceRuntimeScene({
 
   // 4. 3D depth stage (perspective & preserve-3d)
   const { stageStyles } = useDepth3DEngine({
-    config: config.scene3d,
+    config: effectiveScene3D,
     reducedMotion,
   });
 
@@ -162,32 +215,31 @@ export function ExperienceRuntimeScene({
     isInteractive,
   });
 
-  // 6. WebGL Shader Background (v2.0)
-  const isShaderBackground = Boolean(config.background?.type === 'shader' && config.background?.shader);
+  // Legacy single-pipeline WebGL engines (active when not using layered compositing)
+  const isLegacyShaderBg = !hasComposableLayers && Boolean(effectiveBackground?.type === 'shader' && effectiveBackground?.shader);
   useShaderEngine({
     containerRef,
-    config: config.background?.shader,
+    config: effectiveBackground?.shader,
     pointerX: pointerSignal.current.x,
     pointerY: pointerSignal.current.y,
-    isPlaying: isPlaying && isShaderBackground,
+    isPlaying: isPlaying && isLegacyShaderBg,
     reducedMotion,
   });
 
-  // 7. Interactive Gradient Background (v2.0)
-  const isGradientBackground = Boolean(config.background?.type === 'interactive-gradient' && config.background?.gradient);
+  const isLegacyGradientBg = !hasComposableLayers && Boolean(effectiveBackground?.type === 'interactive-gradient' && effectiveBackground?.gradient);
   useInteractiveGradient({
     containerRef,
-    config: config.background?.gradient,
+    config: effectiveBackground?.gradient,
     pointerX: pointerSignal.current.x,
     pointerY: pointerSignal.current.y,
-    isPlaying: isPlaying && isGradientBackground,
+    isPlaying: isPlaying && isLegacyGradientBg,
     reducedMotion,
   });
 
-  // 8. Particle Runtime (v2.0)
+  const isLegacyParticles = !hasComposableLayers && Boolean(effectiveParticles && effectiveParticles.count > 0);
   useParticleEngine({
     containerRef,
-    config: config.particles,
+    config: isLegacyParticles ? effectiveParticles : undefined,
     pointerSignal,
     isPlaying,
     reducedMotion,
@@ -205,12 +257,9 @@ export function ExperienceRuntimeScene({
     activeStoryStep: activeStep,
   };
 
-  const isSpotlightActive = config.pointer?.type === 'spotlight' || config.pointer?.type === 'glow';
-  const spotlightColor = config.pointer?.color || 'rgba(139, 92, 246, 0.18)';
-  const spotlightRadius = config.pointer?.radius || 350;
-
-  // When shader or interactive-gradient engine handles background, suppress CSS background layer
-  const useWebGLBackground = isShaderBackground || isGradientBackground;
+  const isSpotlightActive = effectivePointer?.type === 'spotlight' || effectivePointer?.type === 'glow';
+  const spotlightColor = effectivePointer?.color || 'rgba(139, 92, 246, 0.18)';
+  const spotlightRadius = effectivePointer?.radius || 350;
 
   return (
     <ExperienceErrorBoundary>
@@ -223,49 +272,174 @@ export function ExperienceRuntimeScene({
             ...style,
           }}
         >
-          {/* Dynamic Motion Background Layer (CSS-based, skipped when WebGL engine handles background) */}
-          {config.background && config.background.type !== 'none' && !useWebGLBackground && (
-            <ExperienceBackgroundLayer
-              config={config.background}
-              isPlaying={isPlaying}
-              reducedMotion={reducedMotion}
-            />
-          )}
+          {/* COMPOSABLE LAYER STACK (v3.0) */}
+          {hasComposableLayers && config.layers?.map((layer) => {
+            const isVisible = layer.visible !== false;
+            const layerOpacity = layer.opacity ?? 1;
+            const blendMode = layer.blendMode || 'normal';
 
-          {/* Pointer Spotlight / Glow Overlay */}
-          {isSpotlightActive && isInteractive && !reducedMotion && (
-            <div
-              className="absolute inset-0 pointer-events-none z-10 transition-opacity duration-300"
-              style={{
-                background: `radial-gradient(${spotlightRadius}px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), ${spotlightColor}, transparent 70%)`,
-              }}
-            />
-          )}
+            if (!isVisible) return null;
 
-          {/* Main Content Stage with Motion and 3D Tilt Driver */}
-          <div
-            className="solospot-scene-content relative z-20 w-full"
-            style={{
-              ...motionStyles,
-              transform: config.pointer?.type === 'tilt' && !reducedMotion
-                ? 'perspective(1200px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg))'
-                : undefined,
-              transformStyle: config.scene3d?.transformStyle || undefined,
-              transition: isInteractive ? 'transform 0.1s ease-out' : undefined,
-            }}
-          >
-            {children}
-          </div>
+            // Background Layer
+            if (layer.role === 'background' && layer.background) {
+              const isShader = layer.background.type === 'shader' && layer.background.shader;
+              return (
+                <div
+                  key={layer.id}
+                  className="absolute inset-0 w-full h-full pointer-events-none"
+                  style={{
+                    zIndex: layer.zIndex,
+                    opacity: layerOpacity,
+                    mixBlendMode: blendMode as any,
+                  }}
+                >
+                  {isShader ? (
+                    <LayerShaderBackground
+                      config={layer.background.shader}
+                      pointerSignal={pointerSignal}
+                      isPlaying={isPlaying}
+                      reducedMotion={reducedMotion}
+                    />
+                  ) : layer.background.type !== 'none' ? (
+                    <ExperienceBackgroundLayer
+                      config={layer.background}
+                      isPlaying={isPlaying}
+                      reducedMotion={reducedMotion}
+                    />
+                  ) : null}
+                </div>
+              );
+            }
 
-          {/* Optional Stage Reflection Plane */}
-          {config.scene3d?.reflection && !reducedMotion && (
-            <div
-              className="absolute left-0 right-0 bottom-0 h-24 pointer-events-none z-10"
-              style={{
-                background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%)',
-                opacity: config.scene3d.reflectionOpacity ?? 0.3,
-              }}
-            />
+            // Particles Layer
+            if (layer.role === 'particles' && layer.particles) {
+              return (
+                <div
+                  key={layer.id}
+                  className="absolute inset-0 w-full h-full pointer-events-none"
+                  style={{
+                    zIndex: layer.zIndex,
+                    opacity: layerOpacity,
+                    mixBlendMode: blendMode as any,
+                  }}
+                >
+                  <LayerParticleField
+                    config={layer.particles}
+                    pointerSignal={pointerSignal}
+                    isPlaying={isPlaying}
+                    reducedMotion={reducedMotion}
+                  />
+                </div>
+              );
+            }
+
+            // Overlay / Spotlight Layer
+            if (layer.role === 'overlay') {
+              const pConfig = layer.pointer || effectivePointer;
+              const sColor = pConfig?.color || spotlightColor;
+              const sRadius = pConfig?.radius || spotlightRadius;
+              return (
+                <div
+                  key={layer.id}
+                  className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+                  style={{
+                    zIndex: layer.zIndex,
+                    opacity: layerOpacity,
+                    mixBlendMode: blendMode as any,
+                    background: isInteractive && !reducedMotion
+                      ? `radial-gradient(${sRadius}px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), ${sColor}, transparent 70%)`
+                      : undefined,
+                  }}
+                />
+              );
+            }
+
+            // Content Stage Layer
+            if (layer.role === 'content') {
+              return (
+                <div
+                  key={layer.id}
+                  className="solospot-scene-content relative w-full"
+                  style={{
+                    zIndex: layer.zIndex,
+                    opacity: layerOpacity,
+                    mixBlendMode: blendMode as any,
+                    ...motionStyles,
+                    transform: effectivePointer?.type === 'tilt' && !reducedMotion
+                      ? 'perspective(1200px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg))'
+                      : undefined,
+                    transformStyle: effectiveScene3D?.transformStyle || undefined,
+                    transition: isInteractive ? 'transform 0.1s ease-out' : undefined,
+                  }}
+                >
+                  {children}
+                </div>
+              );
+            }
+
+            // Spatial 3D Reflection Plane
+            if (layer.role === 'spatial-3d' && layer.scene3d?.reflection && !reducedMotion) {
+              return (
+                <div
+                  key={layer.id}
+                  className="absolute left-0 right-0 bottom-0 h-24 pointer-events-none"
+                  style={{
+                    zIndex: layer.zIndex,
+                    opacity: layer.scene3d.reflectionOpacity ?? 0.3,
+                    mixBlendMode: blendMode as any,
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%)',
+                  }}
+                />
+              );
+            }
+
+            return null;
+          })}
+
+          {/* LEGACY FALLBACK RENDERING (When config.layers is not set) */}
+          {!hasComposableLayers && (
+            <>
+              {effectiveBackground && effectiveBackground.type !== 'none' && !isLegacyShaderBg && !isLegacyGradientBg && (
+                <ExperienceBackgroundLayer
+                  config={effectiveBackground}
+                  isPlaying={isPlaying}
+                  reducedMotion={reducedMotion}
+                />
+              )}
+
+              {isSpotlightActive && isInteractive && !reducedMotion && (
+                <div
+                  className="absolute inset-0 pointer-events-none z-10 transition-opacity duration-300"
+                  style={{
+                    background: `radial-gradient(${spotlightRadius}px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), ${spotlightColor}, transparent 70%)`,
+                  }}
+                />
+              )}
+
+              <div
+                className="solospot-scene-content relative z-20 w-full"
+                style={{
+                  ...motionStyles,
+                  transform: effectivePointer?.type === 'tilt' && !reducedMotion
+                    ? 'perspective(1200px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg))'
+                    : undefined,
+                  transformStyle: effectiveScene3D?.transformStyle || undefined,
+                  transition: isInteractive ? 'transform 0.1s ease-out' : undefined,
+                }}
+              >
+                {children}
+              </div>
+
+              {config.scene3d?.reflection && !reducedMotion && (
+                <div
+                  className="absolute left-0 right-0 bottom-0 h-24 pointer-events-none z-10"
+                  style={{
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%)',
+                    opacity: config.scene3d.reflectionOpacity ?? 0.3,
+                  }}
+                />
+              )}
+            </>
           )}
         </div>
       </ExperienceRuntimeContext.Provider>
