@@ -134,7 +134,7 @@ export function useThreeScene({
 
     if (config.lights) {
       for (const lightDef of config.lights) {
-        let light: THREE.Light;
+        let light: THREE.Light | null = null;
         switch (lightDef.type) {
           case 'ambient':
             light = new THREE.AmbientLight(parseColor(lightDef.color), lightDef.intensity ?? 0.5);
@@ -154,6 +154,14 @@ export function useThreeScene({
             if (lightDef.position) light.position.set(...lightDef.position);
             break;
           }
+        }
+        if (light) {
+          scene.add(light);
+          const currentLight = light;
+          tracker.track('three-mesh', () => {
+            scene.remove(currentLight);
+            currentLight.dispose?.();
+          });
         }
       }
     }

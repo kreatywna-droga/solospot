@@ -17,7 +17,7 @@
  *   - --scroll-direction: 1 (down) or -1 (up)
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import type { ScrollDriverConfig } from '../ExperienceRuntimeTypes';
 
 interface UseScrollDriverOptions {
@@ -32,11 +32,14 @@ export function useScrollDriver({
   simulatedProgress,
 }: UseScrollDriverOptions) {
   const [effectiveProgress, setEffectiveProgress] = useState(0);
+  const [activeStep, setActiveStep] = useState(0);
   const steps = config?.steps ?? 3;
   const horizontalFactor = config?.horizontalFactor ?? 1.0;
   const rafIdRef = useRef<number | null>(null);
   const prevScrollRef = useRef<number>(0);
   const velocityRef = useRef<number>(0);
+  const currentStepRef = useRef<number>(0);
+  const progressRef = useRef<number>(0);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -55,11 +58,12 @@ export function useScrollDriver({
 
     const applyProgress = (normProgress: number, isRealScroll = false) => {
       const p = Math.max(0, Math.min(1, normProgress));
-      setEffectiveProgress(p);
+      progressRef.current = p;
 
       const stepIndex = Math.min(steps - 1, Math.floor(p * steps));
       const horizOffset = (-p * (steps - 1) * 100 * horizontalFactor).toFixed(2);
 
+      // Direct DOM mutation — 0 React VDOM overhead
       el.style.setProperty('--scene-progress', p.toFixed(3));
       el.style.setProperty('--horizontal-offset', `${horizOffset}%`);
       el.style.setProperty('--story-step', `${stepIndex}`);
@@ -73,6 +77,18 @@ export function useScrollDriver({
 
         el.style.setProperty('--scroll-velocity', velocityRef.current.toFixed(2));
         el.style.setProperty('--scroll-direction', delta >= 0 ? '1' : '-1');
+
+        // Only trigger React state update when the discrete step actually changes
+        if (currentStepRef.current !== stepIndex) {
+          currentStepRef.current = stepIndex;
+          setActiveStep(stepIndex);
+          setEffectiveProgress(p);
+        }
+      } else {
+        // Simulated progress mode (e.g. preview slider) directly syncs state
+        currentStepRef.current = stepIndex;
+        setActiveStep(stepIndex);
+        setEffectiveProgress(p);
       }
 
       // Parallax depth: elements deeper in the scene move slower
@@ -81,7 +97,7 @@ export function useScrollDriver({
     };
 
     if (simulatedProgress !== undefined) {
-      applyProgress(simulatedProgress / 100);
+      applyProgress(simulatedProgress / 100, false);
       return;
     }
 
@@ -111,8 +127,6 @@ export function useScrollDriver({
       }
     };
   }, [containerRef, config, simulatedProgress, steps, horizontalFactor]);
-
-  const activeStep = Math.min(steps - 1, Math.floor(effectiveProgress * steps));
 
   return {
     scrollProgress: effectiveProgress,

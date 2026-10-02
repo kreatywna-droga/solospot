@@ -97,6 +97,35 @@ export function validateSectionTemplateIdArg(
   return { ok: true, sectionTemplateId: trimmed };
 }
 
+/**
+ * Validates experienceId argument for insert_experience_from_library / inspect_experience.
+ */
+export function validateExperienceIdArg(
+  raw: unknown
+): { ok: true; experienceId: string } | { ok: false; reason: string } {
+  if (raw === undefined || raw === null) {
+    return {
+      ok: false,
+      reason: 'insert_experience_from_library wymaga parametru experienceId (ID Experience z biblioteki).',
+    };
+  }
+  if (typeof raw !== 'string') {
+    return {
+      ok: false,
+      reason:
+        'insert_experience_from_library wymaga parametru experienceId jako string. Nieprawidłowy typ argumentu.',
+    };
+  }
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) {
+    return {
+      ok: false,
+      reason: 'insert_experience_from_library wymaga parametru experienceId (ID Experience z biblioteki).',
+    };
+  }
+  return { ok: true, experienceId: trimmed };
+}
+
 /** True when a tool status counts as "ran to completion" (not a hard failure). */
 export function isToolStatusCompleted(status: HacpExecutionStatus): boolean {
   return status === 'EXECUTED' || status === 'CLARIFY';
@@ -670,18 +699,26 @@ export class HacpBridge {
     }
 
     if (name === 'inspect_experience') {
+      const idCheck = validateExperienceIdArg(args.experienceId);
+      if (!idCheck.ok) {
+        return {
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: 'none' },
+          message: idCheck.reason,
+        };
+      }
       const { inspectExperience } = await import('../ai/LibraryIntelligence');
-      const result = inspectExperience(args.experienceId as string);
+      const result = inspectExperience(idCheck.experienceId);
       if (!result) {
         return {
-          status: 'EXECUTED',
-          verification: { passed: true, operation: name, target: args.experienceId as string },
-          message: `Nie znaleziono Experience o ID \`${args.experienceId}\`.`,
+          status: 'FAILED',
+          verification: { passed: false, operation: name, target: idCheck.experienceId },
+          message: `Nie znaleziono Experience o ID \`${idCheck.experienceId}\`.`,
         };
       }
       return {
         status: 'EXECUTED',
-        verification: { passed: true, operation: name, target: args.experienceId as string },
+        verification: { passed: true, operation: name, target: idCheck.experienceId },
         message: JSON.stringify(result, null, 2),
       };
     }
@@ -797,14 +834,15 @@ export class HacpBridge {
     }
 
     if (name === 'insert_experience_from_library') {
-      const experienceId = args.experienceId as string;
-      if (!experienceId) {
+      const idCheck = validateExperienceIdArg(args.experienceId);
+      if (!idCheck.ok) {
         return {
           status: 'FAILED',
           verification: { passed: false, operation: name, target: 'none' },
-          message: 'insert_experience_from_library wymaga parametru experienceId (ID Experience z biblioteki).',
+          message: idCheck.reason,
         };
       }
+      const experienceId = idCheck.experienceId;
 
       try {
         const { getExperienceById } = await import('../experience/ExperienceCatalog');
@@ -818,56 +856,118 @@ export class HacpBridge {
           };
         }
 
-        const sectionId = (args.sectionId as string) || activePage?.sections[0]?.id || '';
-        if (!sectionId) {
-          return {
-            status: 'FAILED',
-            verification: { passed: false, operation: name, target: experienceId },
-            message: 'Nie określono sekcji docelowej. Zaznacz sekcję na Canvasie lub podaj sectionId.',
+        const mode = (args.mode as string) || (args.sectionId ? 'apply' : 'insert');
+        const targetPageId = (args.pageId as string) || activePageId;
+        const targetPage = document.pages.find(p => p.id === targetPageId) || activePage;
+
+        if (mode === 'insert' || mode === 'add' || !args.sectionId) {
+          // INSERT MODE — Creates a new section node from experience definition
+          const sectionNode = experience.createNode();
+          const atIndex = typeof args.atIndex === 'number' ? args.atIndex : targetPage?.sections.length || 0;
+          const sectionId = sectionNode.id;
+
+          const experienceConfig = (args.configuration as Record<string, unknown>) ||
+            experience.runtimeConfig || {
+              background: { type: 'mesh-gradient', colors: ['#D9A86C', '#F2C27F', '#1A1813', '#080B10'] },
+              motion: { type: 'float', speed: 0.85 },
+            };
+
+          const cmd: BuilderCommand = {
+            type: 'ADD_SECTION',
+            pageId: targetPageId,
+            sectionType: sectionNode.type || 'section',
+            defaultProps: {
+              ...(sectionNode.props || {}),
+              experienceConfig,
+              experienceId: experience.id,
+              experienceName: experience.name,
+            },
+            atIndex,
+            label: (args.label as string) || experience.name || `Experience: ${experienceId}`,
+            sectionId,
+            children: sectionNode.children || [],
+            styles: sectionNode.styles,
           };
-        }
 
-        const experienceConfig = (args.configuration as Record<string, unknown>) || {
-          background: experience.runtimeConfig?.background || { type: 'mesh-gradient', colors: ['#D9A86C', '#F2C27F', '#1A1813', '#080B10'] },
-          motion: experience.runtimeConfig?.motion || { type: 'float', speed: 0.85 },
-        };
+          const result = this.verifyCommandExecution(cmd, document, { targetId: targetPageId });
 
-        const cmd: BuilderCommand = {
-          type: 'UPDATE_PROPS',
-          pageId: (args.pageId as string) || activePageId,
-          sectionId,
-          props: {
-            experienceConfig,
-            experienceId: experience.id,
-            experienceName: experience.name,
-          },
-        };
+          if (result.verification.passed) {
+            return {
+              command: cmd,
+              verification: result.verification,
+              status: 'EXECUTED',
+              message: `Wstawiłem Experience **${experience.name}** (${experience.category}) z biblioteki do strony.`,
+              appliedChange: {
+                target: targetPageId,
+                property: 'sections',
+                summary: `Wstawiono Experience: ${experience.name} (${experienceId})`,
+              },
+              createdNodeId: sectionId,
+            };
+          }
 
-        const result = this.verifyCommandExecution(cmd, document, {
-          targetId: sectionId,
-          property: 'experienceConfig',
-        });
-
-        if (result.verification.passed) {
           return {
             command: cmd,
             verification: result.verification,
-            status: 'EXECUTED',
-            message: `Zastosowałem Experience **${experience.name}** (${experience.category}) na sekcji \`${sectionId}\`.`,
-            appliedChange: {
-              target: sectionId,
-              property: 'experienceConfig',
-              summary: `Zastosowano Experience: ${experience.name} (${experienceId})`,
+            status: 'FAILED',
+            message: `Nie udało się wstawić Experience "${experienceId}" z biblioteki: weryfikacja nie powiodła się.`,
+          };
+        } else {
+          // APPLY MODE — Updates existing section props
+          const sectionId = args.sectionId as string;
+          const targetSection = targetPage?.sections.find(s => s.id === sectionId);
+
+          if (!targetSection) {
+            return {
+              status: 'FAILED',
+              verification: { passed: false, operation: name, target: sectionId },
+              message: `Nie znaleziono sekcji o ID "${sectionId}" na stronie.`,
+            };
+          }
+
+          const experienceConfig = (args.configuration as Record<string, unknown>) ||
+            experience.runtimeConfig || {
+              background: { type: 'mesh-gradient', colors: ['#D9A86C', '#F2C27F', '#1A1813', '#080B10'] },
+              motion: { type: 'float', speed: 0.85 },
+            };
+
+          const cmd: BuilderCommand = {
+            type: 'UPDATE_PROPS',
+            pageId: targetPageId,
+            sectionId,
+            props: {
+              experienceConfig,
+              experienceId: experience.id,
+              experienceName: experience.name,
             },
           };
-        }
 
-        return {
-          command: cmd,
-          verification: result.verification,
-          status: 'FAILED',
-          message: `Nie udało się zastosować Experience "${experienceId}" na sekcji \`${sectionId}\`.`,
-        };
+          const result = this.verifyCommandExecution(cmd, document, {
+            targetId: sectionId,
+            property: 'experienceConfig',
+          });
+
+          if (result.verification.passed) {
+            return {
+              command: cmd,
+              verification: result.verification,
+              status: 'EXECUTED',
+              message: `Zastosowałem Experience **${experience.name}** (${experience.category}) na sekcji \`${sectionId}\`.`,
+              appliedChange: {
+                target: sectionId,
+                property: 'experienceConfig',
+                summary: `Zastosowano Experience: ${experience.name} (${experienceId})`,
+              },
+            };
+          }
+
+          return {
+            command: cmd,
+            verification: result.verification,
+            status: 'FAILED',
+            message: `Nie udało się zastosować Experience "${experienceId}" na sekcji \`${sectionId}\`.`,
+          };
+        }
       } catch (err: any) {
         return {
           status: 'FAILED',
